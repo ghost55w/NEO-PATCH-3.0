@@ -281,7 +281,8 @@ ovlcmd({
 🔷NEOcoins: ${data.nc}🔷
 🔶NEOpoints: ${data.np}🔶
 🎫Coupons: ${data.coupons}🎫
-▔▔▔▔▔▔▔▔▔░░ `INFOS`
+▔▔▔▔▔▔▔▔▔░░ INFOS
+   
 🎮MY GAMES🪀
 🌀All Stars: ${data.all_stars}
 ⚽Blue Lock: ${data.blue_lock}
