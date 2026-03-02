@@ -220,20 +220,22 @@ async function addOrUpdateFiche(nom_joueur, jid, image_oc, joueur_div) {
 }
 
 // ================= ADD FICHE =================
-function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
+function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
   if (registeredFiches.has(nom_joueur)) registeredFiches.delete(nom_joueur);
 
   registeredFiches.add(nom_joueur);
 
   ovlcmd({
-    nom_cmd: nom_joueur,
+    nom_cmd: nom_joueur, // c'est juste la commande +pseudo
     classe: joueur_div,
     react: "✅"
   }, async (ms_org, ovl, cmd_options) => {
     const { repondre, ms, arg, prenium_id } = cmd_options;
 
     try {
-      const dataRaw = await getData({ jid });
+      // 🔹 Toujours utiliser le vrai JID pour récupérer la fiche
+      const dataRaw = await getData({ jid: jid_real });
+      if (!dataRaw) return await repondre("❌ Fiche introuvable pour ce joueur.");
       const data = dataRaw.dataValues ?? dataRaw;
 
       data.exp = data.exp ?? 0;
@@ -319,7 +321,7 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
 }
 
 // ================= INIT FICHES AUTO =================
- async function initFichesAuto() {
+async function initFichesAuto() {
   try {
     const all = await getAllFiches();
     if (!all || !all.length) return console.log("Aucune fiche trouvée.");
@@ -328,21 +330,21 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
       if (!player.code_fiche || player.code_fiche === "pas de fiche") continue;
       if (!player.jid) continue;
 
-      const nom = player.code_fiche;
-      const jid = player.jid;
+      const nom = player.code_fiche; // commande +pseudo
+      const jid_real = player.jid;   // vrai JID pour getData
       const image = player.oc_url || "https://files.catbox.moe/4quw3r.jpg";
       const division = (player.division || "Other").replace(/\*/g, '');
 
-      // 🔹 On supprime l'ancien + on ré-enregistre à chaque init
+      // 🔹 Ré-enregistrer la commande
       registeredFiches.delete(nom);
-      add_fiche(nom, jid, image, division);
+      add_fiche(nom, jid_real, image, division);
     }
 
     console.log("Fiches initialisées correctement ✅");
   } catch (e) {
     console.error("Erreur d'initFichesAuto:", e);
   }
-}
+} 
 
 initFichesAuto();
 
