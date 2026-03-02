@@ -288,12 +288,7 @@ function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
 ╰───────────────────
 ░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
 
-        await ovl.sendMessage(ms_org, {
-          video: { url: 'https://files.catbox.moe/0qzigf.mp4' },
-          gifPlayback: true,
-          caption: ""
-        }, { quoted: ms });
-
+        
         return ovl.sendMessage(ms_org, {
           image: { url: data.oc_url },
           caption: fiche
