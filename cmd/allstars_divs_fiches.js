@@ -321,22 +321,31 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
 async function initFichesAuto() {
   try {
     const all = await getAllFiches();
+
+    if (!all || !all.length) {
+      console.log("Aucune fiche trouvée.");
+      return;
+    }
+
     for (const player of all) {
-      if (!player.code_fiche || player.code_fiche === "pas de fiche" || !player.division || !player.oc_url || !player.id) {
-        continue;
-      }
+
+      if (!player.code_fiche || player.code_fiche === "pas de fiche") continue;
+      if (!player.jid) continue;
 
       const nom = player.code_fiche;
-      const jid = player.jid;
-      const division = player.division.replace(/\*/g, '');
-      add_fiche(nom, jid, player.oc_url, division);
+      const jid = player.jid; // On ne touche pas au format
+      const image = player.oc_url || "https://files.catbox.moe/4quw3r.jpg";
+      const division = (player.division || "Other").replace(/\*/g, '');
+
+      add_fiche(nom, jid, image, division);
     }
+
+    console.log("Fiches initialisées correctement ✅");
+
   } catch (e) {
     console.error("Erreur d'initFichesAuto:", e);
   }
 }
-
-initFichesAuto();
 
 // ================= COMMANDE ADD_FICHE =================
 ovlcmd({
