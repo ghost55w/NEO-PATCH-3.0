@@ -142,7 +142,7 @@ ovlcmd({
 Après cela attendez la validation de votre achat ou de votre vente.
 #Happy202️⃣6️⃣🎊🎄
 ╰───────────────────
-                          *🔷NEO🛍️STORE*`
+                    *🔷NEO🛍️STORE*`
         }, { quoted: ms });
 
         const waitFor = async (timeout = 120000) => {
