@@ -12,7 +12,7 @@ const {
   fetchLatestBaileysVersion
 } = require("@whiskeysockets/baileys");
 
-const { get_session, restaureAuth } = require('./DataBase/session');
+const { get_session, restaureAuth } = require('./Database/session');
 const config = require('./set');
 const {
   message_upsert,
