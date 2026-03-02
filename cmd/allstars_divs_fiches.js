@@ -221,7 +221,8 @@ async function addOrUpdateFiche(nom_joueur, jid, image_oc, joueur_div) {
 
 // ================= ADD FICHE =================
 function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
-  if (registeredFiches.has(nom_joueur)) return;
+  if (registeredFiches.has(nom_joueur)) registeredFiches.delete(nom_joueur);
+
   registeredFiches.add(nom_joueur);
 
   ovlcmd({
@@ -318,34 +319,32 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
 }
 
 // ================= INIT FICHES AUTO =================
-async function initFichesAuto() {
+ async function initFichesAuto() {
   try {
     const all = await getAllFiches();
-
-    if (!all || !all.length) {
-      console.log("Aucune fiche trouvée.");
-      return;
-    }
+    if (!all || !all.length) return console.log("Aucune fiche trouvée.");
 
     for (const player of all) {
-
       if (!player.code_fiche || player.code_fiche === "pas de fiche") continue;
       if (!player.jid) continue;
 
       const nom = player.code_fiche;
-      const jid = player.jid; // On ne touche pas au format
+      const jid = player.jid;
       const image = player.oc_url || "https://files.catbox.moe/4quw3r.jpg";
       const division = (player.division || "Other").replace(/\*/g, '');
 
+      // 🔹 On supprime l'ancien + on ré-enregistre à chaque init
+      registeredFiches.delete(nom);
       add_fiche(nom, jid, image, division);
     }
 
     console.log("Fiches initialisées correctement ✅");
-
   } catch (e) {
     console.error("Erreur d'initFichesAuto:", e);
   }
 }
+
+initFichesAuto();
 
 // ================= COMMANDE ADD_FICHE =================
 ovlcmd({
