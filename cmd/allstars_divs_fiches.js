@@ -209,6 +209,9 @@ async function addOrUpdateFiche(nom_joueur, jid, image_oc, joueur_div) {
       if (!registeredFiches.has(nom_joueur)) registeredFiches.add(nom_joueur);
       return { action: "mise à jour", jid };
     } else {
+
+  console.log("➕ Création nouvelle fiche :", nom_joueur);
+  console.log("➡️ JID :", jid);
       await add_id(jid, { code_fiche: nom_joueur, division: joueur_div, oc_url: image_oc });
       if (!registeredFiches.has(nom_joueur)) registeredFiches.add(nom_joueur);
       return { action: "ajoutée", jid };
@@ -221,6 +224,9 @@ async function addOrUpdateFiche(nom_joueur, jid, image_oc, joueur_div) {
 
 // ================= ADD FICHE =================
 function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
+    console.log("📝 Enregistrement commande :", nom_joueur);
+  console.log("➡️ JID associé :", jid_real);
+  console.log("➡️ Division :", joueur_div);
   if (registeredFiches.has(nom_joueur)) registeredFiches.delete(nom_joueur);
 
   registeredFiches.add(nom_joueur);
@@ -235,6 +241,10 @@ function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
     try {
       // 🔹 Toujours utiliser le vrai JID pour récupérer la fiche
       const dataRaw = await getData({ jid: jid_real });
+
+console.log("🔍 Recherche fiche pour :", nom_joueur);
+console.log("➡️ JID recherché :", jid_real);
+console.log("➡️ Résultat DB :", dataRaw);
       if (!dataRaw) return await repondre("❌ Fiche introuvable pour ce joueur.");
       const data = dataRaw.dataValues ?? dataRaw;
 
@@ -322,6 +332,10 @@ async function initFichesAuto() {
     if (!all || !all.length) return console.log("Aucune fiche trouvée.");
 
     for (const player of all) {
+
+  console.log("♻️ Réinitialisation fiche :", player.code_fiche);
+  console.log("➡️ JID trouvé :", player.jid);
+  console.log("➡️ Division :", player.division);
       if (!player.code_fiche || player.code_fiche === "pas de fiche") continue;
       if (!player.jid) continue;
 
