@@ -56,23 +56,27 @@ async function analyserTir(texte, repondre) {
 
 
 ovlcmd({
-  nom_cmd: 'exercice1',
-  classe: 'BLUELOCK⚽',
-  react: '⚽',
-  desc: "Lance l'épreuve du loup"
+  nom_cmd: 'exercice1',
+  classe: 'BLUELOCK⚽',
+  react: '⚽',
+  desc: "Lance l'épreuve du loup"
 }, async (ms_org, ovl, { repondre, auteur_Message }) => {
-  try {
-    await ovl.sendMessage(ms_org, {
-      video: { url: 'https://files.catbox.moe/z64kuq.mp4' },
-      gifPlayback: true,
-      caption: ''
-    });
+  try {
+    // --- Étape 1 : envoi GIF initial ---
+    await ovl.sendMessage(ms_org, {
+      video: { url: 'https://files.catbox.moe/z64kuq.mp4' },
+      gifPlayback: true,
+      caption: ''
+    });
 
-    const texteDebut = `*🔷ÉPREUVE DE TIRS⚽🥅*
+    // --- Étape 2 : envoi des règles (texte d'accueil inchangé) ---
+    const texteDebut = `*🔷ÉPREUVE DE TIRS⚽🥅*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 
-                   🔷⚽RÈGLES:
-Dans cet exercice l'objectif est de marquer 18 buts en 18 tirs max dans le temps imparti ❗20 mins⌛ face à un gardien Robot qui  mémorise vos tirs pour bloquer le même tir de suite. ⚠Vous devez marquer au moins 6 buts sinon vous êtes éliminé ❌. 
+🔷⚽RÈGLES:
+Dans cet exercice l'objectif est de marquer 18 buts en 18 tirs max dans le temps imparti ❗20 mins⌛
+face à un gardien Robot qui mémorise vos tirs pour bloquer le même tir de suite. ⚠
+Vous devez marquer au moins 6 buts sinon vous êtes éliminé ❌. 
 
 ⚠SI VOUS RATEZ UN TIR, FIN DE L'EXERCICE ❌.
 
@@ -88,160 +92,184 @@ Souhaitez-vous lancer l'exercice ? :
 ✅ Oui
 ❌ Non
 
-                         ⚽BLUE🔷LOCK`;
+⚽BLUE🔷LOCK`;
 
-    await ovl.sendMessage(ms_org, {
-      image: { url: 'https://files.catbox.moe/09rll9.jpg' },
-      caption: texteDebut
-    });
+    await ovl.sendMessage(ms_org, {
+      image: { url: 'https://files.catbox.moe/09rll9.jpg' },
+      caption: texteDebut
+    });
 
-    const rep = await ovl.recup_msg({ auteur: auteur_Message, ms_org, temps: 60000 });
-    const response = rep?.message?.extendedTextMessage?.text || rep?.message?.conversation;
-    if (!response) return repondre("⏳Pas de réponse, épreuve annulée.");
-    if (response.toLowerCase() === "non") return repondre("❌ Lancement de l'exercice annulé...");
+    // --- Étape 3 : créer l'état du joueur en attente de confirmation ---
+    joueurs.set(auteur_Message, {
+      id: auteur_Message,
+      attente_confirmation: true,
+      tir_type: null,
+      tir_zone: null,
+      tir_info: [],
+      but: 0,
+      tirs_total: 0,
+      en_cours: false,
+      timer: null,
+      paused: false,
+      remainingTime: 20 * 60 * 1000,
+      pauseTimestamp: null
+    });
 
-    if (response.toLowerCase() === "oui") {
-      const id = auteur_Message;
-      const timer = setTimeout(() => {
-        if (joueurs.has(id)) {
-          joueurs.get(id).en_cours = false;
-          envoyerResultats(ms_org, ovl, joueurs.get(id));
-        }
-      }, 20 * 60 * 1000);
+    // --- Étape 4 : informer le joueur ---
+    await repondre("✅ Tape `Oui` pour lancer l'exercice ou `Non` pour annuler.");
 
-      joueurs.set(id, {
-        id,
-        tir_type: null,
-        tir_zone: null,
-        tir_info: [],
-        but: 0,
-        tirs_total: 0,
-        en_cours: true,
-        timer,
-        paused: false,
-        remainingTime: 20 * 60 * 1000,
-        pauseTimestamp: null
-      });
+  } catch (error) {
+    repondre("❌ Une erreur est survenue.");
+    console.error(error);
+  }
+});
 
-      await ovl.sendMessage(ms_org, {
-        video: { url: "https://files.catbox.moe/zqm7et.mp4" },
-        gifPlayback: true,
-        caption: `*⚽BLUE LOCK🔷:* Début de l'exercice ⌛ Durée : 20:00 mins`
-      });
-    }
-  } catch (error) {
-    repondre("❌ Une erreur est survenue.");
-    console.error(error);
-  }
+// --- Listener global pour gérer la confirmation Oui/Non ---
+ovlcmd({
+  nom_cmd: 'confirmation_exercice',
+  isfunc: true
+}, async (ms_org, ovl, { repondre, auteur_Message, texte }) => {
+  try {
+    const joueur = joueurs.get(auteur_Message);
+    if (!joueur || !joueur.attente_confirmation) return;
+
+    const msg = texte?.toLowerCase().trim();
+    if (!msg) return;
+
+    if (msg === "non") {
+      joueurs.delete(auteur_Message);
+      return repondre("❌ Lancement de l'exercice annulé.");
+    }
+
+    if (msg === "oui") {
+      joueur.attente_confirmation = false;
+      joueur.en_cours = true;
+
+      // --- Démarrer le timer 20 minutes ---
+      joueur.timer = setTimeout(() => {
+        joueur.en_cours = false;
+        envoyerResultats(ms_org, ovl, joueur);
+      }, joueur.remainingTime);
+
+      // --- Envoyer vidéo de début ---
+      await ovl.sendMessage(ms_org, {
+        video: { url: "https://files.catbox.moe/zqm7et.mp4" },
+        gifPlayback: true,
+        caption: `*⚽BLUE LOCK🔷:* Début de l'exercice ⌛ Durée : 20:00 mins`
+      });
+    }
+  } catch (error) {
+    repondre("❌ Une erreur est survenue lors de la confirmation.");
+    console.error(error);
+  }
 });
 
 
-
 ovlcmd({
-  nom_cmd: 'epreuve du tir',
+  nom_cmd: 'epreuve_du_tir',
   isfunc: true
 }, async (ms_org, ovl, { repondre, auteur_Message, texte }) => {
+  try {
+    const joueur = joueurs.get(auteur_Message);
+    if (!joueur || !joueur.en_cours) return; // Vérifie que le joueur est en session active
 
-  if (!texte.toLowerCase().endsWith("*⚽blue🔷lock🥅*")) return;
-  const id = auteur_Message;
-  const joueur = joueurs.get(id);
-  if (!joueur || !joueur.en_cours) return;
+    // --- DÉTECTION LOCALE ULTRA-TOLÉRANTE ---
+    function detectMissLocal(text) {
+      const t = (text || "").toLowerCase().trim();
+      const motsClesTir = ["tir", "tire", "frappe", "direct", "enroul", "enroulé", "trivela"];
+      const contientTir = motsClesTir.some(m => t.includes(m));
 
-  // --- DÉTECTION LOCALE ULTRA-TOLÉRANTE ---
-  function detectMissLocal(text) {
-    const t = (text || "").toLowerCase().trim();
+      const zones = ["ras du sol gauche", "ras du sol droite", "mi-hauteur gauche", "mi-hauteur droite", "lucarne gauche", "lucarne droite"];
+      const contientZone = zones.some(z => t.includes(z));
 
-    const motsClesTir = ["tir", "tire", "frappe", "direct", "enroul", "enroulé", "trivela"];
-    const contientTir = motsClesTir.some(m => t.includes(m));
+      if (!contientTir || !contientZone) return { tir_type: "MISSED", tir_zone: "AUCUNE" };
+      return null;
+    }
 
-    const zones = ["ras du sol gauche", "ras du sol droite", "mi-hauteur gauche", "mi-hauteur droite", "lucarne gauche", "lucarne droite"];
-    const contientZone = zones.some(z => t.includes(z));
+    // --- Vérifie si le tir est une répétition après 3 tirs différents ---
+    function estTirRepeté(tir_info, tir_courant) {
+      const indexDernierIdentique = [...tir_info].reverse().findIndex(
+        t => t.tir_type === tir_courant.tir_type && t.tir_zone === tir_courant.tir_zone
+      );
+      if (indexDernierIdentique === -1) return false;
+      const derniersTirs = tir_info.slice(-(indexDernierIdentique));
+      const tirsDifferents = derniersTirs.filter(
+        t => t.tir_type !== tir_courant.tir_type || t.tir_zone !== tir_courant.tir_zone
+      );
+      return tirsDifferents.length < 3;
+    }
 
-    if (!contientZone || !contientTir) return { tir_type: "MISSED", tir_zone: "AUCUNE" };
+    // --- Étape 1 : analyse locale ---
+    let analyse = detectMissLocal(texte);
 
-    return null;
-  }
+    if (analyse && analyse.tir_type === "MISSED") {
+      clearTimeout(joueur.timer);
+      joueur.en_cours = false;
+      await ovl.sendMessage(ms_org, {
+        video: { url: "https://files.catbox.moe/9k5b3v.mp4" },
+        gifPlayback: true,
+        caption: "❌MISSED! : Tir manqué, vous avez échoué à l'exercice. Fermeture de la session..."
+      });
+      return envoyerResultats(ms_org, ovl, joueur);
+    }
 
-  // --- Fonction pour gérer la répétition après 3 tirs différents ---
-  function estTirRepeté(tir_info, tir_courant) {
-    const indexDernierIdentique = [...tir_info].reverse().findIndex(
-      t => t.tir_type === tir_courant.tir_type && t.tir_zone === tir_courant.tir_zone
-    );
-    if (indexDernierIdentique === -1) return false;
-    const derniersTirs = tir_info.slice(-(indexDernierIdentique));
-    const tirsDifferents = derniersTirs.filter(
-      t => t.tir_type !== tir_courant.tir_type || t.tir_zone !== tir_courant.tir_zone
-    );
-    return tirsDifferents.length < 3;
-  }
+    // --- Étape 2 : analyse via Gemini si pas de MISS local ---
+    if (!analyse) {
+      analyse = await analyserTir(texte, repondre);
+    }
 
-  // --- Étape 1 : Vérification locale ---
-  let analyse = detectMissLocal(texte);
+    if (!analyse || !analyse.tir_type || !analyse.tir_zone) return;
 
-  if (analyse && analyse.tir_type === "MISSED") {
-    clearTimeout(joueur.timer);
-    joueur.en_cours = false;
+    if (analyse.tir_type === "MISSED") {
+      clearTimeout(joueur.timer);
+      joueur.en_cours = false;
+      await ovl.sendMessage(ms_org, {
+        video: { url: "https://files.catbox.moe/9k5b3v.mp4" },
+        gifPlayback: true,
+        caption: "❌MISSED! : Tir manqué, vous avez échoué à l'exercice. Fermeture de la session..."
+      });
+      return envoyerResultats(ms_org, ovl, joueur);
+    }
+
+    // --- Étape 3 : vérification répétition ---
+    const tir_courant = { tir_type: analyse.tir_type, tir_zone: analyse.tir_zone };
+    const tir_repeté = estTirRepeté(joueur.tir_info, tir_courant);
+
+    if (tir_repeté) {
+      clearTimeout(joueur.timer);
+      joueur.en_cours = false;
+      await ovl.sendMessage(ms_org, {
+        video: { url: "https://files.catbox.moe/9k5b3v.mp4" },
+        gifPlayback: true,
+        caption: "❌MISSED! : Tir manqué, vous avez échoué à l'exercice. Fermeture de la session❌"
+      });
+      return envoyerResultats(ms_org, ovl, joueur);
+    }
+
+    // --- Étape 4 : Tir valide ---
+    joueur.tir_info.push(tir_courant);
+    joueur.tirs_total++;
+    joueur.but++;
+
+    const restants = 15 - joueur.but;
     await ovl.sendMessage(ms_org, {
-      video: { url: "https://files.catbox.moe/9k5b3v.mp4" },
+      video: { url: "https://files.catbox.moe/pad98d.mp4" },
       gifPlayback: true,
-      caption: "❌MISSED! : Tir manqué, vous avez échoué à l'exercice. Fermeture de la session..."
+      caption: `✅⚽GOAL : ${joueur.but} but${joueur.but > 1 ? 's' : ''} 🎯\n⚠️ Il vous reste ${restants} tirs ⌛`
     });
-    return envoyerResultats(ms_org, ovl, joueur);
+
+    // --- Étape 5 : fin d’exercice si 15 buts ---
+    if (joueur.but >= 15) {
+      clearTimeout(joueur.timer);
+      joueur.en_cours = false;
+      return envoyerResultats(ms_org, ovl, joueur);
+    }
+
+  } catch (error) {
+    repondre("❌ Une erreur est survenue lors de l'épreuve de tir.");
+    console.error(error);
   }
-
-  // --- Étape 2 : analyse Gemini si pas de MISS local ---
-  if (!analyse) {
-    analyse = await analyserTir(texte, repondre);
-  }
-
-  if (!analyse || !analyse.tir_type || !analyse.tir_zone) return;
-
-  if (analyse.tir_type === "MISSED") {
-    clearTimeout(joueur.timer);
-    joueur.en_cours = false;
-    await ovl.sendMessage(ms_org, {
-      video: { url: "https://files.catbox.moe/9k5b3v.mp4" },
-      gifPlayback: true,
-      caption: "❌MISSED! : Tir manqué, vous avez échoué à l'exercice. Fermeture de la session..."
-    });
-    return envoyerResultats(ms_org, ovl, joueur);
-  }
-
-  // --- Étape 3 : Vérification répétition ---
-  const tir_courant = { tir_type: analyse.tir_type, tir_zone: analyse.tir_zone };
-  const tir_repeté = estTirRepeté(joueur.tir_info, tir_courant);
-
-  if (tir_repeté) {
-    clearTimeout(joueur.timer);
-    joueur.en_cours = false;
-    await ovl.sendMessage(ms_org, {
-      video: { url: "https://files.catbox.moe/9k5b3v.mp4" },
-      gifPlayback: true,
-      caption: "❌MISSED! : Tir manqué, vous avez échoué à l'exercice . Fermeture de la session❌"
-    });    
-return envoyerResultats(ms_org, ovl, joueur);
-  }
-
-  // Tir valide (pas répétition)
-  joueur.tir_info.push(tir_courant);
-  joueur.tirs_total++;
-  joueur.but++;
-
-  const restants = 15 - joueur.but;
-  await ovl.sendMessage(ms_org, {
-    video: { url: "https://files.catbox.moe/pad98d.mp4" },
-    gifPlayback: true,
-    caption: `✅⚽GOAL : ${joueur.but} but${joueur.but > 1 ? 's' : ''} 🎯\n⚠️ Il vous reste ${restants} tirs ⌛`
-  });
-
-  if (joueur.but >= 15) {
-    clearTimeout(joueur.timer);
-    joueur.en_cours = false;
-    return envoyerResultats(ms_org, ovl, joueur);
-  }
-
-});    
-
+});
 
     
 ovlcmd({
