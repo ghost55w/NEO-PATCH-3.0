@@ -224,6 +224,7 @@ async function addOrUpdateFiche(nom_joueur, jid, image_oc, joueur_div) {
 
 // ================= ADD FICHE =================
 function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
+  jid_real = jid_real.replace("@whatsapp.net", "@s.whatsapp.net");
     console.log("📝 Enregistrement commande :", nom_joueur);
   console.log("➡️ JID associé :", jid_real);
   console.log("➡️ Division :", joueur_div);
@@ -340,7 +341,11 @@ async function initFichesAuto() {
       if (!player.jid) continue;
 
       const nom = player.code_fiche; // commande +pseudo
-      const jid_real = player.jid;   // vrai JID pour getData
+      let jid_real = player.jid;
+
+if (jid_real && !jid_real.includes("@s.whatsapp.net")) {
+  jid_real = jid_real.replace("@whatsapp.net", "@s.whatsapp.net");
+}   // vrai JID pour getData
       const image = player.oc_url || "https://files.catbox.moe/4quw3r.jpg";
       const division = (player.division || "Other").replace(/\*/g, '');
 
