@@ -233,7 +233,7 @@ function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
 
   ovlcmd({
     nom_cmd: nom_joueur, // c'est juste la commande +pseudo
-    classe: joueur_div,
+    classe: "Other",
     react: "✅"
   }, async (ms_org, ovl, cmd_options) => {
     const { repondre, ms, arg, prenium_id } = cmd_options;
