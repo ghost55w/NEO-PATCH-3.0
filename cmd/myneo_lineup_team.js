@@ -760,7 +760,13 @@ for (let i = 0; i < activePlayers.length; i++) {
     classementTexte += "▝▝▝          *BLUE🔷LOCK⚽🥅*";
 
     // 🔥 ENVOI DU MESSAGE
-    await ovl.sendMessage(ms_org, { text: classementTexte });
+   await ovl.sendMessage(
+  ms_org,
+  {
+    image: { url: "https://files.catbox.moe/kyrnzq.jpg" },
+    caption: classementTexte
+  }
+);
 
   } catch (e) {
     console.error("❌ Erreur commande +classement⚽ :", e);
@@ -774,12 +780,13 @@ ovlcmd({
   classe: "Other",
   react: "⚽",
   desc: "Masquer un joueur du classement."
-}, async (ms_org, ovl, { texte, repondre }) => {
+}, async (ms_org, ovl, { arg, repondre }) => {
 
-  const target = texte.split(":")[1]?.trim();
-if (!target) return repondre("⚠️ Format : +hide: NomDuJoueur");
+  if (!arg.length)
+    return repondre("⚠️ Utilise : +hide NomDuJoueur");
 
-const cleanedTarget = cleanName(target);
+  const target = arg.join(" ").trim();
+  const cleanedTarget = cleanName(target);
 
   hiddenPlayers.add(cleanedTarget);
 
@@ -792,12 +799,12 @@ ovlcmd({
   classe: "Other",
   react: "⚽",
   desc: "Réafficher un joueur dans le classement."
-}, async (ms_org, ovl, { texte, repondre }) => {
+}, async (ms_org, ovl, { arg, repondre }) => {
 
-  const target = texte.split(":")[1]?.trim();
-  if (!target)
-    return repondre("⚠️ Format : +show: NomDuJoueur");
+  if (!arg.length)
+    return repondre("⚠️ Utilise : +show NomDuJoueur");
 
+  const target = arg.join(" ").trim();
   const cleanedTarget = cleanName(target);
 
   if (!hiddenPlayers.has(cleanedTarget))
