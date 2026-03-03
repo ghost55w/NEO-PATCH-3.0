@@ -74,7 +74,9 @@ function normalizeJid(input) {
 function cleanName(str) {
   return String(str || "")
     .normalize("NFKC")
-    .replace(/[\u200B-\u206F]/g, "") // supprime caractères invisibles
+    .replace(/[\u200B-\u206F]/g, "")
+    .replace(/[\p{Emoji}]/gu, "") // 🔥 SUPPRIME TOUS LES EMOJIS
+    .toLowerCase()
     .trim();
 }
 
@@ -775,10 +777,11 @@ ovlcmd({
 }, async (ms_org, ovl, { texte, repondre }) => {
 
   const target = texte.split(":")[1]?.trim();
-  if (!target)
-    return repondre("⚠️ Format : +hide: NomDuJoueur");
+if (!target) return repondre("⚠️ Format : +hide: NomDuJoueur");
 
-  hiddenPlayers.add(cleanName(target));
+const cleanedTarget = cleanName(target);
+
+  hiddenPlayers.add(cleanedTarget);
 
   return repondre(`✅ ${target} est maintenant caché du classement.`);
 });
@@ -795,7 +798,12 @@ ovlcmd({
   if (!target)
     return repondre("⚠️ Format : +show: NomDuJoueur");
 
-  hiddenPlayers.delete(cleanName(target));
+  const cleanedTarget = cleanName(target);
+
+  if (!hiddenPlayers.has(cleanedTarget))
+    return repondre("⚠️ Ce joueur n'est pas caché.");
+
+  hiddenPlayers.delete(cleanedTarget);
 
   return repondre(`✅ ${target} est maintenant visible dans le classement.`);
 });
