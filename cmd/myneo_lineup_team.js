@@ -723,10 +723,19 @@ ovlcmd({
 
     // Mettre à jour le classement dans la fiche de chaque joueur
     const emojies = ["🥇", "🥈", "🥉"];
-    for (let i = 0; i < activePlayers.length; i++) {
-      const rankText = emojies[i] || `${i + 1}`;
-      await TeamFunctions.updateUser(activePlayers[i].id, { classement: rankText });
-    }
+
+for (let i = 0; i < activePlayers.length; i++) {
+  let classementValue;
+
+  if (i === 0) classementValue = `1er${emojies[0]}`;
+  else if (i === 1) classementValue = `2e${emojies[1]}`;
+  else if (i === 2) classementValue = `3e${emojies[2]}`;
+  else classementValue = `${i + 1}e`;
+
+  await TeamFunctions.updateUser(activePlayers[i].id, {
+    classement: classementValue
+  });
+}
 
     // Classement nouveau format texte
     let classementTexte = "░░ *🏆CLASSEMENT BLUE🔷LOCK⚽ 🏆*\n";
