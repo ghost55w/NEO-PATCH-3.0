@@ -369,7 +369,7 @@ function add_fiche(nom_joueur, jid_real, image_oc, joueur_div) {
         return ovl.sendMessage(
           ms_org,
           {
-            image: { url: image },
+            image: { url: data.oc_url },
             caption: fiche
           },
           { quoted: ms }
