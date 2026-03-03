@@ -32,19 +32,38 @@ const pureName = str => {
 const compact = s => pureName(s).replace(/\s+/g, "");
 
 // --- COMPTE COMBIEN DE JOUEURS POSSÈDENT UNE CARTE ---
-async function countCardOwners(cardName) {
-  const users = await MyNeoFunctions.getAllUsers(); // ⚠️ doit exister
+async function countCardOwnersSecure(cardName) {
   const normCard = pureName(cardName);
-
   let count = 0;
 
+  // 🔹 1) Vérifier toutes les fiches joueurs (cards)
+  const users = await MyNeoFunctions.getAllUsers();
   for (const u of users) {
     if (!u.cards) continue;
+
     const owned = u.cards
       .split("\n")
       .map(c => pureName(c));
 
     if (owned.includes(normCard)) count++;
+  }
+
+  // 🔹 2) Vérifier tous les lineups
+  const allLineups = await BlueLockFunctions.getAllLineups();
+
+  for (const lineup of allLineups) {
+    const data = lineup.toJSON ? lineup.toJSON() : lineup;
+
+    for (let i = 1; i <= 15; i++) {
+      const slot = data[`joueur${i}`];
+      if (!slot || slot === "aucun") continue;
+
+      const slotNorm = pureName(slot);
+      if (slotNorm.includes(normCard)) {
+        count++;
+        break; // éviter double comptage pour un même joueur
+      }
+    }
   }
 
   return count;
@@ -87,7 +106,7 @@ function calculPrix(card) {
 // --- PRIX DYNAMIQUE + LIMITE ---
 async function getDynamicCardPrice(card) {
   const basePrice = card.price;
-  const owners = await countCardOwners(card.name);
+  const owners = await countCardOwnersSecure(card.name);
 
   if (owners >= 3) {
     return {
