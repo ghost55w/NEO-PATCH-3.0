@@ -80,6 +80,12 @@ const Team = sequelize.define(
     loss: { type: DataTypes.INTEGER, defaultValue: 0 },
     goals: { type: DataTypes.INTEGER, defaultValue: 0 },
     trophies: { type: DataTypes.INTEGER, defaultValue: 0 },
+
+    // ✅ Nouveau champ pour masquer du classement
+    hidden: { 
+      type: DataTypes.BOOLEAN, 
+      defaultValue: false 
+    },
   },
   {
     tableName: "team",
