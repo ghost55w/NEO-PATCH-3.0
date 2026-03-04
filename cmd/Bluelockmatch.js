@@ -47,27 +47,92 @@ function extraireZones(sequence){
 function distance(z1,z2){ return Math.abs(DISTANCES[z1] - DISTANCES[z2]); }
 
 function perteBalle(match){
+  if(match.possessionsRestantes[match.possession] > 0)
+    match.possessionsRestantes[match.possession]--;
   match.possession = match.possession === "A" ? "B" : "A";
   match.tour = match.possession;
-  return { ok:false, message:"❌ Faute. Ballon perdu. Possession adverse." };
+  match.tourActuel = 0;
+  return { ok:false, message:"❌ Faute ou pavé invalide. Ballon perdu. Possession adverse." };
 }
 
-
-//MATCH⚽
+// Trouver utilisateur dans la DB
 async function trouverUser(nom){
   const allPlayers = await TeamFunctions.getAllTeams();
   if(!allPlayers) return null;
   for(const team of allPlayers){
     const user = team?.data?.users?.find(u => u.name.toLowerCase() === nom.toLowerCase());
-    if(user){
-      return { teamId: team.id, teamName: team.name, userData: user };
-    }
+    if(user) return { teamId: team.id, teamName: team.name, userData: user };
   }
   return null;
 }
 
-function tirageKickOff(){ return Math.random() < 0.5 ? "A" : "B"; }
+// Arbitre Page 1
+function arbitrerPave(match, equipe, pave){
+  if(match.possession !== equipe) return { ok:false, message:"⛔ Ce n'est pas ton tour." };
+  const action = extraireAction(pave);
+  if(!action) return perteBalle(match);
 
+  const sequences = separerSequences(action);
+  if(sequences.length > 2) return perteBalle(match);
+
+  let positionActuelle = null;
+  let joueurNom = null;
+
+  for(let i=0;i<sequences.length;i++){
+    const seq = sequences[i];
+    if(compterActions(seq) > 3) return perteBalle(match);
+    if(!verifierCombo(seq)) return perteBalle(match);
+
+    const zones = extraireZones(seq);
+    if(!zones) return perteBalle(match);
+
+    if(i===0){
+      joueurNom = seq.match(/\)\s*(\w+)/)?.[1];
+      if(!joueurNom) return perteBalle(match);
+      const positionReelle = match.equipes[equipe].joueurs[joueurNom]?.zone;
+      if(!positionReelle || positionReelle !== zones.depart) return perteBalle(match);
+      positionActuelle = positionReelle;
+    }
+
+    if(zones.depart !== positionActuelle) return perteBalle(match);
+    if(distance(zones.depart, zones.arrivee) > 10) return perteBalle(match);
+    positionActuelle = zones.arrivee;
+  }
+
+  match.equipes[equipe].joueurs[joueurNom].zone = positionActuelle;
+  match.tourActuel++;
+  if(match.tourActuel >= 4){
+    match.possession = match.possession === "A" ? "B" : "A";
+    match.tour = match.possession;
+    match.tourActuel = 0;
+    return { ok:true, message:"✅ Action validée. 4 tours effectués, possession changée." };
+  }
+
+  return { ok:true, message:"✅ Action validée." };
+}
+
+// Timer par tour
+function lancerTimer(from, ovl){
+  const match = matchsActifs.get(from);
+  if(match.timer) clearTimeout(match.timer);
+
+  match.timer = setTimeout(async ()=>{
+    match.tourActuel++;
+    if(match.tourActuel >= 4){
+      match.possession = match.possession === "A" ? "B" : "A";
+      match.tour = match.possession;
+      match.tourActuel = 0;
+      ovl.sendMessage(from,{ text:"⏰ 4 tours écoulés, possession changée." });
+    } else {
+      ovl.sendMessage(from,{ text:`⏰ 6 minutes écoulées. Tour ${match.tourActuel}/4 pour ${match.equipes[match.possession].nom}.` });
+      lancerTimer(from, ovl);
+    }
+  }, 6*60*1000);
+}
+
+/* ===============================
+   COMMANDE +Match⚽
+=================================*/
 ovlcmd({
   nom_cmd: 'match⚽',
   classe: 'BLUELOCK⚽',
@@ -75,16 +140,13 @@ ovlcmd({
   desc: "Lance un match BLUE LOCK"
 }, async (ms_org, ovl, { repondre, auteur_Message }) => {
   try {
-
     if(matchsActifs.has(ms_org))
       return ovl.sendMessage(ms_org,{ text:"⚠️ Un match est déjà en cours." });
 
     matchsActifs.set(ms_org, { statut: "attente_confirmation" });
 
-    // 1️⃣ Pavé initial d'attente de confirmation
     await ovl.sendMessage(ms_org,{
-      text:`
-🔷⚽ MATCH BLUE LOCK🥅
+      text:`🔷⚽ MATCH BLUE LOCK🥅
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🥅👤Joueur1:                        
 🥅👤Joueur2:           
@@ -96,52 +158,36 @@ ovlcmd({
 ⚠️ Veuillez renvoyer le pavé de confirmation dans 1 minute.`
     });
 
-    // 2️⃣ Attendre le pavé de confirmation
     const filter = (msg) => msg.body.includes("MATCH BLUE LOCK") && matchsActifs.get(ms_org)?.statut === "attente_confirmation";
-
     const confirmationPromise = new Promise((resolve)=>{
-      const timer = setTimeout(()=> resolve(null), 60*1000); // 1 min timeout
-      const handler = async (msg) => {
-        if(msg.from === ms_org && filter(msg)){
-          clearTimeout(timer);
-          resolve(msg.body);
-        }
-      };
+      const timer = setTimeout(()=> resolve(null), 60*1000);
+      const handler = async (msg) => { if(msg.from === ms_org && filter(msg)){ clearTimeout(timer); resolve(msg.body); } };
       repondre.on('message', handler);
     });
 
-    const pavéConfirm = await confirmationPromise;
-
-    if(!pavéConfirm){
+    const paveConfirm = await confirmationPromise;
+    if(!paveConfirm){
       matchsActifs.delete(ms_org);
       return ovl.sendMessage(ms_org,{ text:"❌ Session fermée, confirmation non reçue." });
     }
 
-    // 3️⃣ Extraire noms et gardien
-    const lignes = pavéConfirm.split("\n");
-    const nomJ1Match = lignes.find(l=>l.includes("Joueur1"))?.match(/Joueur1:\s*(.*?)🇨/);
-    const nomJ2Match = lignes.find(l=>l.includes("Joueur2"))?.match(/Joueur2:\s*(.*?)🇨/);
-    const gardienMatch = lignes.find(l=>l.includes("Gardien"))?.match(/Gardien:\s*(\d+)/);
+    const lignes = paveConfirm.split("\n");
+    const nomJ1 = lignes.find(l=>l.includes("Joueur1"))?.split(":")[1]?.trim();
+    const nomJ2 = lignes.find(l=>l.includes("Joueur2"))?.split(":")[1]?.trim();
+    const gardienNiveau = parseInt(lignes.find(l=>l.includes("Gardien"))?.split(":")[1]?.trim());
 
-    if(!nomJ1Match || !nomJ2Match || !gardienMatch)
-      return ovl.sendMessage(ms_org,{ text:"❌ Format invalide, assurez-vous d'indiquer Joueur1, Joueur2 et Gardien." });
-
-    const nomJ1 = nomJ1Match[1].trim();
-    const nomJ2 = nomJ2Match[1].trim();
-    const gardienNiveau = parseInt(gardienMatch[1]);
-
-    // 4️⃣ Vérifier joueurs dans la DB
     const joueur1 = await trouverUser(nomJ1);
     const joueur2 = await trouverUser(nomJ2);
     if(!joueur1 || !joueur2)
       return ovl.sendMessage(ms_org,{ text:"❌ Un des joueurs est introuvable dans la base." });
 
-    // 5️⃣ Initialiser le match
     const equipeKickOff = tirageKickOff();
     const match = {
       statut:"en_cours",
       possession:equipeKickOff,
       tour:equipeKickOff,
+      tourActuel:0,
+      possessionsRestantes: { A: 2, B: 2 },
       timer:null,
       gardien:gardienNiveau,
       equipes:{
@@ -153,11 +199,12 @@ ovlcmd({
 
     const joueurKickOff = match.equipes[equipeKickOff].nom;
 
-    // 6️⃣ Envoyer GIF Kick Off avec légende
     await ovl.sendMessage(ms_org,{
       video: "https://files.catbox.moe/7jmwi8.mp4",
-      caption: `⚽ ${joueurKickOff} démarre le match avec la possession !`
+      caption: `⚽ ${joueurKickOff} démarre le match avec la possession ! 6 minutes pour le premier pavé.`
     });
+
+    lancerTimer(ms_org, ovl);
 
   } catch(e){
     console.log(e);
@@ -165,14 +212,11 @@ ovlcmd({
   }
 });
 
-
-
 /* ===============================
    EXPORT
 =================================*/
 module.exports = {
   matchsActifs,
-  initialiserMatch,
   arbitrerPave,
   lancerTimer
 };
