@@ -259,8 +259,17 @@ async function addOrUpdateFiche(code_fiche, jid, image_oc, division) {
 
 async function initFichesAuto(ovl) {
 
+  if (!ovl) {
+    console.error("[CRITIQUE] initFichesAuto appelé sans ovl ! Les commandes ne seront pas créées.");
+    return;
+  }
+
+  console.log("[INIT] Début chargement fiches...");
+
   try {
     const all = await getAllFiches();
+    console.log(`[INIT] ${all?.length || 0} fiches trouvées en base`);
+
     if (!all?.length) return;
 
     for (const player of all) {
@@ -278,6 +287,7 @@ async function initFichesAuto(ovl) {
       );
     }
 
+    console.log(`[INIT] ${registeredFiches.size} commandes dynamiques enregistrées`);
     console.log("Fiches chargées ✅");
   } catch (e) {
     console.error("Erreur initFichesAuto:", e);
@@ -333,30 +343,44 @@ function add_fiche(nom_joueur, jid_real, image_oc, joueur_div, ovl) {
 
         const fiche = `░▒░ *👤N E O P L A Y E R | RAZORX⚡™ 🎮*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-◇ *Pseudo👤*: ${pseudo}
-◇ *User👤*: ${user}
-◇ *Surnom(s)👤*: ${surnom}
-◇ *Classement continental🌍:* ${classement}
-◇ *Experience⏫:* ${exp} Exp
-◇ *Niveau🎖️*: ${niveau} ▲
-◇ *Division🛡️*: ${division}
-◇ *Rank 🎖️*: ${rang}
-◇ *Classe🎖️*: ${classe}
+◇ *Pseudo👤*: ${data.pseudo}
+◇ *User👤*: ${data.user}
+◇ *Surnom(s)👤*: ${data.surnom}
+◇ *Classement continental🌍:* ${data.classement}
+◇ *Experience⏫:* ${data.exp} Exp
+◇ *Niveau🎖️*: ${data.niveau} ▲
+◇ *Division🛡️*: ${data.division}
+◇ *Rank 🎖️*: ${data.rang}
+◇ *Classe🎖️*: ${data.classe}
 
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-◇ *Golds🧭*: ${golds} ©🧭
-◇ *Fans👥*: ${fans} 👥
-◇ *Archetype ⚖️*: ${archetype}
+◇ *Golds🧭*: ${data.golds} ©🧭
+◇ *Fans👥*: ${data.fans} 👥
+◇ *Archetype ⚖️*: ${data.archetype}
 
 ░▒░░ PALMARÈS🏆
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-✅ Victoires: ${victoires} - ❌ Défaites: ${defaites}
+✅ Victoires: ${data.victoires} - ❌ Défaites: ${data.defaites}
+*◇🏆Championnats*: ${data.championnants}
+*◇🏆NEO cup💫*: ${data.neo_cup}
+*◇🏆EVO💠*: ${data.evo}
+*◇🏆GrandSlam🅰️*: ${data.grandslam}
+*◇🌟TOS*: ${data.tos}
+*◇👑The BEST🏆*: ${data.the_best}
+*◇🗿Sigma🏆*: ${data.sigma}
+*◇🎖️Neo Globes*: ${data.neo_globes}
+*◇🏵️Golden Rookie🏆*: ${data.golden_boy}
 
-░▒░▒░ CARDS 🎴: ${countCards(cardsRaw)}
+░▒░▒░ STATS 📊
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-🎴 ${cardsRaw 
-  ? cardsRaw.split("\n").join(" • ")
-  : "Aucune card"}
+📈 Note: ${data.note}/100
+⌬ *Talent⭐:* ▱▱▱▱▬▬▬ ${data.talent}
+⌬ *Strikes👊🏻:* ▱▱▱▱▬▬▬ ${data.strikes}
+⌬ *Attaques🌀:* ▱▱▱▱▬▬▬ ${data.attaques}
+
+░▒░▒░ CARDS 🎴: ${countCards(data.cards)}
+▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
+🎴 ${data.cards.split("\n").join(" • ")}
 
 ╰───────────────────
 ░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
@@ -430,13 +454,3 @@ async (ms_org, ovl, { repondre, arg, prenium_id }) => {
 
   await repondre("Fiche supprimée.");
 });
-
-// ================= INIT AUTO =================
-
-(async () => {
-  try {
-    await initFichesAuto(); // sans ovl pour init global
-  } catch (e) {
-    console.error("Erreur initFichesAuto:", e);
-  }
-})();
