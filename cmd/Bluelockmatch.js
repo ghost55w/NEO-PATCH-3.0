@@ -160,32 +160,87 @@ async function analyserPave(from, msg, ovl){
 }
 
 /* ===============================
-   COMMANDE +Match⚽
+COMMANDE +Match⚽
 =================================*/
 ovlcmd({
-  nom_cmd: 'match⚽',
-  classe: 'BLUELOCK⚽',
-  react: '⚽',
-  desc: "Lance un match BLUE LOCK"
+nom_cmd: 'match⚽',
+classe: 'BLUELOCK⚽',
+react: '⚽',
+desc: "Lance un match BLUE LOCK"
 }, async (ms_org, ovl, { repondre, auteur_Message }) => {
-  if(matchsActifs.has(ms_org)) return ovl.sendMessage(ms_org,{ text:"⚠️ Un match est déjà en cours." });
+try {
+if(matchsActifs.has(ms_org))
+return ovl.sendMessage(ms_org,{ text:"⚠️ Un match est déjà en cours." });
 
-  matchsActifs.set(ms_org, { statut: "attente_confirmation" });
+matchsActifs.set(ms_org, { statut: "attente_confirmation" });  
 
-  await ovl.sendMessage(ms_org,{
-    text:`🔷⚽ MATCH BLUE LOCK🥅
+await ovl.sendMessage(ms_org,{  
+  text:`🔷⚽ MATCH BLUE LOCK🥅
+
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🥅👤Joueur1:                        
-🥅👤Joueur2:           
+🥅👤Joueur1:
+🥅👤Joueur2:
 🥅🧤Gardien:
-             
+
 ╰───────────────────
-▝▝▝       *🔷BLUELOCK⚽*
+▝▝▝       🔷BLUELOCK⚽
 
 ⚠️ Veuillez renvoyer le pavé de confirmation dans 1 minute.`
-  });
 });
 
+const filter = (msg) => msg.body.includes("MATCH BLUE LOCK") && matchsActifs.get(ms_org)?.statut === "attente_confirmation";  
+const confirmationPromise = new Promise((resolve)=>{  
+  const timer = setTimeout(()=> resolve(null), 60*1000);  
+  const handler = async (msg) => { if(msg.from === ms_org && filter(msg)){ clearTimeout(timer); resolve(msg.body); } };  
+  repondre.on('message', handler);  
+});  
+
+const paveConfirm = await confirmationPromise;  
+if(!paveConfirm){  
+  matchsActifs.delete(ms_org);  
+  return ovl.sendMessage(ms_org,{ text:"❌ Session fermée, confirmation non reçue." });  
+}  
+
+const lignes = paveConfirm.split("\n");  
+const nomJ1 = lignes.find(l=>l.includes("Joueur1"))?.split(":")[1]?.trim();  
+const nomJ2 = lignes.find(l=>l.includes("Joueur2"))?.split(":")[1]?.trim();  
+const gardienNiveau = parseInt(lignes.find(l=>l.includes("Gardien"))?.split(":")[1]?.trim());  
+
+const joueur1 = await trouverUser(nomJ1);  
+const joueur2 = await trouverUser(nomJ2);  
+if(!joueur1 || !joueur2)  
+  return ovl.sendMessage(ms_org,{ text:"❌ Un des joueurs est introuvable dans la base." });  
+
+const equipeKickOff = tirageKickOff();  
+const match = {  
+  statut:"en_cours",  
+  possession:equipeKickOff,  
+  tour:equipeKickOff,  
+  tourActuel:0,  
+  possessionsRestantes: { A: 2, B: 2 },  
+  timer:null,  
+  gardien:gardienNiveau,  
+  equipes:{  
+    A:{ nom:nomJ1, db:joueur1, joueurs:{ [nomJ1]:{ zone:"C2", stats: joueur1.userData } }, score:0 },  
+    B:{ nom:nomJ2, db:joueur2, joueurs:{ [nomJ2]:{ zone:"C2", stats: joueur2.userData } }, score:0 }  
+  }  
+};  
+matchsActifs.set(ms_org, match);  
+
+const joueurKickOff = match.equipes[equipeKickOff].nom;  
+
+await ovl.sendMessage(ms_org,{  
+  video: "https://files.catbox.moe/7jmwi8.mp4",  
+  caption: `⚽ ${joueurKickOff} démarre le match avec la possession ! 6 minutes pour le premier pavé.`  
+});  
+
+lancerTimer(ms_org, ovl);
+
+} catch(e){
+console.log(e);
+ovl.sendMessage(ms_org,{ text:"⚠️ Erreur lors du lancement du match." });
+}
+});
 /* ===============================
    INTÉGRATION RECEPTION MESSAGE
 =================================*/
