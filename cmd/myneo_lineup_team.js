@@ -709,8 +709,8 @@ ovlcmd({
 
     // Filtrer joueurs avec Goals > 0 et non cachés
     let activePlayers = allPlayers.filter(
-      p => p.goals > 0 && p.users && !hiddenPlayers.has(cleanName(p.users))
-    );
+  p => p.goals > 0 && p.users && !p.hidden
+);
 
     if (!activePlayers.length)
       return ovl.sendMessage(ms_org, { text: "⚠️ Aucun joueur actif avec des goals." });
@@ -786,11 +786,21 @@ ovlcmd({
     return repondre("⚠️ Utilise : +hide NomDuJoueur");
 
   const target = arg.join(" ").trim();
-  const cleanedTarget = cleanName(target);
+  const jid = await findTeamJidByUsers(target);
 
-  hiddenPlayers.add(cleanedTarget);
+  if (!jid)
+    return repondre("⚠️ Joueur introuvable.");
 
-  return repondre(`✅ ${target} est maintenant caché du classement.`);
+  const data = await TeamFunctions.getUserData(jid);
+  if (!data)
+    return repondre("⚠️ Données introuvables.");
+
+  if (data.hidden)
+    return repondre("⚠️ Ce joueur est déjà caché.");
+
+  await TeamFunctions.updateUser(jid, { hidden: true });
+
+  return repondre(`✅ ${data.users} est maintenant caché du classement.`);
 });
 
 // --- Réafficher un joueur ---
@@ -805,12 +815,19 @@ ovlcmd({
     return repondre("⚠️ Utilise : +show NomDuJoueur");
 
   const target = arg.join(" ").trim();
-  const cleanedTarget = cleanName(target);
+  const jid = await findTeamJidByUsers(target);
 
-  if (!hiddenPlayers.has(cleanedTarget))
+  if (!jid)
+    return repondre("⚠️ Joueur introuvable.");
+
+  const data = await TeamFunctions.getUserData(jid);
+  if (!data)
+    return repondre("⚠️ Données introuvables.");
+
+  if (!data.hidden)
     return repondre("⚠️ Ce joueur n'est pas caché.");
 
-  hiddenPlayers.delete(cleanedTarget);
+  await TeamFunctions.updateUser(jid, { hidden: false });
 
-  return repondre(`✅ ${target} est maintenant visible dans le classement.`);
+  return repondre(`✅ ${data.users} est maintenant visible dans le classement.`);
 });
