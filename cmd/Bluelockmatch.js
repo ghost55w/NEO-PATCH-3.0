@@ -1,6 +1,7 @@
 const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
+const stringSimilarity = require('string-similarity');
 
 const matchsActifs = new Map();
 
@@ -130,6 +131,143 @@ function lancerTimer(from, ovl){
   }, 6*60*1000);
 }
 
+
+async function analyserPave(from, msg, ovl){
+
+  // Vérifier si match actif
+  if(!matchsActifs.has(from)) return;
+
+  const match = matchsActifs.get(from);
+  if(match.statut !== "en_cours") return;
+
+  // Extraction pavé (le pavé commence par 💬 et contient ⚽)
+  if(!msg.body.includes("💬:") || !msg.body.includes("⚽:")) return;
+
+  // Extraire ligne ⚽
+  const action = msg.body.split("\n").find(l => l.startsWith("⚽:"));
+  if(!action) return;
+
+  const texteAction = action.replace("⚽:","").trim();
+
+  // Modèle de référence pour contrôle + conduite
+  const model = "(Z) NOM contrôle la balle de l'intérieur ou pointe du pied à DIST cm puis enchaîne avec une conduite de balle de la pointe du pied droit à DIST vmax vers Z2";
+
+  // Calculer ressemblance
+  const similarity = stringSimilarity.compareTwoStrings(texteAction.toLowerCase(), model.toLowerCase());
+  if(similarity < 0.4){
+    // Refus si ressemblance < 40%
+    clearTimeout(match.timer);
+    match.possession = match.possession === "A" ? "B" : "A";
+    match.tour = match.possession;
+    return ovl.sendMessage(from,{
+      text:"❌ Pavé refusé : ressemblance insuffisante. Ballon perdu."
+    });
+  }
+
+  // Séparer séquences
+  const sequences = texteAction.split("/").map(s=>s.trim());
+  if(sequences.length > 2){
+    clearTimeout(match.timer);
+    match.possession = match.possession === "A" ? "B" : "A";
+    match.tour = match.possession;
+    return ovl.sendMessage(from,{
+      text:"❌ Trop de séquences. Ballon perdu."
+    });
+  }
+
+  const equipe = match.possession;
+  let positionActuelle = null;
+  let joueurNom = null;
+
+  for(let i=0;i<sequences.length;i++){
+    const seq = sequences[i];
+
+    // Compter actions dans la séquence
+    let totalActions = 0;
+    ["contrôle","conduit"].forEach(a=>{
+      const m = seq.match(new RegExp(a,"gi"));
+      if(m) totalActions += m.length;
+    });
+    if(totalActions > 3){
+      clearTimeout(match.timer);
+      match.possession = match.possession === "A" ? "B" : "A";
+      match.tour = match.possession;
+      return ovl.sendMessage(from,{ text:"❌ Trop d'actions dans la séquence. Ballon perdu." });
+    }
+
+    // Vérifier combo
+    const comboOk = seq.match(/\(combo\)/gi);
+    if(comboOk && comboOk.length > 1){
+      clearTimeout(match.timer);
+      match.possession = match.possession === "A" ? "B" : "A";
+      match.tour = match.possession;
+      return ovl.sendMessage(from,{ text:"❌ Combo non valide. Ballon perdu." });
+    }
+
+    // Extraire zones
+    const departMatch = seq.match(/\((.*?)\)/);
+    const arriveeMatch = seq.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)/i);
+    if(!departMatch || !arriveeMatch){
+      clearTimeout(match.timer);
+      match.possession = match.possession === "A" ? "B" : "A";
+      match.tour = match.possession;
+      return ovl.sendMessage(from,{ text:"❌ Zone départ ou arrivée manquante. Ballon perdu." });
+    }
+
+    const depart = departMatch[1].toUpperCase();
+    const arrivee = (arriveeMatch[1] || arriveeMatch[2]).toUpperCase();
+
+    // Vérifier joueur
+    if(i === 0){
+      joueurNom = seq.match(/\)\s*(\w+)/)?.[1];
+      if(!joueurNom || !match.equipes[equipe].joueurs[joueurNom]){
+        clearTimeout(match.timer);
+        match.possession = match.possession === "A" ? "B" : "A";
+        match.tour = match.possession;
+        return ovl.sendMessage(from,{ text:"❌ Joueur introuvable ou incorrect. Ballon perdu." });
+      }
+      positionActuelle = match.equipes[equipe].joueurs[joueurNom].zone;
+      if(positionActuelle !== depart){
+        clearTimeout(match.timer);
+        match.possession = match.possession === "A" ? "B" : "A";
+        match.tour = match.possession;
+        return ovl.sendMessage(from,{ text:"❌ Mauvaise position de départ. Ballon perdu." });
+      }
+    }
+
+    // Vérifier distance
+    if(Math.abs(DISTANCES[depart] - DISTANCES[arrivee]) > 10){
+      clearTimeout(match.timer);
+      match.possession = match.possession === "A" ? "B" : "A";
+      match.tour = match.possession;
+      return ovl.sendMessage(from,{ text:"❌ Distance trop longue. Ballon perdu." });
+    }
+
+    // Vérifier pied pour contrôle et distance
+    if(!/(intérieur|pointe)/i.test(seq) || !/(\d+)cm/i.test(seq)){
+      clearTimeout(match.timer);
+      match.possession = match.possession === "A" ? "B" : "A";
+      match.tour = match.possession;
+      return ovl.sendMessage(from,{ text:"❌ Pied de contrôle ou distance manquant. Ballon perdu." });
+    }
+
+    // Vérifier vmax
+    if(!/vmax/i.test(seq)){
+      match.equipes[equipe].joueurs[joueurNom].vitesse = "reduced";
+    }
+
+    // Mettre à jour position du joueur
+    positionActuelle = arrivee;
+  }
+
+  match.equipes[equipe].joueurs[joueurNom].zone = positionActuelle;
+
+  ovl.sendMessage(from,{ text:"✅ Pavé validé. Action acceptée." });
+
+  // Relancer timer pour le joueur suivant
+  clearTimeout(match.timer);
+  lancerTimer(from, ovl);
+}
 /* ===============================
    COMMANDE +Match⚽
 =================================*/
