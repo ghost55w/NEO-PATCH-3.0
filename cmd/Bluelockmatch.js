@@ -54,14 +54,19 @@ function perteBalle(match){
 
 /* ===============================
    ARBITRAGE PAGE 1
+   (déplacements et séquences)
 =================================*/
-function arbitrerPave(match, equipe, pave){
+function arbitrerPave(match, equipe, pave, formuleModel){
 
   if(match.possession !== equipe)
     return { ok:false, message:"⛔ Ce n'est pas ton tour." };
 
   const action = extraireAction(pave);
   if(!action) return perteBalle(match);
+
+  // Vérifier ressemblance du pavé avec la formule à au moins 50%
+  const similarity = calculerSimilarite(action, formuleModel);
+  if(similarity < 0.5) return perteBalle(match);
 
   const sequences = separerSequences(action);
   if(sequences.length > 2) return perteBalle(match);
@@ -96,7 +101,15 @@ function arbitrerPave(match, equipe, pave){
 
   match.equipes[equipe].joueurs[joueurNom].zone = positionActuelle;
 
-  return { ok:true, message:"✅ Action validée." };
+  return { ok:true, message:"✅ Pavé validé." };
+}
+
+// Simule la fonction de calcul de similarité du texte avec le modèle
+function calculerSimilarite(pave, model){
+  // Ici tu peux mettre ton algorithme de comparaison textuelle
+  // Par exemple : NLP Cosine similarity ou autre
+  // Pour l’instant placeholder 1 (100% pour test)
+  return 1;
 }
 
 /* ===============================
@@ -133,8 +146,9 @@ async function trouverUser(nom){
 
 /* ===============================
    INITIALISATION MATCH
+   (avec niveau gardien)
 =================================*/
-async function initialiserMatch(from, j1Nom, j2Nom, ovl){
+async function initialiserMatch(from, j1Nom, j2Nom, niveauGardien, ovl){
 
   const joueur1 = await trouverUser(j1Nom);
   const joueur2 = await trouverUser(j2Nom);
@@ -152,6 +166,7 @@ async function initialiserMatch(from, j1Nom, j2Nom, ovl){
     possession:equipeKickOff,
     tour:equipeKickOff,
     timer:null,
+    niveauGardien: niveauGardien,
     equipes:{
       A:{ nom:j1Nom, db:joueur1, joueurs:{ [j1Nom]:{ zone:"C2", stats: joueur1.userData } }, score:0 },
       B:{ nom:j2Nom, db:joueur2, joueurs:{ [j2Nom]:{ zone:"C2", stats: joueur2.userData } }, score:0 }
@@ -166,7 +181,8 @@ async function initialiserMatch(from, j1Nom, j2Nom, ovl){
     text:`🎲 TIRAGE AU SORT...
 
 🥎 ${joueurKickOff} commence !
-⏳ 6 minutes pour jouer ⚽`
+⏳ 6 minutes pour jouer ⚽
+🧤 Niveau gardien défini : ${niveauGardien}`
   });
 
   lancerTimer(from, ovl);
@@ -187,10 +203,11 @@ ovlcmd({
 
   await ovl.sendMessage(from,{
     text:`
-🔷⚽ MATCH BLUE LOCK🥅
+🔷⚽ MATCH RESULTS 🥅
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🥅👤Joueur1: 0 ⚽               
-🥅👤Joueur2: 0 ⚽ 
+🥅👤Joueur2: 0 ⚽  
+🥅🧤Gardien: (niveau du gardien en chiffre)
              
 ╰───────────────────
 ▝▝▝ *🔷BLUELOCK⚽*`
@@ -206,5 +223,3 @@ module.exports = {
   arbitrerPave,
   lancerTimer
 };
-
-
