@@ -692,8 +692,6 @@ ovlcmd({
     await ovl.sendMessage(ms_org, { text: pavé }, { quoted: ms });
 });
 
-// Stockage joueurs cachés
-let hiddenPlayers = new Set();
 
 // ================= COMMANDE +CLASSEMENT⚽ =================
 ovlcmd({
