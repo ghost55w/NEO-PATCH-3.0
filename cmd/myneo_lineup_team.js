@@ -631,6 +631,26 @@ ovlcmd({
         await TeamFunctions.updateUser(jid1, { goals: (data1.goals || 0) + results[0].score });
         await TeamFunctions.updateUser(jid2, { goals: (data2.goals || 0) + results[1].score });
 
+        // ─── RECOMPENSES ARGENT 🔥
+        for (let i = 0; i < 2; i++) {
+            const jid = i === 0 ? jid1 : jid2;
+            const result = results[i];
+            const data = i === 0 ? data1 : data2;
+
+            if (result.rating === "✅") {
+                let gain = 10000; // +10000 de base
+                // bonus victoire si score supérieur
+                if ((i === 0 && results[0].score > results[1].score) || (i === 1 && results[1].score > results[0].score)) {
+                    gain += 10000;           // bonus victoire
+                    gain += 2000 * result.score; // bonus par but
+                }
+                await TeamFunctions.updateUser(jid, { argent: (data.argent || 0) + gain });
+                console.log(`[TEAM] ${data.users} +${gain} argent (rating ✅)`);
+            } else {
+                console.log(`[TEAM] ${data.users} pas de récompense (rating ❌)`);
+            }
+        }
+
         // ─── WINS / LOSS ───
         if (results[0].score > results[1].score) {
             await TeamFunctions.updateUser(jid1, { wins: (data1.wins || 0) + 1 });
@@ -671,7 +691,7 @@ ovlcmd({
     } catch (e) {
         console.error("❌ Erreur listener MATCH RESULTS :", e);
     }
-});
+}); 
 
 /* ================= PAVÉ DE FIN DE MATCH ================= */
 ovlcmd({
