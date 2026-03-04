@@ -26,6 +26,26 @@ const countryEmojis = {
 
 const getCountryEmoji = country => countryEmojis[country] || "";
 
+// ─── UTILITAIRE POUR TROUVER LE JID PAR NOM ───
+async function findTeamJidByUsers(name) {
+    if (!name) return null;
+    const allTeams = await TeamFunctions.getAllTeams();
+    if (!allTeams || !allTeams.length) return null;
+
+    const target = name
+        .normalize("NFKC")
+        .replace(/[\u200B-\u206F]/g,'')
+        .replace(/[\p{Emoji}]/gu,'')
+        .trim();
+
+    const team = allTeams.find(
+        t => t.users && t.users !== "aucun" &&
+        t.users.normalize("NFKC").replace(/[\u200B-\u206F]/g,'').replace(/[\p{Emoji}]/gu,'').trim() === target
+    );
+
+    return team ? team.id : null;
+}
+
 
 // --- RECHERCHE JOUEUR DB AVEC OVR ---
 function findPlayerInDB(inputName) {
