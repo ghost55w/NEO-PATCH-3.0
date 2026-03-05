@@ -823,22 +823,21 @@ ovlcmd({
   if (!arg.length)
     return repondre("⚠️ Utilise : +hide NomDuJoueur");
 
-  const target = arg.join(" ").trim();
-  const jid = await findTeamJidByUsers(target);
+  const target = arg.join(" ").trim().toLowerCase();
 
-  if (!jid)
+  const allPlayers = await TeamFunctions.getAllTeams();
+
+  const player = allPlayers.find(p => p.users.toLowerCase() === target);
+
+  if (!player)
     return repondre("⚠️ Joueur introuvable.");
 
-  const data = await TeamFunctions.getUserData(jid);
-  if (!data)
-    return repondre("⚠️ Données introuvables.");
-
-  if (data.hidden)
+  if (player.hidden)
     return repondre("⚠️ Ce joueur est déjà caché.");
 
-  await TeamFunctions.updateUser(jid, { hidden: true });
+  await TeamFunctions.updateUser(player.id, { hidden: true });
 
-  return repondre(`✅ ${data.users} est maintenant caché du classement.`);
+  return repondre(`✅ ${player.users} est maintenant caché du classement.`);
 });
 
 // --- Réafficher un joueur ---
@@ -852,20 +851,19 @@ ovlcmd({
   if (!arg.length)
     return repondre("⚠️ Utilise : +show NomDuJoueur");
 
-  const target = arg.join(" ").trim();
-  const jid = await findTeamJidByUsers(target);
+  const target = arg.join(" ").trim().toLowerCase();
 
-  if (!jid)
+  const allPlayers = await TeamFunctions.getAllTeams();
+
+  const player = allPlayers.find(p => p.users.toLowerCase() === target);
+
+  if (!player)
     return repondre("⚠️ Joueur introuvable.");
 
-  const data = await TeamFunctions.getUserData(jid);
-  if (!data)
-    return repondre("⚠️ Données introuvables.");
-
-  if (!data.hidden)
+  if (!player.hidden)
     return repondre("⚠️ Ce joueur n'est pas caché.");
 
-  await TeamFunctions.updateUser(jid, { hidden: false });
+  await TeamFunctions.updateUser(player.id, { hidden: false });
 
-  return repondre(`✅ ${data.users} est maintenant visible dans le classement.`);
+  return repondre(`✅ ${player.users} est maintenant visible dans le classement.`);
 });
