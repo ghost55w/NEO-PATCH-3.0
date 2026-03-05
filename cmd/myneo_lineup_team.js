@@ -747,7 +747,7 @@ ovlcmd({
 
     // Filtrer joueurs avec Goals > 0 et non cachés
     let activePlayers = allPlayers.filter(
-  p => p.goals > 0 && p.users && !p.hidden
+  p => p.goals > 0 && p.users && p.hidden !== true
 );
 
     if (!activePlayers.length)
