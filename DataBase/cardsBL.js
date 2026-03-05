@@ -1188,6 +1188,23 @@ const cardsBlueLock = {
   rank: "SS",
   taille: "193cm",
   pieds: "gauche"
+}, 
+
+"Hugo": {
+  name: "Hugo",
+  country: "France",
+  ovr: 97,
+  sho: 90,
+  dri: 90,
+  pas: 97,
+  acc: 87,
+  phy: 88,
+  def: 87,
+  goal: "",
+  image: "",
+  rank: "S",
+  taille: "187cm",
+  pieds: "droit"
 }
 };
 
