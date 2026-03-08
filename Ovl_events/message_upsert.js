@@ -3,11 +3,11 @@ const { Sudo } = require('../DataBase/sudo');
 const { jidDecode, getContentType } = require("@whiskeysockets/baileys");
 const evt = require("../lib/ovlcmd");
 const config = require("../set");
-const prefixe = config.PREFIXE || "";
+const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
-const { verifierFiche } = require("../cmd/Bluelockmatch");
+const { verifierFiche } = require("../commands/bluelockmatch");
 
 async function message_upsert(m, ovl) {
   try {
@@ -154,7 +154,6 @@ async function message_upsert(m, ovl) {
     /* ================================
        DETECTION FICHE MATCH BLUELOCK
     ================================= */
-
     try {
       if (texte && texte.includes("MATCH BLUE LOCK")) {
         await verifierFiche(texte, ms_org, ovl);
@@ -169,11 +168,10 @@ async function message_upsert(m, ovl) {
     }
 
     if (isCmd) {
-      const cd = evt.cmd.find(c => c.nom_cmd === cmdName || c.alias?.includes(cmdName));
+      const cd = evt.cmd?.find(c => c.nom_cmd === cmdName || c.alias?.includes(cmdName));
 
       if (cd) {
         try {
-
           if (config.MODE !== 'public' && !prenium_id) return;
 
           if ((!dev_id && auteur_Message !== '221772430620@s.whatsapp.net') &&
@@ -196,7 +194,7 @@ async function message_upsert(m, ovl) {
       }
     }
 
-    for (const cmd of evt.func) {
+    for (const cmd of evt.func || []) {
       try {
         await cmd.fonction(ms_org, ovl, cmd_options);
       } catch (err) {
