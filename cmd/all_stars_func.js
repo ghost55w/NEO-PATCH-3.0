@@ -118,6 +118,126 @@ const resultat = tirAleatoire <= probaGoal ? "but" : "arrêt";
     }
 });
 
+const { ovlcmd } = require("../lib/ovlcmd");
+const { cardsBlueLock } = require("../DataBase/cardsBL");
+
+ovlcmd({
+    nom: "goal",
+    isfunc: true
+}, async (ms_org, ovl, { texte, repondre }) => {
+    if (!texte.toLowerCase().startsWith("🔷⚽ goal🥅")) return;
+
+    // Extraction des stats depuis le pavé
+    const joueurMatch = texte.match(/🥅joueur\s*=\s*(.+)/i);
+    const gardienMatch = texte.match(/🥅Gardien\s*=\s*(\d+)/i);
+    const zoneMatch = texte.match(/🥅Zone\s*=\s*([\w\s-]+)/i);
+    const distanceMatch = texte.match(/🥅Distance\s*=\s*([\d.]+)/i);
+
+    if (!joueurMatch || !gardienMatch || !zoneMatch || !distanceMatch) {
+        return repondre("⚠️ Format incorrect. Assure-toi que la fiche est bien remplie.");
+    }
+
+    // Normalisation du nom saisi
+    const joueurNomSaisi = joueurMatch[1].trim().toLowerCase().replace(/\s+/g, ' ');
+
+    // Recherche du joueur dans la database (ignore la casse et les espaces)
+    const joueurData = Object.values(cardsBlueLock).find(joueur => {
+    const nameNormalized = joueur.name.trim().toLowerCase().replace(/\s+/g, ' ');
+    return nameNormalized === joueurNomSaisi;
+});
+
+    if (!joueurData) {
+        return repondre(`⚠️ Joueur non trouvé dans la Database : *${joueurNomSaisi}*`);
+    }
+
+    const tirPuissance = parseInt(joueurData.tir || 50, 10); // Tir pris depuis la Database
+    const gardien = parseInt(gardienMatch[1], 10);
+    const zone = zoneMatch[1].trim().toLowerCase().replace(/\s+/g, ' ');
+    const distance = parseFloat(distanceMatch[1]);
+
+    // Calcul du résultat du tir
+const sho = parseInt(joueurData.sho || 50, 10); // sho du joueur
+
+// Calcul du résultat du tir selon la distance et l'écart sho/gardien
+let probaGoal = 0;
+const ecart = sho - gardien;
+
+if (distance <= 5) {
+    if (ecart > 10) probaGoal = 1.0;       // 100%
+    else if (ecart > 0) probaGoal = 0.85;  // 85%
+    else if (ecart === 0) probaGoal = 0.5; // 50%
+    else probaGoal = 0;                     // tir < gardien → 0%
+} else if (distance <= 10) {
+    if (ecart > 10) probaGoal = 0.9;       // 90%
+    else if (ecart > 0) probaGoal = 0.65;  // 65%
+    else if (ecart === 0) probaGoal = 0.3; // 30%
+    else if (ecart >= -5) probaGoal = 0.2; // tir < gardien mais < 5 points → 20%
+    else probaGoal = 0;                     // sinon 0%
+} else {
+    // Pour les distances >10, ajustement possible
+    if (ecart > 10) probaGoal = 0.85;
+    else if (ecart > 0) probaGoal = 0.6;
+    else if (ecart === 0) probaGoal = 0.2;
+    else if (ecart >= -5) probaGoal = 0.1;
+    else probaGoal = 0;
+}
+
+// Tir aléatoire selon la probabilité
+const tirAleatoire = Math.random(); // valeur entre 0 et 1
+const resultat = tirAleatoire <= probaGoal ? "but" : "arrêt"; 
+
+   if (resultat === "but") {
+        const commentaires = {
+            "lucarne droite": ["*🎙️: COMME UN MISSILE GUIDÉ ! Le ballon se niche dans la lucarne droite - splendide !*", "*🎙️: UNE FRAPPE POUR L'HISTOIRE ! La lucarne droite explose sous l'effet de la frappe !*"],
+            "lucarne gauche": ["*🎙️: MAGNIFIQUE ! La lucarne gauche est pulvérisée par cette frappe !*", "*🎙️: UNE PRÉCISION D'ORFÈVRE ! Lucarne gauche touchée, le gardien impuissant !*"],
+            "lucarne milieu": ["*🎙️: JUSTE SOUS LA BARRE ! Une frappe centrée magistrale !*", "*🎙️: UNE FUSÉE POUR LES LIVRES D’HISTOIRE ! En pleine lucarne centrale !*"],
+            "mi-hauteur droite": ["*🎙️: UNE FRAPPE SÈCHE ET PRÉCISE ! Filets droits transpercés !*"],
+            "mi-hauteur gauche": ["*🎙️: PUISSANCE ET PRÉCISION ! Le ballon traverse la défense à gauche !*"],
+            "mi-hauteur centre": ["*🎙️: UNE FUSÉE AU CENTRE ! Le ballon frappe en plein milieu à mi-hauteur !*"],
+            "ras du sol droite": ["*🎙️: ENTRE LES JAMBES ! Le ballon glisse à ras du sol côté droit !*"],
+            "ras du sol gauche": ["*🎙️: UNE RACLÉE TECHNIQUE ! Le tir rase le sol à gauche et finit au fond !*"],
+            "ras du sol milieu": ["*🎙️: UNE FINALE DE CLASSE ! Le ballon fuse au sol, en plein centre !*"]
+        };
+
+        if (!commentaires[zone]) {
+            await repondre(`Zone inconnue : *${zone}*\nZones valides :\n- ${Object.keys(commentaires).join("\n- ")}`);
+            return;
+        }
+
+        const commentaire = commentaires[zone][Math.floor(Math.random() * commentaires[zone].length)];
+
+        // 1️⃣ Premier GIF : GOAL classique avec commentaire
+        const videoGoal = [
+            "https://files.catbox.moe/chcn2d.mp4",
+            "https://files.catbox.moe/t04dmz.mp4",
+            "https://files.catbox.moe/8t1eya.mp4"
+        ][Math.floor(Math.random() * 3)];
+
+        await ovl.sendMessage(ms_org, {
+            video: { url: videoGoal },
+            caption: `*🥅:✅GOOAAAAAL!!!⚽⚽⚽ ▱▱▱▱*\n${commentaire}`,
+            gifPlayback: true
+        });
+
+        // 2️⃣ Deuxième GIF : célébration spécifique du joueur
+        const gifCelebration = joueurData.goal;
+        if (gifCelebration) {
+            await ovl.sendMessage(ms_org, {
+                video: { url: gifCelebration },
+                caption: "",
+                gifPlayback: true
+            });
+        }
+
+    } else {
+        await ovl.sendMessage(ms_org, {
+            video: { url: 'https://files.catbox.moe/88lylr.mp4' },
+            caption: "*🥅:❌MISSED GOAL!!! ▱▱▱▱*",
+            gifPlayback: true
+        });
+    }
+});
+
 const activeCountdowns = {};
 const pausedCountdowns = {};
 
