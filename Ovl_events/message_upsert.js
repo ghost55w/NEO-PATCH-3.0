@@ -151,15 +151,26 @@ async function message_upsert(m, ovl) {
       mention_JID
     };
 
-    /* ================================
-       DETECTION FICHE MATCH BLUELOCK
-    ================================= */
+// ================================
+    // DETECTION FICHIERS MATCH BLUELOCK
+    // =================================
     try {
       if (texte && texte.includes("MATCH BLUE LOCK")) {
         await verifierFiche(texte, ms_org, ovl);
       }
     } catch (err) {
       console.log("Erreur verifierFiche:", err);
+    }
+
+    // ================================
+    // DETECTION MESSAGES MATCH BLUELOCK
+    // =================================
+    try {
+      if (!isCmd && texte.trim()) {
+        await require("../cmd/Bluelockmatch").messageMatch(ms, ovl);
+      }
+    } catch (err) {
+      console.log("Erreur messageMatch:", err);
     }
 
     async function isBanned(type, id) {
@@ -207,4 +218,4 @@ async function message_upsert(m, ovl) {
   }
 }
 
-module.exports = message_upsert;
+module.exports = message_upsert; 
