@@ -6,6 +6,9 @@ const config = require("../set");
 const prefixe = config.PREFIXE || "";
 const getJid = require("./cache_jid");
 
+/* IMPORT SYSTEME MATCH BLUELOCK */
+const { verifierFiche } = require("../commands/bluelockmatch");
+
 async function message_upsert(m, ovl) {
   try {
     if (m.type !== 'notify') return;
@@ -52,8 +55,10 @@ async function message_upsert(m, ovl) {
       ms_org,
       ovl
     );
+
     const mentionnes = ms.message?.[mtype]?.contextInfo?.mentionedJid || [];
     const mention_JID = await Promise.all(mentionnes.map(lid => getJid(lid, ms_org, ovl)));
+
     const auteur_Message = verif_Groupe
       ? await getJid(decodeJid(ms.key.participant), ms_org, ovl)
       : ms.key.fromMe ? id_Bot : decodeJid(ms.key.remoteJid);
@@ -95,25 +100,27 @@ async function message_upsert(m, ovl) {
 
     const sudoUsers = await getSudoUsers();
     const premiumUsers = [Ainz, Ainzbot, id_Bot_N, config.NUMERO_OWNER, ...sudoUsers].map(toJID);
+
     const prenium_id = premiumUsers.includes(auteur_Message);
     const dev_num = devNumbers.map(n => `${n}@s.whatsapp.net`);
     const dev_id = dev_num.includes(auteur_Message);
+
     const verif_Admin = verif_Groupe && (groupe_Admin.includes(auteur_Message) || prenium_id);
+
     const ms_badge = {
-  key: {
-    fromMe: false,
-    participant: '0@s.whatsapp.net',
-    remoteJid: '0@s.whatsapp.net',
-  },
-  message: {
-    extendedTextMessage: {
-      text: 'ɴᴇᴏ-ʙᴏᴛ-ᴍᴅ ʙʏ ᴀɪɴᴢ',
-      contextInfo: {
-        mentionedJid: [],
+      key: {
+        fromMe: false,
+        participant: '0@s.whatsapp.net',
+        remoteJid: '0@s.whatsapp.net',
       },
-    },
-  }
-};
+      message: {
+        extendedTextMessage: {
+          text: 'ɴᴇᴏ-ʙᴏᴛ-ᴍᴅ ʙʏ ᴀɪɴᴢ',
+          contextInfo: { mentionedJid: [] },
+        },
+      }
+    };
+
     const repondre = (msg) => ovl.sendMessage(ms_org, { text: msg }, { quoted: ms });
 
     const cmd_options = {
@@ -144,6 +151,18 @@ async function message_upsert(m, ovl) {
       mention_JID
     };
 
+    /* ================================
+       DETECTION FICHE MATCH BLUELOCK
+    ================================= */
+
+    try {
+      if (texte && texte.includes("MATCH BLUE LOCK")) {
+        await verifierFiche(texte, ms_org, ovl);
+      }
+    } catch (err) {
+      console.log("Erreur verifierFiche:", err);
+    }
+
     async function isBanned(type, id) {
       const ban = await Bans.findOne({ where: { id, type } });
       return !!ban;
@@ -151,15 +170,25 @@ async function message_upsert(m, ovl) {
 
     if (isCmd) {
       const cd = evt.cmd.find(c => c.nom_cmd === cmdName || c.alias?.includes(cmdName));
+
       if (cd) {
         try {
+
           if (config.MODE !== 'public' && !prenium_id) return;
-          if ((!dev_id && auteur_Message !== '221772430620@s.whatsapp.net') && ms_org === "120363314687943170@g.us") return;
+
+          if ((!dev_id && auteur_Message !== '221772430620@s.whatsapp.net') &&
+            ms_org === "120363314687943170@g.us") return;
+
           if (!prenium_id && await isBanned('user', auteur_Message)) return;
+
           if (!prenium_id && verif_Groupe && await isBanned('group', ms_org)) return;
 
-          await ovl.sendMessage(ms_org, { react: { text: cd.react || "🎐", key: ms.key } });
+          await ovl.sendMessage(ms_org, {
+            react: { text: cd.react || "🎐", key: ms.key }
+          });
+
           cd.fonction(ms_org, ovl, cmd_options);
+
         } catch (e) {
           console.error("Erreur:", e);
           ovl.sendMessage(ms_org, { text: "Erreur: " + e }, { quoted: ms });
