@@ -158,23 +158,26 @@ ovlcmd({
     return ovl.sendMessage(ms_org, { text: "▶️ Décompte repris." });
   }
 
-  let countdownTime = null;
-  let isGo = false;
-  if (mots[0]?.startsWith("@") && /(next|nx|nxt)$/.test(mots[1] || "")) {
-    countdownTime = 6 * 60;
-  } else if (mots[0]?.startsWith("@") && /go$/.test(mots[1] || "")) {
-    countdownTime = 6 * 60;
-    isGo = true;
-  } else return;
+  // Détection Go / Next
+let countdownTime = null;
+let isGo = false;
+let gifUrl = "";
 
-  if (activeCountdowns[ms_org] || pausedCountdowns[ms_org]) {
-    return ovl.sendMessage(ms_org, { text: "⚠️ Un décompte est déjà en cours ou en pause." });
-  }
+if (mots[1] === "go") {
+  countdownTime = 6 * 60;
+  isGo = true;
+  gifUrl = "https://files.catbox.moe/1td1ai.mp4"; // GIF Go
+} else if (mots[1] === "next") {
+  countdownTime = 6 * 60;
+  isGo = true; // Toujours true pour la logique
+  gifUrl = "https://files.catbox.moe/7jmwi8.mp4"; // GIF Next
+} else return;
 
-  await ovl.sendMessage(ms_org, {
-    video: { url: isGo ? "https://files.catbox.moe/1td1ai.mp4" : "https://files.catbox.moe/7jmwi8.mp4" },
-    gifPlayback: true
-  });
+// Envoi du GIF
+await ovl.sendMessage(ms_org, {
+  video: { url: gifUrl },
+  gifPlayback: true
+});
 
   const interval = setInterval(async () => {
     countdownTime--;
