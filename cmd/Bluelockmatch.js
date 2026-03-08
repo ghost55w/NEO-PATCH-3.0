@@ -63,199 +63,162 @@ async function trouverUser(nom){
   return null;
 }
 
-/* ===============================
-   TIMER
-=================================*/
-function lancerTimer(from, ovl){
-  const match = matchsActifs.get(from);
-  if(match.timer) clearTimeout(match.timer);
-
-  match.timer = setTimeout(async ()=>{
-    match.tourActuel++;
-    if(match.tourActuel >= 4){
-      match.possession = match.possession === "A" ? "B" : "A";
-      match.tour = match.possession;
-      match.tourActuel = 0;
-      ovl.sendMessage(from,{ text:"⏰ 4 tours écoulés, possession changée." });
-    } else {
-      ovl.sendMessage(from,{ text:`⏰ 6 minutes écoulées. Tour ${match.tourActuel}/4 pour ${match.equipes[match.possession].nom}.` });
-      lancerTimer(from, ovl);
-    }
-  }, 6*60*1000);
-}
-
-/* ===============================
-   ANALYSE DES PAVÉS
-=================================*/
-async function analyserPave(from, msg, ovl){
-  if(!matchsActifs.has(from)) return;
-
-  const match = matchsActifs.get(from);
-  if(match.statut !== "en_cours") return;
-  if(!msg.body.includes("💬:") || !msg.body.includes("⚽:")) return;
-
-  const actionLine = msg.body.split("\n").find(l => l.startsWith("⚽:"));
-  if(!actionLine) return;
-
-  const texteAction = actionLine.replace("⚽:","").trim();
-  const model = "(Z) NOM contrôle la balle de l'intérieur ou pointe du pied à DIST cm puis enchaîne avec une conduite de balle de la pointe du pied droit à DIST vmax vers Z2";
-
-  const similarity = stringSimilarity.compareTwoStrings(texteAction.toLowerCase(), model.toLowerCase());
-  if(similarity < 0.4){
-    clearTimeout(match.timer);
-    match.possession = match.possession === "A" ? "B" : "A";
-    match.tour = match.possession;
-    return ovl.sendMessage(from,{ text:"❌ Pavé refusé : ressemblance insuffisante. Ballon perdu." });
-  }
-
-  const sequences = texteAction.split("/").map(s=>s.trim());
-  if(sequences.length > 2){
-    clearTimeout(match.timer);
-    match.possession = match.possession === "A" ? "B" : "A";
-    match.tour = match.possession;
-    return ovl.sendMessage(from,{ text:"❌ Trop de séquences. Ballon perdu." });
-  }
-
-  const equipe = match.possession;
-  let positionActuelle = null;
-  let joueurNom = null;
-
-  for(let i=0;i<sequences.length;i++){
-    const seq = sequences[i];
-
-    if(compterActions(seq) > 3) return ovl.sendMessage(from,{ text:"❌ Trop d'actions dans la séquence. Ballon perdu." });
-    if(!verifierCombo(seq)) return ovl.sendMessage(from,{ text:"❌ Combo non valide. Ballon perdu." });
-
-    const zones = extraireZones(seq);
-    if(!zones) return ovl.sendMessage(from,{ text:"❌ Zone départ ou arrivée manquante. Ballon perdu." });
-
-    if(i===0){
-      joueurNom = seq.match(/\)\s*(\w+)/)?.[1];
-      if(!joueurNom || !match.equipes[equipe].joueurs[joueurNom]) 
-        return ovl.sendMessage(from,{ text:"❌ Joueur introuvable. Ballon perdu." });
-
-      positionActuelle = match.equipes[equipe].joueurs[joueurNom].zone;
-      if(positionActuelle !== zones.depart) 
-        return ovl.sendMessage(from,{ text:"❌ Mauvaise position de départ. Ballon perdu." });
-    }
-
-    if(zones.depart !== positionActuelle) 
-      return ovl.sendMessage(from,{ text:"❌ Zones incohérentes. Ballon perdu." });
-    if(distance(zones.depart, zones.arrivee) > 10) 
-      return ovl.sendMessage(from,{ text:"❌ Distance trop longue. Ballon perdu." });
-
-    if(!/(intérieur|pointe)/i.test(seq) || !/(\d+)cm/i.test(seq)) 
-      return ovl.sendMessage(from,{ text:"❌ Pied de contrôle ou distance manquant. Ballon perdu." });
-    if(!/vmax/i.test(seq)) 
-      match.equipes[equipe].joueurs[joueurNom].vitesse = "reduced";
-
-    positionActuelle = zones.arrivee;
-  }
-
-  match.equipes[equipe].joueurs[joueurNom].zone = positionActuelle;
-  ovl.sendMessage(from,{ text:"✅ Pavé validé. Action acceptée." });
-
-  clearTimeout(match.timer);
-  lancerTimer(from, ovl);
-}
-
-/* ===============================
-COMMANDE +Match⚽
-=================================*/
 ovlcmd({
-nom_cmd: 'match⚽',
-classe: 'BLUELOCK⚽',
-react: '⚽',
-desc: "Lance un match BLUE LOCK"
-}, async (ms_org, ovl, { repondre, auteur_Message }) => {
-try {
-if(matchsActifs.has(ms_org))
-return ovl.sendMessage(ms_org,{ text:"⚠️ Un match est déjà en cours." });
+  nom_cmd: "match⚽",
+  classe: "BLUELOCK⚽",
+  react: "⚽",
+  desc: "Créer un match Blue Lock"
+}, async (ms_org, ovl) => {
 
-matchsActifs.set(ms_org, { statut: "attente_confirmation" });  
+const chat = ms_org.key.remoteJid
 
-await ovl.sendMessage(ms_org,{  
-  text:`🔷⚽ MATCH BLUE LOCK🥅
-
+const ficheMatch = `
+🔷⚽ *MATCH BLUE LOCK* 🥅
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🥅👤Joueur1:
 🥅👤Joueur2:
 🥅🧤Gardien:
-
+⌛ Score win:
+             
 ╰───────────────────
-▝▝▝       🔷BLUELOCK⚽
+▝▝▝       *🔷BLUELOCK⚽*
+`
 
-⚠️ Veuillez renvoyer le pavé de confirmation dans 1 minute.`
-});
+await ovl.sendMessage(chat,{text:ficheMatch})
 
-const filter = (msg) => msg.body.includes("MATCH BLUE LOCK") && matchsActifs.get(ms_org)?.statut === "attente_confirmation";  
-const confirmationPromise = new Promise((resolve)=>{  
-  const timer = setTimeout(()=> resolve(null), 60*1000);  
-  const handler = async (msg) => { if(msg.from === ms_org && filter(msg)){ clearTimeout(timer); resolve(msg.body); } };  
-  repondre.on('message', handler);  
-});  
+matchsActifs.set(chat,{
+etat:"attente_fiche",
+createur:ms_org.key.participant || ms_org.key.remoteJid
+})
 
-const paveConfirm = await confirmationPromise;  
-if(!paveConfirm){  
-  matchsActifs.delete(ms_org);  
-  return ovl.sendMessage(ms_org,{ text:"❌ Session fermée, confirmation non reçue." });  
-}  
+setTimeout(()=>{
+const match = matchsActifs.get(chat)
 
-const lignes = paveConfirm.split("\n");  
-const nomJ1 = lignes.find(l=>l.includes("Joueur1"))?.split(":")[1]?.trim();  
-const nomJ2 = lignes.find(l=>l.includes("Joueur2"))?.split(":")[1]?.trim();  
-const gardienNiveau = parseInt(lignes.find(l=>l.includes("Gardien"))?.split(":")[1]?.trim());  
-
-const joueur1 = await trouverUser(nomJ1);  
-const joueur2 = await trouverUser(nomJ2);  
-if(!joueur1 || !joueur2)  
-  return ovl.sendMessage(ms_org,{ text:"❌ Un des joueurs est introuvable dans la base." });  
-
-const equipeKickOff = tirageKickOff();  
-const match = {  
-  statut:"en_cours",  
-  possession:equipeKickOff,  
-  tour:equipeKickOff,  
-  tourActuel:0,  
-  possessionsRestantes: { A: 2, B: 2 },  
-  timer:null,  
-  gardien:gardienNiveau,  
-  equipes:{  
-    A:{ nom:nomJ1, db:joueur1, joueurs:{ [nomJ1]:{ zone:"C2", stats: joueur1.userData } }, score:0 },  
-    B:{ nom:nomJ2, db:joueur2, joueurs:{ [nomJ2]:{ zone:"C2", stats: joueur2.userData } }, score:0 }  
-  }  
-};  
-matchsActifs.set(ms_org, match);  
-
-const joueurKickOff = match.equipes[equipeKickOff].nom;  
-
-await ovl.sendMessage(ms_org,{  
-  video: "https://files.catbox.moe/7jmwi8.mp4",  
-  caption: `⚽ ${joueurKickOff} démarre le match avec la possession ! 6 minutes pour le premier pavé.`  
-});  
-
-lancerTimer(ms_org, ovl);
-
-} catch(e){
-console.log(e);
-ovl.sendMessage(ms_org,{ text:"⚠️ Erreur lors du lancement du match." });
-}
-});
-/* ===============================
-   INTÉGRATION RECEPTION MESSAGE
-=================================*/
-async function onMessageReceived(from, msg, ovl){
-  if(matchsActifs.has(from)){
-    await analyserPave(from, msg, ovl);
-  }
+if(match && match.etat === "attente_fiche"){
+matchsActifs.delete(chat)
+ovl.sendMessage(chat,{text:"⌛ Temps écoulé. Match annulé."})
 }
 
-/* ===============================
-   EXPORT
-=================================*/
-module.exports = {
-  matchsActifs,
-  analyserPave,
-  lancerTimer,
-  onMessageReceived
-};
+},60000)
+
+})
+//----------DETECTION PAVÉ DE MATCH
+async function verifierFiche(message,chat,ovl){
+
+const match = matchsActifs.get(chat)
+if(!match) return
+
+if(match.etat !== "attente_fiche") return
+
+if(!message.includes("MATCH BLUE LOCK")) return
+
+const joueur1 = message.match(/Joueur1:\s*(.*)/)
+const joueur2 = message.match(/Joueur2:\s*(.*)/)
+const gardien = message.match(/Gardien:\s*(.*)/)
+const score = message.match(/Score win:\s*(.*)/)
+
+if(!joueur1 || !joueur2) return
+
+match.joueur1 = joueur1[1].trim()
+match.joueur2 = joueur2[1].trim()
+match.scoreWin = score ? score[1] : "2"
+
+const allPlayers = await TeamFunctions.getAllTeams()
+
+const j1 = allPlayers.find(p => 
+stringSimilarity.compareTwoStrings(p.name.toLowerCase(),match.joueur1.toLowerCase()) > 0.6
+)
+
+const j2 = allPlayers.find(p => 
+stringSimilarity.compareTwoStrings(p.name.toLowerCase(),match.joueur2.toLowerCase()) > 0.6
+)
+
+if(!j1 || !j2){
+
+await ovl.sendMessage(chat,{
+text:"❌ Joueurs introuvables dans la base."
+})
+
+matchsActifs.delete(chat)
+return
+}
+
+match.id1 = j1.user
+match.id2 = j2.user
+
+match.etat = "attente_lineup"
+
+await ovl.sendMessage(chat,{
+text:`📋 Joueurs confirmés !
+
+👤 ${match.joueur1}
+👤 ${match.joueur2}
+
+⚽ Les joueurs doivent envoyer *+lineup⚽*`
+})
+
+}
+
+ovlcmd({
+nom_cmd:"lineup⚽",
+classe:"BLUELOCK⚽",
+react:"📋"
+},async(ms_org,ovl)=>{
+
+const chat = ms_org.key.remoteJid
+const sender = ms_org.key.participant
+
+const match = matchsActifs.get(chat)
+
+if(!match) return
+if(match.etat !== "attente_lineup") return
+
+if(sender === match.id1){
+
+match.lineup1 = true
+
+await ovl.sendMessage(chat,{text:`✅ Lineup reçu pour ${match.joueur1}`})
+
+}
+
+if(sender === match.id2){
+
+match.lineup2 = true
+
+await ovl.sendMessage(chat,{text:`✅ Lineup reçu pour ${match.joueur2}`})
+
+}
+
+if(match.lineup1 && match.lineup2){
+
+match.etat = "debut_match"
+
+await ovl.sendMessage(chat,{
+text:"⏳ Match commence dans *1 minute*..."
+})
+
+setTimeout(()=>lancerMatch(chat,ovl),60000)
+
+}
+
+})
+
+async function lancerMatch(chat,ovl){
+
+const match = matchsActifs.get(chat)
+if(!match) return
+
+const premier = Math.random() < 0.5 ? match.joueur1 : match.joueur2
+
+match.possession = premier
+match.etat = "match"
+
+await ovl.sendMessage(chat,{
+text:`🏟️ *MATCH BLUE LOCK*
+
+⚽ ${premier} commence avec la possession !
+
+🔥 *KICK OFF*`
+})
+
+}
