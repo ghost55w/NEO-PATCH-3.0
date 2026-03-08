@@ -162,8 +162,8 @@ ovlcmd({
   let countdownTime = null;
   let isGo = false;
 
-  if (user && /(next|nx|nxt)/.test(neoTexte)) countdownTime = 6*60;
-  else if (user && /go/.test(neoTexte)) { countdownTime = 6*60; isGo = true; }
+  if (user && /\b(next|nx|nxt)\b/.test(neoTexte)) countdownTime = 6*60;
+else if (user && /\bgo\b/.test(neoTexte)) { countdownTime = 6*60; isGo = true; }
   else return;
 
   if (activeCountdowns[ms_org] || pausedCountdowns[ms_org]) return ovl.sendMessage(ms_org, { text: "⚠️ Un décompte est déjà en cours ou en pause." });
