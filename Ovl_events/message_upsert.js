@@ -7,7 +7,7 @@ const prefixe = config.PREFIXE || "";
 const getJid = require("./cache_jid");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
-const { verifierFiche } = require("../commands/bluelockmatch");
+const { verifierFiche } = require("../commands/Bluelockmatch");
 
 async function message_upsert(m, ovl) {
   try {
