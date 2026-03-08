@@ -1,7 +1,6 @@
 const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
-const stringSimilarity = require('string-similarity');
 
 const matchsActifs = new Map();
 
