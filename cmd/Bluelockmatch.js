@@ -177,7 +177,20 @@ match.id2 = j2.id;
     match.equipe1 = null;
     match.equipe2 = null;
 
-    const confirmation = `🔷⚽ *MATCH BLUE LOCK* 🥅
+    // ================= IMAGES MATCH CONFIRMATION =================
+const imagesMatchConfirm = [
+  "https://files.catbox.moe/kyrnzq.jpg",
+  "https://files.catbox.moe/7jmwi8.mp4",
+  "https://files.catbox.moe/abcd12.jpg",
+  "https://files.catbox.moe/efgh34.jpg"
+];
+   
+function randomImage(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+// ================= MESSAGE CONFIRMATION MATCH =================
+const confirmation = `🔷⚽ *MATCH BLUE LOCK* 🥅
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🎙️: ✅ Joueurs confirmés !
 👤 ${match.joueur1}
@@ -189,10 +202,11 @@ match.id2 = j2.id;
 ╰───────────────────
                       *🔷BLUELOCK⚽*`;
 
+// ================= ENVOI MESSAGE =================
 await ovl.sendMessage(
   chat,
   {
-    image: { url: "TON_URL_IMAGE_ICI" },
+    image: { url: randomImage(imagesMatchConfirm) },
     caption: confirmation
   }
 );
