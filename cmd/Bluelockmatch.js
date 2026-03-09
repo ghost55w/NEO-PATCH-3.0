@@ -177,16 +177,25 @@ match.id2 = j2.id;
     match.equipe1 = null;
     match.equipe2 = null;
 
-    await ovl.sendMessage(chat, {
-        text: `📋 Joueurs confirmés !
-
+    const confirmation = `🔷⚽ *MATCH BLUE LOCK* 🥅
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🎙️: ✅ Joueurs confirmés !
 👤 ${match.joueur1}
 👤 ${match.joueur2}
 🧤 Gardien: ${match.gardien}
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+⚠️ //Chaque joueur doit maintenant envoyer son lineup, les remplacements ne sont autorisés que après un but où après la fin d'une possession d'attaque//.
 
-⚽ Chaque joueur doit maintenant envoyer son lineup avec la commande *+lineup⚽* suivie de son texte de formation.`
-    });
-}
+╰───────────────────
+                      *🔷BLUELOCK⚽*`;
+
+await ovl.sendMessage(
+  chat,
+  {
+    image: { url: "TON_URL_IMAGE_ICI" },
+    caption: confirmation
+  }
+);
 
 /* ===============================
    COMMANDE LINEUP
