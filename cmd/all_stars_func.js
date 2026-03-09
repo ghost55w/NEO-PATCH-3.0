@@ -170,7 +170,7 @@ if (mots[1] === "go") {
 } else if (mots[1] === "next") {
   countdownTime = 6 * 60;
   isGo = true; // Toujours true pour la logique
-  gifUrl = "https://files.catbox.moe/7jmwi8.mp4"; // GIF Next
+  gifUrl = "https://files.catbox.moe/mdvntr.mp4"; // GIF Next
 } else return;
 
 // Envoi du GIF
