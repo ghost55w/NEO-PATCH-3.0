@@ -80,25 +80,21 @@ function parseLineup(texte) {
 /* ===============================
    TROUVER JOUEUR DB
 =================================*/
-
 async function trouverUser(nom) {
     const allPlayers = await TeamFunctions.getAllTeams();
     if (!allPlayers) return null;
 
-    for (const team of allPlayers) {
-        const user = team?.data?.users?.find(u =>
-            u.name.toLowerCase() === nom.toLowerCase()
-        );
-        if (user) {
-            return {
-                teamId: team.id,
-                teamName: team.name,
-                userData: user
-            };
+    const nomClean = nom.toLowerCase().trim();
+
+    for (const player of allPlayers) {
+        if ((player.users || "").toLowerCase().trim() === nomClean) {
+            return player;
         }
     }
+
     return null;
 }
+
 
 /* ===============================
    COMMANDE MATCH
@@ -175,8 +171,8 @@ async function verifierFiche(message, chat, ovl) {
         return;
     }
 
-    match.id1 = j1.userData.id;
-    match.id2 = j2.userData.id;
+    match.id1 = j1.id;
+match.id2 = j2.id;
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
