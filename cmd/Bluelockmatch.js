@@ -179,10 +179,8 @@ match.id2 = j2.id;
 
     // ================= IMAGES MATCH CONFIRMATION =================
 const imagesMatchConfirm = [
-  "https://files.catbox.moe/kyrnzq.jpg",
-  "https://files.catbox.moe/7jmwi8.mp4",
-  "https://files.catbox.moe/abcd12.jpg",
-  "https://files.catbox.moe/efgh34.jpg"
+  "https://files.catbox.moe/7m2axj.jpg",
+  "https://files.catbox.moe/mtou2n.jpg"
 ];
    
 function randomImage(list) {
