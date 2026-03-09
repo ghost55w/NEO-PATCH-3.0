@@ -271,6 +271,43 @@ async function lancerMatch(chat, ovl) {
     });
 }
 
+// ================= COMMANDE +STOPMATCH⚽ =================
+ovlcmd({
+  nom_cmd: "stopmatch⚽",
+  classe: "BLUELOCK⚽",
+  react: "⛔",
+  desc: "Arrêter le match en cours dans le groupe"
+}, async (ms_org, ovl, cmd_options) => {
+  try {
+    const chat = ms_org; // ou ms_org.key.remoteJid selon comment tu appelles la commande
+    const match = matchsActifs.get(chat);
+
+    if (!match) {
+      return ovl.sendMessage(chat, {
+        text: "⚠️ Aucun match en cours dans ce groupe."
+      });
+    }
+
+    // Supprimer le match actif
+    matchsActifs.delete(chat);
+
+    // Message de confirmation
+    await ovl.sendMessage(chat, {
+      text: `⛔ Le match Blue Lock en cours a été arrêté!`
+    });
+
+  } catch (e) {
+    console.error("❌ Erreur commande +stopmatch⚽ :", e);
+    await ovl.sendMessage(chat, {
+      text: "❌ Une erreur est survenue lors de l'arrêt du match."
+    });
+  }
+});
+
+
+
+
+   
 /* ===============================
    LECTURE MESSAGES
 =================================*/
