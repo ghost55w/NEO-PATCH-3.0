@@ -10,6 +10,29 @@ const ACTIONS = ["contrôle", "conduit", "accélère", "tir", "frappe", "passe",
 /* ===============================
 OUTILS JEU
 =================================*/
+function parseSquadBlueLock(text) {
+    const lignes = text.split("\n");
+    const joueurs = [];
+
+    const regex = /\d+\s+👤(?:\([A-Z]{2}\))?\s*([^(]+)\s*\((\d+)\)/i;
+
+    for (const ligne of lignes) {
+        const match = ligne.match(regex);
+        if (match) {
+            joueurs.push(match[1].trim());
+        }
+    }
+
+    if (joueurs.length === 0) return null;
+
+    const fiche = {};
+    joueurs.forEach((j, i) => {
+        fiche[`joueur${i + 1}`] = j;
+    });
+
+    return fiche;
+}
+
 
 function tirageKickOff() {
     return Math.random() < 0.5 ? "A" : "B";
@@ -290,11 +313,31 @@ LECTURE MESSAGES
 =================================*/
 async function messageMatch(ms, ovl) {
     if (!ms.message) return;
+
     const chat = ms.key.remoteJid;
-    const text = ms.message.conversation || ms.message.extendedTextMessage?.text || "";
+    const sender = ms.key.participant || ms.key.remoteJid;
+
+    const text =
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        "";
 
     if (!text) return;
+
+    // Détection fiche match
     await verifierFiche(text, chat, ovl);
+
+    const match = matchsActifs.get(chat);
+    if (!match || match.etat !== "attente_lineup") return;
+
+    // Détection du squad affiché par +lineup⚽
+    if (text.includes("👥SQUAD⚽🥅")) {
+
+        const ficheLineup = parseSquadBlueLock(text);
+        if (!ficheLineup) return;
+
+        await enregistrerLineupMatch(sender, chat, ficheLineup);
+    }
 }
 
 module.exports = { messageMatch, verifierFiche };
