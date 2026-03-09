@@ -214,34 +214,33 @@ ovlcmd({
 }, async (ms_org, ovl) => {
     const chat = ms_org.key.remoteJid;
     const sender = ms_org.key.participant || ms_org.key.remoteJid;
-    const texteMessage = ms_org.message?.conversation || ms_org.message?.extendedTextMessage?.text || "";
 
     const match = matchsActifs.get(chat);
-    if (!match || match.etat !== "attente_lineup") return;
 
-    const positionsJoueurs = parseLineup(texteMessage);
+    if (match && match.etat === "attente_lineup") {
+        // 🔹 On est dans un match -> récupérer le lineup depuis la BD
+        let ficheLineup = await BlueLockFunctions.getUserData(sender);
+        if (!ficheLineup) return ovl.sendMessage(chat, { text: "❌ Impossible de récupérer ton lineup." });
+        ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 
-    if (positionsJoueurs.length === 0) {
-        return ovl.sendMessage(chat, { text: "⚠️ Format de lineup invalide ou aucune position détectée." });
-    }
+        const positionsJoueurs = [];
+        for (let i = 1; i <= 15; i++) {
+            positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
+        }
 
-    if (sender === match.id1) {
-        match.equipe1 = positionsJoueurs;
-        await ovl.sendMessage(chat, { text: `✅ Lineup enregistré pour ${match.joueur1} ! (${positionsJoueurs.length} joueurs)` });
-    } else if (sender === match.id2) {
-        match.equipe2 = positionsJoueurs;
-        await ovl.sendMessage(chat, { text: `✅ Lineup enregistré pour ${match.joueur2} ! (${positionsJoueurs.length} joueurs)` });
+        if (sender === match.id1) match.equipe1 = positionsJoueurs;
+        else if (sender === match.id2) match.equipe2 = positionsJoueurs;
+
+        await ovl.sendMessage(chat, { text: `✅ Lineup enregistré pour ${sender}!` });
+
+        if (match.equipe1 && match.equipe2) {
+            match.etat = "debut_match";
+            await ovl.sendMessage(chat, { text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..." });
+            setTimeout(() => lancerMatch(chat, ovl), 60000);
+        }
     } else {
-        return;
-    }
-
-    if (match.equipe1 && match.equipe2) {
-        match.etat = "debut_match";
-        await ovl.sendMessage(chat, { text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..." });
-
-        setTimeout(() => {
-            lancerMatch(chat, ovl);
-        }, 60000);
+        // 🔹 Pas de match en cours -> comportement classique + affichage
+        afficherLineup(sender, chat, ovl, ms_org);
     }
 });
 
