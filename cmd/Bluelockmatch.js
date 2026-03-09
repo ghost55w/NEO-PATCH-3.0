@@ -8,7 +8,7 @@ const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 const ACTIONS = ["contrôle", "conduit", "accélère", "tir", "frappe", "passe", "dribble"];
 
 /* ===============================
-   OUTILS JEU
+OUTILS JEU
 =================================*/
 
 function tirageKickOff() {
@@ -35,10 +35,50 @@ function compterActions(sequence) {
     return total;
 }
 
+function verifierCombo(sequence) {
+    const combos = sequence.match(/(contrôle|conduit|accélère|tir|frappe|passe|dribble)/gi);
+    return !combos || combos.length <= 1;
+}
 
+function extraireZones(sequence) {
+    const departMatch = sequence.match(/de\s+(A1|A2|B1|B2|C1|C2)/i);
+    const arriveeMatch = sequence.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)/i);
+    if (!departMatch || !arriveeMatch) return null;
+    const depart = departMatch[1].toUpperCase();
+    const arrivee = (arriveeMatch[1] || arriveeMatch[2]).toUpperCase();
+    return { depart, arrivee };
+}
+
+function distance(z1, z2) {
+    return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
+}
+
+function perteBalle(match) {
+    match.possession = match.possession === "A" ? "B" : "A";
+    match.tour = match.possession;
+    match.tourActuel = 0;
+    return {
+        ok: false,
+        message: "❌ Pavé invalide. Ballon perdu. Possession adverse."
+    };
+}
+
+function parseLineup(texte) {
+    const regex = /\s*(\w+)\s*:\s*([^\n\r]+)\s*-\s*(\d+)/gi;
+    const joueurs = [];
+    let match;
+    while ((match = regex.exec(texte)) !== null) {
+        joueurs.push({
+            position: match[1].toUpperCase(),
+            nom: match[2].trim(),
+            note: match[3].trim()
+        });
+    }
+    return joueurs;
+}
 
 /* ===============================
-   TROUVER JOUEUR DB
+TROUVER JOUEUR DB
 =================================*/
 async function trouverUser(nom) {
     const allPlayers = await TeamFunctions.getAllTeams();
@@ -56,47 +96,7 @@ async function trouverUser(nom) {
 }
 
 /* ===============================
-VERIFIER COMBO
-=================================*/
-function verifierCombo(sequence) {
-    // Remplacer la regex vide par une regex correcte pour détecter "combo"
-    const combos = sequence.match(/\bcombo\b/gi);
-    return !combos || combos.length <= 1;
-}
-
-/* ===============================
-EXTRAIRE ZONES
-=================================*/
-function extraireZones(sequence) {
-    // Regex pour extraire la zone de départ et d'arrivée (A1, A2, B1, B2, C1, C2)
-    const departMatch = sequence.match(/\b(A1|A2|B1|B2|C1|C2)\b/i);
-    const arriveeMatch = sequence.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)/i);
-    if (!departMatch || !arriveeMatch) return null;
-    const depart = departMatch[1]?.toUpperCase();
-    const arrivee = (arriveeMatch[1] || arriveeMatch[2])?.toUpperCase();
-    return { depart, arrivee };
-}
-
-/* ===============================
-PARSE LINEUP
-=================================*/
-function parseLineup(texte) {
-    // Regex corrigée pour extraire position, nom, note
-    // Exemple attendu : (AG) John Doe (8.5)
-    const regex = /\((AG|AC|AD|MG|MC|MD|DG|DD)\)\s+([^\(]+)\s*\((.*?)\)/gi;
-    const joueurs = [];
-    let match;
-    while ((match = regex.exec(texte)) !== null) {
-        joueurs.push({
-            position: match[1].toUpperCase(),
-            nom: match[2].trim(),
-            note: match[3].trim()
-        });
-    }
-    return joueurs;
-}
-/* ===============================
-   COMMANDE MATCH
+COMMANDE MATCH
 =================================*/
 ovlcmd({
     nom_cmd: "match⚽",
@@ -105,7 +105,6 @@ ovlcmd({
     desc: "Créer un match Blue Lock"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-
         const chat = ms_org;
         const sender = cmd_options?.auteur_Message;
 
@@ -116,14 +115,15 @@ ovlcmd({
         }
 
         const ficheMatch = `🔷⚽ *MATCH BLUE LOCK* 🥅
+
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🥅👤Joueur1:
 🥅👤Joueur2:
 🥅🧤Gardien:
 ⌛ Score win:
-             
+
 ╰───────────────────
-▝▝▝       *🔷BLUELOCK⚽*`;
+▝▝▝       🔷BLUELOCK⚽`;
 
         await ovl.sendMessage(chat, { text: ficheMatch });
 
@@ -137,11 +137,9 @@ ovlcmd({
     }
 });
 
-
 /* ===============================
-   DETECTION FICHE MATCH
+DETECTION FICHE MATCH
 =================================*/
-
 async function verifierFiche(message, chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "attente_fiche") return;
@@ -171,47 +169,44 @@ async function verifierFiche(message, chat, ovl) {
     }
 
     match.id1 = j1.id;
-match.id2 = j2.id;
+    match.id2 = j2.id;
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
 
-    // ================= IMAGES MATCH CONFIRMATION =================
-const imagesMatchConfirm = [
-  "https://files.catbox.moe/7m2axj.jpg",
-  "https://files.catbox.moe/mtou2n.jpg"
-];
-   
-function randomImage(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
+    const imagesMatchConfirm = [
+        "https://files.catbox.moe/7m2axj.jpg",
+        "https://files.catbox.moe/mtou2n.jpg"
+    ];
 
-// ================= MESSAGE CONFIRMATION MATCH =================
-const confirmation = `🔷⚽ *MATCH BLUE LOCK* 🥅
+    function randomImage(list) {
+        return list[Math.floor(Math.random() * list.length)];
+    }
+
+    const confirmation = `🔷⚽ MATCH BLUE LOCK 🥅
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🎙️: ✅ Joueurs confirmés !
 👤 ${match.joueur1}
 👤 ${match.joueur2}
 🧤 Gardien: ${match.gardien}
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-⚠️ //Chaque joueur doit maintenant envoyer son lineup, les remplacements ne sont autorisés que après un but où après la fin d'une possession d'attaque//.
+⚠️ Chaque joueur doit maintenant envoyer son lineup, les remplacements ne sont autorisés que après un but où après la fin d'une possession d'attaque.
 
 ╰───────────────────
-                      *🔷BLUELOCK⚽*`;
+🔷BLUELOCK⚽`;
 
-// ================= ENVOI MESSAGE =================
-await ovl.sendMessage(
-  chat,
-  {
-    image: { url: randomImage(imagesMatchConfirm) },
-    caption: confirmation
-  }
-);
+    await ovl.sendMessage(
+        chat,
+        {
+            image: { url: randomImage(imagesMatchConfirm) },
+            caption: confirmation
+        }
+    );
+}
 
 /* ===============================
-   COMMANDE LINEUP
+COMMANDE LINEUP
 =================================*/
-
 ovlcmd({
     nom_cmd: "lineup⚽",
     classe: "BLUELOCK⚽",
@@ -237,7 +232,7 @@ ovlcmd({
         match.equipe2 = positionsJoueurs;
         await ovl.sendMessage(chat, { text: `✅ Lineup enregistré pour ${match.joueur2} ! (${positionsJoueurs.length} joueurs)` });
     } else {
-        return; 
+        return;
     }
 
     if (match.equipe1 && match.equipe2) {
@@ -251,9 +246,8 @@ ovlcmd({
 });
 
 /* ===============================
-   LANCEMENT MATCH
+LANCEMENT MATCH
 =================================*/
-
 async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
@@ -263,54 +257,50 @@ async function lancerMatch(chat, ovl) {
     match.etat = "en_cours";
 
     await ovl.sendMessage(chat, {
-        text: `🏟️ *MATCH BLUE LOCK* ⚽ Le coup de sifflet retentit ! 
-🔥 ${premier} débute avec la possession ! 
+        text: `🏟️ *MATCH BLUE LOCK* ⚽ Le coup de sifflet retentit !
 
-*KICK OFF !* ⚽`
+🔥 ${premier} débute avec la possession !
+
+KICK OFF ! ⚽`
     });
 }
 
-// ================= COMMANDE +STOPMATCH⚽ =================
+/* ===============================
+COMMANDE +STOPMATCH⚽
+=================================*/
 ovlcmd({
-  nom_cmd: "stopmatch⚽",
-  classe: "BLUELOCK⚽",
-  react: "⛔",
-  desc: "Arrêter le match en cours dans le groupe"
+    nom_cmd: "stopmatch⚽",
+    classe: "BLUELOCK⚽",
+    react: "⛔",
+    desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
-  try {
-    const chat = ms_org; // ou ms_org.key.remoteJid selon comment tu appelles la commande
-    const match = matchsActifs.get(chat);
+    try {
+        const chat = ms_org;
+        const match = matchsActifs.get(chat);
 
-    if (!match) {
-      return ovl.sendMessage(chat, {
-        text: "⚠️ Aucun match en cours dans ce groupe."
-      });
+        if (!match) {
+            return ovl.sendMessage(chat, {
+                text: "⚠️ Aucun match en cours dans ce groupe."
+            });
+        }
+
+        matchsActifs.delete(chat);
+
+        await ovl.sendMessage(chat, {
+            text: `⛔ Le match Blue Lock en cours a été arrêté!`
+        });
+
+    } catch (e) {
+        console.error("❌ Erreur commande +stopmatch⚽ :", e);
+        await ovl.sendMessage(chat, {
+            text: "❌ Une erreur est survenue lors de l'arrêt du match."
+        });
     }
-
-    // Supprimer le match actif
-    matchsActifs.delete(chat);
-
-    // Message de confirmation
-    await ovl.sendMessage(chat, {
-      text: `⛔ Le match Blue Lock en cours a été arrêté!`
-    });
-
-  } catch (e) {
-    console.error("❌ Erreur commande +stopmatch⚽ :", e);
-    await ovl.sendMessage(chat, {
-      text: "❌ Une erreur est survenue lors de l'arrêt du match."
-    });
-  }
 });
 
-
-
-
-   
 /* ===============================
-   LECTURE MESSAGES
+LECTURE MESSAGES
 =================================*/
-
 async function messageMatch(ms, ovl) {
     if (!ms.message) return;
     const chat = ms.key.remoteJid;
