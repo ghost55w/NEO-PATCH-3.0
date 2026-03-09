@@ -35,47 +35,7 @@ function compterActions(sequence) {
     return total;
 }
 
-function verifierCombo(sequence) {
-    const combos = sequence.match(/\(combo\)/gi);
-    return !combos || combos.length <= 1;
-}
 
-function extraireZones(sequence) {
-    const departMatch = sequence.match(/\((.*?)\)/);
-    const arriveeMatch = sequence.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)/i);
-    if (!departMatch || !arriveeMatch) return null;
-    const depart = departMatch[1].toUpperCase();
-    const arrivee = (arriveeMatch[1] || arriveeMatch[2]).toUpperCase();
-    return { depart, arrivee };
-}
-
-function distance(z1, z2) {
-    return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
-}
-
-function perteBalle(match) {
-    match.possession = match.possession === "A" ? "B" : "A";
-    match.tour = match.possession;
-    match.tourActuel = 0;
-    return {
-        ok: false,
-        message: "❌ Pavé invalide. Ballon perdu. Possession adverse."
-    };
-}
-
-function parseLineup(texte) {
-    const regex = /\((AG|AC|AD|MG|MC|MD|DG|DC|DD)\)\s+([^\(]+)\s*\((.*?)\)/gi;
-    const joueurs = [];
-    let match;
-    while ((match = regex.exec(texte)) !== null) {
-        joueurs.push({
-            position: match[1].toUpperCase(),
-            nom: match[2].trim(),
-            note: match[3].trim()
-        });
-    }
-    return joueurs;
-}
 
 /* ===============================
    TROUVER JOUEUR DB
@@ -95,7 +55,46 @@ async function trouverUser(nom) {
     return null;
 }
 
+/* ===============================
+VERIFIER COMBO
+=================================*/
+function verifierCombo(sequence) {
+    // Remplacer la regex vide par une regex correcte pour détecter "combo"
+    const combos = sequence.match(/\bcombo\b/gi);
+    return !combos || combos.length <= 1;
+}
 
+/* ===============================
+EXTRAIRE ZONES
+=================================*/
+function extraireZones(sequence) {
+    // Regex pour extraire la zone de départ et d'arrivée (A1, A2, B1, B2, C1, C2)
+    const departMatch = sequence.match(/\b(A1|A2|B1|B2|C1|C2)\b/i);
+    const arriveeMatch = sequence.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)/i);
+    if (!departMatch || !arriveeMatch) return null;
+    const depart = departMatch[1]?.toUpperCase();
+    const arrivee = (arriveeMatch[1] || arriveeMatch[2])?.toUpperCase();
+    return { depart, arrivee };
+}
+
+/* ===============================
+PARSE LINEUP
+=================================*/
+function parseLineup(texte) {
+    // Regex corrigée pour extraire position, nom, note
+    // Exemple attendu : (AG) John Doe (8.5)
+    const regex = /\((AG|AC|AD|MG|MC|MD|DG|DD)\)\s+([^\(]+)\s*\((.*?)\)/gi;
+    const joueurs = [];
+    let match;
+    while ((match = regex.exec(texte)) !== null) {
+        joueurs.push({
+            position: match[1].toUpperCase(),
+            nom: match[2].trim(),
+            note: match[3].trim()
+        });
+    }
+    return joueurs;
+}
 /* ===============================
    COMMANDE MATCH
 =================================*/
