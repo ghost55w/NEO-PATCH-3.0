@@ -103,15 +103,16 @@ async function trouverUser(nom) {
 /* ===============================
    COMMANDE MATCH
 =================================*/
-
 ovlcmd({
     nom_cmd: "match⚽",
     classe: "BLUELOCK⚽",
     react: "⚽",
     desc: "Créer un match Blue Lock"
-}, async (ms_org, ovl) => {
+}, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org.key.remoteJid;
+
+        const chat = ms_org;
+        const sender = cmd_options?.auteur_Message;
 
         if (matchsActifs.has(chat)) {
             return ovl.sendMessage(chat, {
@@ -131,27 +132,16 @@ ovlcmd({
 
         await ovl.sendMessage(chat, { text: ficheMatch });
 
-        const sender = ms_org.key.participant || ms_org.key.remoteJid;
-
         matchsActifs.set(chat, {
             etat: "attente_fiche",
             createur: sender
         });
 
-        setTimeout(() => {
-            const match = matchsActifs.get(chat);
-            if (match && match.etat === "attente_fiche") {
-                matchsActifs.delete(chat);
-                ovl.sendMessage(chat, {
-                    text: "⌛ Temps écoulé. Match annulé."
-                });
-            }
-        }, 60000);
-
     } catch (e) {
         console.log("Erreur match⚽ :", e);
     }
 });
+
 
 /* ===============================
    DETECTION FICHE MATCH
@@ -277,4 +267,4 @@ async function messageMatch(ms, ovl) {
     await verifierFiche(text, chat, ovl);
 }
 
-module.exports = { messageMatch };
+module.exports = { messageMatch, verifierFiche };
