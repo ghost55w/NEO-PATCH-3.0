@@ -250,23 +250,33 @@ async function enregistrerLineupMatch(sender, chat, ficheLineup) {
         positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
     }
 
-    if (sender === match.id1) {
+    const nomPremier = positionsJoueurs[0]?.toLowerCase();
 
-        match.equipe1 = positionsJoueurs;
+    // vérifier si c'est le lineup du joueur 1
+    if (nomPremier && nomPremier.includes(match.joueur1.toLowerCase())) {
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Lineup enregistré pour ${match.joueur1} !`
-        });
+        if (!match.equipe1) {
+            match.equipe1 = positionsJoueurs;
 
-    } else if (sender === match.id2) {
+            await ovl.sendMessage(chat, {
+                text: `✅ Lineup enregistré pour ${match.joueur1} !`
+            });
+        }
 
-        match.equipe2 = positionsJoueurs;
+    }
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Lineup enregistré pour ${match.joueur2} !`
-        });
+    // vérifier si c'est le lineup du joueur 2
+    else if (nomPremier && nomPremier.includes(match.joueur2.toLowerCase())) {
 
-    } else return;
+        if (!match.equipe2) {
+            match.equipe2 = positionsJoueurs;
+
+            await ovl.sendMessage(chat, {
+                text: `✅ Lineup enregistré pour ${match.joueur2} !`
+            });
+        }
+
+    }
 
     if (match.equipe1 && match.equipe2) {
 
@@ -278,7 +288,7 @@ async function enregistrerLineupMatch(sender, chat, ficheLineup) {
 
         setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
-}  
+}
 
 /* ===============================
 LANCEMENT MATCH
