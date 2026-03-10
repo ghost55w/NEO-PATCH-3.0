@@ -191,8 +191,11 @@ async function verifierFiche(message, chat, ovl) {
         return;
     }
 
-    match.id1 = j1.id;
-    match.id2 = j2.id;
+    match.joueur1Nom = match.joueur1;
+match.joueur2Nom = match.joueur2;
+
+match.id1 = j1.jid || j1.id;
+match.id2 = j2.jid || j2.id;
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
@@ -250,32 +253,34 @@ async function enregistrerLineupMatch(sender, chat, ficheLineup) {
         positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
     }
 
-    const nomPremier = positionsJoueurs[0]?.toLowerCase();
-
-    // vérifier si c'est le lineup du joueur 1
-    if (nomPremier && nomPremier.includes(match.joueur1.toLowerCase())) {
+    if (sender === match.id1) {
 
         if (!match.equipe1) {
             match.equipe1 = positionsJoueurs;
 
             await ovl.sendMessage(chat, {
-                text: `✅ Lineup enregistré pour ${match.joueur1} !`
+                text: `✅ Lineup enregistré pour ${match.joueur1Nom} !`
             });
         }
 
     }
 
-    // vérifier si c'est le lineup du joueur 2
-    else if (nomPremier && nomPremier.includes(match.joueur2.toLowerCase())) {
+    else if (sender === match.id2) {
 
         if (!match.equipe2) {
             match.equipe2 = positionsJoueurs;
 
             await ovl.sendMessage(chat, {
-                text: `✅ Lineup enregistré pour ${match.joueur2} !`
+                text: `✅ Lineup enregistré pour ${match.joueur2Nom} !`
             });
         }
 
+    }
+
+    else {
+        return ovl.sendMessage(chat, {
+            text: "❌ Vous ne participez pas à ce match."
+        });
     }
 
     if (match.equipe1 && match.equipe2) {
@@ -350,7 +355,7 @@ async function messageMatch(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-    const sender = ms.key.participant || ms.key.remoteJid;
+    const sender = (ms.key.participant || ms.key.remoteJid).split(":")[0];
 
     const text =
         ms.message.conversation ||
