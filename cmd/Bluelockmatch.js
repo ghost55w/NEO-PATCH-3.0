@@ -128,7 +128,7 @@ ovlcmd({
     desc: "Créer un match Blue Lock"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org;
+        const chat = ms_org.key.remoteJid;
         const sender = cmd_options?.auteur_Message;
 
         if (matchsActifs.has(chat)) {
@@ -248,7 +248,33 @@ async function enregistrerLineupMatch(sender, chat, ficheLineup, ovl) {
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "attente_lineup") return;
 
-    // Si le message vient du bot (lineup affiché)
+    // Si ficheLineup = null → joueur vient juste de taper +lineup⚽
+    if (!ficheLineup) {
+        if (sender === match.id1) {
+            if (match.equipe1) {
+                return ovl.sendMessage(chat, {
+                    text: `⚠️ ${match.joueur1Nom} a déjà envoyé sa formation.`
+                });
+            }
+            match.attenteLineup = match.id1;
+        } 
+        else if (sender === match.id2) {
+            if (match.equipe2) {
+                return ovl.sendMessage(chat, {
+                    text: `⚠️ ${match.joueur2Nom} a déjà envoyé sa formation.`
+                });
+            }
+            match.attenteLineup = match.id2;
+        } 
+        else {
+            return ovl.sendMessage(chat, {
+                text: "❌ Vous ne participez pas à ce match."
+            });
+        }
+        return; // on sort ici, on attend le lineup du bot
+    }
+
+    // Si sender = bot (lineup envoyé)
     if (sender === ovl.user.id) {
 
         if (!match.attenteLineup) return;
@@ -260,60 +286,22 @@ async function enregistrerLineupMatch(sender, chat, ficheLineup, ovl) {
 
         // On regarde quel joueur attendait ce lineup
         if (match.attenteLineup === match.id1 && !match.equipe1) {
-
             match.equipe1 = positionsJoueurs;
 
             await ovl.sendMessage(chat, {
                 text: `✅ Lineup enregistré pour *${match.joueur1Nom}* !`
             });
-
         } 
         else if (match.attenteLineup === match.id2 && !match.equipe2) {
-
             match.equipe2 = positionsJoueurs;
 
             await ovl.sendMessage(chat, {
                 text: `✅ Lineup enregistré pour *${match.joueur2Nom}* !`
             });
-
         }
 
         // Reset attente
         match.attenteLineup = null;
-
-    } 
-    else {
-
-        // Ici c'est un joueur qui tape +lineup⚽
-
-        if (sender === match.id1) {
-
-            if (match.equipe1) {
-                return ovl.sendMessage(chat, {
-                    text: `⚠️ ${match.joueur1Nom} a déjà envoyé sa formation.`
-                });
-            }
-
-            match.attenteLineup = match.id1;
-
-        } 
-        else if (sender === match.id2) {
-
-            if (match.equipe2) {
-                return ovl.sendMessage(chat, {
-                    text: `⚠️ ${match.joueur2Nom} a déjà envoyé sa formation.`
-                });
-            }
-
-            match.attenteLineup = match.id2;
-
-        } 
-        else {
-            return ovl.sendMessage(chat, {
-                text: "❌ Vous ne participez pas à ce match."
-            });
-        }
-
     }
 
     // Vérifier si les deux équipes sont prêtes
@@ -360,7 +348,7 @@ ovlcmd({
     desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org;
+        const chat = ms_org.key.remoteJid;
         const match = matchsActifs.get(chat);
 
         if (!match) {
@@ -399,19 +387,29 @@ async function messageMatch(ms, ovl) {
 
     if (!text) return;
 
+    const match = matchsActifs.get(chat);
+
+    // Détection joueur qui tape +lineup⚽
+    if (text.startsWith("+lineup⚽")) {
+        if (!match || match.etat !== "attente_lineup") return;
+
+        // On appelle la fonction avec ficheLineup = null pour enregistrer l'attente
+        await enregistrerLineupMatch(sender, chat, null, ovl);
+        return;
+    }
+
     // Détection fiche match
     await verifierFiche(text, chat, ovl);
 
-    const match = matchsActifs.get(chat);
+    // Détection du squad affiché par le bot
     if (!match || match.etat !== "attente_lineup") return;
 
-    // Détection du squad affiché par +lineup⚽
     if (text.includes("👥SQUAD⚽🥅")) {
-
         const ficheLineup = parseSquadBlueLock(text);
         if (!ficheLineup) return;
 
-        await enregistrerLineupMatch(sender, chat, ficheLineup);
+        // Ici sender = bot
+        await enregistrerLineupMatch(ovl.user.id, chat, ficheLineup, ovl);
     }
 }
 
