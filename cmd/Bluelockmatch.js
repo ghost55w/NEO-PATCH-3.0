@@ -224,9 +224,8 @@ async function verifierFiche(message, chat, ovl) {
         }
     );
 
-// MESSAGE DEMANDE LINEUP
-await ovl.sendMessage(chat, {
-    text: `📢 ${match.joueur1} et ${match.joueur2}
+    await ovl.sendMessage(chat, {
+        text: `📢 ${match.joueur1} et ${match.joueur2}
 
 ⏳ Vous avez *1 minute* pour envoyer votre formation.
 
@@ -235,35 +234,51 @@ Tapez maintenant la commande :
 
 Dès que les deux lineups seront enregistrés,
 le match commencera automatiquement.`
-});
-    
-// Fonction qui intercepte le lineup affiché et l'enregistre dans le match si nécessaire
+    });
+}
+  /* ===============================
+ENREGISTRER LINEUP MATCH
+=================================*/
 async function enregistrerLineupMatch(sender, chat, ficheLineup) {
+
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "attente_lineup") return;
 
-    // Transforme le lineup en tableau de positions
     const positionsJoueurs = [];
+
     for (let i = 1; i <= 15; i++) {
         positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
     }
 
-    // Détermine si c'est l'équipe 1 ou 2
     if (sender === match.id1) {
+
         match.equipe1 = positionsJoueurs;
-        await ovl.sendMessage(chat, { text: `✅ Lineup enregistré pour ${match.joueur1} ! (${positionsJoueurs.length} joueurs)` });
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Lineup enregistré pour ${match.joueur1} !`
+        });
+
     } else if (sender === match.id2) {
+
         match.equipe2 = positionsJoueurs;
-        await ovl.sendMessage(chat, { text: `✅ Lineup enregistré pour ${match.joueur2} ! (${positionsJoueurs.length} joueurs)` });
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Lineup enregistré pour ${match.joueur2} !`
+        });
+
     } else return;
 
-    // Si les deux lineups sont prêts, on passe à la phase début de match
     if (match.equipe1 && match.equipe2) {
+
         match.etat = "debut_match";
-        await ovl.sendMessage(chat, { text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..." });
+
+        await ovl.sendMessage(chat, {
+            text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..."
+        });
+
         setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
-}
+}  
 
 /* ===============================
 LANCEMENT MATCH
