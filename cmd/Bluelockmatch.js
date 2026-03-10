@@ -239,50 +239,84 @@ Dès que les deux lineups seront enregistrés,
 le match commencera automatiquement.`
     });
 }
-  /* ===============================
+
+/* ===============================
 ENREGISTRER LINEUP MATCH
 =================================*/
-async function enregistrerLineupMatch(sender, chat, ficheLineup) {
+async function enregistrerLineupMatch(sender, chat, ficheLineup, ovl) {
 
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "attente_lineup") return;
 
-    const positionsJoueurs = [];
+    // Si le message vient du bot (lineup affiché)
+    if (sender === ovl.user.id) {
 
-    for (let i = 1; i <= 15; i++) {
-        positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
-    }
+        if (!match.attenteLineup) return;
 
-    if (sender === match.id1) {
+        const positionsJoueurs = [];
+        for (let i = 1; i <= 15; i++) {
+            positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
+        }
 
-        if (!match.equipe1) {
+        // On regarde quel joueur attendait ce lineup
+        if (match.attenteLineup === match.id1 && !match.equipe1) {
+
             match.equipe1 = positionsJoueurs;
 
             await ovl.sendMessage(chat, {
-                text: `✅ Lineup enregistré pour ${match.joueur1Nom} !`
+                text: `✅ Lineup enregistré pour *${match.joueur1Nom}* !`
             });
-        }
 
-    }
+        } 
+        else if (match.attenteLineup === match.id2 && !match.equipe2) {
 
-    else if (sender === match.id2) {
-
-        if (!match.equipe2) {
             match.equipe2 = positionsJoueurs;
 
             await ovl.sendMessage(chat, {
-                text: `✅ Lineup enregistré pour ${match.joueur2Nom} !`
+                text: `✅ Lineup enregistré pour *${match.joueur2Nom}* !`
+            });
+
+        }
+
+        // Reset attente
+        match.attenteLineup = null;
+
+    } 
+    else {
+
+        // Ici c'est un joueur qui tape +lineup⚽
+
+        if (sender === match.id1) {
+
+            if (match.equipe1) {
+                return ovl.sendMessage(chat, {
+                    text: `⚠️ ${match.joueur1Nom} a déjà envoyé sa formation.`
+                });
+            }
+
+            match.attenteLineup = match.id1;
+
+        } 
+        else if (sender === match.id2) {
+
+            if (match.equipe2) {
+                return ovl.sendMessage(chat, {
+                    text: `⚠️ ${match.joueur2Nom} a déjà envoyé sa formation.`
+                });
+            }
+
+            match.attenteLineup = match.id2;
+
+        } 
+        else {
+            return ovl.sendMessage(chat, {
+                text: "❌ Vous ne participez pas à ce match."
             });
         }
 
     }
 
-    else {
-        return ovl.sendMessage(chat, {
-            text: "❌ Vous ne participez pas à ce match."
-        });
-    }
-
+    // Vérifier si les deux équipes sont prêtes
     if (match.equipe1 && match.equipe2) {
 
         match.etat = "debut_match";
@@ -294,6 +328,7 @@ async function enregistrerLineupMatch(sender, chat, ficheLineup) {
         setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
 }
+
 
 /* ===============================
 LANCEMENT MATCH
