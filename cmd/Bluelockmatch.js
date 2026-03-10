@@ -212,11 +212,9 @@ async function verifierFiche(message, chat, ovl) {
 👤 ${match.joueur1}
 👤 ${match.joueur2}
 🧤 Gardien: ${match.gardien}
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-⚠️ Chaque joueur doit maintenant envoyer son lineup, les remplacements ne sont autorisés que après un but où après la fin d'une possession d'attaque.
 
 ╰───────────────────
-🔷BLUELOCK⚽`;
+               *🔷BLUELOCK⚽*`;
 
     await ovl.sendMessage(
         chat,
@@ -225,8 +223,20 @@ async function verifierFiche(message, chat, ovl) {
             caption: confirmation
         }
     );
-}
 
+// MESSAGE DEMANDE LINEUP
+await ovl.sendMessage(chat, {
+    text: `📢 ${match.joueur1} et ${match.joueur2}
+
+⏳ Vous avez *1 minute* pour envoyer votre formation.
+
+Tapez maintenant la commande :
+➜ +lineup⚽
+
+Dès que les deux lineups seront enregistrés,
+le match commencera automatiquement.`
+});
+    
 // Fonction qui intercepte le lineup affiché et l'enregistre dans le match si nécessaire
 async function enregistrerLineupMatch(sender, chat, ficheLineup) {
     const match = matchsActifs.get(chat);
