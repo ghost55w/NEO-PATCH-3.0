@@ -436,15 +436,15 @@ ovlcmd({
       }, { quoted: ms });
     }
 
-    // ==========================
-    // 📋 AFFICHAGE DU LINEUP
-    // ==========================
-    if (!isModification) {
-      let data = await getLineup(targetUser);
-      if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
-      data = data.toJSON ? data.toJSON() : data;
+// ==========================
+// 📋 AFFICHAGE DU LINEUP
+// ==========================
+if (!isModification) {
+  let data = await getLineup(targetUser);
+  if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
+  data = data.toJSON ? data.toJSON() : data;
 
-      const lineup = `░░ *👥SQUAD⚽🥅*
+  const lineup = `░░ *👥SQUAD⚽🥅: ${data.users || "Joueur"}*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱▱
 1  👤(AG) ${data.joueur1 || "aucun"} 
 2  👤(AC) ${data.joueur2 || "aucun"} 
@@ -463,14 +463,16 @@ ovlcmd({
 13 👤${data.joueur13 || "aucun"}
 14 👤${data.joueur14 || "aucun"}
 15 👤${data.joueur15 || "aucun"}
-╰───────────────────
-▝▝▝           *BLUE🔷LOCK⚽*`;
+╰─────────────────▱▱▱
 
-      return ovl.sendMessage(ms_org, {
-        image: { url: "https://files.catbox.moe/kyrnzq.jpg" },
-        caption: lineup
-      }, { quoted: ms });
-    }
+                   🔷BLUELOCK⚽
+                 *powered by NEOVERSE™*`;
+
+  return ovl.sendMessage(ms_org, {
+    image: { url: "https://files.catbox.moe/kyrnzq.jpg" },
+    caption: lineup
+  }, { quoted: ms });
+}
 
     // ==========================
     // 🔒 SÉCURITÉ : PAS DE MODIF SUR AUTRUI
