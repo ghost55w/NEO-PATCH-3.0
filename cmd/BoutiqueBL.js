@@ -465,7 +465,7 @@ if (!isModification) {
 15 👤${data.joueur15 || "aucun"}
 ╰─────────────────▱▱▱
 
-                   🔷BLUELOCK⚽
+                      🔷BLUELOCK⚽🥅
                  *powered by NEOVERSE™*`;
 
   return ovl.sendMessage(ms_org, {
