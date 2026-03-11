@@ -474,7 +474,7 @@ if (!isModification) {
   }, { quoted: ms });
 }
 
-// ==========================
+  // ==========================
 // 🔒 SÉCURITÉ MODIFICATION
 // ==========================
 if (targetUser !== auteur_Message && !prenium_id)
@@ -484,7 +484,7 @@ if (targetUser !== auteur_Message && !prenium_id)
 // ✏️ MODIFICATION DU LINEUP
 // ==========================
 if (arg.length < 3)
-  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
+  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon ou users = Damian🇨🇬⚽");
 
 let ficheLineup = await getLineup(targetUser);
 if (!ficheLineup)
@@ -495,33 +495,21 @@ ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 const updates = {};
 
 for (let i = 0; i < arg.length; i++) {
-
-  // ==========================
-  // ✏️ MODIFIER LE NOM DU SQUAD
-  // ==========================
+  // ✏️ Modifier le nom du squad
   if (arg[i]?.toLowerCase() === "users" && arg[i + 1] === "=") {
-
     let valueParts = [];
     let j = i + 2;
-
     while (j < arg.length && !/^j\d+$/i.test(arg[j])) {
       valueParts.push(arg[j]);
       j++;
     }
-
     const squadName = valueParts.join(" ").trim();
-
-    if (squadName) {
-      updates["users"] = squadName;
-    }
-
+    if (squadName) updates["users"] = squadName;
     i = j - 1;
     continue;
   }
 
-  // ==========================
-  // ✏️ MODIFIER UN JOUEUR
-  // ==========================
+  // ✏️ Modifier un joueur
   if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
 
   const pos = parseInt(arg[i].slice(1), 10);
@@ -534,40 +522,20 @@ for (let i = 0; i < arg.length; i++) {
     players.find(p => pureName(p.name) === input) ||
     players.find(p => pureName(p.name).includes(input));
 
-  if (!found) {
-    updates[`joueur${pos}`] = "aucun";
-    continue;
-  }
-
-  const countryEmoji = found.country ? getCountryEmoji(found.country) : "";
-
-  updates[`joueur${pos}`] = `${found.name} (${found.ovr}) ${countryEmoji}`;
+  updates[`joueur${pos}`] = found
+    ? `${found.name} (${found.ovr}) ${found.country ? getCountryEmoji(found.country) : ""}`
+    : "aucun";
 }
 
-// ==========================
 // ⚠️ AUCUN CHANGEMENT
-// ==========================
 if (!Object.keys(updates).length)
   return repondre("⚠️ Aucun changement effectué.");
 
-// ==========================
-// 💾 UPDATE DB
-// ==========================
+// 💾 Update DB
 await updatePlayers(targetUser, updates);
 
-// ==========================
-// ✅ MESSAGE DE CONFIRMATION
-// ==========================
-return repondre(
-  "✅ Lineup mis à jour ⚽\n" +
-  Object.entries(updates)
-    .map(([k, v]) =>
-      k === "users"
-        ? `• Squad → ${v}`
-        : `• ${k.replace("joueur", "J")} → ${v}`
-    )
-    .join("\n")
-);
+// ✅ Message de confirmation silencieuse
+return repondre("✅ Lineup mis à jour ⚽");
 
   } catch (e) {
     console.error("❌ LINEUP ERROR:", e);
