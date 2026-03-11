@@ -495,19 +495,23 @@ ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 const updates = {};
 
 for (let i = 0; i < arg.length; i++) {
-  // ✏️ Modifier le nom du squad
-  if (arg[i]?.toLowerCase() === "users" && arg[i + 1] === "=") {
-    let valueParts = [];
-    let j = i + 2;
-    while (j < arg.length && !/^j\d+$/i.test(arg[j])) {
-      valueParts.push(arg[j]);
-      j++;
-    }
-    const squadName = valueParts.join(" ").trim();
-    if (squadName) updates["users"] = squadName;
-    i = j - 1;
-    continue;
+// ✏️ Modifier le nom du squad
+if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
+  let valueParts = [];
+  let j = i + 2;
+
+  while (j < arg.length && !/^j\d+$/i.test(arg[j])) {
+    valueParts.push(arg[j]);
+    j++;
   }
+
+  const squadName = valueParts.join(" ").trim();
+
+  if (squadName) updates["squad"] = squadName;
+
+  i = j - 1;
+  continue;
+}
 
   // ✏️ Modifier un joueur
   if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
