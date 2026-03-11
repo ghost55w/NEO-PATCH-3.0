@@ -128,8 +128,9 @@ ovlcmd({
     desc: "Créer un match Blue Lock"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org.key.remoteJid;
-        const sender = cmd_options?.auteur_Message;
+        // Récupère correctement le chat et l'auteur
+        const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
+        const sender = ms_org.sender || cmd_options?.auteur_Message || (ms_org.key?.participant || "").split(":")[0];
 
         if (matchsActifs.has(chat)) {
             return ovl.sendMessage(chat, {
@@ -348,9 +349,9 @@ ovlcmd({
     desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org.key.remoteJid;
-        const match = matchsActifs.get(chat);
+        const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
 
+        const match = matchsActifs.get(chat);
         if (!match) {
             return ovl.sendMessage(chat, {
                 text: "⚠️ Aucun match en cours dans ce groupe."
@@ -365,6 +366,7 @@ ovlcmd({
 
     } catch (e) {
         console.error("❌ Erreur commande +stopmatch⚽ :", e);
+        const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
         await ovl.sendMessage(chat, {
             text: "❌ Une erreur est survenue lors de l'arrêt du match."
         });
