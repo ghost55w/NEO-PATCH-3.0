@@ -495,25 +495,24 @@ if (!ficheLineup)
 ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 
 const updates = {};
+let onlySquadUpdate = false; // ← nouveau flag pour savoir si c’est uniquement le nom du squad
 
 for (let i = 0; i < arg.length; i++) {
 
-// ==========================
-// ✏️ MODIFIER LE NOM DU SQUAD
-// ==========================
-if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
-
-  const squadName = arg[i + 2];
-
-  if (squadName) {
-    updates["nom"] = squadName;   // colonne SQL sur Supabase
+  // ==========================
+  // ✏️ MODIFIER LE NOM DU SQUAD
+  // ==========================
+  if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
+    const squadName = arg[i + 2];
+    if (squadName) {
+      updates["nom"] = squadName;   // colonne SQL sur Supabase
+      onlySquadUpdate = true;       // ← c’est une modification uniquement du squad
+    }
+    i += 2;
+    continue;
   }
 
-  i += 2;
-  continue;
-}
-
-  // ✏️ Modifier un joueur
+  // ✏️ Modifier un joueur (joueurs j1-j15)
   if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
 
   const pos = parseInt(arg[i].slice(1), 10);
@@ -529,6 +528,8 @@ if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
   updates[`joueur${pos}`] = found
     ? `${found.name} (${found.ovr}) ${found.country ? getCountryEmoji(found.country) : ""}`
     : "aucun";
+
+  onlySquadUpdate = false; // si un joueur est modifié, on ne fait plus que le squad
 }
 
 // ⚠️ AUCUN CHANGEMENT
@@ -538,8 +539,12 @@ if (!Object.keys(updates).length)
 // 💾 Update DB
 await updatePlayers(targetUser, updates);
 
-// ✅ Message de confirmation uniquement
-return repondre("✅ Lineup mis à jour ⚽");
+// ✅ Message de confirmation
+if (onlySquadUpdate) {
+  return repondre(`✅ Lineup mis à jour pour ${updates.nom} ⚽`);
+} else {
+  return repondre("✅ Lineup mis à jour ⚽");
+}
 
   } catch (e) {
     console.error("❌ LINEUP ERROR:", e);
