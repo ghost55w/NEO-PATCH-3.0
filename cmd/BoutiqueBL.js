@@ -437,6 +437,13 @@ ovlcmd({
     }
 
 // ==========================
+// 🔎 DETECTER SI C'EST UNE MODIFICATION
+// ==========================
+const isModification = arg.some(a =>
+  /^j\d+$/i.test(a) || a.toLowerCase() === "squad"
+);
+    
+// ==========================
 // 📋 AFFICHAGE DU LINEUP
 // ==========================
 if (!isModification) {
@@ -484,7 +491,7 @@ if (targetUser !== auteur_Message && !prenium_id)
 // ✏️ MODIFICATION DU LINEUP
 // ==========================
 if (arg.length < 3)
-  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon ou users = Damian🇨🇬⚽");
+  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon ou squad = Damian🇨🇬⚽");
 
 let ficheLineup = await getLineup(targetUser);
 if (!ficheLineup)
