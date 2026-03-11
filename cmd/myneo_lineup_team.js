@@ -465,27 +465,30 @@ ovlcmd({
     const data = await getTeam(userId);
     if (!data) return repondre("⚠️ Aucune donnée trouvée pour cet utilisateur.");
 
-    // ─── AFFICHAGE SIMPLE ───
-    if (arg.length <= 1) {
-      const fiche = `░░ *👤PLAYER🥅⚽*: ${data.users}
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-*🛡️Team:* ${data.team}
-*⬆️Niveau:* ${data.niveau}▲
-*💰Argent:* ${data.argent} 💶
-*🎖️Classement:* ${data.classement}
+    // ─── AFFICHAGE TEAM ───
+  if (arg.length <= 1) {
+    const fiche = `
+░░ *👤PLAYER🥅⚽*: ${data.users || "Inconnu"}
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
+*🛡️Team:* ${data.team || "aucun"}
+*⬆️Niveau:* ${data.niveau || 0}▲
+*💰Argent:* ${data.argent || 0} 💶
+*🎖️Classement:* ${data.classement || "aucun"}
 
-░░ *📊RECORDS⚽🥅*
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-*✅Wins:* ${data.wins}   *❌Loss:* ${data.loss}   *⚽Goals:* ${data.goals}
-░▒▒▒▒░ *🏆Trophies:* ${data.trophies}
+░░ *🏆RECORDS⚽🥅*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
+*✅Wins:* ${data.wins || 0}   *❌Loss:* ${data.loss || 0}   *⚽Goals:* ${data.goals || 0}
+          ▱▱▱ *🏆Trophies:* ${data.trophies || 0} ▱▱▱
 
-╭───〔 *⚽DATAS📊🔷* 〕───⬣
+░░ *📊DATAS⚽🥅*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
 🥅+Lineup⚽ → voir la formation
 🌍+player⚽ → voir le Hero
 
-╰───────────────────
-▝▝▝           *🔷BLUELOCK⚽*`;
-
+╰──────────────────▱▱▱
+                     🔷BLUELOCK⚽
+                 *powered by NEOVERSE™*`;
+    
       return ovl.sendMessage(
         ms_org,
         { image: { url: "https://files.catbox.moe/2patx3.jpg" }, caption: fiche },
