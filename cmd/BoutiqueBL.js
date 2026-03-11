@@ -509,7 +509,7 @@ if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
 
   const squadName = valueParts.join(" ").trim();
 
-  if (squadName) updates["squad"] = squadName;
+  if (squadName) updates["users"] = squadName;
 
   i = j - 1;
   continue;
