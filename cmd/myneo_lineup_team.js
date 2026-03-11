@@ -218,7 +218,7 @@ ovlcmd({
     }
 
    base = {
-  users: "aucun",
+  squad: "aucun",
   nom: "Starter Squad",
   joueur1: starters[0] || "",
   joueur2: starters[1] || "",
