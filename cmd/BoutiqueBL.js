@@ -444,7 +444,7 @@ if (!isModification) {
   if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
   data = data.toJSON ? data.toJSON() : data;
 
-  const lineup = `░░ *👥SQUAD⚽🥅: ${data.users || "Joueur"}*
+  const lineup = `░░ *👥SQUAD⚽🥅: ${data.squad || "Joueur"}*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱▱
 1  👤(AG) ${data.joueur1 || "aucun"} 
 2  👤(AC) ${data.joueur2 || "aucun"} 
