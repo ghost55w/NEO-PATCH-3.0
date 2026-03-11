@@ -89,7 +89,9 @@ ovlcmd({
 ⚽: 
              
 ╰───────────────────
-  ▝▝▝       *BLUE🔷LOCK⚽🥅*`;
+  ▝▝▝       
+             🔷BLUELOCK⚽
+          *powered by NEOVERSE™*`;
 
     // Envoi direct, sans repondre(), pour éviter de déclencher d'autres listeners
     await ovl.sendMessage(ms_org, { text: pavé }, { quoted: ms });
