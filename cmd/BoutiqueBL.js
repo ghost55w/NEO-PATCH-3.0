@@ -474,7 +474,7 @@ if (!isModification) {
   }, { quoted: ms });
 }
 
-  // ==========================
+// ==========================
 // 🔒 SÉCURITÉ MODIFICATION
 // ==========================
 if (targetUser !== auteur_Message && !prenium_id)
@@ -534,7 +534,7 @@ if (!Object.keys(updates).length)
 // 💾 Update DB
 await updatePlayers(targetUser, updates);
 
-// ✅ Message de confirmation silencieuse
+// ✅ Message de confirmation uniquement
 return repondre("✅ Lineup mis à jour ⚽");
 
   } catch (e) {
@@ -542,7 +542,6 @@ return repondre("✅ Lineup mis à jour ⚽");
     return repondre("❌ Erreur interne LINEUP.");
   }
 }); 
-
 
 // --- SUBSTITUTION / ÉCHANGE +sub⚽ ---
 ovlcmd({
