@@ -411,7 +411,6 @@ ovlcmd({
   react: "⚽",
   classe: "NEO_GAMES⚽"
 }, async (ms_org, ovl, cmd_options) => {
-
   const { arg = [], auteur_Message, repondre, ms, prenium_id } = cmd_options;
 
   try {
@@ -420,13 +419,15 @@ ovlcmd({
     // ==========================
     let targetUser = auteur_Message;
     if (arg.length >= 1 && !/^j\d+$/i.test(arg[0])) {
+      const normalizeJid = jid => String(jid).trim();
       targetUser = normalizeJid(arg[0]);
     }
 
     // ==========================
-    // 📦 Récupération team pour synchronisation
+    // 📦 Récupération team pour affichage
     // ==========================
-    const allTeams = await getAllTeams(); // { [jid]: { users, team, ... } }
+    let allTeams = {};
+    if (typeof getAllTeams === "function") allTeams = await getAllTeams();
     const teamData = allTeams[targetUser] || {};
     const squadFromTeam = teamData.users || "Joueur";
 
@@ -435,7 +436,14 @@ ovlcmd({
     // ==========================
     const squadIndex = arg.findIndex(a => a.toLowerCase() === "squad");
     const isSquadModification = squadIndex !== -1 && arg[squadIndex + 1] === "=";
-    const hasPlayerModification = arg.some(a => /^j\d+$/i.test(a) && arg[arg.indexOf(a)+1] === "=");
+
+    let hasPlayerModification = false;
+    for (let i = 0; i < arg.length; i++) {
+      if (/^j\d+$/i.test(arg[i]) && arg[i + 1] === "=") {
+        hasPlayerModification = true;
+        break;
+      }
+    }
 
     // ==========================
     // 📋 AFFICHAGE DU LINEUP
@@ -445,7 +453,7 @@ ovlcmd({
       if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
       data = data.toJSON ? data.toJSON() : data;
 
-      const lineup = `░░ *👥SQUAD⚽🥅: ${squadFromTeam}*
+      const lineup = `░░ *👥SQUAD⚽🥅*: ${squadFromTeam}
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱▱
 1  👤(AG) ${data.joueur1 || "aucun"} 
 2  👤(AC) ${data.joueur2 || "aucun"} 
@@ -484,20 +492,16 @@ ovlcmd({
     // ==========================
     // ✏️ MODIFICATION DU LINEUP
     // ==========================
-    if (!isSquadModification && !hasPlayerModification)
-      return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
-
     let ficheLineup = await getLineup(targetUser);
-    if (!ficheLineup)
-      return repondre("❌ Impossible de récupérer le lineup.");
+    if (!ficheLineup) return repondre("❌ Impossible de récupérer le lineup.");
     ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 
     const updates = {};
 
     // 🔹 Modifier le nom du squad
     if (isSquadModification) {
-      const squadName = arg[squadIndex + 2];
-      if (squadName) updates["nom"] = squadName; // colonne SQL sur Supabase
+      const squadName = arg.slice(squadIndex + 2).join(" "); // tout ce qui suit =
+      if (squadName) updates.nom = squadName;
     }
 
     // 🔹 Modifier les joueurs
@@ -521,6 +525,7 @@ ovlcmd({
       return repondre("⚠️ Aucun changement effectué.");
 
     // 💾 Update DB
+    console.log("🔹 Updates lineup:", updates); // debug
     await updatePlayers(targetUser, updates);
 
     // ✅ Confirmation
@@ -528,6 +533,7 @@ ovlcmd({
       return repondre(`✅ Lineup mis à jour pour ${updates.nom} ⚽`);
     else
       return repondre("✅ Lineup mis à jour ⚽");
+
 
   } catch (e) {
     console.error("❌ LINEUP ERROR:", e);
