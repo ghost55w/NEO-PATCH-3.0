@@ -474,57 +474,100 @@ if (!isModification) {
   }, { quoted: ms });
 }
 
-    // ==========================
-    // 🔒 SÉCURITÉ : PAS DE MODIF SUR AUTRUI
-    // ==========================
-    if (targetUser !== auteur_Message)
-      return repondre("❌ Tu ne peux pas modifier le lineup d’un autre joueur.");
+// ==========================
+// 🔒 SÉCURITÉ MODIFICATION
+// ==========================
+if (targetUser !== auteur_Message && !prenium_id)
+  return repondre("❌ Seuls les membres NS peuvent modifier le lineup d’un autre joueur.");
 
-    // ==========================
-    // ✏️ MODIFICATION DU LINEUP
-    // ==========================
-    if (arg.length < 3)
-      return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
+// ==========================
+// ✏️ MODIFICATION DU LINEUP
+// ==========================
+if (arg.length < 3)
+  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
 
-    let ficheLineup = await getLineup(auteur_Message);
-    if (!ficheLineup)
-      return repondre("❌ Impossible de récupérer ton lineup.");
-    ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
+let ficheLineup = await getLineup(targetUser);
+if (!ficheLineup)
+  return repondre("❌ Impossible de récupérer le lineup.");
 
-    const updates = {};
+ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 
-    for (let i = 0; i < arg.length; i++) {
-      if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
+const updates = {};
 
-      const pos = parseInt(arg[i].slice(1), 10);
-      if (pos < 1 || pos > 15) continue;
+for (let i = 0; i < arg.length; i++) {
 
-      const input = pureName(arg[i + 2]);
-      const players = Object.values(cardsBlueLock);
+  // ==========================
+  // ✏️ MODIFIER LE NOM DU SQUAD
+  // ==========================
+  if (arg[i]?.toLowerCase() === "users" && arg[i + 1] === "=") {
 
-      let found = players.find(p => pureName(p.name) === input)
-               || players.find(p => pureName(p.name).includes(input));
+    let valueParts = [];
+    let j = i + 2;
 
-      if (!found) {
-        updates[`joueur${pos}`] = `aucun`;
-        continue; // ignore si introuvable
-      }
-
-      const countryEmoji = found.country ? getCountryEmoji(found.country) : "";
-      updates[`joueur${pos}`] = `${found.name} (${found.ovr}) ${countryEmoji}`;
+    while (j < arg.length && !/^j\d+$/i.test(arg[j])) {
+      valueParts.push(arg[j]);
+      j++;
     }
 
-    if (!Object.keys(updates).length)
-      return repondre("⚠️ Aucun changement effectué.");
+    const squadName = valueParts.join(" ").trim();
 
-    await updatePlayers(auteur_Message, updates);
+    if (squadName) {
+      updates["users"] = squadName;
+    }
 
-    return repondre(
-      "✅ Lineup mis à jour ⚽\n" +
-      Object.entries(updates)
-        .map(([k, v]) => `• ${k.replace("joueur", "J")} → ${v}`)
-        .join("\n")
-    );
+    i = j - 1;
+    continue;
+  }
+
+  // ==========================
+  // ✏️ MODIFIER UN JOUEUR
+  // ==========================
+  if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
+
+  const pos = parseInt(arg[i].slice(1), 10);
+  if (pos < 1 || pos > 15) continue;
+
+  const input = pureName(arg[i + 2]);
+  const players = Object.values(cardsBlueLock);
+
+  let found =
+    players.find(p => pureName(p.name) === input) ||
+    players.find(p => pureName(p.name).includes(input));
+
+  if (!found) {
+    updates[`joueur${pos}`] = "aucun";
+    continue;
+  }
+
+  const countryEmoji = found.country ? getCountryEmoji(found.country) : "";
+
+  updates[`joueur${pos}`] = `${found.name} (${found.ovr}) ${countryEmoji}`;
+}
+
+// ==========================
+// ⚠️ AUCUN CHANGEMENT
+// ==========================
+if (!Object.keys(updates).length)
+  return repondre("⚠️ Aucun changement effectué.");
+
+// ==========================
+// 💾 UPDATE DB
+// ==========================
+await updatePlayers(targetUser, updates);
+
+// ==========================
+// ✅ MESSAGE DE CONFIRMATION
+// ==========================
+return repondre(
+  "✅ Lineup mis à jour ⚽\n" +
+  Object.entries(updates)
+    .map(([k, v]) =>
+      k === "users"
+        ? `• Squad → ${v}`
+        : `• ${k.replace("joueur", "J")} → ${v}`
+    )
+    .join("\n")
+);
 
   } catch (e) {
     console.error("❌ LINEUP ERROR:", e);
