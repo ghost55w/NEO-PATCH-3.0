@@ -486,8 +486,9 @@ if (targetUser !== auteur_Message && !prenium_id)
 // ✏️ MODIFICATION DU LINEUP
 // ==========================
 if (arg.length < 3)
-  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon ou squad = Damian🇨🇬⚽");
+  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon ou squad = NomDuSquad");
 
+// Récupérer le lineup existant
 let ficheLineup = await getLineup(targetUser);
 if (!ficheLineup)
   return repondre("❌ Impossible de récupérer le lineup.");
@@ -495,7 +496,6 @@ if (!ficheLineup)
 ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 
 const updates = {};
-let onlySquadUpdate = false; // ← nouveau flag pour savoir si c’est uniquement le nom du squad
 
 for (let i = 0; i < arg.length; i++) {
 
@@ -503,16 +503,18 @@ for (let i = 0; i < arg.length; i++) {
   // ✏️ MODIFIER LE NOM DU SQUAD
   // ==========================
   if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
-    const squadName = arg[i + 2];
-    if (squadName) {
-      updates["nom"] = squadName;   // colonne SQL sur Supabase
-      onlySquadUpdate = true;       // ← c’est une modification uniquement du squad
-    }
+    
+    // Récupérer automatiquement le nom depuis team
+    const teamData = await getTeam(targetUser);
+    if (!teamData || !teamData.users) 
+      return repondre("❌ Impossible de récupérer le nom depuis la team.");
+
+    updates["nom"] = teamData.users;   // colonne SQL sur Supabase
     i += 2;
     continue;
   }
 
-  // ✏️ Modifier un joueur (joueurs j1-j15)
+  // ✏️ Modifier un joueur (ne change rien si c’est juste le nom du squad)
   if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
 
   const pos = parseInt(arg[i].slice(1), 10);
@@ -528,8 +530,6 @@ for (let i = 0; i < arg.length; i++) {
   updates[`joueur${pos}`] = found
     ? `${found.name} (${found.ovr}) ${found.country ? getCountryEmoji(found.country) : ""}`
     : "aucun";
-
-  onlySquadUpdate = false; // si un joueur est modifié, on ne fait plus que le squad
 }
 
 // ⚠️ AUCUN CHANGEMENT
@@ -539,12 +539,8 @@ if (!Object.keys(updates).length)
 // 💾 Update DB
 await updatePlayers(targetUser, updates);
 
-// ✅ Message de confirmation
-if (onlySquadUpdate) {
-  return repondre(`✅ Lineup mis à jour pour ${updates.nom} ⚽`);
-} else {
-  return repondre("✅ Lineup mis à jour ⚽");
-}
+// ✅ Message de confirmation uniquement
+return repondre(`✅ Lineup mis à jour pour ${updates.nom || "⚽"} ⚽`);
 
   } catch (e) {
     console.error("❌ LINEUP ERROR:", e);
