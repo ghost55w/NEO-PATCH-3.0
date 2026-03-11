@@ -53,7 +53,7 @@ ovlcmd(
 +Allstars🌀 +Bluelock⚽  +Elysium💠
 
 ╰───────────────────
-                     *NEO🔷VERSE*`;
+                   *🔷Powered by NEOVERSE™*`;
       await ovl.sendMessage(ms_org, { image: { url: lien }, caption: msg }, { quoted: ms });
     }
   }
