@@ -217,27 +217,28 @@ ovlcmd({
   return repondre("⚠️ Impossible de générer le lineup de départ.");
     }
 
-    base = {
-      nom: "Starter Squad",
-      joueur1: starters[0] || "",
-      joueur2: starters[1] || "",
-      joueur3: starters[2] || "",
-      joueur4: starters[3] || "",
-      joueur5: starters[4] || "",
-      joueur6: starters[5] || "",
-      joueur7: starters[6] || "",
-      joueur8: starters[7] || "",
-      joueur9: starters[8] || "",
-      joueur10: starters[9] || "",
-      joueur11: "",
-      joueur12: "",
-      joueur13: "",
-      joueur14: "",
-      joueur15: "",
-      stat1: 100, stat2: 100, stat3: 100, stat4: 100,
-      stat5: 100, stat6: 100, stat7: 100, stat8: 100,
-      stat9: 100, stat10: 100
-    };
+   base = {
+  users: "aucun",
+  nom: "Starter Squad",
+  joueur1: starters[0] || "",
+  joueur2: starters[1] || "",
+  joueur3: starters[2] || "",
+  joueur4: starters[3] || "",
+  joueur5: starters[4] || "",
+  joueur6: starters[5] || "",
+  joueur7: starters[6] || "",
+  joueur8: starters[7] || "",
+  joueur9: starters[8] || "",
+  joueur10: starters[9] || "",
+  joueur11: "",
+  joueur12: "",
+  joueur13: "",
+  joueur14: "",
+  joueur15: "",
+  stat1: 100, stat2: 100, stat3: 100, stat4: 100,
+  stat5: 100, stat6: 100, stat7: 100, stat8: 100,
+  stat9: 100, stat10: 100
+}; 
   }
 
   // --- Mise à jour des champs supplémentaires depuis les arguments ---
