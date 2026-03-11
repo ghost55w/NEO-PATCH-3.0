@@ -497,21 +497,19 @@ ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 const updates = {};
 
 for (let i = 0; i < arg.length; i++) {
-// ✏️ Modifier le nom du squad
-if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
-  let valueParts = [];
-  let j = i + 2;
 
-  while (j < arg.length && !/^j\d+$/i.test(arg[j])) {
-    valueParts.push(arg[j]);
-    j++;
+// ==========================
+// ✏️ MODIFIER LE NOM DU SQUAD
+// ==========================
+if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
+
+  const squadName = arg[i + 2];
+
+  if (squadName) {
+    updates["nom"] = squadName;   // colonne SQL sur Supabase
   }
 
-  const squadName = valueParts.join(" ").trim();
-
-  if (squadName) updates["nom"] = squadName;
-
-  i = j - 1;
+  i += 2;
   continue;
 }
 
