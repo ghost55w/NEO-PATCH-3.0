@@ -25,7 +25,17 @@ function parseSquadBlueLock(text) {
 
     if (joueurs.length === 0) return null;
 
-    const fiche = {};
+    // 🔹 EXTRACTION NOM TEAM (on supprime uniquement le ballon ⚽, on garde les drapeaux)
+    const teamMatch = text.match(/SQUAD⚽🥅:\s*([^\n]+)/i);
+    let teamName = teamMatch ? teamMatch[1].trim() : null;
+
+    if (teamName) {
+        // Supprime uniquement le symbole ⚽ à la fin
+        teamName = teamName.replace(/⚽$/, "").trim();
+    }
+
+    const fiche = { teamName };
+
     joueurs.forEach((j, i) => {
         fiche[`joueur${i + 1}`] = j;
     });
@@ -266,45 +276,58 @@ KICK OFF ! ⚽`
 /* ===============================
 ENREGISTRER LINEUP MATCH
 =================================*/
-async function enregistrerLineupMatch(senderId, chat, ficheLineup, ovl) {
+async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
+
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "attente_lineup") return;
 
-    // Si le joueur tape juste +lineup⚽ sans envoyer de fiche
-    if (!ficheLineup) {
-        if (senderId === match.id1 && !match.equipe1) {
-            match.attenteLineup = match.id1;
-        } else if (senderId === match.id2 && !match.equipe2) {
-            match.attenteLineup = match.id2;
-        } else {
-            return ovl.sendMessage(chat, { text: "❌ Vous ne participez pas à ce match." });
-        }
-        return; // On attend le lineup envoyé par le bot
-    }
+    if (!ficheLineup || !ficheLineup.teamName) return;
 
-    // Création du tableau des joueurs
+    const teamName = ficheLineup.teamName.toLowerCase();
+
+    // Création tableau joueurs
     const positionsJoueurs = [];
+
     for (let i = 1; i <= 15; i++) {
         positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
     }
 
-    // Vérification par ID et enregistrement
-    if (senderId === match.id1 && !match.equipe1) {
+    // TEAM 1
+    if (teamName === match.team1.toLowerCase() && !match.equipe1) {
+
         match.equipe1 = positionsJoueurs;
-        await ovl.sendMessage(chat, { text: `✅ Formation confirmée pour *${match.team1Nom}* !` });
-    } else if (senderId === match.id2 && !match.equipe2) {
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+        });
+
+    }
+
+    // TEAM 2
+    else if (teamName === match.team2.toLowerCase() && !match.equipe2) {
+
         match.equipe2 = positionsJoueurs;
-        await ovl.sendMessage(chat, { text: `✅ Formation confirmée pour *${match.team2Nom}* !` });
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+        });
+
     }
 
     // Vérifier si les deux équipes sont prêtes
     if (match.equipe1 && match.equipe2) {
-        if (match.timerMatch) clearTimeout(match.timerMatch); // Stopper le timer d'attente
+
+        if (match.timerMatch) clearTimeout(match.timerMatch);
+
         match.etat = "debut_match";
-        await ovl.sendMessage(chat, { text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..." });
+
+        await ovl.sendMessage(chat, {
+            text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..."
+        });
+
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
-} 
+}
 
 
 /* ===============================
@@ -361,23 +384,13 @@ async function messageMatch(ms, ovl) {
 
     if (!match) return;
 
-    // 2️⃣ Étape Lineup : on mémorise qui tape la commande +lineup⚽
-    if (text.toLowerCase() === "+lineup⚽") {
-        match.lastLineupRequester = sender; // ID de celui qui demande son squad
-    }
-
-    // 3️⃣ Détection du squad (envoyé par le bot ou le joueur)
+    // 2️⃣ Détection du squad (envoyé par le bot ou le joueur)
     if (text.includes("👥SQUAD⚽🥅")) {
         const ficheLineup = parseSquadBlueLock(text);
         if (!ficheLineup) return;
 
-        // Si c'est le bot qui envoie le squad, on prend l'ID du dernier demandeur (+lineup⚽)
-        const realSender = fromMe ? match.lastLineupRequester : sender;
-        
-        if (realSender) {
-            // Appel à enregistrerLineupMatch qui gère maintenant Team 1 / Team 2
-            await enregistrerLineupMatch(realSender, chat, ficheLineup, ovl);
-        }
+        // On ne se base plus sur qui a tapé +lineup⚽, on utilise juste le teamName
+        await enregistrerLineupMatch(chat, ficheLineup, ovl);
     }
 }
 
