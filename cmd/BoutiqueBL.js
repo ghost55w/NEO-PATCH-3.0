@@ -409,10 +409,11 @@ Merci pour l'achat ⚽🔷 !
 ovlcmd({
   nom_cmd: "lineup⚽",
   react: "⚽",
-  classe: "NEO_GAMES⚽"
+  classe: "NEO_GAMES⚽",
+  desc: "Afficher le lineup ou modifier le nom du squad."
 }, async (ms_org, ovl, cmd_options) => {
 
-  const { arg = [], auteur_Message, repondre, ms } = cmd_options;
+  const { arg = [], auteur_Message, prenium_id, repondre, ms } = cmd_options;
 
   try {
 
@@ -424,29 +425,27 @@ ovlcmd({
       targetUser = arg[0]; // ID du joueur tagué
     }
 
-// 🔎 DETECTER SI C'EST UNE MODIFICATION
-const isModification = arg.some(a =>
-  /^j\d+$/i.test(a) || a.toLowerCase() === "squad"
-);
+    // ==========================
+    // 🔎 DETECTER SI C'EST UNE MODIFICATION DE SQUAD
+    // ==========================
+    const squadModIndex = arg.findIndex(a => a.toLowerCase() === "squad" && arg[arg.indexOf(a) + 1] === "=");
+    const isSquadModification = squadModIndex !== -1;
 
-// 🎬 GIF d'affichage uniquement
-if (!isModification) {
-  await ovl.sendMessage(ms_org, {
-    video: { url: "https://files.catbox.moe/z64kuq.mp4" },
-    caption: "",
-    gifPlayback: true
-  }, { quoted: ms });
-}
-    
-// ==========================
-// 📋 AFFICHAGE DU LINEUP
-// ==========================
-if (!isModification) {
-  let data = await getLineup(targetUser);
-  if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
-  data = data.toJSON ? data.toJSON() : data;
+    // ==========================
+    // 📋 AFFICHAGE DU LINEUP
+    // ==========================
+    if (!isSquadModification) {
 
-  const lineup = `░░ *👥SQUAD⚽🥅: ${data.squad || "Joueur"}*
+      // Récupérer le lineup
+      let data = await getLineup(targetUser);
+      if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
+      data = data.toJSON ? data.toJSON() : data;
+
+      // Synchroniser le nom du squad depuis team
+      const teamData = await getTeam(targetUser);
+      const squadName = teamData?.users || data.squad || "Joueur";
+
+      const lineup = `░░ *👥SQUAD⚽🥅: ${squadName}*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱▱
 1  👤(AG) ${data.joueur1 || "aucun"} 
 2  👤(AC) ${data.joueur2 || "aucun"} 
@@ -470,23 +469,41 @@ if (!isModification) {
                       🔷BLUELOCK⚽🥅
                  *powered by NEOVERSE™*`;
 
-  return ovl.sendMessage(ms_org, {
-    image: { url: "https://files.catbox.moe/kyrnzq.jpg" },
-    caption: lineup
-  }, { quoted: ms });
-}
+      return ovl.sendMessage(ms_org, {
+        image: { url: "https://files.catbox.moe/kyrnzq.jpg" },
+        caption: lineup
+      }, { quoted: ms });
+    }
 
-// ==========================
-// 🔒 SÉCURITÉ MODIFICATION
-// ==========================
-if (targetUser !== auteur_Message && !prenium_id)
-  return repondre("❌ Seuls les membres NS peuvent modifier le lineup d’un autre joueur.");
+    // ==========================
+    // 🔒 SÉCURITÉ MODIFICATION
+    // ==========================
+    if (targetUser !== auteur_Message && !prenium_id)
+      return repondre("❌ Seuls les membres NS peuvent modifier le lineup d’un autre joueur.");
 
+    // ==========================
+    // ✏️ MODIFICATION DU NOM DU SQUAD
+    // ==========================
+    const updates = {};
+    if (isSquadModification) {
+      const teamData = await getTeam(targetUser);
+      if (!teamData || !teamData.users)
+        return repondre("❌ Impossible de récupérer le nom depuis la team.");
+
+      updates["nom"] = teamData.users; // colonne SQL sur Supabase
+
+      // 💾 Update DB
+      await updatePlayers(targetUser, updates);
+
+      // ✅ Message de confirmation uniquement
+      return repondre(`✅ Lineup mis à jour pour ${updates.nom} ⚽`);
+    }
+    
 // ==========================
 // ✏️ MODIFICATION DU LINEUP
 // ==========================
 if (arg.length < 3)
-  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon ou squad = NomDuSquad");
+  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
 
 // Récupérer le lineup existant
 let ficheLineup = await getLineup(targetUser);
@@ -498,21 +515,6 @@ ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
 const updates = {};
 
 for (let i = 0; i < arg.length; i++) {
-
-  // ==========================
-  // ✏️ MODIFIER LE NOM DU SQUAD
-  // ==========================
-  if (arg[i]?.toLowerCase() === "squad" && arg[i + 1] === "=") {
-    
-    // Récupérer automatiquement le nom depuis team
-    const teamData = await getTeam(targetUser);
-    if (!teamData || !teamData.users) 
-      return repondre("❌ Impossible de récupérer le nom depuis la team.");
-
-    updates["nom"] = teamData.users;   // colonne SQL sur Supabase
-    i += 2;
-    continue;
-  }
 
   // ✏️ Modifier un joueur (ne change rien si c’est juste le nom du squad)
   if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
