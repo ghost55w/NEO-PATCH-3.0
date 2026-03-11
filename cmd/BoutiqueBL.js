@@ -424,24 +424,19 @@ ovlcmd({
       targetUser = arg[0]; // ID du joueur tagué
     }
 
-    // ==========================
-    // 🎬 GIF d'affichage uniquement
-    // ==========================
-    const isModification = arg.some(a => /^j\d+$/i.test(a));
-    if (!isModification) {
-      await ovl.sendMessage(ms_org, {
-        video: { url: "https://files.catbox.moe/z64kuq.mp4" },
-        caption: "",
-        gifPlayback: true
-      }, { quoted: ms });
-    }
-
-// ==========================
 // 🔎 DETECTER SI C'EST UNE MODIFICATION
-// ==========================
 const isModification = arg.some(a =>
   /^j\d+$/i.test(a) || a.toLowerCase() === "squad"
 );
+
+// 🎬 GIF d'affichage uniquement
+if (!isModification) {
+  await ovl.sendMessage(ms_org, {
+    video: { url: "https://files.catbox.moe/z64kuq.mp4" },
+    caption: "",
+    gifPlayback: true
+  }, { quoted: ms });
+}
     
 // ==========================
 // 📋 AFFICHAGE DU LINEUP
