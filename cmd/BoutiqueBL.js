@@ -409,43 +409,43 @@ Merci pour l'achat ⚽🔷 !
 ovlcmd({
   nom_cmd: "lineup⚽",
   react: "⚽",
-  classe: "NEO_GAMES⚽",
-  desc: "Afficher le lineup ou modifier le nom du squad."
+  classe: "NEO_GAMES⚽"
 }, async (ms_org, ovl, cmd_options) => {
 
-  const { arg = [], auteur_Message, prenium_id, repondre, ms } = cmd_options;
+  const { arg = [], auteur_Message, repondre, ms, prenium_id } = cmd_options;
 
   try {
-
     // ==========================
     // 🎯 DÉTERMINATION DU JOUEUR
     // ==========================
     let targetUser = auteur_Message;
     if (arg.length >= 1 && !/^j\d+$/i.test(arg[0])) {
-      targetUser = arg[0]; // ID du joueur tagué
+      targetUser = normalizeJid(arg[0]);
     }
 
     // ==========================
-    // 🔎 DETECTER SI C'EST UNE MODIFICATION DE SQUAD
+    // 📦 Récupération team pour synchronisation
     // ==========================
-    const squadModIndex = arg.findIndex(a => a.toLowerCase() === "squad" && arg[arg.indexOf(a) + 1] === "=");
-    const isSquadModification = squadModIndex !== -1;
+    const allTeams = await getAllTeams(); // { [jid]: { users, team, ... } }
+    const teamData = allTeams[targetUser] || {};
+    const squadFromTeam = teamData.users || "Joueur";
+
+    // ==========================
+    // 🔎 DÉTECTION MODIFICATIONS
+    // ==========================
+    const squadIndex = arg.findIndex(a => a.toLowerCase() === "squad");
+    const isSquadModification = squadIndex !== -1 && arg[squadIndex + 1] === "=";
+    const hasPlayerModification = arg.some(a => /^j\d+$/i.test(a) && arg[arg.indexOf(a)+1] === "=");
 
     // ==========================
     // 📋 AFFICHAGE DU LINEUP
     // ==========================
-    if (!isSquadModification) {
-
-      // Récupérer le lineup
+    if (!isSquadModification && !hasPlayerModification) {
       let data = await getLineup(targetUser);
       if (!data) return repondre("❌ Aucun lineup trouvé pour ce joueur.");
       data = data.toJSON ? data.toJSON() : data;
 
-      // Synchroniser le nom du squad depuis team
-      const teamData = await getTeam(targetUser);
-      const squadName = teamData?.users || data.squad || "Joueur";
-
-      const lineup = `░░ *👥SQUAD⚽🥅: ${squadName}*
+      const lineup = `░░ *👥SQUAD⚽🥅: ${squadFromTeam}*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱▱
 1  👤(AG) ${data.joueur1 || "aucun"} 
 2  👤(AC) ${data.joueur2 || "aucun"} 
@@ -482,73 +482,58 @@ ovlcmd({
       return repondre("❌ Seuls les membres NS peuvent modifier le lineup d’un autre joueur.");
 
     // ==========================
-    // ✏️ MODIFICATION DU NOM DU SQUAD
+    // ✏️ MODIFICATION DU LINEUP
     // ==========================
+    if (!isSquadModification && !hasPlayerModification)
+      return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
+
+    let ficheLineup = await getLineup(targetUser);
+    if (!ficheLineup)
+      return repondre("❌ Impossible de récupérer le lineup.");
+    ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
+
     const updates = {};
+
+    // 🔹 Modifier le nom du squad
     if (isSquadModification) {
-      const teamData = await getTeam(targetUser);
-      if (!teamData || !teamData.users)
-        return repondre("❌ Impossible de récupérer le nom depuis la team.");
-
-      updates["nom"] = teamData.users; // colonne SQL sur Supabase
-
-      // 💾 Update DB
-      await updatePlayers(targetUser, updates);
-
-      // ✅ Message de confirmation uniquement
-      return repondre(`✅ Lineup mis à jour pour ${updates.nom} ⚽`);
+      const squadName = arg[squadIndex + 2];
+      if (squadName) updates["nom"] = squadName; // colonne SQL sur Supabase
     }
-    
-// ==========================
-// ✏️ MODIFICATION DU LINEUP
-// ==========================
-if (arg.length < 3)
-  return repondre("⚠️ Format : +lineup⚽ j2 = Kuon");
 
-// Récupérer le lineup existant
-let ficheLineup = await getLineup(targetUser);
-if (!ficheLineup)
-  return repondre("❌ Impossible de récupérer le lineup.");
+    // 🔹 Modifier les joueurs
+    for (let i = 0; i < arg.length; i++) {
+      if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
+      const pos = parseInt(arg[i].slice(1), 10);
+      if (pos < 1 || pos > 15) continue;
 
-ficheLineup = ficheLineup.toJSON ? ficheLineup.toJSON() : ficheLineup;
+      const input = pureName(arg[i + 2]);
+      const players = Object.values(cardsBlueLock);
+      let found =
+        players.find(p => pureName(p.name) === input) ||
+        players.find(p => pureName(p.name).includes(input));
 
-const updates = {};
+      updates[`joueur${pos}`] = found
+        ? `${found.name} (${found.ovr}) ${found.country ? getCountryEmoji(found.country) : ""}`
+        : "aucun";
+    }
 
-for (let i = 0; i < arg.length; i++) {
+    if (!Object.keys(updates).length)
+      return repondre("⚠️ Aucun changement effectué.");
 
-  // ✏️ Modifier un joueur (ne change rien si c’est juste le nom du squad)
-  if (!/^j\d+$/i.test(arg[i]) || arg[i + 1] !== "=") continue;
+    // 💾 Update DB
+    await updatePlayers(targetUser, updates);
 
-  const pos = parseInt(arg[i].slice(1), 10);
-  if (pos < 1 || pos > 15) continue;
-
-  const input = pureName(arg[i + 2]);
-  const players = Object.values(cardsBlueLock);
-
-  let found =
-    players.find(p => pureName(p.name) === input) ||
-    players.find(p => pureName(p.name).includes(input));
-
-  updates[`joueur${pos}`] = found
-    ? `${found.name} (${found.ovr}) ${found.country ? getCountryEmoji(found.country) : ""}`
-    : "aucun";
-}
-
-// ⚠️ AUCUN CHANGEMENT
-if (!Object.keys(updates).length)
-  return repondre("⚠️ Aucun changement effectué.");
-
-// 💾 Update DB
-await updatePlayers(targetUser, updates);
-
-// ✅ Message de confirmation uniquement
-return repondre(`✅ Lineup mis à jour pour ${updates.nom || "⚽"} ⚽`);
+    // ✅ Confirmation
+    if (isSquadModification && !hasPlayerModification)
+      return repondre(`✅ Lineup mis à jour pour ${updates.nom} ⚽`);
+    else
+      return repondre("✅ Lineup mis à jour ⚽");
 
   } catch (e) {
     console.error("❌ LINEUP ERROR:", e);
     return repondre("❌ Erreur interne LINEUP.");
   }
-}); 
+});
 
 // --- SUBSTITUTION / ÉCHANGE +sub⚽ ---
 ovlcmd({
