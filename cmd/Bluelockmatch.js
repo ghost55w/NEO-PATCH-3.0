@@ -287,14 +287,19 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
     if (!match || match.etat !== "attente_lineup") return;
     if (!ficheLineup || !ficheLineup.teamName) return;
 
-    // 🔹 Normalisation des noms pour comparaison
+    // 🔹 Normalisation pour comparaison
     const teamLineup = normalizeTeamName(ficheLineup.teamName);
     const team1 = normalizeTeamName(match.team1);
     const team2 = normalizeTeamName(match.team2);
 
+    // 🔹 Trouver le propriétaire via la DB
+    const user = await trouverUser(ficheLineup.teamName);
+    const ownerJid = user?.jid || null;
+
     // TEAM 1
     if (teamLineup === team1 && !match.equipe1) {
         match.equipe1 = ficheLineup.joueurs;
+        match.owner1 = ownerJid; // on stocke le jid
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team1Nom}* !`
         });
@@ -302,6 +307,7 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
     // TEAM 2
     else if (teamLineup === team2 && !match.equipe2) {
         match.equipe2 = ficheLineup.joueurs;
+        match.owner2 = ownerJid; // on stocke le jid
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team2Nom}* !`
         });
@@ -319,7 +325,6 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
 }
-
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
@@ -362,7 +367,7 @@ async function messageMatch(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-
+    const senderJid = ms.key.participant || ms.key.remoteJid;
     const text =
         ms.message.conversation ||
         ms.message.extendedTextMessage?.text ||
@@ -370,21 +375,67 @@ async function messageMatch(ms, ovl) {
 
     if (!text) return;
 
-    // 1️⃣ Détection fiche match
+    const match = matchsActifs.get(chat);
+
+    // 1️⃣ Détection de la fiche match
     await verifierFiche(text, chat, ovl);
 
-    // ⚠️ IMPORTANT : récupérer le match APRÈS verifierFiche
-    const match = matchsActifs.get(chat);
     if (!match) return;
 
-    // 2️⃣ Détection squad
+    // 2️⃣ Détection du squad envoyé par le bot
     if (text.includes("👥SQUAD⚽🥅")) {
-
         const ficheLineup = parseSquadBlueLock(text);
         if (!ficheLineup) return;
 
-        await enregistrerLineupMatch(chat, ficheLineup, ovl);
+        // 🔹 Normalisation pour comparaison
+        const teamLineup = normalizeTeamName(ficheLineup.teamName);
+        const team1 = normalizeTeamName(match.team1);
+        const team2 = normalizeTeamName(match.team2);
+
+        // 🔹 Trouver le propriétaire via la DB
+        const user = await trouverUser(ficheLineup.teamName);
+        const ownerJid = user?.jid || null;
+
+        // TEAM 1
+        if (teamLineup === team1 && !match.equipe1) {
+            if (ownerJid && ownerJid !== senderJid) {
+                return ovl.sendMessage(chat, {
+                    text: `❌ Vous n'êtes pas autorisé à envoyer la formation de *${match.team1Nom}* !`
+                });
+            }
+
+            match.equipe1 = ficheLineup.joueurs;
+            match.owner1 = ownerJid;
+            await ovl.sendMessage(chat, {
+                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+            });
+        }
+        // TEAM 2
+        else if (teamLineup === team2 && !match.equipe2) {
+            if (ownerJid && ownerJid !== senderJid) {
+                return ovl.sendMessage(chat, {
+                    text: `❌ Vous n'êtes pas autorisé à envoyer la formation de *${match.team2Nom}* !`
+                });
+            }
+
+            match.equipe2 = ficheLineup.joueurs;
+            match.owner2 = ownerJid;
+            await ovl.sendMessage(chat, {
+                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+            });
+        }
+
+        // 🔹 Vérifier si les deux équipes sont prêtes
+        if (match.equipe1 && match.equipe2) {
+            if (match.timerMatch) clearTimeout(match.timerMatch);
+            match.etat = "debut_match";
+
+            await ovl.sendMessage(chat, {
+                text: "⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽..."
+            });
+
+            match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+        }
     }
-}
 
 module.exports = { messageMatch, verifierFiche };
