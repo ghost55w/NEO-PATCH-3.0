@@ -317,16 +317,32 @@ async function messageMatch(ms, ovl) {
 
     // si les deux équipes sont prêtes
     if (match.equipe1 && match.equipe2) {
+    if (match.timerMatch) clearTimeout(match.timerMatch);
+    match.etat = "debut_match";
 
-        match.etat = "debut_match";
+    // Texte à afficher
+    const readyText = `⏳ Les deux formations sont prêtes.
+Le match commence dans *1 minute* 🥅⚽...`;
 
-        await ovl.sendMessage(chat, {
-            text: "⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽..."
-        });
+    // Liste d'images possibles
+    const imagesReady = [
+        "https://files.catbox.moe/7m2axj.jpg",
+        "https://files.catbox.moe/mtou2n.jpg",
+        "https://files.catbox.moe/abcd12.jpg"
+    ];
 
-        setTimeout(() => lancerMatch(chat, ovl), 60000);
-    }
-}
+    // Choisir une image aléatoire
+    const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+
+    // Envoyer le message en caption
+    await ovl.sendMessage(chat, {
+        image: { url: imageRandom },
+        caption: readyText
+    });
+
+    // Lancer le match après 1 minute
+    match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+                                  }
 
 /* ===============================
 LANCEMENT MATCH
