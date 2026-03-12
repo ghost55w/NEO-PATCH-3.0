@@ -340,7 +340,7 @@ Le match commence dans *1 minute* 🥅⚽...`;
     // Lancer le match après 1 minute
     match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
    }
-
+} 
 /* ===============================
 LANCEMENT MATCH
 =================================*/
