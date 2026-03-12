@@ -245,16 +245,20 @@ async function verifierFiche(message, chat, ovl) {
     );
 
     await ovl.sendMessage(chat, {
-        text: `📢 ${match.team1} et ${match.team2}
+    text: `📢 ${match.team1} et ${match.team2}
+⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène, ⚠️Ne tapez pas la commande ici.*`
+});
+}
 
-⏳ Vous avez *1 minute* pour envoyer votre formation.
-
-Tapez maintenant la commande :
-➜ +lineup⚽
-
-Dès que les deux lineups seront enregistrés,
-le match commencera automatiquement.`
-    });
+// 🔹 Timer d'annulation si pas de lineup après 2 minutes
+    match.timerLineup = setTimeout(async () => {
+        if (!match.equipe1 || !match.equipe2) {
+            matchsActifs.delete(chat);
+            await ovl.sendMessage(chat, {
+                text: "❌ Les deux équipes n'ont pas envoyé leurs lineups à temps. Le match est annulé."
+            });
+        }
+    }, 2 * 60 * 1000); // 2 minutes
 }
 
 /* ===============================
