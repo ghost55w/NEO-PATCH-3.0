@@ -335,16 +335,29 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
+    // Choisir aléatoirement qui commence
     const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
     match.possession = premier;
     match.etat = "en_cours";
 
+    // Nouveau texte de kickoff
+    const kickoffText = `*BLUE LOCK LIVE▶️* 🥅
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
+⚽: KICK OFF🥅‼️ ${premier} débute avec la possession...`;
+
+    // Tableau d'images possibles
+    const imagesKickoff = [
+        "https://files.catbox.moe/7m2axj.jpg", 
+        "https://files.catbox.moe/abcd12.jpg"
+    ];
+
+    // Choisir une image aléatoire
+    const imageRandom = imagesKickoff[Math.floor(Math.random() * imagesKickoff.length)];
+
+    // Envoyer l'image avec le caption
     await ovl.sendMessage(chat, {
-        text: `🏟️ *MATCH BLUE LOCK* ⚽ Le coup de sifflet retentit !
-
-🔥 ${premier} débute avec la possession !
-
-KICK OFF ! ⚽`
+        image: { url: imageRandom },
+        caption: kickoffText
     });
 }
 
