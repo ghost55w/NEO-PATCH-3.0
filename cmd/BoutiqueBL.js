@@ -426,11 +426,12 @@ ovlcmd({
     // ==========================
     // 📦 Récupération team pour affichage
     // ==========================
-    let allTeams = {};
-    if (typeof getAllTeams === "function") allTeams = await getAllTeams();
-    const teamData = allTeams[targetUser] || {};
-    const squadFromTeam = teamData.users || "Joueur";
+let playerData = await getData(targetUser);
+playerData = playerData?.toJSON ? playerData.toJSON() : playerData;
 
+const squadFromTeam = playerData?.users || "Joueur";
+
+    
     // ==========================
     // 🔎 DÉTECTION MODIFICATIONS
     // ==========================
