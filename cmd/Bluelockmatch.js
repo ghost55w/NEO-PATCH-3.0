@@ -261,7 +261,7 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-    const premier = Math.random() < 0.5 ? match.joueur1 : match.joueur2;
+    const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
     match.possession = premier;
     match.etat = "en_cours";
 
@@ -365,25 +365,27 @@ async function messageMatch(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-    const sender = ms.key.participant || ms.key.remoteJid;
-    const fromMe = ms.key.fromMe;
 
-    const text = ms.message.conversation || ms.message.extendedTextMessage?.text || "";
+    const text =
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        "";
+
     if (!text) return;
 
-    const match = matchsActifs.get(chat);
-
-    // 1️⃣ Détection Fiche Initiale (Team 1 / Team 2)
+    // 1️⃣ Détection fiche match
     await verifierFiche(text, chat, ovl);
 
+    // ⚠️ IMPORTANT : récupérer le match APRÈS verifierFiche
+    const match = matchsActifs.get(chat);
     if (!match) return;
 
-    // 2️⃣ Détection du squad (envoyé par le bot ou le joueur)
+    // 2️⃣ Détection squad
     if (text.includes("👥SQUAD⚽🥅")) {
+
         const ficheLineup = parseSquadBlueLock(text);
         if (!ficheLineup) return;
 
-        // On ne se base plus sur qui a tapé +lineup⚽, on utilise juste le teamName
         await enregistrerLineupMatch(chat, ficheLineup, ovl);
     }
 }
