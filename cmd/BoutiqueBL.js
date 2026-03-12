@@ -423,14 +423,13 @@ ovlcmd({
       targetUser = normalizeJid(arg[0]);
     }
 
-    // ==========================
-    // 📦 Récupération team pour affichage
-    // ==========================
-let playerData = await getData(targetUser);
-playerData = playerData?.toJSON ? playerData.toJSON() : playerData;
+// ==========================
+// 📦 Récupération team pour affichage
+// ==========================
+const allPlayers = await TeamFunctions.getAllTeams();
+const player = allPlayers.find(p => p.id === targetUser);
 
-const squadFromTeam = playerData?.users || "Joueur";
-
+const squadFromTeam = player?.users || "Joueur";
     
     // ==========================
     // 🔎 DÉTECTION MODIFICATIONS
