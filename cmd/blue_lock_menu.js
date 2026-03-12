@@ -11,26 +11,26 @@ ovlcmd(
   },
   async (ms_org, ovl, { arg, ms }) => {
     if (!arg || arg.length === 0) {
-      await ovl.sendMessage(ms_org, {
-        video: { url: gifIntro },
-        gifPlayback: true,
-        caption: ""
-      });
+  await ovl.sendMessage(ms_org, {
+    video: { url: gifIntro },
+    gifPlayback: true,
+    caption: ""
+  });
 
-      const liens = [
-        'https://files.catbox.moe/nie52h.jpg',
-        'https://files.catbox.moe/sffbqk.jpg',
-        'https://files.catbox.moe/2ctprm.jpg',
-        'https://files.catbox.moe/mkvm09.jpg',
-        'https://files.catbox.moe/qpmpus.jpg', 
-        'https://files.catbox.moe/5tcgns.jpg'
-      ];
+  const liens = [
+    'https://files.catbox.moe/nie52h.jpg',
+    'https://files.catbox.moe/sffbqk.jpg',
+    'https://files.catbox.moe/2ctprm.jpg',
+    'https://files.catbox.moe/mkvm09.jpg',
+    'https://files.catbox.moe/qpmpus.jpg', 
+    'https://files.catbox.moe/5tcgns.jpg'
+  ];
 
-      for (const lien of liens) {
-        await ovl.sendMessage(ms_org, { image: { url: lien }, caption: "" }, { quoted: ms });
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-    }
+  for (const lien of liens) {
+    await ovl.sendMessage(ms_org, { image: { url: lien }, caption: "" });
+    await new Promise(resolve => setTimeout(resolve, 300)); 
+  }
+}
   }
 );
 
