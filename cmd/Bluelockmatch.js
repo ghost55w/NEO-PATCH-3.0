@@ -44,6 +44,11 @@ function parseSquadBlueLock(text) {
     };
 }
 
+function normalizeTeamName(name) {
+    if (!name) return "";
+    // Supprime tous les emojis et espaces en début/fin
+    return name.replace(/\p{Emoji}/gu, "").trim().toLowerCase();
+}
 
 function tirageKickOff() {
     return Math.random() < 0.5 ? "A" : "B";
@@ -278,41 +283,33 @@ KICK OFF ! ⚽`
 ENREGISTRER LINEUP MATCH
 =================================*/
 async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
-
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "attente_lineup") return;
-
     if (!ficheLineup || !ficheLineup.teamName) return;
 
-    const teamName = ficheLineup.teamName.toLowerCase();
+    // 🔹 Normalisation des noms pour comparaison
+    const teamLineup = normalizeTeamName(ficheLineup.teamName);
+    const team1 = normalizeTeamName(match.team1);
+    const team2 = normalizeTeamName(match.team2);
 
     // TEAM 1
-    if (teamName === match.team1.toLowerCase() && !match.equipe1) {
-
+    if (teamLineup === team1 && !match.equipe1) {
         match.equipe1 = ficheLineup.joueurs;
-
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team1Nom}* !`
         });
-
     }
-
     // TEAM 2
-    else if (teamName === match.team2.toLowerCase() && !match.equipe2) {
-
+    else if (teamLineup === team2 && !match.equipe2) {
         match.equipe2 = ficheLineup.joueurs;
-
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team2Nom}* !`
         });
-
     }
 
     // Si les deux équipes sont prêtes
     if (match.equipe1 && match.equipe2) {
-
         if (match.timerMatch) clearTimeout(match.timerMatch);
-
         match.etat = "debut_match";
 
         await ovl.sendMessage(chat, {
