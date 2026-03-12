@@ -236,21 +236,17 @@ async function verifierFiche(message, chat, ovl) {
 ╰───────────────────
                *🔷BLUELOCK⚽*`;
 
-    await ovl.sendMessage(
-        chat,
-        {
-            image: { url: randomImage(imagesMatchConfirm) },
-            caption: confirmation
-        }
-    );
+    await ovl.sendMessage(chat, {
+        image: { url: randomImage(imagesMatchConfirm) },
+        caption: confirmation
+    });
 
     await ovl.sendMessage(chat, {
-    text: `📢 ${match.team1} et ${match.team2}
+        text: `📢 ${match.team1} et ${match.team2}
 ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène, ⚠️Ne tapez pas la commande ici.*`
-});
-}
+    });
 
-// 🔹 Timer d'annulation si pas de lineup après 2 minutes
+    // 🔹 Timer d'annulation si pas de lineup après 2 minutes
     match.timerLineup = setTimeout(async () => {
         if (!match.equipe1 || !match.equipe2) {
             matchsActifs.delete(chat);
@@ -260,6 +256,7 @@ async function verifierFiche(message, chat, ovl) {
         }
     }, 2 * 60 * 1000); // 2 minutes
 }
+
 
 /* ===============================
 LECTURE MESSAGES
@@ -361,7 +358,7 @@ async function lancerMatch(chat, ovl) {
 
     // Tableau d'images possibles
     const imagesKickoff = [
-        "https://files.catbox.moe/onotk4.jpg", 
+        "https://files.catbox.moe/onotk4.jpg",
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
@@ -373,17 +370,15 @@ async function lancerMatch(chat, ovl) {
         image: { url: imageRandom },
         caption: kickoffText
     });
-}
-// 🔹 Timer pour que le joueur en possession envoie son pavé : 6 minutes
+
+    // 🔹 Timer pour que le joueur en possession envoie son pavé : 6 minutes
     match.timerPave = setTimeout(async () => {
         await ovl.sendMessage(chat, {
             text: `⏰ ${premier} LATENCE OUT! ❌.`
         });
-
-        // Ici on ne change pas la possession, elle sera gérée dans une autre fonction
     }, 6 * 60 * 1000); // 6 minutes
 }
-
+    
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/
