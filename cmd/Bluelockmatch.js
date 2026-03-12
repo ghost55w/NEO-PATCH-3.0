@@ -326,9 +326,9 @@ Le match commence dans *1 minute* 🥅⚽...`;
 
     // Liste d'images possibles
     const imagesReady = [
-        "https://files.catbox.moe/7m2axj.jpg",
-        "https://files.catbox.moe/mtou2n.jpg",
-        "https://files.catbox.moe/abcd12.jpg"
+        "https://files.catbox.moe/dlj5z6.jpg",
+        "https://files.catbox.moe/fdadd0.jpeg",
+        "https://files.catbox.moe/4104s3.jpg"
     ];
 
     // Choisir une image aléatoire
