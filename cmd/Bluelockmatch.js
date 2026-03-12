@@ -14,33 +14,34 @@ function parseSquadBlueLock(text) {
     const lignes = text.split("\n");
     const joueurs = [];
 
-    const regex = /\d+\s+👤(?:\([A-Z]{2}\))?\s*([^(]+)\s*\((\d+)\)/i;
+    // Capture : position + nom + note
+    const regex = /\d+\s+👤\(([A-Z]{2})\)\s*([^(]+)\s*\((\d+)\)/i;
 
     for (const ligne of lignes) {
         const match = ligne.match(regex);
         if (match) {
-            joueurs.push(match[1].trim());
+            joueurs.push({
+                position: match[1].trim(),
+                nom: match[2].trim(),
+                note: parseInt(match[3])
+            });
         }
     }
 
     if (joueurs.length === 0) return null;
 
-    // 🔹 EXTRACTION NOM TEAM (on supprime uniquement le ballon ⚽, on garde les drapeaux)
+    // 🔹 EXTRACTION NOM TEAM (on supprime uniquement ⚽)
     const teamMatch = text.match(/SQUAD⚽🥅:\s*([^\n]+)/i);
     let teamName = teamMatch ? teamMatch[1].trim() : null;
 
     if (teamName) {
-        // Supprime uniquement le symbole ⚽ à la fin
         teamName = teamName.replace(/⚽$/, "").trim();
     }
 
-    const fiche = { teamName };
-
-    joueurs.forEach((j, i) => {
-        fiche[`joueur${i + 1}`] = j;
-    });
-
-    return fiche;
+    return {
+        teamName,
+        joueurs
+    };
 }
 
 
@@ -285,17 +286,10 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
 
     const teamName = ficheLineup.teamName.toLowerCase();
 
-    // Création tableau joueurs
-    const positionsJoueurs = [];
-
-    for (let i = 1; i <= 15; i++) {
-        positionsJoueurs.push(ficheLineup[`joueur${i}`] || "aucun");
-    }
-
     // TEAM 1
     if (teamName === match.team1.toLowerCase() && !match.equipe1) {
 
-        match.equipe1 = positionsJoueurs;
+        match.equipe1 = ficheLineup.joueurs;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team1Nom}* !`
@@ -306,7 +300,7 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
     // TEAM 2
     else if (teamName === match.team2.toLowerCase() && !match.equipe2) {
 
-        match.equipe2 = positionsJoueurs;
+        match.equipe2 = ficheLineup.joueurs;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team2Nom}* !`
@@ -314,7 +308,7 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
 
     }
 
-    // Vérifier si les deux équipes sont prêtes
+    // Si les deux équipes sont prêtes
     if (match.equipe1 && match.equipe2) {
 
         if (match.timerMatch) clearTimeout(match.timerMatch);
@@ -322,7 +316,7 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
         match.etat = "debut_match";
 
         await ovl.sendMessage(chat, {
-            text: "⏳ Les deux formations sont prêtes. Le match commence dans *1 minute* 🥅⚽..."
+            text: "⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽..."
         });
 
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
