@@ -341,9 +341,7 @@ async function lancerMatch(chat, ovl) {
     match.etat = "en_cours";
 
     // Nouveau texte de kickoff
-    const kickoffText = `*BLUE LOCK LIVE▶️* 🥅
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
-⚽: KICK OFF🥅‼️ ${premier} débute avec la possession...`;
+    const kickoffText = `🎙️⚽: KICK OFF🥅‼️ ${premier} débute avec la possession...`;
 
     // Tableau d'images possibles
     const imagesKickoff = [
