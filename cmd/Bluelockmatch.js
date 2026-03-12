@@ -360,6 +360,15 @@ async function lancerMatch(chat, ovl) {
         caption: kickoffText
     });
 }
+// 🔹 Timer pour que le joueur en possession envoie son pavé : 6 minutes
+    match.timerPave = setTimeout(async () => {
+        await ovl.sendMessage(chat, {
+            text: `⏰ ${premier} LATENCE OUT! ❌.`
+        });
+
+        // Ici on ne change pas la possession, elle sera gérée dans une autre fonction
+    }, 6 * 60 * 1000); // 6 minutes
+}
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
