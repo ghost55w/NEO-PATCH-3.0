@@ -297,21 +297,24 @@ async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
     const ownerJid = user?.jid || null;
 
     // TEAM 1
-    if (teamLineup === team1 && !match.equipe1) {
-        match.equipe1 = ficheLineup.joueurs;
-        match.owner1 = ownerJid; // on stocke le jid
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-        });
-    }
-    // TEAM 2
-    else if (teamLineup === team2 && !match.equipe2) {
-        match.equipe2 = ficheLineup.joueurs;
-        match.owner2 = ownerJid; // on stocke le jid
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-        });
-    }
+if (teamLineup === team1 && !match.equipe1) {
+
+    match.equipe1 = ficheLineup.joueurs;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+    });
+}
+
+// TEAM 2
+else if (teamLineup === team2 && !match.equipe2) {
+
+    match.equipe2 = ficheLineup.joueurs;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+    });
+}
 
     // Si les deux équipes sont prêtes
     if (match.equipe1 && match.equipe2) {
