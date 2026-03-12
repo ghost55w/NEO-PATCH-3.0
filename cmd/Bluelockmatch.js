@@ -345,8 +345,8 @@ async function lancerMatch(chat, ovl) {
 
     // Tableau d'images possibles
     const imagesKickoff = [
-        "https://files.catbox.moe/7m2axj.jpg", 
-        "https://files.catbox.moe/abcd12.jpg"
+        "https://files.catbox.moe/onotk4.jpg", 
+        "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
     // Choisir une image aléatoire
