@@ -257,7 +257,72 @@ le match commencera automatiquement.`
     });
 }
 
+/* ===============================
+LECTURE MESSAGES
+=================================*/
+async function messageMatch(ms, ovl) {
 
+    if (!ms.message) return;
+
+    const chat = ms.key.remoteJid;
+
+    // récupérer texte ou caption
+    const text =
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        ms.message.imageMessage?.caption ||
+        "";
+
+    if (!text) return;
+
+    // vérifier fiche match
+    await verifierFiche(text, chat, ovl);
+
+    const match = matchsActifs.get(chat);
+    if (!match || match.etat !== "attente_lineup") return;
+
+    // lire le nom de squad
+    const squadMatch = text.match(/SQUAD.*?:\s*([^\n]+)/i);
+    if (!squadMatch) return;
+
+    const squadName = squadMatch[1].trim();
+
+    const team1 = normalizeTeamName(match.team1);
+    const team2 = normalizeTeamName(match.team2);
+    const squad = normalizeTeamName(squadName);
+
+    // TEAM 1
+    if (squad === team1 && !match.equipe1) {
+
+        match.equipe1 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+        });
+    }
+
+    // TEAM 2
+    else if (squad === team2 && !match.equipe2) {
+
+        match.equipe2 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+        });
+    }
+
+    // si les deux équipes sont prêtes
+    if (match.equipe1 && match.equipe2) {
+
+        match.etat = "debut_match";
+
+        await ovl.sendMessage(chat, {
+            text: "⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽..."
+        });
+
+        setTimeout(() => lancerMatch(chat, ovl), 60000);
+    }
+}
 
 /* ===============================
 LANCEMENT MATCH
@@ -278,54 +343,6 @@ async function lancerMatch(chat, ovl) {
 KICK OFF ! ⚽`
     });
 }
-/* ===============================
-ENREGISTRER LINEUP MATCH
-=================================*/
-async function enregistrerLineupMatch(chat, ficheLineup, ovl) {
-
-    const match = matchsActifs.get(chat);
-    if (!match || match.etat !== "attente_lineup") return;
-    if (!ficheLineup || !ficheLineup.teamName) return;
-
-    // Normalisation pour comparaison
-    const teamLineup = normalizeTeamName(ficheLineup.teamName);
-    const team1 = normalizeTeamName(match.team1);
-    const team2 = normalizeTeamName(match.team2);
-
-    // TEAM 1
-    if (teamLineup === team1 && !match.equipe1) {
-
-        match.equipe1 = ficheLineup.joueurs;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-        });
-    }
-
-    // TEAM 2
-    else if (teamLineup === team2 && !match.equipe2) {
-
-        match.equipe2 = ficheLineup.joueurs;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-        });
-    }
-
-    // Si les deux équipes sont prêtes
-    if (match.equipe1 && match.equipe2) {
-
-        if (match.timerMatch) clearTimeout(match.timerMatch);
-
-        match.etat = "debut_match";
-
-        await ovl.sendMessage(chat, {
-            text: "⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽..."
-        });
-
-        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
-    }
-} 
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
@@ -361,36 +378,5 @@ ovlcmd({
     }
 });
 
-/* ===============================
-LECTURE MESSAGES
-=================================*/
-async function messageMatch(ms, ovl) {
-
-    if (!ms.message) return;
-
-    const chat = ms.key.remoteJid;
-
-    // récupérer texte ou caption
-    const text =
-        ms.message.conversation ||
-        ms.message.extendedTextMessage?.text ||
-        ms.message.imageMessage?.caption ||
-        "";
-
-    if (!text) return;
-
-    // 1️⃣ vérifier fiche match
-    await verifierFiche(text, chat, ovl);
-
-    const match = matchsActifs.get(chat);
-    if (!match) return;
-
-    // 2️⃣ détecter lineup
-    const ficheLineup = parseSquadBlueLock(text);
-    if (!ficheLineup) return;
-
-    // 3️⃣ enregistrer lineup
-    await enregistrerLineupMatch(chat, ficheLineup, ovl);
-}
 
 module.exports = { messageMatch, verifierFiche };
