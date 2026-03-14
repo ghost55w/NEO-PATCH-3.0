@@ -365,17 +365,23 @@ async function lancerMatch(chat, ovl) {
     // Choisir une image aléatoire
     const imageRandom = imagesKickoff[Math.floor(Math.random() * imagesKickoff.length)];
 
-    // Envoyer l'image avec le caption
-    await ovl.sendMessage(chat, {
-        image: { url: imageRandom },
-        caption: kickoffText
-    });
+    // déterminer le jid du joueur qui commence
+const jidStart = premier === match.team1Nom ? match.id1 : match.id2;
+
+await ovl.sendMessage(chat, {
+    image: { url: imageRandom },
+    caption: `🎙️⚽: KICK OFF🥅‼️ @${premier} débute avec la possession...`,
+    mentions: [jidStart]
+});
 
     // 🔹 Timer pour que le joueur en possession envoie son pavé : 6 minutes
     match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ ${premier} LATENCE OUT! ❌.`
-        });
+        const jidStart = premier === match.team1Nom ? match.id1 : match.id2;
+
+await ovl.sendMessage(chat, {
+    text: `⏰ @${premier} LATENCE OUT! ❌.`,
+    mentions: [jidStart]
+});
     }, 6 * 60 * 1000); // 6 minutes
 }
     
