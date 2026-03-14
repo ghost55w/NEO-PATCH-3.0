@@ -374,36 +374,35 @@ Le match commence dans *1 minute* 🥅⚽...`;
 LANCEMENT MATCH
 =================================*/
 async function lancerMatch(chat, ovl) {
+
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-    if (match.kickoffStarted) return; // 🔒 empêche double kickoff
+    if (match.kickoffStarted) return;
     match.kickoffStarted = true;
 
     const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
+
     match.possession = premier;
     match.etat = "en_cours";
+    match.joueurTour = premier === match.team1Nom ? match.id1 : match.id2;
 
-    // Nouveau texte de kickoff
-    const kickoffText = `🎙️⚽: KICK OFF🥅‼️ ${premier} débute avec la possession...`;
-
-    // Tableau d'images possibles
     const imagesKickoff = [
         "https://files.catbox.moe/onotk4.jpg",
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
-    // Choisir une image aléatoire
     const imageRandom = imagesKickoff[Math.floor(Math.random() * imagesKickoff.length)];
 
-    // déterminer le jid du joueur qui commence
-const jidStart = premier === match.team1Nom ? match.id1 : match.id2;
+    const jidStart = match.joueurTour;
 
-await ovl.sendMessage(chat, {
-    image: { url: imageRandom },
-    caption: `🎙️⚽: KICK OFF🥅‼️ @${premier} débute avec la possession...`,
-    mentions: [jidStart]
-});
+    await ovl.sendMessage(chat, {
+        image: { url: imageRandom },
+        caption: `🎙️⚽: KICK OFF🥅‼️ @${premier} débute avec la possession...`,
+        mentions: [jidStart]
+    });
+
+}
 
     // 🔹 Timer pour que le joueur en possession envoie son pavé : 6 minutes
     match.timerPave = setTimeout(async () => {
