@@ -416,7 +416,6 @@ await ovl.sendMessage(chat, {
     }, 6 * 60 * 1000); // 6 minutes
 }
 
-
 /* ===============================
 LECTURE DES PAVÉS
 =================================*/
@@ -445,21 +444,53 @@ async function lirePaveAction(ms, ovl) {
     // ❌ si ce n'est pas le joueur qui doit jouer
     if (sender !== match.joueurTour) return;
 
+    // extraire l'action du pavé
     const action = extraireAction(text);
-
     if (!action) return;
 
     console.log("⚽ Action détectée :", action);
 
+    // ==============================
+    // Récupérer le nom du joueur dans le pavé
+    // Exemple : (C2) Rin contrôle la balle ...
+    const nomJoueur = extraireNomJoueur(action); // à définir pour extraire "Rin"
+    if (!nomJoueur) return;
+
+    // chercher la carte dans la base
+    const carte = trouverCarteJoueur(nomJoueur);
+    if (!carte) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Joueur "${nomJoueur}" introuvable dans la base Blue Lock.`
+        });
+    }
+
     // stop timer latence
     if (match.timerPave) clearTimeout(match.timerPave);
 
+    // déterminer le joueur suivant
+    const nextPlayerJID = sender === match.id1 ? match.id2 : match.id1;
+    const nextPlayerName = sender === match.id1 ? match.team2Nom : match.team1Nom;
+
+    // mettre à jour le joueur qui doit jouer ensuite
+    match.joueurTour = nextPlayerJID;
+
+    // envoyer confirmation avec mention (pas les stats)
     await ovl.sendMessage(chat, {
-        text: `⚽ Action validée !\n\n${action}`
+        text: `✅ Action validée ! NEXT⚽ @${nextPlayerName}`,
+        mentions: [nextPlayerJID]
     });
 
-}
+    // relancer le timer de 6 minutes pour le joueur suivant
+    match.timerPave = setTimeout(async () => {
+        await ovl.sendMessage(chat, {
+            text: `⏰ @${nextPlayerName} LATENCE OUT! ❌.`,
+            mentions: [nextPlayerJID]
+        });
 
+        // ici tu peux gérer perte de balle ou repasser au joueur précédent
+        // match.joueurTour = sender;
+    }, 6 * 60 * 1000);
+}
     
 /* ===============================
 COMMANDE +STOPMATCH⚽
