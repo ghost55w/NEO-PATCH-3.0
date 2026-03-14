@@ -417,10 +417,9 @@ await ovl.sendMessage(chat, {
 }
 
 /* ===============================
-LECTURE DES PAVÉS
+LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
 async function lirePaveAction(ms, ovl) {
-
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
@@ -429,68 +428,119 @@ async function lirePaveAction(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "en_cours") return;
 
-    // récupérer texte
+    // récupérer texte ou caption
     const text =
         ms.message.conversation ||
         ms.message.extendedTextMessage?.text ||
         ms.message.imageMessage?.caption ||
         "";
 
-    if (!text) return;
-
-    // doit contenir ⚽
     if (!text.includes("⚽:")) return;
 
-    // ❌ si ce n'est pas le joueur qui doit jouer
+    // Vérifie si c’est le joueur qui doit jouer
     if (sender !== match.joueurTour) return;
 
-    // extraire l'action du pavé
+    // Extraire l’action complète
     const action = extraireAction(text);
     if (!action) return;
 
-    console.log("⚽ Action détectée :", action);
-
-    // ==============================
-    // Récupérer le nom du joueur dans le pavé
-    // Exemple : (C2) Rin contrôle la balle ...
-    const nomJoueur = extraireNomJoueur(action); // à définir pour extraire "Rin"
-    if (!nomJoueur) return;
-
-    // chercher la carte dans la base
-    const carte = trouverCarteJoueur(nomJoueur);
-    if (!carte) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Joueur "${nomJoueur}" introuvable dans la base Blue Lock.`
+    // Extraire le nom du joueur utilisé dans le pavé
+    const nomJoueur = extraireNomJoueur(action);
+    if (!nomJoueur) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Impossible d'identifier le joueur utilisé."
         });
+        return;
     }
 
-    // stop timer latence
+    // Chercher la carte dans la BDD
+    const carte = trouverCarteJoueur(nomJoueur);
+    if (!carte) {
+        await ovl.sendMessage(chat, {
+            text: `❌ Joueur *${nomJoueur}* introuvable dans la base Blue Lock.`
+        });
+        return;
+    }
+
+    // 🔹 Séparer le pavé en séquences/action individuelles
+    const sequences = separerSequences(action);
+
+    // 🔹 Dispatcher chaque action vers son compartiment
+    for (const seq of sequences) {
+        let type = null;
+        if (/tir|frappe/i.test(seq)) type = "tir";
+        else if (/passe/i.test(seq)) type = "passe";
+        else if (/dribble|conduit|accélère|contrôle/i.test(seq)) type = "dribble";
+        else type = "deplacement"; // Tout le reste = déplacement
+
+        switch (type) {
+            case "tir":
+                await gestionTirs(seq, carte, match, chat, ovl);
+                break;
+            case "passe":
+                await gestionPasses(seq, carte, match, chat, ovl);
+                break;
+            case "dribble":
+                await gestionDribbles(seq, carte, match, chat, ovl);
+                break;
+            case "deplacement":
+                await gestionDeplacements(seq, carte, match, chat, ovl);
+                break;
+        }
+    }
+
+    // 🔹 Passer au joueur suivant
+    const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
+    match.joueurTour = nextJoueur;
+
+    // 🔹 Stop timer latence
     if (match.timerPave) clearTimeout(match.timerPave);
 
-    // déterminer le joueur suivant
-    const nextPlayerJID = sender === match.id1 ? match.id2 : match.id1;
-    const nextPlayerName = sender === match.id1 ? match.team2Nom : match.team1Nom;
-
-    // mettre à jour le joueur qui doit jouer ensuite
-    match.joueurTour = nextPlayerJID;
-
-    // envoyer confirmation avec mention (pas les stats)
+    // 🔹 Confirmation de validation et mention du joueur suivant
     await ovl.sendMessage(chat, {
-        text: `✅ Action validée ! NEXT⚽ @${nextPlayerName}`,
-        mentions: [nextPlayerJID]
+        text: `✅ Action validée ! @${nextJoueur} NEXT⚽`,
+        mentions: [nextJoueur]
     });
-
-    // relancer le timer de 6 minutes pour le joueur suivant
-    match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${nextPlayerName} LATENCE OUT! ❌.`,
-            mentions: [nextPlayerJID]
-        });
-
-        // ici tu peux gérer perte de balle ou repasser au joueur précédent
-        // match.joueurTour = sender;
-    }, 6 * 60 * 1000);
 }
+
+/* ===============================
+GESTION DES DÉPLACEMENTS
+=================================*/
+async function gestionDeplacements(seq, carte, match, chat, ovl) {
+    // TODO: Vérifier distance max, zones, et mise à jour de la position du joueur
+    // Exemple:
+    const zones = extraireZones(seq);
+    if (!zones) return ovl.sendMessage(chat, { text: "❌ Impossible de déterminer les zones." });
+
+    const dist = distance(zones.depart, zones.arrivee);
+    if (dist > 10) {
+        return ovl.sendMessage(chat, { text: "❌ Déplacement trop long, action annulée." });
+    }
+
+    // Mettre à jour la position du joueur
+    carte.positionActuelle = zones.arrivee;
+}
+
+/* ===============================
+GESTION DES TIRS
+=================================*/
+async function gestionTirs(seq, carte, match, chat, ovl) {
+    // TODO: Ajouter logique de réussite du tir selon stats SHO, distance, zone, etc.
+}
+
+/* ===============================
+GESTION DES PASSES
+=================================*/
+async function gestionPasses(seq, carte, match, chat, ovl) {
+    // TODO: Ajouter logique de réussite de passe selon stats PAS, zone, etc.
+}
+
+/* ===============================
+GESTION DES DRIBBLES / ACCÉLÉRATIONS
+=================================*/
+async function gestionDribbles(seq, carte, match, chat, ovl) {
+    // TODO: Ajouter logique de réussite selon DRI, ACC, PHY, combo, etc.
+} 
     
 /* ===============================
 COMMANDE +STOPMATCH⚽
