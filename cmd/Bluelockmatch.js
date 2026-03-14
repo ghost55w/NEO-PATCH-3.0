@@ -341,33 +341,31 @@ async function messageMatch(ms, ovl) {
     }
 
     // si les deux équipes sont prêtes
-    if (match.equipe1 && match.equipe2) {
+    if (match.equipe1 && match.equipe2 && !match.starting) {
+
+    match.starting = true; // 🔒 verrou anti double lancement
+
     if (match.timerMatch) clearTimeout(match.timerMatch);
     match.etat = "debut_match";
 
-    // Texte à afficher
     const readyText = `⏳ Les deux formations sont prêtes.
 Le match commence dans *1 minute* 🥅⚽...`;
 
-    // Liste d'images possibles
     const imagesReady = [
         "https://files.catbox.moe/dlj5z6.jpg",
         "https://files.catbox.moe/fdadd0.jpeg",
         "https://files.catbox.moe/4104s3.jpg"
     ];
 
-    // Choisir une image aléatoire
     const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-    // Envoyer le message en caption
     await ovl.sendMessage(chat, {
         image: { url: imageRandom },
         caption: readyText
     });
 
-    // Lancer le match après 1 minute
     match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
-    }
+}
 // 👇 LECTURE DES PAVÉS GAMEPLAY
     await lirePaveAction(ms, ovl);
 } 
@@ -379,7 +377,9 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-    // Choisir aléatoirement qui commence
+    if (match.kickoffStarted) return; // 🔒 empêche double kickoff
+    match.kickoffStarted = true;
+
     const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
     match.possession = premier;
     match.etat = "en_cours";
