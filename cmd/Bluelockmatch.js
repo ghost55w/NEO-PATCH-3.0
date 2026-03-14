@@ -134,6 +134,34 @@ async function trouverUser(nom) {
     return null;
 }
 
+function extraireAction(pave) {
+    const ligne = pave.split("\n").find(l => l.startsWith("⚽:"));
+    if (!ligne) return null;
+    return ligne.replace("⚽:", "").trim();
+}
+
+/* ===============================
+TROUVER CARTE JOUEUR
+=================================*/
+function trouverCarteJoueur(nom) {
+
+    if (!cardsBlueLock) return null;
+
+    const nomClean = nom.toLowerCase().trim();
+
+    for (const carte of cardsBlueLock) {
+
+        if (!carte.nom) continue;
+
+        if (carte.nom.toLowerCase() === nomClean) {
+            return carte;
+        }
+    }
+
+    return null;
+}
+
+
 /* ===============================
 COMMANDE MATCH
 =================================*/
@@ -339,8 +367,11 @@ Le match commence dans *1 minute* 🥅⚽...`;
 
     // Lancer le match après 1 minute
     match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
-   }
+    }
+// 👇 LECTURE DES PAVÉS GAMEPLAY
+    await lirePaveAction(ms, ovl);
 } 
+
 /* ===============================
 LANCEMENT MATCH
 =================================*/
@@ -384,6 +415,51 @@ await ovl.sendMessage(chat, {
 });
     }, 6 * 60 * 1000); // 6 minutes
 }
+
+
+/* ===============================
+LECTURE DES PAVÉS
+=================================*/
+async function lirePaveAction(ms, ovl) {
+
+    if (!ms.message) return;
+
+    const chat = ms.key.remoteJid;
+    const sender = ms.key.participant || ms.key.remoteJid;
+
+    const match = matchsActifs.get(chat);
+    if (!match || match.etat !== "en_cours") return;
+
+    // récupérer texte
+    const text =
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        ms.message.imageMessage?.caption ||
+        "";
+
+    if (!text) return;
+
+    // doit contenir ⚽
+    if (!text.includes("⚽:")) return;
+
+    // ❌ si ce n'est pas le joueur qui doit jouer
+    if (sender !== match.joueurTour) return;
+
+    const action = extraireAction(text);
+
+    if (!action) return;
+
+    console.log("⚽ Action détectée :", action);
+
+    // stop timer latence
+    if (match.timerPave) clearTimeout(match.timerPave);
+
+    await ovl.sendMessage(chat, {
+        text: `⚽ Action validée !\n\n${action}`
+    });
+
+}
+
     
 /* ===============================
 COMMANDE +STOPMATCH⚽
