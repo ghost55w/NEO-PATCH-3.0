@@ -561,7 +561,76 @@ async function gestionDeplacements(seq, carte, match, chat, ovl) {
 /* ===============================
 GESTION DES PASSES
 =================================*/
-// Ici tu ajouteras la fonction gestionPasses(seq, carte, match, chat, ovl)
+async function gestionPassesEtControle(seq, carte, match, chat, ovl, isTir = false) {
+    // Extraction type de passe
+    const passeMatch = seq.match(/\b(passe directe|passe trivela|passe circulaire|longue passe|talonnade|centre)\b.*?(ras du sol|mi-hauteur|centre).*?(intérieur du pied droit|intérieur du pied gauche|extérieur du pied droit|extérieur du pied gauche|poitrine).*?direction (gauche|droite|devant|derrière|diagonale)?.*?vers (\w+)/i);
+    if (!passeMatch) return ovl.sendMessage(chat, { text: "❌ Impossible d'identifier la passe correctement." });
+
+    const typePasse = passeMatch[1].toLowerCase();   // passe directe, trivela, circulaire, longue, talonnade, centre
+    const hauteur = passeMatch[2].toLowerCase();     // ras du sol, mi-hauteur, centre
+    const typePied = passeMatch[3].toLowerCase();
+    const direction = passeMatch[4] ? passeMatch[4].toLowerCase() : null;
+    const receveurNom = passeMatch[5];
+
+    if (!direction) return passeRatee(match, carte, chat, ovl, "Direction manquante");
+
+    // Joueur receveur
+    const receveur = trouverCarteJoueur(receveurNom);
+    if (!receveur) return passeRatee(match, carte, chat, ovl, `Joueur receveur introuvable : ${receveurNom}`);
+
+    // Extraction contrôle du receveur
+    const controlMatch = seq.match(/réçoit.*contrôle.*(intérieur du pied droit|intérieur du pied gauche|extérieur du pied droit|extérieur du pied gauche|poitrine).*?(\d+)\s?cm/i);
+    let controlType, controlDistance;
+    if (!controlMatch) return controleRateAvecRebond(match, carte, receveur, chat, ovl, "Distance du contrôle non précisée");
+
+    controlType = controlMatch[1].toLowerCase();
+    controlDistance = parseInt(controlMatch[2], 10);
+    if (controlDistance < 10 || controlDistance > 15) return controleRateAvecRebond(match, carte, receveur, chat, ovl, `Distance du contrôle invalide (${controlDistance}cm)`);
+
+    // Vérification cohérence hauteur / type / pied
+    if ((typePasse === "passe directe" && hauteur === "ras du sol" && !typePied.includes("pied")) ||
+        (typePasse === "passe trivela" && hauteur === "ras du sol" && !typePied.includes("pied")) ||
+        (typePasse === "passe circulaire" && hauteur === "mi-hauteur" && !["pied","poitrine"].includes(controlType)) ||
+        (typePasse === "longue passe" && hauteur === "centre" && controlDistance < 100) ||
+        (typePasse === "centre" && hauteur === "centre" && controlDistance < 100) ||
+        (typePasse === "talonnade" && hauteur !== "ras du sol")) {
+        return passeRatee(match, carte, chat, ovl, "Hauteur, type de passe ou partie du pied incohérent");
+    }
+
+    // Vérification interception
+    const interception = await verifierInterceptionHauteur(match, hauteur, receveur.positionActuelle, carte, chat, ovl, typePasse);
+    if (interception) return;
+
+    // Calcul réussite passe selon stat PAS
+    const pas = parseInt(carte.PAS || 50, 10);
+    const distanceMatch = seq.match(/(\d+)\s?m/i);
+    const distance = distanceMatch ? parseInt(distanceMatch[1], 10) : 5;
+    let proba = distance <= 5 ? pas / 100 : distance <= 10 ? pas / 120 : pas / 150;
+
+    const reussi = Math.random() <= proba;
+    if (!reussi) return passeRatee(match, carte, chat, ovl, "Précision insuffisante");
+
+    // Passe réussie
+    receveur.positionActuelle = receveur.positionActuelle;
+    match.ballZone = receveur.positionActuelle;
+
+    // Message avec type de passe + effet esthétique
+    let effet = "";
+    switch(typePasse) {
+        case "passe trivela": effet = "🎯 Courbe latérale, corps légèrement décalé"; break;
+        case "passe circulaire": effet = "🌀 Trajectoire circulaire"; break;
+        case "longue passe": effet = "⛅ Ballon lobé"; break;
+        case "centre": effet = "⚡ Centre aérien"; break;
+        case "talonnade": effet = "💨 Talonnade rapide"; break;
+        default: effet = "↗ Passe directe"; break;
+    }
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Passe réussie ! ${carte.nom} vers ${receveur.nom} (${typePasse}, ${hauteur}, direction: ${direction})\n${effet}\n${receveur.nom} contrôle la balle avec ${controlType} sur ${controlDistance}cm.`
+    });
+} 
+
+
 
 /* ===============================
 GESTION DES TIRS
