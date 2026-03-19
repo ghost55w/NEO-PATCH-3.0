@@ -566,8 +566,103 @@ GESTION DES PASSES
 /* ===============================
 GESTION DES TIRS
 =================================*/
-// Ici tu ajouteras la fonction gestionTirs(seq, carte, match, chat, ovl)
+async function gestionChancesTir(ms_org, ovl, joueurNomSaisi, zone, distance, gardienMatch) {
+    // Normalisation du nom du joueur
+    const nomNormalise = joueurNomSaisi.trim().toLowerCase().replace(/\s+/g, ' ');
 
+    // Recherche du joueur dans la DB
+    const joueurData = Object.values(cardsBlueLock).find(j => {
+        const nameNormalized = j.nom.trim().toLowerCase().replace(/\s+/g, ' ');
+        return nameNormalized === nomNormalise;
+    });
+
+    if (!joueurData) {
+        return ovl.sendMessage(ms_org, {
+            text: `⚠️ Joueur non trouvé dans la database : *${joueurNomSaisi}*`
+        });
+    }
+
+    const tirPuissance = parseInt(joueurData.tir || 50, 10);
+    const sho = parseInt(joueurData.sho || 50, 10);
+    const gardien = parseInt(gardienMatch || 50, 10);
+    distance = parseFloat(distance || 3);
+
+    let probaGoal = 0;
+    const ecart = sho - gardien;
+
+    // Calcul probabilité selon distance et écart
+    if (distance <= 5) {
+        probaGoal = ecart > 10 ? 1.0 : ecart > 0 ? 0.85 : ecart === 0 ? 0.5 : 0;
+    } else if (distance <= 10) {
+        probaGoal = ecart > 10 ? 0.9 : ecart > 0 ? 0.65 : ecart === 0 ? 0.3 : ecart >= -5 ? 0.2 : 0;
+    } else {
+        probaGoal = ecart > 10 ? 0.85 : ecart > 0 ? 0.6 : ecart === 0 ? 0.2 : ecart >= -5 ? 0.1 : 0;
+    }
+
+    const tirAleatoire = Math.random();
+    const resultat = tirAleatoire <= probaGoal ? "but" : "arrêt";
+
+    if (resultat === "but") {
+        const commentaires = {
+            "lucarne droite": [
+                `*🎙️: COMME UN MISSILE GUIDÉ ! ${joueurData.nom} envoie le ballon dans la lucarne droite - splendide !*`,
+                `*🎙️: UNE FRAPPE POUR L'HISTOIRE ! ${joueurData.nom} explose la lucarne droite !*`
+            ],
+            "lucarne gauche": [
+                `*🎙️: MAGNIFIQUE ! ${joueurData.nom} pulvérise la lucarne gauche !*`,
+                `*🎙️: UNE PRÉCISION D'ORFÈVRE ! ${joueurData.nom} touche la lucarne gauche, gardien impuissant !*`
+            ],
+            "lucarne milieu": [
+                `*🎙️: JUSTE SOUS LA BARRE ! ${joueurData.nom} centre magistralement !*`,
+                `*🎙️: UNE FUSÉE POUR LES LIVRES ! ${joueurData.nom} en pleine lucarne centrale !*`
+            ],
+            "mi-hauteur droite": [`*🎙️: UNE FRAPPE SÈCHE ET PRÉCISE ! ${joueurData.nom} transperce les filets droits !*`],
+            "mi-hauteur gauche": [`*🎙️: PUISSANCE ET PRÉCISION ! ${joueurData.nom} traverse la défense à gauche !*`],
+            "mi-hauteur centre": [`*🎙️: UNE FUSÉE AU CENTRE ! ${joueurData.nom} frappe en plein milieu à mi-hauteur !*`],
+            "ras du sol droite": [`*🎙️: ENTRE LES JAMBES ! ${joueurData.nom} glisse le ballon à ras du sol côté droit !*`],
+            "ras du sol gauche": [`*🎙️: UNE RACLÉE TECHNIQUE ! ${joueurData.nom} rase le sol à gauche !*`],
+            "ras du sol milieu": [`*🎙️: UNE FINALE DE CLASSE ! ${joueurData.nom} envoie le ballon au sol, en plein centre !*`]
+        };
+
+        if (!commentaires[zone]) {
+            return ovl.sendMessage(ms_org, {
+                text: `Zone inconnue : *${zone}*\nZones valides :\n- ${Object.keys(commentaires).join("\n- ")}`
+            });
+        }
+
+        const commentaire = commentaires[zone][Math.floor(Math.random() * commentaires[zone].length)];
+
+        // GIF GOAL
+        const videoGoal = [
+            "https://files.catbox.moe/chcn2d.mp4",
+            "https://files.catbox.moe/t04dmz.mp4",
+            "https://files.catbox.moe/8t1eya.mp4"
+        ][Math.floor(Math.random() * 3)];
+
+        await ovl.sendMessage(ms_org, {
+            video: { url: videoGoal },
+            caption: `*🥅:✅GOOAAAAAL!!!⚽⚽⚽ ▱▱▱▱*\n${commentaire}`,
+            gifPlayback: true
+        });
+
+        // GIF spécifique du joueur si défini
+        if (joueurData.goal) {
+            await ovl.sendMessage(ms_org, {
+                video: { url: joueurData.goal },
+                caption: "",
+                gifPlayback: true
+            });
+        }
+
+    } else {
+        // Tir raté
+        await ovl.sendMessage(ms_org, {
+            video: { url: 'https://files.catbox.moe/88lylr.mp4' },
+            caption: "*🥅:❌MISSED GOAL!!! ▱▱▱▱*",
+            gifPlayback: true
+        });
+    }
+}
 /* ===============================
 GESTION DES DRIBBLES / ACCÉLÉRATIONS
 =================================*/
