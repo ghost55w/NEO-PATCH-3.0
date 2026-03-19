@@ -416,6 +416,14 @@ await ovl.sendMessage(chat, {
 }
 
 /* ===============================
+LISTE DES ACTIONS DU JEU
+=================================*/
+const ACTIONS_JEU = [
+    "tir", "frappe", "passe", "dribble", "conduit", "accélère", "contrôle"
+    // ajouter/modifier selon besoins
+];
+
+/* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
 async function lirePaveAction(ms, ovl) {
@@ -434,23 +442,24 @@ async function lirePaveAction(ms, ovl) {
         ms.message.imageMessage?.caption ||
         "";
 
-    if (!text.includes("⚽:")) return;
+    // Vérifie que c'est un pavé Blue Lock valide
+    if (!text.includes("💬: GO!") || !text.includes("⚽:") || !text.includes("🔷BLUELOCK⚽🥅")) return;
 
     // Vérifie si c’est le joueur qui doit jouer
     if (sender !== match.joueurTour) return;
 
-    // Extraire l’action complète
-    const action = extraireAction(text);
-    if (!action) return;
+    // Extraire le texte après ⚽:
+    const actionTexte = text.split("\n").find(l => l.startsWith("⚽:"));
+    if (!actionTexte) return;
+    const actionClean = actionTexte.replace("⚽:", "").trim();
 
     // Extraire le nom du joueur utilisé dans le pavé
-    const nomJoueur = extraireNomJoueur(action);
-    if (!nomJoueur) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Impossible d'identifier le joueur utilisé."
-        });
+    const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\s]+)/i);
+    if (!nomJoueurMatch) {
+        await ovl.sendMessage(chat, { text: "❌ Impossible d'identifier le joueur utilisé." });
         return;
     }
+    const nomJoueur = nomJoueurMatch[2].trim();
 
     // Chercher la carte dans la BDD
     const carte = trouverCarteJoueur(nomJoueur);
@@ -462,10 +471,19 @@ async function lirePaveAction(ms, ovl) {
     }
 
     // 🔹 Séparer le pavé en séquences/action individuelles
-    const sequences = separerSequences(action);
+    const sequences = actionClean.split("/").map(s => s.trim());
 
-    // 🔹 Dispatcher chaque action vers son compartiment
     for (const seq of sequences) {
+        // 🔹 Vérifie si l'action est dans la liste des actions du jeu
+        const actionTrouvee = ACTIONS_JEU.find(a => new RegExp(`\\b${a}\\b`, "i").test(seq));
+        if (!actionTrouvee) {
+            await ovl.sendMessage(chat, {
+                text: `❌ Action non reconnue dans le pavé : "${seq}". Pavé refusé.`
+            });
+            return; // Stop le pavé si une action n'est pas valide
+        }
+
+        // 🔹 Dispatcher chaque action vers son compartiment
         let type = null;
         if (/tir|frappe/i.test(seq)) type = "tir";
         else if (/passe/i.test(seq)) type = "passe";
@@ -497,7 +515,7 @@ async function lirePaveAction(ms, ovl) {
 
     // 🔹 Confirmation de validation et mention du joueur suivant
     await ovl.sendMessage(chat, {
-        text: `✅ Action validée ! @${nextJoueur} NEXT⚽`,
+        text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
     });
 }
@@ -506,44 +524,65 @@ async function lirePaveAction(ms, ovl) {
 GESTION DES DÉPLACEMENTS
 =================================*/
 async function gestionDeplacements(seq, carte, match, chat, ovl) {
-    // TODO: Vérifier distance max, zones, et mise à jour de la position du joueur
-    // Exemple:
-    const zones = extraireZones(seq);
-    if (!zones) return ovl.sendMessage(chat, { text: "❌ Impossible de déterminer les zones." });
+    // Extraire zones départ et arrivée
+    const departMatch = seq.match(/\((A1|A2|B1|B2|C1|C2)\)/i);
+    const arriveeMatch = seq.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)/i);
 
-    const dist = distance(zones.depart, zones.arrivee);
+    if (!departMatch || !arriveeMatch) {
+        return ovl.sendMessage(chat, { text: "❌ Impossible de déterminer les zones." });
+    }
+
+    const depart = departMatch[1].toUpperCase();
+    const arrivee = (arriveeMatch[1] || arriveeMatch[2]).toUpperCase();
+
+    // Vérification distance max 10m
+    const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
+    const dist = Math.abs(DISTANCES[depart] - DISTANCES[arrivee]);
     if (dist > 10) {
         return ovl.sendMessage(chat, { text: "❌ Déplacement trop long, action annulée." });
     }
 
-    // Mettre à jour la position du joueur
-    carte.positionActuelle = zones.arrivee;
-}
+    // Vérification espacement minimal
+    match.positions = match.positions || {};
+    for (const pid in match.positions) {
+        if (pid === carte.nom) continue;
+        if (match.positions[pid] === arrivee) {
+            return ovl.sendMessage(chat, { text: `❌ ${carte.nom} trop proche d'un autre joueur dans la zone cible.` });
+        }
+    }
 
-/* ===============================
-GESTION DES TIRS
-=================================*/
-async function gestionTirs(seq, carte, match, chat, ovl) {
-    // TODO: Ajouter logique de réussite du tir selon stats SHO, distance, zone, etc.
+    // Mise à jour position du joueur
+    carte.positionActuelle = arrivee;
+    match.positions[carte.nom] = arrivee;
+
+    await ovl.sendMessage(chat, { text: `✅ ${carte.nom} se déplace de ${depart} vers ${arrivee} avec succès !` });
 }
 
 /* ===============================
 GESTION DES PASSES
 =================================*/
-async function gestionPasses(seq, carte, match, chat, ovl) {
-    // TODO: Ajouter logique de réussite de passe selon stats PAS, zone, etc.
-}
+// Ici tu ajouteras la fonction gestionPasses(seq, carte, match, chat, ovl)
+
+/* ===============================
+GESTION DES TIRS
+=================================*/
+// Ici tu ajouteras la fonction gestionTirs(seq, carte, match, chat, ovl)
 
 /* ===============================
 GESTION DES DRIBBLES / ACCÉLÉRATIONS
 =================================*/
-async function gestionDribbles(seq, carte, match, chat, ovl) {
-    // TODO: Ajouter logique de réussite selon DRI, ACC, PHY, combo, etc.
-} 
-    
+// Ici tu ajouteras la fonction gestionDribbles(seq, carte, match, chat, ovl)    
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/
+
+
+
+
+
+
+
+
 ovlcmd({
     nom_cmd: "stopmatch⚽",
     classe: "BLUELOCK⚽",
