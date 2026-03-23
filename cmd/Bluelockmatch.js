@@ -263,6 +263,91 @@ async function verifierFiche(message, chat, ovl) {
 }
 
 /* ===============================
+LECTURE MESSAGES
+=================================*/
+async function messageMatch(ms, ovl) {
+
+    if (!ms.message) return;
+
+    const chat = ms.key.remoteJid;
+
+    // récupérer texte ou caption
+    const text =
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        ms.message.imageMessage?.caption ||
+        "";
+
+    if (!text) return;
+
+    // vérifier fiche match
+    await verifierFiche(text, chat, ovl);
+
+    const match = matchsActifs.get(chat);
+    if (!match || match.etat !== "attente_lineup") return;
+
+    // lire le nom de squad
+    const squadMatch = text.match(/SQUAD.*?:\s*([^\n]+)/i);
+    if (!squadMatch) return;
+
+    const squadName = squadMatch[1].trim();
+
+    const team1 = normalizeTeamName(match.team1);
+    const team2 = normalizeTeamName(match.team2);
+    const squad = normalizeTeamName(squadName);
+
+    // TEAM 1
+    if (squad === team1 && !match.equipe1) {
+
+        match.equipe1 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+        });
+    }
+
+    // TEAM 2
+    else if (squad === team2 && !match.equipe2) {
+
+        match.equipe2 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+        });
+    }
+
+    // si les deux équipes sont prêtes
+    if (match.equipe1 && match.equipe2 && !match.starting) {
+
+        match.starting = true; // 🔒 verrou anti double lancement
+
+        if (match.timerMatch) clearTimeout(match.timerMatch);
+        match.etat = "debut_match";
+
+        const readyText = `⏳ Les deux formations sont prêtes.
+Le match commence dans *1 minute* 🥅⚽...`;
+
+        const imagesReady = [
+            "https://files.catbox.moe/dlj5z6.jpg",
+            "https://files.catbox.moe/fdadd0.jpeg",
+            "https://files.catbox.moe/4104s3.jpg"
+        ];
+
+        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+
+        await ovl.sendMessage(chat, {
+            image: { url: imageRandom },
+            caption: readyText
+        });
+
+        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+    }
+
+    // 👇 LECTURE DES PAVÉS GAMEPLAY
+    await lirePaveAction(ms, ovl);
+}
+
+/* ===============================
 LANCEMENT MATCH
 =================================*/
 async function lancerMatch(chat, ovl) {
