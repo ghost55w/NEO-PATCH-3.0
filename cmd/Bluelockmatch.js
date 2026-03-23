@@ -2,10 +2,81 @@ const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
+
 const matchsActifs = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 const ACTIONS = ["contrôle", "conduit", "accélère", "tir", "frappe", "passe", "dribble"];
+
+/* ===============================
+MOTS CLÉS PASSES (FORMULE 🧩)
+=================================*/
+const MOTS_CLES_PASSES = {
+
+    types: [
+        "passe directe",
+        "passe enroulée",
+        "passe trivela",
+        "passe lobbée",
+        "centre",
+        "passe longue"
+    ],
+
+    pied: [
+        "pied gauche",
+        "pied droit"
+    ],
+
+    zonesPied: [
+        "pointe de pied",
+        "intérieur du pied",
+        "extérieur du pied",
+        "talon",
+        "tête"
+    ],
+
+    directions: [
+        "gauche",
+        "droite",
+        "devant",
+        "derrière",
+        "diagonal sur la gauche",
+        "diagonal sur la droite"
+    ],
+
+    hauteurs: [
+        "ras du sol",
+        "50cmh",
+        "1mh",
+        "2mh",
+        "2.5mh"
+    ],
+
+    distanceMax: 30,
+
+    zonesCible: [
+        "intérieur pied gauche",
+        "intérieur du pied droit",
+        "extérieur du pied gauche",
+        "extérieur du pied droit",
+        "mi-hauteur 50cmh",
+        "tête",
+        "torse"
+    ]
+};
+
+/* ===============================
+MODELS DES PASSES (COMPARAISON)
+=================================*/
+const TYPES_PASSES = {
+    "passe directe": "passe directe pied droit intérieur du pied ras du sol devant 10m intérieur pied gauche",
+    "passe enroulée": "passe enroulée pied droit extérieur du pied 1mh diagonal sur la droite 20m torse",
+    "passe trivela": "passe trivela pied droit extérieur du pied ras du sol gauche 15m intérieur pied droit",
+    "passe lobbée": "passe lobbée pied droit intérieur du pied 2mh devant 25m tête",
+    "centre": "centre pied droit intérieur du pied 2mh diagonal sur la gauche 20m tête",
+    "passe longue": "passe longue pied droit intérieur du pied 2mh devant 30m torse"
+};
+
 
 /* ===============================
 OUTILS JEU
@@ -559,76 +630,127 @@ async function gestionDeplacements(seq, carte, match, chat, ovl) {
 }
 
 /* ===============================
-GESTION DES PASSES
+GESTION DES PASSES 
 =================================*/
-async function gestionPassesEtControle(seq, carte, match, chat, ovl, isTir = false) {
-    // Extraction type de passe
-    const passeMatch = seq.match(/\b(passe directe|passe trivela|passe circulaire|longue passe|talonnade|centre)\b.*?(ras du sol|mi-hauteur|centre).*?(intérieur du pied droit|intérieur du pied gauche|extérieur du pied droit|extérieur du pied gauche|poitrine).*?direction (gauche|droite|devant|derrière|diagonale)?.*?vers (\w+)/i);
-    if (!passeMatch) return ovl.sendMessage(chat, { text: "❌ Impossible d'identifier la passe correctement." });
+async function gestionPasses(seq, carte, match, chat, ovl) {
 
-    const typePasse = passeMatch[1].toLowerCase();   // passe directe, trivela, circulaire, longue, talonnade, centre
-    const hauteur = passeMatch[2].toLowerCase();     // ras du sol, mi-hauteur, centre
-    const typePied = passeMatch[3].toLowerCase();
-    const direction = passeMatch[4] ? passeMatch[4].toLowerCase() : null;
-    const receveurNom = passeMatch[5];
+    const texte = seq.toLowerCase();
 
-    if (!direction) return passeRatee(match, carte, chat, ovl, "Direction manquante");
+    /* ===============================
+    1️⃣ DETECTION TYPE DE PASSE
+    ==============================*/
+    const typePasse = MOTS_CLES_PASSES.types.find(t => texte.includes(t));
 
-    // Joueur receveur
-    const receveur = trouverCarteJoueur(receveurNom);
-    if (!receveur) return passeRatee(match, carte, chat, ovl, `Joueur receveur introuvable : ${receveurNom}`);
-
-    // Extraction contrôle du receveur
-    const controlMatch = seq.match(/réçoit.*contrôle.*(intérieur du pied droit|intérieur du pied gauche|extérieur du pied droit|extérieur du pied gauche|poitrine).*?(\d+)\s?cm/i);
-    let controlType, controlDistance;
-    if (!controlMatch) return controleRateAvecRebond(match, carte, receveur, chat, ovl, "Distance du contrôle non précisée");
-
-    controlType = controlMatch[1].toLowerCase();
-    controlDistance = parseInt(controlMatch[2], 10);
-    if (controlDistance < 10 || controlDistance > 15) return controleRateAvecRebond(match, carte, receveur, chat, ovl, `Distance du contrôle invalide (${controlDistance}cm)`);
-
-    // Vérification cohérence hauteur / type / pied
-    if ((typePasse === "passe directe" && hauteur === "ras du sol" && !typePied.includes("pied")) ||
-        (typePasse === "passe trivela" && hauteur === "ras du sol" && !typePied.includes("pied")) ||
-        (typePasse === "passe circulaire" && hauteur === "mi-hauteur" && !["pied","poitrine"].includes(controlType)) ||
-        (typePasse === "longue passe" && hauteur === "centre" && controlDistance < 100) ||
-        (typePasse === "centre" && hauteur === "centre" && controlDistance < 100) ||
-        (typePasse === "talonnade" && hauteur !== "ras du sol")) {
-        return passeRatee(match, carte, chat, ovl, "Hauteur, type de passe ou partie du pied incohérent");
+    if (!typePasse) {
+        return ovl.sendMessage(chat, {
+            text: "❌ Type de passe manquant ou invalide."
+        });
     }
 
-    // Vérification interception
-    const interception = await verifierInterceptionHauteur(match, hauteur, receveur.positionActuelle, carte, chat, ovl, typePasse);
+    const modele = TYPES_PASSES[typePasse];
+
+    /* ===============================
+    2️⃣ VALIDATION MOTS CLÉS 🧩
+    ==============================*/
+    let score = 0;
+    let total = 0;
+    let manquants = [];
+
+    function check(categorie) {
+        total++;
+        const ok = categorie.some(m => texte.includes(m));
+        if (ok) score++;
+        else manquants.push(categorie[0]);
+    }
+
+    check(MOTS_CLES_PASSES.types);
+    check(MOTS_CLES_PASSES.pied);
+    check(MOTS_CLES_PASSES.zonesPied);
+    check(MOTS_CLES_PASSES.directions);
+    check(MOTS_CLES_PASSES.hauteurs);
+    check(MOTS_CLES_PASSES.zonesCible);
+
+    // Distance
+    total++;
+    const distMatch = texte.match(/(\d+)\s?m/);
+    let distance = distMatch ? parseInt(distMatch[1]) : null;
+
+    if (distance && distance <= MOTS_CLES_PASSES.distanceMax) {
+        score++;
+    } else {
+        manquants.push("distance valide (max 30m)");
+    }
+
+    const pourcentage = Math.floor((score / total) * 100);
+
+    /* ===============================
+    3️⃣ ECHEC SI MOT CLÉ MANQUANT
+    ==============================*/
+    if (score < total) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Passe ratée !
+📊 Validation: ${pourcentage}%
+❗ Manquant: ${manquants.join(", ")}`
+        });
+    }
+
+    /* ===============================
+    4️⃣ EXTRACTION RECEVEUR
+    ==============================*/
+    const receveurMatch = texte.match(/vers\s+([^\s]+)/i);
+    if (!receveurMatch) {
+        return ovl.sendMessage(chat, {
+            text: "❌ Aucun receveur trouvé."
+        });
+    }
+
+    const receveurNom = receveurMatch[1];
+    const receveur = trouverCarteJoueur(receveurNom);
+
+    if (!receveur) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Joueur receveur introuvable : ${receveurNom}`
+        });
+    }
+
+    /* ===============================
+    5️⃣ INTERCEPTION (SEULE CAUSE D'ÉCHEC)
+    ==============================*/
+    const interception = await verifierInterceptionHauteur(
+        match,
+        texte,
+        receveur.positionActuelle,
+        carte,
+        chat,
+        ovl,
+        typePasse
+    );
+
     if (interception) return;
 
-    // Calcul réussite passe selon stat PAS
-    const pas = parseInt(carte.PAS || 50, 10);
-    const distanceMatch = seq.match(/(\d+)\s?m/i);
-    const distance = distanceMatch ? parseInt(distanceMatch[1], 10) : 5;
-    let proba = distance <= 5 ? pas / 100 : distance <= 10 ? pas / 120 : pas / 150;
-
-    const reussi = Math.random() <= proba;
-    if (!reussi) return passeRatee(match, carte, chat, ovl, "Précision insuffisante");
-
-    // Passe réussie
-    receveur.positionActuelle = receveur.positionActuelle;
+    /* ===============================
+    6️⃣ PASSE REUSSIE ✅
+    ==============================*/
     match.ballZone = receveur.positionActuelle;
 
-    // Message avec type de passe + effet esthétique
     let effet = "";
     switch(typePasse) {
-        case "passe trivela": effet = "🎯 Courbe latérale, corps légèrement décalé"; break;
-        case "passe circulaire": effet = "🌀 Trajectoire circulaire"; break;
-        case "longue passe": effet = "⛅ Ballon lobé"; break;
+        case "passe trivela": effet = "🎯 Effet extérieur"; break;
+        case "passe enroulée": effet = "🌀 Effet enroulé"; break;
+        case "passe lobbée": effet = "⛅ Ballon lobé"; break;
         case "centre": effet = "⚡ Centre aérien"; break;
-        case "talonnade": effet = "💨 Talonnade rapide"; break;
+        case "passe longue": effet = "🚀 Long ballon"; break;
         default: effet = "↗ Passe directe"; break;
     }
 
     await ovl.sendMessage(chat, {
-        text: `✅ Passe réussie ! ${carte.nom} vers ${receveur.nom} (${typePasse}, ${hauteur}, direction: ${direction})\n${effet}\n${receveur.nom} contrôle la balle avec ${controlType} sur ${controlDistance}cm.`
+        text: `✅ Passe réussie !
+📊 Validation: ${pourcentage}%
+🎯 ${carte.nom} → ${receveur.nom}
+🧩 Type: ${typePasse}
+${effet}`
     });
-} 
+}
 
 
 
