@@ -408,16 +408,27 @@ async function lirePaveAction(ms, ovl) {
         "";
 
     // Vérifie que c'est un pavé Blue Lock valide
-    if (!text.includes("💬: GO!") || !text.includes("⚽:") || !text.includes("🔷BLUELOCK⚽🥅")) return;
+    const isPave =
+    text.includes("⚽:") &&
+    text.includes("🔷BLUELOCK⚽🥅");
+
+if (!isPave) return;
 
     // Vérifie si c’est le joueur qui doit jouer
     if (sender !== match.joueurTour) return;
 
     // Extraire le texte après ⚽:
-    const actionTexte = text.split("\n").find(l => l.startsWith("⚽:"));
-    if (!actionTexte) return;
-    const actionClean = actionTexte.replace("⚽:", "").trim();
+    const actionLine = text.split("\n").find(l => l.trim().startsWith("⚽:"));
+if (!actionLine) return;
 
+const actionClean = actionLine.replace("⚽:", "").trim();
+
+if (!actionClean) {
+    await ovl.sendMessage(chat, {
+        text: "❌ Aucune action détectée après ⚽:"
+    });
+    return;
+}
     // Extraire le nom du joueur utilisé dans le pavé
     const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\s]+)/i);
     if (!nomJoueurMatch) {
