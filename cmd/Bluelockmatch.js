@@ -8,11 +8,15 @@ const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 const ACTIONS_MAP = {
     tir: ["tir", "frappe"],
     passe: ["passe"],
-    dribble: [
-        "dribble", "conduit", "conduite",
+
+    deplacement: [
+        "conduit", "conduite",
         "accélère", "acceleration",
-        "fonce", "vmax", "course"
-    ]
+        "fonce", "vmax", "course",
+        "se déplace", "avance", "court"
+    ],
+
+    dribble: ["dribble"] // uniquement vrai dribble
 };
 /* ===============================
 MOTS CLÉS PASSES (FORMULE 🧩)
@@ -521,7 +525,11 @@ GESTION DES DÉPLACEMENTS
 async function gestionDeplacements(seq, carte, match, chat, ovl) {
     // Extraire zones départ et arrivée
     const departMatch = seq.match(/\((A1|A2|B1|B2|C1|C2)\)/i);
-    const arriveeMatch = seq.match(/vers\s+(A1|A2|B1|B2|C1|C2)|en\s+(A1|A2|B1|B2|C1|C2)|zone\s+(A1|A2|B1|B2|C1|C2)/i);
+    const arriveeMatch = seq.match(
+ /vers\s+(A1|A2|B1|B2|C1|C2)|
+  en\s+(A1|A2|B1|B2|C1|C2)|
+  (?:la\s+)?zone\s+(A1|A2|B1|B2|C1|C2)/i
+);
     if (!departMatch || !arriveeMatch) {
         return ovl.sendMessage(chat, { text: "❌ Impossible de déterminer les zones." });
     }
