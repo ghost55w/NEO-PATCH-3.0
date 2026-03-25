@@ -198,5 +198,207 @@ const cards =
   Price: "450K",
   Moves: "",
   Patterns: ""
-}
-]
+}, 
+{
+  name: "Asuma",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/e9h4s7.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "AtomicSamurai",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/ihy73q.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Avdol",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/wgv1t5.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "BabyVegeta",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/ahxz48.jpg",
+  Price: "310NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Bakugo",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/gz77gh.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Bardock",
+  grade: "Bronze",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/pidi5o.jpg",
+  Price: "110NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Bang",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/yis1od.jpg",
+  Price: "450K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Beerus",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/y9cgpo.jpg",
+  Price: "530NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Bigmom",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/8qo8yi.jpg",
+  Price: "1M",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "BlackGoku",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/un7c3l.jpg",
+  Price: "460NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Blizzard",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/q3qznx.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Bojack",
+  grade: "Argent",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/ck3vpk.jpg",
+  Price: "120NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Boro",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/bokgxn.jpg",
+  Price: "700K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Boros",
+  grade: "Or",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/ofoqc5.jpg",
+  Price: "2M",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Borushiki",
+  grade: "Argent",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/ayb8n5.jpg",
+  Price: "800K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Boruto",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/8qzmzr.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Broly",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/au0pd6.jpg",
+  Price: "300NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Broly(Dbs)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/2qvkfx.jpg",
+  Price: "480NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Brooks",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/kf359g.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Buhan",
+  grade: "Or",
+  category: "SS",
+  images: "",
+  card: "https://files.catbox.moe/2tbn9y.jpg",
+  Price: "340NC",
+  Moves: "",
+  Patterns: ""
+}, 
+  
+
+  
