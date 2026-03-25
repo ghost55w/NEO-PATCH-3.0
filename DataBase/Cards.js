@@ -1400,5 +1400,185 @@ const cards =
   Price: "600K",
   Moves: "",
   Patterns: ""
-}
+}, 
+  {
+  name: "Hades",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/12yij9.jpg",
+  Price: "500NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hakari",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/2k6dyk.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Haku",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/iqzqpd.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hanami",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/s8ajn1.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hanzo",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/bfepmy.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Haruta",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/plkxqq.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hashirama(Alive)",
+  grade: "Argent",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/vom5wp.jpg",
+  Price: "1m300k",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hashirama(Edo)",
+  grade: "Argent",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/08zqem.jpg",
+  Price: "1m500k",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hawk",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/enl424.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hidan",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/896un5.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Higuruma",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/e3cqou.jpg",
+  Price: "150K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hinata",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/l7bwxg.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hiruzen",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/e15qos.jpg",
+  Price: "600K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hisoka",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/z2ku4m.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hit",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/3t3uzr.jpg",
+  Price: "430NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "HommeMasqué",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/sccdyw.jpg",
+  Price: "600K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hyoga",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/eqbudy.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Hypnos",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/9k7vjk.jpg",
+  Price: "400NC",
+  Moves: "",
+  Patterns: ""
+}, 
   
