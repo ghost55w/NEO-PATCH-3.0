@@ -399,6 +399,806 @@ const cards =
   Moves: "",
   Patterns: ""
 }, 
-  
-
+  ,
+{
+  name: "Burter",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/jkx88l.jpg",
+  Price: "90NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Buu(super)",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/5lfqpz.jpg",
+  Price: "310NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Buu(Fat)",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/xnl4el.jpg",
+  Price: "300NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Buu(Kid)",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/bb2e50.jpg",
+  Price: "360NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Buutenks",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/1gcugi.jpg",
+  Price: "320NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Cabba",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/rkdbjj.jpg",
+  Price: "130NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Caufila",
+  grade: "Argent",
+  category: "SS",
+  images: "",
+  card: "https://files.catbox.moe/36yixr.jpg",
+  Price: "200NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Cell(perfect)",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/3vv40w.jpg",
+  Price: "280NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Cell(super)",
+  grade: "Argent",
+  category: "SS",
+  images: "",
+  card: "https://files.catbox.moe/6mi2yw.jpg",
+  Price: "210NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Cell(base)",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/xsh1ot.jpg",
+  Price: "100NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Chiyo",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/5m69a3.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Choji",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/caghzt.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Choso",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/ww982g.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Chrollo",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/jpuv9q.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Code",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/bhq7oh.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Code(TBV)",
+  grade: "Or",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/3vhh0l.jpg",
+  Price: "1M200K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Crocodile",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/s8yttz.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Dabi",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/mjb4lj.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Dabura",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/edan2e.jpg",
+  Price: "250NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Daemon",
+  grade: "Or",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/s0sucf.jpg",
+  Price: "1M800K",
+  Moves: "",
+  Patterns: ""
+}, 
+  ,
+{
+  name: "Dagon",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/cp5op5.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Daki",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/14j5af.jpg",
+  Price: "150K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Dante",
+  grade: "Or",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/n4dlb1.jpg",
+  Price: "1M",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Danzo",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/jve2vt.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Darui",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/zs80ob.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Deathmask",
+  grade: "Or",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/m6zwzi.jpg",
+  Price: "1M500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "DeepSeaKing",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/yqiviz.jpg",
+  Price: "700K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Deepa",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/epjakr.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Deidara",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/m0wm1s.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "DekuRogueHero",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/z5hzqb.jpg",
+  Price: "700K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Deku",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/oh99hl.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Delta",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/h68hzb.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Denki",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/xerqh0.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Diavolo",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/yw5xb8.jpg",
+  Price: "900K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Dio",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/32pw7w.jpg",
+  Price: "900K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Doflamingo",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/v126vu.jpg",
+  Price: "550K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Doma",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/4xdikn.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Dr.Gero",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/glg41l.jpg",
+  Price: "600K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Dyspo",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/tr27u0.jpg",
+  Price: "400NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Edward",
+  grade: "Argent",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/q5bapo.jpg",
+  Price: "1M200K",
+  Moves: "",
+  Patterns: ""
+}, 
+{
+  name: "Eida",
+  grade: "Or",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/5tx64p.jpg",
+  Price: "1M800K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Eijiro",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/ljz7bk.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Endeavor",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/qcunun.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Enmu",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/x4hsa6.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Erza",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/otsr2e.jpg",
+  Price: "450K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "FlashyFlash",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/git5xh.jpg",
+  Price: "700K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Franky",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/t46wfj.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Frieza(super)",
+  grade: "Argent",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/l97ml8.jpg",
+  Price: "160NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Frieza(Base)",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/i84paz.jpg",
+  Price: "150NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Frieza(Golden)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/dptorv.jpg",
+  Price: "420NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Fuegoleon",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/2ocv94.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Fujitora",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/fslosy.jpg",
+  Price: "700K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Fumikage",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/mucucs.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gaara(4GG)",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/v3nvkj.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gaara",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/cto2vg.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gajeel",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/8j1xus.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Garou",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/hbdp8l.jpg",
+  Price: "450K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "GarouMonster",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/joebj6.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Garou(cosmic)",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/6qyvrq.jpg",
+  Price: "200NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Garp",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/20h2tl.jpg",
+  Price: "800K",
+  Moves: "",
+  Patterns: ""
+} ,
+{
+  name: "Gauche",
+  grade: "Bronze",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/7gv4r9.jpg",
+  Price: "100K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gengetsu",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/77h87l.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Genos(forme 2)",
+  grade: "Argent",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/0p7zf7.jpg",
+  Price: "500K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Genos",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/yvk9j3.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Geto",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/ytx8vy.jpg",
+  Price: "400K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Geto(student)",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/0o4is7.jpg",
+  Price: "350K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gildarts",
+  grade: "Argent",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/41g7x4.jpg",
+  Price: "900K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Ginyu",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/1nhx0y.jpg",
+  Price: "100NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Giorno",
+  grade: "Or",
+  category: "S-",
+  images: "",
+  card: "https://files.catbox.moe/5wvjc1.jpg",
+  Price: "1M200K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Giyu",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/7ehtyz.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gogeta(Dbz)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/ddf764.jpg",
+  Price: "450NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gogeta(Dbs)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/ru0r9d.jpg",
+  Price: "550NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gogeta(SSJ4)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/agk0gp.jpg",
+  Price: "460NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(Beast)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/aj97ba.jpg",
+  Price: "550NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(Futur)",
+  grade: "Argent",
+  category: "SS",
+  images: "",
+  card: "https://files.catbox.moe/ghl7so.jpg",
+  Price: "190NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(SSj2)",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/ym9696.jpg",
+  Price: "290NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(SSJ)",
+  grade: "Argent",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/d39zp8.jpg",
+  Price: "150NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(Buu arc)",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/r3za80.jpg",
+  Price: "260NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(Kid)",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/3b7ypn.jpg",
+  Price: "90NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gohan(ultime)",
+  grade: "Or",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/arcs79.jpg",
+  Price: "350NC",
+  Moves: "",
+  Patterns: ""
+  } 
   
