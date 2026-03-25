@@ -296,7 +296,12 @@ async function messageMatch(ms, ovl) {
         "";
 
     if (!text) return;
-
+const safeText = (text || "")
+    .replace(/\u200B/g, "")
+    .replace(/\u200E/g, "")
+    .replace(/\u200F/g, "")
+    .replace(/\r/g, "")
+    .trim();
     // vérifier fiche match
     await verifierFiche(text, chat, ovl);
 
@@ -428,9 +433,8 @@ if (match.etat !== "en_cours") {
 
     // Vérifie que c'est un pavé Blue Lock valide
     const isPave =
-        text.includes("⚽:") &&
-        text.includes("🔷BLUELOCK⚽🥅");
-
+    safeText.includes("⚽:") &&
+    safeText.includes("🔷BLUELOCK⚽🥅");
     if (!isPave) return;
 
     // Vérifie si c’est le bon joueur
