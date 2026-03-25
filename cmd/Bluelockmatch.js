@@ -419,17 +419,21 @@ async function lirePaveAction(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-if (match.etat !== "en_cours") {
-    console.log("⛔ MATCH PAS EN COURS:", match.etat);
-    return;
-}
+    if (match.etat !== "en_cours") return;
 
-    // récupérer texte ou caption
-    const text =
+    // ✅ ICI TU METS LE RAW + SAFE TEXT
+    const rawText =
         ms.message.conversation ||
         ms.message.extendedTextMessage?.text ||
         ms.message.imageMessage?.caption ||
         "";
+
+    const safeText = (rawText || "")
+        .replace(/\u200B/g, "")
+        .replace(/\u200E/g, "")
+        .replace(/\u200F/g, "")
+        .replace(/\r/g, "")
+        .trim();
 
     // Vérifie que c'est un pavé Blue Lock valide
     const isPave =
@@ -449,11 +453,15 @@ if (sender !== joueurTour) {
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
     // Extraire ligne action
-    const actionLine = text.split("\n").find(l => l.trim().startsWith("⚽:"));
+    const actionLine = safeText
+    .split("\n")
+    .find(l => l.includes("⚽:"));
     if (!actionLine) return;
 
-    const actionClean = actionLine.replace("⚽:", "").trim();
-
+    const actionClean = actionLine
+    .replace(/⚽\s*:/g, "")
+    .replace(/⚽/g, "")
+    .trim();
 // 🔥 cas 1 : vide total
 if (!actionClean || actionClean.length < 2) {
     await ovl.sendMessage(chat, {
