@@ -482,13 +482,12 @@ async function lirePaveAction(ms, ovl) {
         let type = null;
         const seqClean = seq.toLowerCase();
 
-        // 🔥 DETECTION ACTION VIA ACTIONS_MAP
-        for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
-            if (mots.some(m => seqClean.includes(m))) {
-                type = key;
-                break;
-            }
-        }
+for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
+    if (mots.some(m => seqClean.includes(m))) {
+        type = key;
+        break;
+    }
+}
 
         // ❌ aucune action reconnue
         if (!type) {
