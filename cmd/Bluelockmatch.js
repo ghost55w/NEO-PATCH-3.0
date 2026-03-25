@@ -310,17 +310,22 @@ async function messageMatch(ms, ovl) {
     // TEAM 1
     if (squad === team1 && !match.equipe1) {
 
-        match.equipe1 = true;
+    const parsed = parseSquadBlueLock(text);
+    match.lineup1 = parsed ? parsed.joueurs : [];
 
+    match.equipe1 = true;
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team1Nom}* !`
         });
     }
 
     // TEAM 2
-    else if (squad === team2 && !match.equipe2) {
+    if (squad === team2 && !match.equipe2) {
 
-        match.equipe2 = true;
+    const parsed = parseSquadBlueLock(text);
+    match.lineup2 = parsed ? parsed.joueurs : [];
+
+    match.equipe2 = true;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team2Nom}* !`
@@ -427,6 +432,8 @@ if (!isPave) return;
 
     // Vérifie si c’est le joueur qui doit jouer
     if (sender !== match.joueurTour) return;
+    const isTeam1 = sender === match.id1;
+const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
     // Extraire le texte après ⚽:
     const actionLine = text.split("\n").find(l => l.trim().startsWith("⚽:"));
@@ -447,6 +454,17 @@ if (!actionClean) {
         return;
     }
     const nomJoueur = nomJoueurMatch[2].trim();
+    // 🔒 Vérifie si le joueur est dans le lineup
+const joueurDansEquipe = lineup.find(j =>
+    j.nom.toLowerCase() === nomJoueur.toLowerCase()
+);
+
+if (!joueurDansEquipe) {
+    await ovl.sendMessage(chat, {
+        text: `❌ Joueur invalide ! *${nomJoueur}* n'est pas dans ton lineup.`
+    });
+    return;
+}
 
     // Chercher la carte dans la BDD
     const carte = trouverCarteJoueur(nomJoueur);
