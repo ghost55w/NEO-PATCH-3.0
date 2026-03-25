@@ -450,12 +450,13 @@ if (sender !== joueurTour) {
 
     const actionClean = actionLine.replace("⚽:", "").trim();
 
-    if (!actionClean) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Aucune action détectée après ⚽:"
-        });
-        return;
-    }
+// 🔥 cas 1 : vide total
+if (!actionClean || actionClean.length < 2) {
+    await ovl.sendMessage(chat, {
+        text: "❌ Pavé vide ou aucune action détectée après ⚽:"
+    });
+    return;
+}
 
     // 🔥 NOM JOUEUR (support noms longs)
     const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\n\/]+)/i);
