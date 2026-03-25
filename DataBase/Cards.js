@@ -1200,5 +1200,205 @@ const cards =
   Price: "350NC",
   Moves: "",
   Patterns: ""
-  } 
+  } ,
+{
+  name: "Gohan(Dbs)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/gfnu6y.jpg",
+  Price: "430NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gojo",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/3hmg8k.jpg",
+  Price: "800K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gojo(shinjuku)",
+  grade: "Argent",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/jg1bvq.jpg",
+  Price: "100NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gojo(Student)",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/qnha9o.jpg",
+  Price: "50NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(SSJnamek)",
+  grade: "Argent",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/l4lt5w.jpg",
+  Price: "180NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(androids)",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/fpkm2x.jpg",
+  Price: "270NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(SSJ2)",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/0ib3ua.jpg",
+  Price: "290NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(name)",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/vp7t7k.jpg",
+  Price: "150NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(debut)",
+  grade: "Bronze",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/bxvdah.jpg",
+  Price: "100NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(saiyans)",
+  grade: "Bronze",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/m9tieb.jpg",
+  Price: "130NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(SSJBlue)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/00ehxc.jpg",
+  Price: "450NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(SSJ4)",
+  grade: "Or",
+  category: "SS",
+  images: "",
+  card: "https://files.catbox.moe/cz69qw.jpg",
+  Price: "350NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(UI)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/kt9847.jpg",
+  Price: "500NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(UIM)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/u7bja5.jpg",
+  Price: "550NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goku(SSJGod)",
+  grade: "Or",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/54ri6n.jpg",
+  Price: "420NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gon",
+  grade: "Bronze",
+  category: "S+",
+  images: "",
+  card: "https://files.catbox.moe/ry2s2p.jpg",
+  Price: "450K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Goten",
+  grade: "Argent",
+  category: "SS-",
+  images: "",
+  card: "https://files.catbox.moe/lstklv.jpg",
+  Price: "150NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gotunks",
+  grade: "Argent",
+  category: "SS+",
+  images: "",
+  card: "https://files.catbox.moe/cmwm6d.jpg",
+  Price: "280NC",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Gray",
+  grade: "Bronze",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/p0m71h.jpg",
+  Price: "300K",
+  Moves: "",
+  Patterns: ""
+},
+{
+  name: "Guy(4GG)",
+  grade: "Argent",
+  category: "S",
+  images: "",
+  card: "https://files.catbox.moe/ydickg.jpg",
+  Price: "600K",
+  Moves: "",
+  Patterns: ""
+}
   
