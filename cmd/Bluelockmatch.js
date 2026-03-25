@@ -537,16 +537,18 @@ async function gestionDeplacements(seq, carte, match, chat, ovl) {
     // Extraire zones départ et arrivée
     const departMatch = seq.match(/\((A1|A2|B1|B2|C1|C2)\)/i);
     const arriveeMatch = seq.match(
- /vers\s+(A1|A2|B1|B2|C1|C2)|
-  en\s+(A1|A2|B1|B2|C1|C2)|
-  (?:la\s+)?zone\s+(A1|A2|B1|B2|C1|C2)/i
+    /(vers|en)\s+(A1|A2|B1|B2|C1|C2)|(?:la\s+)?zone\s+(A1|A2|B1|B2|C1|C2)/i
 );
     if (!departMatch || !arriveeMatch) {
         return ovl.sendMessage(chat, { text: "❌ Impossible de déterminer les zones." });
     }
 
     const depart = departMatch[1].toUpperCase();
-    const arrivee = (arriveeMatch[1] || arriveeMatch[2]).toUpperCase();
+    const arrivee = (
+    arriveeMatch?.[2] ||
+    arriveeMatch?.[3] ||
+    arriveeMatch?.[4]
+)?.toUpperCase();
 
     // Vérification distance max 10m
     const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
