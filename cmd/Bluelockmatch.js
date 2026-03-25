@@ -139,6 +139,12 @@ function parseLineup(texte) {
     }
     return joueurs;
 }
+function cleanJid(jid) {
+    return (jid || "")
+        .split(":")[0]
+        .split("@")[0]
+        .trim();
+}
 
 /* ===============================
 TROUVER JOUEUR DB
@@ -403,10 +409,15 @@ async function lirePaveAction(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-    const sender = ms.key.participant || ms.key.remoteJid;
+    const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
 
     const match = matchsActifs.get(chat);
-    if (!match || match.etat !== "en_cours") return;
+    if (!match) return;
+
+if (match.etat !== "en_cours") {
+    console.log("⛔ MATCH PAS EN COURS:", match.etat);
+    return;
+}
 
     // récupérer texte ou caption
     const text =
@@ -423,7 +434,12 @@ async function lirePaveAction(ms, ovl) {
     if (!isPave) return;
 
     // Vérifie si c’est le bon joueur
-    if (sender !== match.joueurTour) return;
+    const joueurTour = cleanJid(match.joueurTour);
+
+if (sender !== joueurTour) {
+    console.log("⛔ PAS TON TOUR", { sender, joueurTour });
+    return;
+}
 
     const isTeam1 = sender === match.id1;
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
