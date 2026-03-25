@@ -397,14 +397,6 @@ async function lancerMatch(chat, ovl) {
 }
 
 /* ===============================
-LISTE DES ACTIONS DU JEU
-=================================*/
-const ACTIONS_JEU = [
-    "tir", "frappe", "passe", "dribble", "conduit", "accélère", "contrôle"
-    // ajouter/modifier selon besoins
-];
-
-/* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
 async function lirePaveAction(ms, ovl) {
@@ -425,48 +417,55 @@ async function lirePaveAction(ms, ovl) {
 
     // Vérifie que c'est un pavé Blue Lock valide
     const isPave =
-    text.includes("⚽:") &&
-    text.includes("🔷BLUELOCK⚽🥅");
+        text.includes("⚽:") &&
+        text.includes("🔷BLUELOCK⚽🥅");
 
-if (!isPave) return;
+    if (!isPave) return;
 
-    // Vérifie si c’est le joueur qui doit jouer
+    // Vérifie si c’est le bon joueur
     if (sender !== match.joueurTour) return;
+
     const isTeam1 = sender === match.id1;
-const lineup = isTeam1 ? match.lineup1 : match.lineup2;
+    const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
-    // Extraire le texte après ⚽:
+    // Extraire ligne action
     const actionLine = text.split("\n").find(l => l.trim().startsWith("⚽:"));
-if (!actionLine) return;
+    if (!actionLine) return;
 
-const actionClean = actionLine.replace("⚽:", "").trim();
+    const actionClean = actionLine.replace("⚽:", "").trim();
 
-if (!actionClean) {
-    await ovl.sendMessage(chat, {
-        text: "❌ Aucune action détectée après ⚽:"
-    });
-    return;
-}
-    // Extraire le nom du joueur utilisé dans le pavé
-    const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\s]+)/i);
-    if (!nomJoueurMatch) {
-        await ovl.sendMessage(chat, { text: "❌ Impossible d'identifier le joueur utilisé." });
+    if (!actionClean) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Aucune action détectée après ⚽:"
+        });
         return;
     }
+
+    // 🔥 NOM JOUEUR (support noms longs)
+    const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\n\/]+)/i);
+
+    if (!nomJoueurMatch) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Impossible d'identifier le joueur utilisé."
+        });
+        return;
+    }
+
     const nomJoueur = nomJoueurMatch[2].trim();
-    // 🔒 Vérifie si le joueur est dans le lineup
-const joueurDansEquipe = lineup.find(j =>
-    j.nom.toLowerCase() === nomJoueur.toLowerCase()
-);
 
-if (!joueurDansEquipe) {
-    await ovl.sendMessage(chat, {
-        text: `❌ Joueur invalide ! *${nomJoueur}* n'est pas dans ton lineup.`
-    });
-    return;
-}
+    // 🔒 Vérifie lineup
+    const joueurDansEquipe = lineup.find(j =>
+        j.nom.toLowerCase() === nomJoueur.toLowerCase()
+    );
 
-    // Chercher la carte dans la BDD
+    if (!joueurDansEquipe) {
+        await ovl.sendMessage(chat, {
+            text: `❌ Joueur invalide ! *${nomJoueur}* n'est pas dans ton lineup.`
+        });
+        return;
+    }
+
+    // 🔎 Carte joueur
     const carte = trouverCarteJoueur(nomJoueur);
     if (!carte) {
         await ovl.sendMessage(chat, {
@@ -475,67 +474,62 @@ if (!joueurDansEquipe) {
         return;
     }
 
-    // 🔹 Séparer le pavé en séquences/action individuelles
+    // 🔹 Séparer les séquences
     const sequences = actionClean.split("/").map(s => s.trim());
 
     for (const seq of sequences) {
-        // 🔹 Vérifie si l'action est dans la liste des actions du jeu
-        const actionTrouvee = ACTIONS_JEU.find(a => new RegExp(`\\b${a}\\b`, "i").test(seq));
-        if (!actionTrouvee) {
-            await ovl.sendMessage(chat, {
-                text: `❌ Action non reconnue dans le pavé : "${seq}". Pavé refusé.`
-            });
-            return; // Stop le pavé si une action n'est pas valide
+
+        let type = null;
+        const seqClean = seq.toLowerCase();
+
+        // 🔥 DETECTION ACTION VIA ACTIONS_MAP
+        for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
+            if (mots.some(m => seqClean.includes(m))) {
+                type = key;
+                break;
+            }
         }
 
-        // 🔹 Dispatcher chaque action vers son compartiment
-        let type = null;
+        // ❌ aucune action reconnue
+        if (!type) {
+            await ovl.sendMessage(chat, {
+                text: `❌ Aucune action valide détectée dans : "${seq}"`
+            });
+            return;
+        }
 
-for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
-    if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seq))) {
-        type = key;
-        break;
-    }
-}
+        // 🎯 DISPATCH ACTION
+        switch (type) {
+            case "tir":
+                await gestionTirs(seq, carte, match, chat, ovl);
+                break;
 
-// ❌ Aucune action détectée → refus du pavé
-if (!type) {
-    await ovl.sendMessage(chat, {
-        text: `❌ Aucune action valide détectée dans : "${seq}"`
-    });
-    return;
-}
-        
-  switch (type) {
-    case "tir":
-        await gestionTirs(seq, carte, match, chat, ovl);
-        break;
-    case "passe":
-        await gestionPasses(seq, carte, match, chat, ovl);
-        break;
-    case "dribble":
-        await gestionDribbles(seq, carte, match, chat, ovl);
-        break;
-    case "deplacement":
-        await gestionDeplacements(seq, carte, match, chat, ovl);
-        break;
-}
+            case "passe":
+                await gestionPasses(seq, carte, match, chat, ovl);
+                break;
+
+            case "dribble":
+                await gestionDribbles(seq, carte, match, chat, ovl);
+                break;
+
+            case "deplacement":
+                await gestionDeplacements(seq, carte, match, chat, ovl);
+                break;
+        }
     }
 
-    // 🔹 Passer au joueur suivant
+    // 🔁 Tour suivant
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
 
-    // 🔹 Stop timer latence
+    // ⏱️ Stop timer
     if (match.timerPave) clearTimeout(match.timerPave);
 
-    // 🔹 Confirmation de validation et mention du joueur suivant
     await ovl.sendMessage(chat, {
         text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
     });
 }
-
 
 /* ===============================
 GESTION DES DÉPLACEMENTS
