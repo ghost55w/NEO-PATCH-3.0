@@ -214,7 +214,7 @@ DETECTION FICHE MATCH
 =================================*/
 async function verifierFiche(message, chat, ovl) {
     const match = matchsActifs.get(chat);
-    if (!match || match.etat !== "attente_fiche") return;
+if (!match) return;
     if (!message.includes("MATCH BLUE LOCK") || !message.includes("Team 1")) return;
 
     const team1 = message.match(/Team 1:\s*([^\n\r]+)/);
@@ -296,81 +296,89 @@ async function messageMatch(ms, ovl) {
         "";
 
     if (!text) return;
-const safeText = (text || "")
-    .replace(/\u200B/g, "")
-    .replace(/\u200E/g, "")
-    .replace(/\u200F/g, "")
-    .replace(/\r/g, "")
-    .trim();
+
+    const safeText = (text || "")
+        .replace(/\u200B/g, "")
+        .replace(/\u200E/g, "")
+        .replace(/\u200F/g, "")
+        .replace(/\r/g, "")
+        .trim();
+
     // vérifier fiche match
     await verifierFiche(text, chat, ovl);
 
     const match = matchsActifs.get(chat);
-    if (!match || match.etat !== "attente_lineup") return;
+    if (!match) return;
 
-    // lire le nom de squad
-    const squadMatch = text.match(/SQUAD.*?:\s*([^\n]+)/i);
-    if (!squadMatch) return;
+    /* ===============================
+    📋 GESTION LINEUP UNIQUEMENT
+    =================================*/
+    if (match.etat === "attente_lineup") {
 
-    const squadName = squadMatch[1].trim();
+        const squadMatch = text.match(/SQUAD.*?:\s*([^\n]+)/i);
+        if (!squadMatch) return;
 
-    const team1 = normalizeTeamName(match.team1);
-    const team2 = normalizeTeamName(match.team2);
-    const squad = normalizeTeamName(squadName);
+        const squadName = squadMatch[1].trim();
 
-    // TEAM 1
-    if (squad === team1 && !match.equipe1) {
+        const team1 = normalizeTeamName(match.team1);
+        const team2 = normalizeTeamName(match.team2);
+        const squad = normalizeTeamName(squadName);
 
-    const parsed = parseSquadBlueLock(text);
-    match.lineup1 = parsed ? parsed.joueurs : [];
+        // TEAM 1
+        if (squad === team1 && !match.equipe1) {
+            const parsed = parseSquadBlueLock(text);
+            match.lineup1 = parsed ? parsed.joueurs : [];
 
-    match.equipe1 = true;
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-        });
-    }
+            match.equipe1 = true;
 
-    // TEAM 2
-    if (squad === team2 && !match.equipe2) {
+            await ovl.sendMessage(chat, {
+                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+            });
+        }
 
-    const parsed = parseSquadBlueLock(text);
-    match.lineup2 = parsed ? parsed.joueurs : [];
+        // TEAM 2
+        if (squad === team2 && !match.equipe2) {
+            const parsed = parseSquadBlueLock(text);
+            match.lineup2 = parsed ? parsed.joueurs : [];
 
-    match.equipe2 = true;
+            match.equipe2 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-        });
-    }
+            await ovl.sendMessage(chat, {
+                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+            });
+        }
 
-    // si les deux équipes sont prêtes
-    if (match.equipe1 && match.equipe2 && !match.starting) {
+        // lancement match si prêt
+        if (match.equipe1 && match.equipe2 && !match.starting) {
 
-        match.starting = true; // 🔒 verrou anti double lancement
+            match.starting = true;
 
-        if (match.timerMatch) clearTimeout(match.timerMatch);
-        match.etat = "debut_match";
+            if (match.timerMatch) clearTimeout(match.timerMatch);
+            match.etat = "debut_match";
 
-        const readyText = `⏳ Les deux formations sont prêtes.
+            const readyText = `⏳ Les deux formations sont prêtes.
 Le match commence dans *1 minute* 🥅⚽...`;
 
-        const imagesReady = [
-            "https://files.catbox.moe/dlj5z6.jpg",
-            "https://files.catbox.moe/fdadd0.jpeg",
-            "https://files.catbox.moe/4104s3.jpg"
-        ];
+            const imagesReady = [
+                "https://files.catbox.moe/dlj5z6.jpg",
+                "https://files.catbox.moe/fdadd0.jpeg",
+                "https://files.catbox.moe/4104s3.jpg"
+            ];
 
-        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+            const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-        await ovl.sendMessage(chat, {
-            image: { url: imageRandom },
-            caption: readyText
-        });
+            await ovl.sendMessage(chat, {
+                image: { url: imageRandom },
+                caption: readyText
+            });
 
-        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+            match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+        }
     }
 
-    // 👇 LECTURE DES PAVÉS GAMEPLAY
+    /* ===============================
+    🎮 LECTURE DES PAVÉS (TOUJOURS)
+    =================================*/
     await lirePaveAction(ms, ovl);
 }
 
