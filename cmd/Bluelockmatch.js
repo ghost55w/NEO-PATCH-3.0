@@ -438,7 +438,7 @@ async function lirePaveAction(ms, ovl) {
     // Vérifie que c'est un pavé Blue Lock valide
     const isPave =
     safeText.includes("⚽:") &&
-    safeText.toLowerCase().includes("bluelock");
+    /🔷\s*blue\s*lock\s*⚽🥅/i.test(safeText);
     if (!isPave) return;
 
     // Vérifie si c’est le bon joueur
