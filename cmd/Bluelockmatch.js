@@ -446,7 +446,18 @@ async function lirePaveAction(ms, ovl) {
     // Vérifie que c'est un pavé Blue Lock valide
     const isPave =
     safeText.includes("⚽:") &&
-    /🔷.*blue\s*lock/i.test(safeText);
+    /🔷.*blue\s*lock|🔷.*bluelock/i.test(safeText);
+
+// 🔍 DEBUG
+console.log("📩 ===== PAVE DEBUG =====");
+console.log("RAW TEXT:\n", rawText);
+console.log("SAFE TEXT:\n", safeText);
+console.log("Contient ⚽: ?", safeText.includes("⚽:"));
+console.log("Match BlueLock ?", /🔷.*blue\s*lock|🔷.*bluelock/i.test(safeText));
+console.log("✅ isPave =", isPave);
+console.log("👤 Sender =", sender);
+console.log("🎯 Joueur attendu =", match.joueurTour);
+console.log("=========================");
     if (!isPave) return;
 
     // Vérifie si c’est le bon joueur
