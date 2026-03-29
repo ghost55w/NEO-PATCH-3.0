@@ -421,7 +421,8 @@ async function lirePaveAction(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-    const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
+    const senderRaw = ms.key.participant || ms.key.remoteJid;
+    const sender = cleanJid(senderRaw);
 
     const match = matchsActifs.get(chat);
     if (!match) return;
@@ -443,25 +444,36 @@ async function lirePaveAction(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
-    // 🔍 DEBUG
+    /* ===============================
+    DEBUG PUISSANT
+    =================================*/
     console.log("📩 ===== PAVE DEBUG =====");
     console.log("RAW TEXT:\n" + rawText);
     console.log("SAFE TEXT:\n" + safeText);
-    console.log("⚽ présent :", safeText.includes("⚽:"));
+    console.log("JSON SAFE:", JSON.stringify(safeText));
+    console.log("⚽ regex test :", /⚽\s*:/.test(safeText));
     console.log("=========================");
 
-    const isPave = safeText.includes("⚽:");
+    /* ===============================
+    DETECTION PAVE (FIX)
+    =================================*/
+    const isPave = /⚽\s*:/.test(safeText);
     if (!isPave) return;
 
-    // Vérifie tour joueur
+    /* ===============================
+    VERIFICATION TOUR (FIX)
+    =================================*/
     const joueurTour = cleanJid(match.joueurTour);
+    const senderClean = cleanJid(sender);
 
-    if (sender !== joueurTour) {
-        console.log("⛔ PAS TON TOUR", { sender, joueurTour });
+    console.log("DEBUG TOUR", { senderClean, joueurTour });
+
+    if (senderClean !== joueurTour) {
+        console.log("⛔ PAS TON TOUR");
         return;
     }
 
-    const isTeam1 = sender === match.id1;
+    const isTeam1 = senderClean === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
     if (!lineup || !Array.isArray(lineup)) {
@@ -471,9 +483,12 @@ async function lirePaveAction(ms, ovl) {
         return;
     }
 
+    /* ===============================
+    EXTRACTION ACTION (FIX)
+    =================================*/
     const actionLine = safeText
         .split("\n")
-        .find(l => l.includes("⚽:"));
+        .find(l => /⚽\s*:/.test(l));
 
     if (!actionLine) return;
 
@@ -489,6 +504,9 @@ async function lirePaveAction(ms, ovl) {
         return;
     }
 
+    /* ===============================
+    DETECTION JOUEUR
+    =================================*/
     const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\n\/]+)/i);
 
     if (!nomJoueurMatch) {
@@ -523,44 +541,41 @@ async function lirePaveAction(ms, ovl) {
 
     for (const seq of sequences) {
 
-    let type = null;
-    const seqClean = seq.toLowerCase();
+        let type = null;
+        const seqClean = seq.toLowerCase();
 
-    // 🔥 DETECTION ACTION PROPRE
-    for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
-        if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
-            type = key;
-            break;
+        for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
+            if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
+                type = key;
+                break;
+            }
+        }
+
+        if (!type) {
+            await ovl.sendMessage(chat, {
+                text: `❌ Aucune action valide détectée dans : "${seq}"`
+            });
+            return;
+        }
+
+        switch (type) {
+            case "tir":
+                await gestionTirs(seq, carte, match, chat, ovl);
+                break;
+
+            case "passe":
+                await gestionPasses(seq, carte, match, chat, ovl);
+                break;
+
+            case "dribble":
+                await gestionDribbles(seq, carte, match, chat, ovl);
+                break;
+
+            case "deplacement":
+                await gestionDeplacements(seq, carte, match, chat, ovl);
+                break;
         }
     }
-
-    // ❌ aucune action reconnue
-    if (!type) {
-        await ovl.sendMessage(chat, {
-            text: `❌ Aucune action valide détectée dans : "${seq}"`
-        });
-        return;
-    }
-
-    // 🎯 DISPATCH ACTION
-    switch (type) {
-        case "tir":
-            await gestionTirs(seq, carte, match, chat, ovl);
-            break;
-
-        case "passe":
-            await gestionPasses(seq, carte, match, chat, ovl);
-            break;
-
-        case "dribble":
-            await gestionDribbles(seq, carte, match, chat, ovl);
-            break;
-
-        case "deplacement":
-            await gestionDeplacements(seq, carte, match, chat, ovl);
-            break;
-    }
-}
 
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
