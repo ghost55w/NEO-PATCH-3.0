@@ -155,7 +155,7 @@ async function message_upsert(m, ovl) {
     // DETECTION FICHIERS MATCH BLUELOCK
     // =================================
     try {
-      if (texte && texte.includes("MATCH BLUE LOCK")) {
+  if (texte && /MATCH\s+BLUE\s+LOCK/i.test(texte)) {
         await verifierFiche(texte, ms_org, ovl);
       }
     } catch (err) {
