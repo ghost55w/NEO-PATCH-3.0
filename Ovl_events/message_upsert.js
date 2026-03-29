@@ -166,8 +166,8 @@ async function message_upsert(m, ovl) {
     // DETECTION MESSAGES MATCH BLUELOCK
     // =================================
     try {
-      if (!isCmd && texte.trim()) {
-        await require("../cmd/Bluelockmatch").messageMatch(ms, ovl);
+      if (!isCmd) {
+    await require("../cmd/Bluelockmatch").messageMatch(ms, ovl);
       }
     } catch (err) {
       console.log("Erreur messageMatch:", err);
