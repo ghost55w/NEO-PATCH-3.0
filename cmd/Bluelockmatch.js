@@ -285,6 +285,7 @@ LECTURE MESSAGES
 async function messageMatch(ms, ovl) {
 
     if (!ms.message) return;
+    console.log("📩 MESSAGE REÇU");
 
     const chat = ms.key.remoteJid;
 
@@ -431,10 +432,24 @@ async function lirePaveAction(ms, ovl) {
 
     // ✅ ICI TU METS LE RAW + SAFE TEXT
     const rawText =
-        ms.message.conversation ||
-        ms.message.extendedTextMessage?.text ||
-        ms.message.imageMessage?.caption ||
-        "";
+    ms.message.conversation ||
+    ms.message.extendedTextMessage?.text ||
+    ms.message.imageMessage?.caption ||
+    "";
+
+// 🔥 TOUJOURS essayer de lire un pavé
+await lirePaveAction(ms, ovl);
+
+// ensuite seulement on filtre
+if (!rawText) return;
+
+const text = rawText;
+    console.log("📩 ===== PAVE DEBUG =====");
+console.log("RAW TEXT:\n" + rawText);
+console.log("SAFE TEXT:\n" + safeText);
+console.log("⚽ présent :", safeText.includes("⚽:"));
+console.log("BlueLock détecté :", /blue\s*lock/i.test(safeText));
+console.log("=========================");
 
     const safeText = (rawText || "")
         .replace(/\u200B/g, "")
