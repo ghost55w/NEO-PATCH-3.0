@@ -289,20 +289,15 @@ async function messageMatch(ms, ovl) {
 
     const chat = ms.key.remoteJid;
 
-    // récupérer texte ou caption
     const rawText =
-    ms.message.conversation ||
-    ms.message.extendedTextMessage?.text ||
-    ms.message.imageMessage?.caption ||
-    "";
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        ms.message.imageMessage?.caption ||
+        "";
 
-// 🔥 Toujours tenter de lire un pavé
-await lirePaveAction(ms, ovl);
+    if (rawText === undefined || rawText === null) return;
 
-// ❗ bloquer seulement si vraiment null/undefined
-if (rawText === undefined || rawText === null) return;
-
-const text = rawText;
+    const text = rawText;
 
     if (!text) return;
 
@@ -312,9 +307,6 @@ const text = rawText;
         .replace(/\u200F/g, "")
         .replace(/\r/g, "")
         .trim();
-
-    // vérifier fiche match
-    await verifierFiche(text, chat, ovl);
 
     const match = matchsActifs.get(chat);
     if (!match) return;
@@ -333,11 +325,9 @@ const text = rawText;
         const team2 = normalizeTeamName(match.team2);
         const squad = normalizeTeamName(squadName);
 
-        // TEAM 1
         if (squad === team1 && !match.equipe1) {
             const parsed = parseSquadBlueLock(text);
             match.lineup1 = parsed ? parsed.joueurs : [];
-
             match.equipe1 = true;
 
             await ovl.sendMessage(chat, {
@@ -345,11 +335,9 @@ const text = rawText;
             });
         }
 
-        // TEAM 2
         if (squad === team2 && !match.equipe2) {
             const parsed = parseSquadBlueLock(text);
             match.lineup2 = parsed ? parsed.joueurs : [];
-
             match.equipe2 = true;
 
             await ovl.sendMessage(chat, {
@@ -357,7 +345,6 @@ const text = rawText;
             });
         }
 
-        // lancement match si prêt
         if (match.equipe1 && match.equipe2 && !match.starting) {
 
             match.starting = true;
@@ -386,7 +373,7 @@ Le match commence dans *1 minute* 🥅⚽...`;
     }
 
     /* ===============================
-    🎮 LECTURE DES PAVÉS (TOUJOURS)
+    🎮 LECTURE DES PAVÉS (UNE SEULE FOIS)
     =================================*/
     await lirePaveAction(ms, ovl);
 }
@@ -446,7 +433,7 @@ async function lirePaveAction(ms, ovl) {
 
     if (!rawText) return;
 
-    const safeText = (rawText || "")
+    const safeText = rawText
         .replace(/\u200B/g, "")
         .replace(/\u200E/g, "")
         .replace(/\u200F/g, "")
@@ -458,50 +445,47 @@ async function lirePaveAction(ms, ovl) {
     console.log("RAW TEXT:\n" + rawText);
     console.log("SAFE TEXT:\n" + safeText);
     console.log("⚽ présent :", safeText.includes("⚽:"));
-    console.log("BlueLock détecté :", /blue\s*lock/i.test(safeText));
     console.log("=========================");
 
-    const isPave =
-        safeText.includes("⚽:") &&
-        /blue\s*lock/i.test(safeText);
+    const isPave = safeText.includes("⚽:");
+    if (!isPave) return;
 
-    if (!isPave) return; 
-    const chat = ms.key.remoteJid;
-    const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
-
-    const match = matchsActifs.get(chat);
-
-
-    // Vérifie si c’est le bon joueur
+    // Vérifie tour joueur
     const joueurTour = cleanJid(match.joueurTour);
 
-if (sender !== joueurTour) {
-    console.log("⛔ PAS TON TOUR", { sender, joueurTour });
-    return;
-}
+    if (sender !== joueurTour) {
+        console.log("⛔ PAS TON TOUR", { sender, joueurTour });
+        return;
+    }
 
     const isTeam1 = sender === match.id1;
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
-    // Extraire ligne action
+    if (!lineup || !Array.isArray(lineup)) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Lineup introuvable."
+        });
+        return;
+    }
+
     const actionLine = safeText
-    .split("\n")
-    .find(l => l.includes("⚽:"));
+        .split("\n")
+        .find(l => l.includes("⚽:"));
+
     if (!actionLine) return;
 
     const actionClean = actionLine
-    .replace(/⚽\s*:/g, "")
-    .replace(/⚽/g, "")
-    .trim();
-// 🔥 cas 1 : vide total
-if (!actionClean || actionClean.length < 2) {
-    await ovl.sendMessage(chat, {
-        text: "❌ Pavé vide ou aucune action détectée après ⚽:"
-    });
-    return;
-}
+        .replace(/⚽\s*:/g, "")
+        .replace(/⚽/g, "")
+        .trim();
 
-    // 🔥 NOM JOUEUR (support noms longs)
+    if (!actionClean || actionClean.length < 2) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Pavé vide ou aucune action détectée après ⚽:"
+        });
+        return;
+    }
+
     const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\n\/]+)/i);
 
     if (!nomJoueurMatch) {
@@ -513,7 +497,6 @@ if (!actionClean || actionClean.length < 2) {
 
     const nomJoueur = nomJoueurMatch[2].trim();
 
-    // 🔒 Vérifie lineup
     const joueurDansEquipe = lineup.find(j =>
         j.nom.toLowerCase() === nomJoueur.toLowerCase()
     );
@@ -525,7 +508,6 @@ if (!actionClean || actionClean.length < 2) {
         return;
     }
 
-    // 🔎 Carte joueur
     const carte = trouverCarteJoueur(nomJoueur);
     if (!carte) {
         await ovl.sendMessage(chat, {
@@ -534,7 +516,6 @@ if (!actionClean || actionClean.length < 2) {
         return;
     }
 
-    // 🔹 Séparer les séquences
     const sequences = actionClean.split("/").map(s => s.trim());
 
     for (const seq of sequences) {
@@ -542,14 +523,13 @@ if (!actionClean || actionClean.length < 2) {
         let type = null;
         const seqClean = seq.toLowerCase();
 
-for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
-    if (mots.some(m => seqClean.includes(m))) {
-        type = key;
-        break;
-    }
-}
+        for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
+            if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
+                type = key;
+                break;
+            }
+        }
 
-        // ❌ aucune action reconnue
         if (!type) {
             await ovl.sendMessage(chat, {
                 text: `❌ Aucune action valide détectée dans : "${seq}"`
@@ -557,7 +537,6 @@ for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
             return;
         }
 
-        // 🎯 DISPATCH ACTION
         switch (type) {
             case "tir":
                 await gestionTirs(seq, carte, match, chat, ovl);
@@ -577,11 +556,9 @@ for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
         }
     }
 
-    // 🔁 Tour suivant
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
 
-    // ⏱️ Stop timer
     if (match.timerPave) clearTimeout(match.timerPave);
 
     await ovl.sendMessage(chat, {
