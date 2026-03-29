@@ -290,11 +290,19 @@ async function messageMatch(ms, ovl) {
     const chat = ms.key.remoteJid;
 
     // récupérer texte ou caption
-    const text =
-        ms.message.conversation ||
-        ms.message.extendedTextMessage?.text ||
-        ms.message.imageMessage?.caption ||
-        "";
+    const rawText =
+    ms.message.conversation ||
+    ms.message.extendedTextMessage?.text ||
+    ms.message.imageMessage?.caption ||
+    "";
+
+// 🔥 Toujours tenter de lire un pavé
+await lirePaveAction(ms, ovl);
+
+// ❗ bloquer seulement si vraiment null/undefined
+if (rawText === undefined || rawText === null) return;
+
+const text = rawText;
 
     if (!text) return;
 
@@ -430,26 +438,13 @@ async function lirePaveAction(ms, ovl) {
 
     if (match.etat !== "en_cours") return;
 
-    // ✅ ICI TU METS LE RAW + SAFE TEXT
     const rawText =
-    ms.message.conversation ||
-    ms.message.extendedTextMessage?.text ||
-    ms.message.imageMessage?.caption ||
-    "";
+        ms.message.conversation ||
+        ms.message.extendedTextMessage?.text ||
+        ms.message.imageMessage?.caption ||
+        "";
 
-// 🔥 TOUJOURS essayer de lire un pavé
-await lirePaveAction(ms, ovl);
-
-// ensuite seulement on filtre
-if (!rawText) return;
-
-const text = rawText;
-    console.log("📩 ===== PAVE DEBUG =====");
-console.log("RAW TEXT:\n" + rawText);
-console.log("SAFE TEXT:\n" + safeText);
-console.log("⚽ présent :", safeText.includes("⚽:"));
-console.log("BlueLock détecté :", /blue\s*lock/i.test(safeText));
-console.log("=========================");
+    if (!rawText) return;
 
     const safeText = (rawText || "")
         .replace(/\u200B/g, "")
@@ -458,21 +453,24 @@ console.log("=========================");
         .replace(/\r/g, "")
         .trim();
 
-    // Vérifie que c'est un pavé Blue Lock valide
+    // 🔍 DEBUG
+    console.log("📩 ===== PAVE DEBUG =====");
+    console.log("RAW TEXT:\n" + rawText);
+    console.log("SAFE TEXT:\n" + safeText);
+    console.log("⚽ présent :", safeText.includes("⚽:"));
+    console.log("BlueLock détecté :", /blue\s*lock/i.test(safeText));
+    console.log("=========================");
+
     const isPave =
-    safeText.includes("⚽:") &&
-    /🔷[\s\S]*blue\s*lock/i.test(safeText);
-// 🔍 DEBUG
-console.log("📩 ===== PAVE DEBUG =====");
-console.log("RAW TEXT:\n" + rawText);
-console.log("SAFE TEXT:\n" + safeText);
-console.log("⚽ présent :", safeText.includes("⚽:"));
-console.log("BlueLock détecté :", /🔷[\s\S]*blue\s*lock/i.test(safeText));
-console.log("👉 isPave =", isPave);
-console.log("👤 Sender =", sender);
-console.log("🎯 Joueur attendu =", match.joueurTour);
-console.log("=========================");
-    if (!isPave) return;
+        safeText.includes("⚽:") &&
+        /blue\s*lock/i.test(safeText);
+
+    if (!isPave) return; 
+    const chat = ms.key.remoteJid;
+    const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
+
+    const match = matchsActifs.get(chat);
+
 
     // Vérifie si c’est le bon joueur
     const joueurTour = cleanJid(match.joueurTour);
