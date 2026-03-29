@@ -426,7 +426,6 @@ async function lirePaveAction(ms, ovl) {
 
     const match = matchsActifs.get(chat);
     if (!match) return;
-
     if (match.etat !== "en_cours") return;
 
     const rawText =
@@ -437,110 +436,53 @@ async function lirePaveAction(ms, ovl) {
 
     if (!rawText) return;
 
-    const safeText = rawText
-        .replace(/\u200B/g, "")
-        .replace(/\u200E/g, "")
-        .replace(/\u200F/g, "")
-        .replace(/\r/g, "")
-        .trim();
+    const safeText = rawText.replace(/\u200B/g, "").replace(/\r/g, "").trim();
 
-    /* ===============================
-    DEBUG PUISSANT
-    =================================*/
-    console.log("📩 ===== PAVE DEBUG =====");
-    console.log("RAW TEXT:\n" + rawText);
-    console.log("SAFE TEXT:\n" + safeText);
-    console.log("JSON SAFE:", JSON.stringify(safeText));
-    console.log("⚽ regex test :", /⚽\s*:/.test(safeText));
-    console.log("=========================");
+    // ===============================
+    // ATTENTE DU PAVÉ COMPLET 
+    // ===============================
+    if (!safeText.includes("💬:") || !safeText.includes("⚽:")) {
+        console.log("⏳ Pavé incomplet, attente du message complet...");
+        return; // Ne rien faire tant que le pavé complet n'est pas là
+    }
 
-    /* ===============================
-    DETECTION PAVE (FIX)
-    =================================*/
-    const isPave = /⚽\s*:/.test(safeText);
-    if (!isPave) return;
+    console.log("📩 Pavé complet reçu, lecture en cours...");
 
-    /* ===============================
-    VERIFICATION TOUR (FIX)
-    =================================*/
+    // ===============================
+    // VERIFICATION DU TOUR DU JOUEUR
+    // ===============================
     const joueurTour = cleanJid(match.joueurTour);
-    const senderClean = cleanJid(sender);
-
-    console.log("DEBUG TOUR", { senderClean, joueurTour });
-
-    if (senderClean !== joueurTour) {
-        console.log("⛔ PAS TON TOUR");
+    if (sender !== joueurTour) {
+        console.log("⛔ Pas le tour du joueur :", sender);
         return;
     }
 
-    const isTeam1 = senderClean === cleanJid(match.id1);
+    // ===============================
+    // EXTRACTION ACTION
+    // ===============================
+    const actionLine = safeText.split("\n").find(l => /⚽\s*:/.test(l));
+    if (!actionLine) return;
+
+    const actionClean = actionLine.replace(/⚽\s*:/g, "").trim();
+    if (!actionClean || actionClean.length < 2) {
+        return ovl.sendMessage(chat, {
+            text: "❌ Pavé vide ou aucune action détectée après ⚽:"
+        });
+    }
+
+    // ===============================
+    // TRAITEMENT DES SEQUENCES
+    // ===============================
+    const sequences = actionClean.split("/").map(s => s.trim());
+
+    const isTeam1 = sender === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
     if (!lineup || !Array.isArray(lineup)) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Lineup introuvable."
-        });
-        return;
+        return ovl.sendMessage(chat, { text: "❌ Lineup introuvable." });
     }
-
-    /* ===============================
-    EXTRACTION ACTION (FIX)
-    =================================*/
-    const actionLine = safeText
-        .split("\n")
-        .find(l => /⚽\s*:/.test(l));
-
-    if (!actionLine) return;
-
-    const actionClean = actionLine
-        .replace(/⚽\s*:/g, "")
-        .replace(/⚽/g, "")
-        .trim();
-
-    if (!actionClean || actionClean.length < 2) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Pavé vide ou aucune action détectée après ⚽:"
-        });
-        return;
-    }
-
-    /* ===============================
-    DETECTION JOUEUR
-    =================================*/
-    const nomJoueurMatch = actionClean.match(/\((A1|A2|B1|B2|C1|C2)\)\s*([^\n\/]+)/i);
-
-    if (!nomJoueurMatch) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Impossible d'identifier le joueur utilisé."
-        });
-        return;
-    }
-
-    const nomJoueur = nomJoueurMatch[2].trim();
-
-    const joueurDansEquipe = lineup.find(j =>
-        j.nom.toLowerCase() === nomJoueur.toLowerCase()
-    );
-
-    if (!joueurDansEquipe) {
-        await ovl.sendMessage(chat, {
-            text: `❌ Joueur invalide ! *${nomJoueur}* n'est pas dans ton lineup.`
-        });
-        return;
-    }
-
-    const carte = trouverCarteJoueur(nomJoueur);
-    if (!carte) {
-        await ovl.sendMessage(chat, {
-            text: `❌ Joueur *${nomJoueur}* introuvable dans la base Blue Lock.`
-        });
-        return;
-    }
-
-    const sequences = actionClean.split("/").map(s => s.trim());
 
     for (const seq of sequences) {
-
         let type = null;
         const seqClean = seq.toLowerCase();
 
@@ -552,31 +494,29 @@ async function lirePaveAction(ms, ovl) {
         }
 
         if (!type) {
-            await ovl.sendMessage(chat, {
-                text: `❌ Aucune action valide détectée dans : "${seq}"`
-            });
+            await ovl.sendMessage(chat, { text: `❌ Aucune action valide détectée dans : "${seq}"` });
             return;
         }
 
         switch (type) {
             case "tir":
-                await gestionTirs(seq, carte, match, chat, ovl);
+                await gestionTirs(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
                 break;
-
             case "passe":
-                await gestionPasses(seq, carte, match, chat, ovl);
+                await gestionPasses(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
                 break;
-
             case "dribble":
-                await gestionDribbles(seq, carte, match, chat, ovl);
+                await gestionDribbles(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
                 break;
-
             case "deplacement":
-                await gestionDeplacements(seq, carte, match, chat, ovl);
+                await gestionDeplacements(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
                 break;
         }
     }
 
+    // ===============================
+    // PASSAGE AU JOUEUR SUIVANT
+    // ===============================
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
 
