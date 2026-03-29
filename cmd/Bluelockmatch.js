@@ -95,13 +95,16 @@ function separerSequences(action) {
     return action.split("/").map(s => s.trim());
 }
 
+
 function compterActions(sequence) {
     let total = 0;
-    ACTIONS.forEach(a => {
+
+    Object.values(ACTIONS_MAP).flat().forEach(a => {
         const r = new RegExp(a, "gi");
         const m = sequence.match(r);
         if (m) total += m.length;
     });
+
     return total;
 }
 
@@ -520,41 +523,44 @@ async function lirePaveAction(ms, ovl) {
 
     for (const seq of sequences) {
 
-        let type = null;
-        const seqClean = seq.toLowerCase();
+    let type = null;
+    const seqClean = seq.toLowerCase();
 
-        for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
-            if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
-                type = key;
-                break;
-            }
-        }
-
-        if (!type) {
-            await ovl.sendMessage(chat, {
-                text: `❌ Aucune action valide détectée dans : "${seq}"`
-            });
-            return;
-        }
-
-        switch (type) {
-            case "tir":
-                await gestionTirs(seq, carte, match, chat, ovl);
-                break;
-
-            case "passe":
-                await gestionPasses(seq, carte, match, chat, ovl);
-                break;
-
-            case "dribble":
-                await gestionDribbles(seq, carte, match, chat, ovl);
-                break;
-
-            case "deplacement":
-                await gestionDeplacements(seq, carte, match, chat, ovl);
-                break;
+    // 🔥 DETECTION ACTION PROPRE
+    for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
+        if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
+            type = key;
+            break;
         }
     }
+
+    // ❌ aucune action reconnue
+    if (!type) {
+        await ovl.sendMessage(chat, {
+            text: `❌ Aucune action valide détectée dans : "${seq}"`
+        });
+        return;
+    }
+
+    // 🎯 DISPATCH ACTION
+    switch (type) {
+        case "tir":
+            await gestionTirs(seq, carte, match, chat, ovl);
+            break;
+
+        case "passe":
+            await gestionPasses(seq, carte, match, chat, ovl);
+            break;
+
+        case "dribble":
+            await gestionDribbles(seq, carte, match, chat, ovl);
+            break;
+
+        case "deplacement":
+            await gestionDeplacements(seq, carte, match, chat, ovl);
+            break;
+    }
+}
 
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
