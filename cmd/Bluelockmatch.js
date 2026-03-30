@@ -407,7 +407,7 @@ async function lancerMatch(chat, ovl) {
         });
     }, 6 * 60 * 1000);
 }
-
+} 
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
