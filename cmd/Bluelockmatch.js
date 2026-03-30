@@ -1,4 +1,4 @@
-const { ovlcmd } = require('../lib/ovlcmd');
+Wwww😇 const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
@@ -286,13 +286,12 @@ if (!match) return;
 LECTURE MESSAGES
 =================================*/
 async function messageMatch(ms, ovl) {
-
     if (!ms.message) return;
     console.log("📩 MESSAGE REÇU");
 
     const chat = ms.key.remoteJid;
-const match = matchsActifs.get(chat);
-if (!match) return;
+    const match = matchsActifs.get(chat);
+    if (!match) return;
 
     const rawText =
         ms.message.conversation ||
@@ -300,28 +299,20 @@ if (!match) return;
         ms.message.imageMessage?.caption ||
         "";
 
-    if (rawText === undefined || rawText === null) return;
+    if (!rawText) return;
 
-    const text = rawText;
-
-    if (!text) return;
-
-    const safeText = (text || "")
+    const safeText = rawText
         .replace(/\u200B/g, "")
         .replace(/\u200E/g, "")
         .replace(/\u200F/g, "")
         .replace(/\r/g, "")
         .trim();
 
-    const match = matchsActifs.get(chat);
-    if (!match) return;
-
     /* ===============================
     📋 GESTION LINEUP UNIQUEMENT
     =================================*/
     if (match.etat === "attente_lineup") {
-
-        const squadMatch = text.match(/SQUAD.*?:\s*([^\n]+)/i);
+        const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
         if (!squadMatch) return;
 
         const squadName = squadMatch[1].trim();
@@ -331,7 +322,7 @@ if (!match) return;
         const squad = normalizeTeamName(squadName);
 
         if (squad === team1 && !match.equipe1) {
-            const parsed = parseSquadBlueLock(text);
+            const parsed = parseSquadBlueLock(safeText);
             match.lineup1 = parsed ? parsed.joueurs : [];
             match.equipe1 = true;
 
@@ -341,7 +332,7 @@ if (!match) return;
         }
 
         if (squad === team2 && !match.equipe2) {
-            const parsed = parseSquadBlueLock(text);
+            const parsed = parseSquadBlueLock(safeText);
             match.lineup2 = parsed ? parsed.joueurs : [];
             match.equipe2 = true;
 
@@ -351,7 +342,6 @@ if (!match) return;
         }
 
         if (match.equipe1 && match.equipe2 && !match.starting) {
-
             match.starting = true;
 
             if (match.timerMatch) clearTimeout(match.timerMatch);
@@ -376,6 +366,7 @@ Le match commence dans *1 minute* 🥅⚽...`;
             match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
         }
     }
+}
 
 /* ===============================
 LANCEMENT MATCH
@@ -794,8 +785,9 @@ ovlcmd({
     desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org.from || ms_org.key?.remoteJid;
+        const chat = ms.key?.remoteJid || ms.from;
 const match = matchsActifs.get(chat);
+if (!match) return;
 
         const match = matchsActifs.get(chat);
         if (!match) {
