@@ -410,47 +410,54 @@ async function lancerMatch(chat, ovl) {
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
 ovlcmd({
-    nom: "lirePaveAction",
+    nom: "lire_pave",
     isfunc: true
 }, async (ms_org, ovl, { texte, repondre, auteur_Message }) => {
 
-    const chat = ms_org.from || ms_org.key?.remoteJid;
-    const match = matchsActifs.get(chat);
+    // Vérifie si le message correspond au format attendu
+    if (!texte.toLowerCase().endsWith("🔷bluelock⚽🥅") && !texte.toLowerCase().includes("⚽match🥅")) return;
 
+    // Récupération du match actif
+    const match = matchsActifs.get(ms_org);
     if (!match || match.etat !== "en_cours") return;
 
-    if (!texte.includes("⚽:") || !texte.includes("💬:")) return;
-
+    // Nettoyage du texte reçu
     const safeText = texte.replace(/\u200B/g, "").replace(/\r/g, "").trim();
 
+    // Vérifie si c'est bien le tour du joueur
     const joueurTour = cleanJid(match.joueurTour);
-    const senderClean = cleanJid(auteur_Message);
+    if (auteur_Message !== joueurTour) {
+        console.log("⛔ Pas ton tour :", auteur_Message);
+        return;
+    }
 
-    if (senderClean !== joueurTour) return;
-
+    // Extraction de la ligne contenant les actions ⚽:
     const actionLine = safeText.split("\n").find(l => /⚽\s*:/.test(l));
     if (!actionLine) return;
 
+    // Nettoyage des actions
     const actionClean = actionLine.replace(/⚽\s*:/g, "").trim();
-
     if (!actionClean || actionClean.length < 2) {
         return repondre("❌ Aucune action détectée après ⚽:");
     }
 
+    // Découpe des actions (séparées par /)
     const sequences = actionClean.split("/").map(s => s.trim());
 
-    const isTeam1 = senderClean === cleanJid(match.id1);
+    // Détermine l'équipe du joueur
+    const isTeam1 = auteur_Message === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
     if (!Array.isArray(lineup)) {
         return repondre("❌ Lineup introuvable.");
     }
 
+    // Parcours de chaque action
     for (const seq of sequences) {
-
         let type = null;
         const seqClean = seq.toLowerCase();
 
+        // Détection du type d'action (tir, passe, etc.)
         for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
             if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
                 type = key;
@@ -463,40 +470,40 @@ ovlcmd({
             return;
         }
 
-        const joueur = lineup.find(j =>
-            seqClean.includes(j.nom.toLowerCase())
-        );
+        // Recherche du joueur concerné dans le lineup
+        const joueur = lineup.find(j => seqClean.includes(j.nom.toLowerCase()));
 
         if (!joueur) {
             await repondre(`❌ Joueur introuvable dans : "${seq}"`);
             return;
         }
 
+        // Appel de la fonction correspondante à l'action
         switch (type) {
             case "tir":
-                await gestionTirs(seq, joueur, match, chat, ovl);
+                await gestionTirs(seq, joueur, match, ms_org, ovl);
                 break;
-
             case "passe":
-                await gestionPasses(seq, joueur, match, chat, ovl);
+                await gestionPasses(seq, joueur, match, ms_org, ovl);
                 break;
-
             case "dribble":
-                await gestionDribbles(seq, joueur, match, chat, ovl);
+                await gestionDribbles(seq, joueur, match, ms_org, ovl);
                 break;
-
             case "deplacement":
-                await gestionDeplacements(seq, joueur, match, chat, ovl);
+                await gestionDeplacements(seq, joueur, match, ms_org, ovl);
                 break;
         }
     }
 
+    // Passage au joueur suivant
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
 
+    // Reset du timer si existant
     if (match.timerPave) clearTimeout(match.timerPave);
 
-    await ovl.sendMessage(chat, {
+    // Message avec mention du prochain joueur
+    await ovl.sendMessage(ms_org, {
         text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
     });
@@ -775,10 +782,9 @@ GESTION DES DRIBBLES / ACCÉLÉRATIONS
 =================================*/
 // Ici tu ajouteras la fonction gestionDribbles(seq, carte, match, chat, ovl)    
 
-
 /* ===============================
 COMMANDE +STOPMATCH⚽
-=================================*/
+=================================*/ 
 ovlcmd({
     nom_cmd: "stopmatch⚽",
     classe: "BLUELOCK⚽",
@@ -795,6 +801,12 @@ ovlcmd({
             });
         }
 
+        // Stop tous les timers
+        if (match.timerPave) clearTimeout(match.timerPave);
+        if (match.timerTour) clearTimeout(match.timerTour);
+        // Si tu as d'autres timers pour actions / déplacements / tirs, ajoute-les ici
+
+        // Supprime le match
         matchsActifs.delete(chat);
 
         await ovl.sendMessage(chat, {
