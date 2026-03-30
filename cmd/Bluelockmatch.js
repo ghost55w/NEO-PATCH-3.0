@@ -416,7 +416,7 @@ ovlcmd({
     isfunc: true
 }, async (ms_org, ovl, { texte, repondre, auteur_Message }) => {
 
-    const chat = ms_org;
+    const chat = ms_org.from || ms_org.key?.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "en_cours") return;
 
