@@ -414,15 +414,19 @@ ovlcmd({
     isfunc: true
 }, async (ms_org, ovl, { texte, repondre, auteur_Message }) => {
 
+    if (!texte) return;
+
+    // Nettoyage complet du texte + mise en minuscules pour comparaison
+    const safeTextRaw = texte.replace(/[\u200B\u200E\u200F]/g, "").replace(/\r/g, "").trim();
+    const safeText = safeTextRaw.toLowerCase().replace(/\n/g, "");
+
     // Vérifie si le message correspond au format attendu
-    if (!texte.toLowerCase().endsWith("🔷bluelock⚽🥅") && !texte.toLowerCase().includes("⚽match🥅")) return;
+    if (!safeText.endsWith("🔷bluelock⚽🥅") && !safeText.includes("⚽match🥅")) return;
 
     // Récupération du match actif
-    const match = matchsActifs.get(ms_org);
+    const chat = ms_org.key?.remoteJid || ms_org.from;
+    const match = matchsActifs.get(chat);
     if (!match || match.etat !== "en_cours") return;
-
-    // Nettoyage du texte reçu
-    const safeText = texte.replace(/\u200B/g, "").replace(/\r/g, "").trim();
 
     // Vérifie si c'est bien le tour du joueur
     const joueurTour = cleanJid(match.joueurTour);
@@ -432,11 +436,10 @@ ovlcmd({
     }
 
     // Extraction de la ligne contenant les actions ⚽:
-    const actionLine = safeText.split("\n").find(l => /⚽\s*:/.test(l));
-    if (!actionLine) return;
+    const actionLineRaw = safeTextRaw.split("\n").find(l => /⚽\s*:/.test(l));
+    if (!actionLineRaw) return repondre("❌ Aucune ligne ⚽: détectée.");
 
-    // Nettoyage des actions
-    const actionClean = actionLine.replace(/⚽\s*:/g, "").trim();
+    const actionClean = actionLineRaw.replace(/⚽\s*:/g, "").trim();
     if (!actionClean || actionClean.length < 2) {
         return repondre("❌ Aucune action détectée après ⚽:");
     }
@@ -448,16 +451,14 @@ ovlcmd({
     const isTeam1 = auteur_Message === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
-    if (!Array.isArray(lineup)) {
-        return repondre("❌ Lineup introuvable.");
-    }
+    if (!Array.isArray(lineup)) return repondre("❌ Lineup introuvable.");
 
     // Parcours de chaque action
     for (const seq of sequences) {
-        let type = null;
         const seqClean = seq.toLowerCase();
+        let type = null;
 
-        // Détection du type d'action (tir, passe, etc.)
+        // Détection du type d'action (tir, passe, dribble, déplacement)
         for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
             if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
                 type = key;
@@ -465,18 +466,11 @@ ovlcmd({
             }
         }
 
-        if (!type) {
-            await repondre(`❌ Action invalide : "${seq}"`);
-            return;
-        }
+        if (!type) return repondre(`❌ Action invalide : "${seq}"`);
 
         // Recherche du joueur concerné dans le lineup
         const joueur = lineup.find(j => seqClean.includes(j.nom.toLowerCase()));
-
-        if (!joueur) {
-            await repondre(`❌ Joueur introuvable dans : "${seq}"`);
-            return;
-        }
+        if (!joueur) return repondre(`❌ Joueur introuvable dans : "${seq}"`);
 
         // Appel de la fonction correspondante à l'action
         switch (type) {
@@ -507,7 +501,7 @@ ovlcmd({
         text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
     });
-});
+}); 
 
 /* ===============================
 GESTION DES DÉPLACEMENTS
