@@ -375,12 +375,6 @@ Le match commence dans *1 minute* 🥅⚽...`;
         }
     }
 
-    /* ===============================
-    🎮 LECTURE DES PAVÉS (UNE SEULE FOIS)
-    =================================*/
-    await lirePaveAction(ms, ovl);
-}
-
 /* ===============================
 LANCEMENT MATCH
 =================================*/
