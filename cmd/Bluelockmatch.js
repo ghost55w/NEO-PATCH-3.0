@@ -291,6 +291,8 @@ async function messageMatch(ms, ovl) {
     console.log("📩 MESSAGE REÇU");
 
     const chat = ms.key.remoteJid;
+const match = matchsActifs.get(chat);
+if (!match) return;
 
     const rawText =
         ms.message.conversation ||
@@ -382,25 +384,23 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
     if (match.kickoffStarted) return;
+
     match.kickoffStarted = true;
 
     const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
+
     match.possession = premier;
     match.etat = "en_cours";
     match.joueurTour = premier === match.team1Nom ? match.id1 : match.id2;
 
-    const imagesKickoff = ["https://files.catbox.moe/onotk4.jpg", "https://files.catbox.moe/kfw0bl.jpg"];
-    const imageRandom = imagesKickoff[Math.floor(Math.random() * imagesKickoff.length)];
     const jidStart = match.joueurTour;
 
     await ovl.sendMessage(chat, {
-        image: { url: imageRandom },
         caption: `🎙️⚽: KICK OFF🥅‼️ @${premier} débute avec la possession...`,
         mentions: [jidStart]
     });
 
     match.timerPave = setTimeout(async () => {
-        const jidStart = premier === match.team1Nom ? match.id1 : match.id2;
         await ovl.sendMessage(chat, {
             text: `⏰ @${premier} LATENCE OUT! ❌.`,
             mentions: [jidStart]
@@ -418,29 +418,18 @@ ovlcmd({
 
     const chat = ms_org.from || ms_org.key?.remoteJid;
     const match = matchsActifs.get(chat);
+
     if (!match || match.etat !== "en_cours") return;
 
-    // ===============================
-    // DETECTION PAVE (FIABLE)
-    // ===============================
     if (!texte.includes("⚽:") || !texte.includes("💬:")) return;
 
     const safeText = texte.replace(/\u200B/g, "").replace(/\r/g, "").trim();
 
-    // ===============================
-    // VERIFICATION TOUR
-    // ===============================
     const joueurTour = cleanJid(match.joueurTour);
     const senderClean = cleanJid(auteur_Message);
 
-    if (senderClean !== joueurTour) {
-        console.log("⛔ Pas ton tour :", senderClean);
-        return;
-    }
+    if (senderClean !== joueurTour) return;
 
-    // ===============================
-    // EXTRACTION ACTION
-    // ===============================
     const actionLine = safeText.split("\n").find(l => /⚽\s*:/.test(l));
     if (!actionLine) return;
 
@@ -452,9 +441,6 @@ ovlcmd({
 
     const sequences = actionClean.split("/").map(s => s.trim());
 
-    // ===============================
-    // LINEUP
-    // ===============================
     const isTeam1 = senderClean === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
@@ -462,9 +448,6 @@ ovlcmd({
         return repondre("❌ Lineup introuvable.");
     }
 
-    // ===============================
-    // TRAITEMENT ACTIONS
-    // ===============================
     for (const seq of sequences) {
 
         let type = null;
@@ -510,9 +493,6 @@ ovlcmd({
         }
     }
 
-    // ===============================
-    // NEXT JOUEUR
-    // ===============================
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
 
@@ -814,7 +794,8 @@ ovlcmd({
     desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
+        const chat = ms_org.from || ms_org.key?.remoteJid;
+const match = matchsActifs.get(chat);
 
         const match = matchsActifs.get(chat);
         if (!match) {
