@@ -1,4 +1,4 @@
-Wwww😇 const { ovlcmd } = require('../lib/ovlcmd');
+const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
@@ -767,17 +767,11 @@ async function gestionChancesTir(ms_org, ovl, joueurNomSaisi, zone, distance, ga
 GESTION DES DRIBBLES / ACCÉLÉRATIONS
 =================================*/
 // Ici tu ajouteras la fonction gestionDribbles(seq, carte, match, chat, ovl)    
+
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/
-
-
-
-
-
-
-
-
 ovlcmd({
     nom_cmd: "stopmatch⚽",
     classe: "BLUELOCK⚽",
@@ -785,11 +779,9 @@ ovlcmd({
     desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms.key?.remoteJid || ms.from;
-const match = matchsActifs.get(chat);
-if (!match) return;
-
+        const chat = ms_org.key?.remoteJid || ms_org.from;
         const match = matchsActifs.get(chat);
+
         if (!match) {
             return ovl.sendMessage(chat, {
                 text: "⚠️ Aucun match en cours dans ce groupe."
@@ -799,7 +791,7 @@ if (!match) return;
         matchsActifs.delete(chat);
 
         await ovl.sendMessage(chat, {
-            text: `⛔ Le match Blue Lock en cours a été arrêté!`
+            text: `⛔ Le match Blue Lock en cours a été arrêté !`
         });
 
     } catch (e) {
@@ -810,6 +802,5 @@ if (!match) return;
         });
     }
 });
-
 
 module.exports = { messageMatch, verifierFiche };
