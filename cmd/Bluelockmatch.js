@@ -379,14 +379,22 @@ async function lancerMatch(chat, ovl) {
     match.kickoffStarted = true;
 
     const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
-
     match.possession = premier;
     match.etat = "en_cours";
     match.joueurTour = premier === match.team1Nom ? match.id1 : match.id2;
 
     const jidStart = match.joueurTour;
 
+    // Images lancement match
+    const imagesKickOff = [
+        "https://files.catbox.moe/dlj5z6.jpg",
+        "https://files.catbox.moe/fdadd0.jpeg",
+        "https://files.catbox.moe/4104s3.jpg"
+    ];
+    const imageRandom = imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)];
+
     await ovl.sendMessage(chat, {
+        image: { url: imageRandom },
         caption: `🎙️⚽: KICK OFF🥅‼️ @${premier} débute avec la possession...`,
         mentions: [jidStart]
     });
@@ -398,7 +406,7 @@ async function lancerMatch(chat, ovl) {
         });
     }, 6 * 60 * 1000);
 }
-} 
+
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
