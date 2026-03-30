@@ -417,43 +417,30 @@ async function lancerMatch(chat, ovl) {
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
-async function lirePaveAction(ms, ovl) {
-    if (!ms.message) return;
+ovlcmd({
+    nom: "lirePaveAction",
+    isfunc: true
+}, async (ms_org, ovl, { texte, repondre, auteur_Message }) => {
 
-    const chat = ms.key.remoteJid;
-    const senderRaw = ms.key.participant || ms.key.remoteJid;
-    const sender = cleanJid(senderRaw);
-
+    const chat = ms_org;
     const match = matchsActifs.get(chat);
-    if (!match) return;
-    if (match.etat !== "en_cours") return;
-
-    const rawText =
-        ms.message.conversation ||
-        ms.message.extendedTextMessage?.text ||
-        ms.message.imageMessage?.caption ||
-        "";
-
-    if (!rawText) return;
-
-    const safeText = rawText.replace(/\u200B/g, "").replace(/\r/g, "").trim();
+    if (!match || match.etat !== "en_cours") return;
 
     // ===============================
-    // ATTENTE DU PAVÉ COMPLET 
+    // DETECTION PAVE (FIABLE)
     // ===============================
-    if (!safeText.includes("💬:") || !safeText.includes("⚽:")) {
-        console.log("⏳ Pavé incomplet, attente du message complet...");
-        return; // Ne rien faire tant que le pavé complet n'est pas là
-    }
+    if (!texte.includes("⚽:") || !texte.includes("💬:")) return;
 
-    console.log("📩 Pavé complet reçu, lecture en cours...");
+    const safeText = texte.replace(/\u200B/g, "").replace(/\r/g, "").trim();
 
     // ===============================
-    // VERIFICATION DU TOUR DU JOUEUR
+    // VERIFICATION TOUR
     // ===============================
     const joueurTour = cleanJid(match.joueurTour);
-    if (sender !== joueurTour) {
-        console.log("⛔ Pas le tour du joueur :", sender);
+    const senderClean = cleanJid(auteur_Message);
+
+    if (senderClean !== joueurTour) {
+        console.log("⛔ Pas ton tour :", senderClean);
         return;
     }
 
@@ -464,25 +451,28 @@ async function lirePaveAction(ms, ovl) {
     if (!actionLine) return;
 
     const actionClean = actionLine.replace(/⚽\s*:/g, "").trim();
+
     if (!actionClean || actionClean.length < 2) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Pavé vide ou aucune action détectée après ⚽:"
-        });
+        return repondre("❌ Aucune action détectée après ⚽:");
     }
 
-    // ===============================
-    // TRAITEMENT DES SEQUENCES
-    // ===============================
     const sequences = actionClean.split("/").map(s => s.trim());
 
-    const isTeam1 = sender === cleanJid(match.id1);
+    // ===============================
+    // LINEUP
+    // ===============================
+    const isTeam1 = senderClean === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
-    if (!lineup || !Array.isArray(lineup)) {
-        return ovl.sendMessage(chat, { text: "❌ Lineup introuvable." });
+    if (!Array.isArray(lineup)) {
+        return repondre("❌ Lineup introuvable.");
     }
 
+    // ===============================
+    // TRAITEMENT ACTIONS
+    // ===============================
     for (const seq of sequences) {
+
         let type = null;
         const seqClean = seq.toLowerCase();
 
@@ -494,28 +484,40 @@ async function lirePaveAction(ms, ovl) {
         }
 
         if (!type) {
-            await ovl.sendMessage(chat, { text: `❌ Aucune action valide détectée dans : "${seq}"` });
+            await repondre(`❌ Action invalide : "${seq}"`);
+            return;
+        }
+
+        const joueur = lineup.find(j =>
+            seqClean.includes(j.nom.toLowerCase())
+        );
+
+        if (!joueur) {
+            await repondre(`❌ Joueur introuvable dans : "${seq}"`);
             return;
         }
 
         switch (type) {
             case "tir":
-                await gestionTirs(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
+                await gestionTirs(seq, joueur, match, chat, ovl);
                 break;
+
             case "passe":
-                await gestionPasses(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
+                await gestionPasses(seq, joueur, match, chat, ovl);
                 break;
+
             case "dribble":
-                await gestionDribbles(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
+                await gestionDribbles(seq, joueur, match, chat, ovl);
                 break;
+
             case "deplacement":
-                await gestionDeplacements(seq, lineup.find(j => seq.includes(j.nom)), match, chat, ovl);
+                await gestionDeplacements(seq, joueur, match, chat, ovl);
                 break;
         }
     }
 
     // ===============================
-    // PASSAGE AU JOUEUR SUIVANT
+    // NEXT JOUEUR
     // ===============================
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
@@ -526,7 +528,7 @@ async function lirePaveAction(ms, ovl) {
         text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
     });
-}
+});
 
 /* ===============================
 GESTION DES DÉPLACEMENTS
