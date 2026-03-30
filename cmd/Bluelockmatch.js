@@ -387,9 +387,8 @@ async function lancerMatch(chat, ovl) {
 
     // Images lancement match
     const imagesKickOff = [
-        "https://files.catbox.moe/dlj5z6.jpg",
-        "https://files.catbox.moe/fdadd0.jpeg",
-        "https://files.catbox.moe/4104s3.jpg"
+        "https://files.catbox.moe/onotk4.jpg",
+        "https://files.catbox.moe/kfw0bl.jpg"
     ];
     const imageRandom = imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)];
 
