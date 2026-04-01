@@ -1958,6 +1958,16 @@ function determinePrice(rank) {
 }
 
 // --------------------
+// 🔵 CATÉGORIE SELON OVR
+// --------------------
+function determineCategory(ovr) {
+  if (ovr >= 100) return "world_class";
+  if (ovr >= 90) return "next_gen";
+  if (ovr >= 80) return "rare";
+  return "normal";
+}
+
+// --------------------
 // 🔵 CRÉATION D’UNE CARD
 // --------------------
 function createCardFromBlueLock(name, data) {
