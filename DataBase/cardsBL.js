@@ -1958,16 +1958,6 @@ function determinePrice(rank) {
 }
 
 // --------------------
-// 🔵 CATÉGORIE SELON OVR
-// --------------------
-function determineCategory(ovr) {
-  if (ovr >= 100) return "world_class";
-  if (ovr >= 90) return "next_gen";
-  if (ovr >= 80) return "rare";
-  return "normal";
-}
-
-// --------------------
 // 🔵 CRÉATION D’UNE CARD
 // --------------------
 function createCardFromBlueLock(name, data) {
@@ -1981,8 +1971,11 @@ function createCardFromBlueLock(name, data) {
     acc: data.acc,
     phy: data.phy,
     def: data.def,
-    goal: data.goal,
+    goal: data.goal || "",
     image: data.image,
+    pictures: data.pictures || [],
+    attitude: data.attitude || "calme",
+    weapons: data.weapons || [],
     rank: data.rank,
     taille: data.taille,
     pieds: data.pieds,
@@ -1996,36 +1989,6 @@ function createCardFromBlueLock(name, data) {
         : "normal"
   };
 }
-// --------------------
-// 🔵 CRÉATION D’UNE CARD
-// --------------------
-function createCardFromBlueLock(name, data) {
-  return {
-    name: data.name,
-    country: data.country,
-    ovr: data.ovr,
-    sho: data.sho,
-    dri: data.dri,
-    pas: data.pas,
-    acc: data.acc,
-    phy: data.phy,
-    def: data.def,
-    goal: data.goal, // ⬅️ conservé ici si tu en as besoin ailleurs
-    image: data.image,
-    rank: data.rank,
-    taille: data.taille,
-    pieds: data.pieds,
-    category: determineCategory(data.ovr),
-    price: determinePrice(data.rank) + (data.ovr * 1000),
-    placement:
-      data.rank === "SS"
-        ? "elite"
-        : data.rank === "S"
-        ? "world_class"
-        : "normal"
-  };
-}
-
 // --------------------
 // 🔵 GROUPER PAR PLACEMENT (SANS goal)
 // --------------------
