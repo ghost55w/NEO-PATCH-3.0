@@ -4718,3 +4718,104 @@ const cards = [
   Moves: "",
   Patterns: ""
   };
+
+function createCard(fileName, imageUrl) {
+  const parts = fileName.replace('.jpg', '').split('_');
+
+  const name = parts[0];
+  const grade = parts[1];
+
+  let placement = parts[2];
+  if (placement === 'legende' || placement === 'card_legende') {
+    placement = 'legend';
+  }
+
+  const category = determineCategory(parts[3]);
+  const priceData = determinePrice(parts[4]);
+
+  return {
+    name,
+    grade,
+    placement,
+    category,
+    price: priceData.price,
+    unit: priceData.unit,
+    image: imageUrl,
+
+    // 🔥 NOUVEAU
+    specs: generateSpecs(grade, placement),
+    Moves: generateMoves(name),
+    Patterns: generatePatterns(name)
+  };
+  }
+
+function determinePrice(pricePart) {
+  pricePart = pricePart.toLowerCase();
+
+  // NC
+  if (pricePart.endsWith('nc')) {
+    const value = parseInt(pricePart.replace(/[^\d]/g, ""));
+    return { price: value, unit: "nc" };
+  }
+
+  // GOLDS
+  let total = 0;
+  const priceRegex = /(\d+)([km]?)/g;
+  let match;
+
+  while ((match = priceRegex.exec(pricePart)) !== null) {
+    const value = parseInt(match[1]);
+    const unit = match[2];
+
+    if (unit === 'k') total += value * 1000;
+    else if (unit === 'm') total += value * 1_000_000;
+    else total += value;
+  }
+
+  return { price: total, unit: "golds" };
+}
+
+function determineCategory(categoryPart) {
+  switch (categoryPart) {
+    case 'sm': return 's-';
+    case 'sp': return 's+';
+    case 's': return 's';
+    case 'ssm': return 'ss-';
+    case 'ssp': return 'ss+';
+    case 'ss': return 'ss';
+    default: return 'inconnu';
+  }
+}
+
+function groupCardsByPlacement(cardsArray) {
+  const groupedCards = {};
+  for (const card of cardsArray) {
+    const placement = card.placement;
+    if (!groupedCards[placement]) {
+      groupedCards[placement] = [];
+    }
+    groupedCards[placement].push({
+  grade: card.grade,
+  name: card.name,
+  category: card.category,
+  image: card.image,
+  price: card.price,
+  unit: card.unit
+});
+  }
+  return groupedCards;
+}
+
+function generateCardsFromObject(cardsObject) {
+  const allCards = [];
+  for (const [fileName, url] of Object.entries(cardsObject)) {
+    if (fileName.endsWith('.jpg')) {
+      const card = createCard(fileName, url);
+      allCards.push(card);
+    }
+  }
+  return groupCardsByPlacement(allCards);
+}
+
+const cardData = generateCardsFromObject(cards);
+module.exports = { cards: cardData };
