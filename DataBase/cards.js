@@ -4734,18 +4734,34 @@ function generatePatterns(name) {
 // ---------------- Détermination du prix ----------------
 function determinePrice(pricePart) {
   if (!pricePart) return { price: 0, unit: "golds" };
-  pricePart = pricePart.toLowerCase();
+
+  pricePart = pricePart.toLowerCase().trim();
+
+  // Cas NC (ex: "420nc")
+  if (pricePart.endsWith("nc")) {
+    const value = parseInt(pricePart.replace(/[^\d]/g, ""));
+    return { price: value, unit: "nc" };
+  }
+
+  // Cas GOLDS (ex: "500k", "2m", "100")
   let total = 0;
   const priceRegex = /(\d+)([km]?)/g;
   let match;
   while ((match = priceRegex.exec(pricePart)) !== null) {
     const value = parseInt(match[1]);
     const unit = match[2];
-    if (unit === 'k') total += value * 1000;
-    else if (unit === 'm') total += value * 1_000_000;
+    if (unit === "k") total += value * 1000;
+    else if (unit === "m") total += value * 1_000_000;
     else total += value;
   }
+
   return { price: total, unit: "golds" };
+}
+
+// ---------------- Formatage pour affichage boutique ----------------
+function formatPrice(priceObj) {
+  if (priceObj.unit === "nc") return `${priceObj.price} 🔷`;
+  return priceObj.price.toLocaleString(); // ex: 500000 -> "500,000"
 }
 
 // ---------------- Détermination de la catégorie ----------------
@@ -4797,18 +4813,22 @@ function createCard(cardObj) {
 
 
 
-function determinePlacement(categoryPart) {
-  if (!categoryPart) return 'standard';
+function determinePlacement(category) {
+  if (!category) return 'standard';
+  const text = category.toLowerCase();
 
-  const text = categoryPart.toLowerCase();
+  // SP → Sparking
+  if (text.includes('sp')) return 'Sparking';
 
-  if (text.includes('ultra')) return 'Ultra';
-  if (text.includes('sparking')) return 'Sparking';
-  if (text.includes('legends')) return 'Legends';
+  // UL → Ultra
+  if (text.includes('ul')) return 'Ultra';
 
+  // LE → Legends
+  if (text.includes('le')) return 'Legends';
+
+  // Si aucun match
   return 'standard';
 }
-
 
 // ---------------- Grouper les cartes par placement ----------------
 function groupCardsByPlacement(cardsArray) {
