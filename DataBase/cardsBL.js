@@ -1945,15 +1945,11 @@ const cardsBlueLock = {
 };
   
 // --------------------
+// --------------------
 // 🔵 FONCTION PRIX
 // --------------------
 function determinePrice(rank) {
-  const rankPrices = {
-    "SS": 3000000,
-    "S": 1000000,
-    "A": 500000,
-    "B": 100000,
-  };
+  const rankPrices = { "SS": 3000000, "S": 1000000, "A": 500000, "B": 100000 };
   return rankPrices[rank] || 0;
 }
 
@@ -1970,7 +1966,7 @@ function determineCategory(ovr) {
 // --------------------
 // 🔵 CRÉATION D’UNE CARD
 // --------------------
-function createCardFromBlueLock(name, data) {
+function createCardFromBlueLock(data) {
   return {
     name: data.name,
     country: data.country,
@@ -1984,8 +1980,8 @@ function createCardFromBlueLock(name, data) {
     goal: data.goal || "",
     image: data.image,
     pictures: data.pictures || [],
-    attitude: data.attitude || "calme",
     weapons: data.weapons || [],
+    attitude: data.attitude || "calme",
     rank: data.rank,
     taille: data.taille,
     pieds: data.pieds,
@@ -1999,6 +1995,17 @@ function createCardFromBlueLock(name, data) {
         : "normal"
   };
 }
+
+// --------------------
+// 🔵 RECHERCHE PAR NAME
+// --------------------
+function findPlayerByName(input, cardsObject) {
+  const search = input.toLowerCase();
+  return Object.values(cardsObject).find(player =>
+    player.name.toLowerCase().includes(search)
+  );
+}
+
 // --------------------
 // 🔵 GROUPER PAR PLACEMENT (SANS goal)
 // --------------------
@@ -2017,7 +2024,9 @@ function groupCardsByPlacement(cardsArray) {
       image: card.image,
       price: card.price,
       taille: card.taille,
-      pieds: card.pieds
+      pieds: card.pieds,
+      attitude: card.attitude,
+      pictures: card.pictures
     });
   }
   return grouped;
@@ -2028,9 +2037,8 @@ function groupCardsByPlacement(cardsArray) {
 // --------------------
 function generateCardsFromBlueLock(cardsObject) {
   const all = [];
-  for (const [key, value] of Object.entries(cardsObject)) {
-    const card = createCardFromBlueLock(key, value);
-    all.push(card);
+  for (const player of Object.values(cardsObject)) {
+    all.push(createCardFromBlueLock(player));
   }
   return groupCardsByPlacement(all);
 }
@@ -2040,4 +2048,9 @@ function generateCardsFromBlueLock(cardsObject) {
 // --------------------
 const groupedCards = generateCardsFromBlueLock(cardsBlueLock);
 
-module.exports = { cardsBlueLock, groupedCards, generateCardsFromBlueLock };
+module.exports = {
+  cardsBlueLock,
+  groupedCards,
+  generateCardsFromBlueLock,
+  findPlayerByName
+};
