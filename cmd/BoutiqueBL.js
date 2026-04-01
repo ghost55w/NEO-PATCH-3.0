@@ -7,7 +7,7 @@ const { BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { getUserData: getLineup, updatePlayers } = BlueLockFunctions;
 const config = require("../set");
 
-const allCards = Object.values(cardsBlueLock).map(player => ({
+const allCardsBL = Object.values(cardsBlueLock).map(player => ({
   name: player.name,
   country: player.country,
   ovr: player.ovr,
@@ -267,8 +267,8 @@ pour fermer la session de boutique 👉🏽 close.
       if (!query) { await repondre("❌ Tu dois écrire un nom après ':'"); userInput = await waitFor(); continue; }
 
       const q = query.replace(/[\s\-\_]/g, "");
-      let card = allCards.find(c => c.name.toLowerCase().replace(/[\s\-\_]/g, "") === q)
-              || allCards.find(c => c.name.toLowerCase().replace(/[\s\-\_]/g, "").includes(q));
+      let card = allCardsBL.find(c => c.name.toLowerCase().replace(/[\s\-\_]/g, "") === q)
+              || allCardsBL.find(c => c.name.toLowerCase().replace(/[\s\-\_]/g, "").includes(q));
 
       if (!card) { await repondre(`❌ Aucune carte trouvée pour : ${query}`); userInput = await waitFor(); continue; }
 
