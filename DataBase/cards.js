@@ -4720,8 +4720,7 @@ const cards = [
 }
 ];
 
-
-----------------
+// ---------------- Fonctions utilitaires ----------------
 function generateSpecs(grade, placement) {
   return `Specs pour ${grade} - ${placement || 'standard'}`;
 }
@@ -4734,7 +4733,7 @@ function generatePatterns(name) {
 
 // ---------------- Détermination du prix ----------------
 function determinePrice(pricePart) {
-  if (!pricePart) return { price: 0, unit: "golds" }; // protection si vide
+  if (!pricePart) return { price: 0, unit: "golds" };
   pricePart = pricePart.toLowerCase();
   let total = 0;
   const priceRegex = /(\d+)([km]?)/g;
@@ -4751,7 +4750,7 @@ function determinePrice(pricePart) {
 
 // ---------------- Détermination de la catégorie ----------------
 function determineCategory(categoryPart) {
-  if (!categoryPart) return 'inconnu'; // protection si vide ou undefined
+  if (!categoryPart) return 'inconnu';
   switch (categoryPart.toLowerCase()) {
     case 'sm': return 's-';
     case 'sp': return 's+';
@@ -4766,15 +4765,16 @@ function determineCategory(categoryPart) {
 // ---------------- Création d'une carte ----------------
 function createCard(cardObj) {
   const priceData = determinePrice(cardObj.price);
+  const placement = cardObj.placement || 'standard';
   return {
     name: cardObj.name || 'Inconnu',
     grade: cardObj.grade || 'Standard',
-    placement: cardObj.placement || 'standard',
+    placement: placement,
     category: determineCategory(cardObj.category),
     price: priceData.price,
     unit: priceData.unit,
     image: cardObj.card || '',
-    specs: generateSpecs(cardObj.grade, cardObj.placement),
+    specs: generateSpecs(cardObj.grade, placement),
     Moves: generateMoves(cardObj.name),
     Patterns: generatePatterns(cardObj.name)
   };
@@ -4787,12 +4787,15 @@ function groupCardsByPlacement(cardsArray) {
     const placement = card.placement || 'standard';
     if (!groupedCards[placement]) groupedCards[placement] = [];
     groupedCards[placement].push({
-      grade: card.grade,
       name: card.name,
+      grade: card.grade,
       category: card.category,
       image: card.image,
       price: card.price,
-      unit: card.unit
+      unit: card.unit,
+      specs: card.specs,
+      Moves: card.Moves,
+      Patterns: card.Patterns
     });
   }
   return groupedCards;
