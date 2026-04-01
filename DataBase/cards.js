@@ -4772,7 +4772,7 @@ function determineCategory(categoryPart) {
 
 // ---------------- Création d'une carte ----------------
 function createCard(cardObj) {
-  const rawPrice = cardObj.price ?? cardObj.Price ?? cardObj.PRICE;
+  const rawPrice = cardObj.price || cardObj.Price || cardObj.PRICE;
   const priceData = determinePrice(rawPrice);
 
   const placement = cardObj.placement || determinePlacement(cardObj.category);
@@ -4790,10 +4790,12 @@ function createCard(cardObj) {
 
     specs: cardObj.specs || generateSpecs(cardObj.grade, placement),
 
-    Moves: cardObj.Moves ?? cardObj.moves ?? generateMoves(cardObj.name),
-    Patterns: cardObj.Patterns ?? cardObj.patterns ?? generatePatterns(cardObj.name)
+    Moves: cardObj.Moves || cardObj.moves || generateMoves(cardObj.name),
+    Patterns: cardObj.Patterns || cardObj.patterns || generatePatterns(cardObj.name)
   };
 }
+
+
 
 function determinePlacement(categoryPart) {
   if (!categoryPart) return 'standard';
