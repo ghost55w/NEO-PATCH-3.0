@@ -4721,6 +4721,7 @@ const cards = [
 ];
 
 
+----------------
 function generateSpecs(grade, placement) {
   return `Specs pour ${grade} - ${placement || 'standard'}`;
 }
@@ -4731,8 +4732,9 @@ function generatePatterns(name) {
   return `Patterns de ${name}`;
 }
 
-// --- Détermination du prix ---
+// ---------------- Détermination du prix ----------------
 function determinePrice(pricePart) {
+  if (!pricePart) return { price: 0, unit: "golds" }; // protection si vide
   pricePart = pricePart.toLowerCase();
   let total = 0;
   const priceRegex = /(\d+)([km]?)/g;
@@ -4747,8 +4749,9 @@ function determinePrice(pricePart) {
   return { price: total, unit: "golds" };
 }
 
-// --- Catégorie simplifiée ---
+// ---------------- Détermination de la catégorie ----------------
 function determineCategory(categoryPart) {
+  if (!categoryPart) return 'inconnu'; // protection si vide ou undefined
   switch (categoryPart.toLowerCase()) {
     case 'sm': return 's-';
     case 'sp': return 's+';
@@ -4760,28 +4763,28 @@ function determineCategory(categoryPart) {
   }
 }
 
-// --- Création d'une carte depuis un objet existant ---
+// ---------------- Création d'une carte ----------------
 function createCard(cardObj) {
   const priceData = determinePrice(cardObj.price);
   return {
-    name: cardObj.name,
-    grade: cardObj.grade,
+    name: cardObj.name || 'Inconnu',
+    grade: cardObj.grade || 'Standard',
     placement: cardObj.placement || 'standard',
     category: determineCategory(cardObj.category),
     price: priceData.price,
     unit: priceData.unit,
-    image: cardObj.card,
+    image: cardObj.card || '',
     specs: generateSpecs(cardObj.grade, cardObj.placement),
     Moves: generateMoves(cardObj.name),
     Patterns: generatePatterns(cardObj.name)
   };
 }
 
-// --- Grouper les cartes par placement ---
+// ---------------- Grouper les cartes par placement ----------------
 function groupCardsByPlacement(cardsArray) {
   const groupedCards = {};
   for (const card of cardsArray) {
-    const placement = card.placement;
+    const placement = card.placement || 'standard';
     if (!groupedCards[placement]) groupedCards[placement] = [];
     groupedCards[placement].push({
       grade: card.grade,
@@ -4795,9 +4798,8 @@ function groupCardsByPlacement(cardsArray) {
   return groupedCards;
 }
 
-// --- Génération finale ---
+// ---------------- Génération finale ----------------
 const allCards = cards.map(c => createCard(c));
 const cardData = groupCardsByPlacement(allCards);
 
 module.exports = { cards: cardData };
- 
