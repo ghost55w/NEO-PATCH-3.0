@@ -4718,6 +4718,7 @@ const cards = [
   Moves: "",
   Patterns: ""
   };
+];
 
 function createCard(fileName, imageUrl) {
   const parts = fileName.replace('.jpg', '').split('_');
@@ -4741,8 +4742,6 @@ function createCard(fileName, imageUrl) {
     price: priceData.price,
     unit: priceData.unit,
     image: imageUrl,
-
-    // 🔥 NOUVEAU
     specs: generateSpecs(grade, placement),
     Moves: generateMoves(name),
     Patterns: generatePatterns(name)
