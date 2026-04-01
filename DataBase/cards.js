@@ -4704,8 +4704,8 @@ const cards = [
   card: "https://files.catbox.moe/dgoqx7.jpg",
   Price: "100k",
   specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  moves: "",
+  patterns: ""
 },
 {
   name: "Zorro",
@@ -4751,34 +4751,62 @@ function determinePrice(pricePart) {
 // ---------------- Détermination de la catégorie ----------------
 function determineCategory(categoryPart) {
   if (!categoryPart) return 'inconnu';
-  switch (categoryPart.toLowerCase()) {
-    case 'sm': return 's-';
-    case 'sp': return 's+';
-    case 's': return 's';
-    case 'ssm': return 'ss-';
-    case 'ssp': return 'ss+';
-    case 'ss': return 'ss';
+
+  const text = categoryPart.toLowerCase();
+
+  // 🔍 On extrait juste le code (sm, sp, ss...)
+  const match = text.match(/ssm|ssp|ss|sm|sp|s/);
+
+  if (!match) return 'inconnu';
+
+  switch (match[0]) {
+    case 'sm': return 'S-';
+    case 'sp': return 'S+';
+    case 's': return 'S';
+    case 'ssm': return 'SS-';
+    case 'ssp': return 'SS+';
+    case 'ss': return 'SS';
     default: return 'inconnu';
   }
 }
 
 // ---------------- Création d'une carte ----------------
 function createCard(cardObj) {
-  const priceData = determinePrice(cardObj.price);
-  const placement = cardObj.placement || 'standard';
+  const rawPrice = cardObj.price ?? cardObj.Price ?? cardObj.PRICE;
+  const priceData = determinePrice(rawPrice);
+
+  const placement = cardObj.placement || determinePlacement(cardObj.category);
+
   return {
     name: cardObj.name || 'Inconnu',
     grade: cardObj.grade || 'Standard',
     placement: placement,
     category: determineCategory(cardObj.category),
+
     price: priceData.price,
     unit: priceData.unit,
+
     image: cardObj.card || '',
-    specs: generateSpecs(cardObj.grade, placement),
-    Moves: generateMoves(cardObj.name),
-    Patterns: generatePatterns(cardObj.name)
+
+    specs: cardObj.specs || generateSpecs(cardObj.grade, placement),
+
+    Moves: cardObj.Moves ?? cardObj.moves ?? generateMoves(cardObj.name),
+    Patterns: cardObj.Patterns ?? cardObj.patterns ?? generatePatterns(cardObj.name)
   };
 }
+
+function determinePlacement(categoryPart) {
+  if (!categoryPart) return 'standard';
+
+  const text = categoryPart.toLowerCase();
+
+  if (text.includes('ultra')) return 'Ultra';
+  if (text.includes('sparking')) return 'Sparking';
+  if (text.includes('legends')) return 'Legends';
+
+  return 'standard';
+}
+
 
 // ---------------- Grouper les cartes par placement ----------------
 function groupCardsByPlacement(cardsArray) {
