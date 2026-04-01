@@ -7,6 +7,27 @@ const { BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { getUserData: getLineup, updatePlayers } = BlueLockFunctions;
 const config = require("../set");
 
+const allCards = Object.values(cardsBlueLock).map(player => ({
+  name: player.name,
+  country: player.country,
+  ovr: player.ovr,
+  sho: player.sho,
+  dri: player.dri,
+  pas: player.pas,
+  acc: player.acc,
+  phy: player.phy,
+  def: player.def,
+  goal: player.goal || "",
+  image: player.image,
+  pictures: player.pictures || [],
+  weapons: player.weapons || [],
+  attitude: player.attitude || "calme",
+  rank: player.rank,
+  taille: player.taille,
+  pieds: player.pieds,
+  price: determinePrice(player.rank) + (player.ovr * 1000)
+}));
+
 // --- UTILITAIRES ---
 const formatNumber = n => {
   try { 
