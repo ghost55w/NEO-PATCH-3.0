@@ -409,6 +409,9 @@ async function lancerMatch(chat, ovl) {
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
+/* ===============================
+LECTURE DES PAVÉS - TOUR DE CONTRÔLE
+=================================*/
 ovlcmd({
     nom: "lire_pave",
     isfunc: true
@@ -421,14 +424,15 @@ ovlcmd({
     const safeText = safeTextRaw.toLowerCase().replace(/\n/g, "");
 
     // ===============================
-// 📦 DETECTION PAVÉ BLUELOCK
-// ===============================
-const isPave =
-    safeText.includes("⚽match🥅") &&
-    safeText.includes("⚽:") &&
-    safeText.includes("🔷bluelock⚽🥅");
+    // 📦 DETECTION PAVÉ BLUELOCK
+    // ===============================
+    const isPave =
+        safeText.includes("⚽match🥅") &&
+        safeText.includes("⚽:") &&
+        safeText.includes("🔷bluelock⚽🥅");
 
-if (!isPave) return;
+    if (!isPave) return;
+
     // Récupération du match actif
     const chat = ms_org.key?.remoteJid || ms_org.from;
     const match = matchsActifs.get(chat);
@@ -442,37 +446,37 @@ if (!isPave) return;
     }
 
     // ===============================
-// 🎭 EXTRACTION DIALOGUE + ACTION
-// ===============================
-const lignes = safeTextRaw.split("\n");
+    // 🎭 EXTRACTION DIALOGUE + ACTION
+    // ===============================
+    const lignes = safeTextRaw.split("\n");
 
-// 💬 Dialogue
-const dialogueLine = lignes.find(l => l.trim().startsWith("💬"));
-const dialogue = dialogueLine
-    ? dialogueLine.replace(/💬\s*:/, "").trim()
-    : "";
+    // 💬 Dialogue
+    const dialogueLine = lignes.find(l => l.trim().startsWith("💬"));
+    const dialogue = dialogueLine
+        ? dialogueLine.replace(/💬\s*:/, "").trim()
+        : "";
 
-// ⚽ Action
-const actionLine = lignes.find(l => l.trim().startsWith("⚽"));
-const actionRaw = actionLine
-    ? actionLine.replace(/⚽\s*:/, "").trim()
-    : "";
+    // ⚽ Action
+    const actionLine = lignes.find(l => l.trim().startsWith("⚽"));
+    const actionRaw = actionLine
+        ? actionLine.replace(/⚽\s*:/, "").trim()
+        : "";
 
-// Si aucune action
-if (!actionRaw || actionRaw.length < 2) {
-    return repondre("❌ Aucune action détectée après ⚽:");
-}
-    
+    // Si aucune action après ⚽:
+    if (!actionRaw) {
+        return repondre("❌ Aucune action détectée après ⚽:");
+    }
+
     // Découpe des actions (séparées par /)
     const sequences = actionRaw
-    .split("/")
-    .map(s => s.trim())
-    .filter(Boolean);
+        .split("/")
+        .map(s => s.trim())
+        .filter(Boolean);
 
     if (dialogue) {
-    await ovl.sendMessage(ms_org, {
-        text: `💬 ${dialogue}`
-    });
+        await ovl.sendMessage(ms_org, {
+            text: `💬 ${dialogue}`
+        });
     }
 
     // Détermine l'équipe du joueur
@@ -499,22 +503,6 @@ if (!actionRaw || actionRaw.length < 2) {
         // Recherche du joueur concerné dans le lineup
         const joueur = lineup.find(j => seqClean.includes(j.nom.toLowerCase()));
         if (!joueur) return repondre(`❌ Joueur introuvable dans : "${seq}"`);
-
-        // Appel de la fonction correspondante à l'action
-        switch (type) {
-            case "tir":
-                await gestionTirs(seq, joueur, match, ms_org, ovl);
-                break;
-            case "passe":
-                await gestionPasses(seq, joueur, match, ms_org, ovl);
-                break;
-            case "dribble":
-                await gestionDribbles(seq, joueur, match, ms_org, ovl);
-                break;
-            case "deplacement":
-                await gestionDeplacements(seq, joueur, match, ms_org, ovl);
-                break;
-        }
     }
 
     // Passage au joueur suivant
@@ -529,280 +517,7 @@ if (!actionRaw || actionRaw.length < 2) {
         text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
     });
-}); 
-
-/* ===============================
-GESTION DES DÉPLACEMENTS
-=================================*/
-async function gestionDeplacements(seq, carte, match, chat, ovl) {
-    // Extraire zones départ et arrivée
-    const departMatch = seq.match(/\((A1|A2|B1|B2|C1|C2)\)/i);
-    const arriveeMatch = seq.match(
-    /(vers|en)\s+(A1|A2|B1|B2|C1|C2)|(?:la\s+)?zone\s+(A1|A2|B1|B2|C1|C2)/i
-);
-    if (!departMatch || !arriveeMatch) {
-        return ovl.sendMessage(chat, { text: "❌ Impossible de déterminer les zones." });
-    }
-
-    const depart = departMatch[1].toUpperCase();
-    const arrivee = (
-    arriveeMatch?.[2] ||
-    arriveeMatch?.[3] ||
-    arriveeMatch?.[4]
-)?.toUpperCase();
-
-    // Vérification distance max 10m
-    const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
-    const dist = Math.abs(DISTANCES[depart] - DISTANCES[arrivee]);
-    if (dist > 10) {
-        return ovl.sendMessage(chat, { text: "❌ Déplacement trop long, action annulée." });
-    }
-
-    // Vérification espacement minimal
-    match.positions = match.positions || {};
-    for (const pid in match.positions) {
-        if (pid === carte.nom) continue;
-        if (match.positions[pid] === arrivee) {
-            return ovl.sendMessage(chat, { text: `❌ ${carte.nom} trop proche d'un autre joueur dans la zone cible.` });
-        }
-    }
-
-    // Mise à jour position du joueur
-    carte.positionActuelle = arrivee;
-    match.positions[carte.nom] = arrivee;
-
-    await ovl.sendMessage(chat, { text: `✅ ${carte.nom} se déplace de ${depart} vers ${arrivee} avec succès !` });
-}
-
-/* ===============================
-GESTION DES PASSES 
-=================================*/
-async function gestionPasses(seq, carte, match, chat, ovl) {
-
-    const texte = seq.toLowerCase();
-
-    /* ===============================
-    1️⃣ DETECTION TYPE DE PASSE
-    ==============================*/
-    const typePasse = MOTS_CLES_PASSES.types.find(t => texte.includes(t));
-
-    if (!typePasse) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Type de passe manquant ou invalide."
-        });
-    }
-
-    const modele = TYPES_PASSES[typePasse];
-
-    /* ===============================
-    2️⃣ VALIDATION MOTS CLÉS 🧩
-    ==============================*/
-    let score = 0;
-    let total = 0;
-    let manquants = [];
-
-    function check(categorie) {
-        total++;
-        const ok = categorie.some(m => texte.includes(m));
-        if (ok) score++;
-        else manquants.push(categorie[0]);
-    }
-
-    check(MOTS_CLES_PASSES.types);
-    check(MOTS_CLES_PASSES.pied);
-    check(MOTS_CLES_PASSES.zonesPied);
-    check(MOTS_CLES_PASSES.directions);
-    check(MOTS_CLES_PASSES.hauteurs);
-    check(MOTS_CLES_PASSES.zonesCible);
-
-    // Distance
-    total++;
-    const distMatch = texte.match(/(\d+)\s?m/);
-    let distance = distMatch ? parseInt(distMatch[1]) : null;
-
-    if (distance && distance <= MOTS_CLES_PASSES.distanceMax) {
-        score++;
-    } else {
-        manquants.push("distance valide (max 30m)");
-    }
-
-    const pourcentage = Math.floor((score / total) * 100);
-
-    /* ===============================
-    3️⃣ ECHEC SI MOT CLÉ MANQUANT
-    ==============================*/
-    if (score < total) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Passe ratée !
-📊 Validation: ${pourcentage}%
-❗ Manquant: ${manquants.join(", ")}`
-        });
-    }
-
-    /* ===============================
-    4️⃣ EXTRACTION RECEVEUR
-    ==============================*/
-    const receveurMatch = texte.match(/vers\s+([^\s]+)/i);
-    if (!receveurMatch) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Aucun receveur trouvé."
-        });
-    }
-
-    const receveurNom = receveurMatch[1];
-    const receveur = trouverCarteJoueur(receveurNom);
-
-    if (!receveur) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Joueur receveur introuvable : ${receveurNom}`
-        });
-    }
-
-    /* ===============================
-    5️⃣ INTERCEPTION (SEULE CAUSE D'ÉCHEC)
-    ==============================*/
-    const interception = await verifierInterceptionHauteur(
-        match,
-        texte,
-        receveur.positionActuelle,
-        carte,
-        chat,
-        ovl,
-        typePasse
-    );
-
-    if (interception) return;
-
-    /* ===============================
-    6️⃣ PASSE REUSSIE ✅
-    ==============================*/
-    match.ballZone = receveur.positionActuelle;
-
-    let effet = "";
-    switch(typePasse) {
-        case "passe trivela": effet = "🎯 Effet extérieur"; break;
-        case "passe enroulée": effet = "🌀 Effet enroulé"; break;
-        case "passe lobbée": effet = "⛅ Ballon lobé"; break;
-        case "centre": effet = "⚡ Centre aérien"; break;
-        case "passe longue": effet = "🚀 Long ballon"; break;
-        default: effet = "↗ Passe directe"; break;
-    }
-
-    await ovl.sendMessage(chat, {
-        text: `✅ Passe réussie !
-📊 Validation: ${pourcentage}%
-🎯 ${carte.nom} → ${receveur.nom}
-🧩 Type: ${typePasse}
-${effet}`
-    });
-}
-
-
-
-/* ===============================
-GESTION DES TIRS
-=================================*/
-async function gestionChancesTir(ms_org, ovl, joueurNomSaisi, zone, distance, gardienMatch) {
-    // Normalisation du nom du joueur
-    const nomNormalise = joueurNomSaisi.trim().toLowerCase().replace(/\s+/g, ' ');
-
-    // Recherche du joueur dans la DB
-    const joueurData = Object.values(cardsBlueLock).find(j => {
-        const nameNormalized = j.nom.trim().toLowerCase().replace(/\s+/g, ' ');
-        return nameNormalized === nomNormalise;
-    });
-
-    if (!joueurData) {
-        return ovl.sendMessage(ms_org, {
-            text: `⚠️ Joueur non trouvé dans la database : *${joueurNomSaisi}*`
-        });
-    }
-
-    const tirPuissance = parseInt(joueurData.tir || 50, 10);
-    const sho = parseInt(joueurData.sho || 50, 10);
-    const gardien = parseInt(gardienMatch || 50, 10);
-    distance = parseFloat(distance || 3);
-
-    let probaGoal = 0;
-    const ecart = sho - gardien;
-
-    // Calcul probabilité selon distance et écart
-    if (distance <= 5) {
-        probaGoal = ecart > 10 ? 1.0 : ecart > 0 ? 0.85 : ecart === 0 ? 0.5 : 0;
-    } else if (distance <= 10) {
-        probaGoal = ecart > 10 ? 0.9 : ecart > 0 ? 0.65 : ecart === 0 ? 0.3 : ecart >= -5 ? 0.2 : 0;
-    } else {
-        probaGoal = ecart > 10 ? 0.85 : ecart > 0 ? 0.6 : ecart === 0 ? 0.2 : ecart >= -5 ? 0.1 : 0;
-    }
-
-    const tirAleatoire = Math.random();
-    const resultat = tirAleatoire <= probaGoal ? "but" : "arrêt";
-
-    if (resultat === "but") {
-        const commentaires = {
-            "lucarne droite": [
-                `*🎙️: COMME UN MISSILE GUIDÉ ! ${joueurData.nom} envoie le ballon dans la lucarne droite - splendide !*`,
-                `*🎙️: UNE FRAPPE POUR L'HISTOIRE ! ${joueurData.nom} explose la lucarne droite !*`
-            ],
-            "lucarne gauche": [
-                `*🎙️: MAGNIFIQUE ! ${joueurData.nom} pulvérise la lucarne gauche !*`,
-                `*🎙️: UNE PRÉCISION D'ORFÈVRE ! ${joueurData.nom} touche la lucarne gauche, gardien impuissant !*`
-            ],
-            "lucarne milieu": [
-                `*🎙️: JUSTE SOUS LA BARRE ! ${joueurData.nom} centre magistralement !*`,
-                `*🎙️: UNE FUSÉE POUR LES LIVRES ! ${joueurData.nom} en pleine lucarne centrale !*`
-            ],
-            "mi-hauteur droite": [`*🎙️: UNE FRAPPE SÈCHE ET PRÉCISE ! ${joueurData.nom} transperce les filets droits !*`],
-            "mi-hauteur gauche": [`*🎙️: PUISSANCE ET PRÉCISION ! ${joueurData.nom} traverse la défense à gauche !*`],
-            "mi-hauteur centre": [`*🎙️: UNE FUSÉE AU CENTRE ! ${joueurData.nom} frappe en plein milieu à mi-hauteur !*`],
-            "ras du sol droite": [`*🎙️: ENTRE LES JAMBES ! ${joueurData.nom} glisse le ballon à ras du sol côté droit !*`],
-            "ras du sol gauche": [`*🎙️: UNE RACLÉE TECHNIQUE ! ${joueurData.nom} rase le sol à gauche !*`],
-            "ras du sol milieu": [`*🎙️: UNE FINALE DE CLASSE ! ${joueurData.nom} envoie le ballon au sol, en plein centre !*`]
-        };
-
-        if (!commentaires[zone]) {
-            return ovl.sendMessage(ms_org, {
-                text: `Zone inconnue : *${zone}*\nZones valides :\n- ${Object.keys(commentaires).join("\n- ")}`
-            });
-        }
-
-        const commentaire = commentaires[zone][Math.floor(Math.random() * commentaires[zone].length)];
-
-        // GIF GOAL
-        const videoGoal = [
-            "https://files.catbox.moe/chcn2d.mp4",
-            "https://files.catbox.moe/t04dmz.mp4",
-            "https://files.catbox.moe/8t1eya.mp4"
-        ][Math.floor(Math.random() * 3)];
-
-        await ovl.sendMessage(ms_org, {
-            video: { url: videoGoal },
-            caption: `*🥅:✅GOOAAAAAL!!!⚽⚽⚽ ▱▱▱▱*\n${commentaire}`,
-            gifPlayback: true
-        });
-
-        // GIF spécifique du joueur si défini
-        if (joueurData.goal) {
-            await ovl.sendMessage(ms_org, {
-                video: { url: joueurData.goal },
-                caption: "",
-                gifPlayback: true
-            });
-        }
-
-    } else {
-        // Tir raté
-        await ovl.sendMessage(ms_org, {
-            video: { url: 'https://files.catbox.moe/88lylr.mp4' },
-            caption: "*🥅:❌MISSED GOAL!!! ▱▱▱▱*",
-            gifPlayback: true
-        });
-    }
-}
-/* ===============================
-GESTION DES DRIBBLES / ACCÉLÉRATIONS
-=================================*/
-// Ici tu ajouteras la fonction gestionDribbles(seq, carte, match, chat, ovl)    
+});
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
