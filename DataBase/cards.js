@@ -4717,104 +4717,87 @@ const cards = [
   specs: "force:, speed:, attacks:",
   Moves: "",
   Patterns: ""
-  };
+}
 ];
 
-function createCard(fileName, imageUrl) {
-  const parts = fileName.replace('.jpg', '').split('_');
 
-  const name = parts[0];
-  const grade = parts[1];
+function generateSpecs(grade, placement) {
+  return `Specs pour ${grade} - ${placement || 'standard'}`;
+}
+function generateMoves(name) {
+  return `Moves de ${name}`;
+}
+function generatePatterns(name) {
+  return `Patterns de ${name}`;
+}
 
-  let placement = parts[2];
-  if (placement === 'legende' || placement === 'card_legende') {
-    placement = 'legend';
-  }
-
-  const category = determineCategory(parts[3]);
-  const priceData = determinePrice(parts[4]);
-
-  return {
-    name,
-    grade,
-    placement,
-    category,
-    price: priceData.price,
-    unit: priceData.unit,
-    image: imageUrl,
-    specs: generateSpecs(grade, placement),
-    Moves: generateMoves(name),
-    Patterns: generatePatterns(name)
-  };
-  }
-
+// --- Détermination du prix ---
 function determinePrice(pricePart) {
   pricePart = pricePart.toLowerCase();
-
-  // NC
-  if (pricePart.endsWith('nc')) {
-    const value = parseInt(pricePart.replace(/[^\d]/g, ""));
-    return { price: value, unit: "nc" };
-  }
-
-  // GOLDS
   let total = 0;
   const priceRegex = /(\d+)([km]?)/g;
   let match;
-
   while ((match = priceRegex.exec(pricePart)) !== null) {
     const value = parseInt(match[1]);
     const unit = match[2];
-
     if (unit === 'k') total += value * 1000;
     else if (unit === 'm') total += value * 1_000_000;
     else total += value;
   }
-
   return { price: total, unit: "golds" };
 }
 
+// --- Catégorie simplifiée ---
 function determineCategory(categoryPart) {
-  switch (categoryPart) {
-    case 'sm': return 's-';
-    case 'sp': return 's+';
-    case 's': return 's';
-    case 'ssm': return 'ss-';
-    case 'ssp': return 'ss+';
-    case 'ss': return 'ss';
-    default: return 'inconnu';
-  }
+  switch (categoryPart.toLowerCase()) {
+    case 'sm': return 's-';
+    case 'sp': return 's+';
+    case 's': return 's';
+    case 'ssm': return 'ss-';
+    case 'ssp': return 'ss+';
+    case 'ss': return 'ss';
+    default: return 'inconnu';
+  }
 }
 
+// --- Création d'une carte depuis un objet existant ---
+function createCard(cardObj) {
+  const priceData = determinePrice(cardObj.price);
+  return {
+    name: cardObj.name,
+    grade: cardObj.grade,
+    placement: cardObj.placement || 'standard',
+    category: determineCategory(cardObj.category),
+    price: priceData.price,
+    unit: priceData.unit,
+    image: cardObj.card,
+    specs: generateSpecs(cardObj.grade, cardObj.placement),
+    Moves: generateMoves(cardObj.name),
+    Patterns: generatePatterns(cardObj.name)
+  };
+}
+
+// --- Grouper les cartes par placement ---
 function groupCardsByPlacement(cardsArray) {
-  const groupedCards = {};
-  for (const card of cardsArray) {
-    const placement = card.placement;
-    if (!groupedCards[placement]) {
-      groupedCards[placement] = [];
-    }
-    groupedCards[placement].push({
-  grade: card.grade,
-  name: card.name,
-  category: card.category,
-  image: card.image,
-  price: card.price,
-  unit: card.unit
-});
-  }
-  return groupedCards;
+  const groupedCards = {};
+  for (const card of cardsArray) {
+    const placement = card.placement;
+    if (!groupedCards[placement]) groupedCards[placement] = [];
+    groupedCards[placement].push({
+      grade: card.grade,
+      name: card.name,
+      category: card.category,
+      image: card.image,
+      price: card.price,
+      unit: card.unit
+    });
+  }
+  return groupedCards;
 }
 
-function generateCardsFromObject(cardsObject) {
-  const allCards = [];
-  for (const [fileName, url] of Object.entries(cardsObject)) {
-    if (fileName.endsWith('.jpg')) {
-      const card = createCard(fileName, url);
-      allCards.push(card);
-    }
-  }
-  return groupCardsByPlacement(allCards);
-}
+// --- Génération finale ---
+const allCards = cards.map(c => createCard(c));
+const cardData = groupCardsByPlacement(allCards);
 
-const cardData = generateCardsFromObject(cards);
 module.exports = { cards: cardData };
+ 
