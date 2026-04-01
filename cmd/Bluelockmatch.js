@@ -420,9 +420,15 @@ ovlcmd({
     const safeTextRaw = texte.replace(/[\u200B\u200E\u200F]/g, "").replace(/\r/g, "").trim();
     const safeText = safeTextRaw.toLowerCase().replace(/\n/g, "");
 
-    // Vérifie si le message correspond au format attendu
-    if (!safeText.endsWith("🔷bluelock⚽🥅") && !safeText.includes("⚽match🥅")) return;
+    // ===============================
+// 📦 DETECTION PAVÉ BLUELOCK
+// ===============================
+const isPave =
+    safeText.includes("⚽match🥅") &&
+    safeText.includes("⚽:") &&
+    safeText.includes("🔷bluelock⚽🥅");
 
+if (!isPave) return;
     // Récupération du match actif
     const chat = ms_org.key?.remoteJid || ms_org.from;
     const match = matchsActifs.get(chat);
@@ -435,17 +441,39 @@ ovlcmd({
         return;
     }
 
-    // Extraction de la ligne contenant les actions ⚽:
-    const actionLineRaw = safeTextRaw.split("\n").find(l => /⚽\s*:/.test(l));
-    if (!actionLineRaw) return repondre("❌ Aucune ligne ⚽: détectée.");
+    // ===============================
+// 🎭 EXTRACTION DIALOGUE + ACTION
+// ===============================
+const lignes = safeTextRaw.split("\n");
 
-    const actionClean = actionLineRaw.replace(/⚽\s*:/g, "").trim();
-    if (!actionClean || actionClean.length < 2) {
-        return repondre("❌ Aucune action détectée après ⚽:");
-    }
+// 💬 Dialogue
+const dialogueLine = lignes.find(l => l.trim().startsWith("💬"));
+const dialogue = dialogueLine
+    ? dialogueLine.replace(/💬\s*:/, "").trim()
+    : "";
 
+// ⚽ Action
+const actionLine = lignes.find(l => l.trim().startsWith("⚽"));
+const actionRaw = actionLine
+    ? actionLine.replace(/⚽\s*:/, "").trim()
+    : "";
+
+// Si aucune action
+if (!actionRaw || actionRaw.length < 2) {
+    return repondre("❌ Aucune action détectée après ⚽:");
+}
+    
     // Découpe des actions (séparées par /)
-    const sequences = actionClean.split("/").map(s => s.trim());
+    const sequences = actionRaw
+    .split("/")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+    if (dialogue) {
+    await ovl.sendMessage(ms_org, {
+        text: `💬 ${dialogue}`
+    });
+    }
 
     // Détermine l'équipe du joueur
     const isTeam1 = auteur_Message === cleanJid(match.id1);
