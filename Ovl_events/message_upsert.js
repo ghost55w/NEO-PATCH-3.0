@@ -9,9 +9,23 @@ const getJid = require("./cache_jid");
 /* IMPORT SYSTEME MATCH BLUELOCK */
 const { verifierFiche } = require("../cmd/Bluelockmatch");
 
+function getTextMessage(msg) {
+  return (
+    msg?.conversation ||
+    msg?.extendedTextMessage?.text ||
+    msg?.imageMessage?.caption ||
+    msg?.videoMessage?.caption ||
+    msg?.documentMessage?.caption ||
+    msg?.buttonsResponseMessage?.selectedButtonId ||
+    msg?.listResponseMessage?.singleSelectReply?.selectedRowId ||
+    ""
+  );
+}
+
 async function message_upsert(m, ovl) {
   try {
     if (m.type !== 'notify') return;
+
     const ms = m.messages?.[0];
     if (!ms?.message) return;
 
@@ -25,18 +39,12 @@ async function message_upsert(m, ovl) {
     };
 
     const mtype = getContentType(ms.message);
-    const texte = {
-      conversation: ms.message.conversation,
-      imageMessage: ms.message.imageMessage?.caption,
-      videoMessage: ms.message.videoMessage?.caption,
-      extendedTextMessage: ms.message.extendedTextMessage?.text,
-      buttonsResponseMessage: ms.message.buttonsResponseMessage?.selectedButtonId,
-      listResponseMessage: ms.message.listResponseMessage?.singleSelectReply?.selectedRowId,
-      messageContextInfo:
-        ms.message.buttonsResponseMessage?.selectedButtonId ||
-        ms.message.listResponseMessage?.singleSelectReply?.selectedRowId ||
-        ms.text
-    }[mtype] || "";
+
+    // ================================
+    // ✅ TEXTE UNIQUE (FIX IMPORTANT)
+    // ================================
+    const texte = getTextMessage(ms.message).trim();
+    if (!texte) return;
 
     const ms_org = ms.key.remoteJid;
     const id_Bot = decodeJid(ovl.user.id);
@@ -151,11 +159,11 @@ async function message_upsert(m, ovl) {
       mention_JID
     };
 
-// ================================
-    // DETECTION FICHIERS MATCH BLUELOCK
-    // =================================
+    // ================================
+    // MATCH BLUELOCK FILES
+    // ================================
     try {
-  if (texte && /MATCH\s+BLUE\s+LOCK/i.test(texte)) {
+      if (texte && /MATCH\s+BLUE\s+LOCK/i.test(texte)) {
         await verifierFiche(texte, ms_org, ovl);
       }
     } catch (err) {
@@ -163,11 +171,11 @@ async function message_upsert(m, ovl) {
     }
 
     // ================================
-    // DETECTION MESSAGES MATCH BLUELOCK
-    // =================================
+    // MATCH BLUELOCK MESSAGES
+    // ================================
     try {
       if (!isCmd) {
-    await require("../cmd/Bluelockmatch").messageMatch(ms, ovl);
+        await require("../cmd/Bluelockmatch").messageMatch(ms, ovl);
       }
     } catch (err) {
       console.log("Erreur messageMatch:", err);
@@ -218,4 +226,4 @@ async function message_upsert(m, ovl) {
   }
 }
 
-module.exports = message_upsert; 
+module.exports = message_upsert;
