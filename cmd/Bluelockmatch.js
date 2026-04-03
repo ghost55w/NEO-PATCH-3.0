@@ -415,71 +415,106 @@ ovlcmd({
     isfunc: true
 }, async (ms_org, ovl, { texte, repondre, auteur_Message }) => {
 
-    if (!texte) return;
+    console.log("🚨 lire_pave appelé");
 
-    // Nettoyage complet du texte + mise en minuscules pour comparaison
+    if (!texte) {
+        console.log("❌ Pas de texte");
+        return;
+    }
+
+    console.log("🧪 TEXTE BRUT:\n", texte);
+
+    // Nettoyage
     const safeTextRaw = texte.replace(/[\u200B\u200E\u200F]/g, "").replace(/\r/g, "").trim();
     const safeText = safeTextRaw
-    .toLowerCase()
-    .replace(/\n/g, "")
-    .replace(/\*/g, "")
-    .replace(/\s+/g, "");
+        .toLowerCase()
+        .replace(/\n/g, "")
+        .replace(/\*/g, "")
+        .replace(/\s+/g, "");
+
+    console.log("🧪 TEXTE CLEAN:", safeText);
+
     // ===============================
-    // 📦 DETECTION PAVÉ BLUELOCK
+    // 📦 DETECTION PAVÉ
     // ===============================
     const isPave =
-    /⚽\s*match\s*🥅/i.test(safeTextRaw) &&
-    /⚽\s*:/i.test(safeTextRaw) &&
-    /bluelock⚽🥅/i.test(safeTextRaw);
-    if (!isPave) return;
-console.log("🧪 PAVE DETECTÉ ?", isPave);
-    
-    // Récupération du match actif
-    const chat = ms_org.key?.remoteJid || ms_org.from;
+        /⚽\s*match\s*🥅/i.test(safeTextRaw) &&
+        /⚽\s*:/i.test(safeTextRaw) &&
+        /bluelock⚽🥅/i.test(safeTextRaw);
+
+    console.log("🧪 isPave =", isPave);
+
+    if (!isPave) {
+        console.log("❌ Pavé NON reconnu");
+        return;
+    }
+
+    console.log("✅ PAVÉ RECONNU");
+
+    // ===============================
+    // ⚠️ CORRECTION ICI
+    // ===============================
+    const chat = ms_org; // 🔥 FIX IMPORTANT
+
+    console.log("🧪 CHAT:", chat);
+
     const match = matchsActifs.get(chat);
+
+    console.log("🧪 MATCH:", match);
+
     if (!match) {
-    return repondre("❌ Aucun match actif.");
-}
+        console.log("❌ Aucun match trouvé");
+        return repondre("❌ Aucun match actif.");
+    }
 
-if (match.etat !== "en_cours") {
-    return repondre(`⚠️ Match non actif (etat: ${match.etat})`);
-}
-    console.log("🧪 ETAT MATCH :", match?.etat); 
+    console.log("🧪 ETAT MATCH:", match.etat);
 
-    // Vérifie si c'est bien le tour du joueur
+    if (match.etat !== "en_cours") {
+        console.log("⚠️ Match pas en cours");
+        return repondre(`⚠️ Match non actif (etat: ${match.etat})`);
+    }
+
+    // ===============================
+    // 🎯 TOUR JOUEUR
+    // ===============================
     const joueurTour = cleanJid(match.joueurTour);
+
+    console.log("🧪 JOUEUR TOUR:", joueurTour);
+    console.log("🧪 AUTEUR:", auteur_Message);
+
     if (auteur_Message !== joueurTour) {
-        console.log("⛔ Pas ton tour :", auteur_Message);
+        console.log("⛔ Pas ton tour");
         return;
     }
 
     // ===============================
-    // 🎭 EXTRACTION DIALOGUE + ACTION
+    // EXTRACTION
     // ===============================
     const lignes = safeTextRaw.split("\n");
 
-    // 💬 Dialogue
     const dialogueLine = lignes.find(l => l.trim().startsWith("💬"));
     const dialogue = dialogueLine
         ? dialogueLine.replace(/💬\s*:/, "").trim()
         : "";
 
-    // ⚽ Action
     const actionLine = lignes.find(l => l.trim().startsWith("⚽"));
     const actionRaw = actionLine
         ? actionLine.replace(/⚽\s*:/, "").trim()
         : "";
 
-    // Si aucune action après ⚽:
+    console.log("🧪 ACTION RAW:", actionRaw);
+
     if (!actionRaw) {
+        console.log("❌ Aucune action détectée");
         return repondre("❌ Aucune action détectée après ⚽:");
     }
 
-    // Découpe des actions (séparées par /)
     const sequences = actionRaw
         .split("/")
         .map(s => s.trim())
         .filter(Boolean);
+
+    console.log("🧪 SEQUENCES:", sequences);
 
     if (dialogue) {
         await ovl.sendMessage(ms_org, {
@@ -487,18 +522,20 @@ if (match.etat !== "en_cours") {
         });
     }
 
-    // Détermine l'équipe du joueur
     const isTeam1 = auteur_Message === cleanJid(match.id1);
     const lineup = isTeam1 ? match.lineup1 : match.lineup2;
 
-    if (!Array.isArray(lineup)) return repondre("❌ Lineup introuvable.");
+    console.log("🧪 LINEUP:", lineup);
 
-    // Parcours de chaque action
+    if (!Array.isArray(lineup)) {
+        console.log("❌ Lineup invalide");
+        return repondre("❌ Lineup introuvable.");
+    }
+
     for (const seq of sequences) {
         const seqClean = seq.toLowerCase();
         let type = null;
 
-        // Détection du type d'action (tir, passe, dribble, déplacement)
         for (const [key, mots] of Object.entries(ACTIONS_MAP)) {
             if (mots.some(m => new RegExp(`\\b${m}\\b`, "i").test(seqClean))) {
                 type = key;
@@ -506,21 +543,30 @@ if (match.etat !== "en_cours") {
             }
         }
 
-        if (!type) return repondre(`❌ Action invalide : "${seq}"`);
+        console.log("🧪 TYPE ACTION:", type);
 
-        // Recherche du joueur concerné dans le lineup
+        if (!type) {
+            console.log("❌ Action invalide:", seq);
+            return repondre(`❌ Action invalide : "${seq}"`);
+        }
+
         const joueur = lineup.find(j => seqClean.includes(j.nom.toLowerCase()));
-        if (!joueur) return repondre(`❌ Joueur introuvable dans : "${seq}"`);
+
+        console.log("🧪 JOUEUR TROUVÉ:", joueur);
+
+        if (!joueur) {
+            console.log("❌ Joueur introuvable:", seq);
+            return repondre(`❌ Joueur introuvable dans : "${seq}"`);
+        }
     }
 
-    // Passage au joueur suivant
     const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
     match.joueurTour = nextJoueur;
 
-    // Reset du timer si existant
     if (match.timerPave) clearTimeout(match.timerPave);
 
-    // Message avec mention du prochain joueur
+    console.log("✅ PAVÉ VALIDÉ");
+
     await ovl.sendMessage(ms_org, {
         text: `✅ Pavé validé ! @${nextJoueur} NEXT⚽`,
         mentions: [nextJoueur]
