@@ -176,7 +176,7 @@ console.log("🧪 TEXTE CLEAN:", clean);
       mention_JID
     };
 
-    // ================================
+// ================================
 // DETECTION MATCH BLUELOCK 
 // ================================
 try {
@@ -189,21 +189,15 @@ try {
 
     console.log("🧪 TEXTE CLEAN:", clean);
 
-    // Détection large (ton pavé réel)
-    if (
-  clean.includes("match") &&
-  clean.includes("bluelock")
-) {
-  console.log("✅ MATCH BLUELOCK DETECTÉ");
-  await verifierFiche(texte, ms_org, ovl);
-    } 
-      
+    if (clean.includes("match") && clean.includes("bluelock")) {
+      console.log("✅ MATCH BLUELOCK DETECTÉ");
+      await verifierFiche(texte, ms_org, ovl);
     } else if (clean.includes("match")) {
       console.log("⚠️ MATCH détecté mais pas bluelock");
     }
   }
 } catch (err) {
-  console.log("Erreur verifierFiche:", err);
+  console.log("❌ Erreur verifierFiche:", err);
 }
 
     // ================================
