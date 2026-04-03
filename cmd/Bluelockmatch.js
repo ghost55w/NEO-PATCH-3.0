@@ -406,9 +406,7 @@ async function lancerMatch(chat, ovl) {
     }, 6 * 60 * 1000);
 }
 
-/* ===============================
-LECTURE DES PAVÉS - TOUR DE CONTRÔLE
-=================================*/
+
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
@@ -421,22 +419,26 @@ ovlcmd({
 
     // Nettoyage complet du texte + mise en minuscules pour comparaison
     const safeTextRaw = texte.replace(/[\u200B\u200E\u200F]/g, "").replace(/\r/g, "").trim();
-    const safeText = safeTextRaw.toLowerCase().replace(/\n/g, "");
-
+    const safeText = safeTextRaw
+    .toLowerCase()
+    .replace(/\n/g, "")
+    .replace(/\*/g, "")
+    .replace(/\s+/g, "");
     // ===============================
     // 📦 DETECTION PAVÉ BLUELOCK
     // ===============================
     const isPave =
-        safeText.includes("⚽match🥅") &&
-        safeText.includes("⚽:") &&
-        safeText.includes("🔷bluelock⚽🥅");
-
+    /⚽\s*match\s*🥅/i.test(safeTextRaw) &&
+    /⚽\s*:/i.test(safeTextRaw) &&
+    /bluelock⚽🥅/i.test(safeTextRaw);
     if (!isPave) return;
-
+console.log("🧪 PAVE DETECTÉ ?", isPave);
+    
     // Récupération du match actif
     const chat = ms_org.key?.remoteJid || ms_org.from;
     const match = matchsActifs.get(chat);
     if (!match || match.etat !== "en_cours") return;
+    console.log("🧪 ETAT MATCH :", match?.etat); 
 
     // Vérifie si c'est bien le tour du joueur
     const joueurTour = cleanJid(match.joueurTour);
