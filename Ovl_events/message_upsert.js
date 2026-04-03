@@ -43,8 +43,25 @@ async function message_upsert(m, ovl) {
     // ================================
     // ✅ TEXTE UNIQUE (FIX IMPORTANT)
     // ================================
-    const texte = getTextMessage(ms.message).trim();
-    if (!texte) return;
+    let texte = getTextMessage(ms.message) || "";
+
+// 🔥 FALLBACK SI TEXTE VIDE
+if (!texte) {
+  try {
+    texte = JSON.stringify(ms.message);
+  } catch (e) {
+    texte = "";
+  }
+}
+
+// nettoyage
+const clean = texte
+  .toLowerCase()
+  .replace(/[^\w\s]/g, "")
+  .replace(/\s+/g, " ")
+  .trim();
+
+console.log("🧪 TEXTE CLEAN:", clean);
 
     const ms_org = ms.key.remoteJid;
     const id_Bot = decodeJid(ovl.user.id);
@@ -174,11 +191,13 @@ try {
 
     // Détection large (ton pavé réel)
     if (
-      clean.includes("match") &&
-      clean.includes("bluelock") // ou "blue lock"
-    ) {
-      console.log("✅ MATCH BLUELOCK DETECTÉ");
-      await verifierFiche(texte, ms_org, ovl);
+  clean.includes("match") &&
+  clean.includes("bluelock")
+) {
+  console.log("✅ MATCH BLUELOCK DETECTÉ");
+  await verifierFiche(texte, ms_org, ovl);
+    } 
+      
     } else if (clean.includes("match")) {
       console.log("⚠️ MATCH détecté mais pas bluelock");
     }
