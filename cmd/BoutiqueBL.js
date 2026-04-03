@@ -25,7 +25,7 @@ const allCardsBL = Object.values(cardsBlueLock).map(player => ({
   rank: player.rank,
   taille: player.taille,
   pieds: player.pieds,
-  price: determinePrice(player.rank) + (player.ovr * 1000)
+  price: calculPrix(player) 
 }));
 
 // --- UTILITAIRES ---
