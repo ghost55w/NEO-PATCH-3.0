@@ -437,7 +437,13 @@ console.log("🧪 PAVE DETECTÉ ?", isPave);
     // Récupération du match actif
     const chat = ms_org.key?.remoteJid || ms_org.from;
     const match = matchsActifs.get(chat);
-    if (!match || match.etat !== "en_cours") return;
+    if (!match) {
+    return repondre("❌ Aucun match actif.");
+}
+
+if (match.etat !== "en_cours") {
+    return repondre(`⚠️ Match non actif (etat: ${match.etat})`);
+}
     console.log("🧪 ETAT MATCH :", match?.etat); 
 
     // Vérifie si c'est bien le tour du joueur
