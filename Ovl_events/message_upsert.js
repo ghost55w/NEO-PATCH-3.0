@@ -160,15 +160,32 @@ async function message_upsert(m, ovl) {
     };
 
     // ================================
-    // MATCH BLUELOCK FILES
-    // ================================
-    try {
-      if (texte && /MATCH\s+BLUE\s+LOCK/i.test(texte)) {
-        await verifierFiche(texte, ms_org, ovl);
-      }
-    } catch (err) {
-      console.log("Erreur verifierFiche:", err);
+// DETECTION MATCH BLUELOCK 
+// ================================
+try {
+  if (texte) {
+    const clean = texte
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "") 
+      .replace(/\s+/g, " ")    
+      .trim();
+
+    console.log("🧪 TEXTE CLEAN:", clean);
+
+    // Détection large (ton pavé réel)
+    if (
+      clean.includes("match") &&
+      clean.includes("bluelock") // ou "blue lock"
+    ) {
+      console.log("✅ MATCH BLUELOCK DETECTÉ");
+      await verifierFiche(texte, ms_org, ovl);
+    } else if (clean.includes("match")) {
+      console.log("⚠️ MATCH détecté mais pas bluelock");
     }
+  }
+} catch (err) {
+  console.log("Erreur verifierFiche:", err);
+}
 
     // ================================
     // MATCH BLUELOCK MESSAGES
