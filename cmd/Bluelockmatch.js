@@ -408,75 +408,116 @@ async function lancerMatch(chat, ovl) {
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
-async function detectMatchPave(message, chat, ovl, auteur) {
-    const match = matchsActifs.get(chat);
-    if (!match) return;
+ovlcmd({
+  nom_cmd: 'detectMatchPave',
+  isfunc: true
+}, async (ms_org, ovl, { repondre, auteur_Message, texte }) => {
 
-    // ❌ on ignore si match pas en cours
-    if (match.etat !== "en_cours") return;
+  if (!texte) return false;
 
-    // ❌ on ignore si c’est pas le bon joueur
-    if (auteur !== match.joueurTour) return;
+  const id = auteur_Message;
 
-    if (!message) return;
+  // ================================
+  // MATCH CHECK
+  // ================================
+  const match = matchsActifs.get(ms_org);
+  if (!match) return false;
 
-    // nettoyage simple
-    const clean = message.toLowerCase();
+  if (match.etat !== "en_cours") return false;
 
-    // ✅ vérifier que c’est bien ton pavé
-    if (!clean.includes("match") || !clean.includes("bluelock")) return;
-
-    console.log("✅ PAVÉ MATCH REÇU DU BON JOUEUR");
-
-    // 🎯 récupérer l’action après ⚽:
-    const actionMatch = message.match(/⚽:\s*([^\n\r]*)/);
-
-    // ❌ si vide
-    if (!actionMatch || !actionMatch[1].trim()) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Action vide, envoie un vrai move ⚽"
-        });
-        return;
-    }
-
-    const action = actionMatch[1].trim();
-    console.log("🎯 ACTION:", action);
-
-    // stop timer
-    clearTimeout(match.timerPave);
-
-    // ✅ MESSAGE ACTION
-    await ovl.sendMessage(chat, {
-        text: `⚽ Action validée:\n${action}`
+  // ❌ pas son tour
+  if (id !== match.joueurTour) {
+    await ovl.sendMessage(ms_org, {
+      text: "⛔ Ce n’est pas votre tour !"
     });
+    return false;
+  }
 
-    // 🔁 CHANGEMENT DE JOUEUR
-    let nextJoueur, nextNom;
+  const raw = texte;
 
-    if (match.joueurTour === match.id1) {
-        nextJoueur = match.id2;
-        nextNom = match.team2Nom;
-    } else {
-        nextJoueur = match.id1;
-        nextNom = match.team1Nom;
-    }
+  // ================================
+  // NORMALISATION
+  // ================================
+  const t = raw.toLowerCase();
+  // ================================
+  // START/END CHECK
+  // ================================
+  const startOk = t.includes("⚽🥅match🔷🎮");
+  const endOk =
+  t.trim().endsWith("🔷bluelock⚽🥅") ||
+  t.trim().endsWith("*🔷bluelock⚽🥅*");
+  // ================================
+  // BLOCS OBLIGATOIRES
+  // ================================
+  const hasDialogue = raw.includes("💬:");
+  const hasAction = raw.includes("⚽:");
 
-    match.joueurTour = nextJoueur;
+  // ================================
+  // VALIDATION FINALE
+  // ================================
+  const isValidPave =
+    startOk &&
+    endOk &&
+    hasDialogue &&
+    hasAction;
 
-    // 🎯 annonce du prochain joueur
-    await ovl.sendMessage(chat, {
-        text: `➡️ À toi de jouer @${nextNom}\nEnvoie ton pavé ⚽`,
-        mentions: [nextJoueur]
+  if (!isValidPave) return false;
+
+  console.log("✅ PAVÉ MATCH VALIDÉ");
+
+  // ================================
+  // EXTRACTION ACTION
+  // ================================
+  const actionMatch = raw.match(/⚽:\s*([\s\S]*?)\n╰/);
+
+  if (!actionMatch || !actionMatch[1].trim()) {
+    await ovl.sendMessage(ms_org, {
+      text: "❌ Action invalide dans le pavé ⚽"
     });
+    return false;
+  }
 
-    // ⏱️ nouveau timer
-    match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${nextNom} temps écoulé ❌`,
-            mentions: [nextJoueur]
-        });
-    }, 6 * 60 * 1000);
-}
+  const action = actionMatch[1].trim();
+
+  // ================================
+  // STOP TIMER
+  // ================================
+  if (match.timerPave) clearTimeout(match.timerPave);
+
+  // ================================
+  // CONFIRM ACTION
+  // ================================
+  await ovl.sendMessage(ms_org, {
+    text: `⚽ Action validée:\n${action}`
+  });
+
+  // ================================
+  // SWITCH TOUR
+  // ================================
+  const isP1 = match.joueurTour === match.id1;
+
+  const nextJoueur = isP1 ? match.id2 : match.id1;
+  const nextNom = isP1 ? match.team2Nom : match.team1Nom;
+
+  match.joueurTour = nextJoueur;
+
+  await ovl.sendMessage(ms_org, {
+    text: `➡️ À toi de jouer @${nextNom}\nEnvoie ton pavé ⚽`,
+    mentions: [nextJoueur]
+  });
+
+  // ================================
+  // TIMER NEXT TOUR
+  // ================================
+  match.timerPave = setTimeout(async () => {
+    await ovl.sendMessage(ms_org, {
+      text: `⏰ @${nextNom} temps écoulé ❌`,
+      mentions: [nextJoueur]
+    });
+  }, 6 * 60 * 1000);
+
+  return true;
+});
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
