@@ -7,7 +7,7 @@ const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
-const { verifierFiche } = require("../cmd/Bluelockmatch");
+const { verifierFiche, detectMatchPave } = require("../cmd/Bluelockmatch");
 
 function getTextMessage(msg) {
   return (
@@ -177,27 +177,25 @@ console.log("🧪 TEXTE CLEAN:", clean);
     };
 
 // ================================
-// DETECTION MATCH BLUELOCK 
+// 🔥 SYSTEME MATCH BLUELOCK GLOBAL
 // ================================
 try {
   if (texte) {
-    const clean = texte
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "") 
-      .replace(/\s+/g, " ")    
-      .trim();
 
-    console.log("🧪 TEXTE CLEAN:", clean);
+    // 📄 Détection fiche (création match)
+    await verifierFiche(texte, ms_org, ovl);
 
-    if (clean.includes("match") && clean.includes("bluelock")) {
-      console.log("✅ MATCH BLUELOCK DETECTÉ");
-      await verifierFiche(texte, ms_org, ovl);
-    } else if (clean.includes("match")) {
-      console.log("⚠️ MATCH détecté mais pas bluelock");
-    }
+    // ⚽ Détection pavé gameplay (tour par tour)
+    await detectMatchPave(
+      ms_org,
+      ovl,
+      texte,
+      auteur_Message
+    );
+
   }
 } catch (err) {
-  console.log("❌ Erreur verifierFiche:", err);
+  console.log("❌ Erreur système match:", err);
 }
 
     // ================================
