@@ -415,71 +415,75 @@ ovlcmd({
 
   if (!texte) return false;
 
+  const chat = ms_org.key?.remoteJid || ms_org.from || ms_org;
   const id = auteur_Message;
 
-  const match = matchsActifs.get(ms_org);
+  const match = matchsActifs.get(chat);
   if (!match) return false;
 
   if (match.etat !== "en_cours") return false;
 
   if (id !== match.joueurTour) {
-    await ovl.sendMessage(ms_org, {
-      text: "⛔ Ce n’est pas votre tour !"
+    await ovl.sendMessage(chat, {
+      text: "⛔ C’est pas votre tour !"
     });
     return false;
   }
 
-  const raw = texte;
+  const raw = texte || "";
+  const clean = raw
+    .replace(/\u200B/g, "")
+    .replace(/\r/g, "")
+    .trim()
+    .toLowerCase();
 
-  const t = raw.toLowerCase();
+  // ============================
+  // 🔷 REGEX PAVÉ WHATSAPP (SOUPLE)
+  // ============================
+  const regexPave = /🔷\s*blue\s*lock\s*⚽🥅|blue\s*lock\s*⚽🥅/i;
 
-  // ================================
-  // START / END PLUS ROBUSTE
-  // ================================
-  const startOk =
-    t.includes("match") &&
-    t.includes("⚽🥅") &&
-    t.includes("🔷🎮");
+  const startOk = regexPave.test(clean);
 
-  const endOk =
-    t.includes("bluelock") &&
-    t.includes("⚽🥅");
+  const endOk = /🔷\s*blue\s*lock\s*⚽🥅/.test(clean);
 
-  // ================================
-  // BLOCS OBLIGATOIRES
-  // ================================
-  const hasDialogue = raw.includes("💬:");
-  const hasAction = raw.includes("⚽:");
+  // ============================
+  // BLOCS OBLIGATOIRES (souples)
+  // ============================
+  const hasDialogue = /💬\s*:/.test(raw);
+  const hasAction = /⚽\s*:/.test(raw);
 
-  const isValidPave =
-    startOk &&
-    endOk &&
-    hasDialogue &&
-    hasAction;
+  const isValidPave = startOk && endOk && hasDialogue && hasAction;
 
   if (!isValidPave) return false;
 
   console.log("✅ PAVÉ MATCH VALIDÉ");
 
-  // ================================
-  // EXTRACTION ACTION (SAFE)
-  // ================================
-  const action = raw.split("⚽:")[1]?.split("╰")[0]?.trim();
+  // ============================
+  // EXTRACTION ACTION ROBUSTE
+  // ============================
+  const actionMatch = raw.match(/⚽\s*:\s*([\s\S]*?)(╰|$)/);
+
+  const action = actionMatch?.[1]?.trim();
 
   if (!action) {
-    await ovl.sendMessage(ms_org, {
-      text: "❌ Action invalide dans le pavé ⚽"
+    await ovl.sendMessage(chat, {
+      text: "❌ Action vide ou invalide dans le pavé"
     });
     return false;
   }
 
-  // STOP TIMER
+  // ============================
+  // TIMER STOP
+  // ============================
   if (match.timerPave) clearTimeout(match.timerPave);
 
-  await ovl.sendMessage(ms_org, {
+  await ovl.sendMessage(chat, {
     text: `⚽ Action validée:\n${action}`
   });
 
+  // ============================
+  // SWITCH JOUEUR
+  // ============================
   const isP1 = match.joueurTour === match.id1;
 
   const nextJoueur = isP1 ? match.id2 : match.id1;
@@ -487,13 +491,13 @@ ovlcmd({
 
   match.joueurTour = nextJoueur;
 
-  await ovl.sendMessage(ms_org, {
+  await ovl.sendMessage(chat, {
     text: `➡️ À toi de jouer @${nextNom}`,
     mentions: [nextJoueur]
   });
 
   match.timerPave = setTimeout(async () => {
-    await ovl.sendMessage(ms_org, {
+    await ovl.sendMessage(chat, {
       text: `⏰ @${nextNom} temps écoulé ❌`,
       mentions: [nextJoueur]
     });
@@ -501,7 +505,6 @@ ovlcmd({
 
   return true;
 });
-
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
