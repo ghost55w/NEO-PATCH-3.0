@@ -540,4 +540,4 @@ ovlcmd({
     }
 });
 
-module.exports = { messageMatch, verifierFiche };
+module.exports = { messageMatch, verifierFiche, detectMatchPave };
