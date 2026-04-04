@@ -397,13 +397,13 @@ async function lancerMatch(chat, ovl) {
     });
 
     // ⏱️ timer 1er joueur
-    match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${premier} LATENCE OUT ❌`,
-            mentions: [jidStart]
-        });
-    }, 6 * 60 * 1000);
-}
+    match.timerKickoff = setTimeout(async () => {
+    await ovl.sendMessage(chat, {
+        text: `⏰ @${premier} LATENCE OUT! ❌.`,
+        mentions: [jidStart]
+    });
+}, 6 * 60 * 1000);
+} 
 
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
@@ -488,7 +488,10 @@ ovlcmd({
     desc: "Arrêter le match en cours dans le groupe"
 }, async (ms_org, ovl, cmd_options) => {
     try {
-        const chat = ms_org.key?.remoteJid || ms_org.from;
+
+        // ✅ ms_org EST DÉJÀ LE JID
+        const chat = ms_org;
+
         const match = matchsActifs.get(chat);
 
         if (!match) {
@@ -497,23 +500,42 @@ ovlcmd({
             });
         }
 
-        // Stop tous les timers
+        // ===============================
+        // ⛔ STOP TOUS LES TIMERS
+        // ===============================
         if (match.timerPave) clearTimeout(match.timerPave);
         if (match.timerTour) clearTimeout(match.timerTour);
-        // Si tu as d'autres timers pour actions / déplacements / tirs, ajoute-les ici
+        if (match.timerKickoff) clearTimeout(match.timerKickoff);
+        if (match.timerAction) clearTimeout(match.timerAction);
 
-        // Supprime le match
+        // BONUS sécurité
+        match.timerPave = null;
+        match.timerTour = null;
+        match.timerKickoff = null;
+        match.timerAction = null;
+
+        // ===============================
+        // 🧨 RESET MATCH COMPLET
+        // ===============================
+        match.etat = "arrete";
+        match.kickoffStarted = false;
+
+        // ===============================
+        // 🗑 SUPPRESSION
+        // ===============================
         matchsActifs.delete(chat);
 
         await ovl.sendMessage(chat, {
-            text: `⛔ Le match Blue Lock en cours a été arrêté !`
+            text: `⛔ Le match Blue Lock a été arrêté avec succès !`
         });
 
     } catch (e) {
-        console.error("❌ Erreur commande +stopmatch⚽ :", e);
-        const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
+        console.error("❌ Erreur stopmatch :", e);
+
+        const chat = ms_org;
+
         await ovl.sendMessage(chat, {
-            text: "❌ Une erreur est survenue lors de l'arrêt du match."
+            text: "❌ Erreur lors de l'arrêt du match."
         });
     }
 });
