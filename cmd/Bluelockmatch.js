@@ -408,6 +408,9 @@ async function lancerMatch(chat, ovl) {
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
+/* ===============================
+LECTURE DES PAVÉS - AUTO DETECT
+=================================*/
 ovlcmd({
   nom_cmd: 'detectMatchPave',
   isfunc: true
@@ -423,6 +426,7 @@ ovlcmd({
 
   if (match.etat !== "en_cours") return false;
 
+  // ❌ PAS SON TOUR
   if (id !== match.joueurTour) {
     await ovl.sendMessage(chat, {
       text: "⛔ C’est pas votre tour !"
@@ -431,6 +435,7 @@ ovlcmd({
   }
 
   const raw = texte || "";
+
   const clean = raw
     .replace(/\u200B/g, "")
     .replace(/\r/g, "")
@@ -438,28 +443,31 @@ ovlcmd({
     .toLowerCase();
 
   // ============================
-  // 🔷 REGEX PAVÉ WHATSAPP (SOUPLE)
+  // 🔷 REGEX SIMPLE WHATSAPP
   // ============================
-  const regexPave = /🔷\s*blue\s*lock\s*⚽🥅|blue\s*lock\s*⚽🥅/i;
 
-  const startOk = regexPave.test(clean);
+  const startOk =
+    /match/.test(clean) &&
+    /⚽/.test(clean);
 
-  const endOk = /🔷\s*blue\s*lock\s*⚽🥅/.test(clean);
+  const endOk =
+    /\*?\s*🔷?\s*blue\s*lock\s*⚽🥅\s*\*?\s*$/i.test(clean);
 
-  // ============================
-  // BLOCS OBLIGATOIRES (souples)
-  // ============================
   const hasDialogue = /💬\s*:/.test(raw);
   const hasAction = /⚽\s*:/.test(raw);
 
-  const isValidPave = startOk && endOk && hasDialogue && hasAction;
+  const isValidPave =
+    startOk &&
+    endOk &&
+    hasDialogue &&
+    hasAction;
 
   if (!isValidPave) return false;
 
   console.log("✅ PAVÉ MATCH VALIDÉ");
 
   // ============================
-  // EXTRACTION ACTION ROBUSTE
+  // EXTRACTION ACTION
   // ============================
   const actionMatch = raw.match(/⚽\s*:\s*([\s\S]*?)(╰|$)/);
 
@@ -473,7 +481,7 @@ ovlcmd({
   }
 
   // ============================
-  // TIMER STOP
+  // STOP TIMER
   // ============================
   if (match.timerPave) clearTimeout(match.timerPave);
 
@@ -496,6 +504,9 @@ ovlcmd({
     mentions: [nextJoueur]
   });
 
+  // ============================
+  // TIMER NEXT
+  // ============================
   match.timerPave = setTimeout(async () => {
     await ovl.sendMessage(chat, {
       text: `⏰ @${nextNom} temps écoulé ❌`,
@@ -568,4 +579,4 @@ ovlcmd({
     }
 });
 
-module.exports = { messageMatch, verifierFiche, detectMatchPave };
+module.exports = { messageMatch, verifierFiche };
