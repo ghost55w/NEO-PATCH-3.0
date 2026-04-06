@@ -397,12 +397,17 @@ async function lancerMatch(chat, ovl) {
 
     match.kickoffStarted = true;
 
-    const premier = Math.random() < 0.5 ? match.team1Nom : match.team2Nom;
-    match.possession = premier;
+    const isTeam1 = Math.random() < 0.5;
+
+    match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
     match.etat = "en_cours";
-    match.joueurTour = premier === match.team1Nom ? match.id1 : match.id2;
+
+    match.joueurTour = isTeam1 ? match.id1 : match.id2;
 
     const jidStart = match.joueurTour;
+    const nomStart = isTeam1 ? match.team1Nom : match.team2Nom;
+
+    const mentionJid = `${jidStart}@s.whatsapp.net`;
 
     const imagesKickOff = [
         "https://files.catbox.moe/onotk4.jpg",
@@ -411,18 +416,18 @@ async function lancerMatch(chat, ovl) {
 
     await ovl.sendMessage(chat, {
         image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
-        caption: `🎙️⚽: KICK OFF 🥅‼️ @${premier} commence !\n⚠️ Envoie ton pavé ⚽`,
-        mentions: [jidStart]
+        caption: `🎙️⚽: KICK OFF 🥅‼️ @${jidStart} commence !\n⚠️ Envoie ton pavé ⚽`,
+        mentions: [mentionJid]
     });
 
     // ⏱️ timer 1er joueur
     match.timerKickoff = setTimeout(async () => {
-    await ovl.sendMessage(chat, {
-        text: `⏰ @${premier} LATENCE OUT! ❌.`,
-        mentions: [jidStart]
-    });
-}, 6 * 60 * 1000);
-} 
+        await ovl.sendMessage(chat, {
+            text: `⏰ @${jidStart} LATENCE OUT! ❌.`,
+            mentions: [mentionJid]
+        });
+    }, 6 * 60 * 1000);
+}
 
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
@@ -461,6 +466,7 @@ async function handlePaveGame(ms, ovl) {
 function cleanJid(jid) {
     return (jid || "")
         .split(":")[0]
+        .split("@")[0]
         .trim();
 }
 
