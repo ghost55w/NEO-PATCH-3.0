@@ -179,19 +179,16 @@ console.log("🧪 TEXTE CLEAN:", clean);
 // ================================
 // 🔥 SYSTEME MATCH BLUELOCK GLOBAL
 // ================================
+// ================================
+// 🔥 SYSTEME MATCH BLUELOCK GLOBAL
+// ================================
 try {
   if (texte) {
 
-    // 📄 Détection fiche (création match)
-    await verifierFiche(texte, ms_org, ovl);
+    const Bluelockmatch = require("../cmd/Bluelockmatch");
 
-    // ⚽ Détection pavé gameplay (tour par tour)
-    await detectMatchPave(
-      ms_org,
-      ovl,
-      texte,
-      auteur_Message
-    );
+    // ⚽ UNIQUE POINT D'ENTRÉE MATCH
+    await Bluelockmatch.messageMatch(ms, ovl);
 
   }
 } catch (err) {
