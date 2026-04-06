@@ -287,14 +287,6 @@ LECTURE MESSAGES
 =================================*/
 async function messageMatch(ms, ovl) {
     if (!ms.message) return;
-// ❌ IGNORER LES MESSAGES SYSTÈME
-    if (
-        ms.message.protocolMessage ||
-        ms.message.senderKeyDistributionMessage ||
-        ms.message.messageContextInfo
-    ) {
-        return;
-    }
 
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
@@ -437,14 +429,7 @@ LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
 async function handlePaveGame(ms, ovl) {
     if (!ms.message) return false;
-// ❌ IGNORER LES MESSAGES SYSTÈME
-    if (
-        ms.message.protocolMessage ||
-        ms.message.senderKeyDistributionMessage ||
-        ms.message.messageContextInfo
-    ) {
-        return false;
-    }
+
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match) return false;
