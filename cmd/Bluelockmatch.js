@@ -458,16 +458,25 @@ async function handlePaveGame(ms, ovl) {
     // =========================
     // 👤 CHECK JOUEUR TOUR
     // =========================
-    const sender =
-        ms.key.participant ||
-        ms.key.remoteJid;
+function cleanJid(jid) {
+    return (jid || "")
+        .split(":")[0]
+        .trim();
+}
 
-    if (sender !== match.joueurTour) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Ce n’est pas ton tour de jouer !"
-        });
-        return true;
-    }
+const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
+const joueurTour = cleanJid(match.joueurTour);
+
+// 🔍 DEBUG
+console.log("🧪 SENDER:", sender);
+console.log("🧪 TOUR:", joueurTour);
+
+if (sender !== joueurTour) {
+    await ovl.sendMessage(chat, {
+        text: "❌ Ce n’est pas ton tour de jouer !"
+    });
+    return true;
+} 
 
     // =========================
     // 📦 PARSING PAVÉ
