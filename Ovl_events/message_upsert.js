@@ -199,13 +199,24 @@ try {
     // MATCH BLUELOCK MESSAGES
     // ================================
     try {
-      if (!isCmd) {
-        await require("../cmd/Bluelockmatch").messageMatch(ms, ovl);
-      }
-    } catch (err) {
-      console.log("Erreur messageMatch:", err);
-    }
+  if (texte) {
 
+    const Bluelockmatch = require("../cmd/Bluelockmatch");
+
+    // =========================
+    // 📄 FICHE MATCH (IMPORTANT)
+    // =========================
+    await Bluelockmatch.verifierFiche(texte, ms_org, ovl);
+
+    // =========================
+    // ⚽ GAMEPLAY PAVÉ / MATCH
+    // =========================
+    await Bluelockmatch.messageMatch(ms, ovl);
+
+  }
+} catch (err) {
+  console.log("❌ Erreur système match:", err);
+}
     async function isBanned(type, id) {
       const ban = await Bans.findOne({ where: { id, type } });
       return !!ban;
