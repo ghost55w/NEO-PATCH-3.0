@@ -177,16 +177,15 @@ console.log("🧪 TEXTE CLEAN:", clean);
     };
 
 // ================================
-// 🔥 SYSTEME MATCH BLUELOCK GLOBAL (FIX PROPRE)
+// 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
 // ================================
 try {
-  const Bluelockmatch = require("../cmd/Bluelockmatch");
 
-  // 📄 FICHE MATCH
-  await Bluelockmatch.verifierFiche(texte, ms_org, ovl);
+  // 📄 Détection fiche match
+  await verifierFiche(texte, ms_org, ovl);
 
-  // ⚽ GAMEPLAY PAVÉ
-  await Bluelockmatch.messageMatch(ms, ovl);
+  // ⚽ Gestion complète du match (lineup + kickoff + pavé)
+  await messageMatch(ms, ovl);
 
 } catch (err) {
   console.log("❌ Erreur système match:", err);
