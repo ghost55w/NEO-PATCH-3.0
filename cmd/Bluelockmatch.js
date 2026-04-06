@@ -405,9 +405,10 @@ async function lancerMatch(chat, ovl) {
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
 
     const jidStart = match.joueurTour;
-    const nomStart = isTeam1 ? match.team1Nom : match.team2Nom;
+    const mentionJid = jidStart;
 
-    const mentionJid = `${jidStart}@s.whatsapp.net`;
+    // ✅ affichage propre (sans @s.whatsapp.net)
+    const displayName = jidStart.split("@")[0];
 
     const imagesKickOff = [
         "https://files.catbox.moe/onotk4.jpg",
@@ -416,14 +417,14 @@ async function lancerMatch(chat, ovl) {
 
     await ovl.sendMessage(chat, {
         image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
-        caption: `🎙️⚽: KICK OFF 🥅‼️ @${jidStart} commence !\n⚠️ Envoie ton pavé ⚽`,
+        caption: `🎙️⚽: KICK OFF 🥅‼️ @${displayName} commence !\n⚠️ Envoie ton pavé ⚽`,
         mentions: [mentionJid]
     });
 
     // ⏱️ timer 1er joueur
     match.timerKickoff = setTimeout(async () => {
         await ovl.sendMessage(chat, {
-            text: `⏰ @${jidStart} LATENCE OUT! ❌.`,
+            text: `⏰ @${displayName} LATENCE OUT! ❌.`,
             mentions: [mentionJid]
         });
     }, 6 * 60 * 1000);
@@ -463,43 +464,25 @@ async function handlePaveGame(ms, ovl) {
     // =========================
     // 👤 CHECK JOUEUR TOUR
     // =========================
-const sender =
-    ms.key.participant ||
-    ms.key.remoteJid;
+function normalizeJid(jid) {
+    return (jid || "")
+        .split(":")[0]
+        .trim();
+}
 
-const joueurTour = match.joueurTour;
+const sender = normalizeJid(ms.key.participant || ms.key.remoteJid);
+const joueurTour = normalizeJid(match.joueurTour);
 
-console.log("🧪 SENDER RAW:", sender);
-console.log("🧪 TOUR RAW:", joueurTour);
+console.log("🧪 SENDER:", sender);
+console.log("🧪 TOUR:", joueurTour);
 
-// ✅ Comparaison basée sur le numéro uniquement
-if (!sender.includes(joueurTour.split("@")[0])) {
+// ✅ COMPARAISON FIABLE
+if (sender !== joueurTour) {
     await ovl.sendMessage(chat, {
         text: "❌ Ce n’est pas ton tour de jouer !"
     });
     return true;
-}
-    
-    // =========================
-    // 📦 PARSING PAVÉ
-    // =========================
-    const dialogueMatch = text.match(/💬:\s*([\s\S]*?)(?=⚽:|🔷BLUELOCK⚽🥅|$)/i);
-    const actionMatch = text.match(/⚽:\s*([\s\S]*?)(?=🔷BLUELOCK⚽🥅|$)/i);
-
-    const dialogue = dialogueMatch ? dialogueMatch[1].trim() : "";
-    const action = actionMatch ? actionMatch[1].trim() : "";
-
-    // =========================
-    // ❌ PAVÉ VIDE
-    // =========================
-    if (!dialogue && !action) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Aucune action détectée dans ce pavé !"
-        });
-
-        await switchJoueur(match, chat, ovl);
-        return true;
-    }
+} 
 
     // =========================
     // ⚽ ACTION
