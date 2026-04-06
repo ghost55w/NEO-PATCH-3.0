@@ -243,8 +243,8 @@ if (!match) return;
 
     match.team1Nom = match.team1;
     match.team2Nom = match.team2;
-    match.id1 = j1.jid || j1.id;
-    match.id2 = j2.jid || j2.id;
+    match.id1 = cleanJid(j1.jid || j1.id);
+match.id2 = cleanJid(j2.jid || j2.id);
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
@@ -467,7 +467,6 @@ function cleanJid(jid) {
 const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
 const joueurTour = cleanJid(match.joueurTour);
 
-// 🔍 DEBUG
 console.log("🧪 SENDER:", sender);
 console.log("🧪 TOUR:", joueurTour);
 
@@ -476,8 +475,7 @@ if (sender !== joueurTour) {
         text: "❌ Ce n’est pas ton tour de jouer !"
     });
     return true;
-} 
-
+}
     // =========================
     // 📦 PARSING PAVÉ
     // =========================
