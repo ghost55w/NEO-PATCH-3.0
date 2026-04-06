@@ -61,8 +61,6 @@ const clean = texte
   .replace(/\s+/g, " ")
   .trim();
 
-console.log("🧪 TEXTE CLEAN:", clean);
-
     const ms_org = ms.key.remoteJid;
     const id_Bot = decodeJid(ovl.user.id);
     const id_Bot_N = id_Bot.split('@')[0];
