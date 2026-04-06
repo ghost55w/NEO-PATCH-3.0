@@ -177,46 +177,21 @@ console.log("🧪 TEXTE CLEAN:", clean);
     };
 
 // ================================
-// 🔥 SYSTEME MATCH BLUELOCK GLOBAL
-// ================================
-// ================================
-// 🔥 SYSTEME MATCH BLUELOCK GLOBAL
+// 🔥 SYSTEME MATCH BLUELOCK GLOBAL (FIX PROPRE)
 // ================================
 try {
-  if (texte) {
+  const Bluelockmatch = require("../cmd/Bluelockmatch");
 
-    const Bluelockmatch = require("../cmd/Bluelockmatch");
+  // 📄 FICHE MATCH
+  await Bluelockmatch.verifierFiche(texte, ms_org, ovl);
 
-    // ⚽ UNIQUE POINT D'ENTRÉE MATCH
-    await Bluelockmatch.messageMatch(ms, ovl);
+  // ⚽ GAMEPLAY PAVÉ
+  await Bluelockmatch.messageMatch(ms, ovl);
 
-  }
 } catch (err) {
   console.log("❌ Erreur système match:", err);
 }
-
-    // ================================
-    // MATCH BLUELOCK MESSAGES
-    // ================================
-    try {
-  if (texte) {
-
-    const Bluelockmatch = require("../cmd/Bluelockmatch");
-
-    // =========================
-    // 📄 FICHE MATCH (IMPORTANT)
-    // =========================
-    await Bluelockmatch.verifierFiche(texte, ms_org, ovl);
-
-    // =========================
-    // ⚽ GAMEPLAY PAVÉ / MATCH
-    // =========================
-    await Bluelockmatch.messageMatch(ms, ovl);
-
-  }
-} catch (err) {
-  console.log("❌ Erreur système match:", err);
-}
+    
     async function isBanned(type, id) {
       const ban = await Bans.findOne({ where: { id, type } });
       return !!ban;
