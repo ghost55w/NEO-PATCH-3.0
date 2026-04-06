@@ -243,8 +243,8 @@ if (!match) return;
 
     match.team1Nom = match.team1;
     match.team2Nom = match.team2;
-    match.id1 = cleanJid(j1.jid || j1.id);
-match.id2 = cleanJid(j2.jid || j2.id);
+    match.id1 = cleanJid(j1.jid || j1.id) + "@s.whatsapp.net";
+match.id2 = cleanJid(j2.jid || j2.id) + "@s.whatsapp.net";
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
@@ -463,25 +463,23 @@ async function handlePaveGame(ms, ovl) {
     // =========================
     // 👤 CHECK JOUEUR TOUR
     // =========================
-function cleanJid(jid) {
-    return (jid || "")
-        .split(":")[0]
-        .split("@")[0]
-        .trim();
-}
+const sender =
+    ms.key.participant ||
+    ms.key.remoteJid;
 
-const sender = cleanJid(ms.key.participant || ms.key.remoteJid);
-const joueurTour = cleanJid(match.joueurTour);
+const joueurTour = match.joueurTour;
 
-console.log("🧪 SENDER:", sender);
-console.log("🧪 TOUR:", joueurTour);
+console.log("🧪 SENDER RAW:", sender);
+console.log("🧪 TOUR RAW:", joueurTour);
 
-if (sender !== joueurTour) {
+// ✅ Comparaison basée sur le numéro uniquement
+if (!sender.includes(joueurTour.split("@")[0])) {
     await ovl.sendMessage(chat, {
         text: "❌ Ce n’est pas ton tour de jouer !"
     });
     return true;
 }
+    
     // =========================
     // 📦 PARSING PAVÉ
     // =========================
