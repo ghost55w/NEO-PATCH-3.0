@@ -287,11 +287,18 @@ LECTURE MESSAGES
 =================================*/
 async function messageMatch(ms, ovl) {
     if (!ms.message) return;
-    console.log("📩 MESSAGE REÇU");
 
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match) return;
+
+    // ===============================
+    // 🔥 GESTION PAVÉ (PRIORITÉ ABSOLUE)
+    // ===============================
+    const handled = await handlePaveGame(ms, ovl);
+    if (handled) return;
+
+    console.log("📩 MESSAGE REÇU (hors pavé)");
 
     const rawText =
         ms.message.conversation ||
@@ -312,6 +319,7 @@ async function messageMatch(ms, ovl) {
     📋 GESTION LINEUP UNIQUEMENT
     =================================*/
     if (match.etat === "attente_lineup") {
+
         const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
         if (!squadMatch) return;
 
@@ -321,6 +329,9 @@ async function messageMatch(ms, ovl) {
         const team2 = normalizeTeamName(match.team2);
         const squad = normalizeTeamName(squadName);
 
+        // ===============================
+        // ✅ TEAM 1
+        // ===============================
         if (squad === team1 && !match.equipe1) {
             const parsed = parseSquadBlueLock(safeText);
             match.lineup1 = parsed ? parsed.joueurs : [];
@@ -331,6 +342,9 @@ async function messageMatch(ms, ovl) {
             });
         }
 
+        // ===============================
+        // ✅ TEAM 2
+        // ===============================
         if (squad === team2 && !match.equipe2) {
             const parsed = parseSquadBlueLock(safeText);
             match.lineup2 = parsed ? parsed.joueurs : [];
@@ -341,10 +355,14 @@ async function messageMatch(ms, ovl) {
             });
         }
 
+        // ===============================
+        // 🚀 MATCH PRÊT
+        // ===============================
         if (match.equipe1 && match.equipe2 && !match.starting) {
             match.starting = true;
 
             if (match.timerMatch) clearTimeout(match.timerMatch);
+
             match.etat = "debut_match";
 
             const readyText = `⏳ Les deux formations sont prêtes.
@@ -367,6 +385,7 @@ Le match commence dans *1 minute* 🥅⚽...`;
         }
     }
 }
+
 
 /* ===============================
 LANCEMENT MATCH
