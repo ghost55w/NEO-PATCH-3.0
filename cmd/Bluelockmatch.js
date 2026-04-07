@@ -330,7 +330,6 @@ if (match.etat === "attente_lineup") {
     const team1 = normalizeTeamName(match.team1);
     const team2 = normalizeTeamName(match.team2);
 
-    // ✅ vrai sender JID
     const senderJid =
         ms.key?.participant ||
         ms.participant ||
@@ -339,72 +338,63 @@ if (match.etat === "attente_lineup") {
 
     const cleanSender = senderJid.split(":")[0];
 
-    // ===============================
-    // ✅ TEAM 1
-    // ===============================
+    // =========================
+    // TEAM 1 LINEUP
+    // =========================
     if (squad === team1 && !match.equipe1) {
 
         const parsed = parseSquadBlueLock(safeText);
+
         match.lineup1 = parsed ? parsed.joueurs : [];
         match.equipe1 = true;
 
-        // 🔥 joueur réel
         match.id1 = cleanSender;
-        teamOwners.set(team1, cleanSender);
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team1Nom}* !`
         });
     }
 
-    // ===============================
-    // ✅ TEAM 2
-    // ===============================
+    // =========================
+    // TEAM 2 LINEUP
+    // =========================
     if (squad === team2 && !match.equipe2) {
 
         const parsed = parseSquadBlueLock(safeText);
+
         match.lineup2 = parsed ? parsed.joueurs : [];
         match.equipe2 = true;
 
-        // 🔥 joueur réel
         match.id2 = cleanSender;
-        teamOwners.set(team2, cleanSender);
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation confirmée pour *${match.team2Nom}* !`
         });
     }
 
-    // ===============================
-    // 🚀 MATCH PRÊT
-    // ===============================
+    // =========================
+    // 🚀 MATCH READY
+    // =========================
     if (match.equipe1 && match.equipe2 && !match.starting) {
+
         match.starting = true;
 
         if (match.timerMatch) clearTimeout(match.timerMatch);
 
         match.etat = "debut_match";
 
-        const readyText = `⏳ Les deux formations sont prêtes.
-Le match commence dans *1 minute* 🥅⚽...`;
-
-        const imagesReady = [
-            "https://files.catbox.moe/dlj5z6.jpg",
-            "https://files.catbox.moe/fdadd0.jpeg",
-            "https://files.catbox.moe/4104s3.jpg"
-        ];
-
-        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
-
         await ovl.sendMessage(chat, {
-            image: { url: imageRandom },
-            caption: readyText
+            text: `⏳ Les deux formations sont prêtes.
+Le match commence dans *1 minute* 🥅⚽...`
         });
 
-        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+        match.timerMatch = setTimeout(() => {
+            lancerMatch(chat, ovl);
+        }, 60000);
     }
-}
 
+    return;
+}
 
 /* ===============================
 LANCEMENT MATCH
