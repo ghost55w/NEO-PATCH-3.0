@@ -471,12 +471,26 @@ function getNumber(jid) {
         .trim();
 }
 
-const senderNumber = getNumber(ms.key.participant || ms.key.remoteJid);
+// ✅ récupération fiable du vrai sender (tous les cas)
+const senderJid =
+    ms.key?.participant ||
+    ms.participant ||
+    ms.key?.remoteJid;
+
+const senderNumber = getNumber(senderJid);
 const tourNumber = getNumber(match.joueurTour);
 
+console.log("🧪 SENDER JID:", senderJid);
 console.log("🧪 SENDER NUM:", senderNumber);
 console.log("🧪 TOUR NUM:", tourNumber);
 
+// ❌ sécurité
+if (!senderNumber || !tourNumber) {
+    console.log("❌ ERREUR JID");
+    return true;
+}
+
+// ✅ comparaison fiable
 if (senderNumber !== tourNumber) {
     await ovl.sendMessage(chat, {
         text: "❌ Ce n’est pas ton tour de jouer !"
@@ -484,6 +498,15 @@ if (senderNumber !== tourNumber) {
     return true;
 }
 
+// =========================
+// 📦 PARSING PAVÉ
+// =========================
+const dialogueMatch = text.match(/💬:\s*([\s\S]*?)(?=⚽:|🔷BLUELOCK⚽🥅|$)/i);
+const actionMatch = text.match(/⚽:\s*([\s\S]*?)(?=🔷BLUELOCK⚽🥅|$)/i);
+
+const dialogue = dialogueMatch ? dialogueMatch[1].trim() : "";
+const action = actionMatch ? actionMatch[1].trim() : "";
+    
     // =========================
     // ⚽ ACTION
     // =========================
