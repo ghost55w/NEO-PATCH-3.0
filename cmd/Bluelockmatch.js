@@ -3,7 +3,6 @@ const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBas
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
 const matchsActifs = new Map();
-const teamOwners = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 const ACTIONS_MAP = {
@@ -319,89 +318,71 @@ async function messageMatch(ms, ovl) {
     /* ===============================
     📋 GESTION LINEUP UNIQUEMENT
     =================================*/
-if (match.etat === "attente_lineup") {
+    if (match.etat === "attente_lineup") {
 
-    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
-    if (!squadMatch) return;
+        const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
+        if (!squadMatch) return;
 
-    const squadNameRaw = squadMatch[1].trim();
-    const squad = normalizeTeamName(squadNameRaw);
+        const squadName = squadMatch[1].trim();
 
-    const team1 = normalizeTeamName(match.team1);
-    const team2 = normalizeTeamName(match.team2);
+        const team1 = normalizeTeamName(match.team1);
+        const team2 = normalizeTeamName(match.team2);
+        const squad = normalizeTeamName(squadName);
 
-    // ✅ vrai sender JID
-    const senderJid =
-        ms.key?.participant ||
-        ms.participant ||
-        ms.key?.remoteJid ||
-        "";
+        // ===============================
+        // ✅ TEAM 1
+        // ===============================
+        if (squad === team1 && !match.equipe1) {
+            const parsed = parseSquadBlueLock(safeText);
+            match.lineup1 = parsed ? parsed.joueurs : [];
+            match.equipe1 = true;
 
-    const cleanSender = senderJid.split(":")[0];
+            await ovl.sendMessage(chat, {
+                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+            });
+        }
 
-    // ===============================
-    // ✅ TEAM 1
-    // ===============================
-    if (squad === team1 && !match.equipe1) {
+        // ===============================
+        // ✅ TEAM 2
+        // ===============================
+        if (squad === team2 && !match.equipe2) {
+            const parsed = parseSquadBlueLock(safeText);
+            match.lineup2 = parsed ? parsed.joueurs : [];
+            match.equipe2 = true;
 
-        const parsed = parseSquadBlueLock(safeText);
-        match.lineup1 = parsed ? parsed.joueurs : [];
-        match.equipe1 = true;
+            await ovl.sendMessage(chat, {
+                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+            });
+        }
 
-        // 🔥 joueur réel
-        match.id1 = cleanSender;
-        teamOwners.set(team1, cleanSender);
+        // ===============================
+        // 🚀 MATCH PRÊT
+        // ===============================
+        if (match.equipe1 && match.equipe2 && !match.starting) {
+            match.starting = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-        });
-    }
+            if (match.timerMatch) clearTimeout(match.timerMatch);
 
-    // ===============================
-    // ✅ TEAM 2
-    // ===============================
-    if (squad === team2 && !match.equipe2) {
+            match.etat = "debut_match";
 
-        const parsed = parseSquadBlueLock(safeText);
-        match.lineup2 = parsed ? parsed.joueurs : [];
-        match.equipe2 = true;
-
-        // 🔥 joueur réel
-        match.id2 = cleanSender;
-        teamOwners.set(team2, cleanSender);
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-        });
-    }
-
-    // ===============================
-    // 🚀 MATCH PRÊT
-    // ===============================
-    if (match.equipe1 && match.equipe2 && !match.starting) {
-        match.starting = true;
-
-        if (match.timerMatch) clearTimeout(match.timerMatch);
-
-        match.etat = "debut_match";
-
-        const readyText = `⏳ Les deux formations sont prêtes.
+            const readyText = `⏳ Les deux formations sont prêtes.
 Le match commence dans *1 minute* 🥅⚽...`;
 
-        const imagesReady = [
-            "https://files.catbox.moe/dlj5z6.jpg",
-            "https://files.catbox.moe/fdadd0.jpeg",
-            "https://files.catbox.moe/4104s3.jpg"
-        ];
+            const imagesReady = [
+                "https://files.catbox.moe/dlj5z6.jpg",
+                "https://files.catbox.moe/fdadd0.jpeg",
+                "https://files.catbox.moe/4104s3.jpg"
+            ];
 
-        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+            const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-        await ovl.sendMessage(chat, {
-            image: { url: imageRandom },
-            caption: readyText
-        });
+            await ovl.sendMessage(chat, {
+                image: { url: imageRandom },
+                caption: readyText
+            });
 
-        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+            match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+        }
     }
 }
 
@@ -421,19 +402,24 @@ async function lancerMatch(chat, ovl) {
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
     match.etat = "en_cours";
 
-   match.joueurTour = isTeam1 ? match.id1 : match.id2;
+    match.joueurTour = isTeam1 ? match.id1 : match.id2;
 
-const jidStart = match.joueurTour;
-const mentionJid = jidStart;
+    const jidStart = match.joueurTour;
+    const mentionJid = jidStart;
 
-// affichage propre
-const displayName = jidStart.split("@")[0];
+    // ✅ affichage propre (sans @s.whatsapp.net)
+    const displayName = jidStart.split("@")[0];
 
-await ovl.sendMessage(chat, {
-    image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
-    caption: `🎙️⚽: KICK OFF 🥅‼️ @${displayName} commence !\n⚠️ Envoie ton pavé ⚽`,
-    mentions: [mentionJid]
-}); 
+    const imagesKickOff = [
+        "https://files.catbox.moe/onotk4.jpg",
+        "https://files.catbox.moe/kfw0bl.jpg"
+    ];
+
+    await ovl.sendMessage(chat, {
+        image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
+        caption: `🎙️⚽: KICK OFF 🥅‼️ @${displayName} commence !\n⚠️ Envoie ton pavé ⚽`,
+        mentions: [mentionJid]
+    });
 
     // ⏱️ timer 1er joueur
     match.timerKickoff = setTimeout(async () => {
@@ -478,41 +464,26 @@ async function handlePaveGame(ms, ovl) {
     // =========================
     // 👤 CHECK JOUEUR TOUR
     // =========================
-function normalizeFullJid(jid) {
-    if (!jid) return "";
-    return jid.split(":")[0].trim().toLowerCase();
+function getNumber(jid) {
+    return (jid || "")
+        .split("@")[0]
+        .split(":")[0]
+        .trim();
 }
 
-const senderJid =
-    ms.key?.participant ||
-    ms.participant ||
-    ms.key?.remoteJid ||
-    "";
+const senderNumber = getNumber(ms.key.participant || ms.key.remoteJid);
+const tourNumber = getNumber(match.joueurTour);
 
-const senderClean = normalizeFullJid(senderJid);
-const tourClean = normalizeFullJid(match.joueurTour);
+console.log("🧪 SENDER NUM:", senderNumber);
+console.log("🧪 TOUR NUM:", tourNumber);
 
-console.log("🧪 SENDER:", senderClean);
-console.log("🧪 TOUR:", tourClean);
-
-if (!senderClean || !tourClean) return true;
-
-if (senderClean !== tourClean) {
+if (senderNumber !== tourNumber) {
     await ovl.sendMessage(chat, {
         text: "❌ Ce n’est pas ton tour de jouer !"
     });
     return true;
 }
 
-// =========================
-// 📦 PARSING PAVÉ
-// =========================
-const dialogueMatch = text.match(/💬:\s*([\s\S]*?)(?=⚽:|🔷BLUELOCK⚽🥅|$)/i);
-const actionMatch = text.match(/⚽:\s*([\s\S]*?)(?=🔷BLUELOCK⚽🥅|$)/i);
-
-const dialogue = dialogueMatch ? dialogueMatch[1].trim() : "";
-const action = actionMatch ? actionMatch[1].trim() : "";
-    
     // =========================
     // ⚽ ACTION
     // =========================
