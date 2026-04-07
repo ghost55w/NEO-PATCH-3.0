@@ -464,25 +464,25 @@ async function handlePaveGame(ms, ovl) {
     // =========================
     // 👤 CHECK JOUEUR TOUR
     // =========================
-function normalizeJid(jid) {
+function getNumber(jid) {
     return (jid || "")
+        .split("@")[0]
         .split(":")[0]
         .trim();
 }
 
-const sender = normalizeJid(ms.key.participant || ms.key.remoteJid);
-const joueurTour = normalizeJid(match.joueurTour);
+const senderNumber = getNumber(ms.key.participant || ms.key.remoteJid);
+const tourNumber = getNumber(match.joueurTour);
 
-console.log("🧪 SENDER:", sender);
-console.log("🧪 TOUR:", joueurTour);
+console.log("🧪 SENDER NUM:", senderNumber);
+console.log("🧪 TOUR NUM:", tourNumber);
 
-// ✅ COMPARAISON FIABLE
-if (sender !== joueurTour) {
+if (senderNumber !== tourNumber) {
     await ovl.sendMessage(chat, {
         text: "❌ Ce n’est pas ton tour de jouer !"
     });
     return true;
-} 
+}
 
     // =========================
     // ⚽ ACTION
