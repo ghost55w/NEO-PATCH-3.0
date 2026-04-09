@@ -6,6 +6,50 @@ const matchsActifs = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 /* ===============================
+POSTES → POSITION TERRAIN
+=================================*/
+
+const POSITION_POSTES = {
+    // ATTAQUE
+    AG: { zoneX: "aile gauche", ligne: "attaque" },
+    AC: { zoneX: "axe", ligne: "attaque" },
+    AD: { zoneX: "aile droite", ligne: "attaque" },
+
+    // MILIEU
+    MG: { zoneX: "aile gauche", ligne: "milieu" },
+    MC: { zoneX: "axe", ligne: "milieu" },
+    MD: { zoneX: "aile droite", ligne: "milieu" },
+
+    // DEFENSE
+    DG: { zoneX: "aile gauche", ligne: "defense" },
+    DC: { zoneX: "axe", ligne: "defense" },
+    DD: { zoneX: "aile droite", ligne: "defense" }
+};
+
+/* ===============================
+PLACEMENT AUTOMATIQUE JOUEURS
+=================================*/
+
+function getZoneYParLigne(ligne, mode){
+
+    // mode = "attaque" ou "defense"
+
+    if(mode === "attaque"){
+        if(ligne === "attaque") return "B1";
+        if(ligne === "milieu") return "B2";
+        if(ligne === "defense") return "C2";
+    }
+
+    if(mode === "defense"){
+        if(ligne === "defense") return "B1";
+        if(ligne === "milieu") return "B2";
+        if(ligne === "attaque") return "C2";
+    }
+
+    return "B2";
+}
+
+/* ===============================
 ZONES LARGEUR (NOUVEAU)
 =================================*/
 
@@ -282,6 +326,37 @@ function verifierDeplacement(sequence){
     };
 }
 
+/* ===============================
+UPDATE POSITION JOUEUR
+=================================*/
+
+function updatePositionJoueur(joueur, direction, distance){
+
+    if(!direction || !distance) return joueur;
+
+    let pos = ZONES_X[joueur.zoneX];
+
+    // déplacement
+    if(direction === "aile droite") pos += distance;
+    if(direction === "aile gauche") pos -= distance;
+
+    if(direction === "axe"){
+        if(pos < 0) pos += distance;
+        else if(pos > 0) pos -= distance;
+    }
+
+    // limites terrain
+    if(pos > 5) pos = 5;
+    if(pos < -5) pos = -5;
+
+    // 🔥 conversion en zone
+    if(pos === -5) joueur.zoneX = "aile gauche";
+    else if(pos === 5) joueur.zoneX = "aile droite";
+    else if(pos === 0) joueur.zoneX = "axe";
+    else joueur.zoneX = "axe"; // approximation
+
+    return joueur;
+}
 
 /* ===============================
 EXTRAIRE ZONE DEPART
@@ -627,7 +702,24 @@ if (match.etat === "attente_lineup") {
         match.id1 = senderJid;
 
         const parsed = parseSquadBlueLock(safeText);
-        match.lineup1 = parsed ? parsed.joueurs : [];
+
+if(parsed){
+
+    match.lineup1 = parsed.joueurs.map(j => {
+
+        const posteData = POSITION_POSTES[j.position] || {};
+
+        return {
+            ...j,
+            zoneX: posteData.zoneX || "axe",
+            ligne: posteData.ligne || "milieu",
+            zoneY: null // sera défini au kickoff
+        };
+    });
+
+}else{
+    match.lineup1 = [];
+}
         match.equipe1 = true;
 
         await ovl.sendMessage(chat, {
@@ -649,9 +741,24 @@ if (match.etat === "attente_lineup") {
         }
 
         match.id2 = senderJid;
+        if(parsed){
 
-        const parsed = parseSquadBlueLock(safeText);
-        match.lineup2 = parsed ? parsed.joueurs : [];
+    match.lineup2 = parsed.joueurs.map(j => {
+
+        const posteData = POSITION_POSTES[j.position] || {};
+
+        return {
+            ...j,
+            zoneX: posteData.zoneX || "axe",
+            ligne: posteData.ligne || "milieu",
+            zoneY: null
+        };
+    });
+
+}else{
+    match.lineup2 = [];
+}
+    
         match.equipe2 = true;
 
         await ovl.sendMessage(chat, {
@@ -704,6 +811,31 @@ async function lancerMatch(chat, ovl) {
     const isTeam1 = Math.random() < 0.5;
 
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
+    // PLACEMENT AUTOMATIQUE
+
+const equipeAttack = match.possession === match.team1Nom ? match.lineup1 : match.lineup2;
+const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : match.lineup1;
+
+//  équipe attaque
+equipeAttack.forEach(j => {
+    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+
+    // largeur automatique selon poste
+    const posteData = POSITION_POSTES[j.position];
+    j.zoneX = posteData?.zoneX || "axe";
+});
+// 🔥 STOCKAGE GLOBAL DES POSITIONS
+match.positions = [
+    ...match.lineup1,
+    ...match.lineup2
+];
+//  équipe défense
+equipeDefense.forEach(j => {
+    j.zoneY = getZoneYParLigne(j.ligne, "defense");
+
+    const posteData = POSITION_POSTES[j.position];
+    j.zoneX = posteData?.zoneX || "axe";
+});
     match.etat = "en_cours";
 
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
@@ -812,10 +944,34 @@ if (sender !== tour) {
     // =========================
     // ⚽ ACTION
     // =========================
-    if (action) {
-        await ovl.sendMessage(chat, {
-            text: `⚽ Action validée:\n${action}`
-        });
+if (action) {
+
+    // 🔍 récupérer joueur
+    const joueurMatch = action.match(/\)\s*([^\s]+)/);
+    const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
+
+    let joueurObj = null;
+
+    [joueurObj] = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ].filter(j => j.nom.toLowerCase() === nomJoueur?.toLowerCase());
+
+    // 🔍 récupérer direction + distance
+    const direction = extraireDirectionLargeur(action);
+    const distance = extraireDistance(action);
+
+    // 🔥 UPDATE POSITION (SEULEMENT SI JOUEUR TROUVÉ)
+    if(joueurObj){
+        updatePositionJoueur(joueurObj, direction, distance);
+
+        console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+    }
+
+    await ovl.sendMessage(chat, {
+        text: `⚽ Action validée:\n${action}`
+    });
+}
     } else {
         await ovl.sendMessage(chat, {
             text: "⚠️ Aucune action détectée."
