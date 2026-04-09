@@ -133,6 +133,22 @@ function perteBalle(match) {
     return { ok: false, message: "❌ Pavé invalide. Ballon perdu. Possession adverse." };
 }
 
+function getSenderJid(ms) {
+    return (
+        ms.key.participant ||
+        ms.participant ||
+        ms.key.remoteJid ||
+        ""
+    ).replace(/:\d+/g, ""); // enlève :12
+}
+
+function normalizeJid(jid) {
+    return (jid || "")
+        .replace(/:\d+/g, "")
+        .replace(/@.*/, "")
+        .trim();
+}
+
 function parseLineup(texte) {
     const regex = /\s*(\w+)\s*:\s*([^\n\r]+)\s*-\s*(\d+)/gi;
     const joueurs = [];
@@ -243,8 +259,6 @@ if (!match) return;
 
     match.team1Nom = match.team1;
     match.team2Nom = match.team2;
-    match.id1 = cleanJid(j1.jid || j1.id) + "@s.whatsapp.net";
-match.id2 = cleanJid(j2.jid || j2.id) + "@s.whatsapp.net";
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
@@ -315,76 +329,103 @@ async function messageMatch(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
-    /* ===============================
-    📋 GESTION LINEUP UNIQUEMENT
-    =================================*/
-    if (match.etat === "attente_lineup") {
+    
+// ===============================
+// 📋 GESTION LINEUP UNIQUEMENT
+// ===============================
+if (match.etat === "attente_lineup") {
 
-        const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
-        if (!squadMatch) return;
+    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
+    if (!squadMatch) return;
 
-        const squadName = squadMatch[1].trim();
+    const squadName = squadMatch[1].trim();
 
-        const team1 = normalizeTeamName(match.team1);
-        const team2 = normalizeTeamName(match.team2);
-        const squad = normalizeTeamName(squadName);
+    const team1 = normalizeTeamName(match.team1);
+    const team2 = normalizeTeamName(match.team2);
+    const squad = normalizeTeamName(squadName);
 
-        // ===============================
-        // ✅ TEAM 1
-        // ===============================
-        if (squad === team1 && !match.equipe1) {
-            const parsed = parseSquadBlueLock(safeText);
-            match.lineup1 = parsed ? parsed.joueurs : [];
-            match.equipe1 = true;
+    const senderJid = getSenderJid(ms);
 
-            await ovl.sendMessage(chat, {
-                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-            });
-        }
+    // ===============================
+    // ✅ TEAM 1
+    // ===============================
+    if (squad === team1 && !match.equipe1) {
 
-        // ===============================
-        // ✅ TEAM 2
-        // ===============================
-        if (squad === team2 && !match.equipe2) {
-            const parsed = parseSquadBlueLock(safeText);
-            match.lineup2 = parsed ? parsed.joueurs : [];
-            match.equipe2 = true;
+    const senderJid = getSenderJid(ms);
 
-            await ovl.sendMessage(chat, {
-                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-            });
-        }
+    // 🔒 ANTI VOL D'ÉQUIPE
+    if (match.id1 && match.id1 !== senderJid) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Cette équipe a déjà été validée par un autre joueur."
+        });
+        return;
+    }
 
-        // ===============================
-        // 🚀 MATCH PRÊT
-        // ===============================
-        if (match.equipe1 && match.equipe2 && !match.starting) {
-            match.starting = true;
+    match.id1 = senderJid; // 🔥 enregistre le vrai joueur
 
-            if (match.timerMatch) clearTimeout(match.timerMatch);
+    const parsed = parseSquadBlueLock(safeText);
+    match.lineup1 = parsed ? parsed.joueurs : [];
+    match.equipe1 = true;
 
-            match.etat = "debut_match";
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+    });
+}
+    // ===============================
+    // ✅ TEAM 2
+    // ===============================
+    if (squad === team2 && !match.equipe2) {
 
-            const readyText = `⏳ Les deux formations sont prêtes.
+    const senderJid = getSenderJid(ms);
+
+    // 🔒 ANTI VOL D'ÉQUIPE
+    if (match.id2 && match.id2 !== senderJid) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Cette équipe a déjà été validée par un autre joueur."
+        });
+        return;
+    }
+
+    match.id2 = senderJid;
+
+    const parsed = parseSquadBlueLock(safeText);
+    match.lineup2 = parsed ? parsed.joueurs : [];
+    match.equipe2 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+    });
+}
+
+    // ===============================
+    // 🚀 MATCH PRÊT
+    // ===============================
+    if (match.equipe1 && match.equipe2 && !match.starting) {
+        match.starting = true;
+
+        if (match.timerMatch) clearTimeout(match.timerMatch);
+
+        match.etat = "debut_match";
+
+        const readyText = `⏳ Les deux formations sont prêtes.
 Le match commence dans *1 minute* 🥅⚽...`;
 
-            const imagesReady = [
-                "https://files.catbox.moe/dlj5z6.jpg",
-                "https://files.catbox.moe/fdadd0.jpeg",
-                "https://files.catbox.moe/4104s3.jpg"
-            ];
+        const imagesReady = [
+            "https://files.catbox.moe/dlj5z6.jpg",
+            "https://files.catbox.moe/fdadd0.jpeg",
+            "https://files.catbox.moe/4104s3.jpg"
+        ];
 
-            const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-            await ovl.sendMessage(chat, {
-                image: { url: imageRandom },
-                caption: readyText
-            });
+        await ovl.sendMessage(chat, {
+            image: { url: imageRandom },
+            caption: readyText
+        });
 
-            match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
-        }
+        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
-}
+} 
 
 
 /* ===============================
@@ -460,34 +501,20 @@ async function handlePaveGame(ms, ovl) {
         text.includes("🔷BLUELOCK⚽🥅");
 
     if (!isBlueLockPave) return false;
+    
+    const action = extraireAction(text);
+const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
 
     // =========================
     // 👤 CHECK JOUEUR TOUR
     // =========================
-function getNumber(jid) {
-    return (jid || "")
-        .split("@")[0]
-        .split(":")[0]
-        .trim();
-}
+const sender = normalizeJid(getSenderJid(ms));
+const tour = normalizeJid(match.joueurTour);
 
-function getSender(ms) {
-    return (
-        ms.key.participant ||
-        ms.participant ||
-        ms.key.remoteJid
-    );
-}
+console.log("🧪 SENDER:", sender);
+console.log("🧪 TOUR:", tour);
 
-const senderJid = getSender(ms);
-
-const senderNumber = getNumber(senderJid);
-const tourNumber = getNumber(match.joueurTour);
-
-console.log("🧪 SENDER:", senderJid);
-console.log("🧪 TOUR:", match.joueurTour);
-
-if (senderNumber !== tourNumber) {
+if (sender !== tour) {
     await ovl.sendMessage(chat, {
         text: "❌ Ce n’est pas ton tour de jouer !"
     });
