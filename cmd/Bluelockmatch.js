@@ -5,6 +5,15 @@ const { cardsBlueLock } = require("../DataBase/cardsBL");
 const matchsActifs = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
+/* ===============================
+REGLES TERRAIN BLUE LOCK
+=================================*/
+
+const ZONES_BLUELOCK = ["A1","A2","B1","B2","C1","C2"];
+
+const MAX_DEPLACEMENT = 10;
+const MAX_ACTIONS_PAVE = 3;
+const MAX_ACTIONS_COMBO = 2;
 const ACTIONS_MAP = {
     tir: ["tir", "frappe"],
     passe: ["passe"],
@@ -18,6 +27,37 @@ const ACTIONS_MAP = {
 
     dribble: ["dribble"] // uniquement vrai dribble
 };
+/* ===============================
+DETECTION AUTOMATIQUE ACTIONS
+=================================*/
+
+function detecterActions(sequence){
+
+    const actionsDetectees = [];
+    const text = sequence.toLowerCase();
+
+    for(const [type, mots] of Object.entries(ACTIONS_MAP)){
+
+        for(const mot of mots){
+
+            const regex = new RegExp("\\b"+mot+"\\b","gi");
+
+            const matches = text.match(regex);
+
+            if(matches){
+
+                for(let i=0;i<matches.length;i++){
+                    actionsDetectees.push(type);
+                }
+
+            }
+
+        }
+
+    }
+
+    return actionsDetectees;
+}
 /* ===============================
 MOTS CLÉS PASSES (FORMULE 🧩)
 =================================*/
@@ -121,7 +161,84 @@ function extraireZones(sequence) {
     const arrivee = (arriveeMatch[1] || arriveeMatch[2]).toUpperCase();
     return { depart, arrivee };
 }
+/* ===============================
+CALCUL DISTANCE ENTRE ZONES
+=================================*/
 
+function calculDistance(zone1, zone2){
+
+    if(!DISTANCES[zone1] || !DISTANCES[zone2]) return 0;
+
+    return Math.abs(DISTANCES[zone1] - DISTANCES[zone2]);
+}
+
+/* ===============================
+VALIDATION DEPLACEMENT
+=================================*/
+
+function verifierDeplacement(sequence){
+
+    const zoneDepart = extraireZoneDepart(sequence);
+
+    if(!zoneDepart){
+        return {
+            ok:false,
+            erreur:"❌ Zone manquante. Exemple : (A1)"
+        };
+    }
+
+    const zoneArrivee = extraireZoneArrivee(sequence);
+
+    if(!zoneArrivee){
+        return {
+            ok:true,
+            zoneDepart
+        };
+    }
+
+    const dist = calculDistance(zoneDepart, zoneArrivee);
+
+    if(dist > MAX_DEPLACEMENT){
+        return {
+            ok:false,
+            erreur:"❌ Déplacement trop long (max 10m)"
+        };
+    }
+
+    return {
+        ok:true,
+        zoneDepart,
+        zoneArrivee,
+        distance:dist
+    };
+}
+
+/* ===============================
+EXTRAIRE ZONE DEPART
+=================================*/
+
+function extraireZoneDepart(sequence){
+
+    const zoneMatch = sequence.match(/\((A1|A2|B1|B2|C1|C2)\)/i);
+
+    if(!zoneMatch) return null;
+
+    return zoneMatch[1].toUpperCase();
+}
+
+
+/* ===============================
+EXTRAIRE ZONE ARRIVEE
+=================================*/
+
+function extraireZoneArrivee(sequence){
+
+    const zones = sequence.match(/\b(A1|A2|B1|B2|C1|C2)\b/gi);
+
+    if(!zones || zones.length < 2) return null;
+
+    return zones[zones.length - 1].toUpperCase();
+}
 function distance(z1, z2) {
     return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
 }
@@ -190,6 +307,43 @@ function triggerCounterAttack(match, attackerTeam, defenderTeam) {
     return {
         newAttacker: defenderTeam,
         newDefender: attackerTeam
+    };
+}
+/* ===============================
+VALIDATION PAVE BLUELOCK
+=================================*/
+
+function verifierPaveBlueLock(actionText){
+
+    if(!actionText){
+        return {ok:false, erreur:"❌ Aucune action détectée"};
+    }
+
+    const actions = detecterActions(actionText);
+
+    if(actions.length === 0){
+        return {
+            ok:false,
+            erreur:"❌ Aucune action reconnue"
+        };
+    }
+
+    if(actions.length > MAX_ACTIONS_PAVE){
+        return {
+            ok:false,
+            erreur:"❌ Maximum 3 actions par pavé"
+        };
+    }
+
+    const zoneCheck = verifierDeplacement(actionText);
+
+    if(!zoneCheck.ok){
+        return zoneCheck;
+    }
+
+    return {
+        ok:true,
+        actions
     };
 }
 
@@ -542,6 +696,16 @@ async function handlePaveGame(ms, ovl) {
     if (!isBlueLockPave) return false;
     
     const action = extraireAction(text);
+    const validation = verifierPaveBlueLock(action);
+
+if(!validation.ok){
+
+    await ovl.sendMessage(chat,{
+        text: validation.erreur
+    });
+
+    return true;
+}
 const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
     const isInvalid = !action || action.length < 3;
 
