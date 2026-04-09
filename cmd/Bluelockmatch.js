@@ -970,33 +970,40 @@ if (action) {
     const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
 
     const allJoueurs = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
 
-let joueurObj = allJoueurs.find(j => 
-    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
-);
-    // 🔍 récupérer direction + distance
+    let joueurObj = allJoueurs.find(j => 
+        j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+    );
+
+    // ❌ joueur non titulaire
+    if(!joueurObj){
+        await ovl.sendMessage(chat,{
+            text:`❌ ${nomJoueur} n'est pas dans les titulaires`
+        });
+        return true;
+    }
+
+    // 🔍 direction + distance
     const direction = extraireDirectionLargeur(action);
     const distance = extraireDistance(action);
 
-    // 🔥 UPDATE POSITION (SEULEMENT SI JOUEUR TROUVÉ)
-    if(joueurObj){
-        updatePositionJoueur(joueurObj, direction, distance);
+    // 🔥 UPDATE POSITION
+    updatePositionJoueur(joueurObj, direction, distance);
 
-        console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
-    }
+    console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
 
     await ovl.sendMessage(chat, {
         text: `⚽ Action validée:\n${action}`
     });
+
+} else {
+    await ovl.sendMessage(chat, {
+        text: "⚠️ Aucune action détectée."
+    });
 }
-    } else {
-        await ovl.sendMessage(chat, {
-            text: "⚠️ Aucune action détectée."
-        });
-    }
 // =========================
 // 🔄 FIN DE POSSESSION (4 actions)
 // =========================
