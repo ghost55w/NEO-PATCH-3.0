@@ -6,6 +6,28 @@ const matchsActifs = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 /* ===============================
+ZONES LARGEUR (NOUVEAU)
+=================================*/
+
+const ZONES_X = {
+    "aile gauche": -5,
+    "axe": 0,
+    "aile droite": 5
+};
+/* ===============================
+SYNONYMES LARGEUR
+=================================*/
+
+const SYNONYMES_X = {
+    "côté gauche": "aile gauche",
+    "gauche": "aile gauche",
+
+    "côté droit": "aile droite",
+    "droite": "aile droite",
+
+    "centre": "axe"
+};
+/* ===============================
 REGLES TERRAIN BLUE LOCK
 =================================*/
 
@@ -162,6 +184,30 @@ function extraireZones(sequence) {
     return { depart, arrivee };
 }
 /* ===============================
+EXTRAIRE DIRECTION LARGEUR
+=================================*/
+
+function extraireDirectionLargeur(sequence){
+
+    const txt = sequence.toLowerCase();
+
+    if(txt.includes("aile gauche")) return "aile gauche";
+    if(txt.includes("aile droite")) return "aile droite";
+    if(txt.includes("axe")) return "axe";
+
+    return null;
+}
+
+function extraireDistance(sequence){
+
+    const match = sequence.match(/(\d+)\s?m/i);
+
+    if(!match) return null;
+
+    return parseInt(match[1]);
+}
+
+/* ===============================
 CALCUL DISTANCE ENTRE ZONES
 =================================*/
 
@@ -172,10 +218,7 @@ function calculDistance(zone1, zone2){
     return Math.abs(DISTANCES[zone1] - DISTANCES[zone2]);
 }
 
-/* ===============================
-VALIDATION DEPLACEMENT
-=================================*/
-
+// DÉPLACEMENTS
 function verifierDeplacement(sequence){
 
     const zoneDepart = extraireZoneDepart(sequence);
@@ -189,29 +232,56 @@ function verifierDeplacement(sequence){
 
     const zoneArrivee = extraireZoneArrivee(sequence);
 
-    if(!zoneArrivee){
-        return {
-            ok:true,
-            zoneDepart
-        };
+    const direction = extraireDirectionLargeur(sequence);
+    const distance = extraireDistance(sequence);
+
+    // 🔥 REGLE LARGEUR (NOUVEAU)
+    if(direction){
+
+        if(!distance){
+            return {
+                ok:false,
+                erreur:"❌ Distance obligatoire pour aller vers l’aile ou l’axe"
+            };
+        }
+
+        if(distance > MAX_DEPLACEMENT){
+            return {
+                ok:false,
+                erreur:"❌ Déplacement trop long (max 10m)"
+            };
+        }
     }
 
-    const dist = calculDistance(zoneDepart, zoneArrivee);
+    // 🔥 TON SYSTEME LONGUEUR (inchangé)
+    if(zoneArrivee){
 
-    if(dist > MAX_DEPLACEMENT){
+        const dist = calculDistance(zoneDepart, zoneArrivee);
+
+        if(dist > MAX_DEPLACEMENT){
+            return {
+                ok:false,
+                erreur:"❌ Déplacement trop long (max 10m)"
+            };
+        }
+
         return {
-            ok:false,
-            erreur:"❌ Déplacement trop long (max 10m)"
+            ok:true,
+            zoneDepart,
+            zoneArrivee,
+            direction,
+            distance
         };
     }
 
     return {
         ok:true,
         zoneDepart,
-        zoneArrivee,
-        distance:dist
+        direction,
+        distance
     };
 }
+
 
 /* ===============================
 EXTRAIRE ZONE DEPART
