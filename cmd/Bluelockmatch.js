@@ -471,11 +471,21 @@ function getNumber(jid) {
         .trim();
 }
 
-const senderNumber = getNumber(ms.key.participant || ms.key.remoteJid);
+function getSender(ms) {
+    return (
+        ms.key.participant ||
+        ms.participant ||
+        ms.key.remoteJid
+    );
+}
+
+const senderJid = getSender(ms);
+
+const senderNumber = getNumber(senderJid);
 const tourNumber = getNumber(match.joueurTour);
 
-console.log("🧪 SENDER NUM:", senderNumber);
-console.log("🧪 TOUR NUM:", tourNumber);
+console.log("🧪 SENDER:", senderJid);
+console.log("🧪 TOUR:", match.joueurTour);
 
 if (senderNumber !== tourNumber) {
     await ovl.sendMessage(chat, {
@@ -483,7 +493,6 @@ if (senderNumber !== tourNumber) {
     });
     return true;
 }
-
     // =========================
     // ⚽ ACTION
     // =========================
