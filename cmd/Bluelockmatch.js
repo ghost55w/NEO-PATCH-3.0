@@ -165,6 +165,34 @@ function cleanJid(jid) {
         .trim();
 }
 
+function resetPossession(match, team) {
+    match.actionsRestantes[team] = 4;
+    match.possessionIndex[team]++;
+    return match.possessionIndex[team];
+}
+
+function switchRoles(match) {
+    const t1 = match.team1Nom;
+    const t2 = match.team2Nom;
+
+    const temp = match.role[t1];
+    match.role[t1] = match.role[t2];
+    match.role[t2] = temp;
+}
+
+function triggerCounterAttack(match, attackerTeam, defenderTeam) {
+
+    const temp = match.joueurTour;
+    match.joueurTour = match.id1 === temp ? match.id2 : match.id1;
+
+    match.actionsRestantes[attackerTeam] = 4;
+
+    return {
+        newAttacker: defenderTeam,
+        newDefender: attackerTeam
+    };
+}
+
 /* ===============================
 TROUVER JOUEUR DB
 =================================*/
@@ -262,6 +290,20 @@ if (!match) return;
     match.etat = "attente_lineup";
     match.equipe1 = null;
     match.equipe2 = null;
+    match.possessionIndex = {
+    [match.team1Nom]: 0,
+    [match.team2Nom]: 0
+};
+
+match.actionsRestantes = {
+    [match.team1Nom]: 4,
+    [match.team2Nom]: 4
+};
+
+match.role = {
+    [match.team1Nom]: "attack",
+    [match.team2Nom]: "defense"
+};
 
     const imagesMatchConfirm = [
         "https://files.catbox.moe/7m2axj.jpg",
@@ -501,6 +543,22 @@ async function handlePaveGame(ms, ovl) {
     
     const action = extraireAction(text);
 const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
+    const isInvalid = !action || action.length < 3;
+
+if (isInvalid) {
+
+    const roles = triggerCounterAttack(match, currentTeam, nextTeam);
+
+    await ovl.sendMessage(chat, {
+        text:
+`❌ Erreur de pavé !
+
+⚡ CONTRE-ATTAQUE IMMÉDIATE !
+⚽ ${roles.newAttacker} récupère le ballon`
+    });
+
+    return true;
+}
 
     // =========================
     // 👤 CHECK JOUEUR TOUR
@@ -529,6 +587,26 @@ if (sender !== tour) {
             text: "⚠️ Aucune action détectée."
         });
     }
+// =========================
+// 🔄 FIN DE POSSESSION (4 actions)
+// =========================
+if (match.actionsRestantes[currentTeam] <= 0) {
+
+    const possessionNumber = resetPossession(match, currentTeam);
+
+    switchRoles(match);
+
+    const roleCurrent = match.role[currentTeam];
+    const roleOther = match.role[nextTeam];
+
+    await ovl.sendMessage(chat, {
+        text:
+`🔁 Fin possession ${possessionNumber}
+
+⚽ ${currentTeam}: ${roleCurrent.toUpperCase()}
+🛡️ ${nextTeam}: ${roleOther.toUpperCase()}`
+    });
+}
 
     // =========================
     // 💬 DIALOGUE
@@ -549,10 +627,18 @@ if (sender !== tour) {
 
     match.joueurTour = nextJoueur;
 
-    await ovl.sendMessage(chat, {
-        text: `➡️ À toi de jouer @${nextNom}`,
-        mentions: [nextJoueur]
-    });
+    const displayNext = nextJoueur.split("@")[0];
+
+await ovl.sendMessage(chat, {
+    text:
+`⚽ NEXT ! @${displayNext}
+
+⚔️ ATTAQUE: ${match.role[currentTeam] === "attack" ? currentTeam : nextTeam}
+🛡️ DÉFENSE: ${match.role[currentTeam] === "attack" ? nextTeam : currentTeam}
+
+🎯 4 actions pour marquer`,
+    mentions: [nextJoueur]
+});
 
     // =========================
     // ⏱️ TIMER TOUR
