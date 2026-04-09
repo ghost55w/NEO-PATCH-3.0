@@ -329,8 +329,7 @@ async function messageMatch(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
-    
-// ===============================
+    // ===============================
 // 📋 GESTION LINEUP UNIQUEMENT
 // ===============================
 if (match.etat === "attente_lineup") {
@@ -351,51 +350,48 @@ if (match.etat === "attente_lineup") {
     // ===============================
     if (squad === team1 && !match.equipe1) {
 
-    const senderJid = getSenderJid(ms);
+        // 🔒 ANTI VOL D'ÉQUIPE
+        if (match.id1 && match.id1 !== senderJid) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Cette équipe a déjà été validée par un autre joueur."
+            });
+            return;
+        }
 
-    // 🔒 ANTI VOL D'ÉQUIPE
-    if (match.id1 && match.id1 !== senderJid) {
+        match.id1 = senderJid;
+
+        const parsed = parseSquadBlueLock(safeText);
+        match.lineup1 = parsed ? parsed.joueurs : [];
+        match.equipe1 = true;
+
         await ovl.sendMessage(chat, {
-            text: "❌ Cette équipe a déjà été validée par un autre joueur."
+            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
         });
-        return;
     }
 
-    match.id1 = senderJid; // 🔥 enregistre le vrai joueur
-
-    const parsed = parseSquadBlueLock(safeText);
-    match.lineup1 = parsed ? parsed.joueurs : [];
-    match.equipe1 = true;
-
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-    });
-}
     // ===============================
     // ✅ TEAM 2
     // ===============================
     if (squad === team2 && !match.equipe2) {
 
-    const senderJid = getSenderJid(ms);
+        // 🔒 ANTI VOL D'ÉQUIPE
+        if (match.id2 && match.id2 !== senderJid) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Cette équipe a déjà été validée par un autre joueur."
+            });
+            return;
+        }
 
-    // 🔒 ANTI VOL D'ÉQUIPE
-    if (match.id2 && match.id2 !== senderJid) {
+        match.id2 = senderJid;
+
+        const parsed = parseSquadBlueLock(safeText);
+        match.lineup2 = parsed ? parsed.joueurs : [];
+        match.equipe2 = true;
+
         await ovl.sendMessage(chat, {
-            text: "❌ Cette équipe a déjà été validée par un autre joueur."
+            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
         });
-        return;
     }
-
-    match.id2 = senderJid;
-
-    const parsed = parseSquadBlueLock(safeText);
-    match.lineup2 = parsed ? parsed.joueurs : [];
-    match.equipe2 = true;
-
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-    });
-}
 
     // ===============================
     // 🚀 MATCH PRÊT
@@ -425,6 +421,7 @@ Le match commence dans *1 minute* 🥅⚽...`;
 
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
+   }
 } 
 
 
