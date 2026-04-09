@@ -908,6 +908,25 @@ if(!validation.ok){
 
     return true;
 }
+// 🔍 vérifier que joueur est dans le lineup ACTIF (pas bench)
+
+const allJoueurs = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
+
+// chercher joueur
+const joueurObj = allJoueurs.find(j => 
+    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+);
+
+if(!joueurObj){
+    await ovl.sendMessage(chat,{
+        text:`❌ ${nomJoueur} n'est pas dans les titulaires`
+    });
+    return true;
+}
+    
 const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
     const isInvalid = !action || action.length < 3;
 
@@ -950,13 +969,14 @@ if (action) {
     const joueurMatch = action.match(/\)\s*([^\s]+)/);
     const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
 
-    let joueurObj = null;
+    const allJoueurs = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
 
-    [joueurObj] = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ].filter(j => j.nom.toLowerCase() === nomJoueur?.toLowerCase());
-
+let joueurObj = allJoueurs.find(j => 
+    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+);
     // 🔍 récupérer direction + distance
     const direction = extraireDirectionLargeur(action);
     const distance = extraireDistance(action);
