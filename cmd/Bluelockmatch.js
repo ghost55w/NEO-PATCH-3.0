@@ -870,11 +870,18 @@ if (!match) return;
     const j2 = await trouverUser(match.team2);
 
     if (!j1 || !j2) {
-        await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
+        const err = formatErreurGlobal("❌ Joueur introuvable");
+
+await ovl.sendMessage(chat, {
+    text: err.texte + `
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`
 });
-        matchsActifs.delete(chat);
-        return;
+
+matchsActifs.delete(chat);
+return;        
     }
 
     match.team1Nom = match.team1;
@@ -925,8 +932,14 @@ match.role = {
     match.timerLineup = setTimeout(async () => {
         if (!match.equipe1 || !match.equipe2) {
             matchsActifs.delete(chat);
-            await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
+            const err = formatErreurGlobal("❌ Temps écoulé pour envoyer les lineups");
+
+await ovl.sendMessage(chat, {
+    text: err.texte + `
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`
 });
         }
     }, 2 * 60 * 1000);
