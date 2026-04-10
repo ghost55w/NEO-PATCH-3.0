@@ -539,6 +539,54 @@ function updatePositionJoueur(joueur, direction, distance){
 }
 
 /* ===============================
+🎭 FORMAT GLOBAL ERREURS BLUELOCK
+=================================*/
+function formatErreurGlobal(input, j1 = null, j2 = null) {
+
+    let message = "";
+
+    // 🔥 Si c’est un objet erreur
+    if (typeof input === "object") {
+        message = input.erreur || "Erreur inconnue";
+        j1 = input.joueur1 || j1;
+        j2 = input.joueur2 || j2;
+    } else {
+        message = input;
+    }
+
+    message = message.replace("❌", "").trim();
+
+    let phrase = message;
+
+    // 🎯 Personnalisation intelligente
+    if (message.toLowerCase().includes("distance") && j1 && j2) {
+        phrase = `la distance entre ${j1.nom} et ${j2.nom} est trop longue 🥅`;
+    }
+
+    if (message.toLowerCase().includes("position") && j1) {
+        phrase = `${j1.nom} n'est pas dans la bonne zone ❌`;
+    }
+
+    if (message.toLowerCase().includes("contrôle") && j1) {
+        phrase = `${j1.nom} rate son contrôle 😬`;
+    }
+
+    if (message.toLowerCase().includes("formule")) {
+        phrase = `la formule de passe est incorrecte ⚠️`;
+    }
+
+    if (message.toLowerCase().includes("kickoff")) {
+        phrase = `le coup d’envoi doit être en (C2) ⚽`;
+    }
+
+    return `⚽❌ : ${phrase}
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅
+                 *powered by NEOVERSE™*`;
+}
+
+/* ===============================
 EXTRAIRE ZONE DEPART
 =================================*/
 
@@ -1150,9 +1198,9 @@ if (!move.ok) {
     
     // ❌ joueur non titulaire
     if(!joueurObj){
-        await ovl.sendMessage(chat,{
-            text:`❌ ${nomJoueur} n'est pas dans les titulaires`
-        });
+        await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(truc, joueurObj) 
+}); 
         return true;
     }
 
