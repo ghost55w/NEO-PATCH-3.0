@@ -1001,11 +1001,20 @@ if (match.etat === "attente_lineup") {
 
         // 🔒 ANTI VOL D'ÉQUIPE
         if (match.id1 && match.id1 !== senderJid) {
-            await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
-});
-            return;
-        }
+            if (match.id1 && match.id1 !== senderJid) {
+
+    const err = formatErreurGlobal("❌ Cette équipe est déjà contrôlée par un autre joueur");
+
+    await ovl.sendMessage(chat, {
+        text: err.texte + `
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`
+    });
+
+    return;
+}
 
         match.id1 = senderJid;
 
@@ -1042,11 +1051,20 @@ if(parsed){
 
     // 🔒 ANTI VOL D'ÉQUIPE
     if (match.id2 && match.id2 !== senderJid) {
-        await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
-});
-        return;
-    }
+
+    const err = formatErreurGlobal("❌ Cette équipe est déjà contrôlée par un autre joueur");
+
+    await ovl.sendMessage(chat, {
+        text: err.texte + `
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`
+    });
+
+    return;
+}
+    
 
     match.id2 = senderJid;
 
@@ -1148,18 +1166,33 @@ const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : matc
     ];
 
     await ovl.sendMessage(chat, {
-        image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
-        caption: `🎙️⚽: KICK OFF 🥅‼️ @${displayName} commence !\n⚠️ Envoie ton pavé ⚽`,
-        mentions: [mentionJid]
-    });
+    image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
+    caption:
+`🎙️⚽: KICK OFF 🥅‼️ @${displayName} Débute avec la possession!⚽ 
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
+    mentions: [mentionJid]
+});
 
     // ⏱️ timer 1er joueur
     match.timerKickoff = setTimeout(async () => {
-        await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
-});
-    }, 6 * 60 * 1000);
-}
+
+    const joueur = match.joueurTour?.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚽❌ *ERREUR* :
+🎙️ @${joueur} n’a pas effectué le coup d’envoi à temps.
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
+        mentions: [match.joueurTour]
+    });
+
+}, 6 * 60 * 1000);
 
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
@@ -1201,11 +1234,19 @@ if (match.phase === "kickoff") {
     const zoneDepart = extraireZoneDepart(action);
 
     if (zoneDepart !== "C2") {
-        await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
-});
-        return true;
-    }
+
+    const err = formatErreurGlobal("❌ kickoff", joueurObj, match);
+
+    await ovl.sendMessage(chat, {
+        text:
+`${err.texte}
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`
+    });
+
+    return true;
 }
     const validation = verifierPaveBlueLock(action);
 
