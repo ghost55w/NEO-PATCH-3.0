@@ -807,7 +807,9 @@ if (!match) return;
     const j2 = await trouverUser(match.team2);
 
     if (!j1 || !j2) {
-        await ovl.sendMessage(chat, { text: "❌ L'une des équipes est introuvable dans la base de données." });
+        await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
         matchsActifs.delete(chat);
         return;
     }
@@ -860,7 +862,9 @@ match.role = {
     match.timerLineup = setTimeout(async () => {
         if (!match.equipe1 || !match.equipe2) {
             matchsActifs.delete(chat);
-            await ovl.sendMessage(chat, { text: "❌ Les deux équipes n'ont pas envoyé leurs lineups à temps. Le match est annulé." });
+            await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
         }
     }, 2 * 60 * 1000);
 }
@@ -921,9 +925,9 @@ if (match.etat === "attente_lineup") {
 
         // 🔒 ANTI VOL D'ÉQUIPE
         if (match.id1 && match.id1 !== senderJid) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Cette équipe a déjà été validée par un autre joueur."
-            });
+            await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
             return;
         }
 
@@ -962,9 +966,9 @@ if(parsed){
 
     // 🔒 ANTI VOL D'ÉQUIPE
     if (match.id2 && match.id2 !== senderJid) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Cette équipe a déjà été validée par un autre joueur."
-        });
+        await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
         return;
     }
 
@@ -1075,10 +1079,9 @@ const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : matc
 
     // ⏱️ timer 1er joueur
     match.timerKickoff = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${displayName} LATENCE OUT! ❌.`,
-            mentions: [mentionJid]
-        });
+        await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
     }, 6 * 60 * 1000);
 }
 
@@ -1122,9 +1125,9 @@ if (match.phase === "kickoff") {
     const zoneDepart = extraireZoneDepart(action);
 
     if (zoneDepart !== "C2") {
-        await ovl.sendMessage(chat, {
-            text: "❌ Kickoff obligatoire en (C2)"
-        });
+        await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
         return true;
     }
 }
