@@ -1133,8 +1133,8 @@ if (match.phase === "kickoff") {
 if(!validation.ok){
 
     await ovl.sendMessage(chat,{
-        text: validation.erreur
-    });
+    text: formatErreurGlobal(validation)
+});
 
     return true;
 }
@@ -1192,7 +1192,9 @@ if (action) {
 const move = await handleDeplacements(match, action, joueurObj);
 
 if (!move.ok) {
-    await ovl.sendMessage(chat, { text: move.erreur });
+    await ovl.sendMessage(chat, { 
+    text: formatErreurGlobal(move, joueurObj) 
+});
     return true;
 }
     
