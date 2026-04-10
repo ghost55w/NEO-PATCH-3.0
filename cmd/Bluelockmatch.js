@@ -161,6 +161,180 @@ const TYPES_PASSES = {
     "centre": "centre pied droit intérieur du pied 2mh diagonal sur la gauche 20m tête",
     "passe longue": "passe longue pied droit intérieur du pied 2mh devant 30m torse"
 };
+const REGLES_PASSES = {
+
+    "passe directe": {
+        obligatoire: [
+            "passe", "directe",
+            "pied", "ras du sol",
+            "m"
+        ],
+
+        validate: (txt) => {
+
+            // intérieur du pied OU tête OU talon
+            const okZonePied =
+                txt.includes("intérieur du pied") ||
+                txt.includes("tête") ||
+                txt.includes("talon") ||
+                txt.includes("pointe de pied");
+
+            if (!okZonePied) {
+                return "❌ Passe directe mal exécutée (zone du pied invalide)";
+            }
+
+            // direction obligatoire
+            if (!txt.match(/gauche|droite|devant|derrière/)) {
+                return "❌ Direction obligatoire";
+            }
+
+            // hauteur max
+            if (txt.includes("mh") && !txt.includes("50cm")) {
+                return "❌ Passe directe max 50cm de hauteur";
+            }
+
+            // pointe de pied = devant + ras du sol
+            if (txt.includes("pointe de pied")) {
+                if (!txt.includes("devant") || !txt.includes("ras du sol")) {
+                    return "❌ Pointe de pied = devant + ras du sol obligatoire";
+                }
+            }
+
+            // tête ou talon = 5m max
+            const d = extraireDistance(txt);
+            if ((txt.includes("tête") || txt.includes("talon")) && d > 5) {
+                return "❌ Tête/Talon = max 5m";
+            }
+
+            return true;
+        }
+    },
+
+    "passe circulaire": {
+        obligatoire: [
+            "passe", "circulaire",
+            "intérieur du pied",
+            "corps décalé",
+            "courbe",
+            "m"
+        ],
+
+        validate: (txt) => {
+
+            if (!txt.includes("50cm")) {
+                return "❌ Hauteur min 50cm obligatoire";
+            }
+
+            if (!txt.includes("60°")) {
+                return "❌ Corps décalé 60° obligatoire";
+            }
+
+            // courbe obligatoire
+            if (!txt.includes("courbe")) {
+                return "❌ Courbe obligatoire";
+            }
+
+            const d = extraireDistance(txt);
+
+            if (d > 10) {
+                return "❌ Portée max 10m";
+            }
+
+            return true;
+        }
+    },
+
+    "passe trivela": {
+        obligatoire: [
+            "passe", "trivela",
+            "extérieur du pied",
+            "corps décalé",
+            "courbe",
+            "m"
+        ],
+
+        validate: (txt) => {
+
+            if (!txt.includes("50cm")) {
+                return "❌ Hauteur min 50cm obligatoire";
+            }
+
+            if (!txt.includes("60°")) {
+                return "❌ Corps décalé 60° obligatoire";
+            }
+
+            const d = extraireDistance(txt);
+
+            if (d > 10) {
+                return "❌ Portée max 10m";
+            }
+
+            return true;
+        }
+    },
+
+    "passe longue": {
+        obligatoire: [
+            "passe",
+            "m"
+        ],
+
+        validate: (txt, joueur) => {
+
+            const d = extraireDistance(txt);
+
+            if (d < 10) {
+                return "❌ Passe longue = minimum 10m";
+            }
+
+            if (d >= 10 && d <= 20 && !txt.includes("4m") && !txt.includes("2m")) {
+                return "❌ Hauteur invalide pour passe longue";
+            }
+
+            if ((joueur.note || 0) < 85) {
+                return "❌ 85+ PAS requis pour passe longue";
+            }
+
+            return true;
+        }
+    },
+
+    "centre": {
+        obligatoire: ["centre", "m"],
+
+        validate: (txt) => {
+
+            if (!txt.includes("aile")) {
+                return "❌ Un centre doit venir d’une aile";
+            }
+
+            return true;
+        }
+    },
+
+    "passe lobbée": {
+        obligatoire: ["lobbée", "m"],
+
+        validate: (txt, joueur) => {
+
+            if (!txt.includes("1.5m")) {
+                return "❌ Arc de 1.5m obligatoire";
+            }
+
+            const d = extraireDistance(txt);
+
+            if (d > 5) {
+                return "❌ Passe lobbée = max 5m";
+            }
+
+            if ((joueur.note || 0) < 95) {
+                return "❌ 95+ PAS requis";
+            }
+
+            return true;
+        }
+    }
+};
 
 /* ===============================
 OUTILS JEU
@@ -1165,6 +1339,191 @@ function assignerVisAVis(match) {
     });
 }
 
+/* ===============================
+🎯 HANDLE PASSES BLUELOCK (FINAL)
+=================================*/
+
+async function handlePasses(match, action, joueur) {
+
+    if (!action || !joueur) {
+        return { ok: false, erreur: "❌ Données invalides (passe)" };
+    }
+
+    const txt = action.toLowerCase();
+
+    // ===============================
+    // 🎯 1. DETECTION TYPE DE PASSE
+    // ===============================
+    let typePasse = null;
+
+    for (const type in TYPES_PASSES) {
+        if (txt.includes(type)) {
+            typePasse = type;
+            break;
+        }
+    }
+
+    if (!typePasse) {
+        return { ok: false, erreur: "❌ Type de passe non reconnu" };
+    }
+
+    // ===============================
+    // 📐 2. FORMULE OBLIGATOIRE
+    // ===============================
+    const elementsObligatoires = [
+        /passe/,
+        /(intérieur du pied|extérieur du pied|pointe de pied|talon|tête)/,
+        /(gauche|droite|devant|derrière)/,
+        /(ras du sol|cm|mh)/,
+        /\d+\s?m/,
+        /(pied|tête|torse)/
+    ];
+
+    for (const reg of elementsObligatoires) {
+        if (!reg.test(txt)) {
+            return {
+                ok: false,
+                erreur: "❌ Formule de passe incomplète"
+            };
+        }
+    }
+
+    // ===============================
+    // 🧩 3. SCORE RESSEMBLANCE MODELE
+    // ===============================
+    const modele = TYPES_PASSES[typePasse];
+    const motsModele = modele.toLowerCase().split(" ");
+
+    let score = 0;
+
+    motsModele.forEach(mot => {
+        if (txt.includes(mot)) score++;
+    });
+
+    const precision = Math.round((score / motsModele.length) * 100);
+
+    if (precision < 60) {
+        return {
+            ok: false,
+            erreur: `❌ Passe mal formulée (${precision}%)`
+        };
+    }
+
+    // ===============================
+    // 🧠 4. REGLES SPECIFIQUES
+    // ===============================
+    const regles = REGLES_PASSES[typePasse];
+
+    if (regles) {
+
+        // mots obligatoires
+        if (regles.obligatoire) {
+            for (const mot of regles.obligatoire) {
+                if (!txt.includes(mot)) {
+                    return {
+                        ok: false,
+                        erreur: `❌ Élément manquant: ${mot}`
+                    };
+                }
+            }
+        }
+
+        // validation custom
+        if (regles.validate) {
+            const result = regles.validate(txt, joueur);
+
+            if (result !== true) {
+                return {
+                    ok: false,
+                    erreur: result
+                };
+            }
+        }
+    }
+
+    // ===============================
+    // 🧠 5. CONTROLE / DEVIATION
+    // ===============================
+    const hasControle =
+        txt.includes("contrôle") ||
+        txt.includes("controle");
+
+    const notePasse = joueur.note || 0;
+
+    if (!hasControle) {
+
+        if (notePasse < 85) {
+            return {
+                ok: false,
+                erreur: "❌ Contrôle obligatoire (joueur <85 PAS)"
+            };
+        }
+
+        if (!txt.includes("déviation") && !txt.includes("deviation")) {
+            return {
+                ok: false,
+                erreur: "❌ Passe sans contrôle = déviation obligatoire"
+            };
+        }
+    }
+
+    // ===============================
+    // 📏 6. DISTANCE MAX GLOBALE
+    // ===============================
+    const d = extraireDistance(txt);
+
+    if (d && d > 30) {
+        return {
+            ok: false,
+            erreur: "❌ Distance max 30m"
+        };
+    }
+
+    // ===============================
+    // ⚔️ 7. INTERCEPTION VIA VIS-À-VIS
+    // ===============================
+    const visavis = joueur.visavis;
+
+    if (visavis) {
+
+        // petite probabilité selon précision
+        const chance = precision < 80 ? 0.5 : 0.2;
+
+        if (Math.random() < chance) {
+
+            match.possession =
+                match.possession === match.team1Nom
+                    ? match.team2Nom
+                    : match.team1Nom;
+
+            return {
+                ok: false,
+                interception: true,
+                message: `🛑 Passe interceptée par ${visavis.nom} !`
+            };
+        }
+    }
+
+    // ===============================
+    // 📍 8. UPDATE POSITION BALLE
+    // ===============================
+    const zoneArrivee = extraireZoneArrivee(txt);
+
+    if (zoneArrivee) {
+        joueur.zoneY = zoneArrivee;
+    }
+
+    // ===============================
+    // ✅ SUCCESS
+    // ===============================
+    return {
+        ok: true,
+        type: typePasse,
+        precision
+    };
+}
+
+        
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
