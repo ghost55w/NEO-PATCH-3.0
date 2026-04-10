@@ -93,7 +93,9 @@ const ACTIONS_MAP = {
 controle: [
         "contrôle",
         "controle",
-        "amorti"
+        "amorti", 
+        "contrôle de balle", 
+    "controle le ballon" 
     ]
 }; 
     
