@@ -1210,10 +1210,14 @@ if (!move.ok) {
     }
 
     console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+await ovl.sendMessage(chat, {  
+    text: `⚽✅ Action validée:\n${action}
+╰─────────────────▱▱▱
 
-    await ovl.sendMessage(chat, {
-        text: `⚽✅ Action validée:\n${action}`
-    });
+                      🔷BLUELOCK⚽🥅
+                 *powered by NEOVERSE™*`  
+});
+    
 // ===============================
 // 🔥 ACTIVATION POSITIONS APRÈS KICKOFF
 // ===============================
@@ -1245,8 +1249,8 @@ if (match.phase === "kickoff") {
 }
 } else {
     await ovl.sendMessage(chat, {
-        text: "⚠️ Aucune action détectée."
-    });
+    text: formatErreurGlobal("Aucune action détectée")
+});
 }
 // =========================
 // 🔄 FIN DE POSSESSION (4 actions)
