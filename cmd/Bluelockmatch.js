@@ -541,49 +541,112 @@ function updatePositionJoueur(joueur, direction, distance){
 /* ===============================
 🎭 FORMAT GLOBAL ERREURS BLUELOCK
 =================================*/
-function formatErreurGlobal(input, j1 = null, j2 = null) {
+function formatErreurGlobal(input, joueur = null, match = null) {
 
     let message = "";
 
-    // 🔥 Si c’est un objet erreur
     if (typeof input === "object") {
         message = input.erreur || "Erreur inconnue";
-        j1 = input.joueur1 || j1;
-        j2 = input.joueur2 || j2;
     } else {
         message = input;
     }
 
     message = message.replace("❌", "").trim();
 
-    let phrase = message;
+    let explication = message;
+    let nom = joueur?.nom || "Le joueur";
 
-    // 🎯 Personnalisation intelligente
-    if (message.toLowerCase().includes("distance") && j1 && j2) {
-        phrase = `la distance entre ${j1.nom} et ${j2.nom} est trop longue 🥅`;
+    // 🎯 Explications intelligentes
+    if (message.toLowerCase().includes("position")) {
+        explication = `${nom} n'est pas dans la bonne zone, son placement est en zone ${joueur?.zoneY || "?"}.`;
     }
 
-    if (message.toLowerCase().includes("position") && j1) {
-        phrase = `${j1.nom} n'est pas dans la bonne zone ❌`;
-    }
-
-    if (message.toLowerCase().includes("contrôle") && j1) {
-        phrase = `${j1.nom} rate son contrôle 😬`;
+    if (message.toLowerCase().includes("distance")) {
+        explication = `La distance de l'action dépasse la limite autorisée.`;
     }
 
     if (message.toLowerCase().includes("formule")) {
-        phrase = `la formule de passe est incorrecte ⚠️`;
+        explication = `La formule de passe n'est pas respectée.`;
+    }
+
+    if (message.toLowerCase().includes("contrôle")) {
+        explication = `${nom} rate son contrôle.`;
     }
 
     if (message.toLowerCase().includes("kickoff")) {
-        phrase = `le coup d’envoi doit être en (C2) ⚽`;
+        explication = `Le coup d’envoi doit obligatoirement être en (C2).`;
     }
 
-    return `⚽❌ : ${phrase}
+    if (message.toLowerCase().includes("joueur")) {
+        explication = `Le joueur mentionné est introuvable ou non valide.`;
+    }
+
+    // ===============================
+    // 🛡️ INTERCEPTION VIS À VIS
+    // ===============================
+    let defenseur = "un adversaire";
+
+    if (match && joueur && joueur.visavis) {
+        defenseur = joueur.visavis.nom;
+    } 
+    else if (match && match.duels && joueur) {
+        const duel = match.duels.find(d => d.joueur1 === joueur.nom);
+        if (duel) {
+            defenseur = duel.joueur2;
+        }
+    }
+
+    return {
+        texte:
+`⚽❌ *ERREUR* : 
+🎙️ ${explication} 
+\`Verdict\`: Ballon perdu, intercepté par ${defenseur}🛡️.`,
+        defenseur
+    };
+}
+
+//ENVOIE DE L'ERREUR
+async function envoyerErreurBlueLock(ovl, chat, match, joueurObj, erreurInput) {
+
+    const err = formatErreurGlobal(erreurInput, joueurObj, match);
+
+    const imagesErreur = [
+        "https://files.catbox.moe/3n8q7l.jpg",
+        "https://files.catbox.moe/7lqz9p.jpg",
+        "https://files.catbox.moe/dxk92l.jpg"
+    ];
+
+    const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
+    const displayNext = nextJoueur.split("@")[0];
+
+    // 🔄 SWITCH JOUEUR
+    match.joueurTour = nextJoueur;
+
+    await ovl.sendMessage(chat, {
+        image: { url: imagesErreur[Math.floor(Math.random() * imagesErreur.length)] },
+        caption:
+`${err.texte}
+
+👉🏽NEXT joueur suivant : @${displayNext}
+⏱️ Tu as 6 minutes.
+
+💡 Tape *+VAR❌* si tu contestes.
+
 ╰─────────────────▱▱▱
 
-                      🔷BLUELOCK⚽🥅
-                 *powered by NEOVERSE™*`;
+                      🔷BLUELOCK⚽🥅`,
+        mentions: [nextJoueur]
+    });
+
+    // ⏱️ TIMER GLOBAL 6 MIN
+    if (match.timerPave) clearTimeout(match.timerPave);
+
+    match.timerPave = setTimeout(async () => {
+        await ovl.sendMessage(chat, {
+            text: `⏰ @${displayNext} temps écoulé ❌`,
+            mentions: [nextJoueur]
+        });
+    }, 6 * 60 * 1000);
 }
 
 /* ===============================
