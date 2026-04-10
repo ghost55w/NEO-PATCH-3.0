@@ -912,39 +912,43 @@ if(parsed){
     // ===============================
     if (squad === team2 && !match.equipe2) {
 
-        // 🔒 ANTI VOL D'ÉQUIPE
-        if (match.id2 && match.id2 !== senderJid) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Cette équipe a déjà été validée par un autre joueur."
-            });
-            return;
-        }
-
-        match.id2 = senderJid;
-        if(parsed){
-
-    match.lineup2 = parsed.joueurs.map(j => {
-
-        const posteData = POSITION_POSTES[j.position] || {};
-
-        return {
-            ...j,
-            zoneX: posteData.zoneX || "axe",
-            ligne: posteData.ligne || "milieu",
-            zoneY: null
-        };
-    });
-
-}else{
-    match.lineup2 = [];
-}
-    
-        match.equipe2 = true;
-
+    // 🔒 ANTI VOL D'ÉQUIPE
+    if (match.id2 && match.id2 !== senderJid) {
         await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+            text: "❌ Cette équipe a déjà été validée par un autre joueur."
         });
+        return;
     }
+
+    match.id2 = senderJid;
+
+    // ✅ FIX ICI
+    const parsed = parseSquadBlueLock(safeText);
+
+    if(parsed){
+
+        match.lineup2 = parsed.joueurs.map(j => {
+
+            const posteData = POSITION_POSTES[j.position] || {};
+
+            return {
+                ...j,
+                zoneX: posteData.zoneX || "axe",
+                ligne: posteData.ligne || "milieu",
+                zoneY: null
+            };
+        });
+
+    } else {
+        match.lineup2 = [];
+    }
+
+    match.equipe2 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+    });
+        }
 
     // ===============================
     // 🚀 MATCH PRÊT
@@ -1093,24 +1097,6 @@ if(!validation.ok){
         text: validation.erreur
     });
 
-    return true;
-}
-// 🔍 vérifier que joueur est dans le lineup ACTIF (pas bench)
-
-const allJoueurs = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
-
-// chercher joueur
-const joueurObj = allJoueurs.find(j => 
-    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
-);
-
-if(!joueurObj){
-    await ovl.sendMessage(chat,{
-        text:`❌ ${nomJoueur} n'est pas dans les titulaires`
-    });
     return true;
 }
     
