@@ -1089,6 +1089,20 @@ async function handlePaveGame(ms, ovl) {
     if (!isBlueLockPave) return false;
     
     const action = extraireAction(text);
+    // =========================
+// 🚨 REGLE KICKOFF
+// =========================
+if (match.phase === "kickoff") {
+
+    const zoneDepart = extraireZoneDepart(action);
+
+    if (zoneDepart !== "C2") {
+        await ovl.sendMessage(chat, {
+            text: "❌ Kickoff obligatoire en (C2)"
+        });
+        return true;
+    }
+}
     const validation = verifierPaveBlueLock(action);
 
 if(!validation.ok){
@@ -1170,7 +1184,35 @@ if (!move.ok) {
     await ovl.sendMessage(chat, {
         text: `⚽✅ Action validée:\n${action}`
     });
+// ===============================
+// 🔥 ACTIVATION POSITIONS APRÈS KICKOFF
+// ===============================
+if (match.phase === "kickoff") {
 
+    const equipeAttack = match.possession === match.team1Nom ? match.lineup1 : match.lineup2;
+    const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : match.lineup1;
+
+    equipeAttack.forEach(j => {
+        j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+    });
+
+    equipeDefense.forEach(j => {
+        j.zoneY = getZoneYParLigne(j.ligne, "defense");
+    });
+
+    match.positions = [
+        ...match.lineup1,
+        ...match.lineup2
+    ];
+
+    assignerVisAVis(match);
+
+    match.phase = "normal";
+
+    await ovl.sendMessage(chat, {
+        text: "📍 Positions maintenant fixées !"
+    });
+}
 } else {
     await ovl.sendMessage(chat, {
         text: "⚠️ Aucune action détectée."
