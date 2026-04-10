@@ -90,9 +90,13 @@ const ACTIONS_MAP = {
         "fonce", "vmax", "course",
         "se déplace", "avance", "court"
     ],
-
-    dribble: ["dribble"] // uniquement vrai dribble
-};
+controle: [
+        "contrôle",
+        "controle",
+        "amorti"
+    ]
+}; 
+    
 /* ===============================
 DETECTION AUTOMATIQUE ACTIONS
 =================================*/
@@ -836,6 +840,13 @@ equipeDefense.forEach(j => {
     const posteData = POSITION_POSTES[j.position];
     j.zoneX = posteData?.zoneX || "axe";
 });
+match.positions = [
+    ...match.lineup1,
+    ...match.lineup2
+];
+
+assignerVisAVis(match);
+    
     match.etat = "en_cours";
 
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
@@ -977,7 +988,13 @@ if (action) {
     let joueurObj = allJoueurs.find(j => 
         j.nom.toLowerCase() === nomJoueur?.toLowerCase()
     );
+const move = await handleDeplacements(match, action, joueurObj);
 
+if (!move.ok) {
+    await ovl.sendMessage(chat, { text: move.erreur });
+    return true;
+}
+    
     // ❌ joueur non titulaire
     if(!joueurObj){
         await ovl.sendMessage(chat,{
@@ -986,17 +1003,10 @@ if (action) {
         return true;
     }
 
-    // 🔍 direction + distance
-    const direction = extraireDirectionLargeur(action);
-    const distance = extraireDistance(action);
-
-    // 🔥 UPDATE POSITION
-    updatePositionJoueur(joueurObj, direction, distance);
-
     console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
 
     await ovl.sendMessage(chat, {
-        text: `⚽ Action validée:\n${action}`
+        text: `⚽✅ Action validée:\n${action}`
     });
 
 } else {
@@ -1072,6 +1082,86 @@ await ovl.sendMessage(chat, {
     return true;
 }
 
+// ===============================
+// -------- GESTION DES DÉPLACEMENTS
+// ===============================
+async function handleDeplacements(match, actionText, joueurObj) {
+
+    const direction = extraireDirectionLargeur(actionText);
+    const distance = extraireDistance(actionText);
+    const zoneDepart = extraireZoneDepart(actionText);
+    const zoneArrivee = extraireZoneArrivee(actionText);
+
+    if (zoneDepart && joueurObj.zoneY !== zoneDepart) {
+        return { ok: false, erreur: "❌ Mauvaise position" };
+    }
+
+    if (zoneArrivee) {
+        const dist = calculDistance(joueurObj.zoneY, zoneArrivee);
+        if (dist > MAX_DEPLACEMENT) {
+            return { ok: false, erreur: "❌ Déplacement trop long" };
+        }
+        joueurObj.zoneY = zoneArrivee;
+    }
+
+    if (direction && distance) {
+        updatePositionJoueur(joueurObj, direction, distance);
+    }
+
+    // 👉 APPEL DU TRACKING
+    updateGlobalPositions(match, joueurObj);
+
+    return { ok: true, joueur: joueurObj };
+}
+
+// ===============================
+// -------- TRACKING POSITIONS
+// ===============================
+function updateGlobalPositions(match, joueur) {
+
+    if (!match.positions) match.positions = [];
+
+    const index = match.positions.findIndex(p => p.nom === joueur.nom);
+
+    if (index !== -1) {
+        match.positions[index] = joueur;
+    } else {
+        match.positions.push(joueur);
+    }
+}
+
+// ===============================
+// -------- VIS À VIS
+// ===============================
+function assignerVisAVis(match) {
+
+    const equipe1 = match.lineup1 || [];
+    const equipe2 = match.lineup2 || [];
+
+    match.duels = [];
+
+    equipe1.forEach(j1 => {
+
+        let cible;
+
+        if (j1.zoneX === "aile gauche") {
+            cible = equipe2.find(j => j.zoneX === "aile droite" && j.ligne === j1.ligne);
+        }
+        else if (j1.zoneX === "aile droite") {
+            cible = equipe2.find(j => j.zoneX === "aile gauche" && j.ligne === j1.ligne);
+        }
+        else {
+            cible = equipe2.find(j => j.zoneX === "axe" && j.ligne === j1.ligne);
+        }
+
+        if (cible) {
+            match.duels.push({
+                joueur1: j1.nom,
+                joueur2: cible.nom
+            });
+        }
+    });
+}
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
