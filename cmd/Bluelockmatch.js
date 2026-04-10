@@ -995,38 +995,15 @@ async function lancerMatch(chat, ovl) {
     const isTeam1 = Math.random() < 0.5;
 
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
+    match.phase = "kickoff";
     // PLACEMENT AUTOMATIQUE
 
 const equipeAttack = match.possession === match.team1Nom ? match.lineup1 : match.lineup2;
 const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : match.lineup1;
 
-//  équipe attaque
-equipeAttack.forEach(j => {
-    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
 
-    // largeur automatique selon poste
-    const posteData = POSITION_POSTES[j.position];
-    j.zoneX = posteData?.zoneX || "axe";
-});
-// 🔥 STOCKAGE GLOBAL DES POSITIONS
-match.positions = [
-    ...match.lineup1,
-    ...match.lineup2
-];
-//  équipe défense
-equipeDefense.forEach(j => {
-    j.zoneY = getZoneYParLigne(j.ligne, "defense");
 
-    const posteData = POSITION_POSTES[j.position];
-    j.zoneX = posteData?.zoneX || "axe";
-});
-match.positions = [
-    ...match.lineup1,
-    ...match.lineup2
-];
-
-assignerVisAVis(match);
-    
+  
     match.etat = "en_cours";
 
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
