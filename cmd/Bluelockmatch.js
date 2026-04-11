@@ -607,9 +607,11 @@ function formatErreurGlobal(input, joueur = null, match = null) {
 
 //ENVOIE DE L'ERREUR
 async function envoyerErreurBlueLock(ovl, chat, match, joueurObj, erreurInput) {
+const err = formatErreurGlobal(move, joueurObj, match);
 
-    const err = formatErreurGlobal(erreurInput, joueurObj, match);
-
+await ovl.sendMessage(chat, { 
+    text: err.texte 
+});
     const imagesErreur = [
         "https://files.catbox.moe/3n8q7l.jpg",
         "https://files.catbox.moe/7lqz9p.jpg",
@@ -1318,21 +1320,36 @@ if (!move.ok) {
     return true;
 }
     
-    // ❌ joueur non titulaire
-    if(!joueurObj){
-        await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(truc, joueurObj) 
-}); 
-        return true;
-    }
+ // ❌ joueur non trouvé (à faire AVANT toute action)
+if (!joueurObj) {
+
+    const err = formatErreurGlobal("❌ Joueur introuvable", joueurObj, match);
+
+    await ovl.sendMessage(chat, { 
+        text: err.texte 
+    });
+
+    return true;
+}
+
+// ✅ déplacement
+const move = await handleDeplacements(match, action, joueurObj);
+
+if (!move.ok) {
+    const err = formatErreurGlobal(move, joueurObj, match);
+
+    await ovl.sendMessage(chat, { 
+        text: err.texte 
+    });
+
+    return true;
+}
 
     console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
 await ovl.sendMessage(chat, {  
     text: `⚽✅ Action validée:\n${action}
-╰─────────────────▱▱▱
-
-                      🔷BLUELOCK⚽🥅
-                 *powered by NEOVERSE™*`  
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
 });
     
 // ===============================
@@ -1422,21 +1439,22 @@ await ovl.sendMessage(chat, {
     mentions: [nextJoueur]
 });
 
-    // =========================
-    // ⏱️ TIMER TOUR
-    // =========================
-    if (match.timerPave) clearTimeout(match.timerPave);
 
-    match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${nextNom} temps écoulé ❌`,
-            mentions: [nextJoueur]
-        });
-    }, 6 * 60 * 1000);
+// =========================
+// ⏱️ TIMER TOUR
+// =========================
+if (match.timerPave) clearTimeout(match.timerPave);
 
-    return true;
-}
+match.timerPave = setTimeout(async () => {
+    await ovl.sendMessage(chat, {
+        text: `⏰ @${nextNom} temps écoulé ❌`,
+        mentions: [nextJoueur]
+    });
+}, 6 * 60 * 1000);
 
+return true;
+} 
+    
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
 // ===============================
