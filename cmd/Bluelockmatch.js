@@ -1373,7 +1373,8 @@ async function handlePaveGame(ms, ovl) {
 
     return true;
 }
-      
+}
+    
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
 // ===============================
