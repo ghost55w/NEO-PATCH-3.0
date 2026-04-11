@@ -1003,12 +1003,11 @@ if (match.etat === "attente_lineup") {
 
         // 🔒 ANTI VOL D'ÉQUIPE
         if (match.id1 && match.id1 !== senderJid) {
-            if (match.id1 && match.id1 !== senderJid) {
 
     const err = formatErreurGlobal("❌ Cette équipe est déjà contrôlée par un autre joueur");
 
     await ovl.sendMessage(chat, {
-        text: err.texte + `
+        text: err + `
 
 ╰─────────────────▱▱▱
 
