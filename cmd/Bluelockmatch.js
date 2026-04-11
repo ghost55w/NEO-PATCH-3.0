@@ -1098,7 +1098,7 @@ if(parsed){
     });
         }
 
-    // ===============================
+// ===============================
     // 🚀 MATCH PRÊT
     // ===============================
     if (match.equipe1 && match.equipe2 && !match.starting) {
@@ -1126,8 +1126,7 @@ Le match commence dans *1 minute* 🥅⚽...`;
 
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
-   }
-} 
+}
 
 
 /* ===============================
