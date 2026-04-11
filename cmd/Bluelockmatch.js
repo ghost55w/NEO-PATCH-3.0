@@ -1299,28 +1299,20 @@ if (sender !== tour) {
     // =========================
 if (action) {
 
-    // 🔍 récupérer joueur
-    const joueurMatch = action.match(/\)\s*([^\s]+)/);
-    const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
+ // 🔍 récupérer joueur
+const joueurMatch = action.match(/\)\s*([^\s]+)/);
+const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
 
-    const allJoueurs = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
+const allJoueurs = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
 
-    let joueurObj = allJoueurs.find(j => 
-        j.nom.toLowerCase() === nomJoueur?.toLowerCase()
-    );
-const move = await handleDeplacements(match, action, joueurObj);
+let joueurObj = allJoueurs.find(j => 
+    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+);
 
-if (!move.ok) {
-    await ovl.sendMessage(chat, { 
-    text: formatErreurGlobal(move, joueurObj) 
-});
-    return true;
-}
-    
- // ❌ joueur non trouvé (à faire AVANT toute action)
+// ❌ joueur non trouvé (TOUJOURS AVANT TOUT)
 if (!joueurObj) {
 
     const err = formatErreurGlobal("❌ Joueur introuvable", joueurObj, match);
@@ -1332,10 +1324,11 @@ if (!joueurObj) {
     return true;
 }
 
-// ✅ déplacement
+// ✅ déplacement (UNE SEULE FOIS)
 const move = await handleDeplacements(match, action, joueurObj);
 
 if (!move.ok) {
+
     const err = formatErreurGlobal(move, joueurObj, match);
 
     await ovl.sendMessage(chat, { 
@@ -1345,7 +1338,8 @@ if (!move.ok) {
     return true;
 }
 
-    console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+
 await ovl.sendMessage(chat, {  
     text: `⚽✅ Action validée:\n${action}
 ╰───────────────────     
