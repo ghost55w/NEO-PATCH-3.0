@@ -607,7 +607,7 @@ function formatErreurGlobal(input, joueur = null, match = null) {
 
 //ENVOIE DE L'ERREUR
 async function envoyerErreurBlueLock(ovl, chat, match, joueurObj, erreurInput) {
-const err = formatErreurGlobal(move, joueurObj, match);
+const err = formatErreurGlobal(erreurInput, joueurObj, match);
 
 await ovl.sendMessage(chat, { 
     text: err.texte 
@@ -1449,6 +1449,7 @@ match.timerPave = setTimeout(async () => {
 }, 6 * 60 * 1000);
 
 return true;
+} 
 } 
     
 // ===============================
