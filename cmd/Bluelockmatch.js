@@ -1207,8 +1207,6 @@ async function handlePaveGame(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
-    const currentTeam = match.possession;
-const nextTeam = currentTeam === match.team1Nom ? match.team2Nom : match.team1Nom;
     if (match.etat !== "en_cours") return false;
 
     const rawText =
@@ -1220,195 +1218,124 @@ const nextTeam = currentTeam === match.team1Nom ? match.team2Nom : match.team1No
     const text = rawText.trim();
     if (!text) return false;
 
-    // =========================
-    // 🔐 VALIDATION PAVÉ BLUELOCK
-    // =========================
     const isBlueLockPave =
         text.includes("💬:") &&
         text.includes("⚽:") &&
         text.includes("🔷BLUELOCK⚽🥅");
 
     if (!isBlueLockPave) return false;
-    
+
     const action = extraireAction(text);
-    // =========================
-// 🚨 REGLE KICKOFF
-// =========================
-if (match.phase === "kickoff") {
-
-    const zoneDepart = extraireZoneDepart(action);
-
-    if (zoneDepart !== "C2") {
-
-        const err = formatErreurGlobal("❌ kickoff", null, match);
-
-        await ovl.sendMessage(chat, {
-            text:
-`${err.texte}
-
-╰─────────────────▱▱▱
-
-                      🔷BLUELOCK⚽🥅`
-        });
-
-        return true;
-    }
-    const validation = verifierPaveBlueLock(action);
-
-if(!validation.ok){
-
-    const err = formatErreurGlobal(validation, null, match);
-
-    await ovl.sendMessage(chat,{
-        text: err.texte
-    });
-
-    return true;
-}
-    
-const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
-    const isInvalid = !action || action.length < 3;
-
-if (isInvalid) {
-
-    const roles = triggerCounterAttack(match, currentTeam, nextTeam);
-
-    await ovl.sendMessage(chat, {
-        text:
-`❌ Erreur de pavé !
-
-⚡ CONTRE-ATTAQUE IMMÉDIATE !
-⚽ ${roles.newAttacker} récupère le ballon`
-    });
-
-    return true;
-}
+    if (!action) return false;
 
     // =========================
-    // 👤 CHECK JOUEUR TOUR
+    // 👤 EXTRACTION JOUEUR AVANT TOUT
     // =========================
-const sender = normalizeJid(getSenderJid(ms));
-const tour = normalizeJid(match.joueurTour);
+    const joueurMatch = action.match(/\)\s*([^\s]+)/);
+    const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
 
-console.log("🧪 SENDER:", sender);
-console.log("🧪 TOUR:", tour);
-
-if (sender !== tour) {
-    await ovl.sendMessage(chat, {
-        text: "❌ Ce n’est pas ton tour de jouer !"
-    });
-    return true;
-}
-    // =========================
-    // ⚽ ACTION
-    // =========================
-if (action) {
-
- // 🔍 récupérer joueur
-const joueurMatch = action.match(/\)\s*([^\s]+)/);
-const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
-
-const allJoueurs = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
-
-let joueurObj = allJoueurs.find(j => 
-    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
-);
-
-// ❌ joueur non trouvé (TOUJOURS AVANT TOUT)
-if (!joueurObj) {
-
-    const err = formatErreurGlobal("❌ Joueur introuvable", joueurObj, match);
-
-    await ovl.sendMessage(chat, { 
-        text: err.texte 
-    });
-
-    return true;
-}
-
-// ✅ déplacement (UNE SEULE FOIS)
-const move = await handleDeplacements(match, action, joueurObj);
-
-if (!move.ok) {
-
-    const err = formatErreurGlobal(move, joueurObj, match);
-
-    await ovl.sendMessage(chat, { 
-        text: err.texte 
-    });
-
-    return true;
-}
-
-console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
-
-await ovl.sendMessage(chat, {  
-    text: `⚽✅ Action validée:\n${action}
-╰───────────────────     
-                       🔷BLUELOCK⚽🥅`
-});
-    
-// ===============================
-// 🔥 ACTIVATION POSITIONS APRÈS KICKOFF
-// ===============================
-if (match.phase === "kickoff") {
-
-    const equipeAttack = match.possession === match.team1Nom ? match.lineup1 : match.lineup2;
-    const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : match.lineup1;
-
-    equipeAttack.forEach(j => {
-        j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-    });
-
-    equipeDefense.forEach(j => {
-        j.zoneY = getZoneYParLigne(j.ligne, "defense");
-    });
-
-    match.positions = [
-        ...match.lineup1,
-        ...match.lineup2
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
     ];
 
-    assignerVisAVis(match);
+    let joueurObj = allJoueurs.find(j => 
+        j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+    );
 
-    match.phase = "normal";
+    if (!joueurObj) {
+        await envoyerErreurBlueLock(ovl, chat, match, null, "❌ Joueur introuvable");
+        return true;
+    }
 
-    await ovl.sendMessage(chat, {
-        text: "📍 Positions maintenant fixées !"
+    // =========================
+    // 🚨 KICKOFF
+    // =========================
+    if (match.phase === "kickoff") {
+
+        const zoneDepart = extraireZoneDepart(action);
+
+        if (zoneDepart !== "C2") {
+            await envoyerErreurBlueLock(ovl, chat, match, joueurObj, "❌ kickoff");
+            return true;
+        }
+    }
+
+    // =========================
+    // 🔐 VALIDATION GLOBALE
+    // =========================
+    const validation = verifierPaveBlueLock(action);
+
+    if (!validation.ok) {
+        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, validation);
+        return true;
+    }
+
+    // =========================
+    // 🔐 TOUR JOUEUR
+    // =========================
+    const sender = normalizeJid(getSenderJid(ms));
+    const tour = normalizeJid(match.joueurTour);
+
+    if (sender !== tour) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Ce n’est pas ton tour de jouer !"
+        });
+        return true;
+    }
+
+    // =========================
+    // 🚶 DÉPLACEMENT
+    // =========================
+    const move = await handleDeplacements(match, action, joueurObj);
+
+    if (!move.ok) {
+        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, move);
+        return true;
+    }
+
+    console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+
+    await ovl.sendMessage(chat, {  
+        text: `⚽✅ Action validée:\n${action}
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
     });
-}
-} else {
-    await ovl.sendMessage(chat, {
-    text: formatErreurGlobal("Aucune action détectée")
-});
-}
-// =========================
-// 🔄 FIN DE POSSESSION (4 actions)
-// =========================
-if (match.actionsRestantes[currentTeam] <= 0) {
 
-    const possessionNumber = resetPossession(match, currentTeam);
+    // =========================
+    // 📍 ACTIVATION POSITIONS
+    // =========================
+    if (match.phase === "kickoff") {
 
-    switchRoles(match);
+        const equipeAttack = match.possession === match.team1Nom ? match.lineup1 : match.lineup2;
+        const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : match.lineup1;
 
-    const roleCurrent = match.role[currentTeam];
-    const roleOther = match.role[nextTeam];
+        equipeAttack.forEach(j => {
+            j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+        });
 
-    await ovl.sendMessage(chat, {
-        text:
-`🔁 Fin possession ${possessionNumber}
+        equipeDefense.forEach(j => {
+            j.zoneY = getZoneYParLigne(j.ligne, "defense");
+        });
 
-⚽ ${currentTeam}: ${roleCurrent.toUpperCase()}
-🛡️ ${nextTeam}: ${roleOther.toUpperCase()}`
-    });
-}
+        match.positions = [
+            ...match.lineup1,
+            ...match.lineup2
+        ];
+
+        assignerVisAVis(match);
+        match.phase = "normal";
+
+        await ovl.sendMessage(chat, {
+            text: "📍 Positions maintenant fixées !"
+        });
+    }
 
     // =========================
     // 💬 DIALOGUE
     // =========================
+    const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
+
     if (dialogue) {
         await ovl.sendMessage(chat, {
             text: `💬 ${dialogue}`
@@ -1416,45 +1343,37 @@ if (match.actionsRestantes[currentTeam] <= 0) {
     }
 
     // =========================
-    // 🔁 SWITCH JOUEUR (IMPORTANT)
+    // 🔁 SWITCH JOUEUR
     // =========================
     const isP1 = match.joueurTour === match.id1;
-
     const nextJoueur = isP1 ? match.id2 : match.id1;
-    const nextNom = isP1 ? match.team2Nom : match.team1Nom;
+    const displayNext = nextJoueur.split("@")[0];
 
     match.joueurTour = nextJoueur;
 
-    const displayNext = nextJoueur.split("@")[0];
-
-await ovl.sendMessage(chat, {
-    text:
+    await ovl.sendMessage(chat, {
+        text:
 `⚽ NEXT ! @${displayNext}
 
-⚔️ ATTAQUE: ${match.role[currentTeam] === "attack" ? currentTeam : nextTeam}
-🛡️ DÉFENSE: ${match.role[currentTeam] === "attack" ? nextTeam : currentTeam}
-
 🎯 4 actions pour marquer`,
-    mentions: [nextJoueur]
-});
-
-
-// =========================
-// ⏱️ TIMER TOUR
-// =========================
-if (match.timerPave) clearTimeout(match.timerPave);
-
-match.timerPave = setTimeout(async () => {
-    await ovl.sendMessage(chat, {
-        text: `⏰ @${nextNom} temps écoulé ❌`,
         mentions: [nextJoueur]
     });
-}, 6 * 60 * 1000);
 
-return true;
-} 
-} 
-    
+    // =========================
+    // ⏱️ TIMER
+    // =========================
+    if (match.timerPave) clearTimeout(match.timerPave);
+
+    match.timerPave = setTimeout(async () => {
+        await ovl.sendMessage(chat, {
+            text: `⏰ @${displayNext} temps écoulé ❌`,
+            mentions: [nextJoueur]
+        });
+    }, 6 * 60 * 1000);
+
+    return true;
+}
+      
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
 // ===============================
