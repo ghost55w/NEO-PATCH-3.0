@@ -1258,9 +1258,11 @@ if (match.phase === "kickoff") {
 
 if(!validation.ok){
 
+    const err = formatErreurGlobal(validation, null, match);
+
     await ovl.sendMessage(chat,{
-    text: formatErreurGlobal(validation)
-});
+        text: err.texte
+    });
 
     return true;
 }
@@ -1463,11 +1465,15 @@ async function handleDeplacements(match, actionText, joueurObj) {
     const distance = extraireDistance(actionText);
     const zoneDepart = extraireZoneDepart(actionText);
     const zoneArrivee = extraireZoneArrivee(actionText);
+    
+if (zoneDepart && joueurObj.zoneY !== zoneDepart) {
 
-    if (zoneDepart && joueurObj.zoneY !== zoneDepart) {
+    // ✅ autoriser pendant kickoff
+    if (match.phase !== "kickoff") {
         return { ok: false, erreur: "❌ Mauvaise position" };
     }
 
+}
     if (zoneArrivee) {
         const dist = calculDistance(joueurObj.zoneY, zoneArrivee);
         if (dist > MAX_DEPLACEMENT) {
