@@ -1208,6 +1208,8 @@ async function handlePaveGame(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
+    const currentTeam = match.possession;
+const nextTeam = currentTeam === match.team1Nom ? match.team2Nom : match.team1Nom;
     if (match.etat !== "en_cours") return false;
 
     const rawText =
@@ -1239,19 +1241,19 @@ if (match.phase === "kickoff") {
 
     if (zoneDepart !== "C2") {
 
-    const err = formatErreurGlobal("❌ kickoff", joueurObj, match);
+        const err = formatErreurGlobal("❌ kickoff", null, match);
 
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `${err.texte}
 
 ╰─────────────────▱▱▱
 
                       🔷BLUELOCK⚽🥅`
-    });
+        });
 
-    return true;
-}
+        return true;
+    }
     const validation = verifierPaveBlueLock(action);
 
 if(!validation.ok){
