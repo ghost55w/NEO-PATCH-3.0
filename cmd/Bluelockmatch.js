@@ -1196,6 +1196,8 @@ const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : matc
 
 }, 6 * 60 * 1000);
 
+} 
+    
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
