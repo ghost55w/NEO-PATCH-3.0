@@ -798,6 +798,39 @@ await ovl.sendMessage(chat, {
         });
     }, 6 * 60 * 1000);
 }
+async function envoyerErreurActionContinue(ovl, chat, match, joueurObj, erreurInput){
+
+    const err = formatErreurGlobal(erreurInput, joueurObj, match);
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚽❌ Action invalide:
+${err.texte}
+
+➡️ Le jeu continue...
+
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
+    });
+
+    // 🔄 SWITCH JOUEUR
+    const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
+    match.joueurTour = nextJoueur;
+
+    const displayNext = nextJoueur.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚽ NEXT ! @${displayNext}
+
+🎯 Reprends le jeu !`,
+        mentions: [nextJoueur]
+    });
+
+    // ⏱️ TIMER + ALERTE 1 MIN
+    lancerTimerAvecAlerte(match, ovl, chat, nextJoueur);
+}
+                             
 /* ===============================
 ANNONCE MATCH-UP
 =================================*/
@@ -817,6 +850,20 @@ async function annoncerMatchUp(ovl, chat, duel){
 🔥 Duel : ${atk} vs ${def}
 
 💥 Duel engagé !
+
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
+    });
+}
+
+async function annoncerPasDeDuel(ovl, chat, joueur){
+
+    await ovl.sendMessage(chat, {
+        text:
+`🚀 ${joueur.nom} avance librement !
+
+😴 Son vis-à-vis reste passif...
+➡️ Aucun duel engagé
 
 ╰───────────────────     
                        🔷BLUELOCK⚽🥅`
@@ -986,9 +1033,23 @@ function detecterMatchUp(match, actionText, joueurActif){
     const isDefense = isActionDefensive(txt);
     const isOffense = isActionOffensive(txt);
 
-    if(!isDefense && !isOffense) return null;
+    // ❌ PAS DE DUEL SI PAS DRIBBLE OU PHYSIQUE
+    const isDribble = /dribbl|feint|crochet|roulette|elastico/.test(txt);
+    const isPhysique = /épaule|contact|bouscul|charg/.test(txt);
 
-    // 🔥 récupérer vis-à-vis
+    if(!isDribble && !isPhysique) return null;
+
+    // ❌ PAS DE DUEL SI PAS DEFENSE ACTIVE
+    if(!isDefense) return null;
+
+    // 📏 DISTANCE
+    const distance = extraireDistance(txt);
+
+    if(isPhysique && (!distance || distance > 1)){
+        return null; // trop loin → pas de contact
+    }
+
+    // 🔥 VIS A VIS
     const duel = match.duels?.find(d => 
         d.joueur1 === joueurActif.nom || 
         d.joueur2 === joueurActif.nom
@@ -1012,10 +1073,11 @@ function detecterMatchUp(match, actionText, joueurActif){
     if(!cible) return null;
 
     return {
-        attaquant: isOffense ? joueurActif : cible,
-        defenseur: isDefense ? joueurActif : cible,
-        typeAttaque: isOffense ? typeAttaque(txt) : null,
-        typeDefense: isDefense ? typeDefense(txt) : null
+        attaquant: joueurActif,
+        defenseur: cible,
+        typeAttaque: typeAttaque(txt),
+        typeDefense: typeDefense(txt),
+        distance
     };
 }
 
@@ -1602,64 +1664,104 @@ async function handlePaveGame(ms, ovl) {
     if (!isBlueLockPave) return false;
 
     const action = extraireAction(text);
-    if (!action) return false;
+
+if (!action){
+
+    await envoyerErreurActionContinue(
+        ovl,
+        chat,
+        match,
+        null,
+        "❌ Aucune action reconnue"
+    );
+
+    return true;
+}
+// 🔥 découpage des séquences (/)
+const sequences = separerSequences(action);
+
+// 🔥 tous les joueurs
+const allJoueurs = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
+
+// =========================
+// 🔁 TRAITEMENT PAR SEQUENCE
+// =========================
+for(const seq of sequences){
 
     // =========================
-    // 👤 EXTRACTION JOUEUR AVANT TOUT
+    // 👤 EXTRACTION JOUEUR
     // =========================
-    const joueurMatch = action.match(/\)\s*([^\s]+)/);
+    const joueurMatch = seq.match(/\)\s*([^\s]+)/);
     const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
 
-    const allJoueurs = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
-    let joueurObj = allJoueurs.find(j => 
+    const joueurObj = allJoueurs.find(j => 
         j.nom.toLowerCase() === nomJoueur?.toLowerCase()
     );
 
-    if (!joueurObj) {
+    if(!joueurObj){
         await envoyerErreurBlueLock(ovl, chat, match, null, "❌ Joueur introuvable");
-        return true;
+        continue;
     }
 
     // =========================
-    // 🚨 KICKOFF
+    // 📍 ZONE OBLIGATOIRE
     // =========================
-    if (match.phase === "kickoff") {
+    const zone = extraireZoneDepart(seq);
 
-        const zoneDepart = extraireZoneDepart(action);
-
-        if (zoneDepart !== "C2") {
-            await envoyerErreurBlueLock(ovl, chat, match, joueurObj, "❌ kickoff");
-            return true;
-        }
+    if(!zone){
+        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, "❌ Zone obligatoire (ex: C2)");
+        continue;
     }
 
     // =========================
-    // 🔐 VALIDATION GLOBALE
+    // 🔐 VALIDATION ACTION
     // =========================
-    const validation = verifierPaveBlueLock(action);
+    const validation = verifierPaveBlueLock(seq);
 
     if (!validation.ok) {
         await envoyerErreurBlueLock(ovl, chat, match, joueurObj, validation);
-        return true;
+        continue;
     }
-// =========================
-// ⚔️ DETECTION DUEL
-// =========================
-const duel = detecterMatchUp(match, action, joueurObj);
 
-if(duel){
+    // =========================
+    // 🚶 DEPLACEMENT
+    // =========================
+    const move = await handleDeplacements(match, seq, joueurObj);
 
-    lancerMatchUp(match, duel);
+    if (!move.ok) {
+        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, move);
+        continue;
+    }
 
-    await annoncerMatchUp(ovl, chat, duel);
+    // =========================
+    // ⚔️ DETECTION DUEL
+    // =========================
+    const duel = detecterMatchUp(match, seq, joueurObj);
 
-    const resultat = resoudreMatchUp(match, duel);
+    if(duel){
 
-    await annoncerResultatDuel(ovl, chat, resultat);
+        await annoncerMatchUp(ovl, chat, duel);
+
+        const resultat = resoudreDuel(duel);
+
+        if(!resultat.ok){
+            await envoyerErreurBlueLock(ovl, chat, match, joueurObj, resultat.erreur);
+            continue;
+        }
+
+    }else{
+
+        await annoncerPasDeDuel(ovl, chat, joueurObj);
+
+    }
+
+    // =========================
+    // 📍 DEBUG POSITION
+    // =========================
+    console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
 }
 
     
