@@ -168,6 +168,99 @@ function detecterActions(sequence){
     return actionsDetectees;
 }
 /* ===============================
+DETECTION ACTION DEFENSIVE
+=================================*/
+function isActionDefensive(txt){
+
+    const patterns = [
+        /bloqu\w*/i,
+        /tacl\w*/i,
+        /intercept\w*/i,
+        /coup\w*/i,
+        /barr\w*/i,
+        /press\w*/i,
+        /défend\w*/i,
+        /defend\w*/i,
+        /marqu\w*/i,
+
+        // 💪 physique
+        /épaule/i,
+        /contact/i,
+        /bouscul\w*/i,
+        /charg\w*/i
+    ];
+
+    return patterns.some(p => p.test(txt));
+}
+
+/* ===============================
+DETECTION ACTION OFFENSIVE
+=================================*/
+function isActionOffensive(txt){
+
+    const patterns = [
+        /dribbl\w*/i,
+        /feint\w*/i,
+        /crochet/i,
+        /roulette/i,
+        /elastico/i,
+
+        /acc[eé]l[eé]r\w*/i,
+        /sprint\w*/i,
+        /vmax/i,
+        /d[eé]marr\w*/i,
+
+        /condui\w*/i,
+        /avance/i,
+
+        /prot[eè]g\w*/i,
+        /dos au jeu/i,
+
+        /[eé]limin\w*/i,
+        /d[eé]pass\w*/i,
+
+        /contr[oô]le orient[eé]/i,
+
+        /attaque/i,
+        /fonce/i
+    ];
+
+    return patterns.some(p => p.test(txt));
+}
+//DEFENSE 
+function typeDefense(txt){
+
+    txt = txt.toLowerCase();
+
+    if(/tacl/.test(txt)) return "tacle";
+    if(/intercept/.test(txt)) return "interception";
+    if(/bloqu/.test(txt)) return "blocage";
+    if(/barr/.test(txt)) return "barrage";
+
+    if(/épaule|contact|bouscul|charg/.test(txt)) return "physique";
+
+    return "defense";
+}
+
+//ATTAQUE
+function typeAttaque(txt){
+
+    txt = txt.toLowerCase();
+
+    if(/dribbl|feint|crochet|roulette|elastico/.test(txt)) return "dribble";
+
+    if(/acc[eé]l[eé]r|sprint|vmax|d[eé]marr/.test(txt)) return "vitesse";
+
+    if(/condui|avance/.test(txt)) return "conduite";
+
+    if(/prot[eè]g|dos au jeu/.test(txt)) return "protection";
+
+    if(/[eé]limin|d[eé]pass/.test(txt)) return "elimination";
+
+    return "attaque";
+}
+
+/* ===============================
 MOTS CLÉS PASSES (FORMULE 🧩)
 =================================*/
 const MOTS_CLES_PASSES = {
