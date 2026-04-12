@@ -1701,10 +1701,10 @@ for(const seq of sequences){
         j.nom.toLowerCase() === nomJoueur?.toLowerCase()
     );
 
-    if(!joueurObj){
-        await envoyerErreurBlueLock(ovl, chat, match, null, "❌ Joueur introuvable");
-        continue;
-    }
+    if (!joueurObj) {
+    await envoyerErreurActionContinue(ovl, chat, match, null, "❌ Joueur introuvable");
+    return true;
+}
 
     // =========================
     // 📍 ZONE OBLIGATOIRE
@@ -1712,9 +1712,15 @@ for(const seq of sequences){
     const zone = extraireZoneDepart(seq);
 
     if(!zone){
-        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, "❌ Zone obligatoire (ex: C2)");
-        continue;
-    }
+    await envoyerErreurActionContinue(
+        ovl,
+        chat,
+        match,
+        joueurObj,
+        "❌ Zone obligatoire (ex: C2)"
+    );
+    continue;
+}
 
     // =========================
     // 🔐 VALIDATION ACTION
@@ -1722,9 +1728,9 @@ for(const seq of sequences){
     const validation = verifierPaveBlueLock(seq);
 
     if (!validation.ok) {
-        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, validation);
-        continue;
-    }
+    await envoyerErreurActionContinue(ovl, chat, match, joueurObj, validation);
+    return true;
+}
 
     // =========================
     // 🚶 DEPLACEMENT
@@ -1732,31 +1738,39 @@ for(const seq of sequences){
     const move = await handleDeplacements(match, seq, joueurObj);
 
     if (!move.ok) {
-        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, move);
-        continue;
+    await envoyerErreurActionContinue(ovl, chat, match, joueurObj, move);
+    continue;
+           
+
+  // =========================
+// ⚔️ DETECTION DUEL
+// =========================
+const duel = detecterMatchUp(match, seq, joueurObj);
+
+if(duel){
+
+    await annoncerMatchUp(ovl, chat, duel);
+
+    const resultat = resoudreDuel(duel);
+
+    if(!resultat.ok){
+
+        await envoyerErreurActionContinue(
+            ovl,
+            chat,
+            match,
+            joueurObj,
+            resultat.erreur
+        );
+
+        continue; 
     }
 
-    // =========================
-    // ⚔️ DETECTION DUEL
-    // =========================
-    const duel = detecterMatchUp(match, seq, joueurObj);
+}else{
 
-    if(duel){
+    await annoncerPasDeDuel(ovl, chat, joueurObj);
 
-        await annoncerMatchUp(ovl, chat, duel);
-
-        const resultat = resoudreDuel(duel);
-
-        if(!resultat.ok){
-            await envoyerErreurBlueLock(ovl, chat, match, joueurObj, resultat.erreur);
-            continue;
-        }
-
-    }else{
-
-        await annoncerPasDeDuel(ovl, chat, joueurObj);
-
-    }
+}  
 
     // =========================
     // 📍 DEBUG POSITION
@@ -1771,7 +1785,7 @@ for(const seq of sequences){
 const sec = handleActionsSecondaires(match, actionsSecondaires);
 
 if(!sec.ok){
-    await envoyerErreurBlueLock(ovl, chat, match, joueurObj, sec);
+    await envoyerErreurActionContinue(ovl, chat, match, joueurObj, sec);
     return true;
 }
 
@@ -1789,23 +1803,25 @@ if(!sec.ok){
         return true;
     }
 
-    // =========================
-    // 🚶 DÉPLACEMENT
-    // =========================
-    const move = await handleDeplacements(match, action, joueurObj);
+// =========================
+// 🚶 DÉPLACEMENT
+// =========================
+const move = await handleDeplacements(match, action, joueurObj);
 
-    if (!move.ok) {
-        await envoyerErreurBlueLock(ovl, chat, match, joueurObj, move);
-        return true;
-    }
+if (!move.ok) {
+    await envoyerErreurActionContinue(ovl, chat, match, joueurObj, move);
+    return true;
+}
 
-    console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
 
-    await ovl.sendMessage(chat, {  
-        text: `⚽✅ Action validée:\n${action}
+await ovl.sendMessage(chat, {  
+    text: `⚽✅ Action validée:
+${action}
+
 ╰───────────────────     
                        🔷BLUELOCK⚽🥅`
-    });
+});
 
     // =========================
     // 📍 ACTIVATION POSITIONS
