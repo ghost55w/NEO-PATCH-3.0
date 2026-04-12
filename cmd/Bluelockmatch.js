@@ -823,6 +823,26 @@ async function annoncerMatchUp(ovl, chat, duel){
     });
 }
 
+/* ===============================
+RESULTAT MATCH-UP
+=================================*/
+async function annoncerResultatDuel(ovl, chat, resultat){
+
+    if(!resultat) return;
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚔️ RESULTAT DU DUEL !
+
+🏆 ${resultat.gagnant.nom}
+❌ ${resultat.perdant.nom}
+
+${resultat.message}
+
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
+    });
+}
     
 /* ===============================
 EXTRAIRE ZONE DEPART
@@ -998,6 +1018,149 @@ function detecterMatchUp(match, actionText, joueurActif){
         typeDefense: isDefense ? typeDefense(txt) : null
     };
 }
+
+/* ===============================
+RESOLUTION MATCH-UP
+=================================*/
+function resoudreMatchUp(match, duel){
+
+    const attaquant = duel.attaquant;
+    const defenseur = duel.defenseur;
+
+    const atkDribble = attaquant.dribble || attaquant.note || 50;
+    const defDefense = defenseur.defense || defenseur.note || 50;
+
+    const atkSpeed = attaquant.vitesse || attaquant.note || 50;
+    const defSpeed = defenseur.vitesse || defenseur.note || 50;
+
+    const atkPhys = attaquant.physique || attaquant.note || 50;
+    const defPhys = defenseur.physique || defenseur.note || 50;
+
+    const atkOvr = attaquant.note || 50;
+    const defOvr = defenseur.note || 50;
+
+    let resultat = {
+        gagnant: null,
+        perdant: null,
+        type: null,
+        message: ""
+    };
+
+    // ===============================
+    // ⚔️ 1. DRIBBLE VS DEFENSE
+    // ===============================
+    if(duel.typeAttaque === "dribble"){
+
+        // ❌ attaquant trop faible → perte immédiate
+        if(atkDribble < defDefense){
+
+            if(defOvr - atkOvr > 10){
+                resultat.gagnant = defenseur;
+                resultat.perdant = attaquant;
+                resultat.type = "interception";
+
+                resultat.message = `🛑 ${defenseur.nom} vole directement le ballon !`;
+                return resultat;
+            }
+
+            resultat.gagnant = defenseur;
+            resultat.perdant = attaquant;
+            resultat.type = "tacle";
+
+            resultat.message = `🛑 ${defenseur.nom} stoppe le dribble avec un tacle !`;
+            return resultat;
+        }
+
+        // ✅ attaquant plus fort → passe
+        if(atkDribble > defDefense){
+
+            resultat.gagnant = attaquant;
+            resultat.perdant = defenseur;
+            resultat.type = "dribble";
+
+            resultat.message = `🔥 ${attaquant.nom} élimine ${defenseur.nom} !`;
+
+            // ⚡ BONUS VITESSE
+            const diffSpeed = atkSpeed - defSpeed;
+
+            if(diffSpeed > 10){
+                resultat.message += ` 💨 Il le laisse sur place !`;
+            }
+            else if(diffSpeed > 0){
+                resultat.message += ` ⚡ Il prend 5m d'avance !`;
+            }
+            else if(diffSpeed >= -5){
+                resultat.message += ` 🏃 ${defenseur.nom} revient au contact !`;
+            }
+            else{
+                resultat.message += ` 🏃 ${defenseur.nom} reste derrière !`;
+            }
+
+            return resultat;
+        }
+    }
+
+    // ===============================
+    // 💪 2. PHYSIQUE
+    // ===============================
+    if(duel.typeDefense === "physique"){
+
+        if(defPhys > atkPhys){
+
+            const diff = defPhys - atkPhys;
+
+            resultat.gagnant = defenseur;
+            resultat.perdant = attaquant;
+            resultat.type = "physique";
+
+            if(diff > 10){
+                resultat.message = `💥 ${attaquant.nom} est projeté au sol par ${defenseur.nom} ! Ballon perdu !`;
+            }else{
+                resultat.message = `💥 ${attaquant.nom} est déséquilibré par ${defenseur.nom} !`;
+            }
+
+            return resultat;
+        }
+
+        if(atkPhys > defPhys){
+
+            resultat.gagnant = attaquant;
+            resultat.perdant = defenseur;
+            resultat.type = "resistance";
+
+            resultat.message = `💪 ${attaquant.nom} résiste au contact !`;
+
+            return resultat;
+        }
+    }
+
+    // ===============================
+    // 🛡️ 3. DEFENSE PURE
+    // ===============================
+    if(duel.typeDefense){
+
+        if(defDefense >= atkDribble){
+
+            resultat.gagnant = defenseur;
+            resultat.perdant = attaquant;
+            resultat.type = "bloc";
+
+            resultat.message = `🛑 ${defenseur.nom} bloque l'action !`;
+        }else{
+
+            resultat.gagnant = attaquant;
+            resultat.perdant = defenseur;
+            resultat.type = "passage";
+
+            resultat.message = `🔥 ${attaquant.nom} passe !`;
+        }
+
+        return resultat;
+    }
+
+    return null;
+}
+
 /* ===============================
 TROUVER JOUEUR DB
 =================================*/
@@ -1483,6 +1646,23 @@ async function handlePaveGame(ms, ovl) {
         await envoyerErreurBlueLock(ovl, chat, match, joueurObj, validation);
         return true;
     }
+// =========================
+// ⚔️ DETECTION DUEL
+// =========================
+const duel = detecterMatchUp(match, action, joueurObj);
+
+if(duel){
+
+    lancerMatchUp(match, duel);
+
+    await annoncerMatchUp(ovl, chat, duel);
+
+    const resultat = resoudreMatchUp(match, duel);
+
+    await annoncerResultatDuel(ovl, chat, resultat);
+}
+
+    
 // =========================
 // 🔁 ACTIONS SECONDAIRES
 // =========================
