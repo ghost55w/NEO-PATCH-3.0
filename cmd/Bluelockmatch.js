@@ -798,7 +798,32 @@ await ovl.sendMessage(chat, {
         });
     }, 6 * 60 * 1000);
 }
+/* ===============================
+ANNONCE MATCH-UP
+=================================*/
+async function annoncerMatchUp(ovl, chat, duel){
 
+    const atk = duel.typeAttaque || "attaque";
+    const def = duel.typeDefense || "défense";
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚔️ MATCH-UP !
+
+👤 ${duel.attaquant.nom}
+🆚
+🛡️ ${duel.defenseur.nom}
+
+🔥 Duel : ${atk} vs ${def}
+
+💥 Duel engagé !
+
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
+    });
+}
+
+    
 /* ===============================
 EXTRAIRE ZONE DEPART
 =================================*/
@@ -933,6 +958,46 @@ function verifierPaveBlueLock(actionText){
     };
 }
 
+//DETECTION DU MATCH UP
+function detecterMatchUp(match, actionText, joueurActif){
+
+    const txt = actionText.toLowerCase();
+
+    const isDefense = isActionDefensive(txt);
+    const isOffense = isActionOffensive(txt);
+
+    if(!isDefense && !isOffense) return null;
+
+    // 🔥 récupérer vis-à-vis
+    const duel = match.duels?.find(d => 
+        d.joueur1 === joueurActif.nom || 
+        d.joueur2 === joueurActif.nom
+    );
+
+    if(!duel) return null;
+
+    const nomCible = duel.joueur1 === joueurActif.nom
+        ? duel.joueur2
+        : duel.joueur1;
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    const cible = allJoueurs.find(j =>
+        j.nom.toLowerCase() === nomCible.toLowerCase()
+    );
+
+    if(!cible) return null;
+
+    return {
+        attaquant: isOffense ? joueurActif : cible,
+        defenseur: isDefense ? joueurActif : cible,
+        typeAttaque: isOffense ? typeAttaque(txt) : null,
+        typeDefense: isDefense ? typeDefense(txt) : null
+    };
+}
 /* ===============================
 TROUVER JOUEUR DB
 =================================*/
