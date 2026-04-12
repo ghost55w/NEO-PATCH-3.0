@@ -80,6 +80,43 @@ const ZONES_BLUELOCK = ["A1","A2","B1","B2","C1","C2"];
 const MAX_DEPLACEMENT = 10;
 const MAX_ACTIONS_PAVE = 3;
 const MAX_ACTIONS_COMBO = 2;
+/* ===============================
+ACTIONS DEFENSIVES
+=================================*/
+const ACTIONS_DEF = [
+    "bloque", "bloquer", "bloqué", "blocage",
+    "tacle", "tacler", "taclé", "tacle debout", "tacle glissé" 
+    "intercepte", "intercepter", "interception",
+    "coupe", "couper",
+    "barre la route", "barrer la route",
+    "pression", "presse", "presser",
+    "défend", "marque",
+
+    // physique
+    "épaule", "coup d'épaule",
+    "contact", "bouscule", "charge"
+];
+
+/* ===============================
+ACTIONS OFFENSIVES
+=================================*/
+const ACTIONS_OFF = [
+    "dribble", "feinte", "crochet",
+    "roulette", "elastico",
+
+    "accélère", "sprint", "vmax",
+    "démarre",
+
+    "conduit", "avance",
+
+    "protège", "dos au jeu",
+
+    "élimine", "dépasse", "laisse surplace", 
+
+    "contrôle orienté",
+
+    "attaque", "fonce"
+];
 const ACTIONS_MAP = {
     tir: ["tir", "frappe"],
     passe: ["passe"],
