@@ -506,6 +506,24 @@ function verifierDeplacement(sequence){
     };
 }
 
+function extraireBloc(text, symbole) {
+    const part = text.split(symbole)[1];
+    if (!part) return null;
+
+    return part
+        .split("▔")[0]
+        .split("─")[0]
+        .trim();
+}
+
+function extraireActionsPrincipales(text){
+    return extraireBloc(text, "⚽:");
+}
+
+function extraireActionsSecondaires(text){
+    return extraireBloc(text, "🔁:");
+}
+
 /* ===============================
 UPDATE POSITION JOUEUR
 =================================*/
@@ -1218,9 +1236,10 @@ async function handlePaveGame(ms, ovl) {
     if (!text) return false;
 
     const isBlueLockPave =
-        text.includes("💬:") &&
-        text.includes("⚽:") &&
-        text.includes("🔷BLUELOCK⚽🥅");
+    text.includes("💬:") &&
+    text.includes("⚽:") &&
+    text.includes("🔁:") &&
+    text.includes("🔷BLUELOCK⚽🥅");
 
     if (!isBlueLockPave) return false;
 
@@ -1269,7 +1288,17 @@ async function handlePaveGame(ms, ovl) {
         await envoyerErreurBlueLock(ovl, chat, match, joueurObj, validation);
         return true;
     }
+// =========================
+// 🔁 ACTIONS SECONDAIRES
+// =========================
+const sec = handleActionsSecondaires(match, actionsSecondaires);
 
+if(!sec.ok){
+    await envoyerErreurBlueLock(ovl, chat, match, joueurObj, sec);
+    return true;
+}
+
+            
     // =========================
     // 🔐 TOUR JOUEUR
     // =========================
@@ -1644,6 +1673,68 @@ async function handlePasses(match, action, joueur) {
     };
 }
 
+// DETECTION DES DÉPLACEMENTS SECONDAIRES
+function handleActionsSecondaires(match, texte){
+
+    if(!texte) return { ok:true };
+
+    const sequences = texte.split("/").map(s => s.trim());
+
+    if(sequences.length > 2){
+        return {
+            ok:false,
+            erreur:"❌ Maximum 2 actions secondaires (🔁)"
+        };
+    }
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    for(const seq of sequences){
+
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        const nom = joueurMatch ? joueurMatch[1].trim() : null;
+
+        const joueur = allJoueurs.find(j =>
+            j.nom.toLowerCase() === nom?.toLowerCase()
+        );
+
+        if(!joueur){
+            return { ok:false, erreur:"❌ Joueur secondaire introuvable" };
+        }
+
+        // 🚫 uniquement déplacement autorisé
+        const actions = detecterActions(seq);
+
+        if(actions.some(a => a !== "deplacement")){
+            return {
+                ok:false,
+                erreur:"❌ 🔁 uniquement des déplacements autorisés"
+            };
+        }
+
+        const move = verifierDeplacement(seq);
+
+        if(!move.ok){
+            return move;
+        }
+
+        // ✅ update position
+        if(move.zoneArrivee){
+            joueur.zoneY = move.zoneArrivee;
+        }
+
+        if(move.direction && move.distance){
+            updatePositionJoueur(joueur, move.direction, move.distance);
+        }
+
+        updateGlobalPositions(match, joueur);
+    }
+
+    return { ok:true };
+}
         
 /* ===============================
 COMMANDE +STOPMATCH⚽
