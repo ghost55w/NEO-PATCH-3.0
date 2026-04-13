@@ -1291,21 +1291,26 @@ function detecterMatchUp(match, actionText, joueurActif){
 RESOLUTION MATCH-UP
 =================================*/
 function resoudreMatchUp(match, duel){
+    
+const attaquant = duel.attaquant;
+const defenseur = duel.defenseur;
+    
+    const atkData = attaquant.data;
+const defData = defenseur.data;
 
-    const attaquant = duel.attaquant;
-    const defenseur = duel.defenseur;
+if(!atkData || !defData) return null;
+ 
+    const atkDribble = atkData.dri || atkData.ovr || 50;
+const defDefense = defData.def || defData.ovr || 50;
 
-    const atkDribble = attaquant.dribble || attaquant.note || 50;
-    const defDefense = defenseur.defense || defenseur.note || 50;
+const atkSpeed = atkData.acc || atkData.ovr || 50;
+const defSpeed = defData.acc || defData.ovr || 50;
 
-    const atkSpeed = attaquant.vitesse || attaquant.note || 50;
-    const defSpeed = defenseur.vitesse || defenseur.note || 50;
+const atkPhys = atkData.phy || atkData.ovr || 50;
+const defPhys = defData.phy || defData.ovr || 50;
 
-    const atkPhys = attaquant.physique || attaquant.note || 50;
-    const defPhys = defenseur.physique || defenseur.note || 50;
-
-    const atkOvr = attaquant.note || 50;
-    const defOvr = defenseur.note || 50;
+const atkOvr = atkData.ovr || 50;
+const defOvr = defData.ovr || 50;
 
     let resultat = {
         gagnant: null,
@@ -1669,15 +1674,17 @@ if(parsed){
 
     match.lineup1 = parsed.joueurs.map(j => {
 
-        const posteData = POSITION_POSTES[j.position] || {};
+    const posteData = POSITION_POSTES[j.position] || {};
+    const data = getJoueurData(j.nom); 
 
-        return {
-            ...j,
-            zoneX: posteData.zoneX || "axe",
-            ligne: posteData.ligne || "milieu",
-            zoneY: null // sera défini au kickoff
-        };
-    });
+    return {
+        ...j,
+        data, 
+        zoneX: posteData.zoneX || "axe",
+        ligne: posteData.ligne || "milieu",
+        zoneY: null
+    };
+});
 
 }else{
     match.lineup1 = [];
@@ -1713,22 +1720,24 @@ if(parsed){
 
     match.id2 = senderJid;
 
-    // ✅ FIX ICI
+    // 
     const parsed = parseSquadBlueLock(safeText);
 
     if(parsed){
 
         match.lineup2 = parsed.joueurs.map(j => {
 
-            const posteData = POSITION_POSTES[j.position] || {};
+    const posteData = POSITION_POSTES[j.position] || {};
+    const data = getJoueurData(j.nom); 
 
-            return {
-                ...j,
-                zoneX: posteData.zoneX || "axe",
-                ligne: posteData.ligne || "milieu",
-                zoneY: null
-            };
-        });
+    return {
+        ...j,
+        data, 
+        zoneX: posteData.zoneX || "axe",
+        ligne: posteData.ligne || "milieu",
+        zoneY: null
+    };
+});
 
     } else {
         match.lineup2 = [];
@@ -1904,9 +1913,13 @@ for(const seq of sequences){
     const nomJoueur = joueurMatch ? joueurMatch[1].trim() : null;
 
     const joueurObj = allJoueurs.find(j => 
-        j.nom.toLowerCase() === nomJoueur?.toLowerCase()
-    );
-
+    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+);
+    
+if(!joueurObj.data){
+    joueurObj.data = getJoueurData(joueurObj.nom);
+}
+    
     if (!joueurObj) {
     await envoyerErreurActionContinue(ovl, chat, match, null, "❌ Joueur introuvable");
     return true;
@@ -2308,7 +2321,13 @@ async function handlePasses(match, action, joueur) {
         txt.includes("contrôle") ||
         txt.includes("controle");
 
-    const notePasse = joueur.note || 0;
+    const data = joueur.data;
+
+if(!data){
+    return { ok:false, erreur:"❌ Data joueur introuvable" };
+}
+
+const notePasse = data.pas || data.ovr || 0;
 
     if (!hasControle) {
 
@@ -2485,12 +2504,18 @@ async function handleTirEtBut(ovl, chat, match, joueurObj, action){
         return { ok:false, erreur:"❌ Data joueur introuvable" };
     }
 
+    const tir = data.sho || data.ovr || 50;
+    
     const hasLongShot = joueurData.weapon?.toLowerCase().includes("long");
 
-    if(distance > 10 && !hasLongShot){
-        return { ok:false, erreur:"❌ Tir impossible à cette distance" };
-    }
+    if(distance > 10 && tir < 85){
+    return { ok:false, erreur:"❌ Tir trop faible pour cette distance" };
+}
+if(distance > 20 && tir < 90){
+    return { ok:false, erreur:"❌ Tir longue distance impossible" };
+}
 
+    
     // =========================
     // 🛡️ DEFENSE SUR TRAJECTOIRE
     // =========================
