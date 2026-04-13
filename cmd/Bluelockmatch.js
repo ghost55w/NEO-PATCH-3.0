@@ -1946,6 +1946,19 @@ if(!joueurObj.data){
 // =========================
 const validationGameplay = validerGameplay(action);
 
+    const weaponResult = handleWeapons(match, seq, joueurObj);
+
+if(!weaponResult.ok){
+    await envoyerErreurActionContinue(
+        ovl,
+        chat,
+        match,
+        joueurObj,
+        weaponResult.erreur
+    );
+    continue;
+}
+    
 if(!validationGameplay.ok){
     await envoyerErreurActionContinue(
         ovl,
