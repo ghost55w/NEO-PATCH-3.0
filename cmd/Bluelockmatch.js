@@ -1957,17 +1957,17 @@ if(validationGameplay.effets){
     return true;
 }
 
-    // =========================
-    // 🚶 DEPLACEMENT
-    // =========================
-    const move = await handleDeplacements(match, seq, joueurObj);
+// =========================
+// 🚶 DEPLACEMENT
+// =========================
+const move = await handleDeplacements(match, seq, joueurObj);
 
-    if (!move.ok) {
+if (!move.ok) {
     await envoyerErreurActionContinue(ovl, chat, match, joueurObj, move);
     continue;
-           
+}
 
-  // =========================
+// =========================
 // ⚔️ DETECTION DUEL
 // =========================
 const duel = detecterMatchUp(match, seq, joueurObj);
@@ -1979,7 +1979,6 @@ if(duel){
     const resultat = resoudreDuel(duel);
 
     if(!resultat.ok){
-
         await envoyerErreurActionContinue(
             ovl,
             chat,
@@ -1987,22 +1986,25 @@ if(duel){
             joueurObj,
             resultat.erreur
         );
-
         continue; 
     }
 
 }else{
-
     await annoncerPasDeDuel(ovl, chat, joueurObj);
-
-}  
-
-    // =========================
-    // 📍 DEBUG POSITION
-    // =========================
-    console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
 }
 
+// =========================
+// 📍 DEBUG POSITION
+// =========================
+console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
+
+await ovl.sendMessage(chat, {  
+    text: `⚽✅ Action validée:
+${action}
+
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
+});    
     
 // =========================
 // 🔁 ACTIONS SECONDAIRES
@@ -2011,9 +2013,7 @@ const sec = handleActionsSecondaires(match, actionsSecondaires);
 
 if(!sec.ok){
     await envoyerErreurActionContinue(ovl, chat, match, joueurObj, sec);
-    return true;
-}
-
+}    
             
     // =========================
     // 🔐 TOUR JOUEUR
@@ -2027,26 +2027,6 @@ if(!sec.ok){
         });
         return true;
     }
-
-// =========================
-// 🚶 DÉPLACEMENT
-// =========================
-const move = await handleDeplacements(match, action, joueurObj);
-
-if (!move.ok) {
-    await envoyerErreurActionContinue(ovl, chat, match, joueurObj, move);
-    return true;
-}
-
-console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`);
-
-await ovl.sendMessage(chat, {  
-    text: `⚽✅ Action validée:
-${action}
-
-╰───────────────────     
-                       🔷BLUELOCK⚽🥅`
-});
 
     // =========================
     // 📍 ACTIVATION POSITIONS
