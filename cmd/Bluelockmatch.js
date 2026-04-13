@@ -89,6 +89,28 @@ function regleContactDistance(txt){
     return { ok: true };
 }
 
+function gererDuel(joueurAttaquant, joueurDefenseur){
+
+    const att = joueurAttaquant.data?.dri || joueurAttaquant.data?.ovr || 50;
+    const def = joueurDefenseur.data?.def || joueurDefenseur.data?.ovr || 50;
+
+    // 🎲 petit facteur aléatoire
+    const rollAtt = att + Math.floor(Math.random() * 10);
+    const rollDef = def + Math.floor(Math.random() * 10);
+
+    if(rollAtt > rollDef){
+        return {
+            gagnant: "att",
+            message: `🔥 ${joueurAttaquant.nom} élimine ${joueurDefenseur.nom} !`
+        };
+    } else {
+        return {
+            gagnant: "def",
+            message: `🛡️ ${joueurDefenseur.nom} stoppe ${joueurAttaquant.nom} !`
+        };
+    }
+}
+
 // ⚡ VITESSE DOIT ÊTRE PRÉCISÉE
 function regleVitesse(txt){
     if(/sprint|vmax/i.test(txt)){
@@ -230,7 +252,26 @@ function validerGameplay(actionText){
     return { ok: true, effets };
 }
 
+function getToursRestants(match, equipe){
 
+    const max = match.maxPaves / 2;
+
+    const joues = equipe === 1 
+        ? match.pavesJoues1 
+        : match.pavesJoues2;
+
+    return String(max - joues).padStart(2, "0");
+}
+
+function getIntercepteur(match, equipePerdante){
+
+    const defense = equipePerdante === 1 
+        ? match.lineup2 
+        : match.lineup1;
+
+    const i = Math.floor(Math.random() * defense.length);
+    return defense[i];
+}
 
 /* ===============================
 PLACEMENT AUTOMATIQUE JOUEURS
@@ -1844,7 +1885,24 @@ const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : matc
                       🔷BLUELOCK⚽🥅`,
         mentions: [match.joueurTour]
     });
+// 🔁 SWITCH POSSESSION
+    match.possession = match.possession === match.team1Nom 
+        ? match.team2Nom 
+        : match.team1Nom;
 
+    // 🔁 SWITCH JOUEUR
+    match.joueurTour = match.joueurTour === match.id1 
+        ? match.id2 
+        : match.id1;
+
+    // 🔔 ANNONCER LE NOUVEAU JOUEUR
+    const next = match.joueurTour.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text: `⚽ Tour perdu ❌\n\n👉 @${next} récupère le ballon !`,
+        mentions: [match.joueurTour]
+    });
+    
 }, 6 * 60 * 1000);
 
 } 
@@ -2014,20 +2072,46 @@ if(duel){
     await annoncerMatchUp(ovl, chat, duel);
 
     const resultat = resoudreDuel(duel);
+if(!resultat.ok){
 
-    if(!resultat.ok){
-   if(!resultat.ok){
-
-    const intercepteur = getIntercepteur(match, joueurObj.equipe);
+    const defenseur = joueurObj.visavis;
     const toursRestants = getToursRestants(match, joueurObj.equipe);
 
+    let messageDuel = "";
+    let intercepteur = defenseur;
+
+    if(defenseur){
+
+        const duel = gererDuel(joueurObj, defenseur);
+
+        messageDuel = duel.message;
+
+        if(duel.gagnant === "att"){
+            // 🔥 L’attaquant garde la balle
+            await ovl.sendMessage(chat, {
+                text: `⚔️ DUEL !
+
+${messageDuel}
+
+✅ ${joueurObj.nom} conserve le ballon !
+⏱ Tours restants: ${toursRestants}`
+            });
+
+            continue; // 👉 on continue sans changer possession
+        }
+
+    }
+
+    // 🛡️ SI DÉFENSEUR GAGNE
     await ovl.sendMessage(chat, {
         text: `⚽❌ Action invalide:
 ⚽❌ *ERREUR* : 
 🎙️ ${resultat.erreur}
 
-\`Verdict\`: Ballon perdu, intercepté par ${intercepteur.nom}🛡️. 
-Tours restants: ${toursRestants}
+⚔️ ${messageDuel}
+
+\`Verdict\`: Ballon perdu, récupéré par ${intercepteur.nom}🛡️
+⏱ Tours restants: ${toursRestants}
 
 ➡️ Le jeu continue...
 
@@ -2041,7 +2125,8 @@ Tours restants: ${toursRestants}
         : match.team1Nom;
 
     continue;
-}     
+}
+    
 
 }else{
     await annoncerPasDeDuel(ovl, chat, joueurObj);
