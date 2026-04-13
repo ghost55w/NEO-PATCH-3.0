@@ -174,7 +174,7 @@ const clean = texte
       mention_JID
     };
 
-    if(rawText.startsWith("+test")){
+    if(texte.startsWith("+test")){
 
     const match = matchsActifs.get(ms_org);
 
@@ -183,20 +183,14 @@ const clean = texte
         return;
     }
 
-    // ❌ ANNULATION DU MATCH NORMAL
-    if(match.timerStart){
-        clearTimeout(match.timerStart);
+    if(match.timerMatch){
+        clearTimeout(match.timerMatch);
     }
 
-    // ===============================
-    // 🧪 CRÉATION MATCH TEST
-    // ===============================
     match.mode = "test";
     match.testType = "all";
-
     match.etat = "test";
 
-    // 🧠 Fake terrain
     match.possession = match.team1Nom;
     match.joueurTour = match.id1;
 
@@ -215,7 +209,7 @@ Envoie ton pavé pour tester 🔥`
     });
 
     return;
-    }
+    } 
 // ================================
 // 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
 // ================================
