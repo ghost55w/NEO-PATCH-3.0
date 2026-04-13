@@ -84,14 +84,16 @@ ovlcmd({
 }, async (ms_org, ovl, { ms }) => {
   try {
     const pavé = `
-💬: 
+💬:  
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
 ⚽: 
+
+
+─────────────────                                
+🔁:
              
-╰───────────────────
-  ▝▝▝       
-                 🔷BLUELOCK⚽🥅
-             *powered by NEOVERSE™🎮*`;
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`;
 
     // Envoi direct, sans repondre(), pour éviter de déclencher d'autres listeners
     await ovl.sendMessage(ms_org, { text: pavé }, { quoted: ms });
