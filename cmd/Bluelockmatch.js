@@ -26,6 +26,201 @@ const POSITION_POSTES = {
     DD: { zoneX: "aile droite", ligne: "defense" }
 };
 
+// ===============================
+// 🧠 GAMEPLAY RULE ENGINE
+// ===============================
+
+// ✋ MAIN DOIT ÊTRE PRÉCISÉE
+function regleMainPrecisee(txt){
+    if(/(main|paume)/i.test(txt)){
+        if(!/(main droite|main gauche|de la main droite|de la main gauche|des deux mains)/i.test(txt)){
+            return { ok: false, erreur: "❌ Précise la main utilisée (droite, gauche ou les deux)" };
+        }
+    }
+    return { ok: true };
+}
+
+// 🛡️ TYPE DE TACLE
+function regleTacleType(txt){
+    if(/tacle/i.test(txt)){
+        if(!/(tacle debout|tacle glissé)/i.test(txt)){
+            return { ok: false, erreur: "❌ Précise le type de tacle (debout ou glissé)" };
+        }
+    }
+    return { ok: true };
+}
+
+// 🔄 SENS TACLE CIRCULAIRE
+function regleTacleCirculaire(txt){
+    if(/circulaire/i.test(txt)){
+        if(!/(droite vers gauche|gauche vers droite)/i.test(txt)){
+            return { ok: false, erreur: "❌ Précise le sens du tacle circulaire" };
+        }
+    }
+    return { ok: true };
+}
+
+// 🧠 COHÉRENCE ACTION
+function regleCoherenceAction(txt){
+    if(/dribble/i.test(txt) && /passe/i.test(txt)){
+        return { ok: false, erreur: "❌ Impossible de dribbler et faire une passe en même temps" };
+    }
+    return { ok: true };
+}
+
+// 📏 CONTACT DISTANCE
+function regleContactDistance(txt){
+    if(/(épaule|contact|bouscule|main|paume)/i.test(txt)){
+        if(!/(< ?1m|moins de 1m|proche|collé)/i.test(txt)){
+            return { ok: false, erreur: "❌ Contact physique uniquement possible à moins de 1m" };
+        }
+    }
+    return { ok: true };
+}
+
+// ⚡ VITESSE DOIT ÊTRE PRÉCISÉE
+function regleVitesse(txt){
+    if(/sprint|vmax/i.test(txt)){
+        if(!/(vmax|accélération|vitesse)/i.test(txt)){
+            return { ok: false, erreur: "❌ Précise le type de vitesse (vmax, accélération...)" };
+        }
+    }
+    return { ok: true };
+}
+
+// 🎯 PASSE → DISTANCE
+function regleDistancePasse(txt){
+    if(/passe/i.test(txt)){
+        if(!/\d+\s?m/i.test(txt)){
+            return { ok: false, erreur: "❌ Précise la distance de la passe (ex: 5m)" };
+        }
+    }
+    return { ok: true };
+}
+
+// 🎯 PASSE → CIBLE
+function regleCiblePasse(txt){
+    if(/passe/i.test(txt)){
+        if(!/(vers|à|pour|sur)/i.test(txt)){
+            return { ok: false, erreur: "❌ Précise le destinataire de la passe" };
+        }
+    }
+    return { ok: true };
+}
+
+function regleCoherenceAction(txt){
+
+    if(/dribble/i.test(txt) && /passe/i.test(txt)){
+        return {
+            ok: false,
+            erreur: "❌ Impossible de dribbler et faire une passe en même temps"
+        };
+    }
+
+    return { ok: true };
+}
+
+        
+// 🦶 PIED + ZONE OBLIGATOIRES
+function reglePiedComplet(txt){
+
+    if(/(conduit|contrôle|controle|tacle|passe|tir|frappe|dribble)/i.test(txt)){
+
+        const pied = /(pied droit|pied gauche)/i.test(txt);
+        const zone = /(intérieur du pied|extérieur du pied|pointe|semelle|talon)/i.test(txt);
+
+        if(!pied && !zone){
+            return { ok: false, erreur: "❌ Précise le pied ET la zone (intérieur, extérieur...)" };
+        }
+
+        if(!pied){
+            return { ok: false, erreur: "❌ Précise le pied utilisé (droit ou gauche)" };
+        }
+
+        if(!zone){
+            return { ok: false, erreur: "❌ Précise la zone du pied (intérieur, extérieur...)" };
+        }
+    }
+
+    return { ok: true };
+}
+
+// ⚡ VMAX NON PRÉCISÉ = LENT
+function regleVitesseMax(txt){
+    if(/(course|court|accélère|acceleration|sprint)/i.test(txt)){
+        if(!/vmax/i.test(txt)){
+            return {
+                ok: true,
+                effet: "vitesse_lente",
+                message: "🐢 Vitesse non maximale → déplacement lent"
+            };
+        }
+    }
+    return { ok: true };
+}
+
+// ⚽ DISTANCE BALLON
+function regleControleBallon(txt){
+
+    const match = txt.match(/(\d+)\s?cm/i);
+
+    if(match){
+        const distance = parseInt(match[1]);
+
+        if(distance <= 50 && /vmax/i.test(txt)){
+            return { ok: false, erreur: "❌ Ballon trop proche (<50cm) → impossible vmax" };
+        }
+
+        if(distance < 100 && /vmax/i.test(txt)){
+            return { ok: false, erreur: "❌ Il faut au moins 1m pour atteindre la vmax" };
+        }
+    }
+
+    return { ok: true };
+}
+
+// ===============================
+// 📦 TABLE DES RÈGLES
+// ===============================
+const GAMEPLAY_RULES = [
+    regleMainPrecisee,
+    regleTacleType,
+    regleTacleCirculaire,
+    regleCoherenceAction,
+    regleContactDistance,
+    regleVitesse,
+    regleDistancePasse,
+    regleCiblePasse,
+    reglePiedComplet,
+    regleVitesseMax,
+    regleControleBallon
+];
+
+// ===============================
+// ⚙️ VALIDATION
+// ===============================
+function validerGameplay(actionText){
+
+    let effets = [];
+
+    for(const rule of GAMEPLAY_RULES){
+
+        const res = rule(actionText);
+
+        if(!res.ok){
+            return res;
+        }
+
+        if(res.effet){
+            effets.push(res);
+        }
+    }
+
+    return { ok: true, effets };
+}
+
+
+
 /* ===============================
 PLACEMENT AUTOMATIQUE JOUEURS
 =================================*/
@@ -1722,6 +1917,36 @@ for(const seq of sequences){
     continue;
 }
 
+// =========================
+// 🧠 VALIDATION GAMEPLAY
+// =========================
+const validationGameplay = validerGameplay(action);
+
+if(!validationGameplay.ok){
+    await envoyerErreurActionContinue(
+        ovl,
+        chat,
+        match,
+        joueurObj,
+        validationGameplay.erreur
+    );
+    continue;
+}
+
+// 🔥 APPLICATION DES EFFETS
+if(validationGameplay.effets){
+    for(const eff of validationGameplay.effets){
+
+        if(eff.message){
+            await ovl.sendMessage(chat, { text: eff.message });
+        }
+
+        if(eff.effet === "vitesse_lente"){
+            joueurObj.vitesseActuelle = "lente";
+        }
+    }
+}
+    
     // =========================
     // 🔐 VALIDATION ACTION
     // =========================
