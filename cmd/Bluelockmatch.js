@@ -2016,15 +2016,32 @@ if(duel){
     const resultat = resoudreDuel(duel);
 
     if(!resultat.ok){
-        await envoyerErreurActionContinue(
-            ovl,
-            chat,
-            match,
-            joueurObj,
-            resultat.erreur
-        );
-        continue; 
-    }
+   if(!resultat.ok){
+
+    const intercepteur = getIntercepteur(match, joueurObj.equipe);
+    const toursRestants = getToursRestants(match, joueurObj.equipe);
+
+    await ovl.sendMessage(chat, {
+        text: `⚽❌ Action invalide:
+⚽❌ *ERREUR* : 
+🎙️ ${resultat.erreur}
+
+\`Verdict\`: Ballon perdu, intercepté par ${intercepteur.nom}🛡️. 
+Tours restants: ${toursRestants}
+
+➡️ Le jeu continue...
+
+╰───────────────────     
+                       🔷BLUELOCK⚽🥅`
+    });
+
+    // 🔁 CHANGEMENT POSSESSION
+    match.possession = match.possession === match.team1Nom 
+        ? match.team2Nom 
+        : match.team1Nom;
+
+    continue;
+}     
 
 }else{
     await annoncerPasDeDuel(ovl, chat, joueurObj);
