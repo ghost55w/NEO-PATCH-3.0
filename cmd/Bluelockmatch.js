@@ -26,6 +26,17 @@ const POSITION_POSTES = {
     DD: { zoneX: "aile droite", ligne: "defense" }
 };
 
+// =========================
+// 🎯 GET DATA JOUEUR
+// =========================
+function getJoueurData(nom){
+    const clean = nom.trim().toLowerCase().replace(/\s+/g, " ");
+
+    return Object.values(cardsBlueLock).find(j => 
+        j.name.trim().toLowerCase().replace(/\s+/g, " ") === clean
+    );
+}
+
 // ===============================
 // 🧠 GAMEPLAY RULE ENGINE
 // ===============================
@@ -2434,7 +2445,159 @@ function handleActionsSecondaires(match, texte){
 
     return { ok:true };
 }
-        
+
+// =========================
+// 🥅 HANDLE TIR & BUT
+// =========================
+async function handleTirEtBut(ovl, chat, match, joueurObj, action){
+
+    const txt = action.toLowerCase();
+
+    // =========================
+    // 🎯 DETECTION TIR
+    // =========================
+    const isTir = txt.includes("tir") || txt.includes("frappe");
+
+    if(!isTir) return { ok: true };
+
+    // =========================
+    // 📍 ZONE OBLIGATOIRE
+    // =========================
+    const zone = extraireZoneDepart(action);
+
+    if(!zone){
+        return { ok:false, erreur:"❌ Zone obligatoire pour tirer" };
+    }
+
+    // =========================
+    // 📏 DISTANCE + REGLES
+    // =========================
+    let distance = 0;
+
+    if(zone === "A1") distance = 5;
+    else if(zone === "A2") distance = 10;
+    else if(zone === "B1" || zone === "B2") distance = 20;
+
+    // ❌ trop loin sauf weapon
+    const joueurData = getJoueurData(joueurObj.nom);
+
+    if(!joueurData){
+        return { ok:false, erreur:"❌ Data joueur introuvable" };
+    }
+
+    const hasLongShot = joueurData.weapon?.toLowerCase().includes("long");
+
+    if(distance > 10 && !hasLongShot){
+        return { ok:false, erreur:"❌ Tir impossible à cette distance" };
+    }
+
+    // =========================
+    // 🛡️ DEFENSE SUR TRAJECTOIRE
+    // =========================
+    const duel = detecterMatchUp(match, action, joueurObj);
+
+    if(duel && duel.defenseur){
+
+        const defenseTxt = txt;
+
+        const bloque = defenseTxt.includes("contre") 
+                    || defenseTxt.includes("bloque")
+                    || defenseTxt.includes("intercepte");
+
+        if(bloque){
+            return { ok:false, erreur:"❌ Tir contré par la défense !" };
+        }
+    }
+
+    // =========================
+    // 📊 STATS
+    // =========================
+    const sho = parseInt(joueurData.sho || joueurData.tir || 50, 10);
+    const gardien = parseInt(match.gardien || 80, 10);
+
+    const ecart = sho - gardien;
+
+    let probaGoal = 0;
+
+    if (distance <= 5) {
+        if (ecart > 10) probaGoal = 1.0;
+        else if (ecart > 0) probaGoal = 0.85;
+        else if (ecart === 0) probaGoal = 0.5;
+        else probaGoal = 0;
+    } else if (distance <= 10) {
+        if (ecart > 10) probaGoal = 0.9;
+        else if (ecart > 0) probaGoal = 0.65;
+        else if (ecart === 0) probaGoal = 0.3;
+        else if (ecart >= -5) probaGoal = 0.2;
+        else probaGoal = 0;
+    } else {
+        // long shot
+        if (ecart > 10) probaGoal = 0.6;
+        else if (ecart > 0) probaGoal = 0.4;
+        else if (ecart === 0) probaGoal = 0.2;
+        else probaGoal = 0.05;
+    }
+
+    const tirAleatoire = Math.random();
+    const resultat = tirAleatoire <= probaGoal ? "but" : "raté";
+
+    // =========================
+    // 🎯 ZONE DE TIR
+    // =========================
+    const zoneTirMatch = txt.match(/lucarne droite|lucarne gauche|lucarne milieu|centre|ras du sol droite|ras du sol gauche|ras du sol milieu/i);
+    const zoneTir = zoneTirMatch ? zoneTirMatch[0] : "centre";
+
+    const commentaires = {
+        "lucarne droite": ["🔥 LUCARNE DROITE ! IMPRENABLE !"],
+        "lucarne gauche": ["🔥 LUCARNE GAUCHE ! MAGNIFIQUE !"],
+        "lucarne milieu": ["🚀 SOUS LA BARRE !"],
+        "centre": ["💥 PLEIN AXE !"],
+        "ras du sol droite": ["⚡ RAS DU SOL DROITE !"],
+        "ras du sol gauche": ["⚡ RAS DU SOL GAUCHE !"],
+        "ras du sol milieu": ["⚡ RAS DU SOL PLEIN CENTRE !"]
+    };
+
+    const commentaire = commentaires[zoneTir]?.[Math.floor(Math.random() * commentaires[zoneTir].length)] || "💥 TIR !";
+
+    // =========================
+    // 🥅 RESULTAT
+    // =========================
+    if(resultat === "but"){
+
+        const videoGoal = [
+            "https://files.catbox.moe/chcn2d.mp4",
+            "https://files.catbox.moe/t04dmz.mp4",
+            "https://files.catbox.moe/8t1eya.mp4"
+        ][Math.floor(Math.random() * 3)];
+
+        await ovl.sendMessage(chat, {
+            video: { url: videoGoal },
+            caption: `🥅✅ GOOOOOAL !!!\n🔥 ${joueurObj.nom}\n${commentaire}`,
+            gifPlayback: true
+        });
+
+        // 🎉 CELEBRATION JOUEUR
+        if(joueurData.goal){
+            await ovl.sendMessage(chat, {
+                video: { url: joueurData.goal },
+                gifPlayback: true
+            });
+        }
+
+        return { ok:true, but:true };
+    }
+
+    // ❌ RATÉ
+    await ovl.sendMessage(chat, {
+        video: { url: "https://files.catbox.moe/88lylr.mp4" },
+        caption: `🥅❌ TIR RATÉ !!!\n${joueurObj.nom}`,
+        gifPlayback: true
+    });
+
+    return { ok:true, but:false };
+}
+
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
