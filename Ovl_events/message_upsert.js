@@ -174,6 +174,48 @@ const clean = texte
       mention_JID
     };
 
+    if(rawText.startsWith("+test")){
+
+    const match = matchsActifs.get(ms_org);
+
+    if(!match){
+        await ovl.sendMessage(ms_org, { text: "❌ Aucun match actif" });
+        return;
+    }
+
+    // ❌ ANNULATION DU MATCH NORMAL
+    if(match.timerStart){
+        clearTimeout(match.timerStart);
+    }
+
+    // ===============================
+    // 🧪 CRÉATION MATCH TEST
+    // ===============================
+    match.mode = "test";
+    match.testType = "all";
+
+    match.etat = "test";
+
+    // 🧠 Fake terrain
+    match.possession = match.team1Nom;
+    match.joueurTour = match.id1;
+
+    await ovl.sendMessage(ms_org, {
+        text: `🧪 MODE TEST ACTIVÉ
+
+🎮 Match simulé lancé !
+
+Commandes:
++testpasses⚽
++testtir⚽
++testduel⚽
++testdeplacements⚽
+
+Envoie ton pavé pour tester 🔥`
+    });
+
+    return;
+    }
 // ================================
 // 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
 // ================================
