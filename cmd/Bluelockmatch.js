@@ -2296,8 +2296,8 @@ if(matchResult.fin){
         }
 
 return true;
-}
-    
+} 
+  }    
 // =========================
 // 🔁 ACTIONS SECONDAIRES
 // =========================
