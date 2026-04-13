@@ -280,7 +280,7 @@ ACTIONS DEFENSIVES
 =================================*/
 const ACTIONS_DEF = [
     "bloque", "bloquer", "bloqué", "blocage",
-    "tacle", "tacler", "taclé", "tacle debout", "tacle glissé" 
+    "tacle", "tacler", "taclé", "tacle debout", "tacle glissé", 
     "intercepte", "intercepter", "interception",
     "coupe", "couper",
     "barre la route", "barrer la route",
