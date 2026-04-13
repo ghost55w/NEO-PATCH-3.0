@@ -1817,11 +1817,26 @@ Le match commence dans *1 minute* 🥅⚽...`;
             caption: readyText
         });
 
-        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
-    }
-}
+        
+// ⏳ TIMER AVANT LANCEMENT MATCH (1 MINUTE)
+match.timerMatch = setTimeout(async () => {
 
+    const currentMatch = matchsActifs.get(chat);
 
+    // ❌ sécurité : match supprimé
+    if (!currentMatch) return;
+
+    // ❌ mode test → bloque le lancement
+    if (currentMatch.mode === "test") return;
+
+    // ❌ déjà lancé
+    if (currentMatch.kickoffStarted) return;
+
+    // ✅ lancement normal
+    await lancerMatch(chat, ovl);
+
+}, 60 * 1000);
+        
 /* ===============================
 LANCEMENT MATCH
 =================================*/
