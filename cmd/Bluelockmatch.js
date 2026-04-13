@@ -2000,11 +2000,11 @@ console.log(`📍 ${joueurObj.nom} → ${joueurObj.zoneX} / ${joueurObj.zoneY}`)
 
 await ovl.sendMessage(chat, {  
     text: `⚽✅ Action validée:
-${action}
+${seq}
 
 ╰───────────────────     
                        🔷BLUELOCK⚽🥅`
-});    
+});
     
 // =========================
 // 🔁 ACTIONS SECONDAIRES
