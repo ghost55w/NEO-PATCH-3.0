@@ -2042,7 +2042,41 @@ ${seq}
 ╰───────────────────     
                        🔷BLUELOCK⚽🥅`
 });
-}   
+// =========================
+// 🥅 GESTION TIR
+// =========================
+const tirResult = await handleTirEtBut(match, joueurObj, seq);
+
+// ⚽ SI BUT
+if(tirResult?.but){
+
+    const matchResult = handleMatchEnd(match, {
+        but:true,
+        equipe: tirResult.equipe,
+        buteur: tirResult.buteur
+    });
+
+    if(matchResult.message){
+        await ovl.sendMessage(chat, { text: matchResult.message });
+    }
+
+    if(matchResult.fin){
+        return true;
+    }
+}
+    // 📊 CHECK FIN MATCH (même sans but)
+const matchResult = handleMatchEnd(match);
+
+if(matchResult.message){
+    await ovl.sendMessage(chat, { text: matchResult.message });
+}
+
+if(matchResult.fin){
+    return true;
+        }
+
+return true;
+}
     
 // =========================
 // 🔁 ACTIONS SECONDAIRES
