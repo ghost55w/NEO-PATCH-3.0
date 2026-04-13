@@ -2622,6 +2622,68 @@ if(distance > 20 && tir < 90){
     return { ok:true, but:false };
 }
 
+// =========================
+// 🥅 HANDLE WEAPONS 
+// =========================
+ function handleWeapons(match, sequence, joueur){
+
+    const txt = sequence.toLowerCase();
+    const data = joueur.data;
+
+    if(!data || !data.weapon) return { ok:true };
+
+    const weapon = data.weapon;
+
+    // ===============================
+    // 🎯 DETECTION NOM (SAFE)
+    // ===============================
+    const keywords = weapon.keywords || [];
+
+    const found = keywords.some(k => txt.includes(k.toLowerCase()));
+
+    if(!found) return { ok:true };
+
+    // ===============================
+    // 📏 CONDITIONS
+    // ===============================
+    const distance = extraireDistance(txt) || 0;
+
+    if(weapon.conditions?.minDistance && distance < weapon.conditions.minDistance){
+        return {
+            ok:false,
+            erreur:`❌ Distance insuffisante pour ${weapon.name}`
+        };
+    }
+
+    if(weapon.conditions?.maxDistance && distance > weapon.conditions.maxDistance){
+        return {
+            ok:false,
+            erreur:`❌ Distance trop grande pour ${weapon.name}`
+        };
+    }
+
+    if(weapon.conditions?.typeAction === "tir" && !txt.includes("tir")){
+        return {
+            ok:false,
+            erreur:`❌ ${weapon.name} s'utilise uniquement pour un tir`
+        };
+    }
+
+    if(weapon.conditions?.typeAction === "passe" && !txt.includes("passe")){
+        return {
+            ok:false,
+            erreur:`❌ ${weapon.name} s'utilise uniquement pour une passe`
+        };
+    }
+
+    // ===============================
+    // ✅ ACTIVATION
+    // ===============================
+    joueur.weaponActive = weapon.name;
+    joueur.weaponBoost = true; // 💥 important pour après
+
+    return { ok:true };
+}           
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
