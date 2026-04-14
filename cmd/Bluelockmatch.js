@@ -2070,6 +2070,9 @@ if (!move.ok) {
     continue;
 }
 
+// ✅ MAJ POSITIONS + VIS-A-VIS
+updateGlobalPositions(match, joueurObj);
+assignerVisAVis(match);
 // =========================
 // ⚔️ DETECTION DUEL
 // =========================
