@@ -2195,27 +2195,24 @@ if(!sec.ok){
         text:
 `⚽ NEXT ! @${displayNext}
 
-🎯 4 actions pour marquer`,
+🎯 4 tours pour marquer`,
         mentions: [nextJoueur]
     });
 
     // =========================
-    // ⏱️ TIMER
-    // =========================
-    if (match.timerPave) clearTimeout(match.timerPave);
+// ⏱️ TIMER
+// =========================
+if (match.timerPave) clearTimeout(match.timerPave);
 
-    match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${displayNext} temps écoulé ❌`,
-            mentions: [nextJoueur]
-        });
-    }, 6 * 60 * 1000);
+match.timerPave = setTimeout(async () => {
+    await ovl.sendMessage(chat, {
+        text: `⏰ @${displayNext} temps écoulé ❌`,
+        mentions: [nextJoueur]
+    });
+}, 6 * 60 * 1000);
 
-    return true;
-}
 return true;
-} // 🔥 ferme handlePaveGame 
-    
+}
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
 // ===============================
