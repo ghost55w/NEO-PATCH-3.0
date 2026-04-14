@@ -2775,6 +2775,131 @@ if(distance > 20 && tir < 90){
     return { ok:true };
 }           
 
+// ===============================
+    // 🤖 MODE DEV / MODE TEST ♻️ 
+    // ===============================
+async function handleTestMode(ovl, chat, match) {
+
+    const text = match.testBuffer;
+    if (!text) return;
+
+    const action = extraireAction(text);
+
+    if (!action) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Aucune action détectée"
+        });
+        return;
+    }
+
+    const sequences = separerSequences(action);
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    let resume = "🧪 RÉSULTAT TEST\n\n";
+
+    for (const seq of sequences) {
+
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+
+        const joueur = allJoueurs.find(j =>
+            j.nom.toLowerCase() === nom?.toLowerCase()
+        );
+
+        if (!joueur) {
+            resume += `❌ Joueur introuvable\n\n`;
+            continue;
+        }
+
+        if (!joueur.data) {
+            joueur.data = getJoueurData(joueur.nom);
+        }
+
+        resume += `👤 ${joueur.nom}\n`;
+
+        // =====================
+        // ⚔️ WEAPON
+        // =====================
+        const weapon = handleWeapons(match, seq, joueur);
+        if (!weapon.ok) {
+            resume += `❌ ${weapon.erreur}\n\n`;
+            continue;
+        }
+
+        // =====================
+        // 🚶 DEPLACEMENT
+        // =====================
+        const move = await handleDeplacements(match, seq, joueur);
+        if (!move.ok) {
+            resume += `❌ ${move.erreur}\n\n`;
+            continue;
+        }
+
+        // =====================
+        // ⚔️ DUEL
+        // =====================
+        const duel = detecterMatchUp(match, seq, joueur);
+
+        if (duel) {
+
+            const res = resoudreDuel(duel);
+
+            if (!res.ok) {
+                resume += `❌ Duel perdu: ${res.erreur}\n`;
+                resume += `🛡️ ${joueur.visavis?.nom} récupère\n\n`;
+                continue;
+            } else {
+                resume += `⚔️ Duel gagné\n`;
+            }
+        }
+
+        // =====================
+        // 🎯 PASSE
+        // =====================
+        if (seq.toLowerCase().includes("passe")) {
+
+            const pass = await handlePasses(match, seq, joueur);
+
+            if (!pass.ok) {
+                if (pass.interception) {
+                    resume += `🛑 Interception !\n\n`;
+                } else {
+                    resume += `❌ ${pass.erreur}\n\n`;
+                }
+                continue;
+            }
+
+            resume += `✅ Passe réussie (${pass.precision}%)\n`;
+        }
+
+        // =====================
+        // 🥅 TIR
+        // =====================
+        if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) {
+
+            const tir = await handleTirEtBut(ovl, chat, match, joueur, seq);
+
+            if (tir?.but) {
+                resume += `🥅 BUT !!!\n\n`;
+            } else {
+                resume += `❌ Tir raté\n\n`;
+            }
+
+            continue;
+        }
+
+        resume += `✅ Action réussie\n\n`;
+    }
+
+    await ovl.sendMessage(chat, {
+        text: resume
+    });
+}
+    
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
