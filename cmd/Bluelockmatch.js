@@ -1789,7 +1789,6 @@ Tape +next pour analyser`
                 text: `✅ Formation confirmée pour *${match.team2Nom}* !`
             });
         }
-    }
 }
 
 
