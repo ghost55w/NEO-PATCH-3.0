@@ -2075,8 +2075,6 @@ if (match.phaseDuel) {
 // 🔴 DEFENSE
 else {
 
-    const sender = normalizeJid(getSenderJid(ms));
-
     // ❌ mauvais joueur
     if (sender !== normalizeJid(match.waitingDefenseFrom)) {
         await ovl.sendMessage(chat, {
