@@ -1014,16 +1014,10 @@ await ovl.sendMessage(chat, {
         mentions: [nextJoueur]
     });
 
-    // ⏱️ TIMER GLOBAL 6 MIN
-    if (match.timerPave) clearTimeout(match.timerPave);
-
-    match.timerPave = setTimeout(async () => {
-        await ovl.sendMessage(chat, {
-            text: `⏰ @${displayNext} temps écoulé ❌`,
-            mentions: [nextJoueur]
-        });
-    }, 6 * 60 * 1000);
-}
+    // ⏱️ TIMER GLOBAL UNIQUE
+startGlobalTimer(ovl, chat, match);
+} 
+    
 async function envoyerErreurActionContinue(ovl, chat, match, joueurObj, erreurInput){
 
     const err = formatErreurGlobal(erreurInput, joueurObj, match);
@@ -1054,7 +1048,7 @@ ${err.texte}
     });
 
     // ⏱️ TIMER + ALERTE 1 MIN
-    lancerTimerAvecAlerte(match, ovl, chat, nextJoueur);
+    startGlobalTimer(ovl, chat, match);
 }
                              
 /* ===============================
