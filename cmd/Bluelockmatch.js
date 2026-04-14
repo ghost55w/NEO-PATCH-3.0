@@ -1647,12 +1647,12 @@ async function messageMatch(ms, ovl) {
     // ===============================
     // 🧪 ACTIVER MODE TEST
     // ===============================
-    if (safeText.toLowerCase() === "+test⚽") {
+ if (safeText.toLowerCase() === "+test⚽") {
 
-    // ❌ bloqué seulement si match déjà lancé
-    if (match.etat === "en_cours") {
+    // ❌ uniquement autorisé JUSTE après kickoff
+    if (!(match.etat === "en_cours" && match.phase === "kickoff")) {
         await ovl.sendMessage(chat, {
-            text: "❌ Impossible d’activer le mode test pendant le match."
+            text: "❌ Le mode test doit être activé juste après le coup d’envoi."
         });
         return;
     }
@@ -1660,11 +1660,9 @@ async function messageMatch(ms, ovl) {
     match.mode = "test";
     match.testBuffer = null;
 
-    // ⛔ stop timer lancement
-    if (match.timerMatch) {
-        clearTimeout(match.timerMatch);
-        match.timerMatch = null;
-    }
+    // ⛔ stop timers
+    if (match.timerKickoff) clearTimeout(match.timerKickoff);
+    if (match.timerPave) clearTimeout(match.timerPave);
 
     await ovl.sendMessage(chat, {
         text: `🧪 MODE TEST ACTIVÉ
@@ -1924,6 +1922,8 @@ async function handlePaveGame(ms, ovl) {
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match) return false;
+    
+    if (match.mode === "test") return false;
 
     if (match.etat !== "en_cours") return false;
 
