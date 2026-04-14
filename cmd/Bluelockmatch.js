@@ -1933,23 +1933,31 @@ LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 =================================*/
 async function handlePaveGame(ms, ovl) {
 
-    if (!ms.message) return false;
-
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
-    if (match.etat !== "en_cours") return false;
-
+    // ===============================
+    // 📩 EXTRACTION TEXTE
+    // ===============================
     const rawText =
-        ms.message.conversation ||
-        ms.message.extendedTextMessage?.text ||
-        ms.message.imageMessage?.caption ||
+        ms.message?.conversation ||
+        ms.message?.extendedTextMessage?.text ||
+        ms.message?.imageMessage?.caption ||
         "";
 
-    const text = rawText.trim();
-    if (!text) return false;
+    if (!rawText) return false;
 
+    const text = rawText
+        .replace(/\u200B/g, "")
+        .replace(/\u200E/g, "")
+        .replace(/\u200F/g, "")
+        .replace(/\r/g, "")
+        .trim();
+
+    // ===============================
+    // ✅ FILTRE PAVÉ (TON FORMAT)
+    // ===============================
     const isBlueLockPave =
         text.includes("💬:") &&
         text.includes("⚽:") &&
@@ -1958,37 +1966,45 @@ async function handlePaveGame(ms, ovl) {
 
     if (!isBlueLockPave) return false;
 
-    // =========================
-    // 🔐 TOUR JOUEUR
-    // =========================
     const sender = normalizeJid(getSenderJid(ms));
-    const tour = normalizeJid(match.joueurTour);
 
-    // ⚠️ autorise défense même si pas son tour
-    if (!match.pendingAttack && sender !== tour) {
+    // ===============================
+    // 🔁 CONTRE EN COURS (PRIORITÉ MAX)
+    // ===============================
+    if (match.phaseDuel) {
+
+        const resultat = await resoudreActionComplete(
+            match,
+            text,                      
+            match.phaseDuel.defense    
+        );
+
         await ovl.sendMessage(chat, {
-            text: "❌ Ce n’est pas ton tour de jouer !"
+            text: resultat.message
         });
+
+        // fin duel si pas de nouveau contre
+        if (resultat.type !== "contre") {
+            match.phaseDuel = null;
+        }
+
+        startGlobalTimer(ovl, chat, match);
         return true;
     }
 
-    // =========================
-    // 💬 DIALOGUE
-    // =========================
-    const dialogue = text.split("💬:")[1]?.split("▔")[0]?.trim();
-
-    if (dialogue) {
-        await ovl.sendMessage(chat, {
-            text: `💬 ${dialogue}`
-        });
-    }
-
-    // =========================
+    // ===============================
     // 🎯 SYSTEME ATTAQUE / DEFENSE
-    // =========================
+    // ===============================
 
     // 🟢 ATTAQUE
     if (!match.pendingAttack) {
+
+        if (sender !== normalizeJid(match.joueurTour)) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Ce n’est pas ton tour !"
+            });
+            return true;
+        }
 
         match.pendingAttack = text;
 
@@ -2021,8 +2037,6 @@ async function handlePaveGame(ms, ovl) {
     // 🔴 DEFENSE
     else {
 
-        const sender = normalizeJid(getSenderJid(ms));
-
         if (sender !== normalizeJid(match.waitingDefenseFrom)) {
             await ovl.sendMessage(chat, {
                 text: "❌ Ce n’est pas à toi de défendre !"
@@ -2034,11 +2048,9 @@ async function handlePaveGame(ms, ovl) {
         const defense = text;
 
         // =========================
-        // ⚔️ ANALYSE COMPLETE
+        // ⚔️ RESOLUTION PRINCIPALE
         // =========================
-        const resultat = await resoudreMatchComplet(
-            ovl,
-            chat,
+        const resultat = await resoudreActionComplete(
             match,
             attaque,
             defense
@@ -2049,14 +2061,25 @@ async function handlePaveGame(ms, ovl) {
         });
 
         // =========================
-        // 🔄 RESET TOUR
+        // ⚠️ CONTRE POSSIBLE
+        // =========================
+        if (resultat.type === "contre") {
+
+            match.phaseDuel = {
+                attaque,
+                defense
+            };
+
+            startGlobalTimer(ovl, chat, match);
+            return true;
+        }
+
+        // =========================
+        // 🔁 RESET NORMAL
         // =========================
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
 
-        // =========================
-        // 🔁 SWITCH JOUEUR
-        // =========================
         const next =
             match.joueurTour === match.id1
                 ? match.id2
@@ -2080,6 +2103,7 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 }
+
 
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
@@ -3016,6 +3040,181 @@ function startGlobalTimer(ovl, chat, match) {
     }, 60 * 1000);
 }
 
+
+        // =========================
+        // GESTION GLOBAL DES DUELS 
+        // =========================
+async function resoudreActionComplete(match, attaqueTxt, defenseTxt) {
+
+    const attaque = attaqueTxt.toLowerCase();
+    const defense = defenseTxt?.toLowerCase() || "";
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    // =========================
+    // 🎯 EXTRACTION ACTIONS
+    // =========================
+    const actions = [];
+
+    if (attaque.includes("contrôle")) actions.push("controle");
+    if (attaque.includes("dribble")) actions.push("dribble");
+    if (attaque.includes("passe")) actions.push("passe");
+    if (attaque.includes("tir") || attaque.includes("frappe")) actions.push("tir");
+
+    if (actions.length === 0) {
+        return { message: "❌ Aucune action détectée" };
+    }
+
+    // =========================
+    // 👤 JOUEURS
+    // =========================
+    const attNom = attaque.match(/\)\s*([^\s]+)/)?.[1];
+    const defNom = defense.match(/\)\s*([^\s]+)/)?.[1];
+
+    const attaquant = allJoueurs.find(j => j.nom.toLowerCase() === attNom?.toLowerCase());
+    const defenseur = allJoueurs.find(j => j.nom.toLowerCase() === defNom?.toLowerCase());
+
+    const ovrAtt = attaquant?.data?.ovr || 50;
+    const ovrDef = defenseur?.data?.ovr || 50;
+
+    // =========================
+    // ❌ PAS DE DEFENSE
+    // =========================
+    if (!defense) {
+        return {
+            message:
+`⚔️ ${attaquant.nom}
+
+🔥 Aucune défense
+
+➡️ ${actions.join(" → ")}
+
+✅ Action complète réussie`
+        };
+    }
+
+    // =========================
+    // ❌ DIVINATION
+    // =========================
+    if (defense.includes("avant")) {
+        return {
+            message:
+`❌ Défense impossible
+
+🔥 Anticipation interdite
+
+➡️ ${actions.join(" → ")}`
+        };
+    }
+
+    // =========================
+    // 🎯 CIBLE DEFENSE
+    // =========================
+    let cible = actions[actions.length - 1];
+
+    if (defense.includes("contrôle")) cible = "controle";
+    if (defense.includes("dribble")) cible = "dribble";
+    if (defense.includes("passe")) cible = "passe";
+    if (defense.includes("tir")) cible = "tir";
+
+    const indexCible = actions.indexOf(cible);
+
+    // =========================
+    // ⏱️ TIMING
+    // =========================
+    let timing = "apres";
+
+    if (defense.includes("au moment") || defense.includes("pendant")) {
+        timing = "pendant";
+    }
+
+    // =========================
+    // ⚔️ CAS DUEL
+    // =========================
+    if (timing === "pendant" && ovrDef > ovrAtt) {
+
+        return {
+            type: "duel",
+            message:
+`⚔️ ${attaquant.nom} 🆚 ${defenseur.nom}
+
+⚡ Duel sur ${cible}
+
+🧠 VERDICT:
+${resoudreDuel({ attaquant, defenseur, action: cible }).ok
+    ? "🛡️ Défenseur gagne"
+    : "🔥 Attaquant gagne"}`
+        };
+    }
+
+    // =========================
+    // ❌ TIMING RATÉ
+    // =========================
+    if (indexCible < actions.length - 1) {
+
+        return {
+            type: "full_success",
+            message:
+`❌ Défense trop tard
+
+🔥 ${attaquant.nom} enchaîne librement
+
+➡️ ${actions.join(" → ")}`
+        };
+    }
+
+    // =========================
+    // ⚠️ CONTRE POSSIBLE
+    // =========================
+    if (defense.includes("tacle") || defense.includes("bloc")) {
+
+        // ❌ si tir déjà parti
+        if (actions.includes("tir")) {
+
+            return {
+                message:
+`❌ Action irréversible
+
+🥅 Tir déjà effectué
+
+➡️ Impossible de réagir`
+            };
+        }
+
+        // ✅ contre possible
+        match.phaseDuel = {
+            attaquant,
+            defenseur,
+            actionCourante: cible
+        };
+
+        return {
+            type: "contre",
+            message:
+`⚠️ CONTRE POSSIBLE !
+
+🎯 ${attaquant.nom} peut réagir
+
+➡️ Envoie un nouveau pavé`
+        };
+    }
+
+    // =========================
+    // 🔁 DEFAULT
+    // =========================
+    return {
+        message:
+`⚔️ ${attaquant.nom} 🆚 ${defenseur.nom}
+
+➡️ ${actions.join(" → ")}
+
+✅ Action réussie`
+    };
+}
+           
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
