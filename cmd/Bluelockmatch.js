@@ -1857,39 +1857,61 @@ Le match commence dans *1 minute* 🥅⚽...`;
 LANCEMENT MATCH
 =================================*/
 async function lancerMatch(chat, ovl) {
+
     const match = matchsActifs.get(chat);
     if (!match) return;
-    // 🧪 BLOQUE SI MODE TEST
-    if (match.mode === "test") return;
+
+    // =========================
+    // 🧪 MODE TEST → BLOQUE MATCH
+    // =========================
+    if (match.isTestMode) {
+        console.log("⛔ Match bloqué (mode test actif)");
+        return;
+    }
+
+    // ❌ déjà lancé
     if (match.kickoffStarted) return;
 
     match.kickoffStarted = true;
 
+    // 🎲 tirage équipe qui commence
     const isTeam1 = Math.random() < 0.5;
 
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
     match.phase = "kickoff";
-    // PLACEMENT AUTOMATIQUE
-
-const equipeAttack = match.possession === match.team1Nom ? match.lineup1 : match.lineup2;
-const equipeDefense = match.possession === match.team1Nom ? match.lineup2 : match.lineup1;
-
-
-
-  
     match.etat = "en_cours";
 
+    // 👤 joueur qui commence
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
+
+    // 🔥 INIT SYSTEME GLOBAL
     match.turnType = "attaque";
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+    match.phaseDuel = null;
 
-startGlobalTimer(ovl, chat, match);
+    // 🧹 CLEAN TIMERS (sécurité)
+    if (match.timerGlobal) {
+        clearTimeout(match.timerGlobal);
+        match.timerGlobal = null;
+    }
 
+    if (match.timerWarning) {
+        clearTimeout(match.timerWarning);
+        match.timerWarning = null;
+    }
+
+    if (match.kickoffTimer) {
+        clearTimeout(match.kickoffTimer);
+        match.kickoffTimer = null;
+    }
+
+    match.waitingKickoff = false;
+
+    // =========================
+    // 🎯 AFFICHAGE KICKOFF
+    // =========================
     const jidStart = match.joueurTour;
-    const mentionJid = jidStart;
-
-    // ✅ affichage propre (sans @s.whatsapp.net)
     const displayName = jidStart.split("@")[0];
 
     const imagesKickOff = [
@@ -1898,35 +1920,51 @@ startGlobalTimer(ovl, chat, match);
     ];
 
     await ovl.sendMessage(chat, {
-    image: { url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)] },
-    caption:
-`🎙️⚽: KICK OFF 🥅‼️ @${displayName} Débute avec la possession!⚽ 
+        image: {
+            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
+        },
+        caption:
+`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ╰─────────────────▱▱▱
-
-                      🔷BLUELOCK⚽🥅`,
-    mentions: [mentionJid]
-});
-
-    // ⏱️ timer 1er joueur
-    match.timerKickoff = setTimeout(async () => {
-
-    const joueur = match.joueurTour?.split("@")[0];
-
-    await ovl.sendMessage(chat, {
-        text:
-`⚽❌ *ERREUR* :
-🎙️ @${joueur} n’a pas effectué le coup d’envoi à temps.
-
-╰─────────────────▱▱▱
-
-                      🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
+🔷BLUELOCK⚽🥅`,
+        mentions: [jidStart]
     });
 
-}, 6 * 60 * 1000);
+    // =========================
+    // 📍 INITIALISATION POSITIONS
+    // =========================
+    const equipeAttack =
+        match.possession === match.team1Nom
+            ? match.lineup1
+            : match.lineup2;
 
-} 
+    const equipeDefense =
+        match.possession === match.team1Nom
+            ? match.lineup2
+            : match.lineup1;
+
+    equipeAttack.forEach(j => {
+        j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+    });
+
+    equipeDefense.forEach(j => {
+        j.zoneY = getZoneYParLigne(j.ligne, "defense");
+    });
+
+    match.positions = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    // 🔗 vis-à-vis
+    assignerVisAVis(match);
+
+    // =========================
+    // ⏱️ TIMER GLOBAL
+    // =========================
+    startGlobalTimer(ovl, chat, match);
+}
     
 /* ===============================
 LECTURE DES PAVÉS - TOUR DE CONTRÔLE
