@@ -3196,9 +3196,12 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 // ===============================
 // ⏱️ TIMER GLOBAL UNIQUE (FIX CIBLE)
 // ===============================
+// ===============================
+// ⏱️ TIMER GLOBAL UNIQUE (FINAL)
+// ===============================
 function startGlobalTimer(ovl, chat, match) {
 
-    // 🔥 stop anciens timers
+    // 🔥 clear anciens timers
     if (match.timerGlobal) {
         clearTimeout(match.timerGlobal);
         match.timerGlobal = null;
@@ -3209,26 +3212,39 @@ function startGlobalTimer(ovl, chat, match) {
         match.timerWarning = null;
     }
 
+    // 🔒 sécurité
     if (!match.joueurTour) return;
 
-    // ✅ 🔒 ON LOCK LE JOUEUR ICI
+    // 🎯 on lock le joueur cible
     const joueurCible = match.joueurTour;
-    const display = joueurCible.split("@")[0];
+    const joueur = joueurCible.split("@")[0];
 
     // =========================
     // ⚠️ WARNING (1 MIN RESTANTE)
     // =========================
     match.timerWarning = setTimeout(async () => {
 
+        // ❌ si le tour a changé → ignore
+        if (match.joueurTour !== joueurCible) return;
+
         await ovl.sendMessage(chat, {
-            text: `⚠️ @${display} il ne reste que 1 minute !`,
+            text:
+`🎙️⚽: PRESSION MAX ⚠️
+
+@${joueur} il ne reste que 1 minute !
+
+🔥 Fais vite !
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
             mentions: [joueurCible]
         });
 
-    }, 5 * 60 * 1000);
+    }, 5 * 60 * 1000); // 5 min
 
     // =========================
-    // ⏱️ FIN TIMER
+    // ⏱️ FIN TIMER (6 MIN)
     // =========================
     match.timerGlobal = setTimeout(async () => {
 
@@ -3238,23 +3254,49 @@ function startGlobalTimer(ovl, chat, match) {
             match.timerWarning = null;
         }
 
-        // ❌ si le joueur a changé → on ignore
+        // ❌ si le joueur a changé → ignore
         if (match.joueurTour !== joueurCible) return;
 
         // =========================
-        // 🟢 ATTAQUE
+        // 🟢 TOUR ATTAQUE
         // =========================
         if (match.turnType === "attaque") {
 
-            await ovl.sendMessage(chat, {
-                text:
-`⏰ Temps écoulé !
+            // 🎯 CAS KICKOFF
+            if (match.phase === "kickoff") {
 
-❌ @${display} n’a pas joué
-🛡️ Ballon perdu`,
-                mentions: [joueurCible]
-            });
+                await ovl.sendMessage(chat, {
+                    text:
+`🎙️⚽: KICK OFF RATÉ ❌‼️
 
+@${joueur} n’a pas engagé à temps !
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
+                    mentions: [joueurCible]
+                });
+
+                match.phase = "normal";
+            }
+
+            // 🎯 CAS NORMAL
+            else {
+
+                await ovl.sendMessage(chat, {
+                    text:
+`🎙️⚽: ACTION MANQUÉE ❌
+
+@${joueur} tarde à jouer… perte de balle !
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
+                    mentions: [joueurCible]
+                });
+            }
+
+            // 🔁 perte de possession
             match.possession =
                 match.possession === match.team1Nom
                     ? match.team2Nom
@@ -3262,21 +3304,27 @@ function startGlobalTimer(ovl, chat, match) {
         }
 
         // =========================
-        // 🔴 DEFENSE
+        // 🔴 TOUR DEFENSE
         // =========================
         else if (match.turnType === "defense") {
 
             await ovl.sendMessage(chat, {
                 text:
-`⏰ @${display} trop lent !
+`🎙️⚽: DÉFENSE EN RETARD ❌
 
-🔥 L’attaque passe automatiquement`,
+@${joueur} réagit trop tard !
+
+🔥 L’attaque déroule sans opposition !
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
                 mentions: [joueurCible]
             });
         }
 
         // =========================
-        // 🔁 SWITCH
+        // 🔁 SWITCH JOUEUR
         // =========================
         const next =
             match.joueurTour === match.id1
@@ -3289,14 +3337,23 @@ function startGlobalTimer(ovl, chat, match) {
         const displayNext = next.split("@")[0];
 
         await ovl.sendMessage(chat, {
-            text: `⚽ NEXT ! @${displayNext}`,
+            text:
+`🎙️⚽: CHANGEMENT DE POSSESSION ⚡
+
+@${displayNext} prend la possession !
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`,
             mentions: [next]
         });
 
+        // 🔁 relance timer
         startGlobalTimer(ovl, chat, match);
 
     }, 6 * 60 * 1000);
-} 
+}
+
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
