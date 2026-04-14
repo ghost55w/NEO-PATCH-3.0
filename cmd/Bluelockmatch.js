@@ -3002,6 +3002,9 @@ ${verdict}
 // =========================
 async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
+    // 🔗 ASSURE VIS A VIS
+    assignerVisAVis(match);
+
     const attaqueAction = extraireAction(attaqueTxt);
     const defenseAction = extraireAction(defenseTxt);
 
@@ -3028,20 +3031,23 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
         const seq = attaqueSeq[i];
 
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        // 🔥 EXTRACTION NOM SAFE
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
         const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
         attaquant = allJoueurs.find(j =>
             j.nom.toLowerCase() === nom?.toLowerCase()
         );
 
-        if (!attaquant) continue;
+        if (!attaquant) {
+            return { message: "❌ Joueur attaquant introuvable" };
+        }
 
         if (!attaquant.data) {
             attaquant.data = getJoueurData(attaquant.nom);
         }
 
-        defenseur = attaquant.visavis;
+        defenseur = attaquant.visavis || null;
 
         // =========================
         // 🎯 TYPE ACTION
@@ -3049,25 +3055,22 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
         let typeAction = "controle";
 
         if (seq.toLowerCase().includes("dribble")) typeAction = "dribble";
-        if (seq.toLowerCase().includes("passe")) typeAction = "passe";
-        if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
+        else if (seq.toLowerCase().includes("passe")) typeAction = "passe";
+        else if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
 
         actions.push(typeAction);
 
-        // =========================
-        // 🔴 DEFENSE ASSOCIEE
-        // =========================
         const defense = defenseSeq[i] || "";
 
         // =========================
-        // ❌ TIMING IMPOSSIBLE
+        // ❌ TIMING INTERDIT
         // =========================
         if (defense.toLowerCase().includes("avant")) {
             return {
                 message:
 `❌ Mauvais timing
 
-⛔ Action défensive avant l'action réelle (divination interdite)`
+⛔ Action défensive avant l'action réelle`
             };
         }
 
@@ -3083,7 +3086,6 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 match
             });
 
-            // ❌ PERTE
             if (!duel.ok) {
                 return {
                     message:
@@ -3103,20 +3105,15 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 defense.toLowerCase().includes("bloc")
             ) {
 
-                // ❌ si tir déjà parti
                 if (actions.includes("tir")) {
-
                     return {
                         message:
 `❌ Action irréversible
 
-🥅 Tir déjà effectué
-
-➡️ Impossible de réagir`
+🥅 Tir déjà effectué`
                     };
                 }
 
-                // ✅ contre possible
                 match.phaseDuel = {
                     attaquant,
                     defenseur,
@@ -3128,9 +3125,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                     message:
 `⚠️ CONTRE POSSIBLE !
 
-🎯 ${attaquant.nom} peut réagir
-
-➡️ Envoie un nouveau pavé`
+🎯 ${attaquant.nom} peut réagir`
                 };
             }
 
@@ -3143,7 +3138,6 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 const accDef = defenseur.data?.acc || 50;
                 const diff = accDef - accAtt;
 
-                // attaquant avance
                 avancerZone(attaquant, 1);
 
                 if (diff > 0) {
@@ -3154,7 +3148,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                         message:
 `🔥 ${attaquant.nom} passe !
 
-⚡ ${defenseur.nom} revient et bloque la route
+⚡ ${defenseur.nom} revient bloquer
 
 ⚠️ CONTRE POSSIBLE`
                     };
@@ -3174,7 +3168,6 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                     };
                 }
 
-                // éliminé
                 actions.push("defenseur battu");
             }
         }
@@ -3223,9 +3216,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
     };
 }
         
-// ===============================
-// ⏱️ TIMER GLOBAL UNIQUE (FIX CIBLE)
-// ===============================
+
 // ===============================
 // ⏱️ TIMER GLOBAL UNIQUE (FINAL)
 // ===============================
