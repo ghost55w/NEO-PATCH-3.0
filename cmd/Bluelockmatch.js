@@ -2967,77 +2967,6 @@ ${verdict}
 }
 
 
-// ===============================
-// ⏱️ TIMER GLOBAL UNIQUE
-// ===============================
-function startGlobalTimer(ovl, chat, match) {
-
-    if (match.timerGlobal) {
-        clearTimeout(match.timerGlobal);
-    }
-
-    match.timerGlobal = setTimeout(async () => {
-
-        const joueur = match.joueurTour?.split("@")[0];
-
-        // =========================
-        // 🟢 TOUR ATTAQUE
-        // =========================
-        if (match.turnType === "attaque") {
-
-            await ovl.sendMessage(chat, {
-                text:
-`⏰ Temps écoulé !
-
-❌ @${joueur} n’a pas joué
-🛡️ Ballon perdu`
-            });
-
-            match.possession =
-                match.possession === match.team1Nom
-                    ? match.team2Nom
-                    : match.team1Nom;
-        }
-
-        // =========================
-        // 🔴 TOUR DEFENSE
-        // =========================
-        else if (match.turnType === "defense") {
-
-            await ovl.sendMessage(chat, {
-                text:
-`⏰ Défense trop lente !
-
-🔥 L’attaque passe automatiquement`
-            });
-
-            match.pendingAttack = null;
-            match.waitingDefenseFrom = null;
-        }
-
-        // =========================
-        // 🔁 SWITCH
-        // =========================
-        const next =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
-
-        match.joueurTour = next;
-        match.turnType = "attaque";
-
-        const displayNext = next.split("@")[0];
-
-        await ovl.sendMessage(chat, {
-            text: `⚽ NEXT ! @${displayNext}`,
-            mentions: [next]
-        });
-
-        startGlobalTimer(ovl, chat, match);
-
-    }, 60 * 1000);
-}
-
 // =========================
 // ⚔️ RESOLUTION DUEL COMPLET
 // =========================
@@ -3264,7 +3193,110 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
     };
 }
         
+// ===============================
+// ⏱️ TIMER GLOBAL UNIQUE (FIX CIBLE)
+// ===============================
+function startGlobalTimer(ovl, chat, match) {
 
+    // 🔥 stop anciens timers
+    if (match.timerGlobal) {
+        clearTimeout(match.timerGlobal);
+        match.timerGlobal = null;
+    }
+
+    if (match.timerWarning) {
+        clearTimeout(match.timerWarning);
+        match.timerWarning = null;
+    }
+
+    if (!match.joueurTour) return;
+
+    // ✅ 🔒 ON LOCK LE JOUEUR ICI
+    const joueurCible = match.joueurTour;
+    const display = joueurCible.split("@")[0];
+
+    // =========================
+    // ⚠️ WARNING (1 MIN RESTANTE)
+    // =========================
+    match.timerWarning = setTimeout(async () => {
+
+        await ovl.sendMessage(chat, {
+            text: `⚠️ @${display} il ne reste que 1 minute !`,
+            mentions: [joueurCible]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // =========================
+    // ⏱️ FIN TIMER
+    // =========================
+    match.timerGlobal = setTimeout(async () => {
+
+        // 🔥 clear warning
+        if (match.timerWarning) {
+            clearTimeout(match.timerWarning);
+            match.timerWarning = null;
+        }
+
+        // ❌ si le joueur a changé → on ignore
+        if (match.joueurTour !== joueurCible) return;
+
+        // =========================
+        // 🟢 ATTAQUE
+        // =========================
+        if (match.turnType === "attaque") {
+
+            await ovl.sendMessage(chat, {
+                text:
+`⏰ Temps écoulé !
+
+❌ @${display} n’a pas joué
+🛡️ Ballon perdu`,
+                mentions: [joueurCible]
+            });
+
+            match.possession =
+                match.possession === match.team1Nom
+                    ? match.team2Nom
+                    : match.team1Nom;
+        }
+
+        // =========================
+        // 🔴 DEFENSE
+        // =========================
+        else if (match.turnType === "defense") {
+
+            await ovl.sendMessage(chat, {
+                text:
+`⏰ @${display} trop lent !
+
+🔥 L’attaque passe automatiquement`,
+                mentions: [joueurCible]
+            });
+        }
+
+        // =========================
+        // 🔁 SWITCH
+        // =========================
+        const next =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+        match.joueurTour = next;
+        match.turnType = "attaque";
+
+        const displayNext = next.split("@")[0];
+
+        await ovl.sendMessage(chat, {
+            text: `⚽ NEXT ! @${displayNext}`,
+            mentions: [next]
+        });
+
+        startGlobalTimer(ovl, chat, match);
+
+    }, 6 * 60 * 1000);
+} 
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
