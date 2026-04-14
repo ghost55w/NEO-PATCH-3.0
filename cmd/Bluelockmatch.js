@@ -3221,6 +3221,8 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 // ⏱️ TIMER GLOBAL UNIQUE (FINAL)
 // ===============================
 function startGlobalTimer(ovl, chat, match) {
+    
+    if (!match || match.etat !== "en_cours") return;
 
     // 🔥 clear anciens timers
     if (match.timerGlobal) {
@@ -3375,7 +3377,6 @@ function startGlobalTimer(ovl, chat, match) {
     }, 6 * 60 * 1000);
 }
 
-
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
@@ -3387,9 +3388,7 @@ ovlcmd({
 }, async (ms_org, ovl, cmd_options) => {
     try {
 
-        // ✅ ms_org EST DÉJÀ LE JID
         const chat = ms_org;
-
         const match = matchsActifs.get(chat);
 
         if (!match) {
@@ -3399,24 +3398,33 @@ ovlcmd({
         }
 
         // ===============================
-        // ⛔ STOP TOUS LES TIMERS
+        // ⛔ STOP TOUS LES TIMERS (FIX)
         // ===============================
+        if (match.timerGlobal) clearTimeout(match.timerGlobal);
+        if (match.timerWarning) clearTimeout(match.timerWarning);
+
+        // anciens timers (sécurité)
         if (match.timerPave) clearTimeout(match.timerPave);
         if (match.timerTour) clearTimeout(match.timerTour);
         if (match.timerKickoff) clearTimeout(match.timerKickoff);
         if (match.timerAction) clearTimeout(match.timerAction);
 
-        // BONUS sécurité
+        // reset refs
+        match.timerGlobal = null;
+        match.timerWarning = null;
         match.timerPave = null;
         match.timerTour = null;
         match.timerKickoff = null;
         match.timerAction = null;
 
         // ===============================
-        // 🧨 RESET MATCH COMPLET
+        // 🧨 RESET MATCH
         // ===============================
         match.etat = "arrete";
         match.kickoffStarted = false;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.phaseDuel = null;
 
         // ===============================
         // 🗑 SUPPRESSION
@@ -3437,5 +3445,6 @@ ovlcmd({
         });
     }
 });
+
 
 module.exports = { messageMatch, verifierFiche };
