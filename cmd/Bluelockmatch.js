@@ -2249,31 +2249,41 @@ async function handleDeplacements(match, actionText, joueurObj) {
     const distance = extraireDistance(actionText);
     const zoneDepart = extraireZoneDepart(actionText);
     const zoneArrivee = extraireZoneArrivee(actionText);
-    
-if (zoneDepart && joueurObj.zoneY !== zoneDepart) {
 
-    // ✅ autoriser pendant kickoff
-    if (match.phase !== "kickoff") {
-        assignerVisAVis(match); // ✅ ICI
-    match.phase = "normal";
-    }
-        return { ok: false, erreur: "❌ Mauvaise position" };
+    // =========================
+    // 📍 VERIF POSITION
+    // =========================
+    if (zoneDepart && joueurObj.zoneY !== zoneDepart) {
+
+        // ✅ autoriser pendant kickoff
+        if (match.phase !== "kickoff") {
+            return { ok: false, erreur: "❌ Mauvaise position" };
+        }
     }
 
-}
+    // =========================
+    // 📏 DEPLACEMENT ZONE
+    // =========================
     if (zoneArrivee) {
         const dist = calculDistance(joueurObj.zoneY, zoneArrivee);
+
         if (dist > MAX_DEPLACEMENT) {
             return { ok: false, erreur: "❌ Déplacement trop long" };
         }
+
         joueurObj.zoneY = zoneArrivee;
     }
 
+    // =========================
+    // ↔️ DEPLACEMENT LATÉRAL
+    // =========================
     if (direction && distance) {
         updatePositionJoueur(joueurObj, direction, distance);
     }
 
-    // 👉 APPEL DU TRACKING
+    // =========================
+    // 📊 TRACKING
+    // =========================
     updateGlobalPositions(match, joueurObj);
 
     return { ok: true, joueur: joueurObj };
