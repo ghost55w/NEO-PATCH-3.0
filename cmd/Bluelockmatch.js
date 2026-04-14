@@ -1201,6 +1201,16 @@ function switchRoles(match) {
     match.role[t2] = temp;
 }
 
+function syncPositions(match) {
+
+    const all = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    match.positions = all.map(j => ({ ...j }));
+}
+
 function triggerCounterAttack(match, attackerTeam, defenderTeam) {
 
     const temp = match.joueurTour;
@@ -2762,6 +2772,178 @@ async function handleTestMode(ovl, chat, match) {
         text: resume
     });
 }
+
+// ===============================
+// BLOC RÉSOUDRE MATCH COMPLET ⚽ 
+// ===============================
+async function resoudreMatchComplet(ovl, chat, match, attaqueTxt, defenseTxt) {
+
+    const attaqueAction = extraireAction(attaqueTxt);
+    const defenseAction = extraireAction(defenseTxt);
+
+    if (!attaqueAction) {
+        return { message: "❌ Aucune action d’attaque détectée" };
+    }
+
+    const attaqueSeq = separerSequences(attaqueAction);
+    const defenseSeq = defenseAction ? separerSequences(defenseAction) : [];
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    let attaquantNom = "Attaquant";
+    let defenseurNom = "Défenseur";
+
+    let attaqueTxtStyle = "";
+    let defenseTxtStyle = "";
+    let verdict = "";
+
+    // =========================
+    // 🟢 ATTAQUE
+    // =========================
+    for (const seq of attaqueSeq) {
+
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+
+        const joueur = allJoueurs.find(j =>
+            j.nom.toLowerCase() === nom?.toLowerCase()
+        );
+
+        if (!joueur) continue;
+
+        attaquantNom = joueur.nom;
+
+        if (!joueur.data) {
+            joueur.data = getJoueurData(joueur.nom);
+        }
+
+        // ⚔️ WEAPON
+        const weapon = handleWeapons(match, seq, joueur);
+        if (!weapon.ok) {
+            verdict = `❌ ${weapon.erreur}`;
+            break;
+        }
+
+        // 🚶 DEPLACEMENT
+        const move = await handleDeplacements(match, seq, joueur);
+        if (!move.ok) {
+            verdict = `❌ ${move.erreur}`;
+            break;
+        }
+
+        // ✅ MAJ TERRAIN COMPLETE (OBLIGATOIRE)
+updateGlobalPositions(match, joueur);
+assignerVisAVis(match);
+syncPositions(match);
+
+        attaqueTxtStyle += `🎯 Attaque\n${joueur.nom} exécute son action ⚡\n`;
+
+        // 🎯 PASSE
+        if (seq.toLowerCase().includes("passe")) {
+
+            const pass = await handlePasses(match, seq, joueur);
+
+            if (!pass.ok) {
+                verdict = pass.interception
+                    ? `🛑 INTERCEPTION !`
+                    : `❌ ${pass.erreur}`;
+                break;
+            }
+
+            attaqueTxtStyle += `➡️ Passe précise (${pass.precision}%) 🎯\n`;
+        }
+
+        // 🥅 TIR
+        if (
+            seq.toLowerCase().includes("tir") ||
+            seq.toLowerCase().includes("frappe")
+        ) {
+
+            const tir = await handleTirEtBut(ovl, chat, match, joueur, seq);
+
+            if (tir?.but) {
+                verdict = `🥅 BUUUUT !!!\n${joueur.nom} marque 🔥`;
+            } else {
+                verdict = `❌ Tir raté`;
+            }
+
+            break;
+        }
+    }
+
+    // =========================
+    // 🔴 DEFENSE
+    // =========================
+    for (const seq of defenseSeq) {
+
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+
+        const joueur = allJoueurs.find(j =>
+            j.nom.toLowerCase() === nom?.toLowerCase()
+        );
+
+        if (!joueur) continue;
+
+        defenseurNom = joueur.nom;
+
+        defenseTxtStyle += `🛡️ Défense\n${joueur.nom} lit le jeu 👁️\n`;
+// =========================
+    // 🚶 DEPLACEMENT DEFENSE
+    // =========================
+    const move = await handleDeplacements(match, seq, joueur);
+
+    if (move.ok) {
+        updateGlobalPositions(match, joueur);
+        assignerVisAVis(match);
+        syncPositions(match);
+    }
+        
+        const duel = detecterMatchUp(match, seq, joueur);
+
+        if (duel) {
+
+            const res = resoudreDuel(duel);
+
+            if (!res.ok) {
+                verdict = `🛑 INTERCEPTION !\n${joueur.nom} récupère 🛡️`;
+            } else {
+                verdict = `🔥 Défense dépassée`;
+            }
+        }
+    }
+
+    // =========================
+    // 🧠 VERDICT FINAL SI VIDE
+    // =========================
+    if (!verdict) {
+        verdict = `✅ Action réussie`;
+    }
+
+    // =========================
+    // 🎬 FORMAT FINAL
+    // =========================
+    const message =
+`⚔️ ${attaquantNom.toUpperCase()} 🆚 ${defenseurNom.toUpperCase()}
+
+${attaqueTxtStyle}
+${defenseTxtStyle}
+
+━━━━━━━━━━━━━━━
+
+🧠 VERDICT
+
+${verdict}
+
+━━━━━━━━━━━━━━━
+🔷BLUELOCK⚽🥅`;
+
+    return { message };
+}
+
 
 // ===============================
 // ⏱️ TIMER GLOBAL UNIQUE
