@@ -935,20 +935,40 @@ function formatErreurGlobal(input, joueur = null, match = null) {
         explication = `Le joueur mentionné est introuvable ou non valide.`;
     }
 
-    // ===============================
-    // 🛡️ INTERCEPTION VIS À VIS
-    // ===============================
-    let defenseur = "un adversaire";
+// ===============================
+// 🛡️ INTERCEPTION VIS À VIS
+// ===============================
+let defenseur = "un adversaire";
 
-    if (match && joueur && joueur.visavis) {
-        defenseur = joueur.visavis.nom;
-    } 
-    else if (match && match.duels && joueur) {
-        const duel = match.duels.find(d => d.joueur1 === joueur.nom);
-        if (duel) {
-            defenseur = duel.joueur2;
-        }
+// ✅ 1. vis-à-vis direct
+if (joueur?.visavis?.nom) {
+    defenseur = joueur.visavis.nom;
+}
+
+// ✅ 2. via système de duels
+else if (match?.duels && joueur) {
+    const duel = match.duels.find(d => d.joueur1 === joueur.nom);
+    if (duel && duel.joueur2) {
+        defenseur = duel.joueur2;
     }
+}
+
+// ✅ 3. fallback intelligent
+else if (match && joueur) {
+
+    const adversaires = joueur.equipe === match.team1Nom
+        ? match.lineup2
+        : match.lineup1;
+
+    const cible = adversaires?.find(j =>
+        j.ligne === joueur.ligne &&
+        j.zoneX !== joueur.zoneX
+    );
+
+    if (cible) {
+        defenseur = cible.nom;
+    }
+}
 
     return {
         texte:
@@ -2231,6 +2251,9 @@ if (zoneDepart && joueurObj.zoneY !== zoneDepart) {
 
     // ✅ autoriser pendant kickoff
     if (match.phase !== "kickoff") {
+        assignerVisAVis(match); // ✅ ICI
+    match.phase = "normal";
+    }
         return { ok: false, erreur: "❌ Mauvaise position" };
     }
 
@@ -2277,8 +2300,6 @@ function assignerVisAVis(match) {
     const equipe1 = match.lineup1 || [];
     const equipe2 = match.lineup2 || [];
 
-    match.duels = [];
-
     equipe1.forEach(j1 => {
 
         let cible;
@@ -2294,14 +2315,12 @@ function assignerVisAVis(match) {
         }
 
         if (cible) {
-            match.duels.push({
-                joueur1: j1.nom,
-                joueur2: cible.nom
-            });
+            // 🔥 LIAISON DIRECTE
+            j1.visavis = cible;
+            cible.visavis = j1;
         }
     });
 }
-
 /* ===============================
 🎯 HANDLE PASSES BLUELOCK (FINAL)
 =================================*/
