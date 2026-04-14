@@ -1629,23 +1629,25 @@ async function messageMatch(ms, ovl) {
     // ===============================
     if (safeText.toLowerCase() === "+test⚽") {
 
-        if (match.etat !== "debut_match") {
-            await ovl.sendMessage(chat, {
-                text: "❌ Le mode test doit être activé AVANT le match."
-            });
-            return;
-        }
-
-        match.mode = "test";
-        match.testBuffer = null;
-
-        if (match.timerMatch) {
-            clearTimeout(match.timerMatch);
-            match.timerMatch = null;
-        }
-
+    // ❌ bloqué seulement si match déjà lancé
+    if (match.etat === "en_cours") {
         await ovl.sendMessage(chat, {
-            text: `🧪 MODE TEST ACTIVÉ
+            text: "❌ Impossible d’activer le mode test pendant le match."
+        });
+        return;
+    }
+
+    match.mode = "test";
+    match.testBuffer = null;
+
+    // ⛔ stop timer lancement
+    if (match.timerMatch) {
+        clearTimeout(match.timerMatch);
+        match.timerMatch = null;
+    }
+
+    await ovl.sendMessage(chat, {
+        text: `🧪 MODE TEST ACTIVÉ
 
 🎮 Tu contrôles les 2 équipes
 📥 Envoie ton pavé
@@ -1653,10 +1655,10 @@ async function messageMatch(ms, ovl) {
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`
-        });
+    });
 
-        return;
-    }
+    return;
+}
 
     // ===============================
     // ▶️ ANALYSE TEST
@@ -1829,6 +1831,8 @@ LANCEMENT MATCH
 async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
+    // 🧪 BLOQUE SI MODE TEST
+    if (match.mode === "test") return;
     if (match.kickoffStarted) return;
 
     match.kickoffStarted = true;
