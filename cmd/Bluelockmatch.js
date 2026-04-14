@@ -1947,9 +1947,9 @@ async function handlePaveGame(ms, ovl) {
     if (!text) return false;
 
     // ===============================
-    // 🧪 MODE TEST
+    // 🧪 MODE TEST (PRIORITAIRE)
     // ===============================
-    if(match.mode === "test"){
+    if (match.mode === "test") {
 
         const allJoueurs = [
             ...(match.lineup1 || []),
@@ -1959,22 +1959,22 @@ async function handlePaveGame(ms, ovl) {
         const joueurMatch = text.match(/\)\s*([^\s]+)/);
         const nomJoueur = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-        const joueurObj = allJoueurs.find(j => 
+        const joueurObj = allJoueurs.find(j =>
             j.nom.toLowerCase() === nomJoueur?.toLowerCase()
         );
 
-        if(!joueurObj){
+        if (!joueurObj) {
             await ovl.sendMessage(chat, { text: "❌ Joueur introuvable" });
             return true;
         }
 
-        if(!joueurObj.data){
+        if (!joueurObj.data) {
             joueurObj.data = getJoueurData(joueurObj.nom);
         }
 
         const txt = text.toLowerCase();
 
-        if(match.testType === "passes"){
+        if (match.testType === "passes") {
             const res = validerPasse(text);
             await ovl.sendMessage(chat, {
                 text: res.ok ? "✅ Passe valide" : `❌ ${res.erreur}`
@@ -1982,7 +1982,7 @@ async function handlePaveGame(ms, ovl) {
             return true;
         }
 
-        if(match.testType === "tir"){
+        if (match.testType === "tir") {
             const res = await handleTirEtBut(match, joueurObj, text);
             await ovl.sendMessage(chat, {
                 text: res.but ? "⚽ BUT VALIDÉ" : "❌ Tir refusé"
@@ -1990,23 +1990,23 @@ async function handlePaveGame(ms, ovl) {
             return true;
         }
 
-        if(match.testType === "duel"){
+        if (match.testType === "duel") {
             const duel = gererDuel(joueurObj, joueurObj.visavis);
             await ovl.sendMessage(chat, { text: duel.message });
             return true;
         }
 
-        if(match.testType === "deplacement"){
+        if (match.testType === "deplacement") {
             const res = validerDeplacement(match, joueurObj, text);
             await ovl.sendMessage(chat, {
-                text: res.ok ? "🏃 Déplacement valide" : `❌ ${res.erreur}`
+                text: res.ok ? "🏃 OK" : `❌ ${res.erreur}`
             });
             return true;
         }
 
-        if(match.testType === "all"){
+        if (match.testType === "all") {
 
-            if(txt.includes("tir")){
+            if (txt.includes("tir")) {
                 const res = await handleTirEtBut(match, joueurObj, text);
                 await ovl.sendMessage(chat, {
                     text: res.but ? "⚽ BUT" : "❌ Raté"
@@ -2014,7 +2014,7 @@ async function handlePaveGame(ms, ovl) {
                 return true;
             }
 
-            if(txt.includes("passe")){
+            if (txt.includes("passe")) {
                 const res = validerPasse(text);
                 await ovl.sendMessage(chat, {
                     text: res.ok ? "✅ Passe" : `❌ ${res.erreur}`
@@ -2022,7 +2022,7 @@ async function handlePaveGame(ms, ovl) {
                 return true;
             }
 
-            if(txt.includes("zone") || txt.includes("fonce")){
+            if (txt.includes("zone") || txt.includes("fonce")) {
                 const res = validerDeplacement(match, joueurObj, text);
                 await ovl.sendMessage(chat, {
                     text: res.ok ? "🏃 OK" : `❌ ${res.erreur}`
@@ -2051,22 +2051,16 @@ async function handlePaveGame(ms, ovl) {
 
     const action = extraireAction(text);
 
-    if (!action){
+    if (!action) {
         await envoyerErreurActionContinue(
-            ovl,
-            chat,
-            match,
-            null,
+            ovl, chat, match, null,
             "❌ Aucune action reconnue"
         );
         return true;
     }
 
     const sequences = separerSequences(action);
-
-    const actionsSecondaires = typeof extraireActionsSecondaires === "function"
-        ? extraireActionsSecondaires(action)
-        : null;
+    const actionsSecondaires = extraireActionsSecondaires(action);
 
     const allJoueurs = [
         ...(match.lineup1 || []),
@@ -2078,12 +2072,12 @@ async function handlePaveGame(ms, ovl) {
     // =========================
     // 🔁 TRAITEMENT PAR SEQUENCE
     // =========================
-    for(const seq of sequences){
+    for (const seq of sequences) {
 
         const joueurMatch = seq.match(/\)\s*([^\s]+)/);
         const nomJoueur = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-        const joueurObj = allJoueurs.find(j => 
+        const joueurObj = allJoueurs.find(j =>
             j.nom.toLowerCase() === nomJoueur?.toLowerCase()
         );
 
@@ -2094,20 +2088,30 @@ async function handlePaveGame(ms, ovl) {
 
         lastJoueur = joueurObj;
 
-        if(!joueurObj.data){
+        if (!joueurObj.data) {
             joueurObj.data = getJoueurData(joueurObj.nom);
         }
 
         const zone = extraireZoneDepart(seq);
 
-        if(!zone){
+        if (!zone) {
             await envoyerErreurActionContinue(
-                ovl,
-                chat,
-                match,
-                joueurObj,
+                ovl, chat, match, joueurObj,
                 "❌ Zone obligatoire (ex: C2)"
             );
+            continue;
+        }
+
+        const validationGameplay = validerGameplay(action);
+        const weaponResult = handleWeapons(match, seq, joueurObj);
+
+        if (!weaponResult.ok) {
+            await envoyerErreurActionContinue(ovl, chat, match, joueurObj, weaponResult.erreur);
+            continue;
+        }
+
+        if (!validationGameplay.ok) {
+            await envoyerErreurActionContinue(ovl, chat, match, joueurObj, validationGameplay.erreur);
             continue;
         }
 
@@ -2127,30 +2131,17 @@ async function handlePaveGame(ms, ovl) {
 
         const duel = detecterMatchUp(match, seq, joueurObj);
 
-        if(duel){
+        if (duel) {
             await annoncerMatchUp(ovl, chat, duel);
 
             const resultat = resoudreDuel(duel);
 
-            if(!resultat.ok){
-
-                const defenseur = joueurObj.visavis;
-                const toursRestants = getToursRestants(match, joueurObj.equipe);
-
-                await ovl.sendMessage(chat, {
-                    text: `⚽❌ Action invalide:
-🎙️ ${resultat.erreur}
-
-Ballon perdu → ${defenseur?.nom || "adversaire"} récupère 🛡️
-⏱ Tours restants: ${toursRestants}`
-                });
-
-                match.possession = match.possession === match.team1Nom 
-                    ? match.team2Nom 
-                    : match.team1Nom;
-
+            if (!resultat.ok) {
+                await envoyerErreurActionContinue(ovl, chat, match, joueurObj, resultat.erreur);
                 continue;
             }
+        } else {
+            await annoncerPasDeDuel(ovl, chat, joueurObj);
         }
 
         await ovl.sendMessage(chat, {
@@ -2159,50 +2150,34 @@ Ballon perdu → ${defenseur?.nom || "adversaire"} récupère 🛡️
 
         const tirResult = await handleTirEtBut(match, joueurObj, seq);
 
-        if(tirResult?.but){
-
+        if (tirResult?.but) {
             const matchResult = handleMatchEnd(match, {
-                but:true,
+                but: true,
                 equipe: tirResult.equipe,
                 buteur: tirResult.buteur
             });
 
-            if(matchResult.message){
+            if (matchResult.message) {
                 await ovl.sendMessage(chat, { text: matchResult.message });
             }
 
-            if(matchResult.fin){
-                return true;
-            }
+            if (matchResult.fin) return true;
         }
     }
 
     // =========================
     // 🔁 ACTIONS SECONDAIRES
     // =========================
-    if(actionsSecondaires){
+    if (actionsSecondaires) {
         const sec = handleActionsSecondaires(match, actionsSecondaires);
 
-        if(!sec.ok){
+        if (!sec.ok) {
             await envoyerErreurActionContinue(ovl, chat, match, lastJoueur, sec);
         }
     }
 
     // =========================
-    // 📊 FIN MATCH CHECK
-    // =========================
-    const matchResult = handleMatchEnd(match);
-
-    if(matchResult.message){
-        await ovl.sendMessage(chat, { text: matchResult.message });
-    }
-
-    if(matchResult.fin){
-        return true;
-    }
-
-    // =========================
-    // 🔁 SWITCH JOUEUR (UNE SEULE FOIS)
+    // 🔁 SWITCH JOUEUR
     // =========================
     match.joueurTour = match.joueurTour === match.id1 ? match.id2 : match.id1;
 
@@ -2227,6 +2202,7 @@ Ballon perdu → ${defenseur?.nom || "adversaire"} récupère 🛡️
 
     return true;
 }
+
 
        
     
