@@ -80,6 +80,8 @@ function findBlueLockPlayer(inputName) {
   return found || null;
 }
 
+
+
 // ===============================
 // 🧠 GAMEPLAY RULE ENGINE
 // ===============================
@@ -1692,6 +1694,84 @@ async function messageMatch(ms, ovl) {
         .trim();
 
     // ===============================
+    // 🧪 ACTIVER MODE TEST
+    // ===============================
+ if (safeText.toLowerCase() === "+test⚽") {
+
+    // ❌ uniquement autorisé JUSTE après kickoff
+    if (!(match.etat === "en_cours" && match.phase === "kickoff")) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Le mode test doit être activé juste après le coup d’envoi."
+        });
+        return;
+    }
+
+    match.mode = "test";
+    match.testBuffer = null;
+
+    // ⛔ stop timers
+    if (match.timerKickoff) clearTimeout(match.timerKickoff);
+    if (match.timerPave) clearTimeout(match.timerPave);
+
+    await ovl.sendMessage(chat, {
+        text: `🧪 MODE TEST ACTIVÉ
+
+🎮 Tu contrôles les 2 équipes
+📥 Envoie ton pavé
+➡️ Puis tape +next pour analyser
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
+    });
+
+    return;
+}
+
+    // ===============================
+    // ▶️ ANALYSE TEST
+    // ===============================
+    if (safeText.toLowerCase() === "+next") {
+
+        if (match.mode !== "test") return;
+
+        if (!match.testBuffer) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Aucun pavé enregistré"
+            });
+            return;
+        }
+
+        await handleTestMode(ovl, chat, match);
+
+        match.testBuffer = null;
+        return;
+    }
+
+    // ===============================
+    // 📥 STOCKAGE PAVÉ TEST
+    // ===============================
+    if (match.mode === "test") {
+
+        const isPave =
+            safeText.includes("💬:") &&
+            safeText.includes("⚽:") &&
+            safeText.includes("🔁:") &&
+            safeText.includes("BLUELOCK");
+
+        if (isPave) {
+
+            match.testBuffer = safeText;
+
+            await ovl.sendMessage(chat, {
+                text: `📥 Pavé enregistré !
+Tape +next pour analyser`
+            });
+
+            return;
+        }
+    }
+
+    // ===============================
     // 🔥 GESTION PAVÉ NORMAL
     // ===============================
     const handled = await handlePaveGame(ms, ovl);
@@ -2664,6 +2744,52 @@ if(distance > 20 && tir < 90){
 
     return { ok:true };
 }           
+
+// ===============================
+    // 🤖 MODE DEV / MODE TEST ♻️ 
+    // ===============================
+async function handleTestMode(ovl, chat, match) {
+
+    const text = match.testBuffer;
+    if (!text) return;
+
+    const action = extraireAction(text);
+
+    if (!action) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Aucune action détectée"
+        });
+        return;
+    }
+
+    const sequences = separerSequences(action);
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    let resume = "🧪 RÉSULTAT TEST\n\n";
+
+    for (const seq of sequences) {
+
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+
+        const joueur = allJoueurs.find(j =>
+            j.nom.toLowerCase() === nom?.toLowerCase()
+        );
+
+        if (!joueur) {
+            resume += `❌ Joueur introuvable\n\n`;
+            continue;
+        }
+
+        if (!joueur.data) {
+            joueur.data = getJoueurData(joueur.nom);
+        }
+
+        resume += `👤 ${joueur.nom}\n`;
 
         // =====================
         // ⚔️ WEAPON
