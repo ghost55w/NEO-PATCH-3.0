@@ -3076,24 +3076,24 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
         const seq = attaqueSeq[i];
 
-        // 🔥 EXTRACTION NOM SAFE
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
-        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+// 🔥 EXTRACTION NOM SAFE
+const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
+const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-        attaquant = allJoueurs.find(j =>
-            j.nom.toLowerCase() === nom?.toLowerCase()
-        );
+const joueurData = findBlueLockPlayer(nom);
 
-        if (!attaquant) {
-            return { message: "❌ Joueur attaquant introuvable" };
-        }
+attaquant = joueurData;
 
-        if (!attaquant.data) {
-            attaquant.data = getJoueurData(attaquant.nom);
-        }
+if (!attaquant) {
+    return { message: "❌ Joueur attaquant introuvable" };
+}
 
-        defenseur = attaquant.visavis || null;
+if (!attaquant.data) {
+    attaquant.data = getJoueurData(attaquant.name);
+}
 
+defenseur = attaquant.visavis || null;
+        
         // =========================
         // 🎯 TYPE ACTION
         // =========================
