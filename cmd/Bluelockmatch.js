@@ -3,6 +3,10 @@ const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBas
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
 const matchsActifs = new Map();
+// ===============================
+// 🧪 MODE TEST / DÉVELOPPEUR
+// ===============================
+const matchsTest = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 /* ===============================
@@ -2011,7 +2015,8 @@ LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 async function handlePaveGame(ms, ovl) {
 
     const chat = ms.key.remoteJid;
-    const match = matchsActifs.get(chat);
+    const match = matchsTest.get(ms_org) || matchsActifs.get(ms_org);
+
     if (!match) return false;
 
     // ===============================
@@ -3422,6 +3427,7 @@ function startGlobalTimer(ovl, chat, match) {
     }, 6 * 60 * 1000);
 }
 
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
@@ -3490,6 +3496,88 @@ ovlcmd({
         });
     }
 });
+
+// ===============================
+// 🧪 COMMANDE +matchtest⚽
+// ===============================
+ovlcmd({
+    nom_cmd: "matchtest⚽",
+    classe: "BLUELOCK⚽",
+    react: "🧪",
+    desc: "Mode test instantané"
+}, async (ms_org, ovl, { ms, auteur_Message, repondre }) => {
+
+    matchsTest.set(ms_org, {
+        etat: "attente_lineup",
+        id1: auteur_Message,
+        id2: auteur_Message,
+        team1: "TEST A",
+        team2: "TEST B",
+        lineup1: null,
+        lineup2: null,
+        joueurTour: auteur_Message,
+        pendingAttack: null,
+        waitingDefenseFrom: null,
+        lastAttacker: null,
+        lastPave: null,
+        testMode: true
+    });
+
+    await repondre(`🧪 MODE TEST ACTIVÉ
+
+Envoie 2 lineups comme d'habitude.
+
+Ensuite envoie ton pavé ⚽
+Puis utilise +next⚽ pour analyser instantanément ⚡`);
+});
+
+
+// ===============================
+// ⚡ COMMANDE +next⚽
+// ===============================
+ovlcmd({
+    nom_cmd: "next⚽",
+    classe: "BLUELOCK⚽",
+    react: "⚡",
+    desc: "Analyse instantanée du pavé"
+}, async (ms_org, ovl, { ms, repondre }) => {
+
+    const match = matchsTest.get(ms_org);
+    if (!match) return repondre("❌ Aucun match test actif.");
+
+    if (!match.lastPave) {
+        return repondre("❌ Aucun pavé détecté.\nEnvoie un pavé ⚽ d'abord.");
+    }
+
+    try {
+        const result = await handlePaveGame(match.lastPave, ovl);
+
+        if (result && result.message) {
+            await ovl.sendMessage(ms_org, {
+                text: result.message
+            }, { quoted: ms });
+        } else {
+            await repondre("⚠️ Aucun résultat.");
+        }
+
+    } catch (e) {
+        console.error("❌ ERREUR TEST:", e);
+        await repondre("❌ Erreur pendant l'analyse.");
+    }
+});
+// ===============================
+// ⚡ COMMANDE +ENDTEST⚽
+// ===============================
+ovlcmd({
+    nom_cmd: "endtest⚽",
+    classe: "BLUELOCK⚽",
+    react: "❌"
+}, async (ms_org, ovl, { repondre }) => {
+
+    matchsTest.delete(ms_org);
+    await repondre("🧪 Mode test terminé.");
+});
+
 
 
 module.exports = { messageMatch, verifierFiche };
