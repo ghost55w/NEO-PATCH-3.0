@@ -2301,8 +2301,8 @@ else {
     });
 
     return true;
-        }     
-        } 
+    }     
+       
 
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
