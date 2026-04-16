@@ -162,6 +162,48 @@ function extraireJoueurPrincipal(actionText){
 }
 
 
+// ===============================
+// 🔎 NORMALISATION NOM (GLOBAL)
+// ===============================
+const pureName = str => {
+  if (!str) return "";
+  let s = String(str);
+  s = s.replace(/.+?/g, " ");
+  s = s.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, " ");
+  s = s.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, " ");
+  s = s.replace(/[\uFE00-\uFE0F\u200D]/g, " ");
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+  s = s.replace(/[^0-9a-zA-ZÀ-ÿ\s]/g, " ");
+  s = s.replace(/\s+/g, " ").trim().toLowerCase();
+  return s;
+};
+
+// ===============================
+// 🎯 FIND PLAYER BLUELOCK
+// ===============================
+function findBlueLockPlayer(inputName) {
+  const players = Object.values(cardsBlueLock);
+  const input = pureName(inputName);
+
+  // 1. exact
+  let found = players.find(p => pureName(p.name) === input);
+
+  // 2. includes
+  if (!found) {
+    found = players.find(p => pureName(p.name).includes(input));
+  }
+
+  // 3. par mots
+  if (!found) {
+    const words = input.split(" ");
+    found = players.find(p => {
+      const nameWords = pureName(p.name).split(" ");
+      return words.some(w => nameWords.includes(w));
+    });
+  }
+
+  return found || null;
+}
     
 // ⚡ VMAX NON PRÉCISÉ = LENT
 function regleVitesseMax(txt){
