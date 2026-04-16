@@ -163,10 +163,16 @@ function extraireJoueurPrincipal(actionText){
 // 🔎 FIND PLAYER IN MATCH
 // ===============================
 function findPlayerInMatch(match, nom) {
-    return [...match.lineup1, ...match.lineup2].find(j =>
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    return allPlayers.find(j =>
         pureName(j.nom).includes(pureName(nom))
     );
-}
+} 
+
 // ===============================
 // 🔎 NORMALISATION NOM (GLOBAL)
 // ===============================
