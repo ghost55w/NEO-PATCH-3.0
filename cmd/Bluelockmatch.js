@@ -1675,11 +1675,9 @@ LECTURE MESSAGES
 async function messageMatch(ms, ovl) {
     if (!ms.message) return;
 
-   const chat = ms.key.remoteJid;
-
-const matchTest = matchsTest.get(chat);
-const matchNormal = matchsActifs.get(chat);
-if (!match) return; 
+    const chat = ms.key.remoteJid;
+    const match = matchsActifs.get(chat);
+    if (!match) return;
 
     // ===============================
     // 📩 EXTRACTION MESSAGE
@@ -1699,49 +1697,82 @@ if (!match) return;
         .replace(/\r/g, "")
         .trim();
 
+    // ===============================
+    // 🧪 ACTIVER MODE TEST
+    // ===============================
+ if (safeText.toLowerCase() === "+test⚽") {
+
+    // ❌ uniquement autorisé JUSTE après kickoff
+    if (!(match.etat === "en_cours" && match.phase === "kickoff")) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Le mode test doit être activé juste après le coup d’envoi."
+        });
+        return;
+    }
+
+    match.mode = "test";
+    match.testBuffer = null;
+
+    // ⛔ stop timers
+    if (match.timerKickoff) clearTimeout(match.timerKickoff);
+    if (match.timerPave) clearTimeout(match.timerPave);
+
+    await ovl.sendMessage(chat, {
+        text: `🧪 MODE TEST ACTIVÉ
+
+🎮 Tu contrôles les 2 équipes
+📥 Envoie ton pavé
+➡️ Puis tape +next pour analyser
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
+    });
+
+    return;
+}
 
     // ===============================
     // ▶️ ANALYSE TEST
     // ===============================
-    if (safeText.toLowerCase() === "+next⚽") {
+    if (safeText.toLowerCase() === "+next") {
 
-    if (!matchTest) return;
+        if (match.mode !== "test") return;
 
-    if (!matchTest.testBuffer) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Aucun pavé enregistré"
-        });
+        if (!match.testBuffer) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Aucun pavé enregistré"
+            });
+            return;
+        }
+
+        await handleTestMode(ovl, chat, match);
+
+        match.testBuffer = null;
         return;
     }
 
-    await handleTestMode(ovl, chat, matchTest);
-
-    matchTest.testBuffer = null;
-    return;
-}
-
-        // ===============================
-    // ▶️ PAVÉ TEST 
     // ===============================
-    if (matchTest) {
+    // 📥 STOCKAGE PAVÉ TEST
+    // ===============================
+    if (match.mode === "test") {
 
-    const isPave =
-        safeText.includes("💬:") &&
-        safeText.includes("⚽:") &&
-        safeText.includes("🔁:") &&
-        safeText.includes("BLUELOCK");
+        const isPave =
+            safeText.includes("💬:") &&
+            safeText.includes("⚽:") &&
+            safeText.includes("🔁:") &&
+            safeText.includes("BLUELOCK");
 
-    if (isPave) {
+        if (isPave) {
 
-        matchTest.testBuffer = safeText;
+            match.testBuffer = safeText;
 
-        await ovl.sendMessage(chat, {
-            text: `📥 Pavé enregistré !
-Tape +next⚽ pour analyser`
-        });
+            await ovl.sendMessage(chat, {
+                text: `📥 Pavé enregistré !
+Tape +next pour analyser`
+            });
 
-        return;
-    }
+            return;
+        }
     }
 
     // ===============================
@@ -1753,150 +1784,86 @@ Tape +next⚽ pour analyser`
     console.log("📩 MESSAGE REÇU (hors pavé)");
 
     // ===============================
-    // 📋 GESTION LINEUP 
-    // ===============================    
-if (match.etat === "attente_lineup") {
-
-    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
-    if (!squadMatch) return;
-
-    const squadName = squadMatch[1].trim();
-    const parsed = parseSquadBlueLock(safeText);
-
-    if (!parsed) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Lineup invalide"
-        });
-        return;
-    }
-
-// ===============================
-// 📋 GESTION LINEUP
-// ===============================
-
-// 🧪 MODE TEST PRIORITAIRE
-if (matchTest && matchTest.etat === "attente_lineup") {
-
-    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
-    if (!squadMatch) return;
-
-    const squadName = squadMatch[1].trim();
-    const parsed = parseSquadBlueLock(safeText);
-
-    if (!parsed) {
-        await ovl.sendMessage(chat, { text: "❌ Lineup invalide" });
-        return;
-    }
-
-    // TEAM 1
-    if (!matchTest.equipe1) {
-        matchTest.lineup1 = parsed.joueurs.map(j => ({
-            ...j,
-            data: getJoueurData(j.nom),
-            zoneY: null
-        }));
-
-        matchTest.team1Nom = squadName;
-        matchTest.equipe1 = true;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${squadName}* !`
-        });
-
-        return;
-    }
-
-    // TEAM 2
-    if (!matchTest.equipe2) {
-        matchTest.lineup2 = parsed.joueurs.map(j => ({
-            ...j,
-            data: getJoueurData(j.nom),
-            zoneY: null
-        }));
-
-        matchTest.team2Nom = squadName;
-        matchTest.equipe2 = true;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${squadName}* !`
-        });
-
-        await ovl.sendMessage(chat, {
-            text: `🧪 Lineups chargées !
-
-Envoie ton pavé ⚽
-Puis tape +next⚽`
-        });
-
-        return;
-    }
-
-    return;
-} 
-    
+    // 📋 GESTION LINEUP UNIQUEMENT
     // ===============================
-    // ⚽ MODE NORMAL (TON CODE)
-    // ===============================
+    if(match.mode === "test"){
+        return;
+    }
 
-    const team1 = normalizeTeamName(match.team1);
-    const team2 = normalizeTeamName(match.team2);
-    const squad = normalizeTeamName(squadName);
-    const senderJid = getSenderJid(ms);
+    if (match.etat === "attente_lineup") {
 
-    // TEAM 1
-    if (squad === team1 && !match.equipe1) {
+        const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
+        if (!squadMatch) return;
 
-        if (match.id1 && match.id1 !== senderJid) {
+        const squadName = squadMatch[1].trim();
+
+        const team1 = normalizeTeamName(match.team1);
+        const team2 = normalizeTeamName(match.team2);
+        const squad = normalizeTeamName(squadName);
+
+        const senderJid = getSenderJid(ms);
+
+        // ===============================
+        // ✅ TEAM 1
+        // ===============================
+        if (squad === team1 && !match.equipe1) {
+
+            if (match.id1 && match.id1 !== senderJid) {
+                await ovl.sendMessage(chat, {
+                    text: "❌ Cette équipe est déjà contrôlée"
+                });
+                return;
+            }
+
+            match.id1 = senderJid;
+            const parsed = parseSquadBlueLock(safeText);
+
+            match.lineup1 = parsed
+                ? parsed.joueurs.map(j => ({
+                    ...j,
+                    data: getJoueurData(j.nom),
+                    zoneY: null
+                }))
+                : [];
+
+            match.equipe1 = true;
+
             await ovl.sendMessage(chat, {
-                text: "❌ Cette équipe est déjà contrôlée"
+                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
             });
-            return;
         }
 
-        match.id1 = senderJid;
+        // ===============================
+        // ✅ TEAM 2
+        // ===============================
+        if (squad === team2 && !match.equipe2) {
 
-        match.lineup1 = parsed.joueurs.map(j => ({
-            ...j,
-            data: getJoueurData(j.nom),
-            zoneY: null
-        }));
+            if (match.id2 && match.id2 !== senderJid) {
+                await ovl.sendMessage(chat, {
+                    text: "❌ Cette équipe est déjà contrôlée"
+                });
+                return;
+            }
 
-        match.equipe1 = true;
+            match.id2 = senderJid;
+            const parsed = parseSquadBlueLock(safeText);
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-        });
+            match.lineup2 = parsed
+                ? parsed.joueurs.map(j => ({
+                    ...j,
+                    data: getJoueurData(j.nom),
+                    zoneY: null
+                }))
+                : [];
 
-        return;
-    }
+            match.equipe2 = true;
 
-    // TEAM 2
-    if (squad === team2 && !match.equipe2) {
-
-        if (match.id2 && match.id2 !== senderJid) {
             await ovl.sendMessage(chat, {
-                text: "❌ Cette équipe est déjà contrôlée"
+                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
             });
-            return;
         }
-
-        match.id2 = senderJid;
-
-        match.lineup2 = parsed.joueurs.map(j => ({
-            ...j,
-            data: getJoueurData(j.nom),
-            zoneY: null
-        }));
-
-        match.equipe2 = true;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-        });
-
-        return;
-    }
 }
+
 
 // ===============================
     // 🚀 MATCH PRÊT
@@ -3537,37 +3504,31 @@ ovlcmd({
     nom_cmd: "matchtest⚽",
     classe: "BLUELOCK⚽",
     react: "🧪",
-    desc: "Créer un match test"
-}, async (ms_org, ovl) => {
+    desc: "Mode test instantané"
+}, async (ms_org, ovl, { ms, auteur_Message, repondre }) => {
 
-    const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
-
-    if (matchsTest.has(chat)) {
-        return ovl.sendMessage(chat, {
-            text: "⚠️ Un test est déjà en cours."
-        });
-    }
-
-    matchsTest.set(chat, {
+    matchsTest.set(ms_org, {
         etat: "attente_lineup",
-        equipe1: false,
-        equipe2: false,
-        lineup1: [],
-        lineup2: [],
-        testBuffer: null
+        id1: auteur_Message,
+        id2: auteur_Message,
+        team1: "TEST A",
+        team2: "TEST B",
+        lineup1: null,
+        lineup2: null,
+        joueurTour: auteur_Message,
+        pendingAttack: null,
+        waitingDefenseFrom: null,
+        lastAttacker: null,
+        lastPave: null,
+        testMode: true
     });
 
-    await ovl.sendMessage(chat, {
-        text: `🧪 MODE TEST ACTIVÉ
+    await repondre(`🧪 MODE TEST ACTIVÉ
 
 Envoie 2 lineups comme d'habitude.
 
 Ensuite envoie ton pavé ⚽
-Puis utilise +next⚽ pour analyser instantanément ⚡
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`
-    });
+Puis utilise +next⚽ pour analyser instantanément ⚡`);
 });
 
 
@@ -3608,25 +3569,13 @@ ovlcmd({
 // ⚡ COMMANDE +ENDTEST⚽
 // ===============================
 ovlcmd({
-    nom_cmd: "stoptest⚽",
+    nom_cmd: "endtest⚽",
     classe: "BLUELOCK⚽",
-    react: "⛔",
-    desc: "Stopper le mode test"
-}, async (ms_org, ovl) => {
+    react: "❌"
+}, async (ms_org, ovl, { repondre }) => {
 
-    const chat = ms_org.from || ms_org.key?.remoteJid;
-
-    if (!matchsTest.has(chat)) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Aucun test en cours."
-        });
-    }
-
-    matchsTest.delete(chat);
-
-    await ovl.sendMessage(chat, {
-        text: "🧪 Mode test supprimé."
-    });
+    matchsTest.delete(ms_org);
+    await repondre("🧪 Mode test terminé.");
 });
 
 
