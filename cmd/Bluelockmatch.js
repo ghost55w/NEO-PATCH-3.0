@@ -168,10 +168,12 @@ function findPlayerInMatch(match, nom) {
         ...(match.lineup2 || [])
     ];
 
-    return allPlayers.find(j =>
-        pureName(j.nom).includes(pureName(nom))
-    );
-} 
+    return allPlayers.find(j => {
+        const a = pureName(j.nom);
+        const b = pureName(nom);
+        return a === b || a.includes(b) || b.includes(a);
+    });
+}
 
 // ===============================
 // 🔎 NORMALISATION NOM (GLOBAL)
@@ -3196,30 +3198,30 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
     let attaquant = null;
     let defenseur = null;
 
-    // =========================
-    // 🟢 TRAITEMENT ATTAQUE
-    // =========================
-    for (let i = 0; i < attaqueSeq.length; i++) {
+   // =========================
+// 🟢 TRAITEMENT ATTAQUE
+// =========================
+for (let i = 0; i < attaqueSeq.length; i++) {
 
-        const seq = attaqueSeq[i];
+    const seq = attaqueSeq[i];
 
-        // 🔥 EXTRACTION NOM SAFE
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
-        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+    // 🔥 EXTRACTION NOM SAFE
+    const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
+    const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-        attaquant = allJoueurs.find(j =>
-            j.nom.toLowerCase() === nom?.toLowerCase()
-        );
+    //
+    attaquant = findPlayerInMatch(match, nom);
 
-        if (!attaquant) {
-            return { message: "❌ Joueur attaquant introuvable" };
-        }
+    if (!attaquant) {
+        return { message: `❌ Joueur attaquant introuvable: ${nom}` };
+    }
 
-        if (!attaquant.data) {
-            attaquant.data = getJoueurData(attaquant.nom);
-        }
+    if (!attaquant.data) {
+        attaquant.data = getJoueurData(attaquant.nom);
+    }
 
-        defenseur = attaquant.visavis || null;
+    defenseur = attaquant.visavis || null;
+} 
 
         // =========================
         // 🎯 TYPE ACTION
