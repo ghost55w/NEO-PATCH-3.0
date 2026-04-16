@@ -1741,122 +1741,141 @@ Tape +next pour analyser`
 
     console.log("📩 MESSAGE REÇU (hors pavé)");
 
+ // ===============================
+// 📋 GESTION LINEUP UNIQUEMENT
+// ===============================
+if (match.etat === "attente_lineup") {
+
+    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
+    if (!squadMatch) return;
+
+    const squadName = squadMatch[1].trim();
+
+    const team1 = normalizeTeamName(match.team1);
+    const team2 = normalizeTeamName(match.team2);
+    const squad = normalizeTeamName(squadName);
+
+    const senderJid = getSenderJid(ms);
+
     // ===============================
-    // 📋 GESTION LINEUP UNIQUEMENT
+    // ✅ TEAM 1
     // ===============================
+    if (squad === team1 && !match.equipe1) {
 
-    if (match.etat === "attente_lineup") {
+        if (match.id1 && match.id1 !== senderJid) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Cette équipe est déjà contrôlée"
+            });
+            return;
+        }
 
-        const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
-        if (!squadMatch) return;
+        match.id1 = senderJid;
 
-        const squadName = squadMatch[1].trim();
+        const parsed = parseSquadBlueLock(safeText);
 
-        const team1 = normalizeTeamName(match.team1);
-        const team2 = normalizeTeamName(match.team2);
-        const squad = normalizeTeamName(squadName);
+        if (!parsed || !parsed.joueurs) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Lineup invalide"
+            });
+            return;
+        }
 
-        const senderJid = getSenderJid(ms);
+        match.lineup1 = parsed.joueurs.map(j => {
 
-// ===============================
-// ✅ TEAM 1
-// ===============================
-if (squad === team1 && !match.equipe1) {
+            const poste = POSITION_POSTES[j.position];
 
-    if (match.id1 && match.id1 !== senderJid) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Cette équipe est déjà contrôlée"
+            return {
+                ...j,
+                data: getJoueurData(j.nom),
+                ligne: poste?.ligne || "milieu",
+                zoneX: poste?.zoneX || "axe",
+                zoneY: null,
+                visavis: null
+            };
         });
-        return;
+
+        match.equipe1 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+        });
     }
 
-    match.id1 = senderJid;
+    // ===============================
+    // ✅ TEAM 2
+    // ===============================
+    else if (squad === team2 && !match.equipe2) {
 
-    // ✅ PARSER BLUELOCK 
-    const parsed = parseSquadBlueLock(safeText);
+        if (match.id2 && match.id2 !== senderJid) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Cette équipe est déjà contrôlée"
+            });
+            return;
+        }
 
-    if (!parsed || !parsed.joueurs) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Lineup invalide"
+        match.id2 = senderJid;
+
+        const parsed = parseSquadBlueLock(safeText);
+
+        if (!parsed || !parsed.joueurs) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Lineup invalide"
+            });
+            return;
+        }
+
+        match.lineup2 = parsed.joueurs.map(j => {
+
+            const poste = POSITION_POSTES[j.position];
+
+            return {
+                ...j,
+                data: getJoueurData(j.nom),
+                ligne: poste?.ligne || "milieu",
+                zoneX: poste?.zoneX || "axe",
+                zoneY: null,
+                visavis: null
+            };
         });
-        return;
+
+        match.equipe2 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+        });
     }
 
-    // ✅ MAPPING COMPLET JOUEURS
-    match.lineup1 = parsed.joueurs.map(j => {
+    // ===============================
+    // 🚀 MATCH PRÊT
+    // ===============================
+    if (match.equipe1 && match.equipe2 && !match.starting) {
+        match.starting = true;
 
-        const poste = POSITION_POSTES[j.position];
+        if (match.timerMatch) clearTimeout(match.timerMatch);
 
-        return {
-            ...j,
-            data: getJoueurData(j.nom),
+        match.etat = "debut_match";
 
-            // 🔥 ESSENTIEL POUR LE GAMEPLAY
-            ligne: poste?.ligne || "milieu",
-            zoneX: poste?.zoneX || "axe",
-            zoneY: null,
+        const readyText = `⏳ Les deux formations sont prêtes.
+Le match commence dans *1 minute* 🥅⚽...`;
 
-            visavis: null
-        };
-    });
+        const imagesReady = [
+            "https://files.catbox.moe/dlj5z6.jpg",
+            "https://files.catbox.moe/fdadd0.jpeg",
+            "https://files.catbox.moe/4104s3.jpg"
+        ];
 
-    match.equipe1 = true;
+        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-    });
-} 
-
-// ===============================
-// ✅ TEAM 2
-// ===============================
-if (squad === team2 && !match.equipe2) {
-
-    if (match.id2 && match.id2 !== senderJid) {
         await ovl.sendMessage(chat, {
-            text: "❌ Cette équipe est déjà contrôlée"
+            image: { url: imageRandom },
+            caption: readyText
         });
-        return;
+
+        match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
 
-    match.id2 = senderJid;
-
-    // ✅ PARSER BLUELOCK 
-    const parsed = parseSquadBlueLock(safeText);
-
-    if (!parsed || !parsed.joueurs) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Lineup invalide"
-        });
-        return;
-    }
-
-    // ✅ MAPPING COMPLET JOUEURS
-    match.lineup2 = parsed.joueurs.map(j => {
-
-        const poste = POSITION_POSTES[j.position];
-
-        return {
-            ...j,
-            data: getJoueurData(j.nom),
-
-            // 🔥 ESSENTIEL
-            ligne: poste?.ligne || "milieu",
-            zoneX: poste?.zoneX || "axe",
-            zoneY: null,
-
-            visavis: null
-        };
-    });
-
-    match.equipe2 = true;
-
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-    });
-}        
-
-
+}    
+    
 // ===============================
     // 🚀 MATCH PRÊT
     // ===============================
