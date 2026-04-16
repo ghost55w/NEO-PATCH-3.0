@@ -131,7 +131,11 @@ function regleCoherenceAction(txt){
     return { ok: true };
 }
 
-        
+function extraireJoueurPrincipal(actionText){
+    const match = actionText.match(/\)\s*([^\s]+)/);
+    return match ? match[1].trim() : null;
+}
+
 // 🦶 PIED + ZONE OBLIGATOIRES
 function reglePiedComplet(txt){
 
@@ -1605,20 +1609,22 @@ match.role = {
     });
 
     match.timerLineup = setTimeout(async () => {
-        if (!match.equipe1 || !match.equipe2) {
-            matchsActifs.delete(chat);
-            const err = formatErreurGlobal("❌ Temps écoulé pour envoyer les lineups");
+    if (!match.equipe1 || !match.equipe2) {
 
-await ovl.sendMessage(chat, {
-    text: err.texte + `
+        matchsActifs.delete(chat);
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚽❌ *MATCH ANNULÉ🥅*  
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
+🎙️⚠️ Temps écoulé pour envoyer les lineups, le match est annulé. 
 
 ╰─────────────────▱▱▱
 
                       🔷BLUELOCK⚽🥅`
-});
-        }
-    }, 2 * 60 * 1000);
-}
+        });
+    }
+}, 2 * 60 * 1000); 
 
 /* ===============================
 LECTURE MESSAGES
@@ -1754,66 +1760,105 @@ Tape +next pour analyser`
 
         const senderJid = getSenderJid(ms);
 
-        // ===============================
-        // ✅ TEAM 1
-        // ===============================
-        if (squad === team1 && !match.equipe1) {
+        
 
-            if (match.id1 && match.id1 !== senderJid) {
-                await ovl.sendMessage(chat, {
-                    text: "❌ Cette équipe est déjà contrôlée"
-                });
-                return;
-            }
+// ===============================
+// ✅ TEAM 1
+// ===============================
+if (squad === team1 && !match.equipe1) {
 
-            match.id1 = senderJid;
-            const parsed = parseSquadBlueLock(safeText);
+    if (match.id1 && match.id1 !== senderJid) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Cette équipe est déjà contrôlée"
+        });
+        return;
+    }
 
-            match.lineup1 = parsed
-                ? parsed.joueurs.map(j => ({
-                    ...j,
-                    data: getJoueurData(j.nom),
-                    zoneY: null
-                }))
-                : [];
+    match.id1 = senderJid;
 
-            match.equipe1 = true;
+    // ✅ PARSER BLUELOCK 
+    const parsed = parseSquadBlueLock(safeText);
 
-            await ovl.sendMessage(chat, {
-                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
-            });
-        }
+    if (!parsed || !parsed.joueurs) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Lineup invalide"
+        });
+        return;
+    }
 
-        // ===============================
-        // ✅ TEAM 2
-        // ===============================
-        if (squad === team2 && !match.equipe2) {
+    // ✅ MAPPING COMPLET JOUEURS
+    match.lineup1 = parsed.joueurs.map(j => {
 
-            if (match.id2 && match.id2 !== senderJid) {
-                await ovl.sendMessage(chat, {
-                    text: "❌ Cette équipe est déjà contrôlée"
-                });
-                return;
-            }
+        const poste = POSITION_POSTES[j.position];
 
-            match.id2 = senderJid;
-            const parsed = parseSquadBlueLock(safeText);
+        return {
+            ...j,
+            data: getJoueurData(j.nom),
 
-            match.lineup2 = parsed
-                ? parsed.joueurs.map(j => ({
-                    ...j,
-                    data: getJoueurData(j.nom),
-                    zoneY: null
-                }))
-                : [];
+            // 🔥 ESSENTIEL POUR LE GAMEPLAY
+            ligne: poste?.ligne || "milieu",
+            zoneX: poste?.zoneX || "axe",
+            zoneY: null,
 
-            match.equipe2 = true;
+            visavis: null
+        };
+    });
 
-            await ovl.sendMessage(chat, {
-                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-            });
-        }
-}
+    match.equipe1 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+    });
+} 
+        
+     // ===============================
+// ✅ TEAM 2
+// ===============================
+if (squad === team2 && !match.equipe2) {
+
+    if (match.id2 && match.id2 !== senderJid) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Cette équipe est déjà contrôlée"
+        });
+        return;
+    }
+
+    match.id2 = senderJid;
+
+    // ✅ PARSER BLUELOCK 
+    const parsed = parseSquadBlueLock(safeText);
+
+    if (!parsed || !parsed.joueurs) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Lineup invalide"
+        });
+        return;
+    }
+
+    // ✅ MAPPING COMPLET JOUEURS
+    match.lineup2 = parsed.joueurs.map(j => {
+
+        const poste = POSITION_POSTES[j.position];
+
+        return {
+            ...j,
+            data: getJoueurData(j.nom),
+
+            // 🔥 ESSENTIEL
+            ligne: poste?.ligne || "milieu",
+            zoneX: poste?.zoneX || "axe",
+            zoneY: null,
+
+            visavis: null
+        };
+    });
+
+    match.equipe2 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+    });
+}   
 
 
 // ===============================
@@ -2027,7 +2072,26 @@ if (match.phaseDuel) {
     // ===============================
     // 🎯 SYSTEME ATTAQUE / DEFENSE
     // ===============================
+const actionText = extraireAction(text);
+const nomJoueur = extraireJoueurPrincipal(actionText);
 
+const allJoueurs = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
+
+const joueurObj = allJoueurs.find(j =>
+    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+);
+
+if (!joueurObj) {
+    await ovl.sendMessage(chat, {
+        text: "❌ Joueur attaquant introuvable"
+    });
+    return true;
+}
+
+    
     // 🟢 ATTAQUE
     if (!match.pendingAttack) {
 
