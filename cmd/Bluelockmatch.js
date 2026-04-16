@@ -1676,8 +1676,9 @@ async function messageMatch(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-    const match = matchsActifs.get(chat);
-    if (!match) return;
+const match = matchsActifs.get(chat);
+
+if (!match) return;
 
     // ===============================
     // 📩 EXTRACTION MESSAGE
@@ -1784,84 +1785,82 @@ Tape +next pour analyser`
     console.log("📩 MESSAGE REÇU (hors pavé)");
 
     // ===============================
-    // 📋 GESTION LINEUP UNIQUEMENT
-    // ===============================
-    if(match.mode === "test"){
+// 📋 GESTION LINEUP
+// ===============================
+if (match.etat === "attente_lineup") {
+
+    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
+    if (!squadMatch) return;
+
+    const squadName = squadMatch[1].trim();
+
+    const team1 = normalizeTeamName(match.team1);
+    const team2 = normalizeTeamName(match.team2);
+    const squad = normalizeTeamName(squadName);
+
+    const senderJid = getSenderJid(ms);
+
+    // TEAM 1
+    if (squad === team1 && !match.equipe1) {
+
+        if (match.id1 && match.id1 !== senderJid) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Cette équipe est déjà contrôlée"
+            });
+            return;
+        }
+
+        match.id1 = senderJid;
+
+        const parsed = parseSquadBlueLock(safeText);
+
+        match.lineup1 = parsed
+            ? parsed.joueurs.map(j => ({
+                ...j,
+                data: getJoueurData(j.nom),
+                zoneY: null
+            }))
+            : [];
+
+        match.equipe1 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+        });
+
         return;
     }
 
-    if (match.etat === "attente_lineup") {
+    // TEAM 2
+    if (squad === team2 && !match.equipe2) {
 
-        const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
-        if (!squadMatch) return;
-
-        const squadName = squadMatch[1].trim();
-
-        const team1 = normalizeTeamName(match.team1);
-        const team2 = normalizeTeamName(match.team2);
-        const squad = normalizeTeamName(squadName);
-
-        const senderJid = getSenderJid(ms);
-
-        // ===============================
-        // ✅ TEAM 1
-        // ===============================
-        if (squad === team1 && !match.equipe1) {
-
-            if (match.id1 && match.id1 !== senderJid) {
-                await ovl.sendMessage(chat, {
-                    text: "❌ Cette équipe est déjà contrôlée"
-                });
-                return;
-            }
-
-            match.id1 = senderJid;
-            const parsed = parseSquadBlueLock(safeText);
-
-            match.lineup1 = parsed
-                ? parsed.joueurs.map(j => ({
-                    ...j,
-                    data: getJoueurData(j.nom),
-                    zoneY: null
-                }))
-                : [];
-
-            match.equipe1 = true;
-
+        if (match.id2 && match.id2 !== senderJid) {
             await ovl.sendMessage(chat, {
-                text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+                text: "❌ Cette équipe est déjà contrôlée"
             });
+            return;
         }
 
-        // ===============================
-        // ✅ TEAM 2
-        // ===============================
-        if (squad === team2 && !match.equipe2) {
+        match.id2 = senderJid;
 
-            if (match.id2 && match.id2 !== senderJid) {
-                await ovl.sendMessage(chat, {
-                    text: "❌ Cette équipe est déjà contrôlée"
-                });
-                return;
-            }
+        const parsed = parseSquadBlueLock(safeText);
 
-            match.id2 = senderJid;
-            const parsed = parseSquadBlueLock(safeText);
+        match.lineup2 = parsed
+            ? parsed.joueurs.map(j => ({
+                ...j,
+                data: getJoueurData(j.nom),
+                zoneY: null
+            }))
+            : [];
 
-            match.lineup2 = parsed
-                ? parsed.joueurs.map(j => ({
-                    ...j,
-                    data: getJoueurData(j.nom),
-                    zoneY: null
-                }))
-                : [];
+        match.equipe2 = true;
 
-            match.equipe2 = true;
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+        });
 
-            await ovl.sendMessage(chat, {
-                text: `✅ Formation confirmée pour *${match.team2Nom}* !`
-            });
-        }
+        return;
+    }
 }
 
 
