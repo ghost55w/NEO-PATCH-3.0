@@ -1676,7 +1676,7 @@ async function messageMatch(ms, ovl) {
     if (!ms.message) return;
 
     const chat = ms.key.remoteJid;
-    const match = matchsActifs.get(chat);
+    const match = matchsTest.get(chat) || matchsActifs.get(chat);
     if (!match) return;
 
     // ===============================
@@ -1697,83 +1697,53 @@ async function messageMatch(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
-    // ===============================
-    // 🧪 ACTIVER MODE TEST
-    // ===============================
- if (safeText.toLowerCase() === "+test⚽") {
-
-    // ❌ uniquement autorisé JUSTE après kickoff
-    if (!(match.etat === "en_cours" && match.phase === "kickoff")) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Le mode test doit être activé juste après le coup d’envoi."
-        });
-        return;
-    }
-
-    match.mode = "test";
-    match.testBuffer = null;
-
-    // ⛔ stop timers
-    if (match.timerKickoff) clearTimeout(match.timerKickoff);
-    if (match.timerPave) clearTimeout(match.timerPave);
-
-    await ovl.sendMessage(chat, {
-        text: `🧪 MODE TEST ACTIVÉ
-
-🎮 Tu contrôles les 2 équipes
-📥 Envoie ton pavé
-➡️ Puis tape +next pour analyser
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`
-    });
-
-    return;
-}
 
     // ===============================
     // ▶️ ANALYSE TEST
     // ===============================
-    if (safeText.toLowerCase() === "+next") {
+    if (safeText.toLowerCase() === "+next⚽") {
 
-        if (match.mode !== "test") return;
+    const matchTest = matchsTest.get(chat);
+    if (!matchTest) return;
 
-        if (!match.testBuffer) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Aucun pavé enregistré"
-            });
-            return;
-        }
-
-        await handleTestMode(ovl, chat, match);
-
-        match.testBuffer = null;
+    if (!matchTest.testBuffer) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Aucun pavé enregistré"
+        });
         return;
     }
 
+    await handleTestMode(ovl, chat, matchTest);
+
+    matchTest.testBuffer = null;
+    return;
+    } 
+
+        // ===============================
+    // ▶️ PAVÉ TEST 
     // ===============================
-    // 📥 STOCKAGE PAVÉ TEST
-    // ===============================
-    if (match.mode === "test") {
+    const matchTest = matchsTest.get(chat);
 
-        const isPave =
-            safeText.includes("💬:") &&
-            safeText.includes("⚽:") &&
-            safeText.includes("🔁:") &&
-            safeText.includes("BLUELOCK");
+if (matchTest) {
 
-        if (isPave) {
+    const isPave =
+        safeText.includes("💬:") &&
+        safeText.includes("⚽:") &&
+        safeText.includes("🔁:") &&
+        safeText.includes("BLUELOCK");
 
-            match.testBuffer = safeText;
+    if (isPave) {
 
-            await ovl.sendMessage(chat, {
-                text: `📥 Pavé enregistré !
-Tape +next pour analyser`
-            });
+        matchTest.testBuffer = safeText;
 
-            return;
-        }
+        await ovl.sendMessage(chat, {
+            text: `📥 Pavé enregistré !
+Tape +next⚽ pour analyser`
+        });
+
+        return;
     }
+}
 
     // ===============================
     // 🔥 GESTION PAVÉ NORMAL
@@ -3504,31 +3474,35 @@ ovlcmd({
     nom_cmd: "matchtest⚽",
     classe: "BLUELOCK⚽",
     react: "🧪",
-    desc: "Mode test instantané"
-}, async (ms_org, ovl, { ms, auteur_Message, repondre }) => {
+    desc: "Créer un match test indépendant"
+}, async (ms_org, ovl) => {
 
-    matchsTest.set(ms_org, {
+    const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
+
+    if (matchsTest.has(chat)) {
+        return ovl.sendMessage(chat, {
+            text: "⚠️ Un test est déjà en cours."
+        });
+    }
+
+    matchsTest.set(chat, {
         etat: "attente_lineup",
-        id1: auteur_Message,
-        id2: auteur_Message,
-        team1: "TEST A",
-        team2: "TEST B",
-        lineup1: null,
-        lineup2: null,
-        joueurTour: auteur_Message,
-        pendingAttack: null,
-        waitingDefenseFrom: null,
-        lastAttacker: null,
-        lastPave: null,
-        testMode: true
+        equipe1: false,
+        equipe2: false,
+        mode: "test"
     });
 
-    await repondre(`🧪 MODE TEST ACTIVÉ
+    await ovl.sendMessage(chat, {
+        text: `🧪 MODE TEST ACTIVÉ
 
 Envoie 2 lineups comme d'habitude.
 
 Ensuite envoie ton pavé ⚽
-Puis utilise +next⚽ pour analyser instantanément ⚡`);
+Puis utilise +next⚽ pour analyser instantanément ⚡
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
+    });
 });
 
 
