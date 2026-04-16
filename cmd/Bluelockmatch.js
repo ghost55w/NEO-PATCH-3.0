@@ -1654,20 +1654,23 @@ match.role = {
     });
 
     match.timerLineup = setTimeout(async () => {
-        if (!match.equipe1 || !match.equipe2) {
-            matchsActifs.delete(chat);
-            const err = formatErreurGlobal("❌ Temps écoulé pour envoyer les lineups");
+    if (!match.equipe1 || !match.equipe2) {
 
-await ovl.sendMessage(chat, {
-    text: err.texte + `
+        matchsActifs.delete(chat);
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚽❌ *MATCH ANNULÉ🥅*  
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
+🎙️⚠️ Temps écoulé pour envoyer les lineups, le match est annulé. 
 
 ╰─────────────────▱▱▱
 
                       🔷BLUELOCK⚽🥅`
-});
-        }
-    }, 2 * 60 * 1000);
-}
+        });
+    }
+}, 2 * 60 * 1000);
+} 
 
 /* ===============================
 LECTURE MESSAGES
