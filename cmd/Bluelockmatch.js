@@ -3,6 +3,10 @@ const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBas
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
 const matchsActifs = new Map();
+// ===============================
+// 🧪 MODE TEST / DÉVELOPPEUR
+// ===============================
+const matchsTest = new Map();
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 /* ===============================
@@ -36,6 +40,51 @@ function getJoueurData(nom){
         j.name.trim().toLowerCase().replace(/\s+/g, " ") === clean
     );
 }
+
+// ===============================
+// 🔎 NORMALISATION NOM (GLOBAL)
+// ===============================
+const pureName = str => {
+  if (!str) return "";
+  let s = String(str);
+  s = s.replace(/.+?/g, " ");
+  s = s.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, " ");
+  s = s.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, " ");
+  s = s.replace(/[\uFE00-\uFE0F\u200D]/g, " ");
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+  s = s.replace(/[^0-9a-zA-ZÀ-ÿ\s]/g, " ");
+  s = s.replace(/\s+/g, " ").trim().toLowerCase();
+  return s;
+};
+
+// ===============================
+// 🎯 FIND PLAYER BLUELOCK
+// ===============================
+function findBlueLockPlayer(inputName) {
+  const players = Object.values(cardsBlueLock);
+  const input = pureName(inputName);
+
+  // 1. exact
+  let found = players.find(p => pureName(p.name) === input);
+
+  // 2. includes
+  if (!found) {
+    found = players.find(p => pureName(p.name).includes(input));
+  }
+
+  // 3. par mots
+  if (!found) {
+    const words = input.split(" ");
+    found = players.find(p => {
+      const nameWords = pureName(p.name).split(" ");
+      return words.some(w => nameWords.includes(w));
+    });
+  }
+
+  return found || null;
+}
+
+
 
 // ===============================
 // 🧠 GAMEPLAY RULE ENGINE
@@ -1966,7 +2015,8 @@ LECTURE DES PAVÉS - TOUR DE CONTRÔLE
 async function handlePaveGame(ms, ovl) {
 
     const chat = ms.key.remoteJid;
-    const match = matchsActifs.get(chat);
+    const match = matchsTest.get(ms_org) || matchsActifs.get(ms_org);
+
     if (!match) return false;
 
     // ===============================
@@ -3002,6 +3052,9 @@ ${verdict}
 // =========================
 async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
+    // 🔗 ASSURE VIS A VIS
+    assignerVisAVis(match);
+
     const attaqueAction = extraireAction(attaqueTxt);
     const defenseAction = extraireAction(defenseTxt);
 
@@ -3028,46 +3081,46 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
         const seq = attaqueSeq[i];
 
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
-        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+// 🔥 EXTRACTION NOM SAFE
+const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
+const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-        attaquant = allJoueurs.find(j =>
-            j.nom.toLowerCase() === nom?.toLowerCase()
-        );
+const joueurData = findBlueLockPlayer(nom);
 
-        if (!attaquant) continue;
+attaquant = joueurData;
 
-        if (!attaquant.data) {
-            attaquant.data = getJoueurData(attaquant.nom);
-        }
+if (!attaquant) {
+    return { message: "❌ Joueur attaquant introuvable" };
+}
 
-        defenseur = attaquant.visavis;
+if (!attaquant.data) {
+    attaquant.data = getJoueurData(attaquant.name);
+}
 
+defenseur = attaquant.visavis || null;
+        
         // =========================
         // 🎯 TYPE ACTION
         // =========================
         let typeAction = "controle";
 
         if (seq.toLowerCase().includes("dribble")) typeAction = "dribble";
-        if (seq.toLowerCase().includes("passe")) typeAction = "passe";
-        if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
+        else if (seq.toLowerCase().includes("passe")) typeAction = "passe";
+        else if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
 
         actions.push(typeAction);
 
-        // =========================
-        // 🔴 DEFENSE ASSOCIEE
-        // =========================
         const defense = defenseSeq[i] || "";
 
         // =========================
-        // ❌ TIMING IMPOSSIBLE
+        // ❌ TIMING INTERDIT
         // =========================
         if (defense.toLowerCase().includes("avant")) {
             return {
                 message:
 `❌ Mauvais timing
 
-⛔ Action défensive avant l'action réelle (divination interdite)`
+⛔ Action défensive avant l'action réelle`
             };
         }
 
@@ -3083,7 +3136,6 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 match
             });
 
-            // ❌ PERTE
             if (!duel.ok) {
                 return {
                     message:
@@ -3103,20 +3155,15 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 defense.toLowerCase().includes("bloc")
             ) {
 
-                // ❌ si tir déjà parti
                 if (actions.includes("tir")) {
-
                     return {
                         message:
 `❌ Action irréversible
 
-🥅 Tir déjà effectué
-
-➡️ Impossible de réagir`
+🥅 Tir déjà effectué`
                     };
                 }
 
-                // ✅ contre possible
                 match.phaseDuel = {
                     attaquant,
                     defenseur,
@@ -3128,9 +3175,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                     message:
 `⚠️ CONTRE POSSIBLE !
 
-🎯 ${attaquant.nom} peut réagir
-
-➡️ Envoie un nouveau pavé`
+🎯 ${attaquant.nom} peut réagir`
                 };
             }
 
@@ -3143,7 +3188,6 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 const accDef = defenseur.data?.acc || 50;
                 const diff = accDef - accAtt;
 
-                // attaquant avance
                 avancerZone(attaquant, 1);
 
                 if (diff > 0) {
@@ -3154,7 +3198,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                         message:
 `🔥 ${attaquant.nom} passe !
 
-⚡ ${defenseur.nom} revient et bloque la route
+⚡ ${defenseur.nom} revient bloquer
 
 ⚠️ CONTRE POSSIBLE`
                     };
@@ -3174,7 +3218,6 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                     };
                 }
 
-                // éliminé
                 actions.push("defenseur battu");
             }
         }
@@ -3223,13 +3266,13 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
     };
 }
         
-// ===============================
-// ⏱️ TIMER GLOBAL UNIQUE (FIX CIBLE)
-// ===============================
+
 // ===============================
 // ⏱️ TIMER GLOBAL UNIQUE (FINAL)
 // ===============================
 function startGlobalTimer(ovl, chat, match) {
+    
+    if (!match || match.etat !== "en_cours") return;
 
     // 🔥 clear anciens timers
     if (match.timerGlobal) {
@@ -3396,9 +3439,7 @@ ovlcmd({
 }, async (ms_org, ovl, cmd_options) => {
     try {
 
-        // ✅ ms_org EST DÉJÀ LE JID
         const chat = ms_org;
-
         const match = matchsActifs.get(chat);
 
         if (!match) {
@@ -3408,24 +3449,33 @@ ovlcmd({
         }
 
         // ===============================
-        // ⛔ STOP TOUS LES TIMERS
+        // ⛔ STOP TOUS LES TIMERS (FIX)
         // ===============================
+        if (match.timerGlobal) clearTimeout(match.timerGlobal);
+        if (match.timerWarning) clearTimeout(match.timerWarning);
+
+        // anciens timers (sécurité)
         if (match.timerPave) clearTimeout(match.timerPave);
         if (match.timerTour) clearTimeout(match.timerTour);
         if (match.timerKickoff) clearTimeout(match.timerKickoff);
         if (match.timerAction) clearTimeout(match.timerAction);
 
-        // BONUS sécurité
+        // reset refs
+        match.timerGlobal = null;
+        match.timerWarning = null;
         match.timerPave = null;
         match.timerTour = null;
         match.timerKickoff = null;
         match.timerAction = null;
 
         // ===============================
-        // 🧨 RESET MATCH COMPLET
+        // 🧨 RESET MATCH
         // ===============================
         match.etat = "arrete";
         match.kickoffStarted = false;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.phaseDuel = null;
 
         // ===============================
         // 🗑 SUPPRESSION
@@ -3446,5 +3496,88 @@ ovlcmd({
         });
     }
 });
+
+// ===============================
+// 🧪 COMMANDE +matchtest⚽
+// ===============================
+ovlcmd({
+    nom_cmd: "matchtest⚽",
+    classe: "BLUELOCK⚽",
+    react: "🧪",
+    desc: "Mode test instantané"
+}, async (ms_org, ovl, { ms, auteur_Message, repondre }) => {
+
+    matchsTest.set(ms_org, {
+        etat: "attente_lineup",
+        id1: auteur_Message,
+        id2: auteur_Message,
+        team1: "TEST A",
+        team2: "TEST B",
+        lineup1: null,
+        lineup2: null,
+        joueurTour: auteur_Message,
+        pendingAttack: null,
+        waitingDefenseFrom: null,
+        lastAttacker: null,
+        lastPave: null,
+        testMode: true
+    });
+
+    await repondre(`🧪 MODE TEST ACTIVÉ
+
+Envoie 2 lineups comme d'habitude.
+
+Ensuite envoie ton pavé ⚽
+Puis utilise +next⚽ pour analyser instantanément ⚡`);
+});
+
+
+// ===============================
+// ⚡ COMMANDE +next⚽
+// ===============================
+ovlcmd({
+    nom_cmd: "next⚽",
+    classe: "BLUELOCK⚽",
+    react: "⚡",
+    desc: "Analyse instantanée du pavé"
+}, async (ms_org, ovl, { ms, repondre }) => {
+
+    const match = matchsTest.get(ms_org);
+    if (!match) return repondre("❌ Aucun match test actif.");
+
+    if (!match.lastPave) {
+        return repondre("❌ Aucun pavé détecté.\nEnvoie un pavé ⚽ d'abord.");
+    }
+
+    try {
+        const result = await handlePaveGame(match.lastPave, ovl);
+
+        if (result && result.message) {
+            await ovl.sendMessage(ms_org, {
+                text: result.message
+            }, { quoted: ms });
+        } else {
+            await repondre("⚠️ Aucun résultat.");
+        }
+
+    } catch (e) {
+        console.error("❌ ERREUR TEST:", e);
+        await repondre("❌ Erreur pendant l'analyse.");
+    }
+});
+// ===============================
+// ⚡ COMMANDE +ENDTEST⚽
+// ===============================
+ovlcmd({
+    nom_cmd: "endtest⚽",
+    classe: "BLUELOCK⚽",
+    react: "❌"
+}, async (ms_org, ovl, { repondre }) => {
+
+    matchsTest.delete(ms_org);
+    await repondre("🧪 Mode test terminé.");
+});
+
+
 
 module.exports = { messageMatch, verifierFiche };
