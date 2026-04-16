@@ -38,49 +38,6 @@ function getJoueurData(nom){
 }
 
 // ===============================
-// 🔎 NORMALISATION NOM (GLOBAL)
-// ===============================
-const pureName = str => {
-  if (!str) return "";
-  let s = String(str);
-  s = s.replace(/.+?/g, " ");
-  s = s.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, " ");
-  s = s.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, " ");
-  s = s.replace(/[\uFE00-\uFE0F\u200D]/g, " ");
-  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-  s = s.replace(/[^0-9a-zA-ZÀ-ÿ\s]/g, " ");
-  s = s.replace(/\s+/g, " ").trim().toLowerCase();
-  return s;
-};
-
-// ===============================
-// 🎯 FIND PLAYER BLUELOCK
-// ===============================
-function findBlueLockPlayer(inputName) {
-  const players = Object.values(cardsBlueLock);
-  const input = pureName(inputName);
-
-  // 1. exact
-  let found = players.find(p => pureName(p.name) === input);
-
-  // 2. includes
-  if (!found) {
-    found = players.find(p => pureName(p.name).includes(input));
-  }
-
-  // 3. par mots
-  if (!found) {
-    const words = input.split(" ");
-    found = players.find(p => {
-      const nameWords = pureName(p.name).split(" ");
-      return words.some(w => nameWords.includes(w));
-    });
-  }
-
-  return found || null;
-}
-
-// ===============================
 // 🧠 GAMEPLAY RULE ENGINE
 // ===============================
 
@@ -1692,6 +1649,84 @@ async function messageMatch(ms, ovl) {
         .trim();
 
     // ===============================
+    // 🧪 ACTIVER MODE TEST
+    // ===============================
+ if (safeText.toLowerCase() === "+test⚽") {
+
+    // ❌ uniquement autorisé JUSTE après kickoff
+    if (!(match.etat === "en_cours" && match.phase === "kickoff")) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Le mode test doit être activé juste après le coup d’envoi."
+        });
+        return;
+    }
+
+    match.mode = "test";
+    match.testBuffer = null;
+
+    // ⛔ stop timers
+    if (match.timerKickoff) clearTimeout(match.timerKickoff);
+    if (match.timerPave) clearTimeout(match.timerPave);
+
+    await ovl.sendMessage(chat, {
+        text: `🧪 MODE TEST ACTIVÉ
+
+🎮 Tu contrôles les 2 équipes
+📥 Envoie ton pavé
+➡️ Puis tape +next pour analyser
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
+    });
+
+    return;
+}
+
+    // ===============================
+    // ▶️ ANALYSE TEST
+    // ===============================
+    if (safeText.toLowerCase() === "+next") {
+
+        if (match.mode !== "test") return;
+
+        if (!match.testBuffer) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Aucun pavé enregistré"
+            });
+            return;
+        }
+
+        await handleTestMode(ovl, chat, match);
+
+        match.testBuffer = null;
+        return;
+    }
+
+    // ===============================
+    // 📥 STOCKAGE PAVÉ TEST
+    // ===============================
+    if (match.mode === "test") {
+
+        const isPave =
+            safeText.includes("💬:") &&
+            safeText.includes("⚽:") &&
+            safeText.includes("🔁:") &&
+            safeText.includes("BLUELOCK");
+
+        if (isPave) {
+
+            match.testBuffer = safeText;
+
+            await ovl.sendMessage(chat, {
+                text: `📥 Pavé enregistré !
+Tape +next pour analyser`
+            });
+
+            return;
+        }
+    }
+
+    // ===============================
     // 🔥 GESTION PAVÉ NORMAL
     // ===============================
     const handled = await handlePaveGame(ms, ovl);
@@ -2665,6 +2700,52 @@ if(distance > 20 && tir < 90){
     return { ok:true };
 }           
 
+// ===============================
+    // 🤖 MODE DEV / MODE TEST ♻️ 
+    // ===============================
+async function handleTestMode(ovl, chat, match) {
+
+    const text = match.testBuffer;
+    if (!text) return;
+
+    const action = extraireAction(text);
+
+    if (!action) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Aucune action détectée"
+        });
+        return;
+    }
+
+    const sequences = separerSequences(action);
+
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    let resume = "🧪 RÉSULTAT TEST\n\n";
+
+    for (const seq of sequences) {
+
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
+        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+
+        const joueur = allJoueurs.find(j =>
+            j.nom.toLowerCase() === nom?.toLowerCase()
+        );
+
+        if (!joueur) {
+            resume += `❌ Joueur introuvable\n\n`;
+            continue;
+        }
+
+        if (!joueur.data) {
+            joueur.data = getJoueurData(joueur.nom);
+        }
+
+        resume += `👤 ${joueur.nom}\n`;
+
         // =====================
         // ⚔️ WEAPON
         // =====================
@@ -2921,9 +3002,6 @@ ${verdict}
 // =========================
 async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
-    // 🔗 ASSURE VIS A VIS
-    assignerVisAVis(match);
-
     const attaqueAction = extraireAction(attaqueTxt);
     const defenseAction = extraireAction(defenseTxt);
 
@@ -2950,23 +3028,20 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
         const seq = attaqueSeq[i];
 
-        // 🔥 EXTRACTION NOM SAFE
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
+        const joueurMatch = seq.match(/\)\s*([^\s]+)/);
         const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
         attaquant = allJoueurs.find(j =>
             j.nom.toLowerCase() === nom?.toLowerCase()
         );
 
-        if (!attaquant) {
-            return { message: "❌ Joueur attaquant introuvable" };
-        }
+        if (!attaquant) continue;
 
         if (!attaquant.data) {
             attaquant.data = getJoueurData(attaquant.nom);
         }
 
-        defenseur = attaquant.visavis || null;
+        defenseur = attaquant.visavis;
 
         // =========================
         // 🎯 TYPE ACTION
@@ -2974,22 +3049,25 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
         let typeAction = "controle";
 
         if (seq.toLowerCase().includes("dribble")) typeAction = "dribble";
-        else if (seq.toLowerCase().includes("passe")) typeAction = "passe";
-        else if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
+        if (seq.toLowerCase().includes("passe")) typeAction = "passe";
+        if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
 
         actions.push(typeAction);
 
+        // =========================
+        // 🔴 DEFENSE ASSOCIEE
+        // =========================
         const defense = defenseSeq[i] || "";
 
         // =========================
-        // ❌ TIMING INTERDIT
+        // ❌ TIMING IMPOSSIBLE
         // =========================
         if (defense.toLowerCase().includes("avant")) {
             return {
                 message:
 `❌ Mauvais timing
 
-⛔ Action défensive avant l'action réelle`
+⛔ Action défensive avant l'action réelle (divination interdite)`
             };
         }
 
@@ -3005,6 +3083,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 match
             });
 
+            // ❌ PERTE
             if (!duel.ok) {
                 return {
                     message:
@@ -3024,15 +3103,20 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 defense.toLowerCase().includes("bloc")
             ) {
 
+                // ❌ si tir déjà parti
                 if (actions.includes("tir")) {
+
                     return {
                         message:
 `❌ Action irréversible
 
-🥅 Tir déjà effectué`
+🥅 Tir déjà effectué
+
+➡️ Impossible de réagir`
                     };
                 }
 
+                // ✅ contre possible
                 match.phaseDuel = {
                     attaquant,
                     defenseur,
@@ -3044,7 +3128,9 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                     message:
 `⚠️ CONTRE POSSIBLE !
 
-🎯 ${attaquant.nom} peut réagir`
+🎯 ${attaquant.nom} peut réagir
+
+➡️ Envoie un nouveau pavé`
                 };
             }
 
@@ -3057,6 +3143,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                 const accDef = defenseur.data?.acc || 50;
                 const diff = accDef - accAtt;
 
+                // attaquant avance
                 avancerZone(attaquant, 1);
 
                 if (diff > 0) {
@@ -3067,7 +3154,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                         message:
 `🔥 ${attaquant.nom} passe !
 
-⚡ ${defenseur.nom} revient bloquer
+⚡ ${defenseur.nom} revient et bloque la route
 
 ⚠️ CONTRE POSSIBLE`
                     };
@@ -3087,6 +3174,7 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
                     };
                 }
 
+                // éliminé
                 actions.push("defenseur battu");
             }
         }
@@ -3135,13 +3223,13 @@ async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
     };
 }
         
-
+// ===============================
+// ⏱️ TIMER GLOBAL UNIQUE (FIX CIBLE)
+// ===============================
 // ===============================
 // ⏱️ TIMER GLOBAL UNIQUE (FINAL)
 // ===============================
 function startGlobalTimer(ovl, chat, match) {
-    
-    if (!match || match.etat !== "en_cours") return;
 
     // 🔥 clear anciens timers
     if (match.timerGlobal) {
@@ -3296,6 +3384,7 @@ function startGlobalTimer(ovl, chat, match) {
     }, 6 * 60 * 1000);
 }
 
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
@@ -3307,7 +3396,9 @@ ovlcmd({
 }, async (ms_org, ovl, cmd_options) => {
     try {
 
+        // ✅ ms_org EST DÉJÀ LE JID
         const chat = ms_org;
+
         const match = matchsActifs.get(chat);
 
         if (!match) {
@@ -3317,33 +3408,24 @@ ovlcmd({
         }
 
         // ===============================
-        // ⛔ STOP TOUS LES TIMERS (FIX)
+        // ⛔ STOP TOUS LES TIMERS
         // ===============================
-        if (match.timerGlobal) clearTimeout(match.timerGlobal);
-        if (match.timerWarning) clearTimeout(match.timerWarning);
-
-        // anciens timers (sécurité)
         if (match.timerPave) clearTimeout(match.timerPave);
         if (match.timerTour) clearTimeout(match.timerTour);
         if (match.timerKickoff) clearTimeout(match.timerKickoff);
         if (match.timerAction) clearTimeout(match.timerAction);
 
-        // reset refs
-        match.timerGlobal = null;
-        match.timerWarning = null;
+        // BONUS sécurité
         match.timerPave = null;
         match.timerTour = null;
         match.timerKickoff = null;
         match.timerAction = null;
 
         // ===============================
-        // 🧨 RESET MATCH
+        // 🧨 RESET MATCH COMPLET
         // ===============================
         match.etat = "arrete";
         match.kickoffStarted = false;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.phaseDuel = null;
 
         // ===============================
         // 🗑 SUPPRESSION
@@ -3364,6 +3446,5 @@ ovlcmd({
         });
     }
 });
-
 
 module.exports = { messageMatch, verifierFiche };
