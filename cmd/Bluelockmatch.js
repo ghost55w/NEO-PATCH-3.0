@@ -29,13 +29,11 @@ const POSITION_POSTES = {
 // =========================
 // 🎯 GET DATA JOUEUR
 // =========================
-function getJoueurData(nom){
-    const clean = nom.trim().toLowerCase().replace(/\s+/g, " ");
-
-    return Object.values(cardsBlueLock).find(j => 
-        j.name.trim().toLowerCase().replace(/\s+/g, " ") === clean
-    );
+function getJoueurData(nom) {
+    const player = findBlueLockPlayer(nom);
+    return player || null;
 }
+
 
 // ===============================
 // 🧠 GAMEPLAY RULE ENGINE
@@ -1802,94 +1800,123 @@ if (match.etat === "attente_lineup") {
 
     const senderJid = getSenderJid(ms);
 
-    // ===============================
-    // ✅ TEAM 1
-    // ===============================
-    if (squad === team1 && !match.equipe1) {
+    
+// ===============================
+// ✅ TEAM 1
+// ===============================
+if (squad === team1 && !match.equipe1) {
 
-        if (match.id1 && match.id1 !== senderJid) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Cette équipe est déjà contrôlée"
-            });
-            return;
-        }
-
-        match.id1 = senderJid;
-
-        const parsed = parseSquadBlueLock(safeText);
-
-        if (!parsed || !parsed.joueurs) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Lineup invalide"
-            });
-            return;
-        }
-
-        match.lineup1 = parsed.joueurs.map(j => {
-
-            const poste = POSITION_POSTES[j.position];
-
-            return {
-                ...j,
-                data: getJoueurData(j.nom),
-                ligne: poste?.ligne || "milieu",
-                zoneX: poste?.zoneX || "axe",
-                zoneY: null,
-                visavis: null
-            };
-        });
-
-        match.equipe1 = true;
-
+    if (match.id1 && match.id1 !== senderJid) {
         await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+            text: "❌ Cette équipe est déjà contrôlée"
         });
+        return;
     }
 
-    // ===============================
-    // ✅ TEAM 2
-    // ===============================
-    else if (squad === team2 && !match.equipe2) {
+    match.id1 = senderJid;
 
-        if (match.id2 && match.id2 !== senderJid) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Cette équipe est déjà contrôlée"
-            });
-            return;
-        }
+    const parsed = parseSquadBlueLock(safeText);
 
-        match.id2 = senderJid;
-
-        const parsed = parseSquadBlueLock(safeText);
-
-        if (!parsed || !parsed.joueurs) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Lineup invalide"
-            });
-            return;
-        }
-
-        match.lineup2 = parsed.joueurs.map(j => {
-
-            const poste = POSITION_POSTES[j.position];
-
-            return {
-                ...j,
-                data: getJoueurData(j.nom),
-                ligne: poste?.ligne || "milieu",
-                zoneX: poste?.zoneX || "axe",
-                zoneY: null,
-                visavis: null
-            };
-        });
-
-        match.equipe2 = true;
-
+    if (!parsed || !parsed.joueurs) {
         await ovl.sendMessage(chat, {
-            text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+            text: "❌ Lineup invalide"
         });
+        return;
     }
 
+    match.lineup1 = parsed.joueurs.map(j => {
+
+        const poste = POSITION_POSTES[j.position];
+        const playerData = getJoueurData(j.nom);
+
+        if (!playerData) {
+            console.log("❌ Joueur introuvable:", j.nom);
+            return null;
+        }
+
+        return {
+            ...j,
+
+            // 🔥 NOM OFFICIEL (ULTRA IMPORTANT)
+            nom: playerData.name,
+
+            // 🔥 DATA COMPLETE
+            data: playerData,
+
+            ligne: poste?.ligne || "milieu",
+            zoneX: poste?.zoneX || "axe",
+            zoneY: null,
+
+            visavis: null
+        };
+
+    }).filter(Boolean);
+
+    match.equipe1 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team1Nom}* !`
+    });
+} 
+    
+    
+// ===============================
+// ✅ TEAM 2
+// ===============================
+else if (squad === team2 && !match.equipe2) {
+
+    if (match.id2 && match.id2 !== senderJid) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Cette équipe est déjà contrôlée"
+        });
+        return;
+    }
+
+    match.id2 = senderJid;
+
+    const parsed = parseSquadBlueLock(safeText);
+
+    if (!parsed || !parsed.joueurs) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Lineup invalide"
+        });
+        return;
+    }
+
+    match.lineup2 = parsed.joueurs.map(j => {
+
+        const poste = POSITION_POSTES[j.position];
+        const playerData = getJoueurData(j.nom);
+
+        if (!playerData) {
+            console.log("❌ Joueur introuvable:", j.nom);
+            return null;
+        }
+
+        return {
+            ...j,
+
+            // 🔥 NOM OFFICIEL
+            nom: playerData.name,
+
+            data: playerData,
+
+            ligne: poste?.ligne || "milieu",
+            zoneX: poste?.zoneX || "axe",
+            zoneY: null,
+
+            visavis: null
+        };
+
+    }).filter(Boolean);
+
+    match.equipe2 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation confirmée pour *${match.team2Nom}* !`
+    });
+} 
+    
     // ===============================
     // 🚀 MATCH PRÊT
     // ===============================
