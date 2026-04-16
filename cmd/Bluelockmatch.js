@@ -159,7 +159,14 @@ function extraireJoueurPrincipal(actionText){
     return match ? match[1].trim() : null;
 }
 
-
+// ===============================
+// 🔎 FIND PLAYER IN MATCH
+// ===============================
+function findPlayerInMatch(match, nom) {
+    return [...match.lineup1, ...match.lineup2].find(j =>
+        pureName(j.nom).includes(pureName(nom))
+    );
+}
 // ===============================
 // 🔎 NORMALISATION NOM (GLOBAL)
 // ===============================
@@ -2160,7 +2167,6 @@ if (match.phaseDuel) {
 // ===============================
 // 🎯 EXTRACTION JOUEUR (IMPORTANT)
 // ===============================
-
 const actionText = extraireAction(text);
 const nomJoueur = extraireJoueurPrincipal(actionText);
 
@@ -2170,12 +2176,12 @@ const allJoueurs = [
 ];
 
 const joueurObj = allJoueurs.find(j =>
-    j.nom.toLowerCase() === nomJoueur?.toLowerCase()
+    pureName(j.nom).includes(pureName(nomJoueur))
 );
 
 if (!joueurObj) {
     await ovl.sendMessage(chat, {
-        text: "❌ Joueur attaquant introuvable"
+        text: `❌ Joueur introuvable: ${nomJoueur}`
     });
     return true;
 }
@@ -2598,12 +2604,15 @@ function handleActionsSecondaires(match, texte){
         const joueurMatch = seq.match(/\)\s*([^\s]+)/);
         const nom = joueurMatch ? joueurMatch[1].trim() : null;
 
-        const joueur = allJoueurs.find(j =>
-            j.nom.toLowerCase() === nom?.toLowerCase()
-        );
+        // ✅ FIX ICI
+        const joueur = allJoueurs.find(j => {
+            const a = pureName(j.nom);
+            const b = pureName(nom);
+            return a === b || a.includes(b) || b.includes(a);
+        });
 
         if(!joueur){
-            return { ok:false, erreur:"❌ Joueur secondaire introuvable" };
+            return { ok:false, erreur:`❌ Joueur secondaire introuvable: ${nom}` };
         }
 
         // 🚫 uniquement déplacement autorisé
