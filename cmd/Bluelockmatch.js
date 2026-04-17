@@ -1911,40 +1911,24 @@ if (squad === team1 && !match.equipe1) {
         return;
     }
 
-    match.lineup1 = parsed.joueurs.map(j => {
+    // 🔥 VALIDATION + NORMALISATION + POSITIONS
+    const check1 = await verifierLineupEtChargerData(parsed.joueurs);
 
-        const poste = POSITION_POSTES[j.position];
-        const playerData = getJoueurData(j.nom);
+    if (!check1.ok) {
+        await ovl.sendMessage(chat, {
+            text: check1.erreur
+        });
+        return;
+    }
 
-        if (!playerData) {
-            console.log("❌ Joueur introuvable:", j.nom);
-            return null;
-        }
-
-        return {
-            ...j,
-
-            // 🔥 NOM OFFICIEL (ULTRA IMPORTANT)
-            nom: playerData.name,
-
-            // 🔥 DATA COMPLETE
-            data: playerData,
-
-            ligne: poste?.ligne || "milieu",
-            zoneX: poste?.zoneX || "axe",
-            zoneY: null,
-
-            visavis: null
-        };
-
-    }).filter(Boolean);
+    match.lineup1 = check1.joueurs;
 
     match.equipe1 = true;
 
     await ovl.sendMessage(chat, {
         text: `✅ Formation confirmée pour *${match.team1Nom}* !`
     });
-} 
+}
     
     
 // ===============================
@@ -1970,39 +1954,24 @@ else if (squad === team2 && !match.equipe2) {
         return;
     }
 
-    match.lineup2 = parsed.joueurs.map(j => {
+    // 🔥 VALIDATION + NORMALISATION + POSITIONS
+    const check2 = await verifierLineupEtChargerData(parsed.joueurs);
 
-        const poste = POSITION_POSTES[j.position];
-        const playerData = getJoueurData(j.nom);
+    if (!check2.ok) {
+        await ovl.sendMessage(chat, {
+            text: check2.erreur
+        });
+        return;
+    }
 
-        if (!playerData) {
-            console.log("❌ Joueur introuvable:", j.nom);
-            return null;
-        }
-
-        return {
-            ...j,
-
-            // 🔥 NOM OFFICIEL
-            nom: playerData.name,
-
-            data: playerData,
-
-            ligne: poste?.ligne || "milieu",
-            zoneX: poste?.zoneX || "axe",
-            zoneY: null,
-
-            visavis: null
-        };
-
-    }).filter(Boolean);
+    match.lineup2 = check2.joueurs;
 
     match.equipe2 = true;
 
     await ovl.sendMessage(chat, {
         text: `✅ Formation confirmée pour *${match.team2Nom}* !`
     });
-} 
+}
     
     // ===============================
     // 🚀 MATCH PRÊT
