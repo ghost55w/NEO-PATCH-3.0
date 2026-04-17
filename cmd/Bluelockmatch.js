@@ -159,6 +159,25 @@ function extraireJoueurPrincipal(actionText){
     return match ? match[1].trim() : null;
 }
 
+function extractPlayersFromText(message, cardsObject) {
+  const texte = pureName(message);
+
+  const joueursTrouves = [];
+
+  for (const player of Object.values(cardsObject)) {
+    const name = pureName(player.name);
+
+    // match mot complet uniquement
+    const regex = new RegExp(`\\b${name}\\b`, "i");
+
+    if (regex.test(texte)) {
+      joueursTrouves.push(player.name);
+    }
+  }
+
+  return joueursTrouves;
+}
+
 // =========================
 // 🔧 NORMALIZE (cardsbl style)
 // =========================
@@ -185,20 +204,23 @@ function findBlueLockPlayer(inputName) {
 // =========================
 // 🔍 FIND PLAYER IN MATCH
 // =========================
-function findPlayerInMatch(match, nom){
+function findPlayerInMatch(match, nom) {
 
     const allJoueurs = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    const q = normalize(nom);
+    const input = pureName(nom);
 
-    return (
-        allJoueurs.find(j => normalize(j.nom) === q) ||
-        allJoueurs.find(j => normalize(j.nom).startsWith(q)) ||
-        allJoueurs.find(j => normalize(j.nom).includes(q))
-    );
+    return allJoueurs.find(j => {
+        const nomJoueur = pureName(j.nom || j.name);
+        return (
+            nomJoueur === input ||
+            nomJoueur.startsWith(input) ||
+            nomJoueur.includes(input)
+        );
+    }) || null;
 }
 
 // ===============================
@@ -221,28 +243,27 @@ const pureName = str => {
 // 🎯 FIND PLAYER BLUELOCK
 // ===============================
 function findBlueLockPlayer(inputName) {
+  if (!inputName) return null;
+
   const players = Object.values(cardsBlueLock);
   const input = pureName(inputName);
 
   // 1. exact
   let found = players.find(p => pureName(p.name) === input);
 
-  // 2. includes
+  // 2. startsWith
+  if (!found) {
+    found = players.find(p => pureName(p.name).startsWith(input));
+  }
+
+  // 3. includes
   if (!found) {
     found = players.find(p => pureName(p.name).includes(input));
   }
 
-  // 3. par mots
-  if (!found) {
-    const words = input.split(" ");
-    found = players.find(p => {
-      const nameWords = pureName(p.name).split(" ");
-      return words.some(w => nameWords.includes(w));
-    });
-  }
-
   return found || null;
 }
+
 
 // ===============================
 // RÉSUMÉ 
