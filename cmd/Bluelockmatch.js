@@ -2206,72 +2206,48 @@ if (!joueurObj) {
     // 🎯 SYSTEME ATTAQUE / DEFENSE
     // ===============================
     
-// ===============================
-// 🟢 ATTAQUE
-// ===============================
-if (!match.pendingAttack) {
+    // 🟢 ATTAQUE
+    if (!match.pendingAttack) {
 
-    if (sender !== normalizeJid(match.joueurTour)) {
+        if (sender !== normalizeJid(match.joueurTour)) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Ce n’est pas ton tour !"
+            });
+            return true;
+        }
+
+        match.pendingAttack = text;
+
+        const nextJoueur =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+        match.waitingDefenseFrom = nextJoueur;
+        match.turnType = "defense";
+
+        startGlobalTimer(ovl, chat, match);
+
+        const displayNext = nextJoueur.split("@")[0];
+
         await ovl.sendMessage(chat, {
-            text: "❌ Ce n’est pas ton tour !"
-        });
-        return true;
-    }
+            text:
+`🛡️ Défense requise !
 
-    let resume = "";
-
-    try {
-
-        const attaqueResult = await handleDuelMatch(
-            match,
-            text,
-            null
-        );
-
-        resume = attaqueResult?.message || "Action en cours...";
-
-    } catch (err) {
-        console.log("ERREUR ATTAQUE:", err);
-        resume = "⚠️ Action confuse mais le jeu continue...";
-    }
-
-    // ✅ on stocke l’attaque quand même
-    match.pendingAttack = text;
-
-    const nextJoueur =
-        match.joueurTour === match.id1
-            ? match.id2
-            : match.id1;
-
-    match.waitingDefenseFrom = nextJoueur;
-    match.turnType = "defense";
-
-    startGlobalTimer(ovl, chat, match);
-
-    const displayNext = nextJoueur.split("@")[0];
-
-    // ✅ FORMAT STYLE BLUELOCK
-    await ovl.sendMessage(chat, {
-        text:
-`⚽ ⚡  ATTAQUE EN COURS   !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️ ${resume}
-
-@${displayNext} NEXT 
+@${displayNext} doit répondre avec un pavé
 
 ╰───────────────────     
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextJoueur]
-    });
+            mentions: [nextJoueur]
+        });
 
-    return true;
-}
+        return true;
+    }
         
-// ===============================
 // 🔴 DEFENSE
-// ===============================
 else {
 
+    // ❌ mauvais joueur
     if (sender !== normalizeJid(match.waitingDefenseFrom)) {
         await ovl.sendMessage(chat, {
             text: "❌ Ce n’est pas à toi de défendre !"
@@ -2279,75 +2255,38 @@ else {
         return true;
     }
 
-    let resultat;
-
-    try {
-
-        resultat = await handleDuelMatch(
-            match,
-            match.pendingAttack,
-            text
-        );
-
-    } catch (err) {
-
-        console.log("ERREUR DEFENSE:", err);
-
-        await ovl.sendMessage(chat, {
-            text: "⚠️ Erreur dans l’action, tour ignoré mais match continue."
-        });
-
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        return true;
-    }
+    const attaque = match.pendingAttack;
+    const defense = text;
 
     // =========================
-    // 🆚 MATCH UP (DUEL)
+    // ⚔️ MOTEUR UNIQUE
     // =========================
-    if (resultat.type === "duel") {
+    const resultat = await handleDuelMatch(
+        match,
+        attaque,
+        defense
+    );
 
-        const atk = resultat.attaquant?.nom || "Attaquant";
-        const def = resultat.defenseur?.nom || "Défenseur";
+    await ovl.sendMessage(chat, {
+        text: resultat.message
+    });
 
-        const next =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
+    // =========================
+    // ⚠️ CONTRE POSSIBLE
+    // =========================
+    if (resultat.type === "contre") {
 
-        const displayNext = next.split("@")[0];
-
-        await ovl.sendMessage(chat, {
-            text:
-`🛡️⚡⚽ MATCH UP !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️:  ${atk} 🆚 ${def}, ${resultat.action || "le duel commence..."}
-
-@${displayNext} NEXT! 
-
-╰───────────────────     
-🔷BLUELOCK⚽🥅`,
-            mentions: [next]
-        });
-
-        // ✅ ON ACTIVE PHASE DUEL
         match.phaseDuel = {
-            attaque: match.pendingAttack,
-            defense: text,
-            attaquant: resultat.attaquant,
-            defenseur: resultat.defenseur
+            attaque,
+            defense
         };
 
         return true;
     }
 
     // =========================
-    // 🔁 AUTRE CAS NORMAL
+    // 🔁 RESET NORMAL
     // =========================
-    await ovl.sendMessage(chat, {
-        text: resultat.message
-    });
-
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
@@ -2369,7 +2308,7 @@ else {
     });
 
     return true;
-}
+    }     
        
 
 // ===============================
@@ -3235,322 +3174,170 @@ ${verdict}
 // =========================
 // ⚔️ RESOLUTION DUEL COMPLET
 // =========================
-async function handleDuelMatch(match, attaqueText, defenseText) {
+async function handleDuelMatch(match, attaqueTxt, defenseTxt) {
 
-    try {
+    // 🔗 ASSURE VIS A VIS
+    assignerVisAVis(match);
 
-        const attaqueSeq = extraireSequences(attaqueText);
+    const attaqueAction = extraireAction(attaqueTxt);
+    const defenseAction = extraireAction(defenseTxt);
 
-        let attaquant = null;
-        let defenseur = null;
-
-        // =========================
-        // 🟢 ATTAQUANT
-        // =========================
-        const firstSeq = attaqueSeq[0];
-
-        const joueurMatch = firstSeq.match(/\)\s*([^\s]+)/i);
-        const nomAtt = joueurMatch ? joueurMatch[1]?.trim() : null;
-
-        attaquant = findPlayerInMatch(match, nomAtt);
-
-        if (!attaquant) {
-            return { message: `❌ Attaquant introuvable: ${nomAtt}` };
-        }
-
-        if (!attaquant.data) {
-            attaquant.data = getJoueurData(attaquant.nom);
-        }
-
-        // =========================
-        // 🔴 DEFENSEUR
-        // =========================
-        const defenseMatch = defenseText.match(/\)\s*([^\s]+)/i);
-        const nomDef = defenseMatch ? defenseMatch[1]?.trim() : null;
-
-        defenseur = findPlayerInMatch(match, nomDef);
-
-        if (!defenseur) {
-            return { message: `❌ Défenseur introuvable: ${nomDef}` };
-        }
-
-        if (!defenseur.data) {
-            defenseur.data = getJoueurData(defenseur.nom);
-        }
-
-        // =========================
-        // 🔗 VIS A VIS
-        // =========================
-        attaquant.visavis = defenseur;
-        defenseur.visavis = attaquant;
-
-        // =========================
-        // ⚡ STATS
-        // =========================
-        const accAtt = attaquant.data?.acc || 50;
-        const accDef = defenseur.data?.acc || 50;
-        const phyAtt = attaquant.data?.phy || 50;
-        const phyDef = defenseur.data?.phy || 50;
-
-        const diffAcc = accAtt - accDef;
-        const diffPhy = phyAtt - phyDef;
-
-        const actionDefense = extraireAction(defenseText) || "engage le duel";
-
-        // =========================
-        // 💥 DETECTION CONTACT PHYSIQUE
-        // =========================
-        const isContact =
-            defenseText.toLowerCase().includes("épaule") ||
-            defenseText.toLowerCase().includes("contact") ||
-            defenseText.toLowerCase().includes("pousse") ||
-            defenseText.toLowerCase().includes("charge");
-
-        // =========================
-        // 💪 DUEL PHYSIQUE
-        // =========================
-        if (isContact) {
-
-            if (diffPhy < -5) {
-                return {
-                    type: "contre",
-                    attaquant,
-                    defenseur,
-                    message:
-`💥 ${defenseur.nom} domine physiquement ${attaquant.nom} !
-
-🎙️ ${actionDefense}
-
-⚠️ CONTRE POSSIBLE`
-                };
-            }
-
-            if (diffPhy >= -5 && diffPhy <= 5) {
-                return {
-                    type: "duel",
-                    attaquant,
-                    defenseur,
-                    message:
-`💥⚔️ DUEL PHYSIQUE !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️ ${attaquant.nom} 🆚 ${defenseur.nom}, duel au corps à corps !
-
-╰───────────────────     
-🔷BLUELOCK⚽🥅`
-                };
-            }
-
-            return {
-                type: "attaque_continue",
-                attaquant,
-                defenseur,
-                message:
-`💪 ${attaquant.nom} résiste au contact de ${defenseur.nom} !
-
-🎙️ Il garde le ballon`
-            };
-        }
-
-        // =========================
-        // 🛑 CONTRE
-        // =========================
-        if (diffAcc < -10) {
-            return {
-                type: "contre",
-                attaquant,
-                defenseur,
-                message:
-`🛡️ ${defenseur.nom} stoppe ${attaquant.nom} !
-
-🎙️ ${actionDefense}
-
-⚠️ CONTRE POSSIBLE`
-            };
-        }
-
-        // =========================
-        // 🏃 POURSUITE
-        // =========================
-        if (diffAcc >= -10 && diffAcc <= 0) {
-            return {
-                type: "poursuite",
-                attaquant,
-                defenseur,
-                message:
-`🏃 ${defenseur.nom} colle ${attaquant.nom} !
-
-🎙️ ${actionDefense}
-
-⚠️ PRESSION`
-            };
-        }
-
-        // =========================
-        // ⚔️ MATCH UP
-        // =========================
-        if (diffAcc > 0 && diffAcc <= 10) {
-            return {
-                type: "duel",
-                attaquant,
-                defenseur,
-                message:
-`🛡️⚡⚽ MATCH UP !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️: ${attaquant.nom} 🆚 ${defenseur.nom}, ${actionDefense}
-
-╰───────────────────     
-🔷BLUELOCK⚽🥅`
-            };
-        }
-
-        // =========================
-        // 🚀 ATTAQUANT PASSE
-        // =========================
-        return {
-            type: "attaque_continue",
-            attaquant,
-            defenseur,
-            message:
-`🔥 ${attaquant.nom} dépasse ${defenseur.nom} !
-
-🎙️ Il continue son action`
-        };
-
-    } catch (err) {
-
-        console.log("DUEL ERROR:", err);
-
-        return {
-            message: "❌ Erreur duel"
-        };
+    if (!attaqueAction) {
+        return { message: "❌ Aucune action d’attaque détectée" };
     }
-}
 
-  // =========================
-// ⚔️ HANDLE DUEL MATCH
-// =========================
-async function handleDuelMatch(match, attaqueText, defenseText) {
+    const attaqueSeq = separerSequences(attaqueAction);
+    const defenseSeq = defenseAction ? separerSequences(defenseAction) : [];
 
-    const attaqueSeq = (attaqueText.match(/⚽:(.*)/i)?.[1] || "")
-        .split("/")
-        .map(s => s.trim())
-        .filter(Boolean);
-
-    const defenseSeq = (defenseText.match(/⚽:(.*)/i)?.[1] || "")
-        .split("/")
-        .map(s => s.trim())
-        .filter(Boolean);
+    const allJoueurs = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
 
     let actions = [];
     let attaquant = null;
     let defenseur = null;
 
-    let actionIrreversible = false;
+   // =========================
+// 🟢 TRAITEMENT ATTAQUE
+// =========================
+for (let i = 0; i < attaqueSeq.length; i++) {
 
-    // =========================
-    // 🟢 TRAITEMENT ATTAQUE
-    // =========================
-    for (let i = 0; i < attaqueSeq.length; i++) {
+    const seq = attaqueSeq[i];
 
-        const seq = attaqueSeq[i];
+    // 🔥 EXTRACTION NOM SAFE
+    const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
+    const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
-        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
+    // ✅ NOUVEAU SYSTEME
+    attaquant = findPlayerInMatch(match, nom);
 
-        attaquant = findPlayerInMatch(match, nom);
+    if (!attaquant) {
+        return { message: `❌ Joueur attaquant introuvable: ${nom}` };
+    }
 
-        if (!attaquant) {
+    if (!attaquant.data) {
+        attaquant.data = getJoueurData(attaquant.nom);
+    }
+
+    defenseur = attaquant.visavis || null;
+}
+
+
+        // =========================
+        // 🎯 TYPE ACTION
+        // =========================
+        let typeAction = "controle";
+
+        if (seq.toLowerCase().includes("dribble")) typeAction = "dribble";
+        else if (seq.toLowerCase().includes("passe")) typeAction = "passe";
+        else if (seq.toLowerCase().includes("tir") || seq.toLowerCase().includes("frappe")) typeAction = "tir";
+
+        actions.push(typeAction);
+
+        const defense = defenseSeq[i] || "";
+
+        // =========================
+        // ❌ TIMING INTERDIT
+        // =========================
+        if (defense.toLowerCase().includes("avant")) {
             return {
-                type: "error",
-                message: `❌ Joueur attaquant introuvable: ${nom}`
+                message:
+`❌ Mauvais timing
+
+⛔ Action défensive avant l'action réelle`
             };
         }
 
-        if (!attaquant.data) {
-            attaquant.data = getJoueurData(attaquant.nom);
-        }
-
-        defenseur = attaquant.visavis || null;
-
-        const actionsDetectees = detecterActions(seq);
-        const typeAction = actionsDetectees[0];
-
         // =========================
-        // 📊 STATS COMPLETES
+        // ⚔️ DUEL
         // =========================
-        const accAtt = attaquant.data?.acc || 50;
-        const driAtt = attaquant.data?.dri || 50;
-        const phyAtt = attaquant.data?.phy || 50;
+        if (defenseur && defense) {
 
-        const accDef = defenseur?.data?.acc || 50;
-        const defDef = defenseur?.data?.def || 50;
-        const phyDef = defenseur?.data?.phy || 50;
+            const duel = resoudreDuel({
+                attaquant,
+                defenseur,
+                action: typeAction,
+                match
+            });
 
-        // =========================
-        // 🔒 ACTION IRRÉVERSIBLE
-        // =========================
-        const ACTIONS_IRREVERSIBLES = ["passe", "controle", "tir"];
+            if (!duel.ok) {
+                return {
+                    message:
+`⚔️ ${attaquant.nom} 🆚 ${defenseur.nom}
 
-        if (ACTIONS_IRREVERSIBLES.includes(typeAction)) {
-            actionIrreversible = true;
-        }
+🛑 ${defenseur.nom} récupère le ballon 🛡️
 
-        // =========================
-        // 🏃 DEPLACEMENT / CONDUITE
-        // =========================
-        if (typeAction === "deplacement" || typeAction === "conduite") {
+➡️ Action stoppée`
+                };
+            }
 
-            actions.push("avance");
+            // =========================
+            // ⚠️ CONTRE POSSIBLE
+            // =========================
+            if (
+                defense.toLowerCase().includes("tacle") ||
+                defense.toLowerCase().includes("bloc")
+            ) {
 
-            if (defenseur) {
+                if (actions.includes("tir")) {
+                    return {
+                        message:
+`❌ Action irréversible
 
-                const diffVitesse = accDef - accAtt;
+🥅 Tir déjà effectué`
+                    };
+                }
+
+                match.phaseDuel = {
+                    attaquant,
+                    defenseur,
+                    actionCourante: typeAction
+                };
+
+                return {
+                    type: "contre",
+                    message:
+`⚠️ CONTRE POSSIBLE !
+
+🎯 ${attaquant.nom} peut réagir`
+                };
+            }
+
+            // =========================
+            // 🏃 DRIBBLE + POURSUITE
+            // =========================
+            if (typeAction === "dribble") {
+
+                const accAtt = attaquant.data?.acc || 50;
+                const accDef = defenseur.data?.acc || 50;
+                const diff = accDef - accAtt;
 
                 avancerZone(attaquant, 1);
 
-                // 🔥 POURSUITE
-                if (diffVitesse > 0) {
+                if (diff > 0) {
                     avancerZone(defenseur, 1);
 
                     return {
                         type: "contre",
                         message:
-`⚡ ${attaquant.nom} avance !
+`🔥 ${attaquant.nom} passe !
 
-🏃 ${defenseur.nom} le suit de près
+⚡ ${defenseur.nom} revient bloquer
 
 ⚠️ CONTRE POSSIBLE`
                     };
                 }
 
-                if (diffVitesse >= -10) {
+                if (diff >= -10) {
                     avancerZone(defenseur, 1);
 
                     return {
                         type: "contre",
                         message:
-`⚡ ${attaquant.nom} progresse !
+`🔥 ${attaquant.nom} passe !
 
-🔥 ${defenseur.nom} reste au contact
-
-⚠️ CONTRE POSSIBLE`
-                    };
-                }
-
-                // =========================
-                // 🎯 DRIBBLE VS DEF
-                // =========================
-                const diffDribble = driAtt - defDef;
-
-                if (diffDribble > 15) {
-                    actions.push("dribble réussi");
-                } else if (diffDribble > 0) {
-                    actions.push("dribble partiel");
-                } else {
-                    return {
-                        type: "contre",
-                        message:
-`🧱 ${defenseur.nom} stoppe le dribble !
+🏃 ${defenseur.nom} reste au contact
 
 ⚠️ CONTRE POSSIBLE`
                     };
@@ -3561,54 +3348,27 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         }
 
         // =========================
-        // 🤝 CONTACT / DUEL PHYSIQUE
+        // 🥅 TIR FINAL
         // =========================
-        if (defenseur && !actionIrreversible) {
+        if (typeAction === "tir") {
 
-            const diffPhysique = phyAtt - phyDef;
+            const tir = await handleTirEtBut(null, null, match, attaquant, seq);
 
-            attaquant.visavis = defenseur;
-
-            if (Math.abs(diffPhysique) < 10) {
+            if (tir?.but) {
                 return {
-                    type: "duel",
-                    attaquant,
-                    defenseur,
                     message:
-`🛡️⚡⚽ MATCH UP !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️ ${attaquant.nom} 🆚 ${defenseur.nom}
+`⚔️ ${attaquant.nom} 🆚 ${defenseur?.nom || "?"}
 
-💥 Duel physique équilibré !`
+🥅 BUUUUT !!! 🔥`
                 };
-            }
-
-            if (diffPhysique > 0) {
-                actions.push("passe en force");
             } else {
                 return {
-                    type: "contre",
                     message:
-`🧱 ${defenseur.nom} stoppe ${attaquant.nom} !
+`⚔️ ${attaquant.nom} 🆚 ${defenseur?.nom || "?"}
 
-⚠️ CONTRE POSSIBLE`
+❌ Tir raté`
                 };
             }
-        }
-
-        // =========================
-        // 🔒 SI IRRÉVERSIBLE
-        // =========================
-        if (actionIrreversible) {
-            return {
-                type: "action",
-                message:
-`⚡ Action rapide !
-
-🎙️ ${attaquant.nom} exécute son geste
-
-❌ Impossible d’intervenir`
-            };
         }
 
         // =========================
@@ -3619,72 +3379,17 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     }
 
     // =========================
-    // 🛡️ DEFENSE PURE
+    // ✅ RESULTAT FINAL
     // =========================
-    for (let i = 0; i < defenseSeq.length; i++) {
+    return {
+        message:
+`⚔️ ${attaquant?.nom || "?"} 🆚 ${defenseur?.nom || "?"}
 
-        const seq = defenseSeq[i];
+➡️ ${actions.join(" → ")}
 
-        const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
-        const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
-
-        defenseur = findPlayerInMatch(match, nom);
-
-        if (!defenseur) {
-            return {
-                type: "error",
-                message: `❌ Défenseur introuvable: ${nom}`
-            };
-        }
-
-        if (!defenseur.data) {
-            defenseur.data = getJoueurData(defenseur.nom);
-        }
-
-        if (attaquant) {
-            attaquant.visavis = defenseur;
-        }
-
-        return {
-            type: "duel",
-            attaquant,
-            defenseur,
-            message:
-`🛡️⚡⚽ MATCH UP !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️ ${attaquant?.nom || "?"} 🆚 ${defenseur.nom}
-
-🧱 ${defenseur.nom} bloque la progression !
-
-╰───────────────────     
-🔷BLUELOCK⚽🥅 `
-        };
-    }
-
-// =========================
-        // ✅ RESULTAT FINAL (ATTAQUE CONTINUE)
-        // =========================
-        return {
-            type: "action",
-            message:
-`⚽ ⚡ ATTAQUE EN COURS !
-🎙️ ${attaquant?.nom || "?"} progresse...
-
-➡️ ${actions.join(" → ") || "action simple"}
-
-╰───────────────────     
-🔷BLUELOCK⚽🥅`
-        };
-
-    } catch (err) {
-        console.log("DUEL ERROR:", err);
-        return {
-            type: "error",
-            message: "❌ Erreur système duel"
-        };
-    }
+✅ Action réussie`
+    };
 }
-
         
 
 // ===============================
