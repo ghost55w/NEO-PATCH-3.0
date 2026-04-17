@@ -2436,7 +2436,7 @@ if (match.pendingAttack) {
 
     return true;
 }
-       
+        }       
 
 // ===============================
 // -------- GESTION DES DÉPLACEMENTS
