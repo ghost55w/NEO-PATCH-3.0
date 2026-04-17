@@ -2326,11 +2326,11 @@ if (!match.pendingAttack) {
 
     return true;
 }
-        
-// 🔴 DEFENSE
-else {
 
-    // ❌ mauvais joueur
+
+// 🔴 DEFENSE
+if (match.pendingAttack) {
+
     if (sender !== normalizeJid(match.waitingDefenseFrom)) {
         await ovl.sendMessage(chat, {
             text: "❌ Ce n’est pas à toi de défendre !"
@@ -2345,10 +2345,7 @@ else {
     // 🔍 IDENTIFICATION JOUEURS
     // =========================
 
-    // 🔥 BON ATTAQUANT (dernier joueur)
     const attaquantNom = extraireDernierJoueur(attaque);
-
-    // 🔥 DEFENSEUR
     const defenseurNom = extraireJoueurPrincipal(defense);
 
     const attaquant = findPlayerInMatch(match, attaquantNom);
@@ -2368,9 +2365,9 @@ else {
     const resume = resumerAction(actionText);
 
     // =========================
-    // ⚔️ MATCH UP (AVANT CALCUL)
+    // ⚔️ MATCH UP
     // =========================
-    const nextJoueur = match.joueurTour; // 🔥 attaquant rejoue
+    const nextJoueur = match.joueurTour; // attaquant rejoue
     const displayNext = nextJoueur.split("@")[0];
 
     await ovl.sendMessage(chat, {
