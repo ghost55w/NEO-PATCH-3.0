@@ -159,20 +159,34 @@ function extraireJoueurPrincipal(actionText){
     return match ? match[1].trim() : null;
 }
 
-// ===============================
-// 🔎 FIND PLAYER IN MATCH
-// ===============================
-function findPlayerInMatch(match, nom) {
-    const allPlayers = [
+// =========================
+// 🔧 NORMALIZE (cardsbl style)
+// =========================
+function normalize(str){
+    return (str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s\-\_\(\)]/g, "");
+}
+
+// =========================
+// 🔍 FIND PLAYER IN MATCH
+// =========================
+function findPlayerInMatch(match, nom){
+
+    const allJoueurs = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    return allPlayers.find(j => {
-        const a = pureName(j.nom);
-        const b = pureName(nom);
-        return a === b || a.includes(b) || b.includes(a);
-    });
+    const q = normalize(nom);
+
+    return (
+        allJoueurs.find(j => normalize(j.nom) === q) ||
+        allJoueurs.find(j => normalize(j.nom).startsWith(q)) ||
+        allJoueurs.find(j => normalize(j.nom).includes(q))
+    );
 }
 
 // ===============================
@@ -2178,14 +2192,7 @@ if (match.phaseDuel) {
 const actionText = extraireAction(text);
 const nomJoueur = extraireJoueurPrincipal(actionText);
 
-const allJoueurs = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
-
-const joueurObj = allJoueurs.find(j =>
-    pureName(j.nom).includes(pureName(nomJoueur))
-);
+const joueurObj = findPlayerInMatch(match, nomJoueur);
 
 if (!joueurObj) {
     await ovl.sendMessage(chat, {
@@ -2588,7 +2595,9 @@ const notePasse = data.pas || data.ovr || 0;
     };
 }
 
-// DETECTION DES DÉPLACEMENTS SECONDAIRES
+// =========================
+// 🔁 ACTIONS SECONDAIRES
+// =========================
 function handleActionsSecondaires(match, texte){
 
     if(!texte) return { ok:true };
@@ -2602,22 +2611,13 @@ function handleActionsSecondaires(match, texte){
         };
     }
 
-    const allJoueurs = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
     for(const seq of sequences){
 
         const joueurMatch = seq.match(/\)\s*([^\s]+)/);
         const nom = joueurMatch ? joueurMatch[1].trim() : null;
 
-        // ✅ FIX ICI
-        const joueur = allJoueurs.find(j => {
-            const a = pureName(j.nom);
-            const b = pureName(nom);
-            return a === b || a.includes(b) || b.includes(a);
-        });
+        // ✅ NOUVEAU SYSTEME
+        const joueur = findPlayerInMatch(match, nom);
 
         if(!joueur){
             return { ok:false, erreur:`❌ Joueur secondaire introuvable: ${nom}` };
@@ -3209,7 +3209,7 @@ for (let i = 0; i < attaqueSeq.length; i++) {
     const joueurMatch = seq.match(/\)\s*([^\s]+)/i);
     const nom = joueurMatch ? joueurMatch[1]?.trim() : null;
 
-    //
+    // ✅ NOUVEAU SYSTEME
     attaquant = findPlayerInMatch(match, nom);
 
     if (!attaquant) {
@@ -3221,7 +3221,8 @@ for (let i = 0; i < attaqueSeq.length; i++) {
     }
 
     defenseur = attaquant.visavis || null;
-} 
+}
+
 
         // =========================
         // 🎯 TYPE ACTION
