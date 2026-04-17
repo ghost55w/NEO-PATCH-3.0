@@ -245,32 +245,48 @@ function findBlueLockPlayer(inputName) {
 }
 
 // ===============================
-// RÉSUMÉ 
+// 🎯 RESUME ACTION 
 // ===============================
 function resumerAction(actionText){
 
     if(!actionText) return "Action en cours...";
 
-    let txt = actionText;
+    const txt = actionText.toLowerCase();
 
-    // 🔥 simplifier les phrases
-    txt = txt
-        .replace(/fait une passe directe de/gi, "passe")
-        .replace(/contrôle de l'intérieur du pied gauche/gi, "contrôle")
-        .replace(/contrôle de l'intérieur du pied droit/gi, "contrôle")
-        .replace(/conduite de balle/gi, "avance")
-        .replace(/fonce vers/gi, "fonce vers")
-        .replace(/visant/gi, "vers")
-        .replace(/à \d+m/gi, "") // supprime distances
-        .replace(/\s+/g, " ")
-        .trim();
+    // 🔍 détecter joueurs
+    const joueurs = actionText.match(/\)\s*([^\(]+?)\s*(?:\(|\/|$)/g) || [];
 
-    // 🔥 raccourcir longueur
-    if (txt.length > 120) {
-        txt = txt.slice(0, 120) + "...";
+    const noms = joueurs.map(j =>
+        j.replace(/\)\s*/, "").trim()
+    );
+
+    const j1 = noms[0] || "Un joueur";
+    const j2 = noms[1] || null;
+
+    // 🔥 TYPES D’ACTIONS
+
+    // 🟢 PASSE
+    if (txt.includes("passe")) {
+        return `${j1} passe à ${j2 || "un coéquipier"}`;
     }
 
-    return txt;
+    // 🟢 DRIBBLE / PROGRESSION
+    if (txt.includes("fonce") || txt.includes("conduite") || txt.includes("avance")) {
+        return `${j1} progresse balle au pied`;
+    }
+
+    // 🟢 TIR
+    if (txt.includes("tire") || txt.includes("frappe")) {
+        return `${j1} tente une frappe`;
+    }
+
+    // 🔴 DEFENSE
+    if (txt.includes("bloque") || txt.includes("intercepte") || txt.includes("tacle")) {
+        return `${j1} intervient défensivement sur ${j2 || "l’adversaire"}`;
+    }
+
+    // 🔥 PAR DÉFAUT
+    return `${j1} lance une action`;
 }
 
 // ⚡ VMAX NON PRÉCISÉ = LENT
