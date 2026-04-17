@@ -34,6 +34,9 @@ function getJoueurData(nom) {
     return player || null;
 }
 
+// =========================
+// PARSER LINEUP
+// =========================
 function parseLineup(message) {
 
     const lignes = message.split("\n");
@@ -41,15 +44,24 @@ function parseLineup(message) {
 
     for (const ligneBrute of lignes) {
 
-        // 👉 on filtre uniquement les lignes joueurs
         if (!ligneBrute.includes("👤")) continue;
 
-        const joueur = {};
+        // 🔢 numéro (1, 2, 3...)
+        const numMatch = ligneBrute.match(/^(\d{1,2})/);
+        const numero = numMatch ? parseInt(numMatch[1], 10) : null;
 
-        // ✅ ICI QUE TU METS TON TRUC
-        joueur.nom = extractCleanNameFromLine(ligneBrute);
+        // 📍 poste (AG, AC, MC...)
+        const posteMatch = ligneBrute.match(/\(([^)]+)\)/);
+        const poste = posteMatch ? posteMatch[1] : null;
 
-        lineup.push(joueur);
+        // 👤 nom propre
+        const cleanName = extractCleanNameFromLine(ligneBrute);
+
+        lineup.push({
+            numero,
+            poste,
+            nom: pureName(cleanName)
+        });
     }
 
     return lineup;
@@ -198,6 +210,8 @@ function extractPlayersFromText(message, cardsObject) {
   return joueursTrouves;
 }
 
+
+
 // =========================
 // 🔧 NORMALIZE (cardsbl style)
 // =========================
@@ -224,23 +238,19 @@ function findBlueLockPlayer(inputName) {
 // =========================
 // 🔍 FIND PLAYER IN MATCH
 // =========================
-function findPlayerInMatch(match, nom) {
+function findPlayerInMatch(match, nom){
 
     const allJoueurs = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    const input = pureName(nom);
+    const search = compact(nom);
 
     return allJoueurs.find(j => {
-        const nomJoueur = pureName(j.nom || j.name);
-        return (
-            nomJoueur === input ||
-            nomJoueur.startsWith(input) ||
-            nomJoueur.includes(input)
-        );
-    }) || null;
+        const base = compact(j.nom);
+        return base.includes(search) || search.includes(base);
+    });
 }
 
 // ===============================
@@ -259,22 +269,15 @@ const pureName = str => {
   return s;
 };
 
-function extractCleanNameFromLine(line) {
-  if (!line) return null;
+function extractCleanNameFromLine(ligne) {
+  if (!ligne) return "";
 
-  // enlève emojis et trucs avant
-  let clean = line.replace(/.*?\)\s*/g, "");
-
-  // enlève le (95)
-  clean = clean.replace(/\(\d+\)/g, "");
-
-  // enlève drapeaux
-  clean = clean.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, "");
-
-  // trim final
-  clean = clean.trim();
-
-  return clean;
+  return ligne
+    .replace(/\(.*?\)/g, "")        // enlève (AG), (78), (NEL)
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, "") // enlève drapeaux
+    .replace(/[^a-zA-ZÀ-ÿ\s]/g, " ") // enlève le reste
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 // ===============================
@@ -2022,15 +2025,21 @@ if (squad === team1 && !match.equipe1) {
 
     const parsed = parseSquadBlueLock(safeText);
 
-    if (!parsed || !parsed.joueurs) {
+    if (!parsed || !Array.isArray(parsed.joueurs) || parsed.joueurs.length === 0) {
         await ovl.sendMessage(chat, {
             text: "❌ Lineup invalide"
         });
         return;
     }
 
-    // 🔥 VALIDATION + NORMALISATION + POSITIONS
-    const check1 = await verifierLineupEtChargerData(parsed.joueurs);
+    // ✅ GARDE numero + poste
+    const joueursClean = parsed.joueurs.map(j => ({
+        numero: j.numero,
+        poste: j.poste,
+        nom: pureName(j.nom)
+    }));
+
+    const check1 = await verifierLineupEtChargerData(joueursClean);
 
     if (!check1.ok) {
         await ovl.sendMessage(chat, {
@@ -2048,7 +2057,6 @@ if (squad === team1 && !match.equipe1) {
     });
 }
     
-    
 // ===============================
 // ✅ TEAM 2
 // ===============================
@@ -2065,15 +2073,21 @@ else if (squad === team2 && !match.equipe2) {
 
     const parsed = parseSquadBlueLock(safeText);
 
-    if (!parsed || !parsed.joueurs) {
+    if (!parsed || !Array.isArray(parsed.joueurs) || parsed.joueurs.length === 0) {
         await ovl.sendMessage(chat, {
             text: "❌ Lineup invalide"
         });
         return;
     }
 
-    // 🔥 VALIDATION + NORMALISATION + POSITIONS
-    const check2 = await verifierLineupEtChargerData(parsed.joueurs);
+    // 🔥 EXACTEMENT COMME TEAM 1
+    const joueursClean = parsed.joueurs.map(j => ({
+        numero: j.numero,
+        poste: j.poste,
+        nom: pureName(j.nom)
+    }));
+
+    const check2 = await verifierLineupEtChargerData(joueursClean);
 
     if (!check2.ok) {
         await ovl.sendMessage(chat, {
