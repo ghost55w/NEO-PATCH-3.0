@@ -243,7 +243,36 @@ function findBlueLockPlayer(inputName) {
 
   return found || null;
 }
-    
+
+// ===============================
+// RÉSUMÉ 
+// ===============================
+function resumerAction(actionText){
+
+    if(!actionText) return "Action en cours...";
+
+    let txt = actionText;
+
+    // 🔥 simplifier les phrases
+    txt = txt
+        .replace(/fait une passe directe de/gi, "passe")
+        .replace(/contrôle de l'intérieur du pied gauche/gi, "contrôle")
+        .replace(/contrôle de l'intérieur du pied droit/gi, "contrôle")
+        .replace(/conduite de balle/gi, "avance")
+        .replace(/fonce vers/gi, "fonce vers")
+        .replace(/visant/gi, "vers")
+        .replace(/à \d+m/gi, "") // supprime distances
+        .replace(/\s+/g, " ")
+        .trim();
+
+    // 🔥 raccourcir longueur
+    if (txt.length > 120) {
+        txt = txt.slice(0, 120) + "...";
+    }
+
+    return txt;
+}
+
 // ⚡ VMAX NON PRÉCISÉ = LENT
 function regleVitesseMax(txt){
     if(/(course|court|accélère|acceleration|sprint)/i.test(txt)){
@@ -2230,46 +2259,51 @@ if (!joueurObj) {
 
 
 // ===============================
-    // 🎯 SYSTEME ATTAQUE / DEFENSE
-    // ===============================
-    
-    // 🟢 ATTAQUE
-    if (!match.pendingAttack) {
+// 🎯 SYSTEME ATTAQUE / DEFENSE
+// ===============================
 
-        if (sender !== normalizeJid(match.joueurTour)) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Ce n’est pas ton tour !"
-            });
-            return true;
-        }
+// 🟢 ATTAQUE
+if (!match.pendingAttack) {
 
-        match.pendingAttack = text;
-
-        const nextJoueur =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
-
-        match.waitingDefenseFrom = nextJoueur;
-        match.turnType = "defense";
-
-        startGlobalTimer(ovl, chat, match);
-
-        const displayNext = nextJoueur.split("@")[0];
-
+    if (sender !== normalizeJid(match.joueurTour)) {
         await ovl.sendMessage(chat, {
-            text:
-`🛡️ Défense requise !
+            text: "❌ Ce n’est pas ton tour !"
+        });
+        return true;
+    }
 
-@${displayNext} doit répondre avec un pavé
+    match.pendingAttack = text;
+
+    const nextJoueur =
+        match.joueurTour === match.id1
+            ? match.id2
+            : match.id1;
+
+    match.waitingDefenseFrom = nextJoueur;
+    match.turnType = "defense";
+
+    startGlobalTimer(ovl, chat, match);
+
+    const displayNext = nextJoueur.split("@")[0];
+
+    const actionText = extraireAction(text);
+    const resume = resumerAction(actionText);
+
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
+🎙️ : ${resume}
+
+➡️ @${displayNext} NEXT
 
 ╰───────────────────     
 🔷BLUELOCK⚽🥅`,
-            mentions: [nextJoueur]
-        });
+        mentions: [nextJoueur]
+    });
 
-        return true;
-    }
+    return true;
+}
         
 // 🔴 DEFENSE
 else {
