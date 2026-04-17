@@ -170,6 +170,18 @@ function normalize(str){
         .replace(/[\s\-\_\(\)]/g, "");
 }
 
+function findBlueLockPlayer(inputName) {
+
+    const players = Object.values(cardsBlueLock);
+    const q = normalize(inputName);
+
+    return (
+        players.find(p => normalize(p.name) === q) ||
+        players.find(p => normalize(p.name).startsWith(q)) ||
+        players.find(p => normalize(p.name).includes(q))
+    ) || null;
+}
+
 // =========================
 // 🔍 FIND PLAYER IN MATCH
 // =========================
@@ -417,7 +429,53 @@ controle: [
     "controle le ballon" 
     ]
 }; 
-    
+
+
+/* ===============================
+LINEUP CHECK
+=================================*/
+async function verifierLineupEtChargerData(joueurs){
+
+    const result = [];
+
+    for(const j of joueurs){
+
+        // 🔍 recherche dans la DB (comme cardsbl)
+        const data = findBlueLockPlayer(j.nom);
+
+        if(!data){
+            return {
+                ok: false,
+                erreur: `❌ Joueur introuvable: ${j.nom}`
+            };
+        }
+
+        const poste = POSITION_POSTES[j.position];
+
+        result.push({
+            position: j.position,
+
+            // 🔥 NOM OFFICIEL DB
+            nom: data.name,
+
+            // 🔥 DATA COMPLÈTE
+            data: data,
+
+            note: parseInt(j.note),
+
+            ligne: poste?.ligne || "milieu",
+            zoneX: poste?.zoneX || "axe",
+            zoneY: null,
+
+            visavis: null
+        });
+    }
+
+    return {
+        ok: true,
+        joueurs: result
+    };
+}
 /* ===============================
 DETECTION AUTOMATIQUE ACTIONS
 =================================*/
