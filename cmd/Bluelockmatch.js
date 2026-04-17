@@ -255,6 +255,13 @@ function resumerAction(actionText){
 
     // 🔍 détecter joueurs
     const joueurs = actionText.match(/\)\s*([^\(]+?)\s*(?:\(|\/|$)/g) || [];
+function resumerAction(actionText){
+
+    if(!actionText) return "Action en cours...";
+
+    const txt = actionText.toLowerCase();
+
+    const joueurs = actionText.match(/\)\s*([^\(]+?)\s*(?:\(|\/|$)/g) || [];
 
     const noms = joueurs.map(j =>
         j.replace(/\)\s*/, "").trim()
@@ -263,44 +270,27 @@ function resumerAction(actionText){
     const j1 = noms[0] || "Un joueur";
     const j2 = noms[1] || null;
 
-    // 🔥 TYPES D’ACTIONS
-
-    // 🟢 PASSE
+    // 🟢 passe
     if (txt.includes("passe")) {
-        return `${j1} passe à ${j2 || "un coéquipier"}`;
+        return `${j1} sert ${j2 || "un coéquipier"}`;
     }
 
-    // 🟢 DRIBBLE / PROGRESSION
-    if (txt.includes("fonce") || txt.includes("conduite") || txt.includes("avance")) {
-        return `${j1} progresse balle au pied`;
+    // 🟢 progression
+    if (txt.includes("fonce") || txt.includes("avance")) {
+        return `${j1} progresse vers l’avant`;
     }
 
-    // 🟢 TIR
-    if (txt.includes("tire") || txt.includes("frappe")) {
-        return `${j1} tente une frappe`;
+    // 🔴 défense
+    if (
+        txt.includes("bloque") ||
+        txt.includes("intercepte") ||
+        txt.includes("tacle") ||
+        txt.includes("vient")
+    ) {
+        return `${j1} vient bloquer ${j2 || "son adversaire"}`;
     }
 
-    // 🔴 DEFENSE
-    if (txt.includes("bloque") || txt.includes("intercepte") || txt.includes("tacle")) {
-        return `${j1} intervient défensivement sur ${j2 || "l’adversaire"}`;
-    }
-
-    // 🔥 PAR DÉFAUT
-    return `${j1} lance une action`;
-}
-
-// ⚡ VMAX NON PRÉCISÉ = LENT
-function regleVitesseMax(txt){
-    if(/(course|court|accélère|acceleration|sprint)/i.test(txt)){
-        if(!/vmax/i.test(txt)){
-            return {
-                ok: true,
-                effet: "vitesse_lente",
-                message: "🐢 Vitesse non maximale → déplacement lent"
-            };
-        }
-    }
-    return { ok: true };
+    return `${j1} agit`;
 }
 
 // ⚽ DISTANCE BALLON
@@ -475,6 +465,22 @@ controle: [
     ]
 }; 
 
+
+/* ===============================
+DERNIER JOUEUR 
+=================================*/
+function extraireDernierJoueur(actionText){
+
+    if(!actionText) return null;
+
+    const joueurs = actionText.match(/\)\s*([^\(]+?)\s*(?:\(|\/|$)/g) || [];
+
+    const noms = joueurs.map(j =>
+        j.replace(/\)\s*/, "").trim()
+    );
+
+    return noms.length ? noms[noms.length - 1] : null;
+                }
 
 /* ===============================
 LINEUP CHECK
@@ -2336,6 +2342,53 @@ else {
     const defense = text;
 
     // =========================
+    // 🔍 IDENTIFICATION JOUEURS
+    // =========================
+
+    // 🔥 BON ATTAQUANT (dernier joueur)
+    const attaquantNom = extraireDernierJoueur(attaque);
+
+    // 🔥 DEFENSEUR
+    const defenseurNom = extraireJoueurPrincipal(defense);
+
+    const attaquant = findPlayerInMatch(match, attaquantNom);
+    const defenseur = findPlayerInMatch(match, defenseurNom);
+
+    if (!attaquant || !defenseur) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Duel impossible (joueur introuvable)"
+        });
+        return true;
+    }
+
+    // =========================
+    // 🎙️ RÉSUMÉ DEFENSE
+    // =========================
+    const actionText = extraireAction(defense);
+    const resume = resumerAction(actionText);
+
+    // =========================
+    // ⚔️ MATCH UP (AVANT CALCUL)
+    // =========================
+    const nextJoueur = match.joueurTour; // 🔥 attaquant rejoue
+    const displayNext = nextJoueur.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`🛡️⚡⚽ MATCH UP !
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
+🎙️ : ${resume}
+
+⚔️ ${attaquant.nom}  🆚  ${defenseur.nom}
+
+➡️ @${displayNext} NEXT !
+
+╰───────────────────     
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextJoueur]
+    });
+
+    // =========================
     // ⚔️ MOTEUR UNIQUE
     // =========================
     const resultat = await handleDuelMatch(
@@ -2377,15 +2430,15 @@ else {
 
     startGlobalTimer(ovl, chat, match);
 
-    const displayNext = next.split("@")[0];
+    const displayNext2 = next.split("@")[0];
 
     await ovl.sendMessage(chat, {
-        text: `⚽ NEXT ! @${displayNext}`,
+        text: `⚽ NEXT ! @${displayNext2}`,
         mentions: [next]
     });
 
     return true;
-    }     
+}
        
 
 // ===============================
