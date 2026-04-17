@@ -34,6 +34,26 @@ function getJoueurData(nom) {
     return player || null;
 }
 
+function parseLineup(message) {
+
+    const lignes = message.split("\n");
+    const lineup = [];
+
+    for (const ligneBrute of lignes) {
+
+        // 👉 on filtre uniquement les lignes joueurs
+        if (!ligneBrute.includes("👤")) continue;
+
+        const joueur = {};
+
+        // ✅ ICI QUE TU METS TON TRUC
+        joueur.nom = extractCleanNameFromLine(ligneBrute);
+
+        lineup.push(joueur);
+    }
+
+    return lineup;
+}
 
 // ===============================
 // 🧠 GAMEPLAY RULE ENGINE
@@ -238,6 +258,24 @@ const pureName = str => {
   s = s.replace(/\s+/g, " ").trim().toLowerCase();
   return s;
 };
+
+function extractCleanNameFromLine(line) {
+  if (!line) return null;
+
+  // enlève emojis et trucs avant
+  let clean = line.replace(/.*?\)\s*/g, "");
+
+  // enlève le (95)
+  clean = clean.replace(/\(\d+\)/g, "");
+
+  // enlève drapeaux
+  clean = clean.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, "");
+
+  // trim final
+  clean = clean.trim();
+
+  return clean;
+}
 
 // ===============================
 // 🎯 FIND PLAYER BLUELOCK
