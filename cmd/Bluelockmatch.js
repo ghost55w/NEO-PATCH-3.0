@@ -2350,6 +2350,53 @@ else {
     const defense = text;
 
     // =========================
+    // 🔍 IDENTIFICATION JOUEURS
+    // =========================
+
+    // 🔥 BON ATTAQUANT (dernier joueur)
+    const attaquantNom = extraireDernierJoueur(attaque);
+
+    // 🔥 DEFENSEUR
+    const defenseurNom = extraireJoueurPrincipal(defense);
+
+    const attaquant = findPlayerInMatch(match, attaquantNom);
+    const defenseur = findPlayerInMatch(match, defenseurNom);
+
+    if (!attaquant || !defenseur) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Duel impossible (joueur introuvable)"
+        });
+        return true;
+    }
+
+    // =========================
+    // 🎙️ RÉSUMÉ DEFENSE
+    // =========================
+    const actionText = extraireAction(defense);
+    const resume = resumerAction(actionText);
+
+    // =========================
+    // ⚔️ MATCH UP (AVANT CALCUL)
+    // =========================
+    const nextJoueur = match.joueurTour; // 🔥 attaquant rejoue
+    const displayNext = nextJoueur.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`🛡️⚡⚽ MATCH UP !
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▱▱▱
+🎙️ : ${resume}
+
+⚔️ ${attaquant.nom}  🆚  ${defenseur.nom}
+
+➡️ @${displayNext} NEXT !
+
+╰───────────────────     
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextJoueur]
+    });
+
+    // =========================
     // ⚔️ MOTEUR UNIQUE
     // =========================
     const resultat = await handleDuelMatch(
@@ -2391,15 +2438,16 @@ else {
 
     startGlobalTimer(ovl, chat, match);
 
-    const displayNext = next.split("@")[0];
+    const displayNext2 = next.split("@")[0];
 
     await ovl.sendMessage(chat, {
-        text: `⚽ NEXT ! @${displayNext}`,
+        text: `⚽ NEXT ! @${displayNext2}`,
         mentions: [next]
     });
 
     return true;
-    }     
+}
+
        
 
 // ===============================
