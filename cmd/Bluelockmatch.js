@@ -3654,16 +3654,19 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
 🎙️ ${attaquant?.nom || "?"} 🆚 ${defenseur.nom}
 
-🧱 ${defenseur.nom} bloque la progression !`
+🧱 ${defenseur.nom} bloque la progression !
+
+╰───────────────────     
+🔷BLUELOCK⚽🥅 `
         };
     }
 
-    // =========================
-    // ✅ RESULTAT FINAL
-    // =========================
-    return {
-        type: "action",
-        message:
+// =========================
+        // ✅ RESULTAT FINAL (ATTAQUE CONTINUE)
+        // =========================
+        return {
+            type: "action",
+            message:
 `⚽ ⚡ ATTAQUE EN COURS !
 🎙️ ${attaquant?.nom || "?"} progresse...
 
@@ -3671,8 +3674,16 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 
 ╰───────────────────     
 🔷BLUELOCK⚽🥅`
-    };
-}          
+        };
+
+    } catch (err) {
+        console.log("DUEL ERROR:", err);
+        return {
+            type: "error",
+            message: "❌ Erreur système duel"
+        };
+    }
+}
 
         
 
