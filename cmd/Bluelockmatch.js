@@ -1987,12 +1987,12 @@ Tape +next pour analyser`
 
     console.log("📩 MESSAGE REÇU (hors pavé)");
 
- // ===============================
+// ===============================
 // 📋 GESTION LINEUP UNIQUEMENT
 // ===============================
 if (match.etat === "attente_lineup") {
 
-    const squadMatch = safeText.match(/SQUAD.*?:\s*([^\n]+)/i);
+    const squadMatch = safeText.match(/SQUAD⚽🥅:\s*(.+)/i);
     if (!squadMatch) return;
 
     const squadName = squadMatch[1].trim();
@@ -2003,7 +2003,23 @@ if (match.etat === "attente_lineup") {
 
     const senderJid = getSenderJid(ms);
 
-    
+    // 🔥 PARSER UNIQUE
+    const parsed = parseLineupFull(safeText);
+
+    if (!parsed || !Array.isArray(parsed.joueurs) || parsed.joueurs.length === 0) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Lineup invalide"
+        });
+        return;
+    }
+
+    const joueursClean = parsed.joueurs.map(j => ({
+        numero: j.numero,
+        poste: j.poste,
+        nom: pureName(j.nom)
+    }));
+
+
 // ===============================
 // ✅ TEAM 1
 // ===============================
@@ -2018,22 +2034,6 @@ if (squad === team1 && !match.equipe1) {
 
     match.id1 = senderJid;
 
-    const parsed = parseSquadBlueLock(safeText);
-
-    if (!parsed || !Array.isArray(parsed.joueurs) || parsed.joueurs.length === 0) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Lineup invalide"
-        });
-        return;
-    }
-
-    // ✅ GARDE numero + poste
-    const joueursClean = parsed.joueurs.map(j => ({
-        numero: j.numero,
-        poste: j.poste,
-        nom: pureName(j.nom)
-    }));
-
     const check1 = await verifierLineupEtChargerData(joueursClean);
 
     if (!check1.ok) {
@@ -2044,14 +2044,14 @@ if (squad === team1 && !match.equipe1) {
     }
 
     match.lineup1 = check1.joueurs;
-
     match.equipe1 = true;
 
     await ovl.sendMessage(chat, {
         text: `✅ Formation confirmée pour *${match.team1Nom}* !`
     });
 }
-    
+
+
 // ===============================
 // ✅ TEAM 2
 // ===============================
@@ -2066,22 +2066,6 @@ else if (squad === team2 && !match.equipe2) {
 
     match.id2 = senderJid;
 
-    const parsed = parseSquadBlueLock(safeText);
-
-    if (!parsed || !Array.isArray(parsed.joueurs) || parsed.joueurs.length === 0) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Lineup invalide"
-        });
-        return;
-    }
-
-    // 🔥 EXACTEMENT COMME TEAM 1
-    const joueursClean = parsed.joueurs.map(j => ({
-        numero: j.numero,
-        poste: j.poste,
-        nom: pureName(j.nom)
-    }));
-
     const check2 = await verifierLineupEtChargerData(joueursClean);
 
     if (!check2.ok) {
@@ -2092,13 +2076,13 @@ else if (squad === team2 && !match.equipe2) {
     }
 
     match.lineup2 = check2.joueurs;
-
     match.equipe2 = true;
 
     await ovl.sendMessage(chat, {
         text: `✅ Formation confirmée pour *${match.team2Nom}* !`
     });
 }
+} 
     
     // ===============================
     // 🚀 MATCH PRÊT
