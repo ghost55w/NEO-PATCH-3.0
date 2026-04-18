@@ -763,7 +763,8 @@ module.exports = {
     getSenderJid,
 
     // MATH
-    calculDistance,
+    calculDistanceXY, 
+    calculDistanceZone, 
     extraireDistance,
     extraireZoneArrivee,
     extraireZoneDepart,
