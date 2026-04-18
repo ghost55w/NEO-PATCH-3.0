@@ -618,8 +618,87 @@ async function lancerMatch(chat, ovl) {
     // =========================
     startGlobalTimer(ovl, chat, match);
 }
-        
 
+
+/* ===============================
+COMMANDE +STOPMATCH⚽
+=================================*/     
+ovlcmd({
+    nom_cmd: "stopmatch⚽",
+    classe: "BLUELOCK⚽",
+    react: "⛔",
+    desc: "Arrêter le match en cours dans le groupe"
+}, async (ms_org, ovl, cmd_options) => {
+    try {
+
+        const chat = ms_org.key?.remoteJid || ms_org.from || ms_org;
+        const match = matchsActifs.get(chat);
+
+        if (!match) {
+            return ovl.sendMessage(chat, {
+                text: "⚠️ Aucun match en cours dans ce groupe."
+            });
+        }
+
+        // ===============================
+        // ⛔ STOP TOUS LES TIMERS
+        // ===============================
+        const timers = [
+            "timerGlobal",
+            "timerWarning",
+            "timerPave",
+            "timerTour",
+            "timerKickoff",
+            "timerAction",
+            "timerMatch",
+            "timerLineup"
+        ];
+
+        for (const t of timers) {
+            if (match[t]) {
+                clearTimeout(match[t]);
+                match[t] = null;
+            }
+        }
+
+        // ===============================
+        // 🧨 RESET MATCH STATE
+        // ===============================
+        match.etat = "arrete";
+        match.kickoffStarted = false;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.phaseDuel = null;
+
+        match.equipe1 = false;
+        match.equipe2 = false;
+
+        match.lineup1 = null;
+        match.lineup2 = null;
+
+        match.positions = null;
+        match.possession = null;
+
+        // ===============================
+        // 🗑 SUPPRESSION
+        // ===============================
+        matchsActifs.delete(chat);
+
+        await ovl.sendMessage(chat, {
+            text: `⛔ *MATCH BLUE LOCK ARRÊTÉ AVEC SUCCÈS*`
+        });
+
+    } catch (e) {
+        console.error("❌ Erreur stopmatch :", e);
+
+        const chat = ms_org.key?.remoteJid || ms_org.from || ms_org;
+
+        await ovl.sendMessage(chat, {
+            text: "❌ Erreur lors de l'arrêt du match."
+        });
+    }
+});
+    
 // ===============================
 // 📦 EXPORTS
 // ===============================
