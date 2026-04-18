@@ -187,8 +187,16 @@ function reglePiedComplet(txt){
 }
 
 function extraireJoueurPrincipal(actionText){
-    const match = actionText.match(/\)\s*([^\s]+)/);
-    return match ? match[1].trim() : null;
+    if (!actionText) return null;
+
+    // 🔥 récupère le joueur AVANT (NEL)
+    const match = actionText.match(/\)\s*([^\(]+?)\s*\(/);
+
+    if (match) return match[1].trim();
+
+    // fallback
+    const simple = actionText.match(/\)\s*([^\s]+)/);
+    return simple ? simple[1].trim() : null;
 }
 
 function extractPlayersFromText(message, cardsObject) {
