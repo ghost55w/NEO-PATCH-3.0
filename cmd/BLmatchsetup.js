@@ -456,7 +456,7 @@ joueursValides.push({
     position: null,
     visavis: null
 });
-        
+    }        
 
     // ===============================
     // ⚽ ATTRIBUTION ÉQUIPE
