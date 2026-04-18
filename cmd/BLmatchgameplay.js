@@ -27,6 +27,60 @@ const {
     handleDuelMatch
 } = require("./BLmatchengine"); // ou ton core match runtime
 
+// ===============================
+// 🎙️ GAMEPLAY UTILITIES (IA / NARRATION)
+// ===============================
+
+// 👉 ICI TU METS resumerAction
+function resumerAction(text) {
+    if (!text) return "Action inconnue";
+
+    const t = text.toLowerCase();
+
+    let passer = extrairePremierJoueur(text);
+    let receveur = extraireDeuxiemeJoueur(text);
+    let zone = extraireZoneArrivee(text);
+
+    let resume = "";
+
+    if (t.includes("passe")) {
+
+        const type = extraireTypePasse(text) || "rapide";
+
+        resume = `${passer} fait une passe ${type}`;
+
+        if (receveur) resume += ` vers ${receveur}`;
+        if (zone) resume += ` qui reçoit en ${zone}`;
+    }
+
+    else if (t.includes("contrôle") || t.includes("controle")) {
+        resume = `${passer} contrôle le ballon`;
+        if (zone) resume += ` et se projette vers ${zone}`;
+    }
+
+    else if (
+        t.includes("fonce") ||
+        t.includes("dribble") ||
+        t.includes("conduite") ||
+        t.includes("course")
+    ) {
+        resume = `${passer} part en conduite de balle`;
+        if (zone) resume += ` vers ${zone}`;
+    }
+
+    else if (t.includes("tir") || t.includes("shoot")) {
+        resume = `${passer} tente une frappe`;
+        if (zone) resume += ` depuis ${zone}`;
+    }
+
+    else {
+        resume = "Action en cours de développement";
+    }
+
+    return resume.replace(/\s+/g, " ").trim();
+}
+
+
 /* ===============================
 ⚽ TERRAIN ENGINE (CORE GAMEPLAY)
 =================================*/
@@ -504,7 +558,12 @@ async function handlePasses(match, action, joueur) {
 📦 EXPORTS
 =================================*/
 module.exports = {
+
+    // 🎮 CORE GAMEPLAY
     handlePaveGame,
     handleDeplacements,
-    handlePasses
+    handlePasses,
+
+    // 🎙️ NARRATION IA
+    resumerAction
 };
