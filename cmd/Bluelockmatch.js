@@ -231,17 +231,6 @@ function normalize(str){
         .replace(/[\s\-\_\(\)]/g, "");
 }
 
-function findBlueLockPlayer(inputName) {
-
-    const players = Object.values(cardsBlueLock);
-    const q = normalize(inputName);
-
-    return (
-        players.find(p => normalize(p.name) === q) ||
-        players.find(p => normalize(p.name).startsWith(q)) ||
-        players.find(p => normalize(p.name).includes(q))
-    ) || null;
-}
 
 // =========================
 // 🔍 FIND PLAYER IN MATCH
@@ -277,6 +266,10 @@ const pureName = str => {
   return s;
 };
 
+
+// ===============================
+// EXTRACTION CLEAN NAME 
+// ===============================
 function extractCleanNameFromLine(ligne) {
   if (!ligne) return "";
 
@@ -1427,15 +1420,7 @@ function normalizeJid(jid) {
         .trim();
 }
 
-function parseLineup(texte) {
-    const regex = /\s*(\w+)\s*:\s*([^\n\r]+)\s*-\s*(\d+)/gi;
-    const joueurs = [];
-    let match;
-    while ((match = regex.exec(texte)) !== null) {
-        joueurs.push({ position: match[1].toUpperCase(), nom: match[2].trim(), note: match[3].trim() });
-    }
-    return joueurs;
-}
+
 function cleanJid(jid) {
     return (jid || "")
         .split(":")[0]
