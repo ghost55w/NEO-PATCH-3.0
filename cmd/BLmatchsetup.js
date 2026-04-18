@@ -5,15 +5,26 @@ const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
 
-// ===============================
-// 📊 STATE GLOBAL
-// ===============================
+/* ===============================
+📦 BLUE LOCK MATCH ENGINE - SETUP CORE
+=================================*/
+
+/* ===============================
+📊 GLOBAL STATE
+=================================*/
 const matchsActifs = new Map();
 
-// ===============================
-// 📏 CONSTANTES TERRAIN
-// ===============================
-const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
+/* ===============================
+📏 TERRAIN CONFIG
+=================================*/
+const DISTANCES = {
+    C2: 30,
+    C1: 25,
+    B2: 20,
+    B1: 15,
+    A2: 10,
+    A1: 5
+};
 
 const POSITION_POSTES = {
     AG: { zoneX: "aile gauche", ligne: "attaque" },
@@ -29,42 +40,99 @@ const POSITION_POSTES = {
     DD: { zoneX: "aile droite", ligne: "defense" }
 };
 
-// ===============================
-// 🔍 NORMALISATION
-// ===============================
-const pureName = str => {
+/* ===============================
+🎯 PASSES CONFIG (ENGINE DATA)
+=================================*/
+const TYPES_PASSES = {
+    courte: "passe courte rapide précision contrôle",
+    longue: "longue passe aérienne profondeur",
+    trivela: "extérieur du pied effet courbe",
+    centre: "centre dans la surface",
+    talon: "talonnade surprise arrière"
+};
+
+/* ===============================
+🧠 UTILITAIRES CORE
+=================================*/
+
+// Nettoyage nom joueur
+function pureName(str) {
     if (!str) return "";
     return str
-        .normalize('NFD')
+        .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-zA-Z0-9\s]/g, " ")
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
-};
+}
 
-// ===============================
-// 🔎 FIND PLAYER DB
-// ===============================
-function findBlueLockPlayer(inputName) {
-    if (!inputName) return null;
+// Normalisation JID
+function normalizeJid(jid) {
+    return jid?.split(":")[0] || jid;
+}
 
-    const players = Object.values(cardsBlueLock);
-    const input = pureName(inputName);
+// Sender helper
+function getSenderJid(ms) {
+    return ms.key?.participant || ms.key?.remoteJid;
+}
+
+/* ===============================
+📐 MATH / TERRAIN ENGINE
+=================================*/
+
+// Distance entre zones
+function calculDistance(z1, z2) {
+    if (!DISTANCES[z1] || !DISTANCES[z2]) return 0;
+    return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
+}
+
+// Extractions terrain
+function extraireDistance(txt) {
+    const m = txt.match(/(\d+)\s?m/);
+    return m ? parseInt(m[1]) : null;
+}
+
+function extraireZoneArrivee(txt) {
+    const m = txt.match(/zone\s*([A-C][1-2])/i);
+    return m ? m[1].toUpperCase() : null;
+}
+
+function extraireZoneDepart(txt) {
+    const m = txt.match(/depuis\s*([A-C][1-2])/i);
+    return m ? m[1].toUpperCase() : null;
+}
+
+function extraireDirectionLargeur(txt) {
+    if (txt.includes("gauche")) return "gauche";
+    if (txt.includes("droite")) return "droite";
+    return null;
+}
+
+/* ===============================
+⚙️ PLAYER ENGINE
+=================================*/
+
+// Trouver joueur DB
+function findBlueLockPlayer(input, cardsBlueLock) {
+    const players = Object.values(cardsBlueLock || {});
+    const clean = pureName(input);
 
     return players.find(p =>
-        pureName(p.name).includes(input)
+        pureName(p.name).includes(clean)
     ) || null;
 }
 
-// ===============================
-// 📋 PARSER LINEUP
-// ===============================
+/* ===============================
+📋 LINEUP ENGINE
+=================================*/
 function parseLineupFull(text) {
+
     const lignes = text.split("\n");
     const joueurs = [];
 
     for (const ligne of lignes) {
+
         if (!ligne.includes("👤")) continue;
 
         const num = ligne.match(/^(\d+)/)?.[1];
@@ -86,67 +154,34 @@ function parseLineupFull(text) {
         });
     }
 
-    if (!joueurs.length) return null;
-
     const teamName = text.match(/SQUAD⚽🥅:\s*(.+)/i)?.[1]?.trim();
 
-    return { teamName, joueurs };
+    return joueurs.length ? { teamName, joueurs } : null;
 }
 
-// ===============================
-// ✅ VALIDATION LINEUP
-// ===============================
-async function verifierLineupEtChargerData(joueurs) {
+/* ===============================
+📦 MATCH ENGINE HELPERS
+=================================*/
 
-    const result = [];
+// Update position global
+function updatePositionJoueur(joueur, direction, distance) {
+    if (!joueur) return;
 
-    for (const j of joueurs) {
+    joueur.positionX = direction;
+    joueur.distance = distance;
+}
 
-        const data = findBlueLockPlayer(j.nom);
+// Update global state
+function updateGlobalPositions(match, joueur) {
+    if (!match.positions) match.positions = [];
 
-        if (!data) {
-            return {
-                ok: false,
-                erreur: `❌ Joueur introuvable: ${j.nom}`
-            };
-        }
+    const index = match.positions.findIndex(p => p.nom === joueur.nom);
 
-        const poste = POSITION_POSTES[j.poste];
-
-        result.push({
-            position: j.poste,
-            nom: data.name,
-            data,
-            note: j.note,
-            ligne: poste?.ligne || "milieu",
-            zoneX: poste?.zoneX || "axe",
-            zoneY: null,
-            visavis: null
-        });
+    if (index !== -1) {
+        match.positions[index] = joueur;
+    } else {
+        match.positions.push(joueur);
     }
-
-    return { ok: true, joueurs: result };
-}
-
-// ===============================
-// 👤 USER LOOKUP
-// ===============================
-async function trouverUser(nom) {
-    const all = await TeamFunctions.getAllTeams();
-    if (!all) return null;
-
-    const clean = nom.toLowerCase().trim();
-
-    return all.find(p =>
-        (p.users || "").toLowerCase().trim() === clean
-    ) || null;
-}
-// ===============================
-// NORMALIZE TEAM NAME 
-// ===============================
-function normalizeTeamName(name) {
-    if (!name) return "";
-    return name.replace(/\p{Emoji}/gu, "").trim().toLowerCase();
 }
 
 // ===============================
@@ -699,17 +734,39 @@ ovlcmd({
     }
 });
     
-// ===============================
-// 📦 EXPORTS
-// ===============================
-module.exports = {
-    matchsActifs,
-    parseLineupFull,
-    verifierLineupEtChargerData,
-    findBlueLockPlayer,
-    pureName,
 
-    // setup only
-    verifierFiche,
-    lancerMatch
+/*===============================
+📤 EXPORT ENGINE
+=================================*/
+module.exports = {
+
+    // STATE
+    matchsActifs,
+
+    // TERRAIN
+    DISTANCES,
+    POSITION_POSTES,
+    TYPES_PASSES,
+
+    // CORE UTILS
+    pureName,
+    normalizeJid,
+    getSenderJid,
+
+    // MATH
+    calculDistance,
+    extraireDistance,
+    extraireZoneArrivee,
+    extraireZoneDepart,
+    extraireDirectionLargeur,
+
+    // PLAYER
+    findBlueLockPlayer,
+
+    // LINEUP
+    parseLineupFull,
+
+    // ENGINE
+    updatePositionJoueur,
+    updateGlobalPositions
 };
