@@ -3,6 +3,13 @@
 =================================*/
 
 const matchsActifs = require("./matchState"); // adapte si besoin
+const {
+    matchsActifs,
+    POSITION_POSTES,
+    DISTANCES,
+    pureName,
+    findBlueLockPlayer
+} = require("./BLmatchsetup");
 
 // ===============================
 // 📩 LECTURE PAVÉ
