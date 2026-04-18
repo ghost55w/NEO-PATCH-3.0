@@ -2,18 +2,218 @@
 📦 BL MATCH GAMEPLAY ENGINE
 =================================*/
 
-const matchsActifs = require("./matchState"); // adapte si besoin
 const {
     matchsActifs,
     POSITION_POSTES,
     DISTANCES,
+    TYPES_PASSES,
+
     pureName,
-    findBlueLockPlayer
+    normalizeJid,
+    getSenderJid,
+
+    calculDistance,
+    extraireDistance,
+    extraireZoneArrivee,
+    extraireZoneDepart,
+    extraireDirectionLargeur,
+    updatePositionJoueur,
+
 } = require("./BLmatchsetup");
 
+// ⚠️ dépendances externes (à garder ailleurs ou setup engine global)
+const {
+    startGlobalTimer,
+    handleDuelMatch
+} = require("./BLmatchengine"); // ou ton core match runtime
+
+/* ===============================
+⚽ TERRAIN ENGINE (CORE GAMEPLAY)
+=================================*/
+
 // ===============================
-// 📩 LECTURE PAVÉ
+// 📏 DIMENSIONS
 // ===============================
+const FIELD = {
+    length: 60, // profondeur (Y)
+    width: 30   // largeur (X)
+};
+
+// ===============================
+// 📍 ZONES PROFONDEUR (Y)
+// ===============================
+const ZONES_Y = {
+    C2: 30,
+    C1: 25,
+    B2: 20,
+    B1: 15,
+    A2: 10,
+    A1: 5
+};
+
+// ===============================
+// ↔️ ZONES LARGEUR (X)
+// ===============================
+const ZONES_X = {
+    gauche: 5,
+    axe: 15,
+    droite: 25
+};
+
+// ===============================
+// 🔄 ZONE → POSITION (X,Y)
+// ===============================
+function convertToPosition(zoneX, zoneY) {
+
+    if (!ZONES_X[zoneX] || !ZONES_Y[zoneY]) return null;
+
+    return {
+        x: ZONES_X[zoneX],
+        y: ZONES_Y[zoneY]
+    };
+}
+
+// ===============================
+// 📏 DISTANCE ENTRE JOUEURS
+// ===============================
+function calculDistance(p1, p2) {
+
+    if (!p1 || !p2) return 0;
+
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ===============================
+// 🚶 DEPLACEMENT AVANT / ARRIERE (ZONE Y)
+// ===============================
+function moveToZone(player, newZoneY) {
+
+    if (!player.position) {
+        return { ok: false, erreur: "❌ Position non initialisée" };
+    }
+
+    const targetY = ZONES_Y[newZoneY];
+
+    if (!targetY) {
+        return { ok: false, erreur: "❌ Zone inconnue" };
+    }
+
+    const dist = Math.abs(player.position.y - targetY);
+
+    // 🔥 limite réaliste Blue Lock
+    if (dist > 10) {
+        return { ok: false, erreur: "❌ Déplacement trop long (>10m)" };
+    }
+
+    player.position.y = targetY;
+
+    return { ok: true };
+}
+
+// ===============================
+// ↔️ DEPLACEMENT LATÉRAL
+// ===============================
+function moveLateral(player, direction, distance = 5) {
+
+    if (!player.position) {
+        return { ok: false, erreur: "❌ Position non initialisée" };
+    }
+
+    if (distance > 10) {
+        return { ok: false, erreur: "❌ Déplacement latéral trop long" };
+    }
+
+    if (direction === "gauche") {
+        player.position.x -= distance;
+    }
+
+    if (direction === "droite") {
+        player.position.x += distance;
+    }
+
+    // 🔒 clamp terrain
+    player.position.x = Math.max(0, Math.min(FIELD.width, player.position.x));
+
+    return { ok: true };
+}
+
+// ===============================
+// 🧠 POSITION → ZONE Y
+// ===============================
+function getZoneFromY(y) {
+
+    if (y >= 28) return "C2";
+    if (y >= 23) return "C1";
+    if (y >= 18) return "B2";
+    if (y >= 13) return "B1";
+    if (y >= 8) return "A2";
+    return "A1";
+}
+
+// ===============================
+// 🧠 POSITION → ZONE X
+// ===============================
+function getZoneFromX(x) {
+
+    if (x <= 10) return "gauche";
+    if (x <= 20) return "axe";
+    return "droite";
+}
+
+// ===============================
+// 🔒 VALIDATION TERRAIN
+// ===============================
+function isInsideField(pos) {
+
+    if (!pos) return false;
+
+    return (
+        pos.x >= 0 &&
+        pos.x <= FIELD.width &&
+        pos.y >= 0 &&
+        pos.y <= FIELD.length
+    );
+}
+
+// ===============================
+// 🧩 INIT POSITION JOUEUR
+// ===============================
+function initPlayerPosition(player) {
+
+    const pos = convertToPosition(player.zoneX, player.zoneY);
+
+    if (!pos) {
+        return { ok: false, erreur: "❌ Position invalide" };
+    }
+
+    player.position = pos;
+
+    return { ok: true };
+}
+
+// ===============================
+// 🔄 UPDATE GLOBAL POSITION
+// ===============================
+function updateGlobalPositions(match, joueur) {
+
+    if (!match.positions) match.positions = [];
+
+    const index = match.positions.findIndex(p => p.nom === joueur.nom);
+
+    if (index !== -1) {
+        match.positions[index] = joueur;
+    } else {
+        match.positions.push(joueur);
+    }
+}
+
+
+/* ===============================
+📩 LECTURE PAVÉ ENGINE
+=================================*/
 async function handlePaveGame(ms, ovl) {
 
     const chat = ms.key.remoteJid;
@@ -46,7 +246,7 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    // ⚔️ DUEL PRIORITY
+    // ⚔️ DUEL PRIORITY SYSTEM
     // ===============================
     if (match.phaseDuel) {
 
@@ -72,9 +272,6 @@ async function handlePaveGame(ms, ovl) {
     if (!match.pendingAttack) {
 
         if (sender !== normalizeJid(match.joueurTour)) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Pas ton tour"
-            });
             return true;
         }
 
@@ -90,10 +287,6 @@ async function handlePaveGame(ms, ovl) {
 
         startGlobalTimer(ovl, chat, match);
 
-        await ovl.sendMessage(chat, {
-            text: `🛡️ ATTAQUE VALIDÉE`
-        });
-
         return true;
     }
 
@@ -101,9 +294,6 @@ async function handlePaveGame(ms, ovl) {
     // 🛡️ DEFENSE
     // ===============================
     if (sender !== normalizeJid(match.waitingDefenseFrom)) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Pas à toi de défendre"
-        });
         return true;
     }
 
@@ -134,9 +324,9 @@ async function handlePaveGame(ms, ovl) {
     return true;
 }
 
-// ===============================
-// 🚶 DEPLACEMENTS (FIXÉ)
-// ===============================
+/* ===============================
+🚶 DEPLACEMENTS ENGINE
+=================================*/
 async function handleDeplacements(match, action, joueur) {
 
     if (!action || !joueur) {
@@ -153,7 +343,9 @@ async function handleDeplacements(match, action, joueur) {
     // 📍 POSITION CHECK
     // ===============================
     if (match.phase !== "kickoff") {
+
         if (joueur.zoneY && txt.includes("zone")) {
+
             const zoneDepart = extraireZoneDepart(txt);
 
             if (zoneDepart && zoneDepart !== joueur.zoneY) {
@@ -166,7 +358,7 @@ async function handleDeplacements(match, action, joueur) {
     }
 
     // ===============================
-    // 📏 MOVE LIMIT
+    // 📏 ZONE MOVE
     // ===============================
     if (zoneArrivee) {
 
@@ -190,21 +382,19 @@ async function handleDeplacements(match, action, joueur) {
         if (distance > 15) {
             return {
                 ok: false,
-                erreur: "❌ Trop grand déplacement latéral"
+                erreur: "❌ Trop grand déplacement"
             };
         }
 
         updatePositionJoueur(joueur, direction, distance);
     }
 
-    updateGlobalPositions(match, joueur);
-
     return { ok: true, joueur };
 }
 
-// ===============================
-// 🎯 PASSES (NETTOYÉ)
-// ===============================
+/* ===============================
+🎯 PASSES ENGINE
+=================================*/
 async function handlePasses(match, action, joueur) {
 
     if (!action || !joueur) {
@@ -249,7 +439,7 @@ async function handlePasses(match, action, joueur) {
     }
 
     // ===============================
-    // 📊 PRECISION
+    // 📊 PRECISION ENGINE
     // ===============================
     const model = TYPES_PASSES[type];
     const words = model.split(" ");
@@ -270,7 +460,7 @@ async function handlePasses(match, action, joueur) {
     }
 
     // ===============================
-    // 📏 DISTANCE MAX
+    // 📏 DISTANCE LIMIT
     // ===============================
     const dist = extraireDistance(txt);
 
@@ -282,7 +472,7 @@ async function handlePasses(match, action, joueur) {
     }
 
     // ===============================
-    // 🛑 INTERCEPTION SIMPLE
+    // 🛑 INTERCEPTION SYSTEM
     // ===============================
     const visavis = joueur.visavis;
 
@@ -310,9 +500,9 @@ async function handlePasses(match, action, joueur) {
     };
 }
 
-// ===============================
-// 📦 EXPORTS
-// ===============================
+/* ===============================
+📦 EXPORTS
+=================================*/
 module.exports = {
     handlePaveGame,
     handleDeplacements,
