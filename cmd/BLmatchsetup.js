@@ -4,6 +4,7 @@
 const { ovlcmd } = require('../lib/ovlcmd');
 const { MyNeoFunctions, TeamFunctions, BlueLockFunctions } = require("../DataBase/myneo_lineup_team");
 const { cardsBlueLock } = require("../DataBase/cardsBL");
+const { handlePaveGame } = require("../cmd/BLmatchgameplay");
 
 /* ===============================
 📦 BLUE LOCK MATCH ENGINE - SETUP CORE
@@ -549,6 +550,8 @@ Le match commence dans *1 minute* 🥅⚽...`;
     match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
 }
 
+} 
+    
 // ===============================
 // 🚀 LANCEMENT MATCH
 // ===============================
