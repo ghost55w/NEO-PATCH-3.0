@@ -704,11 +704,12 @@ ovlcmd({
 // ===============================
 module.exports = {
     matchsActifs,
-    messageMatch,
-    verifierFiche,
-    lancerMatch,
     parseLineupFull,
     verifierLineupEtChargerData,
     findBlueLockPlayer,
-    pureName
+    pureName,
+
+    // setup only
+    verifierFiche,
+    lancerMatch
 };
