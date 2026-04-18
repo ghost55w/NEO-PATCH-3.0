@@ -76,12 +76,12 @@ function getSenderJid(ms) {
 /* ===============================
 📐 MATH / TERRAIN ENGINE
 =================================*/
-
 // Distance entre zones
-function calculDistance(z1, z2) {
+function distancePlayer(z1, z2) {
     if (!DISTANCES[z1] || !DISTANCES[z2]) return 0;
     return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
 }
+
 
 // Extractions terrain
 function extraireDistance(txt) {
@@ -763,8 +763,7 @@ module.exports = {
     getSenderJid,
 
     // MATH
-    calculDistanceXY, 
-    calculDistanceZone, 
+    distancePlayer,
     extraireDistance,
     extraireZoneArrivee,
     extraireZoneDepart,
