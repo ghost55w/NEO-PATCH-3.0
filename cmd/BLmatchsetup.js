@@ -141,6 +141,22 @@ async function trouverUser(nom) {
         (p.users || "").toLowerCase().trim() === clean
     ) || null;
 }
+// ===============================
+// NORMALIZE TEAM NAME 
+// ===============================
+function normalizeTeamName(name) {
+    if (!name) return "";
+    return name.replace(/\p{Emoji}/gu, "").trim().toLowerCase();
+}
+
+// ===============================
+// KICK OFF 
+// ===============================
+function tirageKickOff() {
+    return Math.random() < 0.5 ? "A" : "B";
+}
+
+
 
 // ===============================
 // 🎮 COMMANDE MATCH
