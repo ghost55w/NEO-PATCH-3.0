@@ -185,24 +185,7 @@ const clean = texte
       mention_JID
     };
 
-    // ===============================
-// 🧪 MODE TEST GLOBAL
-// ===============================
-if(texte.startsWith("+test")){
 
-    const match = matchsActifs.get(ms_org);
-
-    if(!match){
-        await ovl.sendMessage(ms_org, { text: "❌ Aucun match actif" });
-        return;
-    }
-
-    // ❌ ANNULATION DU MATCH NORMAL
-    if(match.timerMatch){
-        clearTimeout(match.timerMatch);
-    }
-
-    
     
 // ================================
 // 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
