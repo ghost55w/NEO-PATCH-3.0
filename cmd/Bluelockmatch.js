@@ -2344,22 +2344,6 @@ if (match.phaseDuel) {
     return true;
 } 
 
-    
-// ===============================
-// 🎯 EXTRACTION JOUEUR (IMPORTANT)
-// ===============================
-const actionText = extraireAction(text);
-const nomJoueur = extraireJoueurPrincipal(actionText);
-
-const joueurObj = findPlayerInMatch(match, nomJoueur);
-
-if (!joueurObj) {
-    await ovl.sendMessage(chat, {
-        text: `❌ Joueur introuvable: ${nomJoueur}`
-    });
-    return true;
-}
-
 
 // ===============================
 // 🎯 SYSTEME ATTAQUE / DEFENSE
