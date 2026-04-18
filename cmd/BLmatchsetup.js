@@ -14,30 +14,25 @@ const { cardsBlueLock } = require("../DataBase/cardsBL");
 =================================*/
 const matchsActifs = new Map();
 
-/* ===============================
-📏 TERRAIN CONFIG
-=================================*/
-const DISTANCES = {
-    C2: 30,
-    C1: 25,
-    B2: 20,
-    B1: 15,
-    A2: 10,
-    A1: 5
-};
-
+// ===============================
+// 📍 MAPPING POSTES → TERRAIN
+// ===============================
 const POSITION_POSTES = {
-    AG: { zoneX: "aile gauche", ligne: "attaque" },
-    AC: { zoneX: "axe", ligne: "attaque" },
-    AD: { zoneX: "aile droite", ligne: "attaque" },
 
-    MG: { zoneX: "aile gauche", ligne: "milieu" },
-    MC: { zoneX: "axe", ligne: "milieu" },
-    MD: { zoneX: "aile droite", ligne: "milieu" },
+    // 🔴 ATTAQUE
+    AG: { zoneX: "gauche", ligne: "attaque", zoneY: "B1" },
+    AC: { zoneX: "axe",    ligne: "attaque", zoneY: "B1" },
+    AD: { zoneX: "droite", ligne: "attaque", zoneY: "B1" },
 
-    DG: { zoneX: "aile gauche", ligne: "defense" },
-    DC: { zoneX: "axe", ligne: "defense" },
-    DD: { zoneX: "aile droite", ligne: "defense" }
+    // 🟡 MILIEU
+    MG: { zoneX: "gauche", ligne: "milieu", zoneY: "C1" },
+    MC: { zoneX: "axe",    ligne: "milieu", zoneY: "C1" },
+    MD: { zoneX: "droite", ligne: "milieu", zoneY: "C1" },
+
+    // 🔵 DEFENSE
+    DG: { zoneX: "gauche", ligne: "defense", zoneY: "A2" },
+    DC: { zoneX: "axe",    ligne: "defense", zoneY: "A2" },
+    DD: { zoneX: "droite", ligne: "defense", zoneY: "A2" }
 };
 
 /* ===============================
@@ -126,6 +121,9 @@ function findBlueLockPlayer(input, cardsBlueLock) {
 /* ===============================
 📋 LINEUP ENGINE
 =================================*/
+// ===============================
+// 📋 PARSER LINEUP (AVEC POSTE)
+// ===============================
 function parseLineupFull(text) {
 
     const lignes = text.split("\n");
@@ -135,28 +133,31 @@ function parseLineupFull(text) {
 
         if (!ligne.includes("👤")) continue;
 
-        const num = ligne.match(/^(\d+)/)?.[1];
+        const numero = ligne.match(/^(\d+)/)?.[1];
         const poste = ligne.match(/\(([A-Z]{2})\)/)?.[1];
-        const note = ligne.match(/\((\d{1,3})\)$/)?.[1];
+        const note = ligne.match(/\((\d{1,3})\)/g)?.pop()?.replace(/[()]/g, "");
 
         let nom = ligne
             .replace(/^(\d+)/, "")
             .replace(/👤/, "")
             .replace(/\([A-Z]{2}\)/, "")
-            .replace(/\(\d+\)$/, "")
+            .replace(/\(\d+\)/g, "")
+            .replace(/🇯🇵|🇫🇷|🇬🇧|🇪🇸|🇦🇷/g, "")
             .trim();
 
         joueurs.push({
-            numero: parseInt(num),
+            numero: parseInt(numero),
             poste,
             nom,
             note: parseInt(note)
         });
     }
 
+    if (!joueurs.length) return null;
+
     const teamName = text.match(/SQUAD⚽🥅:\s*(.+)/i)?.[1]?.trim();
 
-    return joueurs.length ? { teamName, joueurs } : null;
+    return { teamName, joueurs };
 }
 
 /* ===============================
@@ -430,33 +431,32 @@ if (match.etat === "attente_lineup") {
         }
 
         nomsUtilises.add(nomClean);
+// ===============================
+// 🧠 CONSTRUCTION JOUEUR COMPLET
+// ===============================
+const posteData = POSITION_POSTES[j.poste];
 
-        // 📍 Poste
-        const poste = POSITION_POSTES[j.poste];
+joueursValides.push({
 
-        if (!poste) {
-            return ovl.sendMessage(chat, {
-                text: `❌ Poste invalide: ${j.poste}`
-            });
-        }
+    numero: j.numero,
 
-        joueursValides.push({
-            numero: j.numero,
-            poste: j.poste,
+    // 🔥 NOM OFFICIEL DB
+    nom: data.name,
 
-            // 🔥 NOM OFFICIEL DB (IMPORTANT)
-            nom: data.name,
+    data: data,
 
-            data: data,
-            note: j.note,
+    note: j.note,
 
-            ligne: poste.ligne,
-            zoneX: poste.zoneX,
-            zoneY: null,
+    poste: j.poste,
+    ligne: posteData.ligne,
 
-            visavis: null
-        });
-    }
+    zoneX: posteData.zoneX,
+    zoneY: posteData.zoneY,
+
+    position: null,
+    visavis: null
+});
+        
 
     // ===============================
     // ⚽ ATTRIBUTION ÉQUIPE
@@ -639,7 +639,13 @@ async function lancerMatch(chat, ovl) {
     equipeDefense.forEach(j => {
         j.zoneY = getZoneYParLigne(j.ligne, "defense");
     });
+// =========================
+// 📌 INIT POSITION PHYSIQUE (X,Y)
+// =========================
+match.lineup1.forEach(j => initPlayerPosition(j));
+match.lineup2.forEach(j => initPlayerPosition(j));
 
+    
     match.positions = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
