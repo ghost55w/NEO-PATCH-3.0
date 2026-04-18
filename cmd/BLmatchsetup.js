@@ -164,11 +164,15 @@ ovlcmd({
     await ovl.sendMessage(chat, {
         text:
 `🔷⚽ MATCH BLUE LOCK
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
 
 🥅👤Team 1:
 🥅👤Team 2:
 🥅🧤Gardien:
-⌛ Score win:`
+⌛ Score win:
+
+╰───────────────────
+                     *🔷BLUELOCK⚽🥅*`
     });
 
     matchsActifs.set(chat, {
@@ -221,54 +225,171 @@ async function messageMatch(ms, ovl) {
 
     if (!text) return;
 
-    // 📋 LINEUP
-    if (match.etat === "attente_lineup") {
+ // ===============================
+// 📋 GESTION LINEUP FULL PRO
+// ===============================
+if (match.etat === "attente_lineup") {
 
-        const parsed = parseLineupFull(text);
-        if (!parsed) return;
+    // 🔍 Vérifie que c'est bien un squad
+    if (!safeText.includes("SQUAD⚽🥅")) return;
 
-        const joueurs = parsed.joueurs.map(j => ({
-            poste: j.poste,
-            nom: j.nom,
-            note: j.note
-        }));
+    const parsed = parseLineupFull(safeText);
 
-        const check = await verifierLineupEtChargerData(joueurs);
-
-        if (!check.ok) {
-            return ovl.sendMessage(chat, { text: check.erreur });
-        }
-
-        if (!match.equipe1) {
-            match.lineup1 = check.joueurs;
-            match.equipe1 = true;
-
-            return ovl.sendMessage(chat, {
-                text: `✅ ${match.team1Nom} prêt`
-            });
-        }
-
-        if (!match.equipe2) {
-            match.lineup2 = check.joueurs;
-            match.equipe2 = true;
-
-            return ovl.sendMessage(chat, {
-                text: `✅ ${match.team2Nom} prêt`
-            });
-        }
+    if (!parsed || !parsed.joueurs || parsed.joueurs.length === 0) {
+        return ovl.sendMessage(chat, {
+            text: "❌ Lineup invalide ou mal formaté"
+        });
     }
 
-    // 🚀 LANCEMENT MATCH
-    if (match.equipe1 && match.equipe2 && !match.started) {
+    // ===============================
+    // 🏷️ NOM ÉQUIPE
+    // ===============================
+    const squadNameRaw = parsed.teamName;
+    if (!squadNameRaw) {
+        return ovl.sendMessage(chat, {
+            text: "❌ Nom d'équipe introuvable"
+        });
+    }
 
-        match.started = true;
+    const normalizeTeam = str =>
+        str.replace(/\p{Emoji}/gu, "").toLowerCase().trim();
+
+    const squadName = normalizeTeam(squadNameRaw);
+    const team1 = normalizeTeam(match.team1Nom);
+    const team2 = normalizeTeam(match.team2Nom);
+
+    const senderJid = getSenderJid(ms);
+
+    // ===============================
+    // 🧠 VALIDATION JOUEURS
+    // ===============================
+    const joueursValides = [];
+    const nomsUtilises = new Set();
+
+    for (const j of parsed.joueurs) {
+
+        // 🔍 Trouver joueur DB
+        const data = findBlueLockPlayer(j.nom);
+
+        if (!data) {
+            return ovl.sendMessage(chat, {
+                text: `❌ Joueur inconnu: ${j.nom}`
+            });
+        }
+
+        // 🔁 éviter doublons
+        const nomClean = pureName(data.name);
+
+        if (nomsUtilises.has(nomClean)) {
+            return ovl.sendMessage(chat, {
+                text: `❌ Joueur en double: ${data.name}`
+            });
+        }
+
+        nomsUtilises.add(nomClean);
+
+        // 📍 Poste
+        const poste = POSITION_POSTES[j.poste];
+
+        if (!poste) {
+            return ovl.sendMessage(chat, {
+                text: `❌ Poste invalide: ${j.poste}`
+            });
+        }
+
+        joueursValides.push({
+            numero: j.numero,
+            poste: j.poste,
+
+            // 🔥 NOM OFFICIEL DB (IMPORTANT)
+            nom: data.name,
+
+            data: data,
+            note: j.note,
+
+            ligne: poste.ligne,
+            zoneX: poste.zoneX,
+            zoneY: null,
+
+            visavis: null
+        });
+    }
+
+    // ===============================
+    // ⚽ ATTRIBUTION ÉQUIPE
+    // ===============================
+
+    // ✅ TEAM 1
+    if (squadName === team1 && !match.equipe1) {
+
+        if (match.id1 && match.id1 !== senderJid) {
+            return ovl.sendMessage(chat, {
+                text: "❌ Cette équipe est déjà contrôlée"
+            });
+        }
+
+        match.id1 = senderJid;
+        match.lineup1 = joueursValides;
+        match.equipe1 = true;
 
         await ovl.sendMessage(chat, {
-            text: "⏳ Match démarre..."
+            text: `✅ Formation validée pour *${match.team1Nom}*`
         });
-
-        setTimeout(() => lancerMatch(chat, ovl), 3000);
     }
+
+    // ✅ TEAM 2
+    else if (squadName === team2 && !match.equipe2) {
+
+        if (match.id2 && match.id2 !== senderJid) {
+            return ovl.sendMessage(chat, {
+                text: "❌ Cette équipe est déjà contrôlée"
+            });
+        }
+
+        match.id2 = senderJid;
+        match.lineup2 = joueursValides;
+        match.equipe2 = true;
+
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation validée pour *${match.team2Nom}*`
+        });
+    }
+
+    else {
+        return ovl.sendMessage(chat, {
+            text: "❌ Équipe non reconnue ou déjà envoyée"
+        });
+    }
+}
+
+    // ===============================
+// 🚀 MATCH PRÊT
+// ===============================
+if (match.equipe1 && match.equipe2 && !match.starting) {
+
+    match.starting = true;
+
+    if (match.timerMatch) clearTimeout(match.timerMatch);
+
+    match.etat = "debut_match";
+
+    const readyText = `⏳ Les deux formations sont prêtes.
+Le match commence dans *1 minute* 🥅⚽...`;
+
+    const imagesReady = [
+        "https://files.catbox.moe/dlj5z6.jpg",
+        "https://files.catbox.moe/fdadd0.jpeg",
+        "https://files.catbox.moe/4104s3.jpg"
+    ];
+
+    const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+
+    await ovl.sendMessage(chat, {
+        image: { url: imageRandom },
+        caption: readyText
+    });
+
+    match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
 }
 
 // ===============================
