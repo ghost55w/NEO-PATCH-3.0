@@ -6,9 +6,19 @@ const config = require("../set");
 const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
 
-/* IMPORT SYSTEME MATCH BLUELOCK */
-const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
-const { matchsActifs } = require("../cmd/Bluelockmatch");
+// ===============================
+// ⚽ BLUELOCK IMPORTS
+// ===============================
+const {
+    verifierFiche,
+    messageMatch,
+    matchsActifs
+} = require("../cmd/BLmatchsetup");
+
+const {
+    handlePaveGame
+} = require("../cmd/BLmatchgameplay");
+
 
 function getTextMessage(msg) {
   return (
@@ -192,34 +202,7 @@ if(texte.startsWith("+test")){
         clearTimeout(match.timerMatch);
     }
 
-    // ===============================
-    // 🧪 CRÉATION MATCH TEST
-    // ===============================
-    match.mode = "test";
-    match.testType = "all";
-
-    match.etat = "test";
-
-    // 🧠 Fake terrain
-    match.possession = match.team1Nom;
-    match.joueurTour = match.id1;
-
-    await ovl.sendMessage(ms_org, {
-        text: `🧪 MODE TEST ACTIVÉ
-
-🎮 Match simulé lancé !
-
-Commandes:
-+testpasses⚽
-+testtir⚽
-+testduel⚽
-+testdeplacements⚽
-
-Envoie ton pavé pour tester 🔥`
-    });
-
-    return;
-}
+    
     
 // ================================
 // 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
