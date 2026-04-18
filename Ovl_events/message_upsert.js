@@ -192,12 +192,9 @@ const clean = texte
 // ================================
 try {
 
-  // 📄 Détection fiche match
-  await verifierFiche(texte, ms_org, ovl);
-
-  // ⚽ Gestion complète du match (lineup + kickoff + pavé)
-  await messageMatch(ms, ovl);
-
+  if (verifierFiche) await verifierFiche(texte, ms_org, ovl);
+if (messageMatch) await messageMatch(ms, ovl);
+    
 } catch (err) {
   console.log("❌ Erreur système match:", err);
 }
