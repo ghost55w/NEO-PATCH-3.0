@@ -548,11 +548,6 @@ if (match.etat === "attente_lineup") {
     return; // 
 }
 
-// ===============================
-// 🎮 MATCH EN COURS (PAVÉ)
-// ===============================
-const handled = await handlePaveGame(ms, ovl);
-if (handled) return;
 
 // ===============================
     // 🔥 GESTION PAVÉ NORMAL
