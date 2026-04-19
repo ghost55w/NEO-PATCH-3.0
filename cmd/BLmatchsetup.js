@@ -419,13 +419,19 @@ async function messageMatch(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
- // ===============================
-// 📋 GESTION LINEUP FULL PRO
+// ===============================
+// 📋 DETECTION FICHE MATCH
+// ===============================
+if (match.etat === "attente_fiche") {
+    await verifierFiche(safeText, chat, ovl);
+    return;
+}
+
+// ===============================
+// 📋 GESTION LINEUP
 // ===============================
 if (match.etat === "attente_lineup") {
-await verifierFiche(safeText, chat, ovl);
-    return; 
-}
+
     // 🔍 Vérifie que c'est bien un squad
     if (!safeText.includes("SQUAD⚽🥅")) return;
 
@@ -464,7 +470,6 @@ await verifierFiche(safeText, chat, ovl);
 
     for (const j of parsed.joueurs) {
 
-        // 🔍 Trouver joueur DB
         const data = findBlueLockPlayer(j.nom);
 
         if (!data) {
@@ -473,7 +478,6 @@ await verifierFiche(safeText, chat, ovl);
             });
         }
 
-        // 🔁 éviter doublons
         const nomClean = pureName(data.name);
 
         if (nomsUtilises.has(nomClean)) {
@@ -483,38 +487,26 @@ await verifierFiche(safeText, chat, ovl);
         }
 
         nomsUtilises.add(nomClean);
-// ===============================
-// 🧠 CONSTRUCTION JOUEUR COMPLET
-// ===============================
-const posteData = POSITION_POSTES[j.poste];
 
-joueursValides.push({
+        const posteData = POSITION_POSTES[j.poste];
 
-    numero: j.numero,
-
-    // 🔥 NOM OFFICIEL DB
-    nom: data.name,
-
-    data: data,
-
-    note: j.note,
-
-    poste: j.poste,
-    ligne: posteData.ligne,
-
-    zoneX: posteData.zoneX,
-    zoneY: posteData.zoneY,
-
-    position: null,
-    visavis: null
-});
-    }        
+        joueursValides.push({
+            numero: j.numero,
+            nom: data.name,
+            data: data,
+            note: j.note,
+            poste: j.poste,
+            ligne: posteData.ligne,
+            zoneX: posteData.zoneX,
+            zoneY: posteData.zoneY,
+            position: null,
+            visavis: null
+        });
+    }
 
     // ===============================
     // ⚽ ATTRIBUTION ÉQUIPE
     // ===============================
-
-    // ✅ TEAM 1
     if (squadName === team1 && !match.equipe1) {
 
         if (match.id1 && match.id1 !== senderJid) {
@@ -530,10 +522,8 @@ joueursValides.push({
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team1Nom}*`
         });
-    }
 
-    // ✅ TEAM 2
-    else if (squadName === team2 && !match.equipe2) {
+    } else if (squadName === team2 && !match.equipe2) {
 
         if (match.id2 && match.id2 !== senderJid) {
             return ovl.sendMessage(chat, {
@@ -548,14 +538,22 @@ joueursValides.push({
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team2Nom}*`
         });
-    }
 
-    else {
+    } else {
         return ovl.sendMessage(chat, {
             text: "❌ Équipe non reconnue ou déjà envoyée"
         });
     }
+
+    return; // 
 }
+
+// ===============================
+// 🎮 MATCH EN COURS (PAVÉ)
+// ===============================
+const handled = await handlePaveGame(ms, ovl);
+if (handled) return;
+
 // ===============================
     // 🔥 GESTION PAVÉ NORMAL
     // ===============================
