@@ -12,8 +12,7 @@ const {
     normalizeJid,
     getSenderJid,
 
-    calculDistanceZone,
-    calculDistanceXY,
+    calculDistance,
     extraireDistance,
     extraireZoneArrivee,
     extraireZoneDepart,
@@ -131,7 +130,7 @@ function convertToPosition(zoneX, zoneY) {
 // ===============================
 // 📏 DISTANCE ENTRE JOUEURS
 // ===============================
-function calculDistanceXY(p1, p2) {
+function distancePlayer(p1, p2) {
 
     if (!p1 || !p2) return 0;
 
