@@ -15,6 +15,8 @@ const { handlePaveGame } = require("../cmd/BLmatchgameplay");
 =================================*/
 const matchsActifs = new Map();
 
+
+const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 // ===============================
 // 📍 MAPPING POSTES → TERRAIN
 // ===============================
