@@ -18,14 +18,9 @@ const {
     extraireZoneDepart,
     extraireDirectionLargeur,
     updatePositionJoueur,
+    startGlobalTimer,
 
 } = require("./BLmatchsetup");
-
-// ⚠️ dépendances externes (à garder ailleurs ou setup engine global)
-const {
-    startGlobalTimer,
-    handleDuelMatch
-} = require("./BLmatchengine"); // ou ton core match runtime
 
 // ===============================
 // 🎙️ GAMEPLAY UTILITIES (IA / NARRATION)
@@ -563,6 +558,7 @@ module.exports = {
     handlePaveGame,
     handleDeplacements,
     handlePasses,
+    startGlobalTimer,
 
     // 🎙️ NARRATION IA
     resumerAction
