@@ -105,6 +105,28 @@ function extraireDirectionLargeur(txt) {
     return null;
 }
 
+
+/* ===============================
+⌚ TIMER GLOBAL 
+=================================*/
+const TURN_TIME = 6 * 60 * 1000; // 6 minutes
+
+function startGlobalTimer(ovl, chat, match) {
+    if (match.timerGlobal) clearTimeout(match.timerGlobal);
+
+    match.timerGlobal = setTimeout(() => {
+        ovl.sendMessage(chat, {
+            text: "⏳ Temps écoulé ! Tour terminé."
+        });
+
+        // 🔄 switch tour auto
+        match.joueurTour =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+    }, TURN_TIME);
+}
 /* ===============================
 ⚙️ PLAYER ENGINE
 =================================*/
