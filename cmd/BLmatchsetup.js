@@ -217,7 +217,32 @@ function tirageKickOff() {
     return Math.random() < 0.5 ? "A" : "B";
 }
 
+// ===============================
+// TROUVER USER DANS LA BD
+// ===============================
+function cleanTeamName(str) {
+    return str
+        .replace(/\p{Emoji}/gu, "") // enlève emojis
+        .toLowerCase()
+        .trim();
+}
 
+async function trouverUser(nom) {
+    const allPlayers = await TeamFunctions.getAllTeams();
+    if (!allPlayers) return null;
+
+    const nomClean = cleanTeamName(nom);
+
+    for (const player of allPlayers) {
+        const userClean = cleanTeamName(player.users || "");
+
+        if (userClean === nomClean) {
+            return player;
+        }
+    }
+
+    return null;
+        }
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -398,7 +423,9 @@ async function messageMatch(ms, ovl) {
 // 📋 GESTION LINEUP FULL PRO
 // ===============================
 if (match.etat === "attente_lineup") {
-
+await verifierFiche(safeText, chat, ovl);
+    return; 
+}
     // 🔍 Vérifie que c'est bien un squad
     if (!safeText.includes("SQUAD⚽🥅")) return;
 
