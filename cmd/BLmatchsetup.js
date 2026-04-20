@@ -529,63 +529,46 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    // ===============================
-    // ⚽ ATTRIBUTION ÉQUIPE
-    // ===============================
-    if (squadName === team1 && !match.equipe1) {
+// ===============================
+// ⚽ ATTRIBUTION ÉQUIPE
+// ===============================
+if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid;
-        match.lineup1 = joueursValides;
-        match.equipe1 = true;
+    match.id1 = senderJid;
+    match.lineup1 = joueursValides;
+    match.equipe1 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team1Nom}*`
-        });
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team1Nom}*`
+    });
 
-    } else if (squadName === team2 && !match.equipe2) {
+} else if (squadName === team2 && !match.equipe2) {
 
-        match.id2 = senderJid;
-        match.lineup2 = joueursValides;
-        match.equipe2 = true;
+    match.id2 = senderJid;
+    match.lineup2 = joueursValides;
+    match.equipe2 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team2Nom}*`
-        });
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team2Nom}*`
+    });
 
-    } else {
-        return ovl.sendMessage(chat, {
-            text: "❌ Équipe non reconnue ou déjà envoyée"
-        });
-    }
-
-    return;
+} else {
+    return ovl.sendMessage(chat, {
+        text: "❌ Équipe non reconnue ou déjà envoyée"
+    });
 }
 
-
 // ===============================
-    // 🔥 GESTION PAVÉ NORMAL
-    // ===============================
-    const handled = await handlePaveGame(ms, ovl);
-    if (handled) return;
-
-    console.log("📩 MESSAGE REÇU (hors pavé)");
-    
- // ===============================
-// 🚀 MATCH PRÊT
+// 🚀 MATCH PRÊT 
 // ===============================
 if (match.equipe1 && match.equipe2 && !match.starting) {
 
     match.starting = true;
 
-    // ⛔ annule le timer lineup si encore actif
-    if (match.lineupTimeout) {
-        clearTimeout(match.lineupTimeout);
-        match.lineupTimeout = null;
+    if (match.timerLineup) {
+        clearTimeout(match.timerLineup);
+        match.timerLineup = null;
     }
-
-    if (match.timerMatch) clearTimeout(match.timerMatch);
-
-    match.etat = "debut_match";
 
     const readyText = `⏳ Les deux formations sont prêtes.
 Le match commence dans *1 minute* 🥅⚽...`;
@@ -607,7 +590,16 @@ Le match commence dans *1 minute* 🥅⚽...`;
     match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
 }
 
-} 
+return;
+
+// ===============================
+    // 🔥 GESTION PAVÉ NORMAL
+    // ===============================
+    const handled = await handlePaveGame(ms, ovl);
+    if (handled) return;
+
+    console.log("📩 MESSAGE REÇU (hors pavé)");
+     
     
 // ===============================
 // 🚀 LANCEMENT MATCH
