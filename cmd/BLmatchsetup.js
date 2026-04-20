@@ -513,56 +513,70 @@ match.ownerName = ms.pushName || senderJid.split("@")[0];
     // 🧠 VALIDATION JOUEURS (OK déjà)
     // ===============================
     const joueursValides = [];
-    const nomsUtilises = new Set();
-    const playersDB = Object.values(cardsBlueLock);
+const nomsUtilises = new Set();
+const playersDB = Object.values(cardsBlueLock);
 
-    for (const j of parsed.joueurs) {
+for (const j of parsed.joueurs) {
 
-        const inputName = pureName(j.name);
+    const inputName = pureName(j.name);
 
-        const data =
-            playersDB.find(p => pureName(p.name) === inputName) ||
-            playersDB.find(p => pureName(p.name).includes(inputName)) ||
-            playersDB.find(p => inputName.includes(pureName(p.name)));
+    const data =
+        playersDB.find(p => pureName(p.name) === inputName) ||
+        playersDB.find(p => pureName(p.name).includes(inputName)) ||
+        playersDB.find(p => inputName.includes(pureName(p.name)));
 
-        if (!data) {
-            return ovl.sendMessage(chat, {
-                text: `❌ Joueur inconnu: ${j.name}`
-            });
-        }
-
-        const nomClean = pureName(data.name);
-
-        if (nomsUtilises.has(nomClean)) {
-            return ovl.sendMessage(chat, {
-                text: `❌ Joueur en double: ${data.name}`
-            });
-        }
-
-        nomsUtilises.add(nomClean);
-
-        const posteData = POSITION_POSTES[j.poste];
-
-        if (!posteData) {
-            return ovl.sendMessage(chat, {
-                text: `❌ Poste invalide: ${j.poste}`
-            });
-        }
-
-        joueursValides.push({
-            numero: j.numero,
-            nom: data.name,
-            data: data,
-            note: j.note,
-            poste: j.poste,
-            ligne: posteData.ligne,
-            zoneX: posteData.zoneX,
-            zoneY: posteData.zoneY,
-            position: null,
-            visavis: null
+    if (!data) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Joueur inconnu: ${j.name}`
         });
     }
 
+    const nomClean = pureName(data.name);
+
+    if (nomsUtilises.has(nomClean)) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Joueur en double: ${data.name}`
+        });
+    }
+
+    nomsUtilises.add(nomClean);
+
+    const posteData = POSITION_POSTES[j.poste];
+
+    if (!posteData) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Poste invalide: ${j.poste}`
+        });
+    }
+
+    joueursValides.push({
+        numero: j.numero,
+        nom: data.name,
+
+        // ⚽ STATS AJOUTÉES 
+        stats: {
+            ovr: data.ovr,
+            sho: data.sho,
+            dri: data.dri,
+            pas: data.pas,
+            acc: data.acc,
+            phy: data.phy,
+            def: data.def
+        },
+
+        weapons: data.weapons || [],
+        attitude: data.attitude || "calme",
+        rank: data.rank,
+
+        poste: j.poste,
+        ligne: posteData.ligne,
+        zoneX: posteData.zoneX,
+        zoneY: posteData.zoneY,
+
+        position: null,
+        visavis: null
+    });
+}
 // ===============================
 // ⚽ ATTRIBUTION ÉQUIPE
 // ===============================
