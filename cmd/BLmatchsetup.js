@@ -135,13 +135,31 @@ function startGlobalTimer(ovl, chat, match) {
 
 // Trouver joueur DB
 function findBlueLockPlayer(input, cardsBlueLock) {
-    const players = Object.values(cardsBlueLock || {});
-    const clean = pureName(input);
+  const q = pureName(input);
+  const players = Object.values(cardsBlueLock);
 
-    return players.find(p =>
-        pureName(p.name).includes(clean)
-    ) || null;
+  return (
+    players.find(p => pureName(p.name) === q) ||
+    players.find(p => pureName(p.name).includes(q) || q.includes(pureName(p.name))) ||
+    null
+  );
 }
+
+const pureName = str => {
+  if (!str) return "";
+  let s = String(str);
+
+  s = s.replace(/.+?/g, " ");
+  s = s.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, " ");
+  s = s.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, " ");
+  s = s.replace(/[\uFE00-\uFE0F\u200D]/g, " ");
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+  s = s.replace(/[^0-9a-zA-ZÀ-ÿ\s]/g, " ");
+  s = s.replace(/\s+/g, " ").trim().toLowerCase();
+
+  return s;
+};
+
 
 /* ===============================
 📋 LINEUP ENGINE
@@ -463,46 +481,59 @@ if (match.etat === "attente_lineup") {
 
     // ===============================
     // 🧠 VALIDATION JOUEURS
-    // ===============================
-    const joueursValides = [];
-    const nomsUtilises = new Set();
+    // ===============================    
+const joueursValides = [];
+const nomsUtilises = new Set();
 
-    for (const j of parsed.joueurs) {
+const playersDB = Object.values(cardsBlueLock);
 
-        const data = findBlueLockPlayer(j.name, cardsBlueLock);
+for (const j of parsed.joueurs) {
 
-        if (!data) {
-            return ovl.sendMessage(chat, {
-                text: `❌ Joueur inconnu: ${j.name}`
-            });
-        }
+    const inputName = pureName(j.name);
 
-        const nomClean = pureName(data.name);
+    // 🔎 recherche style boutique (exact puis includes)
+    const data =
+        playersDB.find(p => pureName(p.name) === inputName) ||
+        playersDB.find(p => pureName(p.name).includes(inputName)) ||
+        playersDB.find(p => inputName.includes(pureName(p.name)));
 
-        if (nomsUtilises.has(nomClean)) {
-            return ovl.sendMessage(chat, {
-                text: `❌ Joueur en double: ${data.name}`
-            });
-        }
-
-        nomsUtilises.add(nomClean);
-
-        const posteData = POSITION_POSTES[j.poste];
-
-        joueursValides.push({
-            numero: j.numero,
-            nom: data.name,
-            data: data,
-            note: j.note,
-            poste: j.poste,
-            ligne: posteData.ligne,
-            zoneX: posteData.zoneX,
-            zoneY: posteData.zoneY,
-            position: null,
-            visavis: null
+    if (!data) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Joueur inconnu: ${j.name}`
         });
     }
 
+    const nomClean = pureName(data.name);
+
+    if (nomsUtilises.has(nomClean)) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Joueur en double: ${data.name}`
+        });
+    }
+
+    nomsUtilises.add(nomClean);
+
+    const posteData = POSITION_POSTES[j.poste];
+
+    if (!posteData) {
+        return ovl.sendMessage(chat, {
+            text: `❌ Poste invalide: ${j.poste}`
+        });
+    }
+
+    joueursValides.push({
+        numero: j.numero,
+        nom: data.name,
+        data: data,
+        note: j.note,
+        poste: j.poste,
+        ligne: posteData.ligne,
+        zoneX: posteData.zoneX,
+        zoneY: posteData.zoneY,
+        position: null,
+        visavis: null
+    });
+}
     // ===============================
     // ⚽ ATTRIBUTION ÉQUIPE
     // ===============================
