@@ -648,28 +648,36 @@ async function lancerMatch(chat, ovl) {
 
     match.waitingKickoff = false;
 
-    // =========================
-    // 🎯 AFFICHAGE KICKOFF
-    // =========================
-    const jidStart = match.joueurTour;
-    const displayName = jidStart.split("@")[0];
+// =========================
+// 🎯 AFFICHAGE KICKOFF 
+// =========================
+const jidStart = match.joueurTour;
 
-    const imagesKickOff = [
-        "https://files.catbox.moe/onotk4.jpg",
-        "https://files.catbox.moe/kfw0bl.jpg"
-    ];
+// 🔥 récupérer nom propre depuis la DB lineup
+const player =
+    match.lineup1?.find(p => match.id1 === jidStart) ||
+    match.lineup2?.find(p => match.id2 === jidStart);
 
-    await ovl.sendMessage(chat, {
-        image: {
-            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
-        },
-        caption:
+const displayName =
+    player?.nom ||
+    jidStart.split("@")[0];
+
+const imagesKickOff = [
+    "https://files.catbox.moe/onotk4.jpg",
+    "https://files.catbox.moe/kfw0bl.jpg"
+];
+
+await ovl.sendMessage(chat, {
+    image: {
+        url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
+    },
+    caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-        mentions: [jidStart]
-    });
+    mentions: [jidStart]
+});
 
     // =========================
     // 📍 INITIALISATION POSITIONS
