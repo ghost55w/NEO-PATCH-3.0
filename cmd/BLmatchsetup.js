@@ -106,48 +106,90 @@ function extraireDirectionLargeur(txt) {
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
- function startGlobalTimer(ovl, chat, match) {
+async function startMatchCycle(chat, ovl, match) {
 
-    // 🧹 clean anciens timers
-    if (match.timerGlobal) clearTimeout(match.timerGlobal);
-    if (match.timerWarning) clearTimeout(match.timerWarning);
+    if (match.turnTimer) clearTimeout(match.turnTimer);
 
-    const jid = match.joueurTour;
-    if (!jid) return;
+    if (!match.tour) match.tour = 1;
+    if (!match.toursRestants) match.toursRestants = 5;
 
-    const jidClean = normalizeJid(jid);
-    const tag = getTagFromJid(jidClean);
+    const attacker = match.attacker;
+    const defender = match.defender;
 
-    // ⚠️ WARNING
-    match.timerWarning = setTimeout(() => {
-        ovl.sendMessage(chat, {
-            text: `⚠️ @${tag} il te reste 1 minute !`,
-            mentions: [jidClean]
-        });
-    }, TURN_TIME - 60000);
+    // 🏁 FIN MATCH
+    if (match.tour > 20) {
 
-    // ❌ LATENCE OUT
-    match.timerGlobal = setTimeout(() => {
+        await ovl.sendMessage(chat, {
+            text:
+`🏁⚽: FIN DU MATCH 🥅‼️
 
-        ovl.sendMessage(chat, {
-            text: `❌ LATENCE OUT !
+📊 20 TOURS ATTEINTS
 
-⛔ @${tag} n’a pas joué à temps.
-➡️ NEXT !`,
-            mentions: [jidClean]
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
         });
 
-        // 🔁 switch joueur
-        match.joueurTour =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
+        return;
+    }
 
-        // 🔥 relance timer
-        startGlobalTimer(ovl, chat, match);
+    // ===============================
+    // 📢 TOUR MESSAGE
+    // ===============================
+    await ovl.sendMessage(chat, {
+        text:
+`🎙️⚽: TOUR ${match.tour}/20 🥅‼️ @${attacker.split("@")[0]} est en attaque ! ⚽
 
-    }, TURN_TIME);
+🛡️ Défenseur : @${defender.split("@")[0]}
+⏳ Tours restants : ${match.toursRestants}
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+        mentions: [attacker, defender]
+    });
+
+    // ===============================
+    // ⏱️ TIMER 6 MIN
+    // ===============================
+    match.turnTimer = setTimeout(async () => {
+
+        const currentAttacker = match.attacker;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⛔⚽: LATENCE OUT ❌‼️ @${currentAttacker.split("@")[0]} n’a pas joué !
+
+🔁 SWITCH DE POSSESSION
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [currentAttacker]
+        });
+
+        // ===============================
+        // 🔁 SWITCH
+        // ===============================
+        const temp = match.attacker;
+        match.attacker = match.defender;
+        match.defender = temp;
+
+        // 🔻 pénalité
+        match.toursRestants = Math.max(1, match.toursRestants - 4);
+
+        match.toursRestants--;
+
+        if (match.toursRestants <= 0) {
+            match.toursRestants = 5;
+            match.tour++;
+        }
+
+        // ===============================
+        // 🔄 RELANCE
+        // ===============================
+        await startMatchCycle(chat, ovl, match);
+
+    }, 6 * 60 * 1000);
 }
+
 
 /* ===============================
 ⚙️ PLAYER ENGINE
@@ -722,38 +764,17 @@ await ovl.sendMessage(chat, {
     mentions: [jidStart]
 });
 
-// =========================
-// ⏱️ TIMER PAVÉ (6 MIN)
-// =========================
-if (match.kickoffTimer) clearTimeout(match.kickoffTimer);
+// ===============================
+// 🚀 INITIALISATION MATCH
+// ===============================
+match.tour = 1;
+match.toursRestants = 5;
 
-match.kickoffTimer = setTimeout(async () => {
+match.attacker = jidStart;
+match.defender = jidOpposite;
 
-    const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
-
-    match.joueurTour = nextJoueur;
-
-    const displayNext = nextJoueur.split("@")[0];
-
-    const imagesLate = [
-        "https://files.catbox.moe/3n8q7l.jpg",
-        "https://files.catbox.moe/7lqz9p.jpg"
-    ];
-
-    await ovl.sendMessage(chat, {
-        image: {
-            url: imagesLate[Math.floor(Math.random() * imagesLate.length)]
-        },
-        caption:
-`⛔ LATENCE OUT ❌ @${displayName} Temps écroulé !
-👉 NEXT : @${displayNext}
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-        mentions: [nextJoueur]
-    });
-
-}, 6 * 60 * 1000);
+// 🔥 START ENGINE
+startMatchCycle(chat, ovl, match);
 
     // =========================
     // 📍 INITIALISATION POSITIONS
@@ -790,12 +811,11 @@ match.lineup2.forEach(j => initPlayerPosition(j));
     // 🔗 vis-à-vis
     assignerVisAVis(match);
 
-    // =========================
-    // ⏱️ TIMER GLOBAL
-    // =========================
-    startGlobalTimer(ovl, chat, match);
-}
-
+    // ===============================
+// 🔥 START ENGINE 
+// ===============================
+startMatchCycle(chat, ovl, match);
+} 
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
@@ -916,6 +936,8 @@ getTagFromJid,
 
     // 🔥 AJOUT IMPORTANT
     messageMatch,
-    verifierFiche
+    verifierFiche, 
+startMatchCycle,
+
 }; 
    
