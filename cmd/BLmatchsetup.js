@@ -99,14 +99,42 @@ function extraireDirectionLargeur(txt) {
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
-const TURN_TIME = 6 * 60 * 1000; // 6 minutes
+ const TURN_TIME = 6 * 60 * 1000; // 6 minutes
 
 function startGlobalTimer(ovl, chat, match) {
-    if (match.timerGlobal) clearTimeout(match.timerGlobal);
 
-    match.timerGlobal = setTimeout(() => {
+    // stop ancien timer
+    if (match.timerGlobal) clearTimeout(match.timerGlobal);
+    if (match.timerWarning) clearTimeout(match.timerWarning);
+
+    const jid = match.joueurTour;
+    const name = match.ownerName || jid.split("@")[0];
+
+    // =========================
+    // ⚠️ WARNING 1 MINUTE RESTANTE
+    // =========================
+    match.timerWarning = setTimeout(() => {
+
         ovl.sendMessage(chat, {
-            text: "⏳ Temps écoulé ! Tour terminé."
+            text:
+`⚠️ @${name} il ne te reste que 1 minute pour jouer ton pavé !`,
+            mentions: [jid]
+        });
+
+    }, 5 * 60 * 1000); // 5 min écoulées → reste 1 min
+
+    // =========================
+    // ❌ FIN DU TOUR (LATENCE OUT)
+    // =========================
+    match.timerGlobal = setTimeout(() => {
+
+        ovl.sendMessage(chat, {
+            text:
+`❌ LATENCE OUT !
+
+⛔ @${name} n’a pas joué à temps.
+➡️ NEXT joueur !`,
+            mentions: [jid]
         });
 
         // 🔄 switch tour auto
@@ -115,8 +143,11 @@ function startGlobalTimer(ovl, chat, match) {
                 ? match.id2
                 : match.id1;
 
+        match.turnType = "attaque";
+
     }, TURN_TIME);
 }
+
 /* ===============================
 ⚙️ PLAYER ENGINE
 =================================*/
