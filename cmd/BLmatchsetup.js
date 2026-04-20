@@ -180,7 +180,7 @@ function parseLineupFull(text) {
 
     if (!joueurs.length) return null;
 
-    const teamName = text.match(/SQUAD⚽🥅:\s*(.+)/i)?.[1]?.trim();
+    const teamName = text.match(/SQUAD⚽🥅[^:]*:\s*(.+)/i)?.[1]?.trim();
 
     return { teamName, joueurs };
 }
