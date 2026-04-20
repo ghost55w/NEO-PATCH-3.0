@@ -721,7 +721,7 @@ await ovl.sendMessage(chat, {
     // ⏱️ Lancer timer du premier joueur
 startGlobalTimer(ovl, chat, match);
 
-} 
+
     // =========================
     // 📍 INITIALISATION POSITIONS
     // =========================
