@@ -590,15 +590,14 @@ Le match commence dans *1 minute* 🥅⚽...`;
     match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
 }
 
-return;
-
 // ===============================
     // 🔥 GESTION PAVÉ NORMAL
     // ===============================
-    const handled = await handlePaveGame(ms, ovl);
-    if (handled) return;
+// 🔥 GESTION PAVÉ NORMAL
+const handled = await handlePaveGame(ms, ovl);
+if (handled) return;
 
-    console.log("📩 MESSAGE REÇU (hors pavé)");
+console.log("📩 MESSAGE REÇU (hors pavé)");
 } 
     
 // ===============================
