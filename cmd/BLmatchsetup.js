@@ -166,31 +166,38 @@ function parseLineupFull(text) {
         if (!ligne.includes("👤")) continue;
 
         const numero = ligne.match(/^(\d+)/)?.[1];
-        const poste = ligne.match(/\(([A-Z]{2})\)/)?.[1];
+
+        // 🔥 POSTE SAFE FIX
+        const posteMatch = ligne.match(/\(([A-Z]{2})\)/i);
+        const poste = posteMatch?.[1]?.toUpperCase() || null;
+
         const note = ligne.match(/\((\d{1,3})\)/g)?.pop()?.replace(/[()]/g, "");
 
         let nom = ligne
             .replace(/^(\d+)/, "")
             .replace(/👤/, "")
-            .replace(/\([A-Z]{2}\)/, "")
+            .replace(/\([A-Z]{2}\)/gi, "")
             .replace(/\(\d+\)/g, "")
             .replace(/🇯🇵|🇫🇷|🇬🇧|🇪🇸|🇦🇷/g, "")
             .trim();
 
-      joueurs.push({
-    numero: parseInt(numero),
-    poste,
-    name: nom,   // 
-    note: parseInt(note)
-});  
-    } 
+        // ❌ sécurité : si poste invalide on ignore la ligne
+        if (!poste || poste.length !== 2) continue;
+
+        joueurs.push({
+            numero: parseInt(numero),
+            poste,
+            name: nom,
+            note: parseInt(note)
+        });
+    }
+
     if (!joueurs.length) return null;
 
     const teamName = text.match(/SQUAD⚽🥅[^:]*:\s*(.+)/i)?.[1]?.trim();
 
     return { teamName, joueurs };
 }
-
 /* ===============================
 📦 MATCH ENGINE HELPERS
 =================================*/
