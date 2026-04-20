@@ -17,6 +17,8 @@ const matchsActifs = new Map();
 
 
 const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
+// ⏱️ Temps par tour (6 minutes)
+const TURN_TIME = 6 * 60 * 1000;
 // ===============================
 // 📍 MAPPING POSTES → TERRAIN
 // ===============================
@@ -63,6 +65,11 @@ function getSenderJid(ms) {
     return ms.key?.participant || ms.key?.remoteJid;
 }
 
+//tag @mention DU sender
+function getTagFromJid(jid) {
+    const clean = normalizeJid(jid);
+    return clean ? clean.split("@")[0] : "user";
+}
 /* ===============================
 📐 MATH / TERRAIN ENGINE
 =================================*/
@@ -101,24 +108,23 @@ function extraireDirectionLargeur(txt) {
 =================================*/
  function startGlobalTimer(ovl, chat, match) {
 
+    // 🧹 clean anciens timers
     if (match.timerGlobal) clearTimeout(match.timerGlobal);
     if (match.timerWarning) clearTimeout(match.timerWarning);
 
     const jid = match.joueurTour;
+    if (!jid) return;
 
-    if (!jid) return; 
+    const jidClean = normalizeJid(jid);
+    const tag = getTagFromJid(jidClean);
 
-    const name = match.ownerName || jid.split("@")[0];
-
-    // ⚠️ WARNING 1 MIN
+    // ⚠️ WARNING
     match.timerWarning = setTimeout(() => {
-
         ovl.sendMessage(chat, {
-            text: `⚠️ @${name} il te reste 1 minute !`,
-            mentions: [jid]
+            text: `⚠️ @${tag} il te reste 1 minute !`,
+            mentions: [jidClean]
         });
-
-    }, 5 * 60 * 1000);
+    }, TURN_TIME - 60000);
 
     // ❌ LATENCE OUT
     match.timerGlobal = setTimeout(() => {
@@ -126,18 +132,22 @@ function extraireDirectionLargeur(txt) {
         ovl.sendMessage(chat, {
             text: `❌ LATENCE OUT !
 
-⛔ @${name} n’a pas joué a temps.
+⛔ @${tag} n’a pas joué à temps.
 ➡️ NEXT !`,
-            mentions: [jid]
+            mentions: [jidClean]
         });
 
+        // 🔁 switch joueur
         match.joueurTour =
             match.joueurTour === match.id1
                 ? match.id2
                 : match.id1;
 
+        // 🔥 relance timer
+        startGlobalTimer(ovl, chat, match);
+
     }, TURN_TIME);
- }
+}
 
 /* ===============================
 ⚙️ PLAYER ENGINE
@@ -690,32 +700,26 @@ async function lancerMatch(chat, ovl) {
 // =========================
 // 🎯 AFFICHAGE KICKOFF 
 // =========================
-const jidStart = match.joueurTour;
-
-// sécurité (au cas où)
+const jidStart = match.joueurTour; 
 if (!jidStart) return;
 
-// nom affiché (UI uniquement)
-const displayName = match.ownerName || jidStart.split("@")[0];
-
-const imagesKickOff = [
-    "https://files.catbox.moe/onotk4.jpg",
-    "https://files.catbox.moe/kfw0bl.jpg"
-];
-
-const text =
-`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`;
+const jidClean = normalizeJid(jidStart);
+const tag = jidClean.split("@")[0];
 
 await ovl.sendMessage(chat, {
     image: {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
-    caption: text,
-    mentions: [jidStart] 
+    caption: `🎙️⚽: KICK OFF 🥅‼️ @${tag} débute avec la possession ! ⚽
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+    mentions: [jidClean]
 });
+    // ⏱️ Lancer timer du premier joueur
+startGlobalTimer(ovl, chat, match);
+
+} 
     // =========================
     // 📍 INITIALISATION POSITIONS
     // =========================
@@ -856,7 +860,8 @@ module.exports = {
     pureName,
     normalizeJid,
     getSenderJid,
-
+getTagFromJid, 
+    
     // MATH
     distancePlayer,
     extraireDistance,
