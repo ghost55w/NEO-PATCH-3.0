@@ -53,18 +53,6 @@ const TYPES_PASSES = {
 🧠 UTILITAIRES CORE
 =================================*/
 
-// Nettoyage nom joueur
-function pureName(str) {
-    if (!str) return "";
-    return str
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-zA-Z0-9\s]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-}
-
 // Normalisation JID
 function normalizeJid(jid) {
     return jid?.split(":")[0] || jid;
@@ -147,17 +135,18 @@ function findBlueLockPlayer(input, cardsBlueLock) {
 
 const pureName = str => {
   if (!str) return "";
-  let s = String(str);
 
-  s = s.replace(/.+?/g, " ");
-  s = s.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, " ");
-  s = s.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, " ");
-  s = s.replace(/[\uFE00-\uFE0F\u200D]/g, " ");
-  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-  s = s.replace(/[^0-9a-zA-ZÀ-ÿ\s]/g, " ");
-  s = s.replace(/\s+/g, " ").trim().toLowerCase();
-
-  return s;
+  return String(str)
+    .replace(/\(.*?\)/g, " ") // enlève (NEL) etc
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, " ") // drapeaux
+    .replace(/[\u{1F300}-\u{1F6FF}]/gu, " ") // emojis
+    .replace(/[\uFE00-\uFE0F\u200D]/g, " ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 };
 
 
