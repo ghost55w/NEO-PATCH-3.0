@@ -599,7 +599,7 @@ return;
     if (handled) return;
 
     console.log("📩 MESSAGE REÇU (hors pavé)");
-     
+} 
     
 // ===============================
 // 🚀 LANCEMENT MATCH
