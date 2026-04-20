@@ -192,7 +192,6 @@ const clean = texte
 // ================================
 try {
 
-  if (verifierFiche) await verifierFiche(texte, ms_org, ovl);
 if (messageMatch) await messageMatch(ms, ovl);
     
 } catch (err) {
