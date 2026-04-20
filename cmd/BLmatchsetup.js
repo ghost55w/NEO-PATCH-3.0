@@ -99,54 +99,45 @@ function extraireDirectionLargeur(txt) {
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
- const TURN_TIME = 6 * 60 * 1000; // 6 minutes
+ function startGlobalTimer(ovl, chat, match) {
 
-function startGlobalTimer(ovl, chat, match) {
-
-    // stop ancien timer
     if (match.timerGlobal) clearTimeout(match.timerGlobal);
     if (match.timerWarning) clearTimeout(match.timerWarning);
 
     const jid = match.joueurTour;
+
+    if (!jid) return; 
+
     const name = match.ownerName || jid.split("@")[0];
 
-    // =========================
-    // ⚠️ WARNING 1 MINUTE RESTANTE
-    // =========================
+    // ⚠️ WARNING 1 MIN
     match.timerWarning = setTimeout(() => {
 
         ovl.sendMessage(chat, {
-            text:
-`⚠️ @${name} il ne te reste que 1 minute pour jouer ton pavé !`,
+            text: `⚠️ @${name} il te reste 1 minute !`,
             mentions: [jid]
         });
 
-    }, 5 * 60 * 1000); // 5 min écoulées → reste 1 min
+    }, 5 * 60 * 1000);
 
-    // =========================
-    // ❌ FIN DU TOUR (LATENCE OUT)
-    // =========================
+    // ❌ LATENCE OUT
     match.timerGlobal = setTimeout(() => {
 
         ovl.sendMessage(chat, {
-            text:
-`❌ LATENCE OUT !
+            text: `❌ LATENCE OUT !
 
-⛔ @${name} n’a pas joué à temps.
-➡️ NEXT joueur !`,
+⛔ @${name} n’a pas joué a temps.
+➡️ NEXT !`,
             mentions: [jid]
         });
 
-        // 🔄 switch tour auto
         match.joueurTour =
             match.joueurTour === match.id1
                 ? match.id2
                 : match.id1;
 
-        match.turnType = "attaque";
-
     }, TURN_TIME);
-}
+ }
 
 /* ===============================
 ⚙️ PLAYER ENGINE
@@ -699,28 +690,32 @@ async function lancerMatch(chat, ovl) {
 // =========================
 // 🎯 AFFICHAGE KICKOFF 
 // =========================
-const jidStart = match.ownerJid;
-const displayName = match.ownerName || jidStart.split("@")[0];
+const jidStart = match.joueurTour;
 
-const mentionText = `@${displayName}`;
+// sécurité (au cas où)
+if (!jidStart) return;
+
+// nom affiché (UI uniquement)
+const displayName = match.ownerName || jidStart.split("@")[0];
 
 const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
     "https://files.catbox.moe/kfw0bl.jpg"
 ];
 
+const text =
+`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`;
+
 await ovl.sendMessage(chat, {
     image: {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
-    caption:
-`🎙️⚽: KICK OFF 🥅‼️ ${mentionText} débute avec la possession ! ⚽
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-    mentions: [jidStart]
+    caption: text,
+    mentions: [jidStart] 
 });
-
     // =========================
     // 📍 INITIALISATION POSITIONS
     // =========================
