@@ -700,27 +700,60 @@ async function lancerMatch(chat, ovl) {
     match.waitingKickoff = false;
 
 // =========================
-// 🎯 AFFICHAGE KICKOFF 
+// 🎯 AFFICHAGE KICKOFF
 // =========================
-const jidStart = match.joueurTour; 
-if (!jidStart) return;
+const jidStart = match.joueurTour;
+const displayName = jidStart.split("@")[0];
 
-const jidClean = normalizeJid(jidStart);
-const tag = jidClean.split("@")[0];
+const imagesKickOff = [
+    "https://files.catbox.moe/onotk4.jpg",
+    "https://files.catbox.moe/kfw0bl.jpg"
+];
 
 await ovl.sendMessage(chat, {
     image: {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
-    caption: `🎙️⚽: KICK OFF 🥅‼️ @${tag} débute avec la possession ! ⚽
+    caption:
+`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-    mentions: [jidClean]
+    mentions: [jidStart]
 });
-    // ⏱️ Lancer timer du premier joueur
-startGlobalTimer(ovl, chat, match);
 
+// =========================
+// ⏱️ TIMER PAVÉ (6 MIN)
+// =========================
+if (match.kickoffTimer) clearTimeout(match.kickoffTimer);
+
+match.kickoffTimer = setTimeout(async () => {
+
+    const nextJoueur = match.joueurTour === match.id1 ? match.id2 : match.id1;
+
+    match.joueurTour = nextJoueur;
+
+    const displayNext = nextJoueur.split("@")[0];
+
+    const imagesLate = [
+        "https://files.catbox.moe/3n8q7l.jpg",
+        "https://files.catbox.moe/7lqz9p.jpg"
+    ];
+
+    await ovl.sendMessage(chat, {
+        image: {
+            url: imagesLate[Math.floor(Math.random() * imagesLate.length)]
+        },
+        caption:
+`⛔ LATENCE OUT ❌ @${displayName} Temps écroulé !
+👉 NEXT : @${displayNext}
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextJoueur]
+    });
+
+}, 6 * 60 * 1000);
 
     // =========================
     // 📍 INITIALISATION POSITIONS
