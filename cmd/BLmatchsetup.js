@@ -445,6 +445,9 @@ if (match.etat === "attente_fiche") {
 // ===============================
 if (match.etat === "attente_lineup") {
 
+    // 🔒 STOP si déjà complet
+    if (match.equipe1 && match.equipe2) return;
+
     // 🔍 Vérifie que c'est bien un squad
     if (!safeText.includes("SQUAD⚽🥅")) return;
 
@@ -456,9 +459,6 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    // ===============================
-    // 🏷️ NOM ÉQUIPE
-    // ===============================
     const squadNameRaw = parsed.teamName;
     if (!squadNameRaw) {
         return ovl.sendMessage(chat, {
@@ -476,70 +476,63 @@ if (match.etat === "attente_lineup") {
     const senderJid = getSenderJid(ms);
 
     // ===============================
-    // 🧠 VALIDATION JOUEURS
-    // ===============================    
-const joueursValides = [];
-const nomsUtilises = new Set();
+    // 🧠 VALIDATION JOUEURS (OK déjà)
+    // ===============================
+    const joueursValides = [];
+    const nomsUtilises = new Set();
+    const playersDB = Object.values(cardsBlueLock);
 
-const playersDB = Object.values(cardsBlueLock);
+    for (const j of parsed.joueurs) {
 
-for (const j of parsed.joueurs) {
+        const inputName = pureName(j.name);
 
-    const inputName = pureName(j.name);
+        const data =
+            playersDB.find(p => pureName(p.name) === inputName) ||
+            playersDB.find(p => pureName(p.name).includes(inputName)) ||
+            playersDB.find(p => inputName.includes(pureName(p.name)));
 
-    // 🔎 recherche style boutique (exact puis includes)
-    const data =
-        playersDB.find(p => pureName(p.name) === inputName) ||
-        playersDB.find(p => pureName(p.name).includes(inputName)) ||
-        playersDB.find(p => inputName.includes(pureName(p.name)));
+        if (!data) {
+            return ovl.sendMessage(chat, {
+                text: `❌ Joueur inconnu: ${j.name}`
+            });
+        }
 
-    if (!data) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Joueur inconnu: ${j.name}`
+        const nomClean = pureName(data.name);
+
+        if (nomsUtilises.has(nomClean)) {
+            return ovl.sendMessage(chat, {
+                text: `❌ Joueur en double: ${data.name}`
+            });
+        }
+
+        nomsUtilises.add(nomClean);
+
+        const posteData = POSITION_POSTES[j.poste];
+
+        if (!posteData) {
+            return ovl.sendMessage(chat, {
+                text: `❌ Poste invalide: ${j.poste}`
+            });
+        }
+
+        joueursValides.push({
+            numero: j.numero,
+            nom: data.name,
+            data: data,
+            note: j.note,
+            poste: j.poste,
+            ligne: posteData.ligne,
+            zoneX: posteData.zoneX,
+            zoneY: posteData.zoneY,
+            position: null,
+            visavis: null
         });
     }
 
-    const nomClean = pureName(data.name);
-
-    if (nomsUtilises.has(nomClean)) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Joueur en double: ${data.name}`
-        });
-    }
-
-    nomsUtilises.add(nomClean);
-
-    const posteData = POSITION_POSTES[j.poste];
-
-    if (!posteData) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Poste invalide: ${j.poste}`
-        });
-    }
-
-    joueursValides.push({
-        numero: j.numero,
-        nom: data.name,
-        data: data,
-        note: j.note,
-        poste: j.poste,
-        ligne: posteData.ligne,
-        zoneX: posteData.zoneX,
-        zoneY: posteData.zoneY,
-        position: null,
-        visavis: null
-    });
-}
     // ===============================
     // ⚽ ATTRIBUTION ÉQUIPE
     // ===============================
     if (squadName === team1 && !match.equipe1) {
-
-        if (match.id1 && match.id1 !== senderJid) {
-            return ovl.sendMessage(chat, {
-                text: "❌ Cette équipe est déjà contrôlée"
-            });
-        }
 
         match.id1 = senderJid;
         match.lineup1 = joueursValides;
@@ -550,12 +543,6 @@ for (const j of parsed.joueurs) {
         });
 
     } else if (squadName === team2 && !match.equipe2) {
-
-        if (match.id2 && match.id2 !== senderJid) {
-            return ovl.sendMessage(chat, {
-                text: "❌ Cette équipe est déjà contrôlée"
-            });
-        }
 
         match.id2 = senderJid;
         match.lineup2 = joueursValides;
@@ -571,7 +558,7 @@ for (const j of parsed.joueurs) {
         });
     }
 
-    return; // 
+    return;
 }
 
 
