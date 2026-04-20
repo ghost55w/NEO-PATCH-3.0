@@ -795,6 +795,7 @@ module.exports = {
 
     // STATE
     matchsActifs,
+    
 
     // TERRAIN
     DISTANCES,
@@ -821,5 +822,10 @@ module.exports = {
 
     // ENGINE
     updatePositionJoueur,
-    updateGlobalPositions
-};
+    updateGlobalPositions, 
+
+    // 🔥 AJOUT IMPORTANT
+    messageMatch,
+    verifierFiche
+}; 
+   
