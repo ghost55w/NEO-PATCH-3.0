@@ -657,6 +657,8 @@ async function lancerMatch(chat, ovl) {
 const jidStart = match.ownerJid;
 const displayName = match.ownerName || jidStart.split("@")[0];
 
+const mentionText = `@${displayName}`;
+
 const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
     "https://files.catbox.moe/kfw0bl.jpg"
@@ -667,7 +669,7 @@ await ovl.sendMessage(chat, {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
     caption:
-`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
+`🎙️⚽: KICK OFF 🥅‼️ ${mentionText} débute avec la possession ! ⚽
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
