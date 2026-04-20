@@ -116,7 +116,9 @@ async function startMatchCycle(chat, ovl, match) {
     const attacker = match.attacker;
     const defender = match.defender;
 
+    // ===============================
     // 🏁 FIN MATCH
+    // ===============================
     if (match.tour > 20) {
 
         await ovl.sendMessage(chat, {
@@ -133,14 +135,15 @@ async function startMatchCycle(chat, ovl, match) {
     }
 
     // ===============================
-    // 📢 TOUR MESSAGE
+    // 🎙️ TOUR MESSAGE
     // ===============================
     await ovl.sendMessage(chat, {
         text:
-`🎙️⚽: TOUR ${match.tour}/20 🥅‼️ @${attacker.split("@")[0]} est en attaque ! ⚽
+`🎙️⚽: TOUR ${match.tour}/20 🥅‼️
 
-🛡️ Défenseur : @${defender.split("@")[0]}
-⏳ Tours restants : ${match.toursRestants}
+🔥 Attaquant: @${attacker.split("@")[0]}
+🛡️ Défenseur: @${defender.split("@")[0]}
+⏳ Tours restants: ${match.toursRestants}
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
@@ -154,9 +157,15 @@ async function startMatchCycle(chat, ovl, match) {
 
         const currentAttacker = match.attacker;
 
+        // ===============================
+        // ⛔ LATENCE OUT MESSAGE
+        // ===============================
         await ovl.sendMessage(chat, {
-            text:
-`⛔⚽: LATENCE OUT ❌‼️ @${currentAttacker.split("@")[0]} n’a pas joué !
+            image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
+            caption:
+`⛔ LATENCE OUT ❌‼️
+
+⚽ @${currentAttacker.split("@")[0]} n’a pas joué !
 
 🔁 SWITCH DE POSSESSION
 
@@ -172,9 +181,10 @@ async function startMatchCycle(chat, ovl, match) {
         match.attacker = match.defender;
         match.defender = temp;
 
-        // 🔻 pénalité
+        // 🔻 pénalité (perte 4 tours restants)
         match.toursRestants = Math.max(1, match.toursRestants - 4);
 
+        // 🔁 progression cycle
         match.toursRestants--;
 
         if (match.toursRestants <= 0) {
@@ -183,13 +193,12 @@ async function startMatchCycle(chat, ovl, match) {
         }
 
         // ===============================
-        // 🔄 RELANCE
+        // 🔄 RELANCE CYCLE
         // ===============================
-        await startMatchCycle(chat, ovl, match);
+        startMatchCycle(chat, ovl, match);
 
     }, 6 * 60 * 1000);
 }
-
 
 /* ===============================
 ⚙️ PLAYER ENGINE
