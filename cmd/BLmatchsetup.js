@@ -475,6 +475,9 @@ if (match.etat === "attente_lineup") {
 
     const senderJid = getSenderJid(ms);
 
+    match.ownerJid = senderJid;
+match.ownerName = ms.pushName || senderJid.split("@")[0];
+
     // ===============================
     // 🧠 VALIDATION JOUEURS (OK déjà)
     // ===============================
@@ -651,16 +654,8 @@ async function lancerMatch(chat, ovl) {
 // =========================
 // 🎯 AFFICHAGE KICKOFF 
 // =========================
-const jidStart = match.joueurTour;
-
-// 🔥 récupérer nom propre depuis la DB lineup
-const player =
-    match.lineup1?.find(p => match.id1 === jidStart) ||
-    match.lineup2?.find(p => match.id2 === jidStart);
-
-const displayName =
-    player?.nom ||
-    jidStart.split("@")[0];
+const jidStart = match.ownerJid;
+const displayName = match.ownerName || jidStart.split("@")[0];
 
 const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
