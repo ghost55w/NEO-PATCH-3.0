@@ -176,7 +176,7 @@ function parseLineupFull(text) {
     name: nom,   // 
     note: parseInt(note)
 });  
-
+    } 
     if (!joueurs.length) return null;
 
     const teamName = text.match(/SQUAD⚽🥅[^:]*:\s*(.+)/i)?.[1]?.trim();
