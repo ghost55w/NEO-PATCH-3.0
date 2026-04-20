@@ -170,13 +170,12 @@ function parseLineupFull(text) {
             .replace(/🇯🇵|🇫🇷|🇬🇧|🇪🇸|🇦🇷/g, "")
             .trim();
 
-        joueurs.push({
-            numero: parseInt(numero),
-            poste,
-            nom,
-            note: parseInt(note)
-        });
-    }
+      joueurs.push({
+    numero: parseInt(numero),
+    poste,
+    name: nom,   // 
+    note: parseInt(note)
+});  
 
     if (!joueurs.length) return null;
 
@@ -470,11 +469,11 @@ if (match.etat === "attente_lineup") {
 
     for (const j of parsed.joueurs) {
 
-        const data = findBlueLockPlayer(j.nom);
+        const data = findBlueLockPlayer(j.name, cardsBlueLock);
 
         if (!data) {
             return ovl.sendMessage(chat, {
-                text: `❌ Joueur inconnu: ${j.nom}`
+                text: `❌ Joueur inconnu: ${j.name}`
             });
         }
 
