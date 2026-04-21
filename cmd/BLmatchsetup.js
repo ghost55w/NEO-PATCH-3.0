@@ -779,11 +779,10 @@ await ovl.sendMessage(chat, {
 match.tour = 1;
 match.toursRestants = 5;
 
+const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
+
 match.attacker = jidStart;
 match.defender = jidOpposite;
-
-// 🔥 START ENGINE
-startMatchCycle(chat, ovl, match);
 
     // =========================
     // 📍 INITIALISATION POSITIONS
@@ -856,8 +855,9 @@ ovlcmd({
             "timerTour",
             "timerKickoff",
             "timerAction",
-            "timerMatch",
-            "timerLineup"
+            "timerMatch",          
+            "timerLineup", 
+            "turnTimer"
         ];
 
         for (const t of timers) {
