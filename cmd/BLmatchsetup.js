@@ -788,42 +788,50 @@ match.toursRestants = 5;
 match.attacker = jidStart;
 match.defender = jidOpposite;
 
-// 🔥 START
-startMatchCycle(chat, ovl, match);
-    // =========================
-    // 📍 INITIALISATION POSITIONS
-    // =========================
-    const equipeAttack =
-        match.possession === match.team1Nom
-            ? match.lineup1
-            : match.lineup2;
-
-    const equipeDefense =
-        match.possession === match.team1Nom
-            ? match.lineup2
-            : match.lineup1;
-
-    equipeAttack.forEach(j => {
-        j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-    });
-
-    equipeDefense.forEach(j => {
-        j.zoneY = getZoneYParLigne(j.ligne, "defense");
-    });
 // =========================
-// 📌 INIT POSITION PHYSIQUE (X,Y)
+// 📍 INITIALISATION POSITIONS (AVANT LE TIMER ⚠️)
+// =========================
+const equipeAttack =
+    match.possession === match.team1Nom
+        ? match.lineup1
+        : match.lineup2;
+
+const equipeDefense =
+    match.possession === match.team1Nom
+        ? match.lineup2
+        : match.lineup1;
+
+// sécurité anti crash
+if (!equipeAttack || !equipeDefense) return;
+
+equipeAttack.forEach(j => {
+    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+});
+
+equipeDefense.forEach(j => {
+    j.zoneY = getZoneYParLigne(j.ligne, "defense");
+});
+
+// =========================
+// 📌 INIT POSITION PHYSIQUE
 // =========================
 match.lineup1.forEach(j => initPlayerPosition(j));
 match.lineup2.forEach(j => initPlayerPosition(j));
 
-    
-    match.positions = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
+// =========================
+// 🔗 VIS A VIS
+// =========================
+match.positions = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
 
-    // 🔗 vis-à-vis
-    assignerVisAVis(match);
+assignerVisAVis(match);
+
+// ===============================
+// 🔥 START ENGINE (TOUJOURS EN DERNIER)
+// ===============================
+startMatchCycle(chat, ovl, match);
 
     
 /* ===============================
