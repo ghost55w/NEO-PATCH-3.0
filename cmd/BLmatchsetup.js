@@ -108,7 +108,8 @@ function extraireDirectionLargeur(txt) {
 =================================*/
 async function startMatchCycle(chat, ovl, match) {
 
-    if (match.turnTimer) clearTimeout(match.turnTimer);
+    // ⛔ Empêche double timer
+    if (match.turnTimer) return;
 
     if (!match.tour) match.tour = 1;
     if (!match.toursRestants) match.toursRestants = 5;
@@ -151,14 +152,17 @@ async function startMatchCycle(chat, ovl, match) {
     });
 
     // ===============================
-    // ⏱️ TIMER 6 MIN
+    // ⏱️ TIMER 6 MIN (FIX)
     // ===============================
     match.turnTimer = setTimeout(async () => {
+
+        // 🔥 IMPORTANT : reset du timer
+        match.turnTimer = null;
 
         const currentAttacker = match.attacker;
 
         // ===============================
-        // ⛔ LATENCE OUT MESSAGE
+        // ⛔ LATENCE OUT
         // ===============================
         await ovl.sendMessage(chat, {
             image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
@@ -181,10 +185,10 @@ async function startMatchCycle(chat, ovl, match) {
         match.attacker = match.defender;
         match.defender = temp;
 
-        // 🔻 pénalité (perte 4 tours restants)
+        // 🔻 pénalité
         match.toursRestants = Math.max(1, match.toursRestants - 4);
 
-        // 🔁 progression cycle
+        // 🔁 progression
         match.toursRestants--;
 
         if (match.toursRestants <= 0) {
@@ -197,7 +201,7 @@ async function startMatchCycle(chat, ovl, match) {
         // ===============================
         startMatchCycle(chat, ovl, match);
 
-    }, 6 * 60 * 1000);
+    }, TURN_TIME);
 }
 
 /* ===============================
@@ -756,8 +760,12 @@ async function lancerMatch(chat, ovl) {
 const jidStart = match.joueurTour;
 const displayName = jidStart.split("@")[0];
 
-// ✅ FIX ICI
 const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
+
+const imagesKickOff = [
+    "https://files.catbox.moe/onotk4.jpg",
+    "https://files.catbox.moe/kfw0bl.jpg"
+];
 
 await ovl.sendMessage(chat, {
     image: {
@@ -780,6 +788,8 @@ match.toursRestants = 5;
 match.attacker = jidStart;
 match.defender = jidOpposite;
 
+// 🔥 START
+startMatchCycle(chat, ovl, match);
     // =========================
     // 📍 INITIALISATION POSITIONS
     // =========================
@@ -815,12 +825,7 @@ match.lineup2.forEach(j => initPlayerPosition(j));
     // 🔗 vis-à-vis
     assignerVisAVis(match);
 
-    // ===============================
-// 🔥 START ENGINE 
-// ===============================
-startMatchCycle(chat, ovl, match);
-} 
-
+    
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/     
