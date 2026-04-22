@@ -145,30 +145,6 @@ async function startMatchCycle(chat, ovl, match) {
     }
 
     // ===============================
-    // 🎙️ TOUR MESSAGE
-    // ===============================
-    const attackerName =
-        match.names?.[attacker] ||
-        attacker.split("@")[0];
-
-    const defenderName =
-        match.names?.[defender] ||
-        defender.split("@")[0];
-
-    await ovl.sendMessage(chat, {
-        text:
-`🎙️⚽: TOUR ${match.tour}/20 🥅‼️
-
-🔥 Attaquant: @${attackerName}
-🛡️ Défenseur: @${defenderName}
-⏳ Tours restants: ${match.toursRestants}
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-        mentions: [attacker, defender]
-    });
-
-    // ===============================
 // ⚠️ WARNING (1 MIN RESTANTE)
 // ===============================
 const currentTurnId = Date.now();
@@ -201,9 +177,6 @@ match.warningTimer = setTimeout(async () => {
 // ===============================
 match.turnTimer = setTimeout(async () => {
 
-    // ❌ sécurité : si le tour a changé → on stop
-    if (match.currentTurnId !== currentTurnId) return;
-
     match.turnTimer = null;
 
     if (match.warningTimer) {
@@ -221,7 +194,9 @@ match.turnTimer = setTimeout(async () => {
     match.defender = temp;
 
     const newAttacker = match.attacker;
-
+// ✅ compteur possession SAFE
+match.possessions[newAttacker] = (match.possessions[newAttacker] || 0) + 1;
+    
     // 🔻 pénalité
     match.toursRestants = Math.max(1, match.toursRestants - 4);
     match.toursRestants--;
@@ -255,9 +230,7 @@ match.turnTimer = setTimeout(async () => {
         mentions: [oldAttacker, newAttacker]
     });
 
-    // ===============================
     // 🔄 RELANCE
-    // ===============================
     startMatchCycle(chat, ovl, match);
 
 }, 6 * 60 * 1000);
@@ -773,6 +746,12 @@ async function lancerMatch(chat, ovl) {
     match.attacker = jidStart;
     match.defender = jidOpposite;
 
+    // ✅ INIT POSSESSIONS
+match.possessions = {
+    [match.id1]: 0,
+    [match.id2]: 0
+};
+
     // =========================
     // ⚠️ SAFE TERRAIN INIT (ANTI CRASH)
     // =========================
@@ -839,7 +818,7 @@ async function lancerMatch(chat, ovl) {
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
+            🔷BLUELOCK⚽🥅`,
         mentions: [jidStart]
     });
 
@@ -856,6 +835,46 @@ async function lancerMatch(chat, ovl) {
     startMatchCycle(chat, ovl, match);
 }
 
+
+ovlcmd({
+    nom_cmd: "statut⚽",
+    classe: "BLUELOCK⚽",
+    react: "📊",
+    desc: "Afficher le statut du match"
+}, async (ms_org, ovl) => {
+
+    const chat = ms_org.key?.remoteJid || ms_org.from;
+    const match = matchsActifs.get(chat);
+
+    if (!match || match.etat !== "en_cours") {
+        return ovl.sendMessage(chat, {
+            text: "⚠️ Aucun match en cours."
+        });
+    }
+
+    const team1 = match.team1Nom;
+    const team2 = match.team2Nom;
+
+    // 👉 nombre de possessions (approx basé sur tours joués)
+    const poss1 = match.attacker === match.id1 ? 1 : 0;
+    const poss2 = match.attacker === match.id2 ? 1 : 0;
+
+    const toursRestantsMatch = 20 - match.tour + 1;
+
+    await ovl.sendMessage(chat, {
+        text:
+`▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+            *🔷MATCH STATUT⚽🔷*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+👤${team1} → possessions: ${poss1}
+👤${team2} → possessions: ${poss2}
+⏳ Temps restants: ${toursRestantsMatch} tours 
+
+╰─────────────────▱▱▱
+                🔷BLUELOCK⚽🥅`
+    });
+
+});
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/     
