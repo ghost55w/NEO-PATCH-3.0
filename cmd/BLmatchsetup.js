@@ -732,132 +732,126 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-    // ❌ déjà lancé
     if (match.kickoffStarted) return;
-
     match.kickoffStarted = true;
 
-    // 🎲 tirage équipe qui commence
     const isTeam1 = Math.random() < 0.5;
 
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
     match.phase = "kickoff";
     match.etat = "en_cours";
 
-    // 👤 joueur qui commence
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
 
-    // 🔥 INIT SYSTEME GLOBAL
     match.turnType = "attaque";
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
     match.phaseDuel = null;
 
-    // 🧹 CLEAN TIMERS (sécurité)
-    if (match.timerGlobal) {
-        clearTimeout(match.timerGlobal);
-        match.timerGlobal = null;
-    }
-
-    if (match.timerWarning) {
-        clearTimeout(match.timerWarning);
-        match.timerWarning = null;
-    }
-
-    if (match.kickoffTimer) {
-        clearTimeout(match.kickoffTimer);
-        match.kickoffTimer = null;
-    }
+    // CLEAN timers
+    ["timerGlobal","timerWarning","kickoffTimer"].forEach(t => {
+        if (match[t]) {
+            clearTimeout(match[t]);
+            match[t] = null;
+        }
+    });
 
     match.waitingKickoff = false;
 
+    // =========================
+    // 🔥 INIT SAFE
+    // =========================
+    const jidStart = match.joueurTour;
+    const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
 
-// =========================
-// 📍 INITIALISATION MATCH 
-// =========================
-const jidStart = match.joueurTour;
-const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
+    match.tour = 1;
+    match.toursRestants = 5;
 
-const displayName =
-    match.names?.[jidStart] ||
-    jidStart.split("@")[0];
+    match.attacker = jidStart;
+    match.defender = jidOpposite;
 
-// INIT STATE
-match.tour = 1;
-match.toursRestants = 5;
+    // =========================
+    // ⚠️ SAFE TERRAIN INIT (ANTI CRASH)
+    // =========================
+    try {
 
-match.attacker = jidStart;
-match.defender = jidOpposite;
+        const equipeAttack =
+            match.possession === match.team1Nom
+                ? match.lineup1
+                : match.lineup2;
 
-// =========================
-// 📍 INITIALISATION TERRAIN
-// =========================
-const equipeAttack =
-    match.possession === match.team1Nom
-        ? match.lineup1
-        : match.lineup2;
+        const equipeDefense =
+            match.possession === match.team1Nom
+                ? match.lineup2
+                : match.lineup1;
 
-const equipeDefense =
-    match.possession === match.team1Nom
-        ? match.lineup2
-        : match.lineup1;
+        if (equipeAttack && equipeDefense) {
 
-if (!equipeAttack || !equipeDefense) return;
+            if (typeof getZoneYParLigne === "function") {
+                equipeAttack.forEach(j => {
+                    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+                });
 
-equipeAttack.forEach(j => {
-    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-});
+                equipeDefense.forEach(j => {
+                    j.zoneY = getZoneYParLigne(j.ligne, "defense");
+                });
+            }
 
-equipeDefense.forEach(j => {
-    j.zoneY = getZoneYParLigne(j.ligne, "defense");
-});
+            if (typeof initPlayerPosition === "function") {
+                match.lineup1?.forEach(j => initPlayerPosition(j));
+                match.lineup2?.forEach(j => initPlayerPosition(j));
+            }
 
-// positions physiques
-match.lineup1.forEach(j => initPlayerPosition(j));
-match.lineup2.forEach(j => initPlayerPosition(j));
+            if (typeof assignerVisAVis === "function") {
+                match.positions = [
+                    ...(match.lineup1 || []),
+                    ...(match.lineup2 || [])
+                ];
 
-// vis-à-vis
-match.positions = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
+                assignerVisAVis(match);
+            }
+        }
 
-assignerVisAVis(match);
+    } catch (e) {
+        console.log("⚠️ Erreur init terrain ignorée :", e);
+    }
 
-// =========================
-// 🎯 KICKOFF (FEU VERT VISUEL)
-// =========================
-const imagesKickOff = [
-    "https://files.catbox.moe/onotk4.jpg",
-    "https://files.catbox.moe/kfw0bl.jpg"
-];
+    // =========================
+    // 🎯 KICKOFF (GARANTI)
+    // =========================
+    const displayName =
+        match.names?.[jidStart] ||
+        jidStart.split("@")[0];
 
-await ovl.sendMessage(chat, {
-    image: {
-        url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
-    },
-    caption:
+    const imagesKickOff = [
+        "https://files.catbox.moe/onotk4.jpg",
+        "https://files.catbox.moe/kfw0bl.jpg"
+    ];
+
+    await ovl.sendMessage(chat, {
+        image: {
+            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
+        },
+        caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-    mentions: [jidStart]
-});
+        mentions: [jidStart]
+    });
 
-// =========================
-// 🚀 DÉMARRAGE MOTEUR (APRÈS KICKOFF)
-// =========================
-match.kickoffSent = true;
+    // =========================
+    // 🚀 START ENGINE
+    // =========================
+    match.kickoffSent = true;
 
-// reset sécurité
-if (match.turnTimer) {
-    clearTimeout(match.turnTimer);
-    match.turnTimer = null;
+    if (match.turnTimer) {
+        clearTimeout(match.turnTimer);
+        match.turnTimer = null;
+    }
+
+    startMatchCycle(chat, ovl, match);
 }
-
-// lancement cycle
-startMatchCycle(chat, ovl, match); 
-}    
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
