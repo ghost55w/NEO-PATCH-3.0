@@ -781,8 +781,8 @@ match.positions = [
 assignerVisAVis(match);
 
 // ===============================
-// 🔥 START ENGINE 
-// ===============================
+// 🔥 START ENGINE (TOUJOURS EN DERNIER)
+// ===============================/
 match.turnTimer = null;
 match.kickoffSent = true;
 
@@ -790,7 +790,6 @@ setTimeout(() => {
     if (!match.kickoffSent) return;
     startMatchCycle(chat, ovl, match);
 }, 6 * 60 * 1000);
-} 
     
 /* ===============================
 COMMANDE +STOPMATCH⚽
