@@ -756,10 +756,8 @@ async function lancerMatch(chat, ovl) {
 const jidStart = match.joueurTour;
 const displayName = jidStart.split("@")[0];
 
-const imagesKickOff = [
-    "https://files.catbox.moe/onotk4.jpg",
-    "https://files.catbox.moe/kfw0bl.jpg"
-];
+// ✅ FIX ICI
+const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
 
 await ovl.sendMessage(chat, {
     image: {
@@ -778,8 +776,6 @@ await ovl.sendMessage(chat, {
 // ===============================
 match.tour = 1;
 match.toursRestants = 5;
-
-const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
 
 match.attacker = jidStart;
 match.defender = jidOpposite;
