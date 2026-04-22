@@ -832,7 +832,7 @@ assignerVisAVis(match);
 // 🔥 START ENGINE (TOUJOURS EN DERNIER)
 // ===============================
 startMatchCycle(chat, ovl, match);
-
+    } 
     
 /* ===============================
 COMMANDE +STOPMATCH⚽
