@@ -715,14 +715,62 @@ async function lancerMatch(chat, ovl) {
 
     match.waitingKickoff = false;
 
+
 // =========================
-// 🎯 AFFICHAGE KICKOFF
+// 📍 INITIALISATION MATCH 
 // =========================
 const jidStart = match.joueurTour;
-const displayName = jidStart.split("@")[0];
-
 const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
 
+const displayName =
+    match.names?.[jidStart] ||
+    jidStart.split("@")[0];
+
+// INIT STATE
+match.tour = 1;
+match.toursRestants = 5;
+
+match.attacker = jidStart;
+match.defender = jidOpposite;
+
+// =========================
+// 📍 INITIALISATION TERRAIN
+// =========================
+const equipeAttack =
+    match.possession === match.team1Nom
+        ? match.lineup1
+        : match.lineup2;
+
+const equipeDefense =
+    match.possession === match.team1Nom
+        ? match.lineup2
+        : match.lineup1;
+
+if (!equipeAttack || !equipeDefense) return;
+
+equipeAttack.forEach(j => {
+    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+});
+
+equipeDefense.forEach(j => {
+    j.zoneY = getZoneYParLigne(j.ligne, "defense");
+});
+
+// positions physiques
+match.lineup1.forEach(j => initPlayerPosition(j));
+match.lineup2.forEach(j => initPlayerPosition(j));
+
+// vis-à-vis
+match.positions = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
+
+assignerVisAVis(match);
+
+// =========================
+// 🎯 KICKOFF (FEU VERT VISUEL)
+// =========================
 const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
     "https://files.catbox.moe/kfw0bl.jpg"
@@ -740,64 +788,21 @@ await ovl.sendMessage(chat, {
     mentions: [jidStart]
 });
 
-// ===============================
-// 🚀 INITIALISATION MATCH
-// ===============================
-match.tour = 1;
-match.toursRestants = 5;
-
-match.attacker = jidStart;
-match.defender = jidOpposite;
-
 // =========================
-// 📍 INITIALISATION POSITIONS (AVANT LE TIMER ⚠️)
+// 🚀 DÉMARRAGE MOTEUR (APRÈS KICKOFF)
 // =========================
-const equipeAttack =
-    match.possession === match.team1Nom
-        ? match.lineup1
-        : match.lineup2;
-
-const equipeDefense =
-    match.possession === match.team1Nom
-        ? match.lineup2
-        : match.lineup1;
-
-// sécurité anti crash
-if (!equipeAttack || !equipeDefense) return;
-
-equipeAttack.forEach(j => {
-    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-});
-
-equipeDefense.forEach(j => {
-    j.zoneY = getZoneYParLigne(j.ligne, "defense");
-});
-
-// =========================
-// 📌 INIT POSITION PHYSIQUE
-// =========================
-match.lineup1.forEach(j => initPlayerPosition(j));
-match.lineup2.forEach(j => initPlayerPosition(j));
-
-// =========================
-// 🔗 VIS A VIS
-// =========================
-match.positions = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
-
-assignerVisAVis(match);
-
-// ===============================
-// 🔥 START ENGINE (TOUJOURS EN DERNIER)
-// ===============================/
-match.turnTimer = null;
 match.kickoffSent = true;
 
-// 🚀 Lancement DIRECT du cycle
-startMatchCycle(chat, ovl, match);
-} 
+// reset sécurité
+if (match.turnTimer) {
+    clearTimeout(match.turnTimer);
+    match.turnTimer = null;
+}
+
+// lancement cycle
+startMatchCycle(chat, ovl, match); 
+}    
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/     
