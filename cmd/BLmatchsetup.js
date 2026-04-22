@@ -786,10 +786,8 @@ assignerVisAVis(match);
 match.turnTimer = null;
 match.kickoffSent = true;
 
-setTimeout(() => {
-    if (!match.kickoffSent) return;
-    startMatchCycle(chat, ovl, match);
-}, 6 * 60 * 1000);
+// 🚀 Lancement DIRECT du cycle
+startMatchCycle(chat, ovl, match);
 } 
 /* ===============================
 COMMANDE +STOPMATCH⚽
