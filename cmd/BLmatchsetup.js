@@ -169,97 +169,100 @@ async function startMatchCycle(chat, ovl, match) {
     });
 
     // ===============================
-    // ⚠️ WARNING (1 MIN RESTANTE)
-    // ===============================
-    match.warningTimer = setTimeout(async () => {
+// ⚠️ WARNING (1 MIN RESTANTE)
+// ===============================
+const currentTurnId = Date.now();
+match.currentTurnId = currentTurnId;
 
-        const currentAttacker = match.attacker;
+match.warningTimer = setTimeout(async () => {
 
-        const attackerName =
-            match.names?.[currentAttacker] ||
-            currentAttacker.split("@")[0];
+    // ❌ si le tour a changé → on ignore
+    if (match.currentTurnId !== currentTurnId) return;
 
-        await ovl.sendMessage(chat, {
-            text:
-`⚠️ ATTENTION @${attackerName} ❗
+    const currentAttacker = match.attacker;
 
-⏳ Il ne reste que *1 MINUTE* pour jouer !
+    const attackerName =
+        match.names?.[currentAttacker] ||
+        currentAttacker.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚠️ ATTENTION @${attackerName} ❗⏳ Il ne reste que *1 MINUTE* pour jouer !
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [currentAttacker]
-        });
+        mentions: [currentAttacker]
+    });
 
-    }, 5 * 60 * 1000);
+}, 5 * 60 * 1000);
+
+// ===============================
+// ⏱️ TIMER FIN (6 MIN)
+// ===============================
+match.turnTimer = setTimeout(async () => {
+
+    // ❌ sécurité : si le tour a changé → on stop
+    if (match.currentTurnId !== currentTurnId) return;
+
+    match.turnTimer = null;
+
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
 
     // ===============================
-    // ⏱️ TIMER FIN (6 MIN)
+    // 🔁 SWITCH
     // ===============================
-    match.turnTimer = setTimeout(async () => {
+    const oldAttacker = match.attacker;
 
-        // 🔥 RESET TIMERS
-        match.turnTimer = null;
+    const temp = match.attacker;
+    match.attacker = match.defender;
+    match.defender = temp;
 
-        if (match.warningTimer) {
-            clearTimeout(match.warningTimer);
-            match.warningTimer = null;
-        }
+    const newAttacker = match.attacker;
 
-        // ===============================
-        // 🔁 SWITCH AVANT MESSAGE
-        // ===============================
-        const oldAttacker = match.attacker;
+    // 🔻 pénalité
+    match.toursRestants = Math.max(1, match.toursRestants - 4);
+    match.toursRestants--;
 
-        const temp = match.attacker;
-        match.attacker = match.defender;
-        match.defender = temp;
+    if (match.toursRestants <= 0) {
+        match.toursRestants = 5;
+        match.tour++;
+    }
 
-        const newAttacker = match.attacker;
+    const oldName =
+        match.names?.[oldAttacker] ||
+        oldAttacker.split("@")[0];
 
-        // 🔻 pénalité
-        match.toursRestants = Math.max(1, match.toursRestants - 4);
-        match.toursRestants--;
+    const newName =
+        match.names?.[newAttacker] ||
+        newAttacker.split("@")[0];
 
-        if (match.toursRestants <= 0) {
-            match.toursRestants = 5;
-            match.tour++;
-        }
-
-        // ===============================
-        // 🧠 NOMS
-        // ===============================
-        const oldName =
-            match.names?.[oldAttacker] ||
-            oldAttacker.split("@")[0];
-
-        const newName =
-            match.names?.[newAttacker] ||
-            newAttacker.split("@")[0];
-
-        // ===============================
-        // ⛔ LATENCE OUT + SWITCH
-        // ===============================
-        await ovl.sendMessage(chat, {
-            image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
-            caption:
+    // ===============================
+    // ⛔ LATENCE OUT
+    // ===============================
+    await ovl.sendMessage(chat, {
+        image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
+        caption:
 `⛔ LATENCE OUT ❌‼️
 
-⚽ @${oldName} n’a pas joué !
-
+⚽ @${oldName} n’a pas joué à temps!
 🔁 @${newName} récupère la possession ⚡
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [oldAttacker, newAttacker]
-        });
+        mentions: [oldAttacker, newAttacker]
+    });
 
-        // ===============================
-        // 🔄 RELANCE
-        // ===============================
-        startMatchCycle(chat, ovl, match);
+    // ===============================
+    // 🔄 RELANCE
+    // ===============================
+    startMatchCycle(chat, ovl, match);
 
-    }, 6 * 60 * 1000);
-                                    } 
+}, 6 * 60 * 1000);
+} 
+
 /* ===============================
 ⚙️ PLAYER ENGINE
 =================================*/
