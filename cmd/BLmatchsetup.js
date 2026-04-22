@@ -501,9 +501,6 @@ async function messageMatch(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-    // ===============================
-    // 📩 EXTRACTION MESSAGE
-    // ===============================
     const rawText =
         ms.message.conversation ||
         ms.message.extendedTextMessage?.text ||
@@ -519,193 +516,148 @@ async function messageMatch(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
-// ===============================
-// 📋 DETECTION FICHE MATCH
-// ===============================
-if (match.etat === "attente_fiche") {
-    await verifierFiche(safeText, chat, ovl);
-    return;
-}
-
-// ===============================
-// 📋 GESTION LINEUP
-// ===============================
-if (match.etat === "attente_lineup") {
-
-    // 🔒 STOP si déjà complet
-    if (match.equipe1 && match.equipe2) return;
-
-    // 🔍 Vérifie que c'est bien un squad
-    if (!safeText.includes("SQUAD⚽🥅")) return;
-
-    const parsed = parseLineupFull(safeText);
-
-    if (!parsed || !parsed.joueurs || parsed.joueurs.length === 0) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Lineup invalide ou mal formaté"
-        });
+    // ===============================
+    // 📋 DETECTION FICHE MATCH
+    // ===============================
+    if (match.etat === "attente_fiche") {
+        await verifierFiche(safeText, chat, ovl);
+        return;
     }
-
-    const squadNameRaw = parsed.teamName;
-    if (!squadNameRaw) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Nom d'équipe introuvable"
-        });
-    }
-
-    const normalizeTeam = str =>
-        str.replace(/\p{Emoji}/gu, "").toLowerCase().trim();
-
-    const squadName = normalizeTeam(squadNameRaw);
-    const team1 = normalizeTeam(match.team1Nom);
-    const team2 = normalizeTeam(match.team2Nom);
-
-    const senderJid = getSenderJid(ms);
-
-    match.ownerJid = senderJid;
-match.ownerName = ms.pushName || senderJid.split("@")[0];
 
     // ===============================
-    // 🧠 VALIDATION JOUEURS (OK déjà)
+    // 📋 GESTION LINEUP
     // ===============================
-    const joueursValides = [];
-const nomsUtilises = new Set();
-const playersDB = Object.values(cardsBlueLock);
+    if (match.etat === "attente_lineup") {
 
-for (const j of parsed.joueurs) {
+        if (match.equipe1 && match.equipe2) return;
+        if (!safeText.includes("SQUAD⚽🥅")) return;
 
-    const inputName = pureName(j.name);
+        const parsed = parseLineupFull(safeText);
 
-    const data =
-        playersDB.find(p => pureName(p.name) === inputName) ||
-        playersDB.find(p => pureName(p.name).includes(inputName)) ||
-        playersDB.find(p => inputName.includes(pureName(p.name)));
-
-    if (!data) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Joueur inconnu: ${j.name}`
-        });
-    }
-
-    const nomClean = pureName(data.name);
-
-    if (nomsUtilises.has(nomClean)) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Joueur en double: ${data.name}`
-        });
-    }
-
-    nomsUtilises.add(nomClean);
-
-    const posteData = POSITION_POSTES[j.poste];
-
-    if (!posteData) {
-        return ovl.sendMessage(chat, {
-            text: `❌ Poste invalide: ${j.poste}`
-        });
-    }
-
-    joueursValides.push({
-        numero: j.numero,
-        nom: data.name,
-
-        // ⚽ STATS AJOUTÉES 
-        stats: {
-            ovr: data.ovr,
-            sho: data.sho,
-            dri: data.dri,
-            pas: data.pas,
-            acc: data.acc,
-            phy: data.phy,
-            def: data.def
-        },
-
-        weapons: data.weapons || [],
-        attitude: data.attitude || "calme",
-        rank: data.rank,
-
-        poste: j.poste,
-        ligne: posteData.ligne,
-        zoneX: posteData.zoneX,
-        zoneY: posteData.zoneY,
-
-        position: null,
-        visavis: null
-    });
-}
-// ===============================
-// ⚽ ATTRIBUTION ÉQUIPE
-// ===============================
-if (squadName === team1 && !match.equipe1) {
-
-    match.id1 = senderJid;
-    match.lineup1 = joueursValides;
-    match.equipe1 = true;
-
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation validée pour *${match.team1Nom}*`
-    });
-
-} else if (squadName === team2 && !match.equipe2) {
-
-    match.id2 = senderJid;
-    match.lineup2 = joueursValides;
-    match.equipe2 = true;
-
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation validée pour *${match.team2Nom}*`
-    });
-
-} else {
-    return ovl.sendMessage(chat, {
-        text: "❌ Équipe non reconnue ou déjà envoyée"
-    });
-}
-
-// ===============================
-// 🚀 MATCH PRÊT 
-// ===============================
-if (match.equipe1 && match.equipe2 && !match.starting) {
-
-    match.starting = true;
-
-    if (match.timerLineup) {
-        clearTimeout(match.timerLineup);
-        match.timerLineup = null;
-    }
-
-    const readyText = `⏳ Les deux formations sont prêtes.
-Le match commence dans *1 minute* 🥅⚽...`;
-
-    const imagesReady = [
-        "https://files.catbox.moe/dlj5z6.jpg",
-        "https://files.catbox.moe/fdadd0.jpeg",
-        "https://files.catbox.moe/4104s3.jpg"
-    ];
-
-    const imageRandom =
-        imagesReady[Math.floor(Math.random() * imagesReady.length)];
-
-    await ovl.sendMessage(chat, {
-        image: { url: imageRandom },
-        caption: readyText
-    });
-
-    match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
-    
-return; 
+        if (!parsed || !parsed.joueurs || parsed.joueurs.length === 0) {
+            return ovl.sendMessage(chat, { text: "❌ Lineup invalide ou mal formaté" });
         }
 
-// ===============================
-    // 🔥 GESTION PAVÉ NORMAL
-    // ===============================
-// 🔥 GESTION PAVÉ NORMAL
-const handled = await handlePaveGame(ms, ovl);
-if (handled) return;
+        const squadNameRaw = parsed.teamName;
+        if (!squadNameRaw) {
+            return ovl.sendMessage(chat, { text: "❌ Nom d'équipe introuvable" });
+        }
 
-console.log("📩 MESSAGE REÇU (hors pavé)");
-} 
-} 
+        const normalizeTeam = str =>
+            str.replace(/\p{Emoji}/gu, "").toLowerCase().trim();
+
+        const squadName = normalizeTeam(squadNameRaw);
+        const team1 = normalizeTeam(match.team1Nom);
+        const team2 = normalizeTeam(match.team2Nom);
+
+        const senderJid = getSenderJid(ms);
+        match.ownerJid = senderJid;
+        match.ownerName = ms.pushName || senderJid.split("@")[0];
+
+        const joueursValides = [];
+        const nomsUtilises = new Set();
+        const playersDB = Object.values(cardsBlueLock);
+
+        for (const j of parsed.joueurs) {
+            const inputName = pureName(j.name);
+            const data =
+                playersDB.find(p => pureName(p.name) === inputName) ||
+                playersDB.find(p => pureName(p.name).includes(inputName)) ||
+                playersDB.find(p => inputName.includes(pureName(p.name)));
+
+            if (!data) {
+                return ovl.sendMessage(chat, { text: `❌ Joueur inconnu: ${j.name}` });
+            }
+
+            const nomClean = pureName(data.name);
+            if (nomsUtilises.has(nomClean)) {
+                return ovl.sendMessage(chat, { text: `❌ Joueur en double: ${data.name}` });
+            }
+
+            nomsUtilises.add(nomClean);
+
+            const posteData = POSITION_POSTES[j.poste];
+            if (!posteData) {
+                return ovl.sendMessage(chat, { text: `❌ Poste invalide: ${j.poste}` });
+            }
+
+            joueursValides.push({
+                numero: j.numero,
+                nom: data.name,
+                stats: {
+                    ovr: data.ovr,
+                    sho: data.sho,
+                    dri: data.dri,
+                    pas: data.pas,
+                    acc: data.acc,
+                    phy: data.phy,
+                    def: data.def
+                },
+                weapons: data.weapons || [],
+                attitude: data.attitude || "calme",
+                rank: data.rank,
+                poste: j.poste,
+                ligne: posteData.ligne,
+                zoneX: posteData.zoneX,
+                zoneY: posteData.zoneY,
+                position: null,
+                visavis: null
+            });
+        }
+
+        if (squadName === team1 && !match.equipe1) {
+            match.id1 = senderJid;
+            match.lineup1 = joueursValides;
+            match.equipe1 = true;
+            await ovl.sendMessage(chat, { text: `✅ Formation validée pour *${match.team1Nom}*` });
+
+        } else if (squadName === team2 && !match.equipe2) {
+            match.id2 = senderJid;
+            match.lineup2 = joueursValides;
+            match.equipe2 = true;
+            await ovl.sendMessage(chat, { text: `✅ Formation validée pour *${match.team2Nom}*` });
+
+        } else {
+            return ovl.sendMessage(chat, { text: "❌ Équipe non reconnue ou déjà envoyée" });
+        }
+
+        if (match.equipe1 && match.equipe2 && !match.starting) {
+            match.starting = true;
+
+            if (match.timerLineup) {
+                clearTimeout(match.timerLineup);
+                match.timerLineup = null;
+            }
+
+            const imagesReady = [
+                "https://files.catbox.moe/dlj5z6.jpg",
+                "https://files.catbox.moe/fdadd0.jpeg",
+                "https://files.catbox.moe/4104s3.jpg"
+            ];
+
+            const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+
+            await ovl.sendMessage(chat, {
+                image: { url: imageRandom },
+                caption: `⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽...`
+            });
+
+            match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
+        }
+
+        return; // 
+    }
+
+    // ===============================
+    // 🔥 GESTION PAVÉ (MATCH EN COURS)
+    // ===============================
+    if (match.etat === "en_cours") {
+        const handled = await handlePaveGame(ms, ovl);
+        if (handled) return;
+        console.log("📩 MESSAGE REÇU (hors pavé)");
+    }
+}
+    
 
 // ===============================
 // 🚀 LANCEMENT MATCH
@@ -831,8 +783,9 @@ assignerVisAVis(match);
 // ===============================
 // 🔥 START ENGINE (TOUJOURS EN DERNIER)
 // ===============================
+match.turnTimer = null; // 
 startMatchCycle(chat, ovl, match);
-    } 
+} 
     
 /* ===============================
 COMMANDE +STOPMATCH⚽
