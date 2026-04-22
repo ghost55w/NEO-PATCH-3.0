@@ -790,7 +790,7 @@ setTimeout(() => {
     if (!match.kickoffSent) return;
     startMatchCycle(chat, ovl, match);
 }, 6 * 60 * 1000);
-    
+} 
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/     
