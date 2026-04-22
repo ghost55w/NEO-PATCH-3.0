@@ -781,10 +781,15 @@ match.positions = [
 assignerVisAVis(match);
 
 // ===============================
-// 🔥 START ENGINE (TOUJOURS EN DERNIER)
+// 🔥 START ENGINE 
 // ===============================
-match.turnTimer = null; // 
-startMatchCycle(chat, ovl, match);
+match.turnTimer = null;
+match.kickoffSent = true;
+
+setTimeout(() => {
+    if (!match.kickoffSent) return;
+    startMatchCycle(chat, ovl, match);
+}, 6 * 60 * 1000);
 } 
     
 /* ===============================
