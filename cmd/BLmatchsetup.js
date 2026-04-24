@@ -108,16 +108,8 @@ function extraireDirectionLargeur(txt) {
 =================================*/
 async function startMatchCycle(chat, ovl, match) {
 
-    // 🔥 RESET SAFE
-    if (match.turnTimer) {
-        clearTimeout(match.turnTimer);
-        match.turnTimer = null;
-    }
-
-    if (match.warningTimer) {
-        clearTimeout(match.warningTimer);
-        match.warningTimer = null;
-    }
+    // 🚫 Empêche double cycle 
+    if (match.turnTimer) return;
 
     // ===============================
     // ✅ INIT
@@ -145,81 +137,89 @@ async function startMatchCycle(chat, ovl, match) {
     }
 
     // ===============================
-// ⚠️ WARNING (1 MIN RESTANTE)
-// ===============================
-const currentTurnId = Date.now();
-match.currentTurnId = currentTurnId;
+    // 🔐 ID UNIQUE DU TOUR 
+    // ===============================
+    const currentTurnId = Date.now();
+    match.currentTurnId = currentTurnId;
 
-match.warningTimer = setTimeout(async () => {
+    // ===============================
+    // ⚠️ WARNING (1 MIN RESTANTE)
+    // ===============================
+    match.warningTimer = setTimeout(async () => {
 
-    // ❌ si le tour a changé → on ignore
-    if (match.currentTurnId !== currentTurnId) return;
+        // ❌ si le tour a changé → on ignore
+        if (match.currentTurnId !== currentTurnId) return;
 
-    const currentAttacker = match.attacker;
+        const currentAttacker = match.attacker;
 
-    const attackerName =
-        match.names?.[currentAttacker] ||
-        currentAttacker.split("@")[0];
+        const attackerName =
+            match.names?.[currentAttacker] ||
+            currentAttacker.split("@")[0];
 
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `⚠️ ATTENTION @${attackerName} ❗⏳ Il ne reste que *1 MINUTE* pour jouer !
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-        mentions: [currentAttacker]
-    });
+            mentions: [currentAttacker]
+        });
 
-}, 5 * 60 * 1000);
-
-// ===============================
-// ⏱️ TIMER FIN (6 MIN)
-// ===============================
-match.turnTimer = setTimeout(async () => {
-
-    match.turnTimer = null;
-
-    if (match.warningTimer) {
-        clearTimeout(match.warningTimer);
-        match.warningTimer = null;
-    }
+    }, 5 * 60 * 1000);
 
     // ===============================
-    // 🔁 SWITCH
+    // ⏱️ TIMER FIN (6 MIN)
     // ===============================
-    const oldAttacker = match.attacker;
+    match.turnTimer = setTimeout(async () => {
 
-    const temp = match.attacker;
-    match.attacker = match.defender;
-    match.defender = temp;
+        // ❌ sécurité anti bug (ULTRA IMPORTANT)
+        if (match.currentTurnId !== currentTurnId) return;
 
-    const newAttacker = match.attacker;
-// ✅ compteur possession SAFE
-match.possessions[newAttacker] = (match.possessions[newAttacker] || 0) + 1;
-    
-    // 🔻 pénalité
-    match.toursRestants = Math.max(1, match.toursRestants - 4);
-    match.toursRestants--;
+        match.turnTimer = null;
 
-    if (match.toursRestants <= 0) {
-        match.toursRestants = 5;
-        match.tour++;
-    }
+        if (match.warningTimer) {
+            clearTimeout(match.warningTimer);
+            match.warningTimer = null;
+        }
 
-    const oldName =
-        match.names?.[oldAttacker] ||
-        oldAttacker.split("@")[0];
+        // ===============================
+        // 🔁 SWITCH JOUEURS
+        // ===============================
+        const oldAttacker = match.attacker;
 
-    const newName =
-        match.names?.[newAttacker] ||
-        newAttacker.split("@")[0];
+        const temp = match.attacker;
+        match.attacker = match.defender;
+        match.defender = temp;
 
-    // ===============================
-    // ⛔ LATENCE OUT
-    // ===============================
-    await ovl.sendMessage(chat, {
-        image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
-        caption:
+        const newAttacker = match.attacker;
+
+        // ✅ compteur possession SAFE
+        match.possessions[newAttacker] =
+            (match.possessions[newAttacker] || 0) + 1;
+
+        // 🔻 pénalité
+        match.toursRestants = Math.max(1, match.toursRestants - 4);
+        match.toursRestants--;
+
+        if (match.toursRestants <= 0) {
+            match.toursRestants = 5;
+            match.tour++;
+        }
+
+        const oldName =
+            match.names?.[oldAttacker] ||
+            oldAttacker.split("@")[0];
+
+        const newName =
+            match.names?.[newAttacker] ||
+            newAttacker.split("@")[0];
+
+        // ===============================
+        // ⛔ LATENCE OUT
+        // ===============================
+        await ovl.sendMessage(chat, {
+            image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
+            caption:
 `⛔ LATENCE OUT ❌‼️
 
 ⚽ @${oldName} n’a pas joué à temps!
@@ -227,14 +227,14 @@ match.possessions[newAttacker] = (match.possessions[newAttacker] || 0) + 1;
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-        mentions: [oldAttacker, newAttacker]
-    });
+            mentions: [oldAttacker, newAttacker]
+        });
 
-    // 🔄 RELANCE
-    startMatchCycle(chat, ovl, match);
+        // 🔄 RELANCE PROPRE
+        startMatchCycle(chat, ovl, match);
 
-}, 6 * 60 * 1000);
-} 
+    }, 6 * 60 * 1000);
+}
 
 /* ===============================
 ⚙️ PLAYER ENGINE
