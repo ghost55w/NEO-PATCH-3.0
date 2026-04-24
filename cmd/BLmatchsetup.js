@@ -108,20 +108,20 @@ function extraireDirectionLargeur(txt) {
 =================================*/
 async function startMatchCycle(chat, ovl, match) {
 
-    // 🚫 Empêche double cycle
-    if (match.turnTimer || match.isCycling) return;
+    // 🔄 CLEAN ancien timer si bug
+    if (match.turnTimer) {
+        clearTimeout(match.turnTimer);
+        match.turnTimer = null;
+    }
 
-    match.isCycling = true;
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
 
-    // ===============================
-    // INIT
-    // ===============================
     if (!match.tour) match.tour = 1;
     if (!match.toursRestants) match.toursRestants = 5;
 
-    // ===============================
-    // FIN MATCH
-    // ===============================
     if (match.tour > 20) {
         await ovl.sendMessage(chat, {
             text:
@@ -130,7 +130,7 @@ async function startMatchCycle(chat, ovl, match) {
 📊 20 TOURS ATTEINTS
 
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`
+              🔷BLUELOCK⚽🥅`
         });
         return;
     }
@@ -143,7 +143,7 @@ async function startMatchCycle(chat, ovl, match) {
     // ===============================
     match.warningTimer = setTimeout(async () => {
 
-        if (match.currentTurnId !== currentTurnId) return;
+        if (!match.turnTimer) return; // 🔥 FIX (remplace ton ancien check bug)
 
         const attacker = match.attacker;
         const attackerName =
@@ -155,7 +155,7 @@ async function startMatchCycle(chat, ovl, match) {
 `⚠️ ATTENTION @${attackerName} ❗⏳ Il ne reste que *1 MINUTE* pour jouer !
 
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
+             🔷BLUELOCK⚽🥅`,
             mentions: [attacker]
         });
 
@@ -168,10 +168,9 @@ async function startMatchCycle(chat, ovl, match) {
 
         console.log("⏱️ FIN TIMER déclenché");
 
-        if (match.currentTurnId !== currentTurnId) return;
+        if (!match.turnTimer) return; // 🔥 FIX
 
         match.turnTimer = null;
-        match.isCycling = false;
 
         if (match.warningTimer) {
             clearTimeout(match.warningTimer);
@@ -215,15 +214,16 @@ async function startMatchCycle(chat, ovl, match) {
 🔁 @${newName} récupère la possession ⚡
 
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
+            🔷BLUELOCK⚽🥅`,
             mentions: [oldAttacker, newAttacker]
         });
 
-        // 🔄 relance propre
+        // 🔁 relance propre
         startMatchCycle(chat, ovl, match);
 
     }, 6 * 60 * 1000);
 }
+        
 
 
 /* ===============================
