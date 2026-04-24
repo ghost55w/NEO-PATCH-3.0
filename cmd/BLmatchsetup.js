@@ -108,20 +108,19 @@ function extraireDirectionLargeur(txt) {
 =================================*/
 async function startMatchCycle(chat, ovl, match) {
 
-    // 🚫 Empêche double cycle 
-    if (match.turnTimer) return;
+    // 🚫 Empêche double cycle
+    if (match.turnTimer || match.isCycling) return;
+
+    match.isCycling = true;
 
     // ===============================
-    // ✅ INIT
+    // INIT
     // ===============================
     if (!match.tour) match.tour = 1;
     if (!match.toursRestants) match.toursRestants = 5;
 
-    const attacker = match.attacker;
-    const defender = match.defender;
-
     // ===============================
-    // 🏁 FIN MATCH
+    // FIN MATCH
     // ===============================
     if (match.tour > 20) {
         await ovl.sendMessage(chat, {
@@ -136,25 +135,20 @@ async function startMatchCycle(chat, ovl, match) {
         return;
     }
 
-    // ===============================
-    // 🔐 ID UNIQUE DU TOUR 
-    // ===============================
     const currentTurnId = Date.now();
     match.currentTurnId = currentTurnId;
 
     // ===============================
-    // ⚠️ WARNING (1 MIN RESTANTE)
+    // ⚠️ WARNING (5 MIN)
     // ===============================
     match.warningTimer = setTimeout(async () => {
 
-        // ❌ si le tour a changé → on ignore
         if (match.currentTurnId !== currentTurnId) return;
 
-        const currentAttacker = match.attacker;
-
+        const attacker = match.attacker;
         const attackerName =
-            match.names?.[currentAttacker] ||
-            currentAttacker.split("@")[0];
+            match.names?.[attacker] ||
+            attacker.split("@")[0];
 
         await ovl.sendMessage(chat, {
             text:
@@ -162,42 +156,40 @@ async function startMatchCycle(chat, ovl, match) {
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [currentAttacker]
+            mentions: [attacker]
         });
 
     }, 5 * 60 * 1000);
 
     // ===============================
-    // ⏱️ TIMER FIN (6 MIN)
+    // ⏱️ FIN TOUR (6 MIN)
     // ===============================
     match.turnTimer = setTimeout(async () => {
 
-        // ❌ sécurité anti bug (ULTRA IMPORTANT)
+        console.log("⏱️ FIN TIMER déclenché");
+
         if (match.currentTurnId !== currentTurnId) return;
 
         match.turnTimer = null;
+        match.isCycling = false;
 
         if (match.warningTimer) {
             clearTimeout(match.warningTimer);
             match.warningTimer = null;
         }
 
-        // ===============================
-        // 🔁 SWITCH JOUEURS
-        // ===============================
         const oldAttacker = match.attacker;
 
-        const temp = match.attacker;
-        match.attacker = match.defender;
-        match.defender = temp;
+        // 🔁 SWITCH
+        [match.attacker, match.defender] = [match.defender, match.attacker];
 
         const newAttacker = match.attacker;
 
-        // ✅ compteur possession SAFE
+        // possessions
         match.possessions[newAttacker] =
             (match.possessions[newAttacker] || 0) + 1;
 
-        // 🔻 pénalité
+        // tours
         match.toursRestants = Math.max(1, match.toursRestants - 4);
         match.toursRestants--;
 
@@ -214,9 +206,6 @@ async function startMatchCycle(chat, ovl, match) {
             match.names?.[newAttacker] ||
             newAttacker.split("@")[0];
 
-        // ===============================
-        // ⛔ LATENCE OUT
-        // ===============================
         await ovl.sendMessage(chat, {
             image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
             caption:
@@ -230,11 +219,12 @@ async function startMatchCycle(chat, ovl, match) {
             mentions: [oldAttacker, newAttacker]
         });
 
-        // 🔄 RELANCE PROPRE
+        // 🔄 relance propre
         startMatchCycle(chat, ovl, match);
 
     }, 6 * 60 * 1000);
 }
+
 
 /* ===============================
 ⚙️ PLAYER ENGINE
@@ -693,12 +683,15 @@ if (match.etat === "attente_lineup") {
     // 🔥 GESTION PAVÉ (MATCH EN COURS)
     // ===============================
     if (match.etat === "en_cours") {
-        const handled = await handlePaveGame(ms, ovl);
-        if (handled) return;
-        console.log("📩 MESSAGE REÇU (hors pavé)");
-    }
+
+    // 🚫 bloque pendant changement de tour
+    if (match.isCycling) return;
+
+    const handled = await handlePaveGame(ms, ovl);
+    if (handled) return;
+
+    console.log("📩 MESSAGE REÇU (hors pavé)");
 }
-    
 
 // ===============================
 // 🚀 LANCEMENT MATCH
@@ -725,7 +718,7 @@ async function lancerMatch(chat, ovl) {
     match.phaseDuel = null;
 
     // CLEAN timers
-    ["timerGlobal","timerWarning","kickoffTimer"].forEach(t => {
+ ["timerGlobal","warningTimer","kickoffTimer"].forEach(t => {
         if (match[t]) {
             clearTimeout(match[t]);
             match[t] = null;
