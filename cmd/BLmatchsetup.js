@@ -692,6 +692,7 @@ if (match.etat === "attente_lineup") {
 
     console.log("📩 MESSAGE REÇU (hors pavé)");
 }
+} 
 
 // ===============================
 // 🚀 LANCEMENT MATCH
