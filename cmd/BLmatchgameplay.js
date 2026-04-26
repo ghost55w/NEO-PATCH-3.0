@@ -284,6 +284,9 @@ async function handlePaveGame(ms, ovl) {
         .replace(/\r/g, "")
         .trim();
 
+    // ===============================
+    // 🎯 DETECTION PAVÉ (comme ancien)
+    // ===============================
     const isPave =
         text.includes("💬:") &&
         text.includes("⚽:") &&
@@ -295,79 +298,106 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
+    // ⚽ EXTRACTION ACTION (IMPORTANT FIX)
+    // ===============================
+    const action = extraireAction(text);
+
+    if (!action) {
+        await ovl.sendMessage(chat, {
+            text: "❌ Aucune action détectée dans ⚽"
+        });
+        return true;
+    }
+
+    // ===============================
     // ⚔️ DUEL PRIORITY SYSTEM
     // ===============================
     if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(
-        match,
-        text,
-        match.phaseDuel.defense
-    );
+        const res = await handleDuelMatch(
+            match,
+            text,
+            match.phaseDuel.defense
+        );
 
-    await ovl.sendMessage(chat, { text: res.message });
+        await ovl.sendMessage(chat, { text: res.message });
 
-    if (res.type !== "contre") {
-        match.phaseDuel = null;
-    }
+        if (res.type !== "contre") {
+            match.phaseDuel = null;
+        }
 
-    return true;
-}
-    // ===============================
-    // 🎯 ATTAQUE
-    // ===============================
-if (!match.pendingAttack) {
-
-    if (sender !== normalizeJid(match.joueurTour)) {
         return true;
     }
 
-    match.pendingAttack = text;
-   
-// 🔥 JOUEUR A JOUÉ
-match.hasPlayed = true;
+    // ===============================
+    // 🎯 ATTAQUE (LOGIQUE ANCIENNE CLEAN)
+    // ===============================
+    if (!match.pendingAttack) {
 
-    const next =
-        match.joueurTour === match.id1
-            ? match.id2
-            : match.id1;
+        if (sender !== normalizeJid(match.joueurTour)) return true;
 
-    match.waitingDefenseFrom = next;
-    match.turnType = "defense";
+        match.pendingAttack = text;
+        match.hasPlayed = true;
 
-    return true;
-}
+        const next =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+        match.waitingDefenseFrom = next;
+        match.turnType = "defense";
+
+        const resume = resumerAction(action);
+
+        await ovl.sendMessage(chat, {
+            text:
+`🛡️⚡⚽ ATTAQUE !
+▔▔▔▔▔▔▔▔▔▔▔▔
+🎙️ : ${resume}
+
+➡️ NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+        });
+
+        return true;
+    }
 
     // ===============================
     // 🛡️ DEFENSE
     // ===============================
-    if (sender !== normalizeJid(match.waitingDefenseFrom)) {
-    return true;
-}
+    if (sender !== normalizeJid(match.waitingDefenseFrom)) return true;
 
-const attaque = match.pendingAttack;
-const defense = text;
+    const attaque = match.pendingAttack;
+    const defense = text;
 
-const res = await handleDuelMatch(match, attaque, defense);
-    // 🔥 JOUEUR A JOUÉ
-match.hasPlayed = true;
+    const res = await handleDuelMatch(match, attaque, defense);
 
-await ovl.sendMessage(chat, { text: res.message });
+    match.hasPlayed = true;
 
-if (res.type === "contre") {
-    match.phaseDuel = { attaque, defense };
-    return true;
-}
+    await ovl.sendMessage(chat, { text: res.message });
 
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
+    // ===============================
+    // ⚠️ CONTRE
+    // ===============================
+    if (res.type === "contre") {
+        match.phaseDuel = { attaque, defense };
+        return true;
+    }
 
-match.joueurTour =
-    match.joueurTour === match.id1
-        ? match.id2
-        : match.id1;
+    // ===============================
+    // 🔁 RESET NORMAL
+    // ===============================
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
 
-match.turnType = "attaque";
+    match.joueurTour =
+        match.joueurTour === match.id1
+            ? match.id2
+            : match.id1;
+
+    match.turnType = "attaque";
 
     return true;
 }
