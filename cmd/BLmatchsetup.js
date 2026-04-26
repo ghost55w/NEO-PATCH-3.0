@@ -102,7 +102,20 @@ function extraireDirectionLargeur(txt) {
     return null;
 }
 
+// ===============================
+// ⏱️ STOP TIMER TOUR
+// ===============================
+function stopTurnTimer(match) {
+    if (match.turnTimer) {
+        clearTimeout(match.turnTimer);
+        match.turnTimer = null;
+    }
 
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
+} 
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
@@ -137,6 +150,8 @@ async function startMatchCycle(chat, ovl, match) {
 
     const currentTurnId = Date.now();
     match.currentTurnId = currentTurnId;
+    
+    match.hasPlayed = false;
 
     // ===============================
     // ⚠️ WARNING (1 MIN RESTANTE)
@@ -168,6 +183,11 @@ async function startMatchCycle(chat, ovl, match) {
     match.turnTimer = setTimeout(async () => {
 
         if (match.currentTurnId !== currentTurnId) return;
+        // 🔥 SI LE JOUEUR A JOUÉ → PAS DE LATENCE
+if (match.hasPlayed) {
+    startMatchCycle(chat, ovl, match);
+    return;
+}
 
         match.turnTimer = null;
 
@@ -221,8 +241,7 @@ async function startMatchCycle(chat, ovl, match) {
         startMatchCycle(chat, ovl, match);
 
     }, TURN_TIME);
-}
-
+} 
 
 /* ===============================
 ⚙️ PLAYER ENGINE
