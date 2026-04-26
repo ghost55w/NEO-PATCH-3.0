@@ -323,6 +323,9 @@ if (!match.pendingAttack) {
     }
 
     match.pendingAttack = text;
+   
+// 🔥 JOUEUR A JOUÉ
+match.hasPlayed = true;
 
     const next =
         match.joueurTour === match.id1
@@ -346,6 +349,8 @@ const attaque = match.pendingAttack;
 const defense = text;
 
 const res = await handleDuelMatch(match, attaque, defense);
+    // 🔥 JOUEUR A JOUÉ
+match.hasPlayed = true;
 
 await ovl.sendMessage(chat, { text: res.message });
 
