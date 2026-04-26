@@ -275,7 +275,14 @@ const pureName = str => {
     .toLowerCase();
 };
 
-
+/* ===============================
+PAVÉ DE JEU GAMEPLAY 🎮 
+=================================*/
+function extraireAction(pave) {
+    const ligne = pave.split("\n").find(l => l.startsWith("⚽:"));
+    if (!ligne) return null;
+    return ligne.replace("⚽:", "").trim();
+}
 /* ===============================
 📋 LINEUP ENGINE
 =================================*/
@@ -986,6 +993,7 @@ module.exports = {
     normalizeJid,
     getSenderJid,
 getTagFromJid, 
+     extraireAction, 
     
     // MATH
     distancePlayer,
