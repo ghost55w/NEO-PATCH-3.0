@@ -18,7 +18,8 @@ const {
     extraireZoneDepart,
     extraireDirectionLargeur,
     updatePositionJoueur,
-    startMatchCycle
+    startMatchCycle, 
+     extraireAction
 
 } = require("./BLmatchsetup");
 
