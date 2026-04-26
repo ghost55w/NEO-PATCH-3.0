@@ -163,7 +163,6 @@ async function startMatchCycle(chat, ovl, match) {
     });
 
 }, TURN_TIME - 60000);
-} 
 
     // ===============================
     // ⏱️ FIN TOUR (6 MIN)
