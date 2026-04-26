@@ -299,76 +299,70 @@ async function handlePaveGame(ms, ovl) {
     // ===============================
     if (match.phaseDuel) {
 
-        const res = await handleDuelMatch(
-            match,
-            text,
-            match.phaseDuel.defense
-        );
+    const res = await handleDuelMatch(
+        match,
+        text,
+        match.phaseDuel.defense
+    );
 
-        await ovl.sendMessage(chat, { text: res.message });
+    await ovl.sendMessage(chat, { text: res.message });
 
-        if (res.type !== "contre") {
-            match.phaseDuel = null;
-        }
-
-        startGlobalTimer(ovl, chat, match);
-        return true;
+    if (res.type !== "contre") {
+        match.phaseDuel = null;
     }
 
+    return true;
+}
     // ===============================
     // 🎯 ATTAQUE
     // ===============================
-    if (!match.pendingAttack) {
+if (!match.pendingAttack) {
 
-        if (sender !== normalizeJid(match.joueurTour)) {
-            return true;
-        }
-
-        match.pendingAttack = text;
-
-        const next =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
-
-        match.waitingDefenseFrom = next;
-        match.turnType = "defense";
-
-        startMatchCycle(chat, ovl, match);
-
+    if (sender !== normalizeJid(match.joueurTour)) {
         return true;
     }
+
+    match.pendingAttack = text;
+
+    const next =
+        match.joueurTour === match.id1
+            ? match.id2
+            : match.id1;
+
+    match.waitingDefenseFrom = next;
+    match.turnType = "defense";
+
+    return true;
+}
 
     // ===============================
     // 🛡️ DEFENSE
     // ===============================
     if (sender !== normalizeJid(match.waitingDefenseFrom)) {
-        return true;
-    }
+    return true;
+}
 
-    const attaque = match.pendingAttack;
-    const defense = text;
+const attaque = match.pendingAttack;
+const defense = text;
 
-    const res = await handleDuelMatch(match, attaque, defense);
+const res = await handleDuelMatch(match, attaque, defense);
 
-    await ovl.sendMessage(chat, { text: res.message });
+await ovl.sendMessage(chat, { text: res.message });
 
-    if (res.type === "contre") {
-        match.phaseDuel = { attaque, defense };
-        return true;
-    }
+if (res.type === "contre") {
+    match.phaseDuel = { attaque, defense };
+    return true;
+}
 
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
 
-    match.joueurTour =
-        match.joueurTour === match.id1
-            ? match.id2
-            : match.id1;
+match.joueurTour =
+    match.joueurTour === match.id1
+        ? match.id2
+        : match.id1;
 
-    match.turnType = "attaque";
-
-    startGlobalTimer(ovl, chat, match);
+match.turnType = "attaque";
 
     return true;
 }
