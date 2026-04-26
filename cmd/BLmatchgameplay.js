@@ -18,7 +18,7 @@ const {
     extraireZoneDepart,
     extraireDirectionLargeur,
     updatePositionJoueur,
-    startGlobalTimer,
+    startMatchCycle
 
 } = require("./BLmatchsetup");
 
