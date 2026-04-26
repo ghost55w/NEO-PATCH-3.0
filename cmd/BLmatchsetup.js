@@ -135,95 +135,97 @@ async function startMatchCycle(chat, ovl, match) {
         return;
     }
 
+    
     const currentTurnId = Date.now();
     match.currentTurnId = currentTurnId;
+
 
     // ===============================
     // ⚠️ WARNING (5 MIN)
     // ===============================
     match.warningTimer = setTimeout(async () => {
 
-        if (!match.turnTimer) return; // 🔥 FIX (remplace ton ancien check bug)
+    // 🔒 Anti ancien timer
+    if (match.currentTurnId !== currentTurnId) return;
 
-        const attacker = match.attacker;
-        const attackerName =
-            match.names?.[attacker] ||
-            attacker.split("@")[0];
+    const attacker = match.attacker;
+    const attackerName =
+        match.names?.[attacker] ||
+        attacker.split("@")[0];
 
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `⚠️ ATTENTION @${attackerName} ❗⏳ Il ne reste que *1 MINUTE* pour jouer !
 
 ╰─────────────────▱▱▱
              🔷BLUELOCK⚽🥅`,
-            mentions: [attacker]
-        });
+        mentions: [attacker]
+    });
 
-    }, 5 * 60 * 1000);
+}, TURN_TIME - 60000);
 
     // ===============================
     // ⏱️ FIN TOUR (6 MIN)
     // ===============================
     match.turnTimer = setTimeout(async () => {
 
-        console.log("⏱️ FIN TIMER déclenché");
+    console.log("⏱️ FIN TIMER déclenché");
 
-        if (!match.turnTimer) return; // 🔥 FIX
+    // 🔒 Anti ancien timer
+    if (match.currentTurnId !== currentTurnId) return;
 
-        match.turnTimer = null;
+    match.turnTimer = null;
 
-        if (match.warningTimer) {
-            clearTimeout(match.warningTimer);
-            match.warningTimer = null;
-        }
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
 
-        const oldAttacker = match.attacker;
+    const oldAttacker = match.attacker;
 
-        // 🔁 SWITCH
-        [match.attacker, match.defender] = [match.defender, match.attacker];
+    // 🔁 SWITCH
+    [match.attacker, match.defender] = [match.defender, match.attacker];
 
-        const newAttacker = match.attacker;
+    const newAttacker = match.attacker;
 
-        // possessions
-        match.possessions[newAttacker] =
-            (match.possessions[newAttacker] || 0) + 1;
+    // 📊 possession
+    match.possessions[newAttacker] =
+        (match.possessions[newAttacker] || 0) + 1;
 
-        // tours
-        match.toursRestants = Math.max(1, match.toursRestants - 4);
-        match.toursRestants--;
+    // ⏳ gestion tours
+    match.toursRestants = Math.max(1, match.toursRestants - 4);
+    match.toursRestants--;
 
-        if (match.toursRestants <= 0) {
-            match.toursRestants = 5;
-            match.tour++;
-        }
+    if (match.toursRestants <= 0) {
+        match.toursRestants = 5;
+        match.tour++;
+    }
 
-        const oldName =
-            match.names?.[oldAttacker] ||
-            oldAttacker.split("@")[0];
+    const oldName =
+        match.names?.[oldAttacker] ||
+        oldAttacker.split("@")[0];
 
-        const newName =
-            match.names?.[newAttacker] ||
-            newAttacker.split("@")[0];
+    const newName =
+        match.names?.[newAttacker] ||
+        newAttacker.split("@")[0];
 
-        await ovl.sendMessage(chat, {
-            image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
-            caption:
+    await ovl.sendMessage(chat, {
+        image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
+        caption:
 `⛔ LATENCE OUT ❌‼️
 
-⚽ @${oldName} n’a pas joué à temps!
+⚽ @${oldName} n’a pas joué à temps !
 🔁 @${newName} récupère la possession ⚡
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
-            mentions: [oldAttacker, newAttacker]
-        });
+        mentions: [oldAttacker, newAttacker]
+    });
 
-        // 🔁 relance propre
-        startMatchCycle(chat, ovl, match);
+    // 🔁 relance propre
+    startMatchCycle(chat, ovl, match);
 
-    }, 6 * 60 * 1000);
-}
-        
+}, TURN_TIME);
 
 
 /* ===============================
