@@ -12,7 +12,8 @@ const getJid = require("./cache_jid");
 const {
     verifierFiche,
     messageMatch,
-    matchsActifs
+    matchsActifs, 
+    startMatchCycle 
 } = require("../cmd/BLmatchsetup");
 
 const {
@@ -188,12 +189,20 @@ const clean = texte
 
     
 // ================================
-// 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
+// ⚽ BLUELOCK PAVÉ ENGINE (PRIORITY)
 // ================================
 try {
+  const paveHandled = await handlePaveGame(ms, ovl);
+  if (paveHandled) return;
+} catch (err) {
+  console.log("❌ Erreur handlePaveGame:", err);
+}
 
-if (messageMatch) await messageMatch(ms, ovl);
-    
+// ================================
+// 🔥 SYSTEME MATCH BLUELOCK GLOBAL
+// ================================
+try {
+  if (messageMatch) await messageMatch(ms, ovl);
 } catch (err) {
   console.log("❌ Erreur système match:", err);
 }
