@@ -334,7 +334,7 @@ async function handlePaveGame(ms, ovl) {
         match.waitingDefenseFrom = next;
         match.turnType = "defense";
 
-        startGlobalTimer(ovl, chat, match);
+        startMatchCycle(chat, ovl, match);
 
         return true;
     }
@@ -558,7 +558,7 @@ module.exports = {
     handlePaveGame,
     handleDeplacements,
     handlePasses,
-    startGlobalTimer,
+    startMatchCycle, 
 
     // 🎙️ NARRATION IA
     resumerAction
