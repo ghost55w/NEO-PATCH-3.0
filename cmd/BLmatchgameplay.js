@@ -298,16 +298,20 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    // ⚽ EXTRACTION ACTION (IMPORTANT FIX)
-    // ===============================
-    const action = extraireAction(text);
+// ⚽ EXTRACTION ACTION (FIX STYLE ANCIEN)
+// ===============================
+const action = extraireAction(text);
 
-    if (!action) {
-        await ovl.sendMessage(chat, {
-            text: "❌ Aucune action détectée dans ⚽"
-        });
-        return true;
-    }
+// ❌ uniquement si le format ⚽: n'existe pas
+if (action === null) {
+    await ovl.sendMessage(chat, {
+        text: "❌ Aucune action détectée"
+    });
+    return true;
+}
+
+// ✅ accepte les actions vides 
+const actionSafe = action || "";
 
     // ===============================
     // ⚔️ DUEL PRIORITY SYSTEM
