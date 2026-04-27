@@ -727,7 +727,6 @@ async function messageMatch(ms, ovl) {
     if (handled) return;
 
     console.log("📩 MESSAGE REÇU (hors pavé)");
-}
 
     // ===============================
 // 📋 DETECTION FICHE MATCH
