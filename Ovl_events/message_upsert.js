@@ -6,20 +6,8 @@ const config = require("../set");
 const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
 
-// ===============================
-// ⚽ BLUELOCK IMPORTS
-// ===============================
-const {
-    verifierFiche,
-    messageMatch,
-    matchsActifs, 
-    startMatchCycle 
-} = require("../cmd/BLmatchsetup");
-
-const {
-    handlePaveGame
-} = require("../cmd/BLmatchgameplay");
-
+/* IMPORT SYSTEME MATCH BLUELOCK */
+const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
 
 function getTextMessage(msg) {
   return (
@@ -185,24 +173,18 @@ const clean = texte
       getJid,
       mention_JID
     };
-
-
     
 // ================================
-// ⚽ BLUELOCK PAVÉ ENGINE (PRIORITY)
+// 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
 // ================================
 try {
-  const paveHandled = await handlePaveGame(ms, ovl);
-  if (paveHandled) return;
-} catch (err) {
-  console.log("❌ Erreur handlePaveGame:", err);
-}
 
-// ================================
-// 🔥 SYSTEME MATCH BLUELOCK GLOBAL
-// ================================
-try {
-  if (messageMatch) await messageMatch(ms, ovl);
+  // 📄 Détection fiche match
+  await verifierFiche(texte, ms_org, ovl);
+
+  // ⚽ Gestion complète du match (lineup + kickoff + pavé)
+  await messageMatch(ms, ovl);
+
 } catch (err) {
   console.log("❌ Erreur système match:", err);
 }
