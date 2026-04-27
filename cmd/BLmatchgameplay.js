@@ -5,7 +5,7 @@
 const {
     matchsActifs,
     POSITION_POSTES,
-    DISTANCES,
+    DISTANCES_TERRAIN,
     TYPES_PASSES,
 
     pureName,
@@ -75,7 +75,7 @@ function resumerAction(text) {
 /* ===============================
 ⚽ TERRAIN ENGINE (CORE GAMEPLAY)
 =================================*/
-const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
+const DISTANCES_TERRAIN = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
 // ⏱️ Temps par tour (6 minutes)
 const TURN_TIME = 6 * 60 * 1000;
 // ===============================
