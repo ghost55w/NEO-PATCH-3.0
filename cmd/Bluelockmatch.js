@@ -868,8 +868,9 @@ if (match.etat === "attente_lineup") {
 
     return;
 }
-
-  // ===============================
+} 
+           
+    // ===============================
 // 🚀 LANCEMENT MATCH
 // ===============================
 async function lancerMatch(chat, ovl) {
