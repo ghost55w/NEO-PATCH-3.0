@@ -417,39 +417,33 @@ function stopTurnTimer(match) {
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
-async function startMatchCycle(chat, ovl, match) {
+// ===============================
+// ⏱️ TIMER GLOBAL STABLE (BLUE LOCK)
+// ===============================
+function startMatchCycle(chat, ovl, match) {
 
-    // 🔄 CLEAN ancien timer si bug
-    if (match.turnTimer) {
-        clearTimeout(match.turnTimer);
-        match.turnTimer = null;
-    }
+    if (!match || match.etat !== "en_cours") return;
 
-    if (match.warningTimer) {
-        clearTimeout(match.warningTimer);
-        match.warningTimer = null;
-    }
+    // 🧹 clean anciens timers
+    clearTimeout(match.turnTimer);
+    clearTimeout(match.warningTimer);
+
+    match.turnTimer = null;
+    match.warningTimer = null;
 
     if (!match.tour) match.tour = 1;
     if (!match.toursRestants) match.toursRestants = 5;
 
-    if (match.tour > 20) {
-        await ovl.sendMessage(chat, {
-            text:
-`🏁⚽: FIN DU MATCH 🥅‼️
-
-📊 20 TOURS ATTEINTS
-
-╰─────────────────▱▱▱
-            🔷BLUELOCK⚽🥅`
-        });
-        return;
-    }
-
+    // 🔒 lock tour ID
     const currentTurnId = Date.now();
     match.currentTurnId = currentTurnId;
-    
-    match.hasPlayed = false;
+
+    const attacker = match.attacker;
+    if (!attacker) return;
+
+    const attackerName =
+        match.names?.[attacker] ||
+        attacker.split("@")[0];
 
     // ===============================
     // ⚠️ WARNING (1 MIN RESTANTE)
@@ -457,89 +451,111 @@ async function startMatchCycle(chat, ovl, match) {
     match.warningTimer = setTimeout(async () => {
 
         if (match.currentTurnId !== currentTurnId) return;
-
-        const attacker = match.attacker;
-
-        const attackerName =
-            match.names?.[attacker] ||
-            attacker.split("@")[0];
+        if (match.hasPlayed) return;
 
         await ovl.sendMessage(chat, {
             text:
-`⚠️ ATTENTION @${attackerName} ❗⏳ Il ne reste que *1 MINUTE* pour jouer !
+`⚠️ ATTENTION @${attackerName} ❗⏳
+
+Il reste *1 MINUTE* pour jouer !
 
 ╰─────────────────▱▱▱
-        🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
             mentions: [attacker]
         });
 
-    }, TURN_TIME - 60000);
+    }, 5 * 60 * 1000); // 5 min total
 
     // ===============================
-    // ⏱️ FIN TOUR
+    // ⏱️ FIN DE TOUR (6 MIN)
     // ===============================
     match.turnTimer = setTimeout(async () => {
 
         if (match.currentTurnId !== currentTurnId) return;
-        // 🔥 SI LE JOUEUR A JOUÉ → PAS DE LATENCE
-if (match.hasPlayed) {
-    startMatchCycle(chat, ovl, match);
-    return;
-}
 
-        match.turnTimer = null;
-
-        if (match.warningTimer) {
-            clearTimeout(match.warningTimer);
-            match.warningTimer = null;
-        }
+        // ❌ reset warning
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
 
         const oldAttacker = match.attacker;
+        const oldName =
+            match.names?.[oldAttacker] ||
+            oldAttacker.split("@")[0];
 
-        // 🔁 SWITCH PROPRE
-        match.attacker = match.defender;
-        match.defender = oldAttacker;
+        // ===============================
+        // ❌ CAS : PAS JOUÉ
+        // ===============================
+        if (!match.hasPlayed) {
 
-        const newAttacker = match.attacker;
+            await ovl.sendMessage(chat, {
+                text:
+`⛔ LATENCE OUT ❌‼️
 
-        // 📊 POSSESSIONS
-        match.possessions[newAttacker] =
-            (match.possessions[newAttacker] || 0) + 1;
+@${oldName} n’a pas joué à temps !
 
-        // ⏳ TOURS RESTANTS (FIX IMPORTANT)
+Perte de balle ⚽
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+                mentions: [oldAttacker]
+            });
+
+            // 🔁 switch possession
+            match.attacker = match.defender;
+            match.defender = oldAttacker;
+        }
+
+        // ===============================
+        // ✅ CAS : JOUÉ
+        // ===============================
+        else {
+            match.hasPlayed = false;
+        }
+
+        // ===============================
+        // 📊 UPDATE TOURS
+        // ===============================
         match.toursRestants -= 1;
 
         if (match.toursRestants <= 0) {
             match.toursRestants = 5;
             match.tour++;
+
+            if (match.tour > 20) {
+                await ovl.sendMessage(chat, {
+                    text:
+`🏁⚽ FIN DU MATCH 🥅
+
+📊 20 TOURS ATTEINTS
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
+                });
+                return;
+            }
         }
 
-        const oldName =
-            match.names?.[oldAttacker] ||
-            oldAttacker.split("@")[0];
-
+        const newAttacker = match.attacker;
         const newName =
             match.names?.[newAttacker] ||
             newAttacker.split("@")[0];
 
         await ovl.sendMessage(chat, {
-            image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
-            caption:
-`⛔ LATENCE OUT ❌‼️
+            text:
+`🔁 CHANGEMENT ⚡
 
-⚽ @${oldName} n’a pas joué à temps !
-🔁 @${newName} récupère la possession ⚡
+@${newName} prend la possession !
 
 ╰─────────────────▱▱▱
-        🔷BLUELOCK⚽🥅`,
-            mentions: [oldAttacker, newAttacker]
+🔷BLUELOCK⚽🥅`,
+            mentions: [newAttacker]
         });
 
-        // 🔁 RELANCE
+        // 🔁 RELANCE PROPRE
         startMatchCycle(chat, ovl, match);
 
-    }, TURN_TIME);
-}
+    }, 6 * 60 * 1000);
+} 
 
 //KICK OFF
 function tirageKickOff() {
