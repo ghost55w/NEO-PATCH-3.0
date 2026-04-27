@@ -11,14 +11,10 @@ const {
     pureName,
     normalizeJid,
     getSenderJid,
-
-    calculDistance,
-    extraireDistance,
-    extraireZoneArrivee,
-    extraireZoneDepart,
-    extraireDirectionLargeur,
-    updatePositionJoueur,
-     extraireAction
+    findBlueLockPlayer,  
+    parseLineupFull,  
+    trouverUser 
+     
 
 } = require("./BLmatchsetup");
 
