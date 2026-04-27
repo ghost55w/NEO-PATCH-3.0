@@ -114,7 +114,7 @@ const TYPES_PASSES = {
 📐 MATH / TERRAIN ENGINE
 =================================*/
 // Distance entre zones
-function distancePlayer(z1, z2) {
+function distanceZone(z1, z2) {
     if (!DISTANCES[z1] || !DISTANCES[z2]) return 0;
     return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
 }
