@@ -27,7 +27,7 @@ const {
 // 🎙️ GAMEPLAY UTILITIES (IA / NARRATION)
 // ===============================
 
-// 👉 ICI TU METS resumerAction
+// 👉 Résumé Action 
 function resumerAction(text) {
     if (!text) return "Action inconnue";
 
@@ -80,6 +80,82 @@ function resumerAction(text) {
 /* ===============================
 ⚽ TERRAIN ENGINE (CORE GAMEPLAY)
 =================================*/
+const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
+// ⏱️ Temps par tour (6 minutes)
+const TURN_TIME = 6 * 60 * 1000;
+// ===============================
+// 📍 MAPPING POSTES → TERRAIN
+// ===============================
+const POSITION_POSTES = {
+
+    // 🔴 ATTAQUE
+    AG: { zoneX: "gauche", ligne: "attaque", zoneY: "B1" },
+    AC: { zoneX: "axe",    ligne: "attaque", zoneY: "B1" },
+    AD: { zoneX: "droite", ligne: "attaque", zoneY: "B1" },
+
+    // 🟡 MILIEU
+    MG: { zoneX: "gauche", ligne: "milieu", zoneY: "C1" },
+    MC: { zoneX: "axe",    ligne: "milieu", zoneY: "C1" },
+    MD: { zoneX: "droite", ligne: "milieu", zoneY: "C1" },
+
+    // 🔵 DEFENSE
+    DG: { zoneX: "gauche", ligne: "defense", zoneY: "A2" },
+    DC: { zoneX: "axe",    ligne: "defense", zoneY: "A2" },
+    DD: { zoneX: "droite", ligne: "defense", zoneY: "A2" }
+};
+
+/* ===============================
+🎯 PASSES CONFIG (ENGINE DATA)
+=================================*/
+const TYPES_PASSES = {
+    courte: "passe courte rapide précision contrôle",
+    longue: "longue passe aérienne profondeur",
+    trivela: "extérieur du pied effet courbe",
+    centre: "centre dans la surface",
+    talon: "talonnade surprise arrière"
+};
+
+/* ===============================
+📐 MATH / TERRAIN ENGINE
+=================================*/
+// Distance entre zones
+function distancePlayer(z1, z2) {
+    if (!DISTANCES[z1] || !DISTANCES[z2]) return 0;
+    return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
+}
+
+
+// Extractions terrain
+function extraireDistance(txt) {
+    const m = txt.match(/(\d+)\s?m/);
+    return m ? parseInt(m[1]) : null;
+}
+
+function extraireZoneArrivee(txt) {
+    const m = txt.match(/zone\s*([A-C][1-2])/i);
+    return m ? m[1].toUpperCase() : null;
+}
+
+function extraireZoneDepart(txt) {
+    const m = txt.match(/depuis\s*([A-C][1-2])/i);
+    return m ? m[1].toUpperCase() : null;
+}
+
+function extraireDirectionLargeur(txt) {
+    if (txt.includes("gauche")) return "gauche";
+    if (txt.includes("droite")) return "droite";
+    return null;
+}
+
+/* ===============================
+PAVÉ DE JEU GAMEPLAY 🎮 
+=================================*/
+function extraireAction(pave) {
+    const ligne = pave.split("\n").find(l => l.startsWith("⚽:"));
+    if (!ligne) return null;
+    return ligne.replace("⚽:", "").trim();
+}
+
 
 // ===============================
 // 📏 DIMENSIONS
