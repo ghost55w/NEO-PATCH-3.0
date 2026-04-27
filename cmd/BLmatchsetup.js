@@ -16,92 +16,6 @@ const { handlePaveGame } = require("../cmd/BLmatchgameplay");
 const matchsActifs = new Map();
 
 
-const DISTANCES = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
-// ⏱️ Temps par tour (6 minutes)
-const TURN_TIME = 6 * 60 * 1000;
-// ===============================
-// 📍 MAPPING POSTES → TERRAIN
-// ===============================
-const POSITION_POSTES = {
-
-    // 🔴 ATTAQUE
-    AG: { zoneX: "gauche", ligne: "attaque", zoneY: "B1" },
-    AC: { zoneX: "axe",    ligne: "attaque", zoneY: "B1" },
-    AD: { zoneX: "droite", ligne: "attaque", zoneY: "B1" },
-
-    // 🟡 MILIEU
-    MG: { zoneX: "gauche", ligne: "milieu", zoneY: "C1" },
-    MC: { zoneX: "axe",    ligne: "milieu", zoneY: "C1" },
-    MD: { zoneX: "droite", ligne: "milieu", zoneY: "C1" },
-
-    // 🔵 DEFENSE
-    DG: { zoneX: "gauche", ligne: "defense", zoneY: "A2" },
-    DC: { zoneX: "axe",    ligne: "defense", zoneY: "A2" },
-    DD: { zoneX: "droite", ligne: "defense", zoneY: "A2" }
-};
-
-/* ===============================
-🎯 PASSES CONFIG (ENGINE DATA)
-=================================*/
-const TYPES_PASSES = {
-    courte: "passe courte rapide précision contrôle",
-    longue: "longue passe aérienne profondeur",
-    trivela: "extérieur du pied effet courbe",
-    centre: "centre dans la surface",
-    talon: "talonnade surprise arrière"
-};
-
-/* ===============================
-🧠 UTILITAIRES CORE
-=================================*/
-
-// Normalisation JID
-function normalizeJid(jid) {
-    return jid?.split(":")[0] || jid;
-}
-
-// Sender helper
-function getSenderJid(ms) {
-    return ms.key?.participant || ms.key?.remoteJid;
-}
-
-//tag @mention DU sender
-function getTagFromJid(jid) {
-    const clean = normalizeJid(jid);
-    return clean ? clean.split("@")[0] : "user";
-}
-/* ===============================
-📐 MATH / TERRAIN ENGINE
-=================================*/
-// Distance entre zones
-function distancePlayer(z1, z2) {
-    if (!DISTANCES[z1] || !DISTANCES[z2]) return 0;
-    return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
-}
-
-
-// Extractions terrain
-function extraireDistance(txt) {
-    const m = txt.match(/(\d+)\s?m/);
-    return m ? parseInt(m[1]) : null;
-}
-
-function extraireZoneArrivee(txt) {
-    const m = txt.match(/zone\s*([A-C][1-2])/i);
-    return m ? m[1].toUpperCase() : null;
-}
-
-function extraireZoneDepart(txt) {
-    const m = txt.match(/depuis\s*([A-C][1-2])/i);
-    return m ? m[1].toUpperCase() : null;
-}
-
-function extraireDirectionLargeur(txt) {
-    if (txt.includes("gauche")) return "gauche";
-    if (txt.includes("droite")) return "droite";
-    return null;
-}
-
 // ===============================
 // ⏱️ STOP TIMER TOUR
 // ===============================
@@ -275,14 +189,7 @@ const pureName = str => {
     .toLowerCase();
 };
 
-/* ===============================
-PAVÉ DE JEU GAMEPLAY 🎮 
-=================================*/
-function extraireAction(pave) {
-    const ligne = pave.split("\n").find(l => l.startsWith("⚽:"));
-    if (!ligne) return null;
-    return ligne.replace("⚽:", "").trim();
-}
+
 /* ===============================
 📋 LINEUP ENGINE
 =================================*/
@@ -330,37 +237,6 @@ function parseLineupFull(text) {
     const teamName = text.match(/SQUAD⚽🥅[^:]*:\s*(.+)/i)?.[1]?.trim();
 
     return { teamName, joueurs };
-}
-/* ===============================
-📦 MATCH ENGINE HELPERS
-=================================*/
-
-// Update position global
-function updatePositionJoueur(joueur, direction, distance) {
-    if (!joueur) return;
-
-    joueur.positionX = direction;
-    joueur.distance = distance;
-}
-
-// Update global state
-function updateGlobalPositions(match, joueur) {
-    if (!match.positions) match.positions = [];
-
-    const index = match.positions.findIndex(p => p.nom === joueur.nom);
-
-    if (index !== -1) {
-        match.positions[index] = joueur;
-    } else {
-        match.positions.push(joueur);
-    }
-}
-
-// ===============================
-// KICK OFF 
-// ===============================
-function tirageKickOff() {
-    return Math.random() < 0.5 ? "A" : "B";
 }
 
 // ===============================
