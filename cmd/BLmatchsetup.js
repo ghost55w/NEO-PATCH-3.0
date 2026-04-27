@@ -441,7 +441,14 @@ if (match.etat === "attente_lineup") {
 
     return;
 }
- 
+    
+ // 🎮 GAMEPLAY PASSATION✅ 
+    if (match.etat === "en_cours") {
+        const handled = await handlePaveGame(ms, ovl);
+        if (handled) return;
+    }
+}
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/     
