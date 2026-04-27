@@ -156,6 +156,23 @@ function extraireAction(pave) {
     return ligne.replace("⚽:", "").trim();
 }
 
+function extraireBloc(text, symbole) {
+    const part = text.split(symbole)[1];
+    if (!part) return null;
+
+    return part
+        .split("▔")[0]
+        .split("─")[0]
+        .trim();
+}
+
+function extraireActionsPrincipales(text){
+    return extraireBloc(text, "⚽:");
+}
+function extraireActionsSecondaires(text){
+    return extraireBloc(text, "🔁:");
+}
+
 
 // ===============================
 // 📏 DIMENSIONS
@@ -335,6 +352,148 @@ function updateGlobalPositions(match, joueur) {
         match.positions.push(joueur);
     }
 }
+
+// ===============================
+// ⏱️ STOP TIMER TOUR
+// ===============================
+function stopTurnTimer(match) {
+    if (match.turnTimer) {
+        clearTimeout(match.turnTimer);
+        match.turnTimer = null;
+    }
+
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
+} 
+/* ===============================
+⌚ TIMER GLOBAL 
+=================================*/
+async function startMatchCycle(chat, ovl, match) {
+
+    // 🔄 CLEAN ancien timer si bug
+    if (match.turnTimer) {
+        clearTimeout(match.turnTimer);
+        match.turnTimer = null;
+    }
+
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
+
+    if (!match.tour) match.tour = 1;
+    if (!match.toursRestants) match.toursRestants = 5;
+
+    if (match.tour > 20) {
+        await ovl.sendMessage(chat, {
+            text:
+`🏁⚽: FIN DU MATCH 🥅‼️
+
+📊 20 TOURS ATTEINTS
+
+╰─────────────────▱▱▱
+            🔷BLUELOCK⚽🥅`
+        });
+        return;
+    }
+
+    const currentTurnId = Date.now();
+    match.currentTurnId = currentTurnId;
+    
+    match.hasPlayed = false;
+
+    // ===============================
+    // ⚠️ WARNING (1 MIN RESTANTE)
+    // ===============================
+    match.warningTimer = setTimeout(async () => {
+
+        if (match.currentTurnId !== currentTurnId) return;
+
+        const attacker = match.attacker;
+
+        const attackerName =
+            match.names?.[attacker] ||
+            attacker.split("@")[0];
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ ATTENTION @${attackerName} ❗⏳ Il ne reste que *1 MINUTE* pour jouer !
+
+╰─────────────────▱▱▱
+        🔷BLUELOCK⚽🥅`,
+            mentions: [attacker]
+        });
+
+    }, TURN_TIME - 60000);
+
+    // ===============================
+    // ⏱️ FIN TOUR
+    // ===============================
+    match.turnTimer = setTimeout(async () => {
+
+        if (match.currentTurnId !== currentTurnId) return;
+        // 🔥 SI LE JOUEUR A JOUÉ → PAS DE LATENCE
+if (match.hasPlayed) {
+    startMatchCycle(chat, ovl, match);
+    return;
+}
+
+        match.turnTimer = null;
+
+        if (match.warningTimer) {
+            clearTimeout(match.warningTimer);
+            match.warningTimer = null;
+        }
+
+        const oldAttacker = match.attacker;
+
+        // 🔁 SWITCH PROPRE
+        match.attacker = match.defender;
+        match.defender = oldAttacker;
+
+        const newAttacker = match.attacker;
+
+        // 📊 POSSESSIONS
+        match.possessions[newAttacker] =
+            (match.possessions[newAttacker] || 0) + 1;
+
+        // ⏳ TOURS RESTANTS (FIX IMPORTANT)
+        match.toursRestants -= 1;
+
+        if (match.toursRestants <= 0) {
+            match.toursRestants = 5;
+            match.tour++;
+        }
+
+        const oldName =
+            match.names?.[oldAttacker] ||
+            oldAttacker.split("@")[0];
+
+        const newName =
+            match.names?.[newAttacker] ||
+            newAttacker.split("@")[0];
+
+        await ovl.sendMessage(chat, {
+            image: { url: "https://files.catbox.moe/3n8q7l.jpg" },
+            caption:
+`⛔ LATENCE OUT ❌‼️
+
+⚽ @${oldName} n’a pas joué à temps !
+🔁 @${newName} récupère la possession ⚡
+
+╰─────────────────▱▱▱
+        🔷BLUELOCK⚽🥅`,
+            mentions: [oldAttacker, newAttacker]
+        });
+
+        // 🔁 RELANCE
+        startMatchCycle(chat, ovl, match);
+
+    }, TURN_TIME);
+}
+
 
 
 /* ===============================
