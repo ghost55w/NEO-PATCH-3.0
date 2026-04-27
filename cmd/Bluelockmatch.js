@@ -417,9 +417,6 @@ function stopTurnTimer(match) {
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
-// ===============================
-// ⏱️ TIMER GLOBAL STABLE (BLUE LOCK)
-// ===============================
 function startMatchCycle(chat, ovl, match) {
 
     if (!match || match.etat !== "en_cours") return;
@@ -471,92 +468,149 @@ Il reste *1 MINUTE* pour jouer !
     // ===============================
     match.turnTimer = setTimeout(async () => {
 
-        if (match.currentTurnId !== currentTurnId) return;
+    if (match.currentTurnId !== currentTurnId) return;
 
-        // ❌ reset warning
+    match.turnTimer = null;
+
+    if (match.warningTimer) {
         clearTimeout(match.warningTimer);
         match.warningTimer = null;
+    }
+
+// ===============================
+// ✅ SI LE JOUEUR A JOUÉ À TEMPS
+// ===============================
+if (match.hasPlayed) {
+
+    const oldAttacker = match.attacker;
+    const newAttacker = match.defender;
+
+    const newName =
+        match.names?.[newAttacker] ||
+        newAttacker.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚡ ACTION VALIDÉE ✅
+
+🔁 @${newName} NEXT !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+        mentions: [newAttacker]
+    });
+
+    // ===============================
+    // 🔁 SWITCH JOUEUR
+    // ===============================
+    match.attacker = newAttacker;
+    match.defender = oldAttacker;
+
+    // ===============================
+    // 📊 POSSESSION
+    // ===============================
+    match.possessions[newAttacker] =
+        (match.possessions[newAttacker] || 0) + 1;
+
+    // ===============================
+    // ⏳ TOURS MANAGEMENT (20 TOURS SYSTEM)
+    // ===============================
+    match.toursRestants -= 1;
+
+    if (match.toursRestants <= 0) {
+        match.toursRestants = 5;
+        match.tour++;
+    }
+
+    // ===============================
+    // 🔄 RESET STATE TOUR
+    // ===============================
+    match.hasPlayed = false;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+    // ===============================
+    // 🚀 RELANCE CYCLE
+    // ===============================
+    startMatchCycle(chat, ovl, match);
+    return;
+}
+    // ===============================
+    // ❌ SI LE JOUEUR N’A PAS JOUÉ
+    // ===============================
+    if (!match.hasPlayed) {
 
         const oldAttacker = match.attacker;
+
         const oldName =
             match.names?.[oldAttacker] ||
             oldAttacker.split("@")[0];
 
-        // ===============================
-        // ❌ CAS : PAS JOUÉ
-        // ===============================
-        if (!match.hasPlayed) {
+        const newAttacker = match.defender;
 
-            await ovl.sendMessage(chat, {
-                text:
+        const newName =
+            match.names?.[newAttacker] ||
+            newAttacker.split("@")[0];
+
+        // 🔥 LATENCE OUT
+        await ovl.sendMessage(chat, {
+            text:
 `⛔ LATENCE OUT ❌‼️
 
-@${oldName} n’a pas joué à temps !
-
-Perte de balle ⚽
+⚽ @${oldName} n’a pas joué à temps !
+🔁 @${newName} récupère la possession ⚡
 
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-                mentions: [oldAttacker]
-            });
+        🔷BLUELOCK⚽🥅`,
+            mentions: [oldAttacker, newAttacker]
+        });
 
-            // 🔁 switch possession
-            match.attacker = match.defender;
-            match.defender = oldAttacker;
-        }
+        // 🔁 SWITCH
+        match.attacker = newAttacker;
+        match.defender = oldAttacker;
 
-        // ===============================
-        // ✅ CAS : JOUÉ
-        // ===============================
-        else {
-            match.hasPlayed = false;
-        }
+        match.possessions[newAttacker] =
+            (match.possessions[newAttacker] || 0) + 1;
 
-        // ===============================
-        // 📊 UPDATE TOURS
-        // ===============================
+        // ⏳ TOURS
         match.toursRestants -= 1;
 
         if (match.toursRestants <= 0) {
             match.toursRestants = 5;
             match.tour++;
-
-            if (match.tour > 20) {
-                await ovl.sendMessage(chat, {
-                    text:
-`🏁⚽ FIN DU MATCH 🥅
-
-📊 20 TOURS ATTEINTS
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`
-                });
-                return;
-            }
         }
+    }
 
-        const newAttacker = match.attacker;
-        const newName =
-            match.names?.[newAttacker] ||
-            newAttacker.split("@")[0];
+    // ===============================
+    // 🔄 RESET TOUR
+    // ===============================
+    match.hasPlayed = false;
 
-        await ovl.sendMessage(chat, {
-            text:
-`🔁 CHANGEMENT ⚡
+    const nextAttacker = match.attacker;
 
-@${newName} prend la possession !
+    const nextName =
+        match.names?.[nextAttacker] ||
+        nextAttacker.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`🎙️⚽: NOUVEAU TOUR ⚡
+
+@${nextName} à toi de jouer !
 
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [newAttacker]
-        });
+        🔷BLUELOCK⚽🥅`,
+        mentions: [nextAttacker]
+    });
 
-        // 🔁 RELANCE PROPRE
-        startMatchCycle(chat, ovl, match);
+    // ===============================
+    // 🔁 RELANCE (20 TOURS OK)
+    // ===============================
+    startMatchCycle(chat, ovl, match);
 
-    }, 6 * 60 * 1000);
+}, 6 * 60 * 1000);
 } 
-
+    
 //KICK OFF
 function tirageKickOff() {
     return Math.random() < 0.5 ? "A" : "B";
