@@ -21,8 +21,24 @@ const {
 const matchsActifs = new Map();
 
 /* ===============================
-⚙️ PLAYER ENGINE
+🧠 UTILITAIRES CORE
 =================================*/
+
+// Normalisation JID
+function normalizeJid(jid) {
+    return jid?.split(":")[0] || jid;
+}
+
+// Sender helper
+function getSenderJid(ms) {
+    return ms.key?.participant || ms.key?.remoteJid;
+}
+
+//tag @mention DU sender
+function getTagFromJid(jid) {
+    const clean = normalizeJid(jid);
+    return clean ? clean.split("@")[0] : "user";
+}
 
 // Trouver joueur DB
 function findBlueLockPlayer(input, cardsBlueLock) {
