@@ -408,9 +408,7 @@ function genererResumeIntelligent(actionText) {
 
     let txt = actionText.toLowerCase();
 
-    // 🔥 patterns simples Blue Lock
-    const joueurMatch = actionText.match(/([a-zA-Z0-9_]+)\s*\(/i);
-    const joueur = joueurMatch ? joueurMatch[1] : "un joueur";
+    const joueur = extractPlayerName(actionText);
 
     const passe = txt.includes("passe");
     const tir = txt.includes("tir") || txt.includes("frappe");
@@ -419,9 +417,6 @@ function genererResumeIntelligent(actionText) {
 
     let resume = "";
 
-    // ===============================
-    // 🧠 CONSTRUCTION INTELLIGENTE
-    // ===============================
     if (passe && controle) {
         resume = `${joueur} combine une passe rapide suivie d’un contrôle propre pour faire progresser le jeu.`;
     }
@@ -500,13 +495,13 @@ function faute(message) {
 }
     
 //VALIDATION DE PAVÉ RAISON 
+// ===============================
+// 🧠 VALIDATION PAVÉ (PATCH)
+// ===============================
 function validatePave(text, joueur, match) {
 
     const errors = [];
 
-    // ===============================
-    // 📦 STRUCTURE
-    // ===============================
     const structure = validateStructure(text);
     if (!structure.ok) errors.push(structure.reason);
 
@@ -514,51 +509,51 @@ function validatePave(text, joueur, match) {
 
     if (action) {
 
+        const txt = text.toLowerCase();
+
         // ===============================
-        // 🚶 DEPLACEMENTS (CHECK ONLY)
+        // 🚶 DÉPLACEMENT OBLIGATOIRE
         // ===============================
+        if (
+            txt.includes("place") ||
+            txt.includes("vient") ||
+            txt.includes("court") ||
+            txt.includes("déplacement")
+        ) {
+
+            if (!txt.match(/\d+\s?m/)) {
+                errors.push("❌ Distance non précisée pour déplacement");
+            }
+
+            if (
+                !txt.includes("vmax") &&
+                !txt.includes("course") &&
+                !txt.includes("déplacement")
+            ) {
+                errors.push("❌ Type de déplacement non précisé (ex: course vmax)");
+            }
+        }
+
         const moveCheck = checkDeplacements(text, joueur, match);
-        if (!moveCheck.ok) {
-            errors.push(moveCheck.erreur);
-        }
+        if (!moveCheck.ok) errors.push(moveCheck.erreur);
 
-        // ===============================
-        // ⚽ PASSES
-        // ===============================
         const passCheck = checkPasses(action, joueur, match);
-        if (!passCheck.ok) {
-            errors.push(passCheck.erreur);
-        }
+        if (!passCheck.ok) errors.push(passCheck.erreur);
 
-        // ===============================
-        // 🎯 TIRS
-        // ===============================
         const tirCheck = checkTirs(action, joueur, match);
-        if (!tirCheck.ok) {
-            errors.push(tirCheck.erreur);
-        }
+        if (!tirCheck.ok) errors.push(tirCheck.erreur);
 
-        // ===============================
-        // ⚔️ DUELS
-        // ===============================
         const duelCheck = checkDuels(text, joueur, match);
-        if (!duelCheck.ok) {
-            errors.push(duelCheck.erreur);
-        }
+        if (!duelCheck.ok) errors.push(duelCheck.erreur);
     }
 
-    // ===============================
-    // ❌ RESULTAT FINAL
-    // ===============================
     if (errors.length > 0) {
-        return {
-            ok: false,
-            reason: errors.join(" | ")
-        };
+        return { ok: false, reason: errors.join(" | ") };
     }
 
     return { ok: true };
 }
+
 
 // ===============================
 // ⏱️ STOP TIMER TOUR
@@ -774,6 +769,34 @@ match.phaseDuel = null;
 function tirageKickOff() {
     return Math.random() < 0.5 ? "A" : "B";
 }
+
+// ===============================
+// 🧠 EXTRACTION NOM JOUEUR (ROBUSTE)
+// ===============================
+function extractPlayerName(actionText) {
+
+    if (!actionText) return "un joueur";
+
+    const words = actionText.split(" ");
+
+    for (let i = 0; i < words.length; i++) {
+
+        let w = words[i]
+            .replace(/[()]/g, "")
+            .trim();
+
+        // ignore zones (C2), etc
+        if (/^[A-C][1-2]$/i.test(w)) continue;
+
+        // nom valide
+        if (/^[A-Z][a-zA-Z0-9]+$/.test(w)) {
+            return w;
+        }
+    }
+
+    return "un joueur";
+}
+
 
 
 // ===============================
