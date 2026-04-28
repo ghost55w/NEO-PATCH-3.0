@@ -484,6 +484,66 @@ function validerAction(action) {
     return { ok: true };
 }
 
+//VALIDATION DE PAVÉ 
+function validatePave(text, joueur, match) {
+
+    const errors = [];
+
+    // ===============================
+    // 📦 STRUCTURE
+    // ===============================
+    const structure = validateStructure(text);
+    if (!structure.ok) errors.push(structure.reason);
+
+    const action = extraireAction(text);
+
+    if (action) {
+
+        // ===============================
+        // 🚶 DEPLACEMENTS (CHECK ONLY)
+        // ===============================
+        const moveCheck = checkDeplacements(text, joueur, match);
+        if (!moveCheck.ok) {
+            errors.push(moveCheck.erreur);
+        }
+
+        // ===============================
+        // ⚽ PASSES
+        // ===============================
+        const passCheck = checkPasses(action, joueur, match);
+        if (!passCheck.ok) {
+            errors.push(passCheck.erreur);
+        }
+
+        // ===============================
+        // 🎯 TIRS
+        // ===============================
+        const tirCheck = checkTirs(action, joueur, match);
+        if (!tirCheck.ok) {
+            errors.push(tirCheck.erreur);
+        }
+
+        // ===============================
+        // ⚔️ DUELS
+        // ===============================
+        const duelCheck = checkDuels(text, joueur, match);
+        if (!duelCheck.ok) {
+            errors.push(duelCheck.erreur);
+        }
+    }
+
+    // ===============================
+    // ❌ RESULTAT FINAL
+    // ===============================
+    if (errors.length > 0) {
+        return {
+            ok: false,
+            reason: errors.join(" | ")
+        };
+    }
+
+    return { ok: true };
+}
 
 // ===============================
 // ⏱️ STOP TIMER TOUR
@@ -1231,57 +1291,79 @@ async function handlePaveGame(ms, ovl) {
     const action = extraireAction(text);
 
     // ===============================
-    // ❌ CAS INVALIDE (pavé mal formé)
+// ❌ CAS INVALIDE (PAVÉ)
+// ===============================
+if (!validation.ok) {
+
+    await ovl.sendMessage(chat, {
+        react: { text: "❌", key: ms.key }
+    });
+
+    const reason = validation.reason;
+
     // ===============================
-    const isValidPave =
-        text.includes("💬:") &&
-        text.includes("⚽:") &&
-        text.includes("🔁:") &&
-        text.includes("BLUELOCK") &&
-        action &&
-        action.trim().length > 5;
+    // ⚔️ RÉCUP VIS-À-VIS (COUNTER SYSTEM)
+    // ===============================
+    const loser = normalizeJid(match.joueurTour);
 
-    if (!isValidPave) {
+    const loserObj = (match.lineup1 || [])
+        .concat(match.lineup2 || [])
+        .find(p =>
+            normalizeJid(p.id || p.jid) === loser ||
+            p.nom === match.names?.[loser]
+        );
 
-        await ovl.sendMessage(chat, {
-            react: { text: "❌", key: ms.key }
-        });
+    const visavis = loserObj?.visavis;
 
-        const reason = "Pavé incomplet ou action mal structurée (éléments manquants ou action vide)";
+    const next = visavis?.jid || match.defender || match.id2;
 
-        await ovl.sendMessage(chat, {
-            text:
+    const nextName =
+        match.names?.[next] ||
+        next.split("@")[0];
+
+    const loserName =
+        match.names?.[loser] ||
+        loser.split("@")[0];
+
+    // 🔒 lock joueur fautif
+    match.lockedPlayers = match.lockedPlayers || new Set();
+    match.lockedPlayers.add(loser);
+
+    await ovl.sendMessage(chat, {
+        text:
 `❌ PAVÉ INVALIDE
 
 🎙️ REASON : ${reason}
 
 📊 NOTE DU PAVÉ : 0/10
+⚡ CONTRE-ATTAQUE IMMÉDIATE !
 
-➡️ Tour passé automatiquement
+⚽ @${nextName} récupère le ballon !
+🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`
-        });
+              🔷BLUELOCK⚽🥅`,
+        mentions: [next, loser]
+    });
 
-        // 🔁 switch tour quand même
-        const next =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
+    // ===============================
+    // 🔁 SWITCH POSSESSION
+    // ===============================
+    match.attacker = next;
+    match.defender =
+        next === match.id1 ? match.id2 : match.id1;
 
-        match.attacker = next;
-        match.defender =
-            next === match.id1 ? match.id2 : match.id1;
+    match.joueurTour = next;
 
-        match.joueurTour = next;
+    match.hasPlayed = true;
+    match.turnType = "attaque";
+    match.phase = "counter";
 
-        match.hasPlayed = true;
+    startMatchCycle(chat, ovl, match);
 
-        startMatchCycle(chat, ovl, match);
-
-        return true;
-    }
-
+    return true;
+}
+    
     // ===============================
     // ♻️ ANALYSE START
     // ===============================
