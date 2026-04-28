@@ -582,9 +582,12 @@ Il reste *1 MINUTE* pour jouer !
             match.toursRestants = 5;
             match.tour++;
         }
-
-        // 🔄 RESET
-        match.hasPlayed = false;
+        
+        // 🔄 RESET COMPLET TOUR
+match.hasPlayed = false;
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
+match.phaseDuel = null;
 
         const nextName =
             match.names?.[newAttacker] ||
