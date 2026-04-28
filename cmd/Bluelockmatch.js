@@ -1073,6 +1073,8 @@ match.possessions = {
 
     startMatchCycle(chat, ovl, match);
 }
+
+
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
 =================================*/
@@ -1098,7 +1100,7 @@ async function handlePaveGame(ms, ovl) {
         .trim();
 
     // ===============================
-    // 🎯 DETECTION PAVÉ (comme ancien)
+    // 🎯 DETECTION PAVÉ
     // ===============================
     const isPave =
         text.includes("💬:") &&
@@ -1108,23 +1110,108 @@ async function handlePaveGame(ms, ovl) {
 
     if (!isPave) return false;
 
-    const sender = normalizeJid(getSenderJid(ms));
+    // ♻️ réaction immédiate (scan)
+    await ovl.sendMessage(chat, {
+        react: {
+            text: "♻️",
+            key: ms.key
+        }
+    });
 
     // ===============================
-// ⚽ EXTRACTION ACTION 
-// ===============================
-const action = extraireAction(text);
+    // 🚫 ANTI-HORS-TOUR
+    // ===============================
+    const joueurAutorise = normalizeJid(match.joueurTour);
+    const joueurActuel = normalizeJid(getSenderJid(ms));
 
-// ❌ uniquement si le format ⚽: n'existe pas
-if (action === null) {
-    await ovl.sendMessage(chat, {
-        text: "❌ Aucune action détectée"
-    });
-    return true;
-}
+    if (joueurActuel !== joueurAutorise) {
 
-// ✅ accepte les actions vides 
-const actionSafe = action || "";
+        const nomTour =
+            match.names?.[joueurAutorise] ||
+            joueurAutorise.split("@")[0];
+
+        await ovl.sendMessage(chat, {
+            text:
+`❌ Ce n'est pas à toi de jouer !
+🎯 Tour de @${nomTour}
+
+╰─────────────────▱▱▱
+                 🔷BLUELOCK⚽🥅`,
+            mentions: [joueurAutorise]
+        });
+
+        return true;
+    }
+
+    // ===============================
+    // ⚽ EXTRACTION ACTION
+    // ===============================
+    const action = extraireAction(text);
+
+    // ===============================
+    // ❌ PAVÉ VIDE = PERTE DE TOUR
+    // ===============================
+    if (!action || action.trim() === "") {
+
+        // ❌ réaction immédiate
+        await ovl.sendMessage(chat, {
+            react: {
+                text: "❌",
+                key: ms.key
+            }
+        });
+
+        stopTurnTimer(match);
+
+        const oldAttacker = match.attacker;
+        const newAttacker = match.defender;
+
+        const oldName =
+            match.names?.[oldAttacker] ||
+            oldAttacker.split("@")[0];
+
+        const newName =
+            match.names?.[newAttacker] ||
+            newAttacker.split("@")[0];
+
+        await ovl.sendMessage(chat, {
+            text:
+`❌ Aucune action détectée
+
+⛔ @${oldName} perd son tour !
+🔁 @${newName} récupère la possession ⚡
+
+╰─────────────────▱▱▱
+             🔷BLUELOCK⚽🥅`,
+            mentions: [oldAttacker, newAttacker]
+        });
+
+        // 🔁 SWITCH
+        match.attacker = newAttacker;
+        match.defender = oldAttacker;
+        match.joueurTour = newAttacker;
+
+        match.possessions[newAttacker] =
+            (match.possessions[newAttacker] || 0) + 1;
+
+        match.toursRestants -= 1;
+
+        if (match.toursRestants <= 0) {
+            match.toursRestants = 5;
+            match.tour++;
+        }
+
+        match.hasPlayed = false;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.phaseDuel = null;
+
+        startMatchCycle(chat, ovl, match);
+
+        return true;
+    }
+
+    const actionSafe = action;
 
     // ===============================
     // ⚔️ DUEL PRIORITY SYSTEM
@@ -1147,13 +1234,25 @@ const actionSafe = action || "";
     }
 
     // ===============================
-    // 🎯 ATTAQUE 
+    // 🎯 ATTAQUE
     // ===============================
     if (!match.pendingAttack) {
 
-        if (sender !== normalizeJid(match.joueurTour)) return true;
+        if (joueurActuel !== joueurAutorise) return true;
+
+        stopTurnTimer(match);
 
         match.pendingAttack = text;
+
+        await ovl.sendMessage(chat, {
+            text:
+`♻️⚽ Analyse du pavé en cours...
+╰─────────────────▱▱▱
+              🔷BLUELOCK⚽🥅`
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 60000));
+
         match.hasPlayed = true;
 
         const next =
@@ -1164,19 +1263,21 @@ const actionSafe = action || "";
         match.waitingDefenseFrom = next;
         match.turnType = "defense";
 
-        const resume = resumerAction(action);
+        const resume = resumerAction(actionSafe);
 
         await ovl.sendMessage(chat, {
             text:
-`🛡️⚡⚽ ATTAQUE !
+`🛡️⚡ ATTAQUE VALIDÉE !
 ▔▔▔▔▔▔▔▔▔▔▔▔
 🎙️ : ${resume}
 
 ➡️ NEXT
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`
+            🔷BLUELOCK⚽🥅`
         });
+
+        startMatchCycle(chat, ovl, match);
 
         return true;
     }
@@ -1184,7 +1285,18 @@ const actionSafe = action || "";
     // ===============================
     // 🛡️ DEFENSE
     // ===============================
-    if (sender !== normalizeJid(match.waitingDefenseFrom)) return true;
+    if (joueurActuel !== normalizeJid(match.waitingDefenseFrom)) return true;
+
+    stopTurnTimer(match);
+
+    await ovl.sendMessage(chat, {
+        text:
+`♻️⚽ Analyse du duel en cours...
+╰─────────────────▱▱▱
+            🔷BLUELOCK⚽🥅`
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 60000));
 
     const attaque = match.pendingAttack;
     const defense = text;
@@ -1195,17 +1307,12 @@ const actionSafe = action || "";
 
     await ovl.sendMessage(chat, { text: res.message });
 
-    // ===============================
-    // ⚠️ CONTRE
-    // ===============================
     if (res.type === "contre") {
         match.phaseDuel = { attaque, defense };
+        startMatchCycle(chat, ovl, match);
         return true;
     }
 
-    // ===============================
-    // 🔁 RESET NORMAL
-    // ===============================
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
@@ -1215,6 +1322,8 @@ const actionSafe = action || "";
             : match.id1;
 
     match.turnType = "attaque";
+
+    startMatchCycle(chat, ovl, match);
 
     return true;
 }
