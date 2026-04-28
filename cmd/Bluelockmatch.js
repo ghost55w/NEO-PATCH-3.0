@@ -1492,7 +1492,8 @@ match.turnType = "attaque";
 startMatchCycle(chat, ovl, match);
 
 return true;        
-          
+} 
+    
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
     // ===============================
