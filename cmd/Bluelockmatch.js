@@ -1229,6 +1229,38 @@ async function handlePaveGame(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
+    const sender = normalizeJid(getSenderJid(ms));
+
+    // ===============================
+    // 🚫 FIND PLAYER CARD
+    // ===============================
+    const allPlayers = (match.lineup1 || [])
+        .concat(match.lineup2 || []);
+
+    const playerCard = allPlayers.find(p =>
+        normalizeJid(p.id || p.jid) === sender ||
+        normalizeJid(p.nomJid) === sender ||
+        match.names?.[sender] === p.nom
+    );
+
+    // ===============================
+    // 🚫 LOCK CHECK (CARD BASED)
+    // ===============================
+    if (playerCard && match.lockedPlayers?.has(playerCard.nom)) {
+
+        await ovl.sendMessage(chat, {
+            text:
+`🚫 TU ES LOCK !
+
+🎮 ${playerCard.nom} ne peut pas jouer ce tour.
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+        });
+
+        return true;
+    }
+    
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -1302,32 +1334,41 @@ if (!validation.ok) {
     const reason = validation.reason;
 
     // ===============================
-    // ⚔️ RÉCUP VIS-À-VIS (COUNTER SYSTEM)
+    // ⚔️ RÉCUP VIS-À-VIS
     // ===============================
     const loser = normalizeJid(match.joueurTour);
 
-    const loserObj = (match.lineup1 || [])
-        .concat(match.lineup2 || [])
-        .find(p =>
-            normalizeJid(p.id || p.jid) === loser ||
-            p.nom === match.names?.[loser]
-        );
+    const allPlayers = (match.lineup1 || [])
+        .concat(match.lineup2 || []);
 
-    const visavis = loserObj?.visavis;
+    // 🎴 LOSER CARD
+    const loserCard = allPlayers.find(p =>
+        normalizeJid(p.id || p.jid) === loser ||
+        p.nom === match.names?.[loser]
+    );
+
+    const visavis = loserCard?.visavis;
 
     const next = visavis?.jid || match.defender || match.id2;
 
+    // 🎴 NEXT CARD
+    const nextCard = allPlayers.find(p =>
+        normalizeJid(p.id || p.jid) === normalizeJid(next)
+    );
+
     const nextName =
+        nextCard?.nom ||
         match.names?.[next] ||
         next.split("@")[0];
 
     const loserName =
+        loserCard?.nom ||
         match.names?.[loser] ||
         loser.split("@")[0];
 
-    // 🔒 lock joueur fautif
+    // 🔒 LOCK (CARD BASED)
     match.lockedPlayers = match.lockedPlayers || new Set();
-    match.lockedPlayers.add(loser);
+    match.lockedPlayers.add(loserCard?.nom || loserName);
 
     await ovl.sendMessage(chat, {
         text:
@@ -1336,13 +1377,14 @@ if (!validation.ok) {
 🎙️ REASON : ${reason}
 
 📊 NOTE DU PAVÉ : 0/10
+
 ⚡ CONTRE-ATTAQUE IMMÉDIATE !
 
 ⚽ @${nextName} récupère le ballon !
 🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [next, loser]
     });
 
