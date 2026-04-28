@@ -1322,7 +1322,7 @@ async function handlePaveGame(ms, ovl) {
 🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`,
+               🔷BLUELOCK⚽🥅`,
             mentions: [next, loser]
         });
 
@@ -1343,7 +1343,7 @@ async function handlePaveGame(ms, ovl) {
         text:
 `♻️⚽ Analyse du pavé en cours...
 ╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`
+              🔷BLUELOCK⚽🥅`
     });
 
     await new Promise(r => setTimeout(r, 60000));
@@ -1392,7 +1392,7 @@ async function handlePaveGame(ms, ovl) {
 ➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`,
+              🔷BLUELOCK⚽🥅`,
             mentions: [next]
         });
 
@@ -1427,7 +1427,7 @@ async function handlePaveGame(ms, ovl) {
 ➡️ @${getTagFromJid(match.joueurTour)} NEXT
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`,
+               🔷BLUELOCK⚽🥅`,
         mentions: [match.joueurTour]
     });
 
