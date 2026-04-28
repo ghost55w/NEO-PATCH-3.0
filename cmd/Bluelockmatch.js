@@ -400,6 +400,73 @@ function extraireActionsSecondaires(text){
     return extraireBloc(text, "🔁:");
 }
 
+
+//RÉSUMÉ INTELLIGENT 
+function genererResumeIntelligent(actionText) {
+
+    if (!actionText) return "Action non identifiable.";
+
+    let txt = actionText.toLowerCase();
+
+    // 🔥 patterns simples Blue Lock
+    const joueurMatch = actionText.match(/([a-zA-Z0-9_]+)\s*\(/i);
+    const joueur = joueurMatch ? joueurMatch[1] : "un joueur";
+
+    const passe = txt.includes("passe");
+    const tir = txt.includes("tir") || txt.includes("frappe");
+    const controle = txt.includes("contrôle") || txt.includes("controle");
+    const course = txt.includes("fonce") || txt.includes("dribble") || txt.includes("conduite");
+
+    let resume = "";
+
+    // ===============================
+    // 🧠 CONSTRUCTION INTELLIGENTE
+    // ===============================
+    if (passe && controle) {
+        resume = `${joueur} combine une passe rapide suivie d’un contrôle propre pour faire progresser le jeu.`;
+    }
+    else if (passe) {
+        resume = `${joueur} effectue une passe pour faire avancer l’action.`;
+    }
+    else if (tir) {
+        resume = `${joueur} tente une frappe vers le but avec intention offensive.`;
+    }
+    else if (course) {
+        resume = `${joueur} accélère et progresse balle au pied vers l’espace libre.`;
+    }
+    else {
+        resume = `${joueur} participe à l’action offensive.`;
+    }
+
+    return resume;
+}
+
+//NOTE PAVÉ 
+function noterPave(action) {
+
+    let score = 5;
+
+    if (!action) return 0;
+
+    const txt = action.toLowerCase();
+
+    // richesse
+    if (txt.length > 80) score += 1;
+    if (txt.length > 150) score += 1;
+
+    // éléments techniques
+    if (txt.includes("passe")) score += 1;
+    if (txt.includes("contrôle") || txt.includes("controle")) score += 1;
+    if (txt.includes("zone")) score += 1;
+    if (txt.match(/\d+\s?m/)) score += 1;
+
+    // précision vocabulaire
+    if (txt.includes("intérieur") || txt.includes("extérieur")) score += 1;
+
+    return Math.min(score, 10);
+}
+
+
 // ===============================
 // ⏱️ STOP TIMER TOUR
 // ===============================
@@ -1078,6 +1145,9 @@ match.possessions = {
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
 =================================*/
+/* ===============================
+📩 LECTURE PAVÉ ENGINE (FINAL)
+=================================*/
 async function handlePaveGame(ms, ovl) {
 
     const chat = ms.key.remoteJid;
@@ -1110,20 +1180,12 @@ async function handlePaveGame(ms, ovl) {
 
     if (!isPave) return false;
 
-    // ♻️ réaction immédiate (scan)
-    await ovl.sendMessage(chat, {
-        react: {
-            text: "♻️",
-            key: ms.key
-        }
-    });
+    const joueurAutorise = normalizeJid(match.joueurTour);
+    const joueurActuel = normalizeJid(getSenderJid(ms));
 
     // ===============================
     // 🚫 ANTI-HORS-TOUR
     // ===============================
-    const joueurAutorise = normalizeJid(match.joueurTour);
-    const joueurActuel = normalizeJid(getSenderJid(ms));
-
     if (joueurActuel !== joueurAutorise) {
 
         const nomTour =
@@ -1131,12 +1193,16 @@ async function handlePaveGame(ms, ovl) {
             joueurAutorise.split("@")[0];
 
         await ovl.sendMessage(chat, {
+            react: { text: "❌", key: ms.key }
+        });
+
+        await ovl.sendMessage(chat, {
             text:
 `❌ Ce n'est pas à toi de jouer !
 🎯 Tour de @${nomTour}
 
 ╰─────────────────▱▱▱
-                 🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
             mentions: [joueurAutorise]
         });
 
@@ -1149,19 +1215,13 @@ async function handlePaveGame(ms, ovl) {
     const action = extraireAction(text);
 
     // ===============================
-    // ❌ PAVÉ VIDE = PERTE DE TOUR
+    // ❌ PAVÉ VIDE (STRUCTURE VALIDE MAIS VIDE)
     // ===============================
     if (!action || action.trim() === "") {
 
-        // ❌ réaction immédiate
         await ovl.sendMessage(chat, {
-            react: {
-                text: "❌",
-                key: ms.key
-            }
+            react: { text: "❌", key: ms.key }
         });
-
-        stopTurnTimer(match);
 
         const oldAttacker = match.attacker;
         const newAttacker = match.defender;
@@ -1182,7 +1242,7 @@ async function handlePaveGame(ms, ovl) {
 🔁 @${newName} récupère la possession ⚡
 
 ╰─────────────────▱▱▱
-             🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
             mentions: [oldAttacker, newAttacker]
         });
 
@@ -1194,27 +1254,19 @@ async function handlePaveGame(ms, ovl) {
         match.possessions[newAttacker] =
             (match.possessions[newAttacker] || 0) + 1;
 
-        match.toursRestants -= 1;
+        match.toursRestants--;
 
         if (match.toursRestants <= 0) {
             match.toursRestants = 5;
             match.tour++;
         }
 
-        match.hasPlayed = false;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.phaseDuel = null;
-
         startMatchCycle(chat, ovl, match);
-
         return true;
     }
 
-    const actionSafe = action;
-
     // ===============================
-    // ⚔️ DUEL PRIORITY SYSTEM
+    // ⚔️ DUEL PRIORITAIRE
     // ===============================
     if (match.phaseDuel) {
 
@@ -1238,46 +1290,101 @@ async function handlePaveGame(ms, ovl) {
     // ===============================
     if (!match.pendingAttack) {
 
-        if (joueurActuel !== joueurAutorise) return true;
-
         stopTurnTimer(match);
 
         match.pendingAttack = text;
 
         await ovl.sendMessage(chat, {
-            text:
-`♻️⚽ Analyse du pavé en cours...
-╰─────────────────▱▱▱
-              🔷BLUELOCK⚽🥅`
+            react: { text: "♻️", key: ms.key }
         });
-
-        await new Promise(resolve => setTimeout(resolve, 60000));
-
-        match.hasPlayed = true;
-
-        const next =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
-
-        match.waitingDefenseFrom = next;
-        match.turnType = "defense";
-
-        const resume = resumerAction(actionSafe);
 
         await ovl.sendMessage(chat, {
             text:
-`🛡️⚡ ATTAQUE VALIDÉE !
-▔▔▔▔▔▔▔▔▔▔▔▔
-🎙️ : ${resume}
-
-➡️ NEXT
-
-╰───────────────────
-            🔷BLUELOCK⚽🥅`
+`♻️⚽ Analyse du pavé en cours...
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`
         });
 
-        startMatchCycle(chat, ovl, match);
+        setTimeout(async () => {
+
+            if (!match.pendingAttack) return;
+
+            const attaqueText = match.pendingAttack;
+
+            const oldAttacker = match.attacker;
+            const newAttacker = match.defender;
+
+            const newName =
+                match.names?.[newAttacker] ||
+                newAttacker.split("@")[0];
+
+            const extracted = extraireAction(attaqueText);
+
+            let valid = true;
+            let reason = "";
+            let resume = "";
+
+            if (!extracted || extracted.trim() === "") {
+                valid = false;
+                reason = "Aucune action claire détectée.";
+            } else {
+                resume = genererResumeIntelligent(extracted);
+            }
+
+            // ===============================
+            // ✔️ VALIDE
+            // ===============================
+            if (valid) {
+
+                match.hasPlayed = true;
+
+                await ovl.sendMessage(chat, {
+                    text:
+`🛡️⚡⚽ ATTAQUE !
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+➡️ @${newName} NEXT
+
+╰───────────────────     
+             🔷BLUELOCK⚽🥅`,
+                    mentions: [newAttacker]
+                });
+
+            }
+            // ===============================
+            // ❌ INVALIDE
+            // ===============================
+            else {
+
+                await ovl.sendMessage(chat, {
+                    text:
+`🛡️⚡⚽ ATTAQUE !
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
+🎙️ RESUME❌ : ${reason}
+
+➡️ @${newName} NEXT
+
+╰───────────────────     
+             🔷BLUELOCK⚽🥅`,
+                    mentions: [newAttacker]
+                });
+            }
+
+            // 🔁 SWITCH
+            match.attacker = newAttacker;
+            match.defender = oldAttacker;
+            match.joueurTour = newAttacker;
+
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = newAttacker;
+            match.turnType = "defense";
+
+            startMatchCycle(chat, ovl, match);
+
+        }, 60000);
 
         return true;
     }
@@ -1290,44 +1397,52 @@ async function handlePaveGame(ms, ovl) {
     stopTurnTimer(match);
 
     await ovl.sendMessage(chat, {
+        react: { text: "♻️", key: ms.key }
+    });
+
+    await ovl.sendMessage(chat, {
         text:
 `♻️⚽ Analyse du duel en cours...
 ╰─────────────────▱▱▱
-            🔷BLUELOCK⚽🥅`
+🔷BLUELOCK⚽🥅`
     });
 
-    await new Promise(resolve => setTimeout(resolve, 60000));
+    setTimeout(async () => {
 
-    const attaque = match.pendingAttack;
-    const defense = text;
+        const attaque = match.pendingAttack;
+        const defense = text;
 
-    const res = await handleDuelMatch(match, attaque, defense);
+        if (!attaque) return;
 
-    match.hasPlayed = true;
+        const res = await handleDuelMatch(match, attaque, defense);
 
-    await ovl.sendMessage(chat, { text: res.message });
+        match.hasPlayed = true;
 
-    if (res.type === "contre") {
-        match.phaseDuel = { attaque, defense };
+        await ovl.sendMessage(chat, { text: res.message });
+
+        if (res.type === "contre") {
+            match.phaseDuel = { attaque, defense };
+            startMatchCycle(chat, ovl, match);
+            return;
+        }
+
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+
+        match.joueurTour =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+        match.turnType = "attaque";
+
         startMatchCycle(chat, ovl, match);
-        return true;
-    }
 
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
-
-    match.joueurTour =
-        match.joueurTour === match.id1
-            ? match.id2
-            : match.id1;
-
-    match.turnType = "attaque";
-
-    startMatchCycle(chat, ovl, match);
+    }, 60000);
 
     return true;
 }
-
+    
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
     // ===============================
