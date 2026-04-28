@@ -1769,6 +1769,234 @@ async function handlePasses(match, action, joueur) {
     };
 }
 
+    // ===============================
+    // ⚽ DUELS ET MATCH UP 🆚 
+    // ===============================
+async function handleDuelMatch(match, attaqueText, defenseText) {
+
+    if (!attaqueText || !defenseText) {
+        return {
+            ok: false,
+            type: "erreur",
+            message: "❌ Duel invalide (données manquantes)"
+        };
+    }
+
+    const atk = attaqueText.toLowerCase();
+    const def = defenseText.toLowerCase();
+
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    // ===============================
+    // 🎯 IDENTIFIER JOUEURS VIA TEXTE
+    // ===============================
+    const findPlayer = (txt) => {
+        return allPlayers.find(p =>
+            txt.includes(p.nom.toLowerCase())
+        );
+    };
+
+    const attacker = findPlayer(attaqueText);
+    const defender = findPlayer(defenseText);
+
+    if (!attacker || !defender) {
+        return {
+            ok: false,
+            type: "erreur",
+            message: "❌ Joueurs introuvables"
+        };
+    }
+
+    // ===============================
+    // 📍 DISTANCE RÉELLE
+    // ===============================
+    if (!attacker.position || !defender.position) {
+        return {
+            ok: false,
+            type: "erreur",
+            message: "❌ Positions non définies"
+        };
+    }
+
+    const dist = distancePlayer(attacker.position, defender.position);
+
+    // ===============================
+    // 🧠 INTENTION DEFENSE (MATCH UP)
+    // ===============================
+    const isBlocking =
+        def.includes("bloque") ||
+        def.includes("barre") ||
+        def.includes("empêche") ||
+        def.includes("tacle") ||
+        def.includes("intercepte");
+
+    // ===============================
+    // 🚫 PAS MATCH UP
+    // ===============================
+    if (!isBlocking || dist > 2) {
+        return {
+            ok: true,
+            type: "normal",
+            message: "ℹ️ Pas de duel direct"
+        };
+    }
+
+    // ===============================
+    // ⚔️ MATCH UP ACTIVÉ
+    // ===============================
+    match.phaseDuel = {
+        attaquant: attacker.nom,
+        defenseur: defender.nom
+    };
+
+    // ===============================
+    // 📊 STATS
+    // ===============================
+    const atkStats = attacker.stats;
+    const defStats = defender.stats;
+
+    const ovrDiff = atkStats.ovr - defStats.ovr;
+
+    let advantage = "equal";
+    if (ovrDiff > 10) advantage = "atk";
+    if (ovrDiff < -10) advantage = "def";
+
+    // ===============================
+    // 🎯 TYPE ACTION
+    // ===============================
+    const isDribble = atk.includes("dribble") || atk.includes("conduite");
+    const isPasse = atk.includes("passe");
+    const isTir = atk.includes("tir");
+
+    const isTacle = def.includes("tacle");
+    const isInterception = def.includes("interception");
+    const isPressing = def.includes("pression");
+
+    let result = null;
+
+    // ===============================
+    // 🧠 DRIBBLE VS DEFENSE
+    // ===============================
+    if (isDribble && isTacle) {
+
+        const diff = atkStats.dri - defStats.def;
+
+        if (advantage === "atk") {
+            result = { ok: true, type: "win", msg: `💥 ${attacker.nom} élimine totalement ${defender.nom} !` };
+        }
+        else if (advantage === "def") {
+            result = { ok: false, type: "lose", msg: `🛑 ${defender.nom} stoppe net ${attacker.nom} !` };
+        }
+        else if (diff > 0) {
+            result = { ok: true, type: "win", msg: `⚡ ${attacker.nom} passe ${defender.nom} en dribble !` };
+        }
+        else {
+            result = { ok: false, type: "lose", msg: `🛑 ${defender.nom} réussit son tacle !` };
+        }
+    }
+
+    // ===============================
+    // ⚡ VITESSE
+    // ===============================
+    else if (isDribble && !isTacle) {
+
+        const speedDiff = atkStats.acc - defStats.acc;
+
+        if (speedDiff > 5) {
+            result = { ok: true, type: "win", msg: `🚀 ${attacker.nom} prend de vitesse ${defender.nom} !` };
+        }
+        else if (speedDiff < -5) {
+            result = { ok: false, type: "lose", msg: `🏃 ${defender.nom} rattrape ${attacker.nom} !` };
+        }
+    }
+
+    // ===============================
+    // 💪 PHYSIQUE
+    // ===============================
+    else if (atk.includes("épaule") || def.includes("épaule")) {
+
+        const phyDiff = atkStats.phy - defStats.phy;
+
+        if (phyDiff > 10) {
+            result = { ok: true, type: "win", msg: `💪 ${attacker.nom} domine physiquement ${defender.nom} !` };
+        }
+        else if (phyDiff < -10) {
+            result = { ok: false, type: "lose", msg: `💥 ${attacker.nom} perd le duel physique !` };
+        }
+        else {
+            result = { ok: false, type: "contre", msg: `⚔️ Duel physique équilibré` };
+        }
+    }
+
+    // ===============================
+    // 🎯 PASSE VS INTERCEPTION
+    // ===============================
+    else if (isPasse && isInterception) {
+
+        const diff = atkStats.pas - defStats.def;
+
+        if (diff > 0) {
+            result = { ok: true, type: "win", msg: `🎯 Passe réussie sous pression !` };
+        } else {
+            result = { ok: false, type: "lose", msg: `🛑 Interception parfaite de ${defender.nom} !` };
+        }
+    }
+
+    // ===============================
+    // 🎯 TIR
+    // ===============================
+    else if (isTir) {
+
+        const diff = atkStats.sho - defStats.def;
+
+        if (diff > 5) {
+            result = { ok: true, type: "goal", msg: `🔥 Frappe dangereuse de ${attacker.nom} !` };
+        } else {
+            result = { ok: false, type: "blocked", msg: `🧱 Tir bloqué par ${defender.nom} !` };
+        }
+    }
+
+    // ===============================
+    // ⚖️ CAS NEUTRE
+    // ===============================
+    if (!result) {
+        result = {
+            ok: false,
+            type: "contre",
+            msg: `⚔️ Duel indécis entre ${attacker.nom} et ${defender.nom}`
+        };
+    }
+
+    // ===============================
+    // 🎬 MESSAGE FINAL MATCH UP
+    // ===============================
+    const resume = `${defender.nom} fait face à ${attacker.nom} pour stopper sa progression.`;
+
+    const next = match.attacker; // attaquant doit répondre
+
+    return {
+        ok: result.ok,
+        type: result.type,
+        message:
+`*🛡️⚽ MATCH UP⚔️ !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
+
+🎙️ RESUME♻️ : ${resume}
+
+${result.msg}
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`
+    };
+}
+
+
 /* ===============================
 COMMANDE +STOPMATCH⚽
 =================================*/ 
