@@ -484,6 +484,21 @@ function validerAction(action) {
     return { ok: true };
 }
 
+// ===============================
+// 🎯 HELPERS RESULT DUEL
+// ===============================
+function success(message) {
+    return { ok: true, type: "win", message };
+}
+
+function fail(message) {
+    return { ok: false, type: "fail", message };
+}
+
+function faute(message) {
+    return { ok: false, type: "faute", message };
+}
+    
 //VALIDATION DE PAVÉ RAISON 
 function validatePave(text, joueur, match) {
 
@@ -1403,20 +1418,53 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
-    // ===============================
-    // 🛡️ DEFENSE
-    // ===============================
-    const defense = action;
+// ===============================
+// 🛡️ DEFENSE
+// ===============================
+const defense = action;
 
-    const res = await handleDuelMatch(match, match.pendingAttack, defense);
+const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
-    match.hasPlayed = true;
+match.hasPlayed = true;
 
-    const resumeDefense = genererResumeIntelligent(defense);
-    const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
+// ===============================
+// 🔥 PRIORITÉ AU MATCH UP / DUEL
+// ===============================
+if (res && res.message && res.type !== "normal") {
 
     await ovl.sendMessage(chat, {
-        text:
+        text: res.message,
+        mentions: [match.joueurTour]
+    });
+
+    // ⚔️ Duel continue
+    if (res.type === "contre") {
+
+        match.phaseDuel = {
+            attaque: match.pendingAttack,
+            defense
+        };
+
+    } else {
+
+        // ✅ Duel terminé
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+    }
+
+    startMatchCycle(chat, ovl, match);
+    return true;
+}
+
+// ===============================
+// 📉 FALLBACK : DEFENSE PASSIVE
+// ===============================
+const resumeDefense = genererResumeIntelligent(defense);
+const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
+
+await ovl.sendMessage(chat, {
+    text:
 `*🛡️⚔️⚽ DÉFENSE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -1428,31 +1476,22 @@ async function handlePaveGame(ms, ovl) {
 
 ╰───────────────────
                🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
-    });
+    mentions: [match.joueurTour]
+});
 
-    if (res.type === "contre") {
-        match.phaseDuel = {
-            attaque: match.pendingAttack,
-            defense
-        };
-        startMatchCycle(chat, ovl, match);
-        return true;
-    }
+// 🔄 Reset attaque
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
 
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+// 🔁 Switch tour
+match.joueurTour =
+    match.joueurTour === match.id1 ? match.id2 : match.id1;
 
-    match.joueurTour =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
+match.turnType = "attaque";
 
-    match.turnType = "attaque";
+startMatchCycle(chat, ovl, match);
 
-    startMatchCycle(chat, ovl, match);
-
-    return true;
-}
-           
+return true;        
           
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
