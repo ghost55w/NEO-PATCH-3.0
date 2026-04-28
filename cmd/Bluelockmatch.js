@@ -1835,15 +1835,22 @@ async function handlePasses(match, action, joueur) {
     // ===============================
     // ⚽ DUELS ET MATCH UP 🆚 
     // ===============================
-// ===============================
-// ⚽ DUELS ET MATCH UP 🆚
-// ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
 
     if (!attaqueText || !defenseText) {
         return { ok: false, type: "erreur", message: "❌ Duel invalide" };
     }
-
+// ===============================
+    // 🚫 GARDIEN DUEL DÉJÀ RÉSOLU
+    // ===============================
+    if (match.phaseDuelResolved) {
+        return {
+            ok: false,
+            type: "ignore",
+            message: "⚠️ Duel déjà résolu"
+        };
+}
+    
     const allPlayers = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
@@ -2091,7 +2098,11 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     }
 
     const next = match.attacker;
-
+// ===============================
+    // 🔒 MARQUAGE DU DUEL
+    // ===============================    
+match.phaseDuelResolved = true;
+    
     return {
         ok: result.ok,
         type: result.type,
