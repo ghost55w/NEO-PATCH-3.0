@@ -2184,29 +2184,30 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase();
 
-    // ===============================
-    // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
-    // ===============================
-    const actionAttacker = attaqueText;
-    const actionDefender = defenseText;
+// ===============================
+// 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
+// ===============================
+const actionAttacker = attaqueText;
+const actionDefender = defenseText;
 
-    const chaseResult = resolveChase(
-        match,
-        attacker,
-        defender,
-        match.ball,
-        actionAttacker,
-        actionDefender
-    );
+const chaseResult = resolveChase(
+    match,
+    attacker,
+    defender,
+    match.ball,
+    actionAttacker,
+    actionDefender
+);
 
-    // ⚡ VITESSE BASE
-    const atkVmax = atkStats.acc || 50;
-    const defBaseVmax = defStats.acc || 50;
+// ===============================
+// ⚡ VITESSE BASE (UNE SEULE FOIS)
+// ===============================
+const atkVmax = atkStats.acc || 50;
+const defBaseVmax = defStats.acc || 50;
 
 // ===============================
 // 🧍 POSTURE DÉFENSIVE
 // ===============================
-
 const postureDebout = ["debout", "relâché", "normal"];
 
 const postureBasse = [
@@ -2226,22 +2227,18 @@ else if (postureDebout.some(w => def.includes(w))) {
 // ===============================
 // ⚙️ VITESSE DEF (VMAX)
 // ===============================
-
-const defBaseVmax = defStats.acc || 50;
-
 let defVmax = posture === "debout"
     ? defBaseVmax * 0.5   // 🧱 lent mais stable
-    : defBaseVmax;        // ⚡ jambes fléchies = vitesse max
+    : defBaseVmax;        // ⚡ posture basse = vmax
 
-// (optionnel mais cohérent)
-const atkVmax = atkStats.acc || 50;
-
+// ===============================
+// 🎯 RESULT GLOBAL (AVANT UTILISATION)
+// ===============================
 let result = null;
 
 // ===============================
 // 🏃 CHASE PRIORITY LOGIC
 // ===============================
-
 if (chaseResult.reason === "INTERCEPTION") {
 
     match.ball.holder = defender.nom;
@@ -2253,7 +2250,6 @@ if (chaseResult.reason === "INTERCEPTION") {
         msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
     };
 }
-
 else if (chaseResult.reason === "CONSERVATION") {
 
     match.ball.holder = attacker.nom;
@@ -2265,7 +2261,6 @@ else if (chaseResult.reason === "CONSERVATION") {
         msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
     };
 }
-
 else if (chaseResult.reason === "CHASE_CONTINUES") {
 
     match.ball.state = "loose";
@@ -2275,7 +2270,7 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
         type: "CONTINUED_CHASE",
         msg: `🏃 Duel de course toujours en cours...`
     };
-}
+} 
 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
