@@ -2127,15 +2127,17 @@ async function handlePasses(match, action, joueur) {
     };
 }
 
-    // ===============================
-    // ⚽ DUELS ET MATCH UP 🆚 
-    // ===============================
+
+// ===============================
+// ⚽ DUELS ET MATCH UP 🆚 
+// ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
 
     if (!attaqueText || !defenseText) {
         return { ok: false, type: "erreur", message: "❌ Duel invalide" };
     }
-// ===============================
+
+    // ===============================
     // 🚫 GARDIEN DUEL DÉJÀ RÉSOLU
     // ===============================
     if (match.phaseDuelResolved) {
@@ -2144,90 +2146,106 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
             type: "ignore",
             message: "⚠️ Duel déjà résolu"
         };
-}
-    
+    }
+
     const allPlayers = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    // ===============================
-    // 🧠 FIND PLAYER ROBUSTE
-    // ===============================
     const findPlayer = (txt) => {
         const t = pureName(txt);
 
         return allPlayers.find(p => {
             const n = pureName(p.nom);
-
-            return (
-                t.includes(n) ||
-                n.includes(t)
-            );
+            return t.includes(n) || n.includes(t);
         });
     };
 
     let attacker = null;
 
-// 🔥 PRIORITÉ AU PORTEUR DE BALLE
-if (match.ballHolder) {
-    attacker = allPlayers.find(p => p.nom === match.ballHolder);
-}
+    if (match.ballHolder) {
+        attacker = allPlayers.find(p => p.nom === match.ballHolder);
+    }
 
-// fallback sécurité
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
-} 
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
+
     const defender = findPlayer(defenseText);
 
     if (!attacker || !defender) {
-        return {
-            ok: false,
-            type: "erreur",
-            message: "❌ Joueurs introuvables"
-        };
+        return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
     }
 
-    if (!attacker.position || !defender.position) {
-        return {
-            ok: false,
-            type: "erreur",
-            message: "❌ Positions non définies"
-        };
-    }
-
-    // ===============================
-    // 📊 STATS SAFE
-    // ===============================
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
 
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase();
+
     // ===============================
-// 🏃 CHASE SYSTEM INTEGRATION
+    // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
+    // ===============================
+    const actionAttacker = attaqueText;
+    const actionDefender = defenseText;
+
+    const chaseResult = resolveChase(
+        match,
+        attacker,
+        defender,
+        match.ball,
+        actionAttacker,
+        actionDefender
+    );
+
+    // ⚡ VITESSE BASE
+    const atkVmax = atkStats.acc || 50;
+    const defBaseVmax = defStats.acc || 50;
+
+// ===============================
+// 🧍 POSTURE DÉFENSIVE
 // ===============================
 
-// 🧠 actions brutes utilisées pour le moteur de course
-const actionAttacker = attaqueText;
-const actionDefender = defenseText;
+const postureDebout = ["debout", "relâché", "normal"];
 
-// ⚡ résolution course attaquant vs défenseur sur ballon
-const chaseResult = resolveChase(
-    match,
-    attacker,
-    defender,
-    match.ball,
-    actionAttacker,
-    actionDefender
-);
+const postureBasse = [
+    "fléchis", "jambes fléchies", "écartées",
+    "défensive", "basse", "stance basse"
+];
 
-// 🧠 gestion résultat
+let posture = "debout";
+
+if (postureBasse.some(w => def.includes(w))) {
+    posture = "basse";
+}
+else if (postureDebout.some(w => def.includes(w))) {
+    posture = "debout";
+}
+
+// ===============================
+// ⚙️ VITESSE DEF (VMAX)
+// ===============================
+
+const defBaseVmax = defStats.acc || 50;
+
+let defVmax = posture === "debout"
+    ? defBaseVmax * 0.5   // 🧱 lent mais stable
+    : defBaseVmax;        // ⚡ jambes fléchies = vitesse max
+
+// (optionnel mais cohérent)
+const atkVmax = atkStats.acc || 50;
+
+let result = null;
+
+// ===============================
+// 🏃 CHASE PRIORITY LOGIC
+// ===============================
+
 if (chaseResult.reason === "INTERCEPTION") {
 
     match.ball.holder = defender.nom;
     match.ball.state = "controle";
-    match.ball.position = { ...defender.position };
 
     result = {
         ok: false,
@@ -2240,7 +2258,6 @@ else if (chaseResult.reason === "CONSERVATION") {
 
     match.ball.holder = attacker.nom;
     match.ball.state = "controle";
-    match.ball.position = { ...attacker.position };
 
     result = {
         ok: true,
@@ -2260,209 +2277,83 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
     };
 }
 
-    let result = null;
+// ===============================
+// 🧱 DEFENSE PASSIVE + VITESSE
+// ===============================
+
+const passiveKeywords = [
+    "se place", "devant", "barrer",
+    "bloque", "ferme", "coupe la route"
+];
+
+const isPassive = passiveKeywords.some(k => def.includes(k));
+
+if (!result && isPassive) {
+
+    const defPower = (defStats.def || 50) + (defStats.phy || 50) * 0.3;
+    const atkPower = (atkStats.acc || 50) + (atkStats.dri || 50) * 0.3;
+
+    const speedGap = atkVmax - defVmax;
+
+    // 💨 si attaquant trop rapide
+    if (speedGap > 15) {
+        result = {
+            ok: true,
+            type: "win",
+            msg: `💨 ${attacker.nom} dépasse la défense malgré le blocage !`
+        };
+    }
+
+    // 🧱 défense physique dominante
+    else if (defPower > atkPower) {
+        result = {
+            ok: false,
+            type: "stop",
+            msg: `🧱 ${defender.nom} bloque la route parfaitement !`
+        };
+    }
+
+    // ⚔️ duel neutre
+    else {
+        result = {
+            ok: false,
+            type: "contre",
+            msg: `⚔️ ${defender.nom} gêne la progression`
+        };
+    }
+}
+
 
     // ===============================
-    // 🎯 TYPES OFFENSIFS (DRIBBLES)
+    // 🎯 DRIBBLES
     // ===============================
     const DRIBBLES = [
-        "crochet extérieur",
-        "crochet intérieur",
-        "double contact",
-        "roulette",
-        "petit pont",
-        "rainbow",
-        "step over",
-        "body feint",
-        "elastico",
-        "drag back",
-        "sombrero",
-        "reverse elastico"
+        "crochet extérieur","crochet intérieur","double contact",
+        "roulette","petit pont","rainbow","step over","elastico"
     ];
 
     const isDribble = DRIBBLES.some(d => atk.includes(d));
 
-    // ===============================
-    // 🛡️ TYPES DÉFENSIFS
-    // ===============================
-    const DEFENSES = {
-        tacleGlisse: ["tacle glissé"],
-        tacleDebout: ["tacle debout"],
-        tacleCirculaire: ["tacle circulaire"],
+    if (!result && isDribble) {
 
-        main: ["main", "main au corps"],
-        epaule: ["épaule", "coup d'épaule"],
+        const diff = atkVmax - (defStats.def || 0);
 
-        interception: ["interception"],
-        pressing: ["pressing", "pression"],
-        blocage: ["blocage", "block"]
-    };
-
-    const isTacleGlisse = DEFENSES.tacleGlisse.some(w => def.includes(w));
-    const isTacleDebout = DEFENSES.tacleDebout.some(w => def.includes(w));
-    const isTacleCirculaire = DEFENSES.tacleCirculaire.some(w => def.includes(w));
-
-    const isMain = DEFENSES.main.some(w => def.includes(w));
-    const isEpaule = DEFENSES.epaule.some(w => def.includes(w));
-
-    const isInterception = DEFENSES.interception.some(w => def.includes(w));
-    const isPressing = DEFENSES.pressing.some(w => def.includes(w));
-    const isBlocage = DEFENSES.blocage.some(w => def.includes(w));
-
-    // ===============================
-    // 🎯 DIRECTIONS / ROTATIONS
-    // ===============================
-    const directionCirculaire = atk.includes("rotation") || atk.includes("tourne");
-    const directionFrontale = atk.includes("face") || atk.includes("frontal");
-
-    const rotation60 = atk.includes("60");
-    const rotation90 = atk.includes("90");
-    const rotation180 = atk.includes("180");
-
-    // ===============================
-    // ⚽ DRIBBLE CLASSIQUE
-    // ===============================
-    if (isDribble && !isTacleGlisse && !isTacleDebout && !isTacleCirculaire) {
-
-        const diff = (atkStats.acc || 0) - (defStats.def || 0);
-
-        if (diff > 8) {
-            result = { ok: true, type: "win", msg: `🔥 ${attacker.nom} humilie ${defender.nom} !` };
-        }
-        else if (diff > 0) {
-            result = { ok: true, type: "win", msg: `⚡ ${attacker.nom} passe en dribble !` };
-        }
-        else {
-            result = { ok: false, type: "lose", msg: `🛑 ${defender.nom} stoppe le dribble !` };
-        }
+        result = diff > 5
+            ? { ok: true, type: "win", msg: `🔥 ${attacker.nom} élimine ${defender.nom}` }
+            : { ok: false, type: "lose", msg: `🛑 ${defender.nom} stoppe le dribble` };
     }
 
     // ===============================
-    // 🛝 TACLE GLISSÉ
-    // ===============================
-    else if (isDribble && isTacleGlisse) {
-
-        const diff = (atkStats.acc || 0) - (defStats.def || 0);
-
-        if (diff > 5) {
-            result = { ok: true, type: "win", msg: `🚀 ${attacker.nom} évite le tacle glissé !` };
-        } else {
-            result = { ok: false, type: "lose", msg: `💥 ${defender.nom} récupère le ballon !` };
-        }
-    }
-
-    // ===============================
-    // 🧱 TACLE DEBOUT
-    // ===============================
-    else if (isDribble && isTacleDebout) {
-
-        const diff = (atkStats.acc || 0) - (defStats.def || 0);
-
-        if (diff > 3) {
-            result = { ok: true, type: "win", msg: `⚡ ${attacker.nom} élimine le défenseur !` };
-        } else {
-            result = { ok: false, type: "lose", msg: `🧱 ${defender.nom} stoppe net l'action !` };
-        }
-    }
-
-    // ===============================
-    // 🌀 TACLE CIRCULAIRE
-    // ===============================
-    else if (isDribble && isTacleCirculaire) {
-
-        const diff = (atkStats.acc || 0) - ((defStats.def || 0) + 3);
-
-        if (diff > 6) {
-            result = { ok: true, type: "win", msg: `🌀 ${attacker.nom} traverse le tacle circulaire !` };
-        } else {
-            result = { ok: false, type: "lose", msg: `🔄 ${defender.nom} enferme ${attacker.nom} dans une rotation défensive !` };
-        }
-    }
-
-    // ===============================
-    // 📡 INTERCEPTION / PRESSING / BLOCAGE
-    // ===============================
-    else if (isInterception || isPressing || isBlocage) {
-
-        const diff = (defStats.def || 0) - (atkStats.acc || 0);
-
-        if (diff > 4) {
-            result = { ok: false, type: "stop", msg: `🧠 ${defender.nom} lit parfaitement l’action !` };
-        } else {
-            result = { ok: true, type: "win", msg: `⚡ ${attacker.nom} échappe à la pression !` };
-        }
-    }
-
-    // ===============================
-    // ✋ MAIN
-    // ===============================
-    else if (isMain) {
-
-        const phyDiff = (defStats.phy || 0) - (atkStats.phy || 0);
-
-        if (phyDiff === 0) {
-            attacker.stats.acc = Math.max(0, (attacker.stats.acc || 0) - 10);
-            result = { ok: true, type: "slow", msg: `🖐️ ${attacker.nom} ralentit (-10 ACC)` };
-        }
-        else if (phyDiff > 0) {
-            result = { ok: false, type: "stop", msg: `🧱 ${defender.nom} stoppe net ${attacker.nom}` };
-        }
-        else {
-            result = { ok: true, type: "win", msg: `💨 ${attacker.nom} repousse la main !` };
-        }
-    }
-
-    // ===============================
-    // 💪 ÉPAULE
-    // ===============================
-    else if (isEpaule) {
-
-        const phyDiff = (defStats.phy || 0) - (atkStats.phy || 0);
-
-        if (phyDiff > 5) {
-            result = { ok: false, type: "stop", msg: `💥 ${defender.nom} détruit l'équilibre !` };
-        }
-        else if (phyDiff < -5) {
-            result = { ok: true, type: "win", msg: `💪 ${attacker.nom} résiste et passe !` };
-        }
-        else {
-            result = { ok: false, type: "contre", msg: `⚔️ Duel physique équilibré` };
-        }
-    }
-
-    // ===============================
-    // 🎯 BONUS DIRECTION
-    // ===============================
-    if (result) {
-
-        if (directionCirculaire) {
-            if (rotation60) result.msg += "\n↪️ Rotation 60° exécutée";
-            if (rotation90) result.msg += "\n↪️ Rotation 90° exécutée";
-            if (rotation180) result.msg += "\n↪️ Rotation 180° exécutée";
-        }
-
-        if (directionFrontale) {
-            result.msg += "\n➡️ Duel frontal engagé";
-        }
-    }
-
-    // ===============================
-    // ⚖️ CAS NEUTRE
+    // ⚖️ FALLBACK
     // ===============================
     if (!result) {
-        result = {
-            ok: false,
-            type: "contre",
-            msg: `⚔️ Duel en cours...`
-        };
+        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
     }
 
     const next = match.attacker;
-// ===============================
-    // 🔒 MARQUAGE DU DUEL
-    // ===============================    
-match.phaseDuelResolved = false;
-    
+
+    match.phaseDuelResolved = true;
+
     return {
         ok: result.ok,
         type: result.type,
@@ -2479,6 +2370,9 @@ ${result.msg}
               🔷BLUELOCK⚽🥅`
     };
 }
+
+
+    
 
 
 /* ===============================
