@@ -2081,6 +2081,61 @@ if (!attacker) {
 
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase();
+    // ===============================
+// 🏃 CHASE SYSTEM INTEGRATION
+// ===============================
+
+// 🧠 actions brutes utilisées pour le moteur de course
+const actionAttacker = attaqueText;
+const actionDefender = defenseText;
+
+// ⚡ résolution course attaquant vs défenseur sur ballon
+const chaseResult = resolveChase(
+    match,
+    attacker,
+    defender,
+    match.ball,
+    actionAttacker,
+    actionDefender
+);
+
+// 🧠 gestion résultat
+if (chaseResult.reason === "INTERCEPTION") {
+
+    match.ball.holder = defender.nom;
+    match.ball.state = "controle";
+    match.ball.position = { ...defender.position };
+
+    result = {
+        ok: false,
+        type: "INTERCEPTION",
+        msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
+    };
+}
+
+else if (chaseResult.reason === "CONSERVATION") {
+
+    match.ball.holder = attacker.nom;
+    match.ball.state = "controle";
+    match.ball.position = { ...attacker.position };
+
+    result = {
+        ok: true,
+        type: "CONSERVATION",
+        msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
+    };
+}
+
+else if (chaseResult.reason === "CHASE_CONTINUES") {
+
+    match.ball.state = "loose";
+
+    result = {
+        ok: false,
+        type: "CONTINUED_CHASE",
+        msg: `🏃 Duel de course toujours en cours...`
+    };
+}
 
     let result = null;
 
