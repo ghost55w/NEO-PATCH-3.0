@@ -406,31 +406,49 @@ function genererResumeIntelligent(actionText) {
 
     if (!actionText) return "Action non identifiable.";
 
-    let txt = actionText.toLowerCase();
+    const txt = actionText.toLowerCase();
 
-    const joueur = extractPlayerName(actionText);
+    // 🔍 extraction joueurs
+    const players = actionText.match(/[A-Z][a-zA-Z0-9]+/g) || [];
 
     const passe = txt.includes("passe");
-    const tir = txt.includes("tir") || txt.includes("frappe");
     const controle = txt.includes("contrôle") || txt.includes("controle");
-    const course = txt.includes("fonce") || txt.includes("dribble") || txt.includes("conduite");
+    const course = txt.includes("fonce") || txt.includes("conduite");
+    const tir = txt.includes("tir") || txt.includes("frappe");
 
     let resume = "";
 
-    if (passe && controle) {
-        resume = `${joueur} combine une passe rapide suivie d’un contrôle propre pour faire progresser le jeu.`;
-    }
-    else if (passe) {
-        resume = `${joueur} effectue une passe pour faire avancer l’action.`;
-    }
-    else if (tir) {
-        resume = `${joueur} tente une frappe vers le but avec intention offensive.`;
-    }
-    else if (course) {
-        resume = `${joueur} accélère et progresse balle au pied vers l’espace libre.`;
-    }
-    else {
-        resume = `${joueur} participe à l’action offensive.`;
+    if (players.length >= 2) {
+
+        const p1 = players[0];
+        const p2 = players[1];
+
+        if (passe && controle && course) {
+            resume = `${p1} effectue une passe vers ${p2}, qui contrôle puis progresse balle au pied.`;
+        }
+        else if (passe && controle) {
+            resume = `${p1} sert ${p2} qui contrôle proprement.`;
+        }
+        else if (passe) {
+            resume = `${p1} transmet le ballon à ${p2}.`;
+        }
+        else {
+            resume = `${p2} est impliqué dans l'action.`;
+        }
+
+    } else {
+
+        const joueur = players[0] || "Un joueur";
+
+        if (tir) {
+            resume = `${joueur} tente une frappe vers le but.`;
+        }
+        else if (course) {
+            resume = `${joueur} progresse balle au pied.`;
+        }
+        else {
+            resume = `${joueur} participe à l’action.`;
+        }
     }
 
     return resume;
@@ -1378,15 +1396,22 @@ async function handlePaveGame(ms, ovl) {
     // ♻️ ANALYSE
     // ===============================
     await ovl.sendMessage(chat, {
-        text:
-`♻️⚽ Analyse du pavé en cours...
-╰─────────────────▱▱▱
-              🔷BLUELOCK⚽🥅`
-    });
+    react: { text: "♻️", key: ms.key }
+});
 
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
+    // ===============================
+// ⚽ UPDATE BALL HOLDER (SMART)
+// ===============================
+const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+
+if (detectedPlayers.length >= 2) {
+    match.ballHolder = detectedPlayers[1]; // receveur
+} else if (detectedPlayers.length === 1) {
+    match.ballHolder = detectedPlayers[0];
+}
 
     // ===============================
     // ⚔️ DUEL PRIORITY
@@ -1872,7 +1897,17 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         });
     };
 
-    const attacker = findPlayer(attaqueText);
+    let attacker = null;
+
+// 🔥 PRIORITÉ AU PORTEUR DE BALLE
+if (match.ballHolder) {
+    attacker = allPlayers.find(p => p.nom === match.ballHolder);
+}
+
+// fallback sécurité
+if (!attacker) {
+    attacker = findPlayer(attaqueText);
+} 
     const defender = findPlayer(defenseText);
 
     if (!attacker || !defender) {
@@ -2101,7 +2136,7 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 // ===============================
     // 🔒 MARQUAGE DU DUEL
     // ===============================    
-match.phaseDuelResolved = true;
+match.phaseDuelResolved = false;
     
     return {
         ok: result.ok,
