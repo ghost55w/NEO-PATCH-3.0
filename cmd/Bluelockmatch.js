@@ -814,7 +814,149 @@ function extractPlayerName(actionText) {
 
     return "un joueur";
 }
+// ===============================
+// 🧭 DIRECTION NORMALIZER
+// ===============================
+function normalizeDirection(texte) {
 
+    const t = texte.toLowerCase();
+
+    // LEFT / RIGHT simples
+    if (t.includes("vers la gauche") || t.includes("à gauche") || t.includes("sur la gauche")) {
+        return "left";
+    }
+
+    if (t.includes("vers la droite") || t.includes("à droite") || t.includes("sur la droite")) {
+        return "right";
+    }
+
+    // FLANK (contournement)
+    if (t.includes("par la gauche")) {
+        return "flank_left";
+    }
+
+    if (t.includes("par la droite")) {
+        return "flank_right";
+    }
+
+    return null;
+}
+
+// ===============================
+// 🛑 ACTION VALIDATOR
+// ===============================
+function validateActionSyntax(texte) {
+
+    const t = texte.toLowerCase();
+
+    // 🚫 PIVOT obligatoire 180°
+    if (t.includes("pivot") || t.includes("retourne") || t.includes("demi tour")) {
+
+        const has180 = t.includes("180");
+        const hasDirection = t.includes("droite") || t.includes("gauche");
+
+        if (!has180 || !hasDirection) {
+            return { valid: false, reason: "PIVOT_INVALID" };
+        }
+    }
+
+    // 🚫 VITESSE MAX obligatoire
+    if (
+        t.includes("accelere") ||
+        t.includes("sprint") ||
+        t.includes("course rapide")
+    ) {
+        const hasVmax = t.includes("vmax") || t.includes("(vmax)");
+
+        if (!hasVmax) {
+            return { valid: false, reason: "SPEED_INVALID" };
+        }
+    }
+
+    return { valid: true };
+}
+
+// ===============================
+// 🧠 SPEED + VALIDATION HELPERS (si pas déjà global)
+// ===============================
+function getDistance(p1, p2) {
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ===============================
+// ⚡ SPEED ENGINE (VMAX SYSTEM)
+// ===============================
+function computeSpeed(player, speedMode) {
+
+    const base = player.ACC || 50;
+
+    if (speedMode === "MAX") return base;
+    if (speedMode === "NORMAL") return Math.floor(base * 0.4);
+    if (speedMode === "PENALTY") return Math.floor(base * 0.15);
+
+    return Math.floor(base * 0.2);
+}
+
+// ===============================
+// 🏃 CHASE SYSTEM
+// ===============================
+function resolveChase(match, attacker, defender, ball, actionA, actionB) {
+
+    const checkA = validateActionSyntax(actionA);
+    const checkB = validateActionSyntax(actionB);
+
+    const speedA = computeSpeed(attacker, checkA.speedMode);
+    const speedB = computeSpeed(defender, checkB.speedMode);
+
+    let distA = getDistance(attacker.position, ball.position);
+    let distB = getDistance(defender.position, ball.position);
+
+    const gainA = speedA * 0.1;
+    const gainB = speedB * 0.1;
+
+    distA = Math.max(0, distA - gainA);
+    distB = Math.max(0, distB - gainB);
+
+    // 🛡️ INTERCEPTION DEFENSEUR
+    if (distB <= 1 && distB < distA) {
+
+        ball.holder = defender.nom;
+        ball.state = "controle";
+        ball.position = { ...defender.position };
+
+        return {
+            winner: defender.nom,
+            reason: "INTERCEPTION"
+        };
+    }
+
+    // ⚽ CONSERVATION ATTAQUANT
+    if (distA <= 1 && distA < distB) {
+
+        ball.holder = attacker.nom;
+        ball.state = "controle";
+        ball.position = { ...attacker.position };
+
+        return {
+            winner: attacker.nom,
+            reason: "CONSERVATION"
+        };
+    }
+
+    // 🔄 BALLON LIBRE
+    ball.state = "loose";
+    ball.position = {
+        x: (attacker.position.x + defender.position.x) / 2,
+        y: (attacker.position.y + defender.position.y) / 2
+    };
+
+    return {
+        winner: null,
+        reason: "CHASE_CONTINUES"
+    };
+}
 
 
 // ===============================
@@ -1156,7 +1298,12 @@ async function lancerMatch(chat, ovl) {
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
     match.phase = "kickoff";
     match.etat = "en_cours";
-
+match.ball = {
+    holder: null,
+    position: { x: 0, y: 0 },
+    state: "libre"
+};
+    
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
 
     match.turnType = "attaque";
