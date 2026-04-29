@@ -401,59 +401,42 @@ function extraireActionsSecondaires(text){
 }
 
 
-//RÉSUMÉ INTELLIGENT 
-function genererResumeIntelligent(actionText) {
+// ===============================
+// 🎙️ RESUME FULL INTELLIGENT
+// ===============================
+function genererResumeFull(actionText, match) {
 
-    if (!actionText) return "Action non identifiable.";
+    const actions = parseActionSequence(actionText, match);
 
-    const txt = actionText.toLowerCase();
+    if (!actions.length) return "Action non identifiable.";
 
-    // 🔍 extraction joueurs
-    const players = actionText.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+    let phrases = [];
 
-    const passe = txt.includes("passe");
-    const controle = txt.includes("contrôle") || txt.includes("controle");
-    const course = txt.includes("fonce") || txt.includes("conduite");
-    const tir = txt.includes("tir") || txt.includes("frappe");
+    for (const act of actions) {
 
-    let resume = "";
-
-    if (players.length >= 2) {
-
-        const p1 = players[0];
-        const p2 = players[1];
-
-        if (passe && controle && course) {
-            resume = `${p1} effectue une passe vers ${p2}, qui contrôle puis progresse balle au pied.`;
+        if (act.type === "passe" && act.target) {
+            phrases.push(`${act.player} passe à ${act.target}`);
         }
-        else if (passe && controle) {
-            resume = `${p1} sert ${p2} qui contrôle proprement.`;
+
+        else if (act.type === "controle") {
+            phrases.push(`${act.player} contrôle le ballon`);
         }
-        else if (passe) {
-            resume = `${p1} transmet le ballon à ${p2}.`;
+
+        else if (act.type === "conduite") {
+            phrases.push(`${act.player} progresse balle au pied`);
         }
+
+        else if (act.type === "tir") {
+            phrases.push(`${act.player} frappe au but`);
+        }
+
         else {
-            resume = `${p2} est impliqué dans l'action.`;
-        }
-
-    } else {
-
-        const joueur = players[0] || "Un joueur";
-
-        if (tir) {
-            resume = `${joueur} tente une frappe vers le but.`;
-        }
-        else if (course) {
-            resume = `${joueur} progresse balle au pied.`;
-        }
-        else {
-            resume = `${joueur} participe à l’action.`;
+            phrases.push(`${act.player} agit`);
         }
     }
 
-    return resume;
+    return phrases.join(", puis ") + ".";
 }
-
 //NOTE PAVÉ 
 function noterPave(action) {
 
@@ -957,6 +940,145 @@ function resolveChase(match, attacker, defender, ball, actionA, actionB) {
         reason: "CHASE_CONTINUES"
     };
 }
+
+// ===============================
+// 🧠 EXTRACTION JOUEURS RÉELS (ANTI FAUX POSITIFS)
+// ===============================
+function extractRealPlayers(actionText, match) {
+
+    if (!actionText) return [];
+
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    const namesDB = allPlayers.map(p => p.nom.toLowerCase());
+
+    const words = actionText.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+
+    return words.filter(w => {
+
+        const lower = w.toLowerCase();
+
+        // ❌ zones terrain (C2, B1...)
+        if (/^[A-C][1-2]$/i.test(w)) return false;
+
+        // ❌ mots techniques
+        const blacklist = [
+            "interieur", "exterieur", "pied", "tete",
+            "zone", "gauche", "droite", "devant"
+        ];
+
+        if (blacklist.includes(lower)) return false;
+
+        // ✅ correspondance avec DB
+        return namesDB.some(n => n.includes(lower));
+    });
+            }
+
+
+// ===============================
+// 🧠 PARSER ACTIONS COMPLEXES (CHAINES)
+// ===============================
+function parseActionSequence(actionText, match) {
+
+    if (!actionText) return [];
+
+    const actions = [];
+
+    // 🔥 split intelligent (/, puis /)
+    const segments = actionText
+        .split(/\/|puis|ensuite|et ensuite/gi)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    const namesDB = allPlayers.map(p => p.nom.toLowerCase());
+
+    let lastPlayer = null;
+
+    for (const seg of segments) {
+
+        const txt = seg.toLowerCase();
+
+        // ===============================
+        // 🎯 DETECTION JOUEUR
+        // ===============================
+        let player = null;
+
+        const words = seg.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+
+        for (const w of words) {
+
+            const lower = w.toLowerCase();
+
+            if (/^[A-C][1-2]$/i.test(w)) continue;
+
+            const found = namesDB.find(n => n.includes(lower));
+
+            if (found) {
+                player = allPlayers.find(p => p.nom.toLowerCase() === found);
+                break;
+            }
+        }
+
+        // fallback → dernier joueur actif
+        if (!player && lastPlayer) {
+            player = lastPlayer;
+        }
+
+        if (!player) continue;
+
+        lastPlayer = player;
+
+        // ===============================
+        // 🎯 TYPE ACTION
+        // ===============================
+        let type = "action";
+
+        if (txt.includes("passe")) type = "passe";
+        else if (txt.includes("contrôle") || txt.includes("controle")) type = "controle";
+        else if (txt.includes("fonce") || txt.includes("conduite")) type = "conduite";
+        else if (txt.includes("tir") || txt.includes("frappe")) type = "tir";
+
+        // ===============================
+        // 🎯 CIBLE (vers X)
+        // ===============================
+        let target = null;
+
+        const targetMatch = seg.match(/vers\s+([a-zA-Z0-9_]+)/i);
+
+        if (targetMatch) {
+            const t = targetMatch[1].toLowerCase();
+            target = allPlayers.find(p =>
+                p.nom.toLowerCase().includes(t)
+            );
+        }
+
+        // ===============================
+        // 📏 DISTANCE
+        // ===============================
+        const distMatch = seg.match(/(\d+)\s?m/);
+        const distance = distMatch ? parseInt(distMatch[1]) : null;
+
+        actions.push({
+            player: player.nom,
+            type,
+            target: target ? target.nom : null,
+            distance,
+            raw: seg
+        });
+    }
+
+    return actions;
+}
+
+
 
 
 // ===============================
@@ -1576,22 +1698,23 @@ if (detectedPlayers.length >= 2) {
         return true;
     }
 
-    // ===============================
-    // 🎯 ATTAQUE
-    // ===============================
-    if (!match.pendingAttack) {
+// ===============================
+// 🎯 ATTAQUE
+// ===============================
+if (!match.pendingAttack) {
 
-        const next =
-            match.joueurTour === match.id1 ? match.id2 : match.id1;
+    const next =
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
 
-        match.pendingAttack = action;
-        match.hasPlayed = true;
+    match.pendingAttack = action;
+    match.hasPlayed = true;
 
-        const resume = genererResumeIntelligent(action);
-        const note = noterPave(action);
+    // 🔥 NEW PARSER
+    const resume = genererResumeFull(action, match);
+    const note = noterPave(action);
 
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -1603,15 +1726,16 @@ if (detectedPlayers.length >= 2) {
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-            mentions: [next]
-        });
+        mentions: [next]
+    });
 
-        match.waitingDefenseFrom = next;
-        match.turnType = "defense";
+    match.waitingDefenseFrom = next;
+    match.turnType = "defense";
 
-        startMatchCycle(chat, ovl, match);
-        return true;
-    }
+    startMatchCycle(chat, ovl, match);
+    return true;
+}
+      
 
 // ===============================
 // 🛡️ DEFENSE
@@ -1651,11 +1775,10 @@ if (res && res.message && res.type !== "normal") {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
 // ===============================
-const resumeDefense = genererResumeIntelligent(defense);
+const resumeDefense = genererResumeFull(defense, match);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
 await ovl.sendMessage(chat, {
