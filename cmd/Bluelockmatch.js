@@ -1754,22 +1754,35 @@ if (detectedPlayers.length >= 2) {
 } else if (detectedPlayers.length === 1) {
     match.ballHolder = detectedPlayers[0];
 }
+    
+// ===============================
+// ⚔️ DUEL PRIORITY
+// ===============================
+if (match.phaseDuel) {
 
-    // ===============================
-    // ⚔️ DUEL PRIORITY
-    // ===============================
-    if (match.phaseDuel) {
+    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
 
-        const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
+    const resume = genererResumeFull(text, match);
+    const note = noterPave(text);
 
-        await ovl.sendMessage(chat, { text: res.message });
+    await ovl.sendMessage(chat, {
+        text:
+`${res.message}
 
-        if (res.type !== "contre") {
-            match.phaseDuel = null;
-        }
+─────────────────
 
-        return true;
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10`
+    });
+
+    if (res.type !== "contre") {
+        match.phaseDuel = null;
     }
+
+    return true;
+}
+
 
 // ===============================
 // 🎯 ATTAQUE
@@ -1808,7 +1821,7 @@ if (!match.pendingAttack) {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-      
+
 
 // ===============================
 // 🛡️ DEFENSE
@@ -1819,13 +1832,24 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
+
 // ===============================
 // 🔥 PRIORITÉ AU MATCH UP / DUEL
 // ===============================
 if (res && res.message && res.type !== "normal") {
 
+    const resume = genererResumeFull(match.pendingAttack, match);
+    const note = noterPave(match.pendingAttack);
+
     await ovl.sendMessage(chat, {
-        text: res.message,
+        text:
+`${res.message}
+
+─────────────────
+
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10`,
         mentions: [match.joueurTour]
     });
 
@@ -1848,6 +1872,7 @@ if (res && res.message && res.type !== "normal") {
     startMatchCycle(chat, ovl, match);
     return true;
 }
+  
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
 // ===============================
