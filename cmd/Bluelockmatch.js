@@ -1152,8 +1152,34 @@ function validerAction(action) {
     return { ok: true };
 }
 
+// ===============================
+// 🛡️ DETECTION TARGET DEFENDER
+//===============================
+function detectTargetPlayer(text, players) {
 
+    const lower = text.toLowerCase();
 
+    // mots clés de duel défensif
+    const keywords = [
+        "devant",
+        "face à",
+        "sur",
+        "contre",
+        "bloquer",
+        "barrer",
+        "empêcher",
+        "stoppe",
+        "stopper"
+    ];
+
+    if (!keywords.some(k => lower.includes(k))) return null;
+
+    // 🔍 cherche un joueur mentionné après ou autour
+    return players.find(p => {
+        const name = pureName(p.nom);
+        return lower.includes(name);
+    }) || null;
+        }
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -2269,8 +2295,14 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     if (!attacker) {
         attacker = findPlayer(attaqueText);
     }
+let defender = findPlayer(defenseText);
 
-    const defender = findPlayer(defenseText);
+// 🧠 fallback tactique
+const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+
+if (tacticalTarget) {
+    defender = tacticalTarget;
+}
 
     if (!attacker || !defender) {
         return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
