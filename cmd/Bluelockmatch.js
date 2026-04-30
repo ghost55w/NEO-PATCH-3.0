@@ -1179,7 +1179,90 @@ function detectTargetPlayer(text, players) {
         const name = pureName(p.nom);
         return lower.includes(name);
     }) || null;
+      }
+
+// ===============================
+// ⚽ VIS-À-VIS AUTO (FORMATION)
+// ===============================
+function generateVisAVis(team1, team2) {
+
+    const map = {
+        AG: "DD",
+        AC: "DC",
+        AD: "DG",
+
+        MG: "MD",
+        MC: "MC",
+        MD: "MG",
+
+        DG: "AD",
+        DC: "AC",
+        DD: "AG"
+    };
+
+    for (const p1 of team1) {
+        const opponent = team2.find(p2 => map[p1.poste] === p2.poste);
+        if (opponent) {
+            p1.visavis = opponent.nom;
+            opponent.visavis = p1.nom;
         }
+    }
+}
+
+
+// ===============================
+// ⚽ INIT POSITION KICK-OFF
+// ===============================
+function initKickoffPositions(match) {
+
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    for (const player of allPlayers) {
+        initPlayerPosition(player);
+    }
+
+    generateVisAVis(match.lineup1, match.lineup2);
+}
+
+
+// ===============================
+// 🎯 KICK-OFF ACTION AUTOMATIQUE
+// ===============================
+function kickoffStart(match) {
+
+    const team1 = match.lineup1 || [];
+
+    const striker = team1.find(p => p.poste === "AC");
+    const midfielder = team1.find(p => p.poste === "MC");
+
+    if (!striker || !midfielder) return;
+
+    const action =
+        `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain / ` +
+        `${midfielder.nom} contrôle le ballon et devient le premier porteur de balle`;
+
+    match.ballHolder = midfielder.nom;
+    match.activePlayer = midfielder.nom;
+    match.phase = "active";
+
+    match.pendingAttack = action;
+}
+
+
+// ===============================
+// 🚀 START MATCH ENGINE
+// ===============================
+function startMatch(match) {
+
+    initKickoffPositions(match);
+
+    kickoffStart(match);
+} 
+
+
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -1599,6 +1682,9 @@ match.possessions = {
                 ];
 
                 assignerVisAVis(match);
+            }
+            if (typeof kickoffStart === "function") {
+    kickoffStart(match);
             }
         }
 
