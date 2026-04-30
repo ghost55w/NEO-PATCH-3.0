@@ -1238,19 +1238,15 @@ function kickoffStart(match) {
     const striker = team1.find(p => p.poste === "AC");
     const midfielder = team1.find(p => p.poste === "MC");
 
-    if (!striker || !midfielder) return;
-
-    const action =
-        `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain / ` +
-        `${midfielder.nom} contrôle le ballon et devient le premier porteur de balle`;
+    if (!striker || !midfielder) return "";
 
     match.ballHolder = midfielder.nom;
     match.activePlayer = midfielder.nom;
     match.phase = "active";
 
-    match.pendingAttack = action;
+    // 👉 ON RETOURNE JUSTE LE TEXTE
+    return `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et prend le contrôle du jeu`;
 }
-
 
 // ===============================
 // 🚀 START MATCH ENGINE
