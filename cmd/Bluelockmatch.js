@@ -979,105 +979,178 @@ function extractRealPlayers(actionText, match) {
 
 
 // ===============================
-// 🧠 PARSER ACTIONS COMPLEXES (CHAINES)
+// 🧠 PARSE ACTION SEQUENCE (FIX PRINCIPAL)
 // ===============================
 function parseActionSequence(actionText, match) {
 
-    if (!actionText) return [];
-
-    const actions = [];
-
-    // 🔥 split intelligent (/, puis /)
-    const segments = actionText
-        .split(/\/|puis|ensuite|et ensuite/gi)
-        .map(s => s.trim())
-        .filter(Boolean);
-
-    const allPlayers = [
+    const players = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    const namesDB = allPlayers.map(p => p.nom.toLowerCase());
+    const steps = actionText.split("/").map(s => s.trim());
 
-    let lastPlayer = null;
+    const actions = [];
 
-    for (const seg of segments) {
+    for (let step of steps) {
 
-        const txt = seg.toLowerCase();
+        const lower = step.toLowerCase();
 
-        // ===============================
-        // 🎯 DETECTION JOUEUR
-        // ===============================
-        let player = null;
+        // 🔍 joueur principal
+        const playerObj = players.find(p => {
+            const name = pureName(p.nom);
+            return lower.includes(name);
+        });
 
-        const words = seg.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+        if (!playerObj) continue;
 
-        for (const w of words) {
+        const player = playerObj.nom;
 
-            const lower = w.toLowerCase();
+        // 🔍 cible (autre joueur)
+        const targetObj = players.find(p => {
+            const name = pureName(p.nom);
+            return lower.includes(name) && p.nom !== player;
+        });
 
-            if (/^[A-C][1-2]$/i.test(w)) continue;
-
-            const found = namesDB.find(n => n.includes(lower));
-
-            if (found) {
-                player = allPlayers.find(p => p.nom.toLowerCase() === found);
-                break;
-            }
-        }
-
-        // fallback → dernier joueur actif
-        if (!player && lastPlayer) {
-            player = lastPlayer;
-        }
-
-        if (!player) continue;
-
-        lastPlayer = player;
+        const target = targetObj ? targetObj.nom : null;
 
         // ===============================
-        // 🎯 TYPE ACTION
+        // 🎯 TYPE D’ACTION
         // ===============================
         let type = "action";
 
-        if (txt.includes("passe")) type = "passe";
-        else if (txt.includes("contrôle") || txt.includes("controle")) type = "controle";
-        else if (txt.includes("fonce") || txt.includes("conduite")) type = "conduite";
-        else if (txt.includes("tir") || txt.includes("frappe")) type = "tir";
-
-        // ===============================
-        // 🎯 CIBLE (vers X)
-        // ===============================
-        let target = null;
-
-        const targetMatch = seg.match(/vers\s+([a-zA-Z0-9_]+)/i);
-
-        if (targetMatch) {
-            const t = targetMatch[1].toLowerCase();
-            target = allPlayers.find(p =>
-                p.nom.toLowerCase().includes(t)
-            );
-        }
-
-        // ===============================
-        // 📏 DISTANCE
-        // ===============================
-        const distMatch = seg.match(/(\d+)\s?m/);
-        const distance = distMatch ? parseInt(distMatch[1]) : null;
+        if (lower.includes("passe")) type = "passe";
+        else if (lower.includes("contrôle") || lower.includes("controle")) type = "controle";
+        else if (
+            lower.includes("fonce") ||
+            lower.includes("avance") ||
+            lower.includes("progresse") ||
+            lower.includes("conduite")
+        ) type = "conduite";
+        else if (lower.includes("tir") || lower.includes("frappe")) type = "tir";
 
         actions.push({
-            player: player.nom,
+            player,
             type,
-            target: target ? target.nom : null,
-            distance,
-            raw: seg
+            target
         });
     }
 
     return actions;
 }
 
+
+// ===============================
+// 🎙️ RESUME FULL INTELLIGENT
+// ===============================
+function genererResumeFull(actionText, match) {
+
+    const actions = parseActionSequence(actionText, match);
+
+    if (!actions.length) return "Action non identifiable.";
+
+    let phrases = [];
+
+    for (const act of actions) {
+
+        if (act.type === "passe" && act.target) {
+            phrases.push(`${act.player} passe à ${act.target}`);
+        }
+
+        else if (act.type === "controle") {
+            phrases.push(`${act.player} contrôle le ballon`);
+        }
+
+        else if (act.type === "conduite") {
+            phrases.push(`${act.player} progresse balle au pied`);
+        }
+
+        else if (act.type === "tir") {
+            phrases.push(`${act.player} frappe au but`);
+        }
+
+        else {
+            phrases.push(`${act.player} enchaîne une action`);
+        }
+    }
+
+    // ===============================
+    // 🔗 CONNECTEURS NATURELS
+    // ===============================
+    const connectors = [
+        "puis",
+        "ensuite",
+        "et",
+        "dans la foulée",
+        "immédiatement",
+        "alors"
+    ];
+
+    let sentence = phrases[0];
+
+    for (let i = 1; i < phrases.length; i++) {
+
+        const connector = connectors[i % connectors.length];
+
+        sentence += `, ${connector} ${phrases[i]}`;
+    }
+
+    return sentence + ".";
+}
+
+
+// ===============================
+// 📊 NOTE DU PAVÉ
+// ===============================
+function noterPave(action) {
+
+    let score = 5;
+
+    if (!action) return 0;
+
+    const txt = action.toLowerCase();
+
+    // richesse
+    if (txt.length > 80) score += 1;
+    if (txt.length > 150) score += 1;
+
+    // éléments techniques
+    if (txt.includes("passe")) score += 1;
+    if (txt.includes("contrôle") || txt.includes("controle")) score += 1;
+    if (txt.includes("zone")) score += 1;
+    if (txt.match(/\d+\s?m/)) score += 1;
+
+    // précision vocabulaire
+    if (txt.includes("intérieur") || txt.includes("extérieur")) score += 1;
+
+    return Math.min(score, 10);
+}
+
+
+// ===============================
+// ✅ VALIDATION DES ACTIONS
+// ===============================
+function validerAction(action) {
+
+    if (!action) return { ok: false, reason: "Aucune action détectée" };
+
+    const txt = action.toLowerCase();
+
+    if (
+        !txt.includes("passe") &&
+        !txt.includes("tir") &&
+        !txt.includes("contrôle") &&
+        !txt.includes("controle")
+    ) {
+        return { ok: false, reason: "Action non reconnue (passe/tir/contrôle requis)" };
+    }
+
+    if (!txt.match(/\d+\s?m/)) {
+        return { ok: false, reason: "Distance obligatoire (ex: 5m)" };
+    }
+
+    return { ok: true };
+}
 
 
 
