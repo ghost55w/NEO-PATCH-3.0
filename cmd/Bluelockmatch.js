@@ -1258,6 +1258,94 @@ function startMatch(match) {
     kickoffStart(match);
 } 
 
+// ===============================
+// 🧠 PARSE DRIBBLE AVANCÉ
+// ===============================
+function parseDribbleAdvanced(text) {
+
+    const t = text.toLowerCase();
+
+    return {
+        hasFeint: t.includes("torse") || t.includes("feinte"),
+        hasExternalTouch: t.includes("extérieur"),
+        hasInternalTouch: t.includes("intérieur"),
+        hasDirectionChange: t.includes("gauche") || t.includes("droite"),
+
+        // 📏 distances
+        shortTouch: extractDistanceRange(t, 0, 0.5), // 0–50cm
+        pushDistance: extractDistance(t), // ex: 1m, 3m, etc
+
+        hasAcceleration: t.includes("vmax") || t.includes("accélère") || t.includes("sprinte")
+    };
+}
+// ===============================
+// 🧠 DISTANCES
+// ===============================
+function extractDistance(text) {
+    const m = text.match(/(\d+)\s?m/);
+    return m ? parseInt(m[1]) : null;
+}
+
+function extractDistanceRange(text, min, max) {
+    const m = text.match(/(\d+\.?\d*)\s?m/);
+    if (!m) return false;
+
+    const val = parseFloat(m[1]);
+    return val >= min && val <= max;
+}
+
+// ===============================
+// ⚖️ VALIDATION DRIBBLE RÉALISTE
+// ===============================
+function validateDribbleRealism(player, defender, data) {
+
+    const atk = player.stats || {};
+    const def = defender.stats || {};
+
+    let valid = true;
+    let reason = "";
+
+    // 🔒 règle 1 : contrôle court (0–0.5m)
+    if (data.hasExternalTouch || data.hasInternalTouch) {
+        if (!data.shortTouch) {
+            valid = false;
+            reason = "Contrôle trop long (doit être ≤ 0.5m)";
+        }
+    }
+
+    // 🔒 règle 2 : poussée de balle réaliste
+    if (data.pushDistance !== null) {
+        if (data.pushDistance < 1 || data.pushDistance > 10) {
+            valid = false;
+            reason = "Poussée de balle irréaliste (1m à 10m requis)";
+        }
+    }
+
+    // 🔒 règle 3 : cohérence mouvement
+    if (data.hasFeint && !data.hasDirectionChange) {
+        valid = false;
+        reason = "Feinte sans changement de direction";
+    }
+
+    if (!valid) {
+        return { ok: false, reason };
+    }
+
+    // ⚔️ duel réel
+    const atkScore = (atk.dri || 50) + (atk.acc || 50) * 0.5;
+    const defScore = (def.def || 50) + (def.phy || 50) * 0.5;
+
+    if (atkScore > defScore + 5) {
+        return { ok: true };
+    }
+
+    if (defScore > atkScore + 5) {
+        return { ok: false, reason: "bloqué" };
+    }
+
+    return { ok: false, reason: "contesté" };
+}
+
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2536,23 +2624,69 @@ if (!result && isPassive) {
 
 
     // ===============================
-    // 🎯 DRIBBLES
-    // ===============================
-    const DRIBBLES = [
-        "crochet extérieur","crochet intérieur","double contact",
-        "roulette","petit pont","rainbow","step over","elastico"
-    ];
+// 🎯 DRIBBLE IA RÉALISTE
+// ===============================
+function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
 
-    const isDribble = DRIBBLES.some(d => atk.includes(d));
+const dribbleData = parseDribbleAdvanced(attaqueText);
 
-    if (!result && isDribble) {
+if (!result && dribbleData) {
 
-        const diff = atkVmax - (defStats.def || 0);
+    const validation = validateDribbleRealism(attacker, defender, dribbleData);
 
-        result = diff > 5
-            ? { ok: true, type: "win", msg: `🔥 ${attacker.nom} élimine ${defender.nom}` }
-            : { ok: false, type: "lose", msg: `🛑 ${defender.nom} stoppe le dribble` };
+    if (validation.ok) {
+
+        const messagesWin = [
+            `🔥 ${attacker.nom} élimine ${defender.nom} avec son dribble !`,
+            `⚡ ${attacker.nom} passe ${defender.nom} grâce à un geste technique !`
+        ];
+
+        result = {
+            ok: true,
+            type: "win",
+            msg: randomChoice(messagesWin)
+        };
+
+    } else {
+
+        if (validation.reason === "bloqué") {
+
+            const messagesLose = [
+                `🛑 ${defender.nom} stoppe le dribble`,
+                `🧱 ${defender.nom} lit parfaitement le mouvement et bloque`
+            ];
+
+            result = {
+                ok: false,
+                type: "lose",
+                msg: randomChoice(messagesLose)
+            };
+
+        } else if (validation.reason === "contesté") {
+
+            const messagesContre = [
+                `⚔️ Duel serré sur le dribble`,
+                `🤜🤛 ${defender.nom} résiste au dribble`
+            ];
+
+            result = {
+                ok: false,
+                type: "contre",
+                msg: randomChoice(messagesContre)
+            };
+
+        } else {
+
+            result = {
+                ok: false,
+                type: "faute",
+                msg: `❌ Action irréaliste: ${validation.reason}`
+            };
+        }
     }
+}
 
     // ===============================
     // ⚖️ FALLBACK
