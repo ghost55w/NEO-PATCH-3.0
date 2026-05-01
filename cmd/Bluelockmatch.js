@@ -2855,8 +2855,6 @@ if (!result) {
         result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
     }
 
-    const next = match.attacker;
-
     match.phaseDuelResolved = true;
 
     const next =
