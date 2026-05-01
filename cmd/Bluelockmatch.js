@@ -1233,19 +1233,26 @@ function initKickoffPositions(match) {
 // ===============================
 function kickoffStart(match) {
 
-    const team1 = match.lineup1 || [];
+    const attackingTeam =
+        match.possession === match.team1Nom
+            ? match.lineup1
+            : match.lineup2;
 
-    const striker = team1.find(p => p.poste === "AC");
-    const midfielder = team1.find(p => p.poste === "MC");
+    if (!attackingTeam) return;
 
-    if (!striker || !midfielder) return "";
+    const { ac, mc } = getKickoffPair(attackingTeam);
 
-    match.ballHolder = midfielder.nom;
-    match.activePlayer = midfielder.nom;
+    // ⚠️ sécurité
+    if (!ac || !mc) return;
+
+    const action =
+        `${ac.nom} fait une passe vers ${mc.nom} au centre du terrain / ` +
+        `${mc.nom} contrôle le ballon et lance immédiatement le jeu`;
+
+    match.ballHolder = mc.nom;
+    match.activePlayer = mc.nom;
     match.phase = "active";
-
-    // 👉 ON RETOURNE JUSTE LE TEXTE
-    return `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et prend le contrôle du jeu`;
+    match.pendingAttack = action;
 }
 
 // ===============================
@@ -1344,6 +1351,16 @@ function validateDribbleRealism(player, defender, data) {
     }
 
     return { ok: false, reason: "contesté" };
+}
+// ===============================
+// REAL KICK OFF
+// ===============================
+function getKickoffPair(team) {
+
+    const ac = team.find(p => p.poste === "AC");
+    const mc = team.find(p => p.poste === "MC");
+
+    return { ac, mc };
 }
 
 
