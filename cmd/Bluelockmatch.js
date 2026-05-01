@@ -2523,26 +2523,50 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         ...(match.lineup2 || [])
     ];
 
-    const findPlayer = (txt) => {
-        const t = pureName(txt);
+    const findPlayer = (txt, exclude = null) => {
+    const t = pureName(txt);
 
-        return allPlayers.find(p => {
-            const n = pureName(p.nom);
-            return t.includes(n) || n.includes(t);
-        });
-    };
+    return allPlayers.find(p => {
+        const n = pureName(p.nom);
+
+        // ❌ empêche auto-match
+        if (exclude && pureName(exclude.nom) === n) return false;
+
+        return t.includes(n) || n.includes(t);
+    });
+};
 
     let attacker = null;
 
-    if (match.ballHolder) {
-        attacker = allPlayers.find(p => p.nom === match.ballHolder);
-    }
+// ⚡ priorité ballon
+if (match.ballHolder) {
+    attacker = allPlayers.find(p => p.nom === match.ballHolder);
+}
 
-    if (!attacker) {
-        attacker = findPlayer(attaqueText);
-    }
-let defender = findPlayer(defenseText);
+// fallback attaque texte
+if (!attacker) {
+    attacker = findPlayer(attaqueText);
+}
 
+// défenseur
+let defender = findPlayer(defenseText, attacker);
+
+// 🧠 lecture tactique
+const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+
+// ⚠️ override intelligent
+if (tacticalTarget && tacticalTarget.nom !== attacker?.nom) {
+    defender = tacticalTarget;
+}
+
+if (!attacker || !defender || attacker.nom === defender.nom) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Match-up invalide"
+    };
+}
+    
 // 🧠 fallback tactique
 const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
@@ -2836,6 +2860,11 @@ if (!result) {
     const next = match.attacker;
 
     match.phaseDuelResolved = true;
+
+    const next =
+    match.joueurTour === match.id1
+        ? match.id2
+        : match.id1;
 
     return {
         ok: result.ok,
