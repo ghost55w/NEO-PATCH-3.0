@@ -1952,29 +1952,18 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
-
 // ===============================
 // 🔥 PRIORITÉ AU MATCH UP / DUEL
 // ===============================
 if (res && res.message && res.type !== "normal") {
 
-    const resume = genererResumeFull(match.pendingAttack, match);
-    const note = noterPave(match.pendingAttack);
-
     await ovl.sendMessage(chat, {
-        text:
-`${res.message}
-
-─────────────────
-
-🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10`,
+        text: res.message,
         mentions: [match.joueurTour]
     });
 
     // ⚔️ Duel continue
-    if (res.type === "contre") {
+    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
         match.phaseDuel = {
             attaque: match.pendingAttack,
@@ -1990,7 +1979,8 @@ if (res && res.message && res.type !== "normal") {
     }
 
     startMatchCycle(chat, ovl, match);
-    return true;
+
+    return true; 
 }
   
 // ===============================
@@ -2492,9 +2482,9 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
     result = {
         ok: false,
         type: "CONTINUED_CHASE",
-        msg: `🏃 Duel de course toujours en cours...`
+        msg: `⚽🛡️ Duel en cours...`
     };
-} 
+}
 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
@@ -2590,8 +2580,6 @@ ${result.msg}
     };
 }
 
-
-    
 
 
 /* ===============================
