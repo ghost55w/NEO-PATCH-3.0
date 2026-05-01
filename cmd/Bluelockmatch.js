@@ -2554,8 +2554,13 @@ let defender = findPlayer(defenseText, attacker);
 // 🧠 lecture tactique
 const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
-// ⚠️ override intelligent
-if (tacticalTarget && tacticalTarget.nom !== attacker?.nom) {
+if (
+    tacticalTarget &&
+    attacker &&
+    defender &&
+    tacticalTarget.nom !== attacker.nom &&
+    tacticalTarget.nom !== defender.nom
+) {
     defender = tacticalTarget;
 }
 
@@ -2567,13 +2572,6 @@ if (!attacker || !defender || attacker.nom === defender.nom) {
     };
 }
     
-// 🧠 fallback tactique
-const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
-
-if (tacticalTarget) {
-    defender = tacticalTarget;
-}
-
     if (!attacker || !defender) {
         return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
     }
