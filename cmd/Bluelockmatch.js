@@ -1908,6 +1908,8 @@ if (match.phaseDuel) {
 // 🎯 ATTAQUE
 // ===============================
 if (!match.pendingAttack) {
+    
+    if (match.phaseDuel) return true;
 
     const next =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
