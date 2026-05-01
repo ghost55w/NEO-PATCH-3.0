@@ -1233,25 +1233,27 @@ function initKickoffPositions(match) {
 // ===============================
 function kickoffStart(match) {
 
-    const attackingTeam =
-        match.possession === match.team1Nom
-            ? match.lineup1
-            : match.lineup2;
+    // ✅ choisir la BONNE équipe
+    const team =
+    match.joueurTour === match.id1
+        ? match.lineup1
+        : match.lineup2;
 
-    if (!attackingTeam) return;
+    if (!team) return;
 
-    const { ac, mc } = getKickoffPair(attackingTeam);
+    // 🔍 vrai AC et vrai MC
+    const striker = team.find(p => p.poste === "AC");
+    const midfielder = team.find(p => p.poste === "MC");
 
-    // ⚠️ sécurité
-    if (!ac || !mc) return;
+    if (!striker || !midfielder) return;
 
     const action =
-        `${ac.nom} fait une passe vers ${mc.nom} au centre du terrain / ` +
-        `${mc.nom} contrôle le ballon et lance immédiatement le jeu`;
+        `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain / ` +
+        `${midfielder.nom} contrôle le ballon et lance le jeu`;
 
-    match.ballHolder = mc.nom;
-    match.activePlayer = mc.nom;
-    match.phase = "active";
+    // ✅ IMPORTANT
+    match.ballHolder = midfielder.nom;
+    match.activePlayer = midfielder.nom;
     match.pendingAttack = action;
 }
 
