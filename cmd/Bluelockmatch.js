@@ -1229,29 +1229,54 @@ function initKickoffPositions(match) {
 
 
 // ===============================
-// 🎯 KICK-OFF ACTION AUTOMATIQUE
+// 🎯 KICK-OFF ACTION + TEXTE PRO
 // ===============================
 function kickoffStart(match) {
 
-    // ✅ choisir la BONNE équipe
+    // ✅ RESET
+    match.pendingAttack = null;
+    match.ballHolder = null;
+    match.activePlayer = null;
+
+    // ✅ bonne équipe (FIABLE)
     const team =
-    match.joueurTour === match.id1
-        ? match.lineup1
-        : match.lineup2;
+        match.joueurTour === match.id1
+            ? match.lineup1
+            : match.lineup2;
 
     if (!team) return;
 
-    // 🔍 vrai AC et vrai MC
+    // 🔍 vrais joueurs
     const striker = team.find(p => p.poste === "AC");
     const midfielder = team.find(p => p.poste === "MC");
 
     if (!striker || !midfielder) return;
 
-    const action =
-        `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain / ` +
-        `${midfielder.nom} contrôle le ballon et lance le jeu`;
+    // =========================
+    // 📍 POSITION C2 (centre)
+    // =========================
+    const centerPos = convertToPosition("axe", "C2");
 
-    // ✅ IMPORTANT
+    if (centerPos) {
+        striker.position = { ...centerPos };
+        midfielder.position = { ...centerPos };
+
+        match.ball = {
+            holder: midfielder.nom,
+            position: { ...centerPos },
+            state: "controle"
+        };
+    }
+
+    // =========================
+    // 🎙️ TEXTE EXACT DEMANDÉ
+    // =========================
+    const action =
+`(C2) ${striker.nom} fait une passe en retrait à ${midfielder.nom} qui contrôle et le match est lancé...`;
+
+    // =========================
+    // ✅ GAME STATE
+    // =========================
     match.ballHolder = midfielder.nom;
     match.activePlayer = midfielder.nom;
     match.pendingAttack = action;
@@ -1796,13 +1821,37 @@ match.possessions = {
     }
 
     // =========================
-    // 🎯 KICKOFF (GARANTI)
+    // 🎯 KICKOFF MATCH ⚽ 
     // =========================
-    const striker = (match.lineup1 || []).find(p => p.poste === "AC");
-const midfielder = (match.lineup1 || []).find(p => p.poste === "MC");
+// ✅ choisir la BONNE équipe
+const team =
+    match.joueurTour === match.id1
+        ? match.lineup1
+        : match.lineup2;
+
+if (!team) return;
+
+// 🔍 vrais joueurs
+const striker = team.find(p => p.poste === "AC");
+const midfielder = team.find(p => p.poste === "MC");
 
 if (striker && midfielder) {
 
+    // 📍 POSITION C2
+    const centerPos = convertToPosition("axe", "C2");
+
+    if (centerPos) {
+        striker.position = { ...centerPos };
+        midfielder.position = { ...centerPos };
+
+        match.ball = {
+            holder: midfielder.nom,
+            position: { ...centerPos },
+            state: "controle"
+        };
+    }
+
+    // ✅ GAME STATE
     match.ballHolder = midfielder.nom;
     match.activePlayer = midfielder.nom;
     match.phase = "active";
@@ -1816,6 +1865,10 @@ if (striker && midfielder) {
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
+    // 🎯 TEXTE PROPRE
+    const kickoffText =
+`(C2) ${striker.nom} fait une passe en retrait à ${midfielder.nom} qui contrôle et le match est lancé...`;
+
     await ovl.sendMessage(chat, {
         image: {
             url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
@@ -1823,14 +1876,14 @@ if (striker && midfielder) {
         caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
-${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et lance le jeu...
+${kickoffText}
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
         mentions: [jidStart]
     });
 }
-
+    
     // =========================
     // 🚀 START ENGINE
     // =========================
