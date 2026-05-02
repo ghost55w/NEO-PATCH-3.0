@@ -2068,7 +2068,7 @@ if (match.phaseDuel) {
 // 🎯 ATTAQUE
 // ===============================
 if (!match.pendingAttack) {
-    
+
     if (match.phaseDuel) return true;
 
     const next =
@@ -2077,7 +2077,7 @@ if (!match.pendingAttack) {
     match.pendingAttack = action;
     match.hasPlayed = true;
 
-    // 🔥 NEW PARSER
+    // 🔥 RESUME + NOTE (ORIGINAL RESTORED)
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
@@ -2104,7 +2104,6 @@ if (!match.pendingAttack) {
     return true;
 }
 
-
 // ===============================
 // 🛡️ DEFENSE
 // ===============================
@@ -2115,7 +2114,7 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 match.hasPlayed = true;
 
 // ===============================
-// 🔥 PRIORITÉ AU MATCH UP / DUEL
+// ⚔️ MATCH UP / DUEL
 // ===============================
 if (res && res.message && res.type !== "normal") {
 
@@ -2124,7 +2123,7 @@ if (res && res.message && res.type !== "normal") {
         mentions: [match.joueurTour]
     });
 
-    // ⚔️ Duel continue
+    // ⚔️ duel en cours
     if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
         match.phaseDuel = {
@@ -2134,19 +2133,18 @@ if (res && res.message && res.type !== "normal") {
 
     } else {
 
-        // ✅ Duel terminé
+        // ✅ duel terminé
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
     }
 
     startMatchCycle(chat, ovl, match);
-
-    return true; 
+    return true;
 }
   
 // ===============================
-// 📉 FALLBACK : DEFENSE PASSIVE
+// 📉 FALLBACK DEFENSE
 // ===============================
 const resumeDefense = genererResumeFull(defense, match);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
@@ -2167,11 +2165,11 @@ await ovl.sendMessage(chat, {
     mentions: [match.joueurTour]
 });
 
-// 🔄 Reset attaque
+// 🔄 RESET
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
 
-// 🔁 Switch tour
+// 🔁 SWITCH TOUR
 match.joueurTour =
     match.joueurTour === match.id1 ? match.id2 : match.id1;
 
@@ -2179,8 +2177,7 @@ match.turnType = "attaque";
 
 startMatchCycle(chat, ovl, match);
 
-return true;        
-} 
+return true;
     
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
