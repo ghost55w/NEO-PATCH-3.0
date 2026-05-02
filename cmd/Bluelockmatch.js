@@ -1229,57 +1229,23 @@ function initKickoffPositions(match) {
 
 
 // ===============================
-// 🎯 KICK-OFF ACTION + TEXTE PRO
+// 🎯 KICK-OFF ACTION AUTOMATIQUE
 // ===============================
 function kickoffStart(match) {
 
-    // ✅ RESET
-    match.pendingAttack = null;
-    match.ballHolder = null;
-    match.activePlayer = null;
+    const team1 = match.lineup1 || [];
 
-    // ✅ bonne équipe (FIABLE)
-    const team =
-        match.joueurTour === match.id1
-            ? match.lineup1
-            : match.lineup2;
+    const striker = team1.find(p => p.poste === "AC");
+    const midfielder = team1.find(p => p.poste === "MC");
 
-    if (!team) return;
+    if (!striker || !midfielder) return "";
 
-    // 🔍 vrais joueurs
-    const striker = team.find(p => p.poste === "AC");
-    const midfielder = team.find(p => p.poste === "MC");
-
-    if (!striker || !midfielder) return;
-
-    // =========================
-    // 📍 POSITION C2 (centre)
-    // =========================
-    const centerPos = convertToPosition("axe", "C2");
-
-    if (centerPos) {
-        striker.position = { ...centerPos };
-        midfielder.position = { ...centerPos };
-
-        match.ball = {
-            holder: midfielder.nom,
-            position: { ...centerPos },
-            state: "controle"
-        };
-    }
-
-    // =========================
-    // 🎙️ TEXTE EXACT DEMANDÉ
-    // =========================
-    const action =
-`(C2) ${striker.nom} fait une passe en retrait à ${midfielder.nom} qui contrôle et le match est lancé...`;
-
-    // =========================
-    // ✅ GAME STATE
-    // =========================
     match.ballHolder = midfielder.nom;
     match.activePlayer = midfielder.nom;
-    match.pendingAttack = action;
+    match.phase = "active";
+
+    // 👉 ON RETOURNE JUSTE LE TEXTE
+    return `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et prend le contrôle du jeu`;
 }
 
 // ===============================
@@ -1291,104 +1257,6 @@ function startMatch(match) {
 
     kickoffStart(match);
 } 
-
-// ===============================
-// 🧠 PARSE DRIBBLE AVANCÉ
-// ===============================
-function parseDribbleAdvanced(text) {
-
-    const t = text.toLowerCase();
-
-    return {
-        hasFeint: t.includes("torse") || t.includes("feinte"),
-        hasExternalTouch: t.includes("extérieur"),
-        hasInternalTouch: t.includes("intérieur"),
-        hasDirectionChange: t.includes("gauche") || t.includes("droite"),
-
-        // 📏 distances
-        shortTouch: extractDistanceRange(t, 0, 0.5), // 0–50cm
-        pushDistance: extractDistance(t), // ex: 1m, 3m, etc
-
-        hasAcceleration: t.includes("vmax") || t.includes("accélère") || t.includes("sprinte")
-    };
-}
-// ===============================
-// 🧠 DISTANCES
-// ===============================
-function extractDistance(text) {
-    const m = text.match(/(\d+)\s?m/);
-    return m ? parseInt(m[1]) : null;
-}
-
-function extractDistanceRange(text, min, max) {
-    const m = text.match(/(\d+\.?\d*)\s?m/);
-    if (!m) return false;
-
-    const val = parseFloat(m[1]);
-    return val >= min && val <= max;
-}
-
-// ===============================
-// ⚖️ VALIDATION DRIBBLE RÉALISTE
-// ===============================
-function validateDribbleRealism(player, defender, data) {
-
-    const atk = player.stats || {};
-    const def = defender.stats || {};
-
-    let valid = true;
-    let reason = "";
-
-    // 🔒 règle 1 : contrôle court (0–0.5m)
-    if (data.hasExternalTouch || data.hasInternalTouch) {
-        if (!data.shortTouch) {
-            valid = false;
-            reason = "Contrôle trop long (doit être ≤ 0.5m)";
-        }
-    }
-
-    // 🔒 règle 2 : poussée de balle réaliste
-    if (data.pushDistance !== null) {
-        if (data.pushDistance < 1 || data.pushDistance > 10) {
-            valid = false;
-            reason = "Poussée de balle irréaliste (1m à 10m requis)";
-        }
-    }
-
-    // 🔒 règle 3 : cohérence mouvement
-    if (data.hasFeint && !data.hasDirectionChange) {
-        valid = false;
-        reason = "Feinte sans changement de direction";
-    }
-
-    if (!valid) {
-        return { ok: false, reason };
-    }
-
-    // ⚔️ duel réel
-    const atkScore = (atk.dri || 50) + (atk.acc || 50) * 0.5;
-    const defScore = (def.def || 50) + (def.phy || 50) * 0.5;
-
-    if (atkScore > defScore + 5) {
-        return { ok: true };
-    }
-
-    if (defScore > atkScore + 5) {
-        return { ok: false, reason: "bloqué" };
-    }
-
-    return { ok: false, reason: "contesté" };
-}
-// ===============================
-// REAL KICK OFF
-// ===============================
-function getKickoffPair(team) {
-
-    const ac = team.find(p => p.poste === "AC");
-    const mc = team.find(p => p.poste === "MC");
-
-    return { ac, mc };
-}
 
 
 // ===============================
@@ -1821,37 +1689,13 @@ match.possessions = {
     }
 
     // =========================
-    // 🎯 KICKOFF MATCH ⚽ 
+    // 🎯 KICKOFF (GARANTI)
     // =========================
-// ✅ choisir la BONNE équipe
-const team =
-    match.joueurTour === match.id1
-        ? match.lineup1
-        : match.lineup2;
-
-if (!team) return;
-
-// 🔍 vrais joueurs
-const striker = team.find(p => p.poste === "AC");
-const midfielder = team.find(p => p.poste === "MC");
+    const striker = (match.lineup1 || []).find(p => p.poste === "AC");
+const midfielder = (match.lineup1 || []).find(p => p.poste === "MC");
 
 if (striker && midfielder) {
 
-    // 📍 POSITION C2
-    const centerPos = convertToPosition("axe", "C2");
-
-    if (centerPos) {
-        striker.position = { ...centerPos };
-        midfielder.position = { ...centerPos };
-
-        match.ball = {
-            holder: midfielder.nom,
-            position: { ...centerPos },
-            state: "controle"
-        };
-    }
-
-    // ✅ GAME STATE
     match.ballHolder = midfielder.nom;
     match.activePlayer = midfielder.nom;
     match.phase = "active";
@@ -1865,10 +1709,6 @@ if (striker && midfielder) {
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
-    // 🎯 TEXTE PROPRE
-    const kickoffText =
-`(C2) ${striker.nom} fait une passe en retrait à ${midfielder.nom} qui contrôle et le match est lancé...`;
-
     await ovl.sendMessage(chat, {
         image: {
             url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
@@ -1876,14 +1716,14 @@ if (striker && midfielder) {
         caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
-${kickoffText}
+${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et lance le jeu...
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
         mentions: [jidStart]
     });
 }
-    
+
     // =========================
     // 🚀 START ENGINE
     // =========================
@@ -1896,6 +1736,7 @@ ${kickoffText}
 
     startMatchCycle(chat, ovl, match);
 }
+
 
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
@@ -1936,9 +1777,6 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
-    // ===============================
-    // 📩 EXTRACTION MESSAGE
-    // ===============================
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -1966,13 +1804,10 @@ async function handlePaveGame(ms, ovl) {
     if (!isPave) return false;
 
     // ===============================
-    // 📌 EXTRACTION ACTION
+    // ❌ PAVÉ VIDE OU MAL FORMÉ
     // ===============================
     const actionCheck = extraireAction(text);
 
-    // ===============================
-    // ❌ PAVÉ INVALIDE
-    // ===============================
     if (!actionCheck || actionCheck.trim().length < 5) {
 
         await ovl.sendMessage(chat, {
@@ -1980,6 +1815,7 @@ async function handlePaveGame(ms, ovl) {
         });
 
         const loser = normalizeJid(match.joueurTour);
+
         const next = match.defender || match.id2;
 
         const loserName =
@@ -2004,16 +1840,17 @@ async function handlePaveGame(ms, ovl) {
 🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`,
+               🔷BLUELOCK⚽🥅`,
             mentions: [next, loser]
         });
 
         match.attacker = next;
         match.defender = next === match.id1 ? match.id2 : match.id1;
         match.joueurTour = next;
-        match.hasPlayed = true;
 
+        match.hasPlayed = true;
         startMatchCycle(chat, ovl, match);
+
         return true;
     }
 
@@ -2021,90 +1858,22 @@ async function handlePaveGame(ms, ovl) {
     // ♻️ ANALYSE
     // ===============================
     await ovl.sendMessage(chat, {
-        react: { text: "♻️", key: ms.key }
-    });
+    react: { text: "♻️", key: ms.key }
+});
 
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(r => setTimeout(r, 60000));
 
-    const attaqueText = actionCheck;
-    const defenseText = extraireDefense(text) || "";
-
+    const action = actionCheck;
     // ===============================
-    // ⚽ UPDATE BALL HOLDER
-    // ===============================
-    const detectedPlayers =
-        attaqueText.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+// ⚽ UPDATE BALL HOLDER (SMART)
+// ===============================
+const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
 
-    if (detectedPlayers.length >= 2) {
-        match.ballHolder = detectedPlayers[1];
-    } else if (detectedPlayers.length === 1) {
-        match.ballHolder = detectedPlayers[0];
-    }
-
-    // ===============================
-    // 🧠 DÉTECTION DÉFENSE
-    // ===============================
-    const defenseIntentKeywords = [
-        "bloque",
-        "devant",
-        "stoppe",
-        "tacle",
-        "en face",
-        "ferme",
-        "coupe la route", 
-        "le passage",
-        "le chemin" 
-    ];
-
-    const hasDefenseIntent = defenseIntentKeywords.some(k =>
-        defenseText.toLowerCase().includes(k)
-    );
-
-    // ===============================
-    // ⚽ CAS SIMPLE
-    // ===============================
-    if (!hasDefenseIntent) {
-
-        const note = Math.max(
-            3,
-            Math.min(10, noterPave(attaqueText))
-        );
-
-        await ovl.sendMessage(chat, {
-            text:
-`*🛡️⚡⚽ ATTAQUE !*
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-
-🎙️ RESUME♻️ : ${genererResumeFull(attaqueText, match)}
-
-📊 NOTE DU PAVÉ : ${note}/10
-
-⚽ PORTEUR : ${match.ballHolder || "Inconnu"}
-
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-            mentions: [match.joueurTour]
-        });
-
-        match.joueurTour =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
-
-        return true;
-    }
-
-    // ===============================
-    // ⚔️ CAS DUEL
-    // ===============================
-    return await handleDuelMatch(
-        match,
-        attaqueText,
-        defenseText
-    );
-}  
+if (detectedPlayers.length >= 2) {
+    match.ballHolder = detectedPlayers[1]; // receveur
+} else if (detectedPlayers.length === 1) {
+    match.ballHolder = detectedPlayers[0];
+}
     
 // ===============================
 // ⚔️ DUEL PRIORITY
@@ -2140,15 +1909,13 @@ if (match.phaseDuel) {
 // ===============================
 if (!match.pendingAttack) {
 
-    if (match.phaseDuel) return true;
-
     const next =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
 
     match.pendingAttack = action;
     match.hasPlayed = true;
 
-    // 🔥 RESUME + NOTE (ORIGINAL RESTORED)
+    // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
@@ -2175,6 +1942,7 @@ if (!match.pendingAttack) {
     return true;
 }
 
+
 // ===============================
 // 🛡️ DEFENSE
 // ===============================
@@ -2184,18 +1952,29 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
+
 // ===============================
-// ⚔️ MATCH UP / DUEL
+// 🔥 PRIORITÉ AU MATCH UP / DUEL
 // ===============================
 if (res && res.message && res.type !== "normal") {
 
+    const resume = genererResumeFull(match.pendingAttack, match);
+    const note = noterPave(match.pendingAttack);
+
     await ovl.sendMessage(chat, {
-        text: res.message,
+        text:
+`${res.message}
+
+─────────────────
+
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10`,
         mentions: [match.joueurTour]
     });
 
-    // ⚔️ duel en cours
-    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
+    // ⚔️ Duel continue
+    if (res.type === "contre") {
 
         match.phaseDuel = {
             attaque: match.pendingAttack,
@@ -2204,7 +1983,7 @@ if (res && res.message && res.type !== "normal") {
 
     } else {
 
-        // ✅ duel terminé
+        // ✅ Duel terminé
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -2215,7 +1994,7 @@ if (res && res.message && res.type !== "normal") {
 }
   
 // ===============================
-// 📉 FALLBACK DEFENSE
+// 📉 FALLBACK : DEFENSE PASSIVE
 // ===============================
 const resumeDefense = genererResumeFull(defense, match);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
@@ -2236,11 +2015,11 @@ await ovl.sendMessage(chat, {
     mentions: [match.joueurTour]
 });
 
-// 🔄 RESET
+// 🔄 Reset attaque
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
 
-// 🔁 SWITCH TOUR
+// 🔁 Switch tour
 match.joueurTour =
     match.joueurTour === match.id1 ? match.id2 : match.id1;
 
@@ -2248,7 +2027,8 @@ match.turnType = "attaque";
 
 startMatchCycle(chat, ovl, match);
 
-return true;
+return true;        
+} 
     
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
@@ -2591,55 +2371,33 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         ...(match.lineup2 || [])
     ];
 
-    const findPlayer = (txt, exclude = null) => {
-    const t = pureName(txt);
+    const findPlayer = (txt) => {
+        const t = pureName(txt);
 
-    return allPlayers.find(p => {
-        const n = pureName(p.nom);
-
-        // ❌ empêche auto-match
-        if (exclude && pureName(exclude.nom) === n) return false;
-
-        return t.includes(n) || n.includes(t);
-    });
-};
+        return allPlayers.find(p => {
+            const n = pureName(p.nom);
+            return t.includes(n) || n.includes(t);
+        });
+    };
 
     let attacker = null;
 
-// ⚡ priorité ballon
-if (match.ballHolder) {
-    attacker = allPlayers.find(p => p.nom === match.ballHolder);
-}
+    if (match.ballHolder) {
+        attacker = allPlayers.find(p => p.nom === match.ballHolder);
+    }
 
-// fallback attaque texte
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
-}
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
+let defender = findPlayer(defenseText);
 
-// défenseur
-let defender = findPlayer(defenseText, attacker);
-
-// 🧠 lecture tactique
+// 🧠 fallback tactique
 const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
-if (
-    tacticalTarget &&
-    attacker &&
-    defender &&
-    tacticalTarget.nom !== attacker.nom &&
-    tacticalTarget.nom !== defender.nom
-) {
+if (tacticalTarget) {
     defender = tacticalTarget;
 }
 
-if (!attacker || !defender || attacker.nom === defender.nom) {
-    return {
-        ok: false,
-        type: "erreur",
-        message: "❌ Match-up invalide"
-    };
-}
-    
     if (!attacker || !defender) {
         return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
     }
@@ -2736,8 +2494,7 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
         type: "CONTINUED_CHASE",
         msg: `⚽🛡️ Duel en cours...`
     };
-}
-
+} 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
 // ===============================
@@ -2915,7 +2672,6 @@ if (!result) {
         }
     }
 }
-    
     // ===============================
     // ⚖️ FALLBACK
     // ===============================
@@ -2923,12 +2679,9 @@ if (!result) {
         result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
     }
 
-    match.phaseDuelResolved = true;
+    const next = match.attacker;
 
-    const next =
-    match.joueurTour === match.id1
-        ? match.id2
-        : match.id1;
+    match.phaseDuelResolved = true;
 
     return {
         ok: result.ok,
@@ -2947,6 +2700,8 @@ ${result.msg}
     };
 }
 
+
+    
 
 
 /* ===============================
