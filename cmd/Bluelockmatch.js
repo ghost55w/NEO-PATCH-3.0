@@ -2024,6 +2024,53 @@ async function handlePaveGame(ms, ovl) {
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
+// ===============================
+// 🧠 DÉTECTION INTENTION DÉFENSIVE
+// ===============================
+const defenseIntentKeywords = [
+    "bloque", "devant", "stoppe", "tacle",
+    "en face", "ferme", "coupe la route"
+];
+
+const hasDefenseIntent = defenseIntentKeywords.some(k =>
+    (defenseText || "").toLowerCase().includes(k)
+);
+
+// ===============================
+// ⚽ CAS 1 : PAS DE DÉFENSE → ATTAQUE SIMPLE
+// ===============================
+if (!hasDefenseIntent) {
+
+    const note = Math.max(3, Math.min(10, noterPave(attaqueText)));
+
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${genererResumeFull(attaqueText, match)}
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+➡️ @${getTagFromJid(match.joueurTour)} NEXT
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`,
+        mentions: [match.joueurTour]
+    });
+
+    // 🔁 changement de tour
+    match.joueurTour =
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
+
+    return true;
+}
+
+// ===============================
+// ⚔️ CAS 2 : DÉFENSE → DUEL
+// ===============================
+return await handleDuelMatch(match, attaqueText, defenseText);
+    
     // ===============================
 // ⚽ UPDATE BALL HOLDER (SMART)
 // ===============================
