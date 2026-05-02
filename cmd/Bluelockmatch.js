@@ -1157,29 +1157,36 @@ function validerAction(action) {
 //===============================
 function detectTargetPlayer(text, players) {
 
-    const lower = text.toLowerCase();
+    const lower = pureName(text);
 
-    // mots clés de duel défensif
+    // mots clés RÉELS de duel défensif
     const keywords = [
-        "devant",
-        "face à",
-        "sur",
+        "face a",
         "contre",
         "bloquer",
+        "bloque",
         "barrer",
-        "empêcher",
+        "empecher",
         "stoppe",
-        "stopper"
+        "stopper",
+        "se place devant",
+        "se met devant",
+        "vient bloquer",
+        "viens bloquer",
+        "bloquer le chemin",
+        "bloquer le passage",
+        "coupe la route"
     ];
 
+    // 🚫 si pas d'action défensive claire
     if (!keywords.some(k => lower.includes(k))) return null;
 
-    // 🔍 cherche un joueur mentionné après ou autour
+    // 🔍 cherche joueur mentionné
     return players.find(p => {
         const name = pureName(p.nom);
         return lower.includes(name);
     }) || null;
-      }
+}
 
 // ===============================
 // ⚽ VIS-À-VIS AUTO (FORMATION)
@@ -2586,17 +2593,29 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     if (!attacker) {
         attacker = findPlayer(attaqueText);
     }
-let defender = findPlayer(defenseText);
 
-// 🧠 fallback tactique
-const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+    // ===============================
+    // 🛡️ DEFENDER = TEXTE DEFENSE UNIQUEMENT
+    // ===============================
+    let defender = findPlayer(defenseText);
 
-if (tacticalTarget) {
-    defender = tacticalTarget;
-}
+    const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+
+    if (tacticalTarget) {
+        defender = tacticalTarget;
+    }
 
     if (!attacker || !defender) {
         return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
+    }
+
+    // 🚫 anti SAE vs SAE
+    if (pureName(attacker.nom) === pureName(defender.nom)) {
+        return {
+            ok: false,
+            type: "ignore",
+            message: "⚠️ Faux duel détecté"
+        };
     }
 
     const atkStats = attacker.stats || {};
@@ -2649,11 +2668,11 @@ else if (postureDebout.some(w => def.includes(w))) {
 // ⚙️ VITESSE DEF (VMAX)
 // ===============================
 let defVmax = posture === "debout"
-    ? defBaseVmax * 0.5   // 🧱 lent mais stable
-    : defBaseVmax;        // ⚡ posture basse = vmax
+    ? defBaseVmax * 0.5
+    : defBaseVmax;
 
 // ===============================
-// 🎯 RESULT GLOBAL (AVANT UTILISATION)
+// 🎯 RESULT GLOBAL
 // ===============================
 let result = null;
 
@@ -2691,7 +2710,8 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
         type: "CONTINUED_CHASE",
         msg: `⚽🛡️ Duel en cours...`
     };
-} 
+}
+ 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
 // ===============================
