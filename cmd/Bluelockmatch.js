@@ -1881,18 +1881,8 @@ if (match.phaseDuel) {
 
     const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
 
-    const resume = genererResumeFull(text, match);
-    const note = noterPave(text);
-
     await ovl.sendMessage(chat, {
-        text:
-`${res.message}
-
-─────────────────
-
-🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10`
+        text: res.message
     });
 
     if (res.type !== "contre") {
@@ -1901,7 +1891,6 @@ if (match.phaseDuel) {
 
     return true;
 }
-
 
 // ===============================
 // 🎯 ATTAQUE
