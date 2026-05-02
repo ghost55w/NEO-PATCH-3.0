@@ -1897,7 +1897,6 @@ ${kickoffText}
     startMatchCycle(chat, ovl, match);
 }
 
-
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
 =================================*/
@@ -1937,6 +1936,9 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
+    // ===============================
+    // 📩 EXTRACTION MESSAGE
+    // ===============================
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -1964,10 +1966,13 @@ async function handlePaveGame(ms, ovl) {
     if (!isPave) return false;
 
     // ===============================
-    // ❌ PAVÉ VIDE OU MAL FORMÉ
+    // 📌 EXTRACTION ACTION
     // ===============================
     const actionCheck = extraireAction(text);
 
+    // ===============================
+    // ❌ PAVÉ INVALIDE
+    // ===============================
     if (!actionCheck || actionCheck.trim().length < 5) {
 
         await ovl.sendMessage(chat, {
@@ -1975,7 +1980,6 @@ async function handlePaveGame(ms, ovl) {
         });
 
         const loser = normalizeJid(match.joueurTour);
-
         const next = match.defender || match.id2;
 
         const loserName =
@@ -2000,17 +2004,16 @@ async function handlePaveGame(ms, ovl) {
 🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-               🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
             mentions: [next, loser]
         });
 
         match.attacker = next;
         match.defender = next === match.id1 ? match.id2 : match.id1;
         match.joueurTour = next;
-
         match.hasPlayed = true;
-        startMatchCycle(chat, ovl, match);
 
+        startMatchCycle(chat, ovl, match);
         return true;
     }
 
@@ -2018,33 +2021,57 @@ async function handlePaveGame(ms, ovl) {
     // ♻️ ANALYSE
     // ===============================
     await ovl.sendMessage(chat, {
-    react: { text: "♻️", key: ms.key }
-});
+        react: { text: "♻️", key: ms.key }
+    });
 
-    await new Promise(r => setTimeout(r, 60000));
+    await new Promise(r => setTimeout(r, 2000));
 
-    const action = actionCheck;
-// ===============================
-// 🧠 DÉTECTION INTENTION DÉFENSIVE
-// ===============================
-const defenseIntentKeywords = [
-    "bloque", "devant", "stoppe", "tacle",
-    "en face", "ferme", "coupe la route"
-];
+    const attaqueText = actionCheck;
+    const defenseText = extraireDefense(text) || "";
 
-const hasDefenseIntent = defenseIntentKeywords.some(k =>
-    (defenseText || "").toLowerCase().includes(k)
-);
+    // ===============================
+    // ⚽ UPDATE BALL HOLDER
+    // ===============================
+    const detectedPlayers =
+        attaqueText.match(/[A-Z][a-zA-Z0-9]+/g) || [];
 
-// ===============================
-// ⚽ CAS 1 : PAS DE DÉFENSE → ATTAQUE SIMPLE
-// ===============================
-if (!hasDefenseIntent) {
+    if (detectedPlayers.length >= 2) {
+        match.ballHolder = detectedPlayers[1];
+    } else if (detectedPlayers.length === 1) {
+        match.ballHolder = detectedPlayers[0];
+    }
 
-    const note = Math.max(3, Math.min(10, noterPave(attaqueText)));
+    // ===============================
+    // 🧠 DÉTECTION DÉFENSE
+    // ===============================
+    const defenseIntentKeywords = [
+        "bloque",
+        "devant",
+        "stoppe",
+        "tacle",
+        "en face",
+        "ferme",
+        "coupe la route", 
+        "le passage",
+        "le chemin" 
+    ];
 
-    await ovl.sendMessage(chat, {
-        text:
+    const hasDefenseIntent = defenseIntentKeywords.some(k =>
+        defenseText.toLowerCase().includes(k)
+    );
+
+    // ===============================
+    // ⚽ CAS SIMPLE
+    // ===============================
+    if (!hasDefenseIntent) {
+
+        const note = Math.max(
+            3,
+            Math.min(10, noterPave(attaqueText))
+        );
+
+        await ovl.sendMessage(chat, {
+            text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -2052,35 +2079,32 @@ if (!hasDefenseIntent) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
+⚽ PORTEUR : ${match.ballHolder || "Inconnu"}
+
 ➡️ @${getTagFromJid(match.joueurTour)} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
-    });
+🔷BLUELOCK⚽🥅`,
+            mentions: [match.joueurTour]
+        });
 
-    // 🔁 changement de tour
-    match.joueurTour =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
+        match.joueurTour =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
 
-    return true;
-}
+        return true;
+    }
 
-// ===============================
-// ⚔️ CAS 2 : DÉFENSE → DUEL
-// ===============================
-return await handleDuelMatch(match, attaqueText, defenseText);
-    
     // ===============================
-// ⚽ UPDATE BALL HOLDER (SMART)
-// ===============================
-const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
-
-if (detectedPlayers.length >= 2) {
-    match.ballHolder = detectedPlayers[1]; // receveur
-} else if (detectedPlayers.length === 1) {
-    match.ballHolder = detectedPlayers[0];
-}
+    // ⚔️ CAS DUEL
+    // ===============================
+    return await handleDuelMatch(
+        match,
+        attaqueText,
+        defenseText
+    );
+}  
     
 // ===============================
 // ⚔️ DUEL PRIORITY
