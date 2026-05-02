@@ -1243,11 +1243,10 @@ function kickoffStart(match) {
     match.ballHolder = midfielder.nom;
     match.activePlayer = midfielder.nom;
     match.phase = "active";
+    match.zone = "C2"; // 👈 IMPORTANT
 
-    // 👉 ON RETOURNE JUSTE LE TEXTE
-    return `${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et prend le contrôle du jeu`;
+    return `(${match.zone}) ${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et prend le contrôle du jeu`;
 }
-
 // ===============================
 // 🚀 START MATCH ENGINE
 // ===============================
