@@ -1962,16 +1962,9 @@ if (res && res.message && res.type !== "normal") {
     const note = noterPave(match.pendingAttack);
 
     await ovl.sendMessage(chat, {
-        text:
-`${res.message}
-
-─────────────────
-
-🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10`,
-        mentions: [match.joueurTour]
-    });
+    text: res.message,
+    mentions: [match.joueurTour]
+});
 
     // ⚔️ Duel continue
     if (res.type === "contre") {
