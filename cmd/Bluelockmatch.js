@@ -2026,6 +2026,64 @@ async function handlePaveGame(ms, ovl) {
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
+
+// ===============================
+// ⚔️ DÉTECTION : ATTAQUE OU DUEL
+// ===============================
+const lowerText = action.toLowerCase();
+
+const defensiveKeywords = [
+    "bloque",
+    "barrer",
+    "barre",
+    "intercepte",
+    "tacle",
+    "contre",
+    "stop",
+    "empêche",
+    "coupe la route",
+    "en face",
+    "devant lui",
+    "posture basse",
+    "stance basse",
+    "se place devant",
+    "ferme l'angle",
+    "ferme la route"
+];
+
+const isDefensiveMove = defensiveKeywords.some(word =>
+    lowerText.includes(word)
+);
+
+// ===============================
+// 🚀 SI PAS DÉFENSE = ATTAQUE SIMPLE
+// ===============================
+if (!isDefensiveMove) {
+
+    match.phaseDuel = null;
+    match.phaseDuelResolved = false;
+
+    const resume = genererResumeFull(action, match);
+    const note = noterPave(action);
+
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+➡️ @${getTagFromJid(match.attacker)} NEXT
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`
+    });
+
+    return true;
+}
+    
     // ===============================
 // ⚽ UPDATE BALL HOLDER (SMART)
 // ===============================
@@ -2042,20 +2100,14 @@ if (detectedPlayers.length >= 2) {
 // ===============================
 if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
-
-    const resume = genererResumeFull(text, match);
-    const note = noterPave(text);
+    const res = await handleDuelMatch(
+        match,
+        text,
+        match.phaseDuel.defense
+    );
 
     await ovl.sendMessage(chat, {
-        text:
-`${res.message}
-
-─────────────────
-
-🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10`
+        text: res.message
     });
 
     if (res.type !== "contre") {
@@ -2064,7 +2116,6 @@ if (match.phaseDuel) {
 
     return true;
 }
-
 
 // ===============================
 // 🎯 ATTAQUE
