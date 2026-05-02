@@ -2030,8 +2030,11 @@ async function handlePaveGame(ms, ovl) {
 // ===============================
 // ⚔️ DÉTECTION : ATTAQUE OU DUEL
 // ===============================
-const lowerText = action.toLowerCase();
+const textLower = text.toLowerCase();
 
+// ===============================
+// 🧠 DÉTECTION DÉFENSE RÉELLE
+// ===============================
 const defensiveKeywords = [
     "bloque",
     "barrer",
@@ -2051,20 +2054,17 @@ const defensiveKeywords = [
     "ferme la route"
 ];
 
-const isDefensiveMove = defensiveKeywords.some(word =>
-    lowerText.includes(word)
+const isDefensiveMove = defensiveKeywords.some(w =>
+    textLower.includes(w)
 );
 
 // ===============================
-// 🚀 SI PAS DÉFENSE = ATTAQUE SIMPLE
+// 🚀 ATTAQUE SIMPLE SI PAS DE DÉFENSE
 // ===============================
 if (!isDefensiveMove) {
 
-    match.phaseDuel = null;
-    match.phaseDuelResolved = false;
-
-    const resume = genererResumeFull(action, match);
-    const note = noterPave(action);
+    const resume = genererResumeFull(text, match);
+    const note = noterPave(text);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2098,7 +2098,7 @@ if (detectedPlayers.length >= 2) {
 // ===============================
 // ⚔️ DUEL PRIORITY
 // ===============================
-if (match.phaseDuel) {
+if (isDefensiveMove && match.phaseDuel) {
 
     const res = await handleDuelMatch(
         match,
@@ -2106,13 +2106,15 @@ if (match.phaseDuel) {
         match.phaseDuel.defense
     );
 
+    // 🔒 verrouillage propre du duel
+    if (res.type !== "contre") {
+        match.phaseDuel = null;
+        match.phaseDuelResolved = true;
+    }
+
     await ovl.sendMessage(chat, {
         text: res.message
     });
-
-    if (res.type !== "contre") {
-        match.phaseDuel = null;
-    }
 
     return true;
 }
@@ -2130,25 +2132,7 @@ if (!match.pendingAttack) {
 
     // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
-    const note = noterPave(action);
-
-    await ovl.sendMessage(chat, {
-        text:
-`*🛡️⚡⚽ ATTAQUE !*
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-
-🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10
-
-➡️ @${getTagFromJid(next)} NEXT
-
-╰───────────────────
-              🔷BLUELOCK⚽🥅`,
-        mentions: [next]
-    });
-
-    match.waitingDefenseFrom = next;
+    const note = waitingDefenseFrom = next;
     match.turnType = "defense";
 
     startMatchCycle(chat, ovl, match);
