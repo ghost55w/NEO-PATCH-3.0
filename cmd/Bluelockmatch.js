@@ -1690,14 +1690,9 @@ match.possessions = {
     // =========================
     // 🎯 KICKOFF (GARANTI)
     // =========================
-    const striker = (match.lineup1 || []).find(p => p.poste === "AC");
-const midfielder = (match.lineup1 || []).find(p => p.poste === "MC");
+const kickoffText = kickoffStart(match); 
 
-if (striker && midfielder) {
-
-    match.ballHolder = midfielder.nom;
-    match.activePlayer = midfielder.nom;
-    match.phase = "active";
+if (kickoffText) {
 
     const displayName =
         match.names?.[jidStart] ||
@@ -1715,7 +1710,7 @@ if (striker && midfielder) {
         caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
-${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et lance le jeu...
+${kickoffText}
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
