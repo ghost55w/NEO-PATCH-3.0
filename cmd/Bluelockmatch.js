@@ -1257,6 +1257,184 @@ function startMatch(match) {
     kickoffStart(match);
 } 
 
+// ===============================
+// 🎯 EXTRACTION COMPLÈTE DISTANCE RANGE
+// ===============================
+function extractDistanceRange(text = "") {
+
+    const m = text.match(/(\d+(?:\.\d+)?)\s*m/);
+
+    if (!m) return null;
+
+    const value = parseFloat(m[1]);
+
+    return {
+        value,
+        isShort: value <= 0.5,
+        isMedium: value > 0.5 && value <= 1,
+        isLong: value > 1
+    };
+}
+
+// ===============================
+// 🎲 RANDOMIZER
+// ===============================
+function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ===============================
+// 🧭 ANGLE NORMALISATION
+// ===============================
+function normalizeAngle(angle) {
+    return ((angle % 360) + 360) % 360;
+}
+
+// ===============================
+// 🧍 BODY STATE
+// ===============================
+function getBodyState(angle) {
+
+    angle = normalizeAngle(angle);
+
+    if (angle >= 0 && angle < 45) return "front";
+    if (angle >= 45 && angle < 135) return "right";
+    if (angle >= 135 && angle < 225) return "back";
+    if (angle >= 225 && angle < 315) return "left";
+
+    return "front";
+}
+
+// ===============================
+// 🔄 ROTATION PLAYER
+// ===============================
+function rotatePlayer(player, deltaAngle) {
+
+    if (!player.bodyAngle) player.bodyAngle = 0;
+
+    player.bodyAngle = normalizeAngle(player.bodyAngle + deltaAngle);
+
+    player.bodyState = getBodyState(player.bodyAngle);
+
+    return player.bodyState;
+}
+
+// ===============================
+// ⚽ RELATIVE POSITION
+// ===============================
+function getRelativePosition(player, target) {
+
+    const dx = target.x - player.x;
+    const dy = target.y - player.y;
+
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+    const relativeAngle = normalizeAngle(angle - (player.bodyAngle || 0));
+
+    return getBodyState(relativeAngle);
+}
+
+// ===============================
+// 🧠 DISTANCE ENTRE 2 POINTS
+// ===============================
+function getDistance(pos1, pos2) {
+
+    if (!pos1 || !pos2) return 0;
+
+    return Math.sqrt(
+        Math.pow(pos2.x - pos1.x, 2) +
+        Math.pow(pos2.y - pos1.y, 2)
+    );
+}
+
+// ===============================
+// ⚔️ VALIDATION TACLE
+// ===============================
+function validateTackle(defender, attacker, text = "") {
+
+    const t = text.toLowerCase();
+
+    const hasSlide = t.includes("tacle glissé");
+    const hasStand = t.includes("tacle debout");
+    const hasCircle = t.includes("tacle circulaire");
+
+    let type = null;
+
+    if (hasStand) type = "stand";
+    else if (hasSlide) type = "slide";
+    else if (hasCircle) type = "circle";
+
+    const distance = extractDistance(text);
+
+    const direction =
+        t.includes("gauche") ? "left" :
+        t.includes("droite") ? "right" :
+        t.includes("face") ? "front" : null;
+
+    const power = defender.stats?.def || 50;
+
+    const successRate = power + Math.random() * 20;
+
+    const atkPower = attacker.stats?.dri || 50;
+
+    const success = successRate > atkPower;
+
+    return {
+        ok: success,
+        type,
+        distance,
+        direction,
+        successRate
+    };
+}
+
+// ===============================
+// ⚡ SPEED COMPUTATION
+// ===============================
+function computeSpeed(player, mode = "normal") {
+
+    const base = player.stats?.acc || 50;
+
+    if (mode === "sprint") return base * 1.5;
+    if (mode === "walk") return base * 0.6;
+
+    return base;
+}
+
+// ===============================
+// 🧠 REACTION WINDOW
+// ===============================
+function computeReactionWindow(diff) {
+
+    if (diff > 10) return "after_sprint";
+    if (diff > 0) return "after_combo";
+    return "anytime";
+}
+
+// ===============================
+// 🧠 TARGET PLAYER DETECTION
+// ===============================
+function detectTargetPlayer(text, players) {
+
+    const t = pureName(text);
+
+    return players.find(p => {
+        const n = pureName(p.nom);
+        return t.includes(n);
+    });
+}
+
+// ===============================
+// 🧠 BALL STATE INIT
+// ===============================
+function initBall(match, position = { x: 0, y: 0 }) {
+
+    match.ball = {
+        holder: null,
+        state: "neutral",
+        position
+    };
+                            }
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2518,25 +2696,227 @@ if (!result && isPassive) {
     }
 }
 
+// ===============================
+// ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
+// ===============================
+
+function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) {
+
+    const atk = attacker.stats || {};
+    const def = defender.stats || {};
+
+    const tA = attackText.toLowerCase();
+    const tD = defenseText.toLowerCase();
 
     // ===============================
-    // 🎯 DRIBBLES
+    // 🧭 BODY ORIENTATION UPDATE
+    // ===============================
+    function updateBody(player, text) {
+
+        if (!player.bodyAngle) player.bodyAngle = 0;
+
+        if (text.includes("pivot du torse 180")) player.bodyAngle += 180;
+        if (text.includes("pivot gauche 90")) player.bodyAngle -= 90;
+        if (text.includes("pivot droite 90")) player.bodyAngle += 90;
+        if (text.includes("tour complet") || text.includes("360")) player.bodyAngle += 360;
+
+        player.bodyAngle = normalizeAngle(player.bodyAngle);
+        player.bodyState = getBodyState(player.bodyAngle);
+    }
+
+    updateBody(attacker, attackText);
+    updateBody(defender, defenseText);
+
+    const attackerState = attacker.bodyState || "front";
+    const defenderState = defender.bodyState || "front";
+
+    // ===============================
+    // ⚽ DRIBBLES RECONNUS (25+)
     // ===============================
     const DRIBBLES = [
-        "crochet extérieur","crochet intérieur","double contact",
-        "roulette","petit pont","rainbow","step over","elastico"
+        "crochet extérieur", "crochet intérieur",
+        "double contact", "roulette", "elastico",
+        "petit pont", "rainbow", "step over",
+        "feinte de corps", "feinte de frappe",
+        "feinte de passe", "changement de direction",
+        "pivot du torse", "contrôle semelle",
+        "conduite intérieure", "conduite extérieure",
+        "double crochet", "dribble rapide",
+        "protection de balle", "tourne sur lui même",
+        "sortie en accélération", "push balle",
+        "dribble court", "dribble long"
     ];
 
-    const isDribble = DRIBBLES.some(d => atk.includes(d));
+    const isDribble = DRIBBLES.some(d => tA.includes(d));
 
-    if (!result && isDribble) {
+    // ===============================
+    // 🧠 INTENTION DRIBBLE
+    // ===============================
+    const intent = {
+        foot:
+            tA.includes("pied gauche") ? "left" :
+            tA.includes("pied droit") ? "right" : null,
 
-        const diff = atkVmax - (defStats.def || 0);
+        surface:
+            tA.includes("extérieur du pied") ? "outside" :
+            tA.includes("intérieur du pied") ? "inside" :
+            tA.includes("semelle") ? "sole" :
+            tA.includes("pointe du pied") ? "toe" :
+            tA.includes("talon") ? "heel" : null,
 
-        result = diff > 5
-            ? { ok: true, type: "win", msg: `🔥 ${attacker.nom} élimine ${defender.nom}` }
-            : { ok: false, type: "lose", msg: `🛑 ${defender.nom} stoppe le dribble` };
+        direction:
+            tA.includes("gauche") ? "left" :
+            tA.includes("droite") ? "right" : null,
+
+        distance: extractDistance(tA),
+
+        sprint:
+            tA.includes("vmax") ||
+            tA.includes("accélère") ||
+            tA.includes("fonce")
+    };
+
+    // ===============================
+    // ⚖️ VALIDATION DRIBBLE
+    // ===============================
+    if (isDribble) {
+
+        if (!intent.foot) {
+            return { ok: false, type: "faute", msg: `❌ Dribble raté : pied non précisé` };
+        }
+
+        if (!intent.surface) {
+            return { ok: false, type: "faute", msg: `❌ Dribble raté : surface du pied non précisée` };
+        }
+
+        if (intent.distance !== null && intent.distance < 0.3) {
+            return { ok: false, type: "faute", msg: `❌ Contrôle trop collé au pied` };
+        }
     }
+
+    // ===============================
+    // 🧠 TIMING SYSTEM
+    // ===============================
+    const diff = (atk.dri || 50) - (def.def || 50);
+
+    let reactionWindow;
+
+    if (diff > 10) reactionWindow = "after_sprint";
+    else if (diff > 0) reactionWindow = "after_combo";
+    else reactionWindow = "anytime";
+
+    // ===============================
+    // 🧠 BODY ADVANTAGE
+    // ===============================
+    const bodyAdvantage =
+        (attackerState === "front" && defenderState === "back") ? 5 :
+        (attackerState === "left" && defenderState === "right") ? 3 :
+        (attackerState === "right" && defenderState === "left") ? 3 : 0;
+
+    // ===============================
+    // 🧱 TACLE SYSTEM
+    // ===============================
+    const tackle = validateTackle(defender, attacker, defenseText);
+
+    function computeBallAfterTackle(tackle) {
+
+        let distance = tackle.distance;
+
+        if (!distance) {
+            if (tackle.type === "stand") distance = 2 + Math.random() * 3;
+            if (tackle.type === "slide") distance = 1.5 + Math.random() * 2.5;
+            if (tackle.type === "circle") distance = 1 + Math.random() * 2;
+        }
+
+        let dx = 0;
+        let dy = 0;
+
+        if (tackle.type === "stand") dy = -distance;
+
+        if (tackle.type === "slide") {
+            if (tackle.direction === "left") dx = -distance;
+            else if (tackle.direction === "right") dx = distance;
+            else dy = -distance;
+        }
+
+        if (tackle.type === "circle") {
+            const angle = tackle.direction === "left" ? -45 : 45;
+            dx = distance * Math.cos(angle);
+            dy = distance * Math.sin(angle);
+        }
+
+        return { dx, dy };
+    }
+
+    // ===============================
+    // ❌ ANTICIPATION RULES
+    // ===============================
+    if (tackle.ok && reactionWindow === "after_combo") {
+        return { ok: false, type: "divination", msg: `❌ ${defender.nom} anticipe trop tôt` };
+    }
+
+    if (tackle.ok && reactionWindow === "after_sprint") {
+        return { ok: false, type: "divination", msg: `❌ Anticipation illégale` };
+    }
+
+    // ===============================
+    // 🛑 INTERCEPTION
+    // ===============================
+    if (tackle.ok && tackle.type === "win_clean") {
+
+        match.ball.holder = defender.nom;
+        match.ball.state = "controle";
+
+        const move = computeBallAfterTackle(tackle);
+        match.ball.position = move;
+
+        return {
+            ok: false,
+            type: "INTERCEPTION",
+            msg: `🛑 ${defender.nom} récupère le ballon proprement`
+        };
+    }
+
+    // ===============================
+    // ⚔️ FINAL DUEL
+    // ===============================
+    const atkPower = (atk.dri || 50) + bodyAdvantage;
+    const defPower = def.def || 50;
+
+    const gap = atkPower - defPower;
+
+    if (gap > 0) {
+
+        if (intent.sprint) {
+            return {
+                ok: true,
+                type: "escape",
+                msg: `🚀 ${attacker.nom} élimine ${defender.nom} et accélère`
+            };
+        }
+
+        return {
+            ok: true,
+            type: "win",
+            msg: `🔥 ${attacker.nom} élimine ${defender.nom}`
+        };
+    }
+
+    if (Math.abs(gap) <= 5) {
+        return {
+            ok: false,
+            type: "contre",
+            msg: `⚔️ Duel serré entre ${attacker.nom} et ${defender.nom}`
+        };
+    }
+
+    return {
+        ok: false,
+        type: "stop",
+        msg: `🧱 ${defender.nom} stoppe l'action`
+    };
+}
+    
 
     // ===============================
     // ⚖️ FALLBACK
