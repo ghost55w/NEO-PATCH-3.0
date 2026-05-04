@@ -1435,7 +1435,32 @@ function initBall(match, position = { x: 0, y: 0 }) {
         position
     };
                             }
+//LINEUP ACTION 
+function validateLineupAction(text, players) {
 
+    const t = pureName(text);
+
+    // Vérifie si un nom inconnu apparaît
+    const knownNames = players.map(p => pureName(p.nom));
+
+    const words = t.split(/\s+/);
+
+    for (let w of words) {
+
+        // Si mot ressemble à un nom mais pas dans lineup
+        const isPotentialName = w.length > 4;
+
+        if (isPotentialName && !knownNames.some(n => n.includes(w))) {
+
+            return {
+                ok: false,
+                error: `❌ Joueur inconnu détecté: ${w}`
+            };
+        }
+    }
+
+    return { ok: true };
+}
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -2525,23 +2550,53 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         ...(match.lineup2 || [])
     ];
 
-    const findPlayer = (txt) => {
-        const t = pureName(txt);
+    // ===============================
+// 🚫 VALIDATION LINEUP GLOBAL
+// ===============================
+const checkAttack = validateLineupAction(attaqueText, allPlayers);
+const checkDefense = validateLineupAction(defenseText, allPlayers);
 
-        return allPlayers.find(p => {
-            const n = pureName(p.nom);
-            return t.includes(n) || n.includes(t);
-        });
-    };
+if (!checkAttack.ok) {
+    return { ok: false, type: "erreur", message: checkAttack.error };
+}
+
+if (!checkDefense.ok) {
+    return { ok: false, type: "erreur", message: checkDefense.error };
+}
+    
+    const findPlayer = (txt) => {
+    const t = pureName(txt);
+
+    // 🔍 Recherche stricte dans le lineup
+    let found = allPlayers.find(p => {
+        const n = pureName(p.nom);
+        return t.includes(n) || n.includes(t);
+    });
+
+    // ❌ Si pas trouvé → on bloque
+    if (!found) return null;
+
+    return found;
+};
 
     let attacker = null;
 
-    if (match.ballHolder) {
-        attacker = allPlayers.find(p => p.nom === match.ballHolder);
-    }
+// ===============================
+// ⚽ PORTEUR DE BALLE PRIORITAIRE
+// ===============================
+if (match.ballHolder) {
+    attacker = allPlayers.find(p => p.nom === match.ballHolder);
 
+    // ❌ sécurité si joueur supprimé / inexistant
     if (!attacker) {
-        attacker = findPlayer(attaqueText);
+        attacker = allPlayers[0]; // fallback safe
+    }
+}
+
+// fallback si pas de ballon
+if (!attacker) {
+    attacker = findPlayer(attaqueText);
+}
     }
 let defender = findPlayer(defenseText);
 
