@@ -1442,22 +1442,58 @@ function initBall(match, position = { x: 0, y: 0 }) {
         position
     };
                             }
-//LINEUP ACTION 
+// ===============================
+// 🚫 VALIDATION LINEUP GLOBAL (IA SAFE)
+// ===============================
 function validateLineupAction(text, players) {
 
-    const t = pureName(text);
+    if (!text || !players) {
+        return { ok: true, detectedPlayers: [] };
+    }
 
-    // Vérifie si un nom inconnu apparaît
-    const knownNames = players.map(p => pureName(p.nom));
+    const t = text.toLowerCase();
+
+    const detectedPlayers = [];
+
+    // ===============================
+    // ⚽ 1. DETECTION INTELLIGENTE JOUEURS
+    // ===============================
+    for (const p of players) {
+
+        if (!p || !p.nom) continue;
+
+        const name = p.nom.toLowerCase();
+
+        // match simple + tolérance erreurs
+        if (
+            t.includes(name) ||
+            levenshtein(name, t.split(" ")[0] || "") <= 2
+        ) {
+            detectedPlayers.push(p);
+        }
+    }
+
+    // ===============================
+    // ⚠️ 2. DETECTION D'ERREURS RÉELLES
+    // ===============================
 
     const words = t.split(/\s+/);
 
     for (let w of words) {
 
-        // Si mot ressemble à un nom mais pas dans lineup
-        const isPotentialName = w.length > 4;
+        if (w.length < 4) continue; // ignore petits mots
 
-        if (isPotentialName && !knownNames.some(n => n.includes(w))) {
+        const isKnown = players.some(p =>
+            p.nom.toLowerCase().includes(w) ||
+            w.includes(p.nom.toLowerCase())
+        );
+
+        const isActionWord = [
+            "fonce", "dribble", "passe", "tir", "shoot",
+            "accélère", "cours", "vmax", "centre"
+        ].includes(w);
+
+        if (!isKnown && !isActionWord && /^[a-zA-Z]+$/.test(w)) {
 
             return {
                 ok: false,
@@ -1466,8 +1502,219 @@ function validateLineupAction(text, players) {
         }
     }
 
-    return { ok: true };
+    // ===============================
+    // 📦 OUTPUT
+    // ===============================
+    return {
+        ok: true,
+        detectedPlayers
+    };
 }
+
+// ===============================
+// 🧠 MATCH ENGINE UTILITIES CORE
+// ===============================
+
+// ===============================
+// 🔁 NORMALISATION ANGLE
+// ===============================
+function normalizeAngle(angle) {
+    return ((angle % 360) + 360) % 360;
+}
+
+// ===============================
+// 🧍 BODY STATE SYSTEM (0–360°)
+// ===============================
+function getBodyState(angle) {
+    angle = normalizeAngle(angle);
+
+    if (angle >= 0 && angle < 45) return "front";
+    if (angle >= 45 && angle < 135) return "right";
+    if (angle >= 135 && angle < 225) return "back";
+    if (angle >= 225 && angle < 315) return "left";
+
+    return "front";
+}
+
+// ===============================
+// 🧍 UPDATE BODY ORIENTATION
+// ===============================
+function updateBody(player, text) {
+
+    if (!player.bodyAngle) player.bodyAngle = 0;
+
+    const t = text.toLowerCase();
+
+    if (t.includes("pivot du torse 180")) player.bodyAngle += 180;
+    if (t.includes("pivot gauche 90")) player.bodyAngle -= 90;
+    if (t.includes("pivot droite 90")) player.bodyAngle += 90;
+    if (t.includes("tour complet") || t.includes("360")) player.bodyAngle += 360;
+
+    player.bodyAngle = normalizeAngle(player.bodyAngle);
+    player.bodyState = getBodyState(player.bodyAngle);
+}
+
+// ===============================
+// 📏 EXTRACTION NOMBRE (DISTANCE)
+// ===============================
+function extractNumber(str) {
+    const match = str.match(/(\d+(\.\d+)?)/);
+    return match ? Number(match[0]) : null;
+}
+
+// ===============================
+// 🧠 LEVENSHTEIN (FUZZY MATCH)
+// ===============================
+function levenshtein(a, b) {
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+
+            if (b[i - 1] === a[j - 1]) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}
+
+// ===============================
+// 🧠 PARSER IA PAVÉ INTELLIGENT
+// ===============================
+function parsePlayerIntent(text, players) {
+
+    if (!text) return null;
+
+    const t = text.toLowerCase();
+
+    // ===============================
+    // ⚽ PLAYERS FUZZY DETECTION
+    // ===============================
+    function findBestPlayer(word) {
+        if (!word) return null;
+
+        let best = null;
+        let bestScore = 0;
+
+        for (const p of players) {
+            const name = p.nom.toLowerCase();
+
+            let score = 0;
+
+            if (name === word) score = 100;
+            else if (name.includes(word) || word.includes(name)) score = 80;
+            else if (levenshtein(name, word) <= 2) score = 60;
+
+            if (score > bestScore) {
+                bestScore = score;
+                best = p;
+            }
+        }
+
+        return bestScore >= 60 ? best : null;
+    }
+
+    // ===============================
+    // ⚙️ ACTIONS
+    // ===============================
+    const actions = [];
+
+    const actionMap = {
+        run: ["fonce", "cours", "accélère", "sprinte", "vmax"],
+        dribble: ["dribble", "crochet", "feinte", "roulette"],
+        pass: ["passe", "donne", "transmet", "centre"],
+        shoot: ["tir", "frappe", "shoot"],
+        defend: ["tacle", "bloque", "intercepte"]
+    };
+
+    for (const key in actionMap) {
+        if (actionMap[key].some(w => t.includes(w))) {
+            actions.push(key);
+        }
+    }
+
+    // ===============================
+    // 🧭 DIRECTION
+    // ===============================
+    let direction = "none";
+
+    if (t.includes("gauche")) direction = "left";
+    else if (t.includes("droite")) direction = "right";
+    else if (t.includes("devant") || t.includes("face") || t.includes("tout droit")) direction = "front";
+    else if (t.includes("diagonale")) direction = "diagonal";
+
+    // ===============================
+    // 🦶 FOOT
+    // ===============================
+    let foot = null;
+
+    if (t.includes("pied gauche")) foot = "left";
+    else if (t.includes("pied droit")) foot = "right";
+
+    // ===============================
+    // 📏 DISTANCES
+    // ===============================
+    const ballDistance = extractNumber(t);
+
+    let targetDistance = null;
+    if (t.includes("1m")) targetDistance = 1;
+    if (t.includes("2m")) targetDistance = 2;
+    if (t.includes("5m")) targetDistance = 5;
+    if (t.includes("10m")) targetDistance = 10;
+
+    // ===============================
+    // 👥 PLAYERS DETECTION
+    // ===============================
+    const detectedPlayers = [];
+
+    for (const p of players) {
+        if (t.includes(p.nom.toLowerCase())) {
+            detectedPlayers.push(p);
+        }
+    }
+
+    // ===============================
+    // 📦 OUTPUT FINAL
+    // ===============================
+    return {
+        players: detectedPlayers.length ? detectedPlayers : null,
+        actions,
+        intent: {
+            direction,
+            foot,
+            ballDistance,
+            targetDistance
+        }
+    };
+}
+
+// ===============================
+// 🧪 SAFE PLAYER FINDER (STRICT + FALLBACK)
+// ===============================
+function findPlayerStrict(text, players) {
+
+    const t = text.toLowerCase();
+
+    let found = players.find(p => {
+        const name = p.nom.toLowerCase();
+        return t.includes(name);
+    });
+
+    return found || null;
+}
+
+
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
