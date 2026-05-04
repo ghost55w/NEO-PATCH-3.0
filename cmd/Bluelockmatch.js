@@ -2696,6 +2696,103 @@ if (!result && isPassive) {
     }
 }
 
+
+// ===============================
+// 💪🏼 CAS: DUELS CONTACT PHYSIQUE 
+// ===============================
+
+const physicalKeywords = [
+    "épaule", "coup d'épaule",
+    "avant bras", "paume",
+    "contact", "pousser", "bouscule"
+];
+
+const isPhysical = physicalKeywords.some(k => atk.includes(k) || def.includes(k));
+
+if (!result && isPhysical) {
+
+    const atkPhy = atkStats.phy || 50;
+    const defPhy = defStats.phy || 50;
+
+    const diffPhy = defPhy - atkPhy;
+
+    // ===============================
+    // 🧱 VALIDATION COUP D'ÉPAULE
+    // ===============================
+    const isShoulder = def.includes("épaule");
+
+    const validTarget =
+        def.includes("épaule droite") ||
+        def.includes("épaule gauche");
+
+    // ❌ FAUTE SI MAUVAISE ZONE
+    if (isShoulder && !validTarget) {
+
+        const zone = match.zone || "C2";
+        const isPenalty = zone === "A1";
+
+        result = {
+            ok: false,
+            type: "faute",
+            msg: `❌ Faute ! (${isPenalty ? "PENALTY" : "COUP FRANC"})`
+        };
+    }
+
+    // ===============================
+    // 💥 RÉSOLUTION DU DUEL
+    // ===============================
+    else {
+
+        // 💥 GROS ÉCART → CHUTE
+        if (diffPhy > 15) {
+
+            match.fallenPlayer = attacker.nom;
+
+            result = {
+                ok: false,
+                type: "chute",
+                msg: `💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
+            };
+        }
+
+        // ⚖️ AVANTAGE DEF → DÉSÉQUILIBRE
+        else if (diffPhy > 0) {
+
+            match.unbalancedPlayer = attacker.nom;
+
+            result = {
+                ok: false,
+                type: "déséquilibre",
+                msg: `⚖️ ${attacker.nom} perd l'équilibre`
+            };
+        }
+
+        // 🤜🤛 ÉGALITÉ
+        else if (diffPhy === 0) {
+
+            match.unbalancedPlayer = attacker.nom;
+
+            result = {
+                ok: false,
+                type: "déséquilibre",
+                msg: `🤜🤛 Duel physique équilibré`
+            };
+        }
+
+        // 💪 ATTAQUANT PLUS FORT
+        else {
+
+            match.unbalancedPlayer = defender.nom;
+
+            result = {
+                ok: true,
+                type: "win_physical",
+                msg: `💪 ${attacker.nom} résiste au contact`
+            };
+        }
+    }
+}    
+
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
 // ===============================
