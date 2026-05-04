@@ -1229,24 +1229,39 @@ function initKickoffPositions(match) {
 
 
 // ===============================
-// 🎯 KICK-OFF ACTION AUTOMATIQUE
+// 🎯 KICK-OFF ACTION AUTOMATIQUE 
 // ===============================
 function kickoffStart(match) {
 
-    const team1 = match.lineup1 || [];
+    const teamA = match.lineup1 || [];
+    const teamB = match.lineup2 || [];
 
-    const striker = team1.find(p => p.poste === "AC");
-    const midfielder = team1.find(p => p.poste === "MC");
+    const mcA = teamA.find(p => p.poste === "MC");
+    const mcB = teamB.find(p => p.poste === "MC");
 
-    if (!striker || !midfielder) return "";
+    if (!mcA || !mcB) return "";
 
-    match.ballHolder = midfielder.nom;
-    match.activePlayer = midfielder.nom;
+    let starter = null;
+
+    // 🧠 équipe qui engage le match
+    if (match.kickoffTeam === 1) {
+        starter = mcA;
+    } 
+    else if (match.kickoffTeam === 2) {
+        starter = mcB;
+    } 
+    else {
+        return ""; // sécurité
+    }
+
+    match.ballHolder = starter.nom;
+    match.activePlayer = starter.nom;
     match.phase = "active";
-    match.zone = "C2"; // 👈 IMPORTANT
+    match.zone = "C2";
 
-    return `(${match.zone}) ${striker.nom} fait une passe vers ${midfielder.nom} au centre du terrain, puis ${midfielder.nom} contrôle et prend le contrôle du jeu`;
+    return `(C2) ${starter.nom} lance le jeu ⚽...`;
 }
+
 // ===============================
 // 🚀 START MATCH ENGINE
 // ===============================
