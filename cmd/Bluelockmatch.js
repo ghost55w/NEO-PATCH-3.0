@@ -1848,58 +1848,56 @@ match.possessions = {
     [match.id2]: 0
 };
 
-    // =========================
-    // ⚠️ SAFE TERRAIN INIT (ANTI CRASH)
-    // =========================
-    try {
+// =========================
+// ⚠️ SAFE TERRAIN INIT (ANTI CRASH)
+// =========================
+try {
 
-        const equipeAttack =
-            match.possession === match.team1Nom
-                ? match.lineup1
-                : match.lineup2;
+    const equipeAttack =
+        match.possession === match.team1Nom
+            ? match.lineup1
+            : match.lineup2;
 
-        const equipeDefense =
-            match.possession === match.team1Nom
-                ? match.lineup2
-                : match.lineup1;
+    const equipeDefense =
+        match.possession === match.team1Nom
+            ? match.lineup2
+            : match.lineup1;
 
-        if (equipeAttack && equipeDefense) {
+    if (equipeAttack && equipeDefense) {
 
-            if (typeof getZoneYParLigne === "function") {
-                equipeAttack.forEach(j => {
-                    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-                });
+        if (typeof getZoneYParLigne === "function") {
+            equipeAttack.forEach(j => {
+                j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+            });
 
-                equipeDefense.forEach(j => {
-                    j.zoneY = getZoneYParLigne(j.ligne, "defense");
-                });
-            }
-
-            if (typeof initPlayerPosition === "function") {
-                match.lineup1?.forEach(j => initPlayerPosition(j));
-                match.lineup2?.forEach(j => initPlayerPosition(j));
-            }
-
-            if (typeof assignerVisAVis === "function") {
-                match.positions = [
-                    ...(match.lineup1 || []),
-                    ...(match.lineup2 || [])
-                ];
-
-                assignerVisAVis(match);
-            }
-            if (typeof kickoffStart === "function") {
-    kickoffStart(match);
-            }
+            equipeDefense.forEach(j => {
+                j.zoneY = getZoneYParLigne(j.ligne, "defense");
+            });
         }
 
-    } catch (e) {
-        console.log("⚠️ Erreur init terrain ignorée :", e);
+        if (typeof initPlayerPosition === "function") {
+            match.lineup1?.forEach(j => initPlayerPosition(j));
+            match.lineup2?.forEach(j => initPlayerPosition(j));
+        }
+
+        if (typeof assignerVisAVis === "function") {
+            match.positions = [
+                ...(match.lineup1 || []),
+                ...(match.lineup2 || [])
+            ];
+
+            assignerVisAVis(match);
+        }
+
     }
 
-    // =========================
-    // 🎯 KICKOFF (GARANTI)
-    // =========================
+} catch (e) {
+    console.log("⚠️ Erreur init terrain ignorée :", e);
+}
+
+// =========================
+// 🎯 KICKOFF (GARANTI)
+// =========================
 const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
