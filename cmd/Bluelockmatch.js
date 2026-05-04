@@ -1803,7 +1803,9 @@ async function lancerMatch(chat, ovl) {
     match.kickoffStarted = true;
 
     const isTeam1 = Math.random() < 0.5;
-
+    
+match.kickoffTeam = isTeam1 ? 1 : 2;
+    
     match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
     match.phase = "kickoff";
     match.etat = "en_cours";
