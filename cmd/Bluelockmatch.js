@@ -1236,23 +1236,24 @@ function kickoffStart(match) {
     const teamA = match.lineup1 || [];
     const teamB = match.lineup2 || [];
 
-    const mcA = teamA.find(p => p.poste === "MC");
-    const mcB = teamB.find(p => p.poste === "MC");
-
-    if (!mcA || !mcB) return "";
+    // 🔥 détection robuste du MC
+    const mcA = teamA.find(p => p.poste?.toUpperCase().includes("MC"));
+    const mcB = teamB.find(p => p.poste?.toUpperCase().includes("MC"));
 
     let starter = null;
 
-    // 🧠 équipe qui engage le match
+    // 🧠 équipe qui engage
     if (match.kickoffTeam === 1) {
-        starter = mcA;
+        starter = mcA || teamA[0]; // fallback safe
     } 
     else if (match.kickoffTeam === 2) {
-        starter = mcB;
+        starter = mcB || teamB[0]; // fallback safe
     } 
     else {
-        return ""; // sécurité
+        return "";
     }
+
+    if (!starter) return "";
 
     match.ballHolder = starter.nom;
     match.activePlayer = starter.nom;
@@ -1261,7 +1262,6 @@ function kickoffStart(match) {
 
     return `(C2) ${starter.nom} lance le jeu ⚽...`;
 }
-
 
 
 // ===============================
