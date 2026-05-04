@@ -2593,8 +2593,7 @@ if (!checkDefense.ok) {
 
     return found;
 };
-
-    let attacker = null;
+let attacker = null;
 
 // ===============================
 // ⚽ PORTEUR DE BALLE PRIORITAIRE
@@ -2602,9 +2601,8 @@ if (!checkDefense.ok) {
 if (match.ballHolder) {
     attacker = allPlayers.find(p => p.nom === match.ballHolder);
 
-    // ❌ sécurité si joueur supprimé / inexistant
     if (!attacker) {
-        attacker = allPlayers[0]; // fallback safe
+        attacker = allPlayers[0];
     }
 }
 
@@ -2612,7 +2610,7 @@ if (match.ballHolder) {
 if (!attacker) {
     attacker = findPlayer(attaqueText);
 }
-    }
+
 let defender = findPlayer(defenseText);
 
 // 🧠 fallback tactique
@@ -2620,8 +2618,8 @@ const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
 if (tacticalTarget) {
     defender = tacticalTarget;
-}
-
+} 
+    
     if (!attacker || !defender) {
         return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
     }
