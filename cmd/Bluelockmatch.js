@@ -1262,15 +1262,7 @@ function kickoffStart(match) {
     return `(C2) ${starter.nom} lance le jeu ⚽...`;
 }
 
-// ===============================
-// 🚀 START MATCH ENGINE
-// ===============================
-function startMatch(match) {
 
-    initKickoffPositions(match);
-
-    kickoffStart(match);
-} 
 
 // ===============================
 // 🎯 EXTRACTION COMPLÈTE DISTANCE RANGE
@@ -1908,7 +1900,7 @@ match.possessions = {
     // =========================
     // 🎯 KICKOFF (GARANTI)
     // =========================
-const kickoffText = kickoffStart(match); 
+const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
 
@@ -1935,7 +1927,6 @@ ${kickoffText}
         mentions: [jidStart]
     });
 }
-
     // =========================
     // 🚀 START ENGINE
     // =========================
