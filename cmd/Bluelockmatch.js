@@ -3423,7 +3423,7 @@ if (!result) {
 // ===============================
 // 🧠 BUILD CONTEXT (POUR NARRATION)
 // ===============================
-const context = match.context || {};
+const resumeContext = match.context || {};
 
 const atkStats = attacker.stats || {};
 const defStats = defender.stats || {};
