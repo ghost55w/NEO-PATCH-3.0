@@ -2387,6 +2387,10 @@ if (!match.pendingAttack) {
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
+    const displayName =
+        match.names?.[next] ||
+        next.split("@")[0];
+
     await ovl.sendMessage(chat, {
         text:
 `*🛡️⚡⚽ ATTAQUE !*
@@ -2396,7 +2400,7 @@ if (!match.pendingAttack) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${displayName} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
@@ -2460,6 +2464,10 @@ if (res && res.message && res.type !== "normal") {
 const resumeDefense = genererResumeFull(defense, match);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
+const displayName =
+    match.names?.[match.joueurTour] ||
+    match.joueurTour.split("@")[0];
+
 await ovl.sendMessage(chat, {
     text:
 `*🛡️⚔️⚽ DÉFENSE !*
@@ -2469,7 +2477,7 @@ await ovl.sendMessage(chat, {
 
 📊 NOTE DU PAVÉ : ${noteDefense}/10
 
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
+➡️ @${displayName} NEXT
 
 ╰───────────────────
                🔷BLUELOCK⚽🥅`,
@@ -3445,7 +3453,9 @@ const resume = generateDuelResume(
 // ===============================
 const next = match.attacker;
 
-match.phaseDuelResolved = true;
+const displayName =
+    match.names?.[next] ||
+    next.split("@")[0];
 
 return {
     ok: result.ok,
@@ -3459,12 +3469,14 @@ return {
 ⚡ ${attacker.nom} Dribble : ${atkStats.dri || 50}
 🛡️ ${defender.nom} Defense : ${defStats.def || 50}
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${displayName} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`
-}; 
-}    
+              🔷BLUELOCK⚽🥅`,
+    mentions: [next] 
+};
+} 
+
 
 
 /* ===============================
