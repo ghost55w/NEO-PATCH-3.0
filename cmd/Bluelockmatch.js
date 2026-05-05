@@ -2908,7 +2908,7 @@ const defText = (defenseText || "").toLowerCase();
 // ===============================
 // 🧠 CONTEXT ENGINE (INTENT LAYER)
 // ===============================
-const context = {
+const duelContext = {
     sprint:
         atkText.includes("vmax") ||
         atkText.includes("accélère") ||
@@ -2936,7 +2936,7 @@ const context = {
         atkText.includes("devant") ? "forward" : null,
 
     distance: extractDistance(atkText)
-};    
+};
     
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
