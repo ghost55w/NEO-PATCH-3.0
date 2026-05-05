@@ -3175,14 +3175,15 @@ if (isPhysical) {
     }
 }
 
+
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
 // ===============================
 
 function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) {
 
-    const atk = attacker.stats || {};
-    const def = defender.stats || {};
+    const atk = attacker?.stats || {};
+    const def = defender?.stats || {};
 
     const tA = (attackText || "").toLowerCase();
     const tD = (defenseText || "").toLowerCase();
@@ -3192,7 +3193,7 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     // ===============================
     function updateBody(player, text) {
 
-        if (!player) return;
+        if (!player || !text) return;
 
         if (!player.bodyAngle) player.bodyAngle = 0;
 
@@ -3204,9 +3205,10 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
         if (t.includes("pivot droite 90")) player.bodyAngle += 90;
         if (t.includes("tour complet") || t.includes("360")) player.bodyAngle += 360;
 
-        // normalization anti overflow
+        // normalisation robuste
         player.bodyAngle = normalizeAngle(player.bodyAngle % 360);
 
+        // safety fallback state
         player.bodyState = getBodyState(player.bodyAngle) || "front";
     }
 
@@ -3216,8 +3218,8 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     updateBody(attacker, attackText);
     updateBody(defender, defenseText);
 
-    const attackerState = attacker.bodyState || "front";
-    const defenderState = defender.bodyState || "front";
+    const attackerState = attacker?.bodyState || "front";
+    const defenderState = defender?.bodyState || "front";
 
     // ===============================
     // ⚽ DRIBBLES RECONNUS (25+)
@@ -3407,36 +3409,73 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 }
     
 
-    // ===============================
-    // ⚖️ FALLBACK
-    // ===============================
-    if (!result) {
-        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
-    }
+   // ===============================
+// ⚖️ FALLBACK SAFE RESULT
+// ===============================
+if (!result) {
+    result = {
+        ok: false,
+        type: "neutral",
+        msg: "⚔️ Duel équilibré"
+    };
+}
 
-    const next = match.attacker;
+// ===============================
+// 🧠 BUILD CONTEXT (POUR NARRATION)
+// ===============================
+const context = match.context || {};
 
-    match.phaseDuelResolved = true;
+const atkStats = attacker.stats || {};
+const defStats = defender.stats || {};
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
+// enrichissement context si pas déjà présent
+context.sprint = context.sprint ?? atk.includes("vmax") || atk.includes("accélère");
+context.skill = context.skill ?? atk.includes("dribble") || atk.includes("feinte");
+context.pressure = context.pressure ?? def.includes("pression") || def.includes("proche");
+
+context.direction =
+    context.direction ??
+    (atk.includes("gauche") ? "left" :
+     atk.includes("droite") ? "right" :
+     atk.includes("devant") ? "forward" : null);
+
+context.distance = context.distance ?? extractDistance(atk);
+
+// ===============================
+// 🎙️ UNIQUE RESUME ENGINE
+// ===============================
+const resume = generateDuelResume(
+    attacker,
+    defender,
+    result.type,
+    context
+);
+
+// ===============================
+// 🏁 FINAL RETURN (CLEAN ENGINE)
+// ===============================
+const next = match.attacker;
+
+match.phaseDuelResolved = true;
+
+return {
+    ok: result.ok,
+    type: result.type,
+    message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
-${result.msg}
+🎙️ RESUME♻️ : ${resume}
+
+⚡ ${attacker.nom} Dribble : ${atkStats.dri || 50}
+🛡️ ${defender.nom} Defense : ${defStats.def || 50}
 
 ➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    };
-}
-
-
-    
+}; 
+}    
 
 
 /* ===============================
