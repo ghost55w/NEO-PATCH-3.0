@@ -1442,74 +1442,7 @@ function initBall(match, position = { x: 0, y: 0 }) {
         position
     };
                             }
-// ===============================
-// 🚫 VALIDATION LINEUP GLOBAL (IA SAFE)
-// ===============================
-function validateLineupAction(text, players) {
 
-    if (!text || !players) {
-        return { ok: true, detectedPlayers: [] };
-    }
-
-    const t = text.toLowerCase();
-
-    const detectedPlayers = [];
-
-    // ===============================
-    // ⚽ 1. DETECTION INTELLIGENTE JOUEURS
-    // ===============================
-    for (const p of players) {
-
-        if (!p || !p.nom) continue;
-
-        const name = p.nom.toLowerCase();
-
-        // match simple + tolérance erreurs
-        if (
-            t.includes(name) ||
-            levenshtein(name, t.split(" ")[0] || "") <= 2
-        ) {
-            detectedPlayers.push(p);
-        }
-    }
-
-    // ===============================
-    // ⚠️ 2. DETECTION D'ERREURS RÉELLES
-    // ===============================
-
-    const words = t.split(/\s+/);
-
-    for (let w of words) {
-
-        if (w.length < 4) continue; // ignore petits mots
-
-        const isKnown = players.some(p =>
-            p.nom.toLowerCase().includes(w) ||
-            w.includes(p.nom.toLowerCase())
-        );
-
-        const isActionWord = [
-            "fonce", "dribble", "passe", "tir", "shoot",
-            "accélère", "cours", "vmax", "centre"
-        ].includes(w);
-
-        if (!isKnown && !isActionWord && /^[a-zA-Z]+$/.test(w)) {
-
-            return {
-                ok: false,
-                error: `❌ Joueur inconnu détecté: ${w}`
-            };
-        }
-    }
-
-    // ===============================
-    // 📦 OUTPUT
-    // ===============================
-    return {
-        ok: true,
-        detectedPlayers
-    };
-}
 
 // ===============================
 // 🧠 MATCH ENGINE UTILITIES CORE
@@ -2804,60 +2737,44 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     ];
 
     // ===============================
-// 🚫 VALIDATION LINEUP GLOBAL
-// ===============================
-const checkAttack = validateLineupAction(attaqueText, allPlayers);
-const checkDefense = validateLineupAction(defenseText, allPlayers);
-
-if (!checkAttack.ok) {
-    return { ok: false, type: "erreur", message: checkAttack.error };
-}
-
-if (!checkDefense.ok) {
-    return { ok: false, type: "erreur", message: checkDefense.error };
-}
-    
+    // 🔍 FIND PLAYER
+    // ===============================
     const findPlayer = (txt) => {
-    const t = pureName(txt);
+        const t = pureName(txt);
 
-    // 🔍 Recherche stricte dans le lineup
-    let found = allPlayers.find(p => {
-        const n = pureName(p.nom);
-        return t.includes(n) || n.includes(t);
-    });
+        return allPlayers.find(p => {
+            const n = pureName(p.nom);
+            return t.includes(n) || n.includes(t);
+        }) || null;
+    };
 
-    // ❌ Si pas trouvé → on bloque
-    if (!found) return null;
+    let attacker = null;
 
-    return found;
-};
-let attacker = null;
+    // ===============================
+    // ⚽ PORTEUR DE BALLE PRIORITAIRE
+    // ===============================
+    if (match.ballHolder) {
+        attacker = allPlayers.find(p => p.nom === match.ballHolder);
 
-// ===============================
-// ⚽ PORTEUR DE BALLE PRIORITAIRE
-// ===============================
-if (match.ballHolder) {
-    attacker = allPlayers.find(p => p.nom === match.ballHolder);
-
-    if (!attacker) {
-        attacker = allPlayers[0];
+        if (!attacker) {
+            attacker = allPlayers[0]; // fallback safe
+        }
     }
-}
 
-// fallback si pas de ballon
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
-}
+    // fallback si pas de ballon
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
 
-let defender = findPlayer(defenseText);
+    let defender = findPlayer(defenseText);
 
-// 🧠 fallback tactique
-const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+    // 🧠 fallback tactique
+    const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
-if (tacticalTarget) {
-    defender = tacticalTarget;
-} 
-    
+    if (tacticalTarget) {
+        defender = tacticalTarget;
+    }
+
     if (!attacker || !defender) {
         return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
     }
@@ -2866,7 +2783,7 @@ if (tacticalTarget) {
     const defStats = defender.stats || {};
 
     const atk = attaqueText.toLowerCase();
-    const def = defenseText.toLowerCase();
+    const def = defenseText.toLowerCase(); 
 
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
@@ -2895,7 +2812,7 @@ const defBaseVmax = defStats.acc || 50;
 const postureDebout = ["debout", "relâché", "normal"];
 
 const postureBasse = [
-    "fléchis", "jambes fléchies", "écartées",
+    "fléchis", "jambes fléchies", "jambes écartées",
     "défensive", "basse", "stance basse"
 ];
 
