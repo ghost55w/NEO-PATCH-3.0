@@ -1647,6 +1647,102 @@ function findPlayerStrict(text, players) {
     return found || null;
 }
 
+// ===============================
+// 🧠 GENERATEUR DE RESUME DYNAMIQUE (AVEC CONTEXT)
+// ===============================
+function generateDuelResume(attacker, defender, resultType, context = {}) {
+
+    const atk = attacker.nom;
+    const def = defender.nom;
+
+    const {
+        sprint = false,
+        skill = false,
+        pressure = false,
+        direction = null,
+        distance = null
+    } = context;
+
+    // ===============================
+    // 🎭 BASE PHRASES
+    // ===============================
+    const successDribble = [
+        `${atk} élimine ${def}`,
+        `${atk} passe ${def}`,
+        `${atk} prend le dessus sur ${def}`,
+        `${atk} déstabilise complètement ${def}`,
+        `${atk} casse la défense de ${def}`
+    ];
+
+    const failDefense = [
+        `${def} intercepte le ballon`,
+        `${def} stoppe l'action`,
+        `${def} bloque ${atk}`,
+        `${def} récupère le ballon`,
+        `${def} coupe la progression de ${atk}`
+    ];
+
+    const consequencesAttack = [
+        "et enchaîne vers l'avant",
+        "et accélère vers le but",
+        "et continue sa progression balle au pied",
+        "et crée une occasion dangereuse",
+        "et prend l'avantage dans l'action"
+    ];
+
+    const consequencesDefense = [
+        "et lance une contre-attaque",
+        "et sécurise la possession",
+        "et relance le jeu proprement",
+        "et reprend le contrôle du rythme",
+        "et inverse immédiatement la pression"
+    ];
+
+    const styles = [
+        "avec maîtrise",
+        "avec puissance",
+        "avec vitesse",
+        "avec sang-froid",
+        "avec autorité"
+    ];
+
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // ===============================
+    // ⚡ CONTEXT BUILDER
+    // ===============================
+    let contextText = [];
+
+    if (sprint) contextText.push("à pleine vitesse");
+    if (skill) contextText.push("avec une technique précise");
+    if (pressure) contextText.push("sous pression");
+
+    if (direction === "left") contextText.push("sur la gauche");
+    if (direction === "right") contextText.push("sur la droite");
+    if (direction === "forward") contextText.push("plein axe");
+
+    if (distance) contextText.push(`sur ${distance}m`);
+
+    const contextString = contextText.length > 0
+        ? " " + contextText.join(", ")
+        : "";
+
+    // ===============================
+    // ⚔️ RESULT LOGIC
+    // ===============================
+    if (resultType === "win" || resultType === "escape") {
+
+        return `${pick(successDribble)}${contextString} ${pick(styles)} ${pick(consequencesAttack)}.`;
+    }
+
+    if (resultType === "stop" || resultType === "INTERCEPTION") {
+
+        return `${pick(failDefense)}${contextString} ${pick(styles)} ${pick(consequencesDefense)}.`;
+    }
+
+    return `Le duel entre ${atk} et ${def} reste intense, aucun ne cède${contextString}.`;
+}
+
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2809,6 +2905,39 @@ const rawDef = defenseText;
 const atk = rawAtk.toLowerCase();
 const def = rawDef.toLowerCase();
 
+// ===============================
+// 🧠 CONTEXT ENGINE (INTENT LAYER)
+// ===============================
+const context = {
+    sprint:
+        atk.includes("vmax") ||
+        atk.includes("accélère") ||
+        atk.includes("fonce"),
+
+    skill:
+        atk.includes("dribble") ||
+        atk.includes("double contact") ||
+        atk.includes("feinte") ||
+        atk.includes("crochet") ||
+        atk.includes("roulette") ||
+        atk.includes("elastico"),
+
+    pressure:
+        def.includes("proche") ||
+        def.includes("1m") ||
+        def.includes("pression") ||
+        def.includes("collé") ||
+        def.includes("serré") ||
+        def.includes("marquage"),
+
+    direction:
+        atk.includes("gauche") ? "left" :
+        atk.includes("droite") ? "right" :
+        atk.includes("devant") ? "forward" : null,
+
+    distance: extractDistance(atk)
+};
+    
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
 // ===============================
