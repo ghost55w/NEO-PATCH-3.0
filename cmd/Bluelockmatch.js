@@ -3408,79 +3408,34 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
     
-// ===============================
-// ⚖️ FALLBACK SAFE RESULT
-// ===============================
-if (!result) {
-    result = {
-        ok: false,
-        type: "contre",
-        msg: "⚔️ Duel en cours..."
-    };
-}
 
 // ===============================
-// 🎙️ RESUME
-// ===============================
-const resumeContext = match.context || {};
+    // ⚖️ FALLBACK
+    // ===============================
+    if (!result) {
+        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
+    }
 
-resumeContext.sprint = resumeContext.sprint ?? atk.includes("vmax");
-resumeContext.skill = resumeContext.skill ?? atk.includes("dribble");
-resumeContext.pressure = resumeContext.pressure ?? def.includes("pression");
+    const next = match.attacker;
 
-resumeContext.direction =
-    resumeContext.direction ??
-    (atk.includes("gauche") ? "left" :
-     atk.includes("droite") ? "right" :
-     atk.includes("devant") ? "forward" : null);
+    match.phaseDuelResolved = true;
 
-resumeContext.distance =
-    resumeContext.distance ?? extractDistance(atk);
-
-const resume = generateDuelResume(
-    attacker,
-    defender,
-    result.type,
-    resumeContext
-);
-
-// ===============================
-// 🔧 SAFE MESSAGE (IMPORTANT)
-// ===============================
-const msg = result.msg || "⚔️ Duel en cours...";
-
-// ===============================
-// 🏁 FINAL RETURN (ANCIEN STYLE RESTAURÉ)
-// ===============================
-const next = match.attacker;
-
-const displayName =
-    match.names?.[next] ||
-    next.split("@")[0];
-
-match.phaseDuelResolved = true;
-    
-return {
-    ok: result.ok,
-    type: result.type,
-    message:
+    return {
+        ok: result.ok,
+        type: result.type,
+        message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
-🎙️ RESUME♻️ : ${resume}
+${result.msg}
 
-⚡ ${attacker.nom} Dribble : ${atkStats.dri || 50}
-🛡️ ${defender.nom} Defense : ${defStats.def || 50}
-
-➡️ @${displayName} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
-    mentions: [next]
-};
-
-} 
+              🔷BLUELOCK⚽🥅`
+    };
+    }
 
 
 /* ===============================
