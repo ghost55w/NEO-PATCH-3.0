@@ -2986,13 +2986,9 @@ let defVmax = posture === "debout"
     : defBaseVmax;
 
 // ===============================
-// 🎯 RESULT GLOBAL (NE BLOQUE PAS LE MATCH)
+// 🎯 RESULT GLOBAL (FIX)
 // ===============================
-let result = {
-    ok: false,
-    type: "neutral",
-    msg: "🏃 Duel en cours..."
-};
+let result = null;
 
 // ===============================
 // 🏃 CHASE PRIORITY LOGIC
@@ -3085,7 +3081,6 @@ if (isPassive && !result) {
 // ===============================
 // 💪🏼 CAS: DUELS CONTACT PHYSIQUE 
 // ===============================
-
 const physicalKeywords = [
     "épaule", "coup d'épaule",
     "avant bras", "paume",
@@ -3093,11 +3088,10 @@ const physicalKeywords = [
 ];
 
 const isPhysical =
-    !result &&
-    (atk && def) &&
-    physicalKeywords.some(k => atk.includes(k) || def.includes(k));
+    (atkText && defText) &&
+    physicalKeywords.some(k => atkText.includes(k) || defText.includes(k));
 
-if (isPhysical) {
+if (!result && isPhysical) {
 
     const atkPhy = atkStats.phy || 50;
     const defPhy = defStats.phy || 50;
@@ -3105,13 +3099,13 @@ if (isPhysical) {
     const diffPhy = defPhy - atkPhy;
 
     // ===============================
-    // 🧱 FAUTE CHECK (PLUS STABLE)
+    // 🧱 FAUTE CHECK
     // ===============================
-    const isShoulder = def.includes("épaule");
+    const isShoulder = defText.includes("épaule");
 
     const validTarget =
-        def.includes("épaule droite") ||
-        def.includes("épaule gauche");
+        defText.includes("épaule droite") ||
+        defText.includes("épaule gauche");
 
     if (isShoulder && !validTarget) {
 
@@ -3148,7 +3142,7 @@ if (isPhysical) {
             result = {
                 ok: false,
                 type: "déséquilibre",
-                msg: `⚖️ ${attacker.nom} perd légèrement l’équilibre sous la pression`
+                msg: `⚖️ ${attacker.nom} perd l’équilibre sous la pression`
             };
         }
 
@@ -3157,7 +3151,7 @@ if (isPhysical) {
             result = {
                 ok: false,
                 type: "neutral",
-                msg: `🤜🤛 Duel physique équilibré entre les deux joueurs`
+                msg: `🤜🤛 Duel physique équilibré`
             };
         }
 
@@ -3166,11 +3160,12 @@ if (isPhysical) {
             result = {
                 ok: true,
                 type: "win_physical",
-                msg: `💪 ${attacker.nom} résiste et garde l’avantage`
+                msg: `💪 ${attacker.nom} résiste au contact et garde le ballon`
             };
         }
     }
 }
+
 
 
 // ===============================
