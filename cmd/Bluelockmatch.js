@@ -3408,39 +3408,35 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
     
-
-   // ===============================
+// ===============================
 // ⚖️ FALLBACK SAFE RESULT
 // ===============================
 if (!result) {
     result = {
         ok: false,
-        type: "neutral",
-        msg: "⚔️ Duel équilibré"
+        type: "contre",
+        msg: "⚔️ Duel en cours..."
     };
 }
 
 // ===============================
-// 🧠 BUILD CONTEXT
+// 🎙️ RESUME
 // ===============================
 const resumeContext = match.context || {};
 
-resumeContext.sprint = resumeContext.sprint ?? atkText.includes("vmax");
-resumeContext.skill = resumeContext.skill ?? atkText.includes("dribble");
-resumeContext.pressure = resumeContext.pressure ?? defText.includes("pression");
+resumeContext.sprint = resumeContext.sprint ?? atk.includes("vmax");
+resumeContext.skill = resumeContext.skill ?? atk.includes("dribble");
+resumeContext.pressure = resumeContext.pressure ?? def.includes("pression");
 
 resumeContext.direction =
     resumeContext.direction ??
-    (atkText.includes("gauche") ? "left" :
-     atkText.includes("droite") ? "right" :
-     atkText.includes("devant") ? "forward" : null);
+    (atk.includes("gauche") ? "left" :
+     atk.includes("droite") ? "right" :
+     atk.includes("devant") ? "forward" : null);
 
 resumeContext.distance =
-    resumeContext.distance ?? extractDistance(atkText);
+    resumeContext.distance ?? extractDistance(atk);
 
-// ===============================
-// 🎙️ RESUME
-// ===============================
 const resume = generateDuelResume(
     attacker,
     defender,
@@ -3448,11 +3444,13 @@ const resume = generateDuelResume(
     resumeContext
 );
 
-// 🔧 FIX SÉCURITÉ MESSAGE (IMPORTANT)
-const msg = result.msg || "🏃 Duel en cours...";
+// ===============================
+// 🔧 SAFE MESSAGE (IMPORTANT)
+// ===============================
+const msg = result.msg || "⚔️ Duel en cours...";
 
 // ===============================
-// 🏁 FINAL RETURN (MATCH UP CLASSIC + HYBRID)
+// 🏁 FINAL RETURN (ANCIEN STYLE RESTAURÉ)
 // ===============================
 const next = match.attacker;
 
@@ -3461,7 +3459,7 @@ const displayName =
     next.split("@")[0];
 
 match.phaseDuelResolved = true;
-
+    
 return {
     ok: result.ok,
     type: result.type,
@@ -3469,9 +3467,6 @@ return {
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
-
-${msg}
-🏃 ${result.type === "CHASE" ? "Duel de course toujours en cours..." : ""}
 
 🎙️ RESUME♻️ : ${resume}
 
@@ -3482,9 +3477,11 @@ ${msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-    mentions: [next] 
+    mentions: [next]
 };
-        } 
+
+} 
+
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
