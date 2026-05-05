@@ -2902,9 +2902,8 @@ const defStats = defender.stats || {};
 const rawAtk = attaqueText;
 const rawDef = defenseText;
 
-const atk = rawAtk.toLowerCase();
-const def = rawDef.toLowerCase();
-
+const atkText = (attaqueText || "").toLowerCase();
+const defText = (defenseText || "").toLowerCase();
 // ===============================
 // 🧠 CONTEXT ENGINE (INTENT LAYER)
 // ===============================
