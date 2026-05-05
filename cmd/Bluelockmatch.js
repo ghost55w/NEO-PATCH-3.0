@@ -3449,7 +3449,7 @@ const resume = generateDuelResume(
 );
 
 // ===============================
-// 🏁 FINAL RETURN (CLEAN ENGINE)
+// 🏁 FINAL RETURN (HYBRID CLEAN)
 // ===============================
 const next = match.attacker;
 
@@ -3457,13 +3457,17 @@ const displayName =
     match.names?.[next] ||
     next.split("@")[0];
 
+match.phaseDuelResolved = true;
+
 return {
     ok: result.ok,
     type: result.type,
     message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
+${result.msg}
 🎙️ RESUME♻️ : ${resume}
 
 ⚡ ${attacker.nom} Dribble : ${atkStats.dri || 50}
@@ -3475,7 +3479,6 @@ return {
               🔷BLUELOCK⚽🥅`,
     mentions: [next] 
 };
-} 
 
 
 
