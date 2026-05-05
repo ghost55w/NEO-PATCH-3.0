@@ -2899,9 +2899,6 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 const atkStats = attacker.stats || {};
 const defStats = defender.stats || {};
 
-const rawAtk = attaqueText;
-const rawDef = defenseText;
-
 const atkText = (attaqueText || "").toLowerCase();
 const defText = (defenseText || "").toLowerCase();
 
@@ -3421,34 +3418,31 @@ if (!result) {
 }
 
 // ===============================
-// 🧠 BUILD CONTEXT (POUR NARRATION)
+// 🧠 BUILD CONTEXT
 // ===============================
 const resumeContext = match.context || {};
 
-const atkStats = attacker.stats || {};
-const defStats = defender.stats || {};
+resumeContext.sprint = resumeContext.sprint ?? atkText.includes("vmax");
+resumeContext.skill = resumeContext.skill ?? atkText.includes("dribble");
+resumeContext.pressure = resumeContext.pressure ?? defText.includes("pression");
 
-// enrichissement context si pas déjà présent
-context.sprint = context.sprint ?? atk.includes("vmax") || atk.includes("accélère");
-context.skill = context.skill ?? atk.includes("dribble") || atk.includes("feinte");
-context.pressure = context.pressure ?? def.includes("pression") || def.includes("proche");
+resumeContext.direction =
+    resumeContext.direction ??
+    (atkText.includes("gauche") ? "left" :
+     atkText.includes("droite") ? "right" :
+     atkText.includes("devant") ? "forward" : null);
 
-context.direction =
-    context.direction ??
-    (atk.includes("gauche") ? "left" :
-     atk.includes("droite") ? "right" :
-     atk.includes("devant") ? "forward" : null);
-
-context.distance = context.distance ?? extractDistance(atk);
+resumeContext.distance =
+    resumeContext.distance ?? extractDistance(atkText);
 
 // ===============================
-// 🎙️ UNIQUE RESUME ENGINE
+// 🎙️ RESUME
 // ===============================
 const resume = generateDuelResume(
     attacker,
     defender,
     result.type,
-    context
+    resumeContext
 );
 
 // ===============================
