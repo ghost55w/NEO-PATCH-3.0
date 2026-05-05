@@ -3034,7 +3034,7 @@ else if (reason === "CHASE_CONTINUES") {
     result = {
         ok: false,
         type: "CHASE",
-        msg: `🏃 Duel toujours en cours...`
+        msg: "⚽🥅 Duel en cours..."
     };
 }
 
@@ -3408,34 +3408,79 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
     
+// ===============================
+// ⚖️ FALLBACK SAFE RESULT
+// ===============================
+if (!result) {
+    result = {
+        ok: false,
+        type: "CONTINUED_CHASE",
+        msg: "⚽🥅 Duel en cours..."
+    };
+}
 
 // ===============================
-    // ⚖️ FALLBACK
-    // ===============================
-    if (!result) {
-        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
-    }
+// 🎙️ RESUME
+// ===============================
+const resumeContext = match.context || {};
 
-    const next = match.attacker;
+resumeContext.sprint = resumeContext.sprint ?? atk.includes("vmax");
+resumeContext.skill = resumeContext.skill ?? atk.includes("dribble");
+resumeContext.pressure = resumeContext.pressure ?? def.includes("pression");
 
-    match.phaseDuelResolved = true;
+resumeContext.direction =
+    resumeContext.direction ??
+    (atk.includes("gauche") ? "left" :
+     atk.includes("droite") ? "right" :
+     atk.includes("devant") ? "forward" : null);
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
+resumeContext.distance =
+    resumeContext.distance ?? extractDistance(atk);
+
+const resume = generateDuelResume(
+    attacker,
+    defender,
+    result.type,
+    resumeContext
+);
+
+// ===============================
+// 🔧 SAFE MESSAGE (IMPORTANT)
+// ===============================
+const msg = result.msg || "⚽🥅 Duel en cours..."; 
+
+// ===============================
+// 🏁 FINAL RETURN 
+// ===============================
+const next = match.attacker;
+
+const displayName =
+    match.names?.[next] ||
+    (next?.split("@")[0] || "NEXT");
+
+match.phaseDuelResolved = true;
+
+return {
+    ok: result.ok,
+    type: result.type,
+    message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
-${result.msg}
+🎙️ RESUME♻️ : ${resume || result.msg || "⚽🥅 Duel en cours..."}
 
-➡️ @${getTagFromJid(next)} NEXT
+⚡ ${attacker.nom} Dribble : ${atkStats.dri || 50}
+🛡️ ${defender.nom} Defense : ${defStats.def || 50}
+
+➡️ @${displayName} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`
-    };
-    }
+              🔷BLUELOCK⚽🥅`,
+    mentions: [next]
+};
+} 
+
 
 
 /* ===============================
