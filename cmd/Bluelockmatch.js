@@ -2904,38 +2904,39 @@ const rawDef = defenseText;
 
 const atkText = (attaqueText || "").toLowerCase();
 const defText = (defenseText || "").toLowerCase();
+
 // ===============================
 // 🧠 CONTEXT ENGINE (INTENT LAYER)
 // ===============================
 const context = {
     sprint:
-        atk.includes("vmax") ||
-        atk.includes("accélère") ||
-        atk.includes("fonce"),
+        atkText.includes("vmax") ||
+        atkText.includes("accélère") ||
+        atkText.includes("fonce"),
 
     skill:
-        atk.includes("dribble") ||
-        atk.includes("double contact") ||
-        atk.includes("feinte") ||
-        atk.includes("crochet") ||
-        atk.includes("roulette") ||
-        atk.includes("elastico"),
+        atkText.includes("dribble") ||
+        atkText.includes("double contact") ||
+        atkText.includes("feinte") ||
+        atkText.includes("crochet") ||
+        atkText.includes("roulette") ||
+        atkText.includes("elastico"),
 
     pressure:
-        def.includes("proche") ||
-        def.includes("1m") ||
-        def.includes("pression") ||
-        def.includes("collé") ||
-        def.includes("serré") ||
-        def.includes("marquage"),
+        defText.includes("proche") ||
+        defText.includes("1m") ||
+        defText.includes("pression") ||
+        defText.includes("collé") ||
+        defText.includes("serré") ||
+        defText.includes("marquage"),
 
     direction:
-        atk.includes("gauche") ? "left" :
-        atk.includes("droite") ? "right" :
-        atk.includes("devant") ? "forward" : null,
+        atkText.includes("gauche") ? "left" :
+        atkText.includes("droite") ? "right" :
+        atkText.includes("devant") ? "forward" : null,
 
-    distance: extractDistance(atk)
-};
+    distance: extractDistance(atkText)
+};    
     
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
