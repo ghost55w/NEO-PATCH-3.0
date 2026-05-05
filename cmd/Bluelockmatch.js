@@ -3448,8 +3448,11 @@ const resume = generateDuelResume(
     resumeContext
 );
 
+// 🔧 FIX SÉCURITÉ MESSAGE (IMPORTANT)
+const msg = result.msg || "🏃 Duel en cours...";
+
 // ===============================
-// 🏁 FINAL RETURN (HYBRID CLEAN)
+// 🏁 FINAL RETURN (MATCH UP CLASSIC + HYBRID)
 // ===============================
 const next = match.attacker;
 
@@ -3467,7 +3470,9 @@ return {
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
-${result.msg}
+${msg}
+🏃 ${result.type === "CHASE" ? "Duel de course toujours en cours..." : ""}
+
 🎙️ RESUME♻️ : ${resume}
 
 ⚡ ${attacker.nom} Dribble : ${atkStats.dri || 50}
@@ -3480,7 +3485,6 @@ ${result.msg}
     mentions: [next] 
 };
         } 
-
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
