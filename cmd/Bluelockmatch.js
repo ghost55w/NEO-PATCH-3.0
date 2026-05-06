@@ -2415,14 +2415,9 @@ const defense = action;
 // 🧠 DETECTION DEFENSE (UNE SEULE FOIS)
 // ===============================
 const defenseIntentKeywords = [
-    "bloque", "bloquer", "blocage",
-    "devant", "en face",
-    "stoppe", "arrête",
-    "tacle", "tacle debout", "tacle glissé",
-    "ferme", "coupe la route",
-    "intercepte", "gêne", "empêche",
-    "barrer", "barre la route",
-    "défense", "position défensive"
+    "bloque", "devant", "stoppe", "tacle",
+    "en face", "ferme", "coupe la route",
+    "intercepte", "gêne", "empêche"
 ];
 
 const isDefenseIntent = defenseIntentKeywords.some(k =>
@@ -2440,12 +2435,12 @@ if (isDefenseIntent && match.pendingAttack) {
         defense
     );
 
-if (res && (res.message || res.msg)) {
+    if (res && res.message) {
 
         await ovl.sendMessage(chat, {
-    text: res.message || res.msg,
-    mentions: [match.joueurTour]
-});
+            text: res.message,
+            mentions: [match.joueurTour]
+        });
 
         // 🔁 continuité du duel
         if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
@@ -2626,7 +2621,6 @@ async function handleDeplacements(match, joueur, texte) {
         message: moved ? "✅ Déplacement enregistré" : "ℹ️ Aucun mouvement"
     };
 }
-
 
  // ===============================
     // ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
@@ -2868,98 +2862,54 @@ if (!atkText || !defText) {
     };
         }
 
-  // ===============================
-// ⚽ FIND PLAYER IA (ROBUSTE)
+// ===============================
+// ⚽ FIND PLAYER SIMPLE (RETOUR VERSION STABLE)
 // ===============================
 const findPlayer = (txt) => {
-
-    const t = normalize(txt || "");
-
-    return allPlayers.find(p => {
-        const n = normalize(p.nom);
-        return t.includes(n);
-    }) || null;
+    return allPlayers.find(p =>
+        txt.toLowerCase().includes(p.nom.toLowerCase())
+    );
 };
 
 // ===============================
-// ⚽ ATTACKER (SOURCE UNIQUE)
+// ⚽ ATTAQUANT (PRIORITÉ BALL HOLDER)
 // ===============================
-const attacker = allPlayers.find(p =>
-    p.nom === match.ballHolder
-);
+let attacker =
+    allPlayers.find(p => p.nom === match.ballHolder) ||
+    findPlayer(attaqueText);
 
+// fallback sécurité
 if (!attacker) {
-    return {
-        ok: false,
-        type: "erreur",
-        message: "❌ Aucun porteur de balle valide"
-    };
+    attacker = allPlayers[0];
 }
 
 // ===============================
-// 🧠 EXTRACTION DEFENSE LINE
+// 🛡️ DEFENSEUR (SIMPLE + SAFE)
 // ===============================
-const combinedText = attaqueText + "\n" + defenseText;
+let defender = findPlayer(defenseText);
 
-const ballLine =
-    combinedText.split("\n").find(l => l.includes("⚽:")) || "";
-
-const detectedPlayers =
-    ballLine.match(/[A-ZÀ-ÿ][a-zà-ÿA-Z0-9'_-]+/g) || [];
-
-// ===============================
-// 🛡️ DEFENDER (RULE SIMPLE + STABLE)
-// ===============================
-
-// priorité 1 : joueur mentionné dans ligne ⚽
-let defender =
-    allPlayers.find(p => p.nom === detectedPlayers[0]) ||
-    null;
-
-// priorité 2 : analyse texte global défense
+// fallback automatique (ULTRA IMPORTANT pour éviter ton bug)
 if (!defender) {
-    defender = findPlayer(defenseText);
-}
-
-// priorité 3 : fallback anti crash
-if (!defender && detectedPlayers.length > 1) {
-    defender = allPlayers.find(p => p.nom === detectedPlayers[1]);
+    defender = allPlayers.find(p => p.nom !== attacker.nom);
 }
 
 // ===============================
-// 🚫 VALIDATION FINALE
+// 🚫 ANTI SELF MATCH (NON BLOQUANT)
 // ===============================
-if (!defender) {
+if (attacker && defender && attacker.nom === defender.nom) {
+    defender = allPlayers.find(p => p.nom !== attacker.nom);
+}
+
+// ===============================
+// 🚫 SÉCURITÉ FINALE (SANS CASSER LE MATCH)
+// ===============================
+if (!attacker || !defender) {
     return {
         ok: false,
         type: "erreur",
-        message: "❌ Défenseur introuvable"
+        message: "❌ Joueurs introuvables"
     };
 }
-
-// ===============================
-// ❌ ANTI SELF MATCH
-// ===============================
-if (attacker.nom === defender.nom) {
-
-    // fallback intelligent (important pour ton cas réel)
-    defender =
-        allPlayers.find(p =>
-            p.nom !== attacker.nom &&
-            detectedPlayers.includes(p.nom)
-        ) || null;
-}
-
-// ===============================
-// 🚫 FINAL SAFETY CHECK
-// ===============================
-if (!defender || attacker.nom === defender.nom) {
-    return {
-        ok: false,
-        type: "erreur",
-        message: "❌ Conflit de rôles (attacker = defender)"
-    };
-}  
 
 // ===============================
 // 📊 STATS SAFE
@@ -3067,8 +3017,7 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
 
 const passiveKeywords = [
     "se place", "devant", "barrer",
-    "bloque", "bloquer", "blocage",
-    "ferme", "coupe la route", "passage", "chemin" 
+    "bloque", "ferme", "coupe la route"
 ];
 
 const isPassive = passiveKeywords.some(k => def.includes(k));
