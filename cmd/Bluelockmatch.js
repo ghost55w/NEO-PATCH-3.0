@@ -2523,7 +2523,7 @@ if (!isRealDuel) {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-    
+}    
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
     // ===============================
