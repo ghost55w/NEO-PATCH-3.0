@@ -3126,9 +3126,9 @@ if (!result && isPhysical) {
     }
 
     // ===============================
-    // 💥 RÉSOLUTION PHYSIQUE 
+    // 💥 RÉSOLUTION PHYSIQUE
     // ===============================
-    if (!result || result.type === "neutral") {
+    if (result.type === "neutral") {
 
         if (diffPhy > 15) {
 
@@ -3169,7 +3169,9 @@ if (!result && isPhysical) {
             };
         }
     }
-}
+
+} // ✅ FIN BLOc PHYSIQUE
+
 
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
