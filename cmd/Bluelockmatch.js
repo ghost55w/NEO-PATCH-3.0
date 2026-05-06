@@ -3060,7 +3060,6 @@ if (!result && isPassive) {
     }
 }
 
-
 // ===============================
 // 💪🏼 CAS: DUELS CONTACT PHYSIQUE 
 // ===============================
@@ -3071,7 +3070,8 @@ const physicalKeywords = [
     "contact", "pousser", "bouscule"
 ];
 
-const isPhysical = physicalKeywords.some(k => atk.includes(k) || def.includes(k));
+const isPhysical =
+    physicalKeywords.some(k => atk.includes(k) || def.includes(k));
 
 if (!result && isPhysical) {
 
@@ -3081,7 +3081,7 @@ if (!result && isPhysical) {
     const diffPhy = defPhy - atkPhy;
 
     // ===============================
-    // 🧱 VALIDATION COUP D'ÉPAULE
+    // 🧱 VALIDATION FAUTE ÉPAULE
     // ===============================
     const isShoulder = def.includes("épaule");
 
@@ -3089,7 +3089,6 @@ if (!result && isPhysical) {
         def.includes("épaule droite") ||
         def.includes("épaule gauche");
 
-    // ❌ FAUTE SI MAUVAISE ZONE
     if (isShoulder && !validTarget) {
 
         const zone = match.zone || "C2";
@@ -3102,36 +3101,35 @@ if (!result && isPhysical) {
         };
     }
 
-// ===============================
-// ⚽ DRIBBLE ENGINE (PATCH)
-// ===============================
-if (!result) {
-    result = resolveDribbleDuel(
-        match,
-        attacker,
-        defender,
-        attaqueText,
-        defenseText
-    );
-}
-
-// ===============================
-// 🧯 FALLBACK GLOBAL
-// ===============================
-if (!result) {
-    result = {
-        ok: false,
-        type: "neutral",
-        msg: `⚔️ Duel sans avantage clair`
-    };
-}
+    // ===============================
+    // ⚽ DRIBBLE ENGINE (SI PAS DE FAUTE)
+    // ===============================
+    if (!result) {
+        result = resolveDribbleDuel(
+            match,
+            attacker,
+            defender,
+            attaqueText,
+            defenseText
+        );
+    }
 
     // ===============================
-    // 💥 RÉSOLUTION DU DUEL
+    // 🧯 FALLBACK PHYSIQUE
     // ===============================
-    else {
+    if (!result) {
+        result = {
+            ok: false,
+            type: "neutral",
+            msg: `⚔️ Duel physique neutre`
+        };
+    }
 
-        // 💥 GROS ÉCART → CHUTE
+    // ===============================
+    // 💥 RÉSOLUTION PHYSIQUE 
+    // ===============================
+    if (!result || result.type === "neutral") {
+
         if (diffPhy > 15) {
 
             match.fallenPlayer = attacker.nom;
@@ -3141,10 +3139,8 @@ if (!result) {
                 type: "chute",
                 msg: `💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
             };
-        }
 
-        // ⚖️ AVANTAGE DEF → DÉSÉQUILIBRE
-        else if (diffPhy > 0) {
+        } else if (diffPhy > 0) {
 
             match.unbalancedPlayer = attacker.nom;
 
@@ -3153,22 +3149,16 @@ if (!result) {
                 type: "déséquilibre",
                 msg: `⚖️ ${attacker.nom} perd l'équilibre`
             };
-        }
 
-        // 🤜🤛 ÉGALITÉ
-        else if (diffPhy === 0) {
-
-            match.unbalancedPlayer = attacker.nom;
+        } else if (diffPhy === 0) {
 
             result = {
                 ok: false,
                 type: "déséquilibre",
                 msg: `🤜🤛 Duel physique équilibré`
             };
-        }
 
-        // 💪 ATTAQUANT PLUS FORT
-        else {
+        } else {
 
             match.unbalancedPlayer = defender.nom;
 
@@ -3179,7 +3169,7 @@ if (!result) {
             };
         }
     }
-}    
+}
 
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
