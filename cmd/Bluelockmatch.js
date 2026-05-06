@@ -3102,6 +3102,30 @@ if (!result && isPhysical) {
         };
     }
 
+// ===============================
+// ⚽ DRIBBLE ENGINE (PATCH)
+// ===============================
+if (!result) {
+    result = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        attaqueText,
+        defenseText
+    );
+}
+
+// ===============================
+// 🧯 FALLBACK GLOBAL
+// ===============================
+if (!result) {
+    result = {
+        ok: false,
+        type: "neutral",
+        msg: `⚔️ Duel sans avantage clair`
+    };
+}
+
     // ===============================
     // 💥 RÉSOLUTION DU DUEL
     // ===============================
@@ -3386,7 +3410,7 @@ if (gap > 0) {
 }
 
 // ===============================
-// 🏁 LOCK DUEL (IMPORTANT)
+// 🏁 LOCK DUEL FINAL
 // ===============================
 match.phaseDuelResolved = true;
 match.phaseDuelFinal = true;
@@ -3398,7 +3422,7 @@ const next = match.ballHolder || match.attacker;
 
 const displayName =
     match.names?.[next] ||
-    next.split("@")[0];
+    (next ? next.split("@")[0] : "player");
 
 // ===============================
 // 📤 RETURN FINAL
@@ -3417,8 +3441,9 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-  };
-}
+};
+} 
+
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
