@@ -2415,9 +2415,14 @@ const defense = action;
 // 🧠 DETECTION DEFENSE (UNE SEULE FOIS)
 // ===============================
 const defenseIntentKeywords = [
-    "bloque", "devant", "stoppe", "tacle",
-    "en face", "ferme", "coupe la route",
-    "intercepte", "gêne", "empêche"
+    "bloque", "bloquer", "blocage",
+    "devant", "en face",
+    "stoppe", "arrête",
+    "tacle", "tacle debout", "tacle glissé",
+    "ferme", "coupe la route",
+    "intercepte", "gêne", "empêche",
+    "barrer", "barre la route",
+    "défense", "position défensive"
 ];
 
 const isDefenseIntent = defenseIntentKeywords.some(k =>
@@ -2435,12 +2440,12 @@ if (isDefenseIntent && match.pendingAttack) {
         defense
     );
 
-    if (res && res.message) {
+if (res && (res.message || res.msg)) {
 
         await ovl.sendMessage(chat, {
-            text: res.message,
-            mentions: [match.joueurTour]
-        });
+    text: res.message || res.msg,
+    mentions: [match.joueurTour]
+});
 
         // 🔁 continuité du duel
         if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
@@ -2894,8 +2899,10 @@ if (!attacker) {
 // ===============================
 // 🧠 EXTRACTION DEFENSE LINE
 // ===============================
+const combinedText = attaqueText + "\n" + defenseText;
+
 const ballLine =
-    text.split("\n").find(l => l.includes("⚽:")) || "";
+    combinedText.split("\n").find(l => l.includes("⚽:")) || "";
 
 const detectedPlayers =
     ballLine.match(/[A-ZÀ-ÿ][a-zà-ÿA-Z0-9'_-]+/g) || [];
@@ -3060,7 +3067,8 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
 
 const passiveKeywords = [
     "se place", "devant", "barrer",
-    "bloque", "ferme", "coupe la route"
+    "bloque", "bloquer", "blocage",
+    "ferme", "coupe la route", "passage", "chemin" 
 ];
 
 const isPassive = passiveKeywords.some(k => def.includes(k));
