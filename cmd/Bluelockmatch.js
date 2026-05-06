@@ -2368,18 +2368,48 @@ if (detectedPlayers.length >= 2) {
 // ===============================
 // ⚔️ DUEL PRIORITY
 // ===============================
-if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
+// 🧠 DETECTION DEFENSE RÉELLE
+const defenseIntentKeywords = [
+    "bloque", "devant", "stoppe", "bloquer",
+    "en face", "ferme", "coupe la route",
+    "intercepte", "gêne", "empêche", "stopper" 
+];
+
+const hasDefenseIntent = defenseIntentKeywords.some(k =>
+    (text || "").toLowerCase().includes(k)
+);
+
+// ===============================
+// ⚔️ MATCH UP SYSTEM
+// ===============================
+if (match.phaseDuel && hasDefenseIntent) {
+
+    const res = await handleDuelMatch(
+        match,
+        match.phaseDuel.attaque,
+        text
+    );
 
     await ovl.sendMessage(chat, {
-        text: res.message
+        text: res.message,
+        mentions: [match.joueurTour]
     });
 
-    if (res.type !== "contre") {
+    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
+
+        match.phaseDuel = {
+            attaque: match.phaseDuel.attaque,
+            defense: text
+        };
+
+    } else {
         match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
     }
 
+    startMatchCycle(chat, ovl, match);
     return true;
 }
 
