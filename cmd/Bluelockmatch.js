@@ -2381,40 +2381,40 @@ const hasDefenseIntent = defenseIntentKeywords.some(k =>
 );
 
 // ===============================
-// ⚔️ MATCH UP SYSTEM (SAFE)
+// ⚔️ MATCH UP SYSTEM (FIX)
 // ===============================
-if (match.phaseDuel && hasDefenseIntent) {
-
-    const attackerAction = match.phaseDuel.attaque;
-    const defenderAction = text;
+if (hasDefenseIntent && match.pendingAttack) {
 
     const res = await handleDuelMatch(
         match,
-        attackerAction,
-        defenderAction
+        match.pendingAttack,
+        text
     );
 
-    await ovl.sendMessage(chat, {
-        text: res.message,
-        mentions: [match.joueurTour]
-    });
+    if (res && res.message) {
 
-    // 🔁 duel continu uniquement si CONTRE
-    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
+        await ovl.sendMessage(chat, {
+            text: res.message,
+            mentions: [match.joueurTour]
+        });
 
-        match.phaseDuel = {
-            attaque: attackerAction,
-            defense: defenderAction
-        };
+        // 🔁 duel continue
+        if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
-    } else {
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
+            match.phaseDuel = {
+                attaque: match.pendingAttack,
+                defense: text
+            };
+
+        } else {
+            match.phaseDuel = null;
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = null;
+        }
+
+        startMatchCycle(chat, ovl, match);
+        return true;
     }
-
-    startMatchCycle(chat, ovl, match);
-    return true;
 }
   
 // ===============================
@@ -2440,8 +2440,7 @@ if (!match.pendingAttack) {
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10
+___________________________________
 
 ➡️ @${displayName} NEXT
 
@@ -2462,67 +2461,83 @@ if (!match.pendingAttack) {
 // ===============================
 const defense = action;
 
-const res = await handleDuelMatch(match, match.pendingAttack, defense);
-
-const duelTypes = [
-    "INTERCEPTION",
-    "CONSERVATION",
-    "CONTINUED_CHASE",
-    "win",
-    "stop",
-    "contre",
-    "faute",
-    "chute",
-    "déséquilibre",
-    "win_physical"
-];
-
-const isRealDuel = duelTypes.includes(res.type);
+// 🧠 DETECTION INTENTION DEF
+const hasDefenseIntent = [
+    "bloque", "devant", "stoppe", "tacle",
+    "en face", "ferme", "coupe la route",
+    "intercepte", "gêne", "empêche"
+].some(k => defense.toLowerCase().includes(k));
 
 // ===============================
-// ⚔️ MATCH UP PRIORITAIRE
+// ⚔️ MATCH UP DIRECT (SEUL POINT)
 // ===============================
+if (hasDefenseIntent && match.pendingAttack) {
+
+    const res = await handleDuelMatch(
+        match,
+        match.pendingAttack,
+        defense
+    );
+
+    if (res && res.message) {
+
+        await ovl.sendMessage(chat, {
+            text: res.message,
+            mentions: [match.joueurTour]
+        });
+
+        if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
+
+            match.phaseDuel = {
+                attaque: match.pendingAttack,
+                defense
+            };
+
+        } else {
+            match.phaseDuel = null;
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = null;
+        }
+
+        startMatchCycle(chat, ovl, match);
+        return true;
+    }
+}
 // ===============================
-// 🧯 FALLBACK SAFE (OBLIGATOIRE)
+// 📉 FALLBACK : DEFENSE PASSIVE
 // ===============================
-if (!isRealDuel) {
+const resumeDefense = genererResumeFull(defense, match);
+const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
-    const resumeDefense = genererResumeFull(defense, match);
-    const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
-
-    const displayName =
-        match.names?.[match.joueurTour] ||
-        match.joueurTour.split("@")[0];
-
-    await ovl.sendMessage(chat, {
-        text:
+await ovl.sendMessage(chat, {
+    text:
 `*🛡️⚔️⚽ DÉFENSE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 🎙️ RESUME♻️ : ${resumeDefense}
+___________________________________
 
-📊 NOTE DU PAVÉ : ${noteDefense}/10
-
-➡️ @${displayName} NEXT
+ ➡️ @${displayName} NEXT
 
 ╰───────────────────
                🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
-    });
+    mentions: [match.joueurTour]
+});
 
-    // 🔄 reset
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+// 🔄 Reset attaque
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
 
-    // 🔁 switch tour
-    match.joueurTour =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
+// 🔁 Switch tour
+match.joueurTour =
+    match.joueurTour === match.id1 ? match.id2 : match.id1;
 
-    match.turnType = "attaque";
+match.turnType = "attaque";
 
-    startMatchCycle(chat, ovl, match);
-    return true;
-}
+startMatchCycle(chat, ovl, match);
+
+return true;        
+} 
     
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
