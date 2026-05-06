@@ -2900,8 +2900,11 @@ if (!attacker || !defender) {
 const atkStats = attacker.stats || {};
 const defStats = defender.stats || {};
 
-const atk = attaqueText.toLowerCase();
-const def = defenseText.toLowerCase();
+// ===============================
+// 🧠 TEXTE NORMALISÉ 
+// ===============================
+const atk = normalize(attaqueText);
+const def = normalize(defenseText);
     
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
