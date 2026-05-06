@@ -2901,26 +2901,40 @@ if (!attacker) {
 }
 
 // ===============================
-// 🛡️ DEFENDER (TEXTE + FALLBACK TACTIQUE)
+// 🛡️ DEFENDER (SOURCE UNIQUE + SAFE)
 // ===============================
-defender = findPlayer(defenseText);
 
-// fallback tactique
-const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+// ⚽ priorité absolue : premier joueur cité dans la ligne action
+const ballLine =
+    text.split("\n").find(l => l.includes("⚽:")) || "";
 
-if (
-    tacticalTarget &&
-    attacker &&
-    tacticalTarget.nom !== attacker.nom &&
-    tacticalTarget.nom !== defender.nom
-) {
-    defender = tacticalTarget;
+const detectedPlayers =
+    ballLine.match(/[A-ZÀ-ÿ][a-zà-ÿA-Z0-9'_-]+/g) || [];
+
+// ===============================
+// 🧠 ATTACKER (SOURCE UNIQUE)
+// ===============================
+const attacker = allPlayers.find(p =>
+    p.nom === match.ballHolder
+);
+
+// ===============================
+// 🧠 DEFENDER (RÈGLE UNIQUE)
+// ===============================
+let defender = allPlayers.find(p =>
+    p.nom === detectedPlayers[0]
+);
+
+// ===============================
+// 🧯 FALLBACK MINIMAL (UNIQUEMENT SI VIDE)
+// ===============================
+if (!defender) {
+    defender = findPlayer(defenseText);
 }
 
 // ===============================
-// 🚫 VALIDATION MATCH-UP ROBUSTE
+// 🚫 ANTI CONFLIT STRICT
 // ===============================
-
 if (!attacker || !defender) {
     return {
         ok: false,
@@ -2929,8 +2943,18 @@ if (!attacker || !defender) {
     };
 }
 
-// ❌ interdit auto-duel
 if (attacker.nom === defender.nom) {
+
+    // fallback secondaire UNIQUEMENT ici
+    defender = allPlayers.find(p =>
+        p.nom === detectedPlayers[1]
+    );
+}
+
+// ===============================
+// ❌ VALIDATION FINALE
+// ===============================
+if (!attacker || !defender || attacker.nom === defender.nom) {
     return {
         ok: false,
         type: "erreur",
