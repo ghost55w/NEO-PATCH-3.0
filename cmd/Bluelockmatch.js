@@ -3171,7 +3171,7 @@ if (!result && isPhysical) {
     }
 
 } // ✅ FIN BLOc PHYSIQUE
-
+    } 
 
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
