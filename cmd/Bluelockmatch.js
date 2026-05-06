@@ -2343,15 +2343,26 @@ async function handlePaveGame(ms, ovl) {
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
-    // ===============================
-// ⚽ UPDATE BALL HOLDER (SMART)
 // ===============================
-const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+// ⚽ UPDATE BALL HOLDER (FIX ROBUSTE)
+// ===============================
 
-if (detectedPlayers.length >= 2) {
-    match.ballHolder = detectedPlayers[1]; // receveur
-} else if (detectedPlayers.length === 1) {
+// On cible uniquement la ligne ⚽
+const ballLine =
+    text.split("\n").find(l => l.includes("⚽:")) || "";
+
+// extraction plus fiable (gère accents + noms composés)
+const detectedPlayers =
+    ballLine.match(/[A-ZÀ-ÿ][a-zà-ÿA-Z0-9'_-]+/g) || [];
+
+// 🧠 FIX IMPORTANT : éviter undefined ballHolder
+if (!match.ballHolder && detectedPlayers.length > 0) {
     match.ballHolder = detectedPlayers[0];
+}
+
+// 🧠 priorité receveur si 2 joueurs détectés
+if (detectedPlayers.length >= 2) {
+    match.ballHolder = detectedPlayers[1];
 }
     
 // ===============================
@@ -2867,18 +2878,18 @@ let attacker = null;
 let defender = null;
 
 // ===============================
-// ⚽ ATTACKER FIX (BALL HOLDER ONLY)
+// ⚽ RESOLUTION ATTACKER (STABLE)
 // ===============================
-if (match.ballHolder) {
-    attacker = allPlayers.find(p => p.nom === match.ballHolder) || null;
-}
+attacker =
+    allPlayers.find(p => p.nom === match.ballHolder) ||
+    null;
 
-// 🚫 SI PAS DE BALL HOLDER → ERREUR (PAS DE FALLBACK TEXTE)
+// fallback sécurité ultime (évite crash)
 if (!attacker) {
     return {
         ok: false,
         type: "erreur",
-        message: "❌ Aucun porteur de balle défini"
+        message: "❌ Aucun porteur de balle valide (ballHolder invalide)"
     };
 }
 
@@ -2887,7 +2898,7 @@ if (!attacker) {
 // ===============================
 defender = findPlayer(defenseText);
 
-// 🧠 fallback tactique (optionnel)
+// fallback tactique
 const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
 if (tacticalTarget) {
