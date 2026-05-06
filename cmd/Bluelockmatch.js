@@ -2371,9 +2371,9 @@ if (detectedPlayers.length >= 2) {
 
 // 🧠 DETECTION DEFENSE RÉELLE
 const defenseIntentKeywords = [
-    "bloque", "devant", "stoppe", "bloquer",
+    "bloque", "devant", "stoppe", "tacle",
     "en face", "ferme", "coupe la route",
-    "intercepte", "gêne", "empêche", "stopper" 
+    "intercepte", "gêne", "empêche"
 ];
 
 const hasDefenseIntent = defenseIntentKeywords.some(k =>
@@ -2381,14 +2381,17 @@ const hasDefenseIntent = defenseIntentKeywords.some(k =>
 );
 
 // ===============================
-// ⚔️ MATCH UP SYSTEM
+// ⚔️ MATCH UP SYSTEM (SAFE)
 // ===============================
 if (match.phaseDuel && hasDefenseIntent) {
 
+    const attackerAction = match.phaseDuel.attaque;
+    const defenderAction = text;
+
     const res = await handleDuelMatch(
         match,
-        match.phaseDuel.attaque,
-        text
+        attackerAction,
+        defenderAction
     );
 
     await ovl.sendMessage(chat, {
@@ -2396,11 +2399,12 @@ if (match.phaseDuel && hasDefenseIntent) {
         mentions: [match.joueurTour]
     });
 
+    // 🔁 duel continu uniquement si CONTRE
     if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
         match.phaseDuel = {
-            attaque: match.phaseDuel.attaque,
-            defense: text
+            attaque: attackerAction,
+            defense: defenderAction
         };
 
     } else {
@@ -2412,7 +2416,7 @@ if (match.phaseDuel && hasDefenseIntent) {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-
+  
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
@@ -2424,9 +2428,11 @@ if (!match.pendingAttack) {
     match.pendingAttack = action;
     match.hasPlayed = true;
 
-    // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
+
+    const displayName =
+        match.names?.[next] || next.split("@")[0];
 
     await ovl.sendMessage(chat, {
         text:
@@ -2437,7 +2443,7 @@ if (!match.pendingAttack) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${displayName} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
@@ -2451,32 +2457,30 @@ if (!match.pendingAttack) {
     return true;
 }
 
-
 // ===============================
 // 🛡️ DEFENSE
 // ===============================
 const defense = action;
 
-const res = await handleDuelMatch(match, match.pendingAttack, defense);
+const res = await handleDuelMatch(
+    match,
+    match.pendingAttack,
+    defense
+);
 
 match.hasPlayed = true;
 
-
 // ===============================
-// 🔥 PRIORITÉ AU MATCH UP / DUEL
+// 🔥 MATCH UP CONTROLLED
 // ===============================
-if (res && res.message && res.type !== "normal") {
-
-    const resume = genererResumeFull(match.pendingAttack, match);
-    const note = noterPave(match.pendingAttack);
+if (res && res.message) {
 
     await ovl.sendMessage(chat, {
-    text: res.message,
-    mentions: [match.joueurTour]
-});
+        text: res.message,
+        mentions: [match.joueurTour]
+    });
 
-    // ⚔️ Duel continue
-    if (res.type === "contre") {
+    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
         match.phaseDuel = {
             attaque: match.pendingAttack,
@@ -2485,7 +2489,6 @@ if (res && res.message && res.type !== "normal") {
 
     } else {
 
-        // ✅ Duel terminé
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -2939,22 +2942,28 @@ defender = findPlayer(defenseText);
 // fallback tactique
 const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
-if (tacticalTarget) {
+if (
+    tacticalTarget &&
+    attacker &&
+    tacticalTarget.nom !== attacker.nom &&
+    tacticalTarget.nom !== defender.nom
+) {
     defender = tacticalTarget;
 }
 
 // ===============================
-// ❌ VALIDATION FINAL
+// 🚫 VALIDATION MATCH-UP ROBUSTE
 // ===============================
-if (!defender) {
+
+if (!attacker || !defender) {
     return {
         ok: false,
         type: "erreur",
-        message: "❌ Défenseur introuvable"
+        message: "❌ Joueurs introuvables"
     };
 }
 
-// 🚫 ANTI SWAP BUG (très important)
+// ❌ interdit auto-duel
 if (attacker.nom === defender.nom) {
     return {
         ok: false,
