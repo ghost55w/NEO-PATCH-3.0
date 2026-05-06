@@ -2420,14 +2420,14 @@ const defenseIntentKeywords = [
     "intercepte", "gêne", "empêche"
 ];
 
-const hasDefenseIntent = defenseIntentKeywords.some(k =>
+const isDefenseIntent = defenseIntentKeywords.some(k =>
     (defense || "").toLowerCase().includes(k)
 );
 
 // ===============================
 // ⚔️ MATCH UP PRIORITAIRE (IMPORTANT)
 // ===============================
-if (hasDefenseIntent && match.pendingAttack) {
+if (isDefenseIntent && match.pendingAttack) {
 
     const res = await handleDuelMatch(
         match,
