@@ -2843,24 +2843,24 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atk = normalize(attaqueText);
     const def = normalize(defenseText);
 
-    // ===============================
-    // ⚽ FIND PLAYER IA (ROBUSTE)
-    // ===============================
-    const findPlayer = (txt) => {
 
-        const t = normalize(txt);
+// ===============================
+// ⚽ FIND PLAYER IA (ROBUSTE)
+// ===============================
+const findPlayer = (txt) => {
 
-        let found = allPlayers.find(p => {
-            const n = normalize(p.nom);
-            return t.includes(n);
-        });
+    const t = normalize(txt);
 
-        return found || null;
-    };
+    let found = allPlayers.find(p => {
+        const n = normalize(p.nom);
+        return t.includes(n);
+    });
 
-    let attacker = null;
-    let defender = null;
+    return found || null;
+};
 
+let attacker = null;
+let defender = null;
 
 // ===============================
 // ⚽ PORTEUR DE BALLE PRIORITAIRE
@@ -2873,30 +2873,36 @@ if (match.ballHolder) {
     }
 }
 
-// fallback si pas de ballon
+// fallback attaquant
 if (!attacker) {
     attacker = findPlayer(attaqueText);
 }
 
-let defender = findPlayer(defenseText);
+// ===============================
+// 🛡️ DÉFENSEUR
+// ===============================
+defender = findPlayer(defenseText);
 
 // 🧠 fallback tactique
 const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
 if (tacticalTarget) {
     defender = tacticalTarget;
-} 
+}
+
+// ===============================
+// ❌ VALIDATION
+// ===============================
+if (!attacker || !defender) {
+    return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
+}
+
+const atkStats = attacker.stats || {};
+const defStats = defender.stats || {};
+
+const atk = attaqueText.toLowerCase();
+const def = defenseText.toLowerCase();
     
-    if (!attacker || !defender) {
-        return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
-    }
-
-    const atkStats = attacker.stats || {};
-    const defStats = defender.stats || {};
-
-    const atk = attaqueText.toLowerCase();
-    const def = defenseText.toLowerCase();
-
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
 // ===============================
