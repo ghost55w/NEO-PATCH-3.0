@@ -2817,15 +2817,15 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     }
 
     // ===============================
-    // ⚠️ on NE bloque plus le flow global du match
-    // ===============================
-    if (match.phaseDuelResolved) {
-        return {
-            ok: false,
-            type: "soft_ignore",
-            message: "⚠️ Duel déjà traité (continuation possible)"
-        };
-    }
+// ⚠️ LOCK SYSTEM (NE PAS BLOQUER LE FLOW)
+// ===============================
+if (match.phaseDuelResolved && match.phaseDuelFinal) {
+    return {
+        ok: false,
+        type: "ignore",
+        message: "⚠️ Duel déjà finalisé"
+    };
+}
 
     const allPlayers = [
         ...(match.lineup1 || []),
@@ -3338,62 +3338,82 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
         };
     }
 
-    // ===============================
-    // ⚔️ FINAL DUEL
-    // ===============================
-    const atkPower = (atk.dri || 50) + bodyAdvantage;
-    const defPower = def.def || 50;
+    
+// ===============================
+// ⚔️ FINAL DUEL
+// ===============================
+const atkPower = (atk.dri || 50) + bodyAdvantage;
+const defPower = def.def || 50;
 
-    const gap = atkPower - defPower;
+const gap = atkPower - defPower;
 
-    if (gap > 0) {
+let result = null;
 
-        if (intent.sprint) {
-            return {
-                ok: true,
-                type: "escape",
-                msg: `🚀 ${attacker.nom} élimine ${defender.nom} et accélère`
-            };
-        }
+// ===============================
+// 🧠 RESOLUTION
+// ===============================
+if (gap > 0) {
 
-        return {
+    if (intent.sprint) {
+        result = {
+            ok: true,
+            type: "escape",
+            msg: `🚀 ${attacker.nom} élimine ${defender.nom} et accélère`
+        };
+    } else {
+        result = {
             ok: true,
             type: "win",
             msg: `🔥 ${attacker.nom} élimine ${defender.nom}`
         };
     }
 
-    if (Math.abs(gap) <= 5) {
-        return {
-            ok: false,
-            type: "contre",
-            msg: `⚔️ Duel serré entre ${attacker.nom} et ${defender.nom}`
-        };
-    }
+} else if (Math.abs(gap) <= 5) {
 
-    return {
+    result = {
+        ok: false,
+        type: "contre",
+        msg: `⚔️ Duel serré entre ${attacker.nom} et ${defender.nom}`
+    };
+
+} else {
+
+    result = {
         ok: false,
         type: "stop",
         msg: `🧱 ${defender.nom} stoppe l'action`
     };
 }
-    
 
-    // ===============================
-    // ⚖️ FALLBACK
-    // ===============================
-    if (!result) {
-        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
-    }
+// ===============================
+// ⚖️ FALLBACK 
+// ===============================
+if (!result) {
+    result = {
+        ok: false,
+        type: "contre",
+        msg: "⚔️ Duel en cours..."
+    };
+}
 
-    const next = match.attacker;
+// ===============================
+// 🏁 LOCK DUEL (IMPORTANT)
+// ===============================
+match.phaseDuelResolved = true;
+match.phaseDuelFinal = true;
 
-    match.phaseDuelResolved = true;
+// ===============================
+// 📍 NEXT PLAYER SAFE
+// ===============================
+const next = match.ballHolder || match.attacker;
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
+// ===============================
+// 📤 RETURN FINAL
+// ===============================
+return {
+    ok: result.ok,
+    type: result.type,
+    message: 
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
@@ -3404,12 +3424,9 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    };
-}
-
-
+};
+} 
     
-
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
