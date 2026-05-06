@@ -2462,18 +2462,27 @@ if (!match.pendingAttack) {
 // ===============================
 const defense = action;
 
-const res = await handleDuelMatch(
-    match,
-    match.pendingAttack,
-    defense
-);
+const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
-match.hasPlayed = true;
+const duelTypes = [
+    "INTERCEPTION",
+    "CONSERVATION",
+    "CONTINUED_CHASE",
+    "win",
+    "stop",
+    "contre",
+    "faute",
+    "chute",
+    "déséquilibre",
+    "win_physical"
+];
+
+const isRealDuel = duelTypes.includes(res.type);
 
 // ===============================
-// 🔥 MATCH UP CONTROLLED
+// ⚔️ MATCH UP PRIORITAIRE
 // ===============================
-if (res && res.message) {
+if (res && res.message && isRealDuel) {
 
     await ovl.sendMessage(chat, {
         text: res.message,
