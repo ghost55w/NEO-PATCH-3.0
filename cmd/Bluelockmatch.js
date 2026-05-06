@@ -2855,6 +2855,14 @@ if (match.phaseDuelResolved && match.phaseDuelFinal) {
     const atkText = normalize(attaqueText);
     const defText = normalize(defenseText);
 
+    // 🧠 sécurité anti empty string
+if (!atkText || !defText) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Texte attaque/défense vide après normalisation"
+    };
+        }
     
 // ===============================
 // ⚽ FIND PLAYER IA (ROBUSTE)
