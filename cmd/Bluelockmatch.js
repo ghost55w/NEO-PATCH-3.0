@@ -1442,32 +1442,308 @@ function initBall(match, position = { x: 0, y: 0 }) {
         position
     };
                             }
-//LINEUP ACTION 
-function validateLineupAction(text, players) {
 
-    const t = pureName(text);
 
-    // Vérifie si un nom inconnu apparaît
-    const knownNames = players.map(p => pureName(p.nom));
+// ===============================
+// 🧠 MATCH ENGINE UTILITIES CORE
+// ===============================
 
-    const words = t.split(/\s+/);
+// ===============================
+// 🔁 NORMALISATION ANGLE
+// ===============================
+function normalizeAngle(angle) {
+    return ((angle % 360) + 360) % 360;
+}
 
-    for (let w of words) {
+// ===============================
+// 🧍 BODY STATE SYSTEM (0–360°)
+// ===============================
+function getBodyState(angle) {
+    angle = normalizeAngle(angle);
 
-        // Si mot ressemble à un nom mais pas dans lineup
-        const isPotentialName = w.length > 4;
+    if (angle >= 0 && angle < 45) return "front";
+    if (angle >= 45 && angle < 135) return "right";
+    if (angle >= 135 && angle < 225) return "back";
+    if (angle >= 225 && angle < 315) return "left";
 
-        if (isPotentialName && !knownNames.some(n => n.includes(w))) {
+    return "front";
+}
 
-            return {
-                ok: false,
-                error: `❌ Joueur inconnu détecté: ${w}`
-            };
+// ===============================
+// 🧍 UPDATE BODY ORIENTATION
+// ===============================
+function updateBody(player, text) {
+
+    if (!player.bodyAngle) player.bodyAngle = 0;
+
+    const t = text.toLowerCase();
+
+    if (t.includes("pivot du torse 180")) player.bodyAngle += 180;
+    if (t.includes("pivot gauche 90")) player.bodyAngle -= 90;
+    if (t.includes("pivot droite 90")) player.bodyAngle += 90;
+    if (t.includes("tour complet") || t.includes("360")) player.bodyAngle += 360;
+
+    player.bodyAngle = normalizeAngle(player.bodyAngle);
+    player.bodyState = getBodyState(player.bodyAngle);
+}
+
+// ===============================
+// 📏 EXTRACTION NOMBRE (DISTANCE)
+// ===============================
+function extractNumber(str) {
+    const match = str.match(/(\d+(\.\d+)?)/);
+    return match ? Number(match[0]) : null;
+}
+
+// ===============================
+// 🧠 LEVENSHTEIN (FUZZY MATCH)
+// ===============================
+function levenshtein(a, b) {
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+
+            if (b[i - 1] === a[j - 1]) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
         }
     }
 
-    return { ok: true };
+    return matrix[b.length][a.length];
 }
+
+// ===============================
+// 🧠 PARSER IA PAVÉ INTELLIGENT
+// ===============================
+function parsePlayerIntent(text, players) {
+
+    if (!text) return null;
+
+    const t = text.toLowerCase();
+
+    // ===============================
+    // ⚽ PLAYERS FUZZY DETECTION
+    // ===============================
+    function findBestPlayer(word) {
+        if (!word) return null;
+
+        let best = null;
+        let bestScore = 0;
+
+        for (const p of players) {
+            const name = p.nom.toLowerCase();
+
+            let score = 0;
+
+            if (name === word) score = 100;
+            else if (name.includes(word) || word.includes(name)) score = 80;
+            else if (levenshtein(name, word) <= 2) score = 60;
+
+            if (score > bestScore) {
+                bestScore = score;
+                best = p;
+            }
+        }
+
+        return bestScore >= 60 ? best : null;
+    }
+
+    // ===============================
+    // ⚙️ ACTIONS
+    // ===============================
+    const actions = [];
+
+    const actionMap = {
+        run: ["fonce", "cours", "accélère", "sprinte", "vmax"],
+        dribble: ["dribble", "crochet", "feinte", "roulette"],
+        pass: ["passe", "donne", "transmet", "centre"],
+        shoot: ["tir", "frappe", "shoot"],
+        defend: ["tacle", "bloque", "intercepte"]
+    };
+
+    for (const key in actionMap) {
+        if (actionMap[key].some(w => t.includes(w))) {
+            actions.push(key);
+        }
+    }
+
+    // ===============================
+    // 🧭 DIRECTION
+    // ===============================
+    let direction = "none";
+
+    if (t.includes("gauche")) direction = "left";
+    else if (t.includes("droite")) direction = "right";
+    else if (t.includes("devant") || t.includes("face") || t.includes("tout droit")) direction = "front";
+    else if (t.includes("diagonale")) direction = "diagonal";
+
+    // ===============================
+    // 🦶 FOOT
+    // ===============================
+    let foot = null;
+
+    if (t.includes("pied gauche")) foot = "left";
+    else if (t.includes("pied droit")) foot = "right";
+
+    // ===============================
+    // 📏 DISTANCES
+    // ===============================
+    const ballDistance = extractNumber(t);
+
+    let targetDistance = null;
+    if (t.includes("1m")) targetDistance = 1;
+    if (t.includes("2m")) targetDistance = 2;
+    if (t.includes("5m")) targetDistance = 5;
+    if (t.includes("10m")) targetDistance = 10;
+
+    // ===============================
+    // 👥 PLAYERS DETECTION
+    // ===============================
+    const detectedPlayers = [];
+
+    for (const p of players) {
+        if (t.includes(p.nom.toLowerCase())) {
+            detectedPlayers.push(p);
+        }
+    }
+
+    // ===============================
+    // 📦 OUTPUT FINAL
+    // ===============================
+    return {
+        players: detectedPlayers.length ? detectedPlayers : null,
+        actions,
+        intent: {
+            direction,
+            foot,
+            ballDistance,
+            targetDistance
+        }
+    };
+}
+
+// ===============================
+// 🧪 SAFE PLAYER FINDER (STRICT + FALLBACK)
+// ===============================
+function findPlayerStrict(text, players) {
+
+    const t = text.toLowerCase();
+
+    let found = players.find(p => {
+        const name = p.nom.toLowerCase();
+        return t.includes(name);
+    });
+
+    return found || null;
+}
+
+// ===============================
+// 🧠 GENERATEUR DE RESUME DYNAMIQUE (AVEC CONTEXT)
+// ===============================
+function generateDuelResume(attacker, defender, resultType, context = {}) {
+
+    const atk = attacker.nom;
+    const def = defender.nom;
+
+    const {
+        sprint = false,
+        skill = false,
+        pressure = false,
+        direction = null,
+        distance = null
+    } = context;
+
+    // ===============================
+    // 🎭 BASE PHRASES
+    // ===============================
+    const successDribble = [
+        `${atk} élimine ${def}`,
+        `${atk} passe ${def}`,
+        `${atk} prend le dessus sur ${def}`,
+        `${atk} déstabilise complètement ${def}`,
+        `${atk} casse la défense de ${def}`
+    ];
+
+    const failDefense = [
+        `${def} intercepte le ballon`,
+        `${def} stoppe l'action`,
+        `${def} bloque ${atk}`,
+        `${def} récupère le ballon`,
+        `${def} coupe la progression de ${atk}`
+    ];
+
+    const consequencesAttack = [
+        "et enchaîne vers l'avant",
+        "et accélère vers le but",
+        "et continue sa progression balle au pied",
+        "et crée une occasion dangereuse",
+        "et prend l'avantage dans l'action"
+    ];
+
+    const consequencesDefense = [
+        "et lance une contre-attaque",
+        "et sécurise la possession",
+        "et relance le jeu proprement",
+        "et reprend le contrôle du rythme",
+        "et inverse immédiatement la pression"
+    ];
+
+    const styles = [
+        "avec maîtrise",
+        "avec puissance",
+        "avec vitesse",
+        "avec sang-froid",
+        "avec autorité"
+    ];
+
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // ===============================
+    // ⚡ CONTEXT BUILDER
+    // ===============================
+    let contextText = [];
+
+    if (sprint) contextText.push("à pleine vitesse");
+    if (skill) contextText.push("avec une technique précise");
+    if (pressure) contextText.push("sous pression");
+
+    if (direction === "left") contextText.push("sur la gauche");
+    if (direction === "right") contextText.push("sur la droite");
+    if (direction === "forward") contextText.push("plein axe");
+
+    if (distance) contextText.push(`sur ${distance}m`);
+
+    const contextString = contextText.length > 0
+        ? " " + contextText.join(", ")
+        : "";
+
+    // ===============================
+    // ⚔️ RESULT LOGIC
+    // ===============================
+    if (resultType === "win" || resultType === "escape") {
+
+        return `${pick(successDribble)}${contextString} ${pick(styles)} ${pick(consequencesAttack)}.`;
+    }
+
+    if (resultType === "stop" || resultType === "INTERCEPTION") {
+
+        return `${pick(failDefense)}${contextString} ${pick(styles)} ${pick(consequencesDefense)}.`;
+    }
+
+    return `Le duel entre ${atk} et ${def} reste intense, aucun ne cède${contextString}.`;
+}
+
+
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
