@@ -2844,62 +2844,82 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atkText = normalize(attaqueText);
     const defText = normalize(defenseText);
 
-    // ===============================
-    // ⚽ FIND PLAYER IA (ROBUSTE)
-    // ===============================
-    const findPlayer = (txt) => {
+    
+// ===============================
+// ⚽ FIND PLAYER IA (ROBUSTE)
+// ===============================
+const findPlayer = (txt) => {
 
-        const t = normalize(txt);
+    const t = normalize(txt);
 
-        let found = allPlayers.find(p => {
-            const n = normalize(p.nom);
-            return t.includes(n);
-        });
+    let found = allPlayers.find(p => {
+        const n = normalize(p.nom);
+        return t.includes(n);
+    });
 
-        return found || null;
+    return found || null;
+};
+
+// ===============================
+// ⚽ INITIALISATION
+// ===============================
+let attacker = null;
+let defender = null;
+
+// ===============================
+// ⚽ ATTACKER FIX (BALL HOLDER ONLY)
+// ===============================
+if (match.ballHolder) {
+    attacker = allPlayers.find(p => p.nom === match.ballHolder) || null;
+}
+
+// 🚫 SI PAS DE BALL HOLDER → ERREUR (PAS DE FALLBACK TEXTE)
+if (!attacker) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Aucun porteur de balle défini"
     };
+}
 
-    let attacker = null;
-    let defender = null;
+// ===============================
+// 🛡️ DEFENDER (TEXTE + FALLBACK TACTIQUE)
+// ===============================
+defender = findPlayer(defenseText);
 
-    // ===============================
-    // ⚽ PORTEUR DE BALLE PRIORITAIRE
-    // ===============================
-    if (match.ballHolder) {
-        attacker = allPlayers.find(p => p.nom === match.ballHolder);
+// 🧠 fallback tactique (optionnel)
+const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
-        if (!attacker) {
-            attacker = allPlayers[0];
-        }
-    }
+if (tacticalTarget) {
+    defender = tacticalTarget;
+}
 
-    // fallback attaquant
-    if (!attacker) {
-        attacker = findPlayer(attaqueText);
-    }
+// ===============================
+// ❌ VALIDATION FINAL
+// ===============================
+if (!defender) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Défenseur introuvable"
+    };
+}
 
-    // ===============================
-    // 🛡️ DÉFENSEUR
-    // ===============================
-    defender = findPlayer(defenseText);
+// 🚫 ANTI SWAP BUG (très important)
+if (attacker.nom === defender.nom) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Conflit de rôles (attacker = defender)"
+    };
+}
 
-    // 🧠 fallback tactique
-    const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
-
-    if (tacticalTarget) {
-        defender = tacticalTarget;
-    }
-
-    // ===============================
-    // ❌ VALIDATION
-    // ===============================
-    if (!attacker || !defender) {
-        return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
-    }
-
-    const atkStats = attacker.stats || {};
-    const defStats = defender.stats || {};
-
+// ===============================
+// 📊 STATS SAFE
+// ===============================
+const atkStats = attacker.stats || {};
+const defStats = defender.stats || {};
+    
     // ===============================
     // 🧠 TEXTE NORMALISÉ (UTILISABLE PARTOUT)
     // ===============================
