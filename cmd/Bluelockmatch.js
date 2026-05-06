@@ -3347,7 +3347,7 @@ const defPower = def.def || 50;
 
 const gap = atkPower - defPower;
 
-let result = null;
+let result;
 
 // ===============================
 // 🧠 RESOLUTION
@@ -3386,17 +3386,6 @@ if (gap > 0) {
 }
 
 // ===============================
-// ⚖️ FALLBACK 
-// ===============================
-if (!result) {
-    result = {
-        ok: false,
-        type: "contre",
-        msg: "⚔️ Duel en cours..."
-    };
-}
-
-// ===============================
 // 🏁 LOCK DUEL (IMPORTANT)
 // ===============================
 match.phaseDuelResolved = true;
@@ -3407,26 +3396,29 @@ match.phaseDuelFinal = true;
 // ===============================
 const next = match.ballHolder || match.attacker;
 
+const displayName =
+    match.names?.[next] ||
+    next.split("@")[0];
+
 // ===============================
 // 📤 RETURN FINAL
 // ===============================
 return {
     ok: result.ok,
     type: result.type,
-    message: 
+    message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
 ${result.msg}
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${displayName} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-};
-} 
-    
+  };
+}
 
 /* ===============================
 COMMANDE +STOPMATCH⚽
