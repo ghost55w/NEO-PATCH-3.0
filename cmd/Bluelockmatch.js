@@ -2862,49 +2862,38 @@ if (!atkText || !defText) {
         message: "❌ Texte attaque/défense vide après normalisation"
     };
         }
-    
-// ===============================
+
+  // ===============================
 // ⚽ FIND PLAYER IA (ROBUSTE)
 // ===============================
 const findPlayer = (txt) => {
 
-    const t = normalize(txt);
+    const t = normalize(txt || "");
 
-    let found = allPlayers.find(p => {
+    return allPlayers.find(p => {
         const n = normalize(p.nom);
         return t.includes(n);
-    });
-
-    return found || null;
+    }) || null;
 };
 
 // ===============================
-// ⚽ INITIALISATION
+// ⚽ ATTACKER (SOURCE UNIQUE)
 // ===============================
-let attacker = null;
-let defender = null;
+const attacker = allPlayers.find(p =>
+    p.nom === match.ballHolder
+);
 
-// ===============================
-// ⚽ RESOLUTION ATTACKER (STABLE)
-// ===============================
-attacker =
-    allPlayers.find(p => p.nom === match.ballHolder) ||
-    null;
-
-// fallback sécurité ultime (évite crash)
 if (!attacker) {
     return {
         ok: false,
         type: "erreur",
-        message: "❌ Aucun porteur de balle valide (ballHolder invalide)"
+        message: "❌ Aucun porteur de balle valide"
     };
 }
 
 // ===============================
-// 🛡️ DEFENDER (SOURCE UNIQUE + SAFE)
+// 🧠 EXTRACTION DEFENSE LINE
 // ===============================
-
-// ⚽ priorité absolue : premier joueur cité dans la ligne action
 const ballLine =
     text.split("\n").find(l => l.includes("⚽:")) || "";
 
@@ -2912,55 +2901,58 @@ const detectedPlayers =
     ballLine.match(/[A-ZÀ-ÿ][a-zà-ÿA-Z0-9'_-]+/g) || [];
 
 // ===============================
-// 🧠 ATTACKER (SOURCE UNIQUE)
+// 🛡️ DEFENDER (RULE SIMPLE + STABLE)
 // ===============================
-const attacker = allPlayers.find(p =>
-    p.nom === match.ballHolder
-);
 
-// ===============================
-// 🧠 DEFENDER (RÈGLE UNIQUE)
-// ===============================
-let defender = allPlayers.find(p =>
-    p.nom === detectedPlayers[0]
-);
+// priorité 1 : joueur mentionné dans ligne ⚽
+let defender =
+    allPlayers.find(p => p.nom === detectedPlayers[0]) ||
+    null;
 
-// ===============================
-// 🧯 FALLBACK MINIMAL (UNIQUEMENT SI VIDE)
-// ===============================
+// priorité 2 : analyse texte global défense
 if (!defender) {
     defender = findPlayer(defenseText);
 }
 
+// priorité 3 : fallback anti crash
+if (!defender && detectedPlayers.length > 1) {
+    defender = allPlayers.find(p => p.nom === detectedPlayers[1]);
+}
+
 // ===============================
-// 🚫 ANTI CONFLIT STRICT
+// 🚫 VALIDATION FINALE
 // ===============================
-if (!attacker || !defender) {
+if (!defender) {
     return {
         ok: false,
         type: "erreur",
-        message: "❌ Joueurs introuvables"
+        message: "❌ Défenseur introuvable"
     };
 }
 
+// ===============================
+// ❌ ANTI SELF MATCH
+// ===============================
 if (attacker.nom === defender.nom) {
 
-    // fallback secondaire UNIQUEMENT ici
-    defender = allPlayers.find(p =>
-        p.nom === detectedPlayers[1]
-    );
+    // fallback intelligent (important pour ton cas réel)
+    defender =
+        allPlayers.find(p =>
+            p.nom !== attacker.nom &&
+            detectedPlayers.includes(p.nom)
+        ) || null;
 }
 
 // ===============================
-// ❌ VALIDATION FINALE
+// 🚫 FINAL SAFETY CHECK
 // ===============================
-if (!attacker || !defender || attacker.nom === defender.nom) {
+if (!defender || attacker.nom === defender.nom) {
     return {
         ok: false,
         type: "erreur",
         message: "❌ Conflit de rôles (attacker = defender)"
     };
-}
+}  
 
 // ===============================
 // 📊 STATS SAFE
