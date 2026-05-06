@@ -2482,39 +2482,20 @@ const isRealDuel = duelTypes.includes(res.type);
 // ===============================
 // ⚔️ MATCH UP PRIORITAIRE
 // ===============================
-if (res && res.message && isRealDuel) {
+// ===============================
+// 🧯 FALLBACK SAFE (OBLIGATOIRE)
+// ===============================
+if (!isRealDuel) {
+
+    const resumeDefense = genererResumeFull(defense, match);
+    const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
+
+    const displayName =
+        match.names?.[match.joueurTour] ||
+        match.joueurTour.split("@")[0];
 
     await ovl.sendMessage(chat, {
-        text: res.message,
-        mentions: [match.joueurTour]
-    });
-
-    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
-
-        match.phaseDuel = {
-            attaque: match.pendingAttack,
-            defense
-        };
-
-    } else {
-
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-    }
-
-    startMatchCycle(chat, ovl, match);
-    return true;
-}
-  
-// ===============================
-// 📉 FALLBACK : DEFENSE PASSIVE
-// ===============================
-const resumeDefense = genererResumeFull(defense, match);
-const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
-
-await ovl.sendMessage(chat, {
-    text:
+        text:
 `*🛡️⚔️⚽ DÉFENSE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -2522,27 +2503,26 @@ await ovl.sendMessage(chat, {
 
 📊 NOTE DU PAVÉ : ${noteDefense}/10
 
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
+➡️ @${displayName} NEXT
 
 ╰───────────────────
                🔷BLUELOCK⚽🥅`,
-    mentions: [match.joueurTour]
-});
+        mentions: [match.joueurTour]
+    });
 
-// 🔄 Reset attaque
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
+    // 🔄 reset
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
 
-// 🔁 Switch tour
-match.joueurTour =
-    match.joueurTour === match.id1 ? match.id2 : match.id1;
+    // 🔁 switch tour
+    match.joueurTour =
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
 
-match.turnType = "attaque";
+    match.turnType = "attaque";
 
-startMatchCycle(chat, ovl, match);
-
-return true;        
-} 
+    startMatchCycle(chat, ovl, match);
+    return true;
+}
     
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
