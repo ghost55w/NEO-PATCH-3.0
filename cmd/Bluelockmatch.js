@@ -2832,7 +2832,7 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         ...(match.lineup2 || [])
     ];
 
-   // ===============================
+    // ===============================
     // 🧠 NORMALISATION IA (IMPORTANT)
     // ===============================
     const normalize = (t = "") =>
@@ -2840,86 +2840,86 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
          .normalize("NFD")
          .replace(/[\u0300-\u036f]/g, "");
 
-    const atk = normalize(attaqueText);
-    const def = normalize(defenseText);
+    // 👉 UNE SEULE VERSION (NORMALISÉE) UTILISÉE PARTOUT
+    const atkText = normalize(attaqueText);
+    const defText = normalize(defenseText);
 
+    // ===============================
+    // ⚽ FIND PLAYER IA (ROBUSTE)
+    // ===============================
+    const findPlayer = (txt) => {
 
-// ===============================
-// ⚽ FIND PLAYER IA (ROBUSTE)
-// ===============================
-const findPlayer = (txt) => {
+        const t = normalize(txt);
 
-    const t = normalize(txt);
+        let found = allPlayers.find(p => {
+            const n = normalize(p.nom);
+            return t.includes(n);
+        });
 
-    let found = allPlayers.find(p => {
-        const n = normalize(p.nom);
-        return t.includes(n);
-    });
+        return found || null;
+    };
 
-    return found || null;
-};
+    let attacker = null;
+    let defender = null;
 
-let attacker = null;
-let defender = null;
+    // ===============================
+    // ⚽ PORTEUR DE BALLE PRIORITAIRE
+    // ===============================
+    if (match.ballHolder) {
+        attacker = allPlayers.find(p => p.nom === match.ballHolder);
 
-// ===============================
-// ⚽ PORTEUR DE BALLE PRIORITAIRE
-// ===============================
-if (match.ballHolder) {
-    attacker = allPlayers.find(p => p.nom === match.ballHolder);
-
-    if (!attacker) {
-        attacker = allPlayers[0];
+        if (!attacker) {
+            attacker = allPlayers[0];
+        }
     }
-}
 
-// fallback attaquant
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
-}
+    // fallback attaquant
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
 
-// ===============================
-// 🛡️ DÉFENSEUR
-// ===============================
-defender = findPlayer(defenseText);
+    // ===============================
+    // 🛡️ DÉFENSEUR
+    // ===============================
+    defender = findPlayer(defenseText);
 
-// 🧠 fallback tactique
-const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+    // 🧠 fallback tactique
+    const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
 
-if (tacticalTarget) {
-    defender = tacticalTarget;
-}
+    if (tacticalTarget) {
+        defender = tacticalTarget;
+    }
 
-// ===============================
-// ❌ VALIDATION
-// ===============================
-if (!attacker || !defender) {
-    return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
-}
+    // ===============================
+    // ❌ VALIDATION
+    // ===============================
+    if (!attacker || !defender) {
+        return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
+    }
 
-const atkStats = attacker.stats || {};
-const defStats = defender.stats || {};
+    const atkStats = attacker.stats || {};
+    const defStats = defender.stats || {};
 
-// ===============================
-// 🧠 TEXTE NORMALISÉ 
-// ===============================
-const atk = normalize(attaqueText);
-const def = normalize(defenseText);
-    
-// ===============================
-// 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
-// ===============================
-const actionAttacker = attaqueText;
-const actionDefender = defenseText;
+    // ===============================
+    // 🧠 TEXTE NORMALISÉ (UTILISABLE PARTOUT)
+    // ===============================
+    const atk = atkText;
+    const def = defText;
 
-const chaseResult = resolveChase(
-    match,
-    attacker,
-    defender,
-    match.ball,
-    actionAttacker,
-    actionDefender
-);
+    // ===============================
+    // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
+    // ===============================
+    const actionAttacker = attaqueText;
+    const actionDefender = defenseText;
+
+    const chaseResult = resolveChase(
+        match,
+        attacker,
+        defender,
+        match.ball,
+        actionAttacker,
+        actionDefender
+    );
 
 // ===============================
 // ⚡ VITESSE BASE (UNE SEULE FOIS)
