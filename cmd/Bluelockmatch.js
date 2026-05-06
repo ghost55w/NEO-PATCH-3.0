@@ -2817,13 +2817,13 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     }
 
     // ===============================
-    // 🚫 GARDIEN DUEL DÉJÀ RÉSOLU
+    // ⚠️ on NE bloque plus le flow global du match
     // ===============================
     if (match.phaseDuelResolved) {
         return {
             ok: false,
-            type: "ignore",
-            message: "⚠️ Duel déjà résolu"
+            type: "soft_ignore",
+            message: "⚠️ Duel déjà traité (continuation possible)"
         };
     }
 
@@ -2832,35 +2832,35 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         ...(match.lineup2 || [])
     ];
 
+   // ===============================
+    // 🧠 NORMALISATION IA (IMPORTANT)
     // ===============================
-// 🚫 VALIDATION LINEUP GLOBAL
-// ===============================
-const checkAttack = validateLineupAction(attaqueText, allPlayers);
-const checkDefense = validateLineupAction(defenseText, allPlayers);
+    const normalize = (t = "") =>
+        t.toLowerCase()
+         .normalize("NFD")
+         .replace(/[\u0300-\u036f]/g, "");
 
-if (!checkAttack.ok) {
-    return { ok: false, type: "erreur", message: checkAttack.error };
-}
+    const atk = normalize(attaqueText);
+    const def = normalize(defenseText);
 
-if (!checkDefense.ok) {
-    return { ok: false, type: "erreur", message: checkDefense.error };
-}
-    
+    // ===============================
+    // ⚽ FIND PLAYER IA (ROBUSTE)
+    // ===============================
     const findPlayer = (txt) => {
-    const t = pureName(txt);
 
-    // 🔍 Recherche stricte dans le lineup
-    let found = allPlayers.find(p => {
-        const n = pureName(p.nom);
-        return t.includes(n) || n.includes(t);
-    });
+        const t = normalize(txt);
 
-    // ❌ Si pas trouvé → on bloque
-    if (!found) return null;
+        let found = allPlayers.find(p => {
+            const n = normalize(p.nom);
+            return t.includes(n);
+        });
 
-    return found;
-};
-let attacker = null;
+        return found || null;
+    };
+
+    let attacker = null;
+    let defender = null;
+
 
 // ===============================
 // ⚽ PORTEUR DE BALLE PRIORITAIRE
