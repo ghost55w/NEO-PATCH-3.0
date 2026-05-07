@@ -2263,24 +2263,220 @@ if (detectedPlayers.length >= 2) {
 // ===============================
 if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
+    const duel = match.phaseDuel;
+
+    // =========================================
+// 🟦 ÉTAPE 1 → ACTION OFFENSIVE
+// =========================================
+if (duel.stage === "waiting_attack_action") {
+
+    duel.attackAction = text;
+    duel.stage = "waiting_defense_response";
+
+    // =====================================
+    // 🎯 ANALYSE TYPE ACTION
+    // =====================================
+    const atk = text.toLowerCase();
+
+    let actionLabel = "une action technique";
+
+    // ⚽ DRIBBLE
+    if (
+        atk.includes("dribble") ||
+        atk.includes("double contact") ||
+        atk.includes("roulette") ||
+        atk.includes("feinte") ||
+        atk.includes("crochet") ||
+        atk.includes("elastico") ||
+        atk.includes("passement de jambe") ||
+        atk.includes("nutmeg")
+    ) {
+
+        actionLabel = "un dribble";
+
+    }
+
+    // 🎯 PASSE
+    else if (
+        atk.includes("passe") ||
+        atk.includes("transmet") ||
+        atk.includes("centre") ||
+        atk.includes("remise")
+    ) {
+
+        actionLabel = "une passe";
+
+    }
+
+    // 🚀 TIR
+    else if (
+        atk.includes("tir") ||
+        atk.includes("frappe") ||
+        atk.includes("shoot") ||
+        atk.includes("volée") ||
+        atk.includes("reprise")
+    ) {
+
+        actionLabel = "un tir";
+
+    }
+
+    // 🏃 ACCÉLÉRATION
+    else if (
+        atk.includes("acceleration") ||
+        atk.includes("sprint") ||
+        atk.includes("vmax") ||
+        atk.includes("course")
+    ) {
+
+        actionLabel = "une percée";
+
+    }
+
+    const next =
+        match.joueurTour === match.id1
+            ? match.id2
+            : match.id1;
+
+    await ovl.sendMessage(chat, {
+        text:
+`*⚡🎯 ACTION OFFENSIVE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ ${duel.attacker.nom} tente ${actionLabel} !
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`,
+        mentions: [next]
+    });
+
+    match.joueurTour = next;
+
+    startMatchCycle(chat, ovl, match);
+    return true;
+}
+    
+// =========================================
+// 🟥 ÉTAPE 2 → RÉPONSE DÉFENSIVE
+// =========================================
+if (duel.stage === "waiting_defense_response") {
+
+    duel.defenseAction = text;
+
+    // =====================================
+    // 🛡️ ANALYSE TYPE DÉFENSE
+    // =====================================
+    const def = text.toLowerCase();
+
+    let defenseLabel = "une défense";
+
+    // 🦶 TACLE
+    if (
+        def.includes("tacle") ||
+        def.includes("glissé") ||
+        def.includes("glisse") ||
+        def.includes("interception")
+    ) {
+
+        defenseLabel = "un tacle";
+
+    }
+
+    // 💪 PHYSIQUE
+    else if (
+        def.includes("épaule") ||
+        def.includes("epaule") ||
+        def.includes("charge") ||
+        def.includes("physique") ||
+        def.includes("pression") ||
+        def.includes("contact")
+    ) {
+
+        defenseLabel = "un duel physique";
+
+    }
+
+    // 🚫 BLOCAGE
+    else if (
+        def.includes("bloc") ||
+        def.includes("bloque") ||
+        def.includes("contre") ||
+        def.includes("stop")
+    ) {
+
+        defenseLabel = "un blocage";
+
+    }
+
+    // 🏃 POURSUITE
+    else if (
+        def.includes("course") ||
+        def.includes("sprint") ||
+        def.includes("vmax") ||
+        def.includes("rattrape")
+    ) {
+
+        defenseLabel = "une poursuite";
+
+    }
+
+    // =====================================
+// 📢 ACTION DÉFENSIVE
+// =====================================
+await ovl.sendMessage(chat, {
+    text:
+`*🛡️⚔️ ACTION DÉFENSIVE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ ${duel.defender.nom} tente ${defenseLabel} !
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`
+});
+
+    // =====================================
+    // ⚔️ RÉSOLUTION
+    // =====================================
+    const res = await handleDuelMatch(
+        match,
+        duel.attackAction,
+        duel.defenseAction
+    );
 
     await ovl.sendMessage(chat, {
         text: res.message
     });
 
-    const duelStillRunning = [
-    "contre",
-    "CONTINUED_CHASE"
-];
+    // =====================================
+    // 🔥 SI LE DUEL CONTINUE
+    // =====================================
+    if (
+        res.type === "contre" ||
+        res.type === "CONTINUED_CHASE"
+    ) {
 
-if (!duelStillRunning.includes(res.type)) {
+        duel.stage = "waiting_attack_action";
+
+        startMatchCycle(chat, ovl, match);
+        return true;
+    }
+
+    // =====================================
+    // ✅ FIN DU DUEL
+    // =====================================
     match.phaseDuel = null;
-}
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+    match.phaseDuelResolved = false;
 
+    match.turnType = "attaque";
+
+    startMatchCycle(chat, ovl, match);
     return true;
 }
-
+} 
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
@@ -2343,16 +2539,42 @@ if (res && res.message && res.type !== "normal") {
     mentions: [match.joueurTour]
 });
 
-    // ⚔️ Duel continue
-    if (res.type === "contre") {
+// ⚔️ Duel continue
+if (
+    res.type === "contre" ||
+    res.type === "CONTINUED_CHASE"
+) {
 
-        match.phaseDuel = {
-            attaque: match.pendingAttack,
-            defense
-        };
+    const attacker =
+        findPlayer(match.pendingAttack);
 
-    } else {
+    let defender =
+        findPlayer(defense);
 
+    if (
+        !defender ||
+        defender.nom === attacker.nom
+    ) {
+
+        defender = allPlayers.find(
+            p => p.nom !== attacker.nom
+        );
+    }
+
+    match.phaseDuel = {
+        active: true,
+        attacker,
+        defender,
+        blockAction: defense,
+
+        // 🔥 NEW FLOW
+        stage: "waiting_attack_action",
+
+        attackAction: null,
+        defenseAction: null
+    };
+
+} else {
         // ✅ Duel terminé
         match.phaseDuel = null;
         match.pendingAttack = null;
