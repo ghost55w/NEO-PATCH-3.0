@@ -2269,9 +2269,14 @@ if (match.phaseDuel) {
         text: res.message
     });
 
-    if (res.type !== "contre") {
-        match.phaseDuel = null;
-    }
+    const duelStillRunning = [
+    "contre",
+    "CONTINUED_CHASE"
+];
+
+if (!duelStillRunning.includes(res.type)) {
+    match.phaseDuel = null;
+}
 
     return true;
 }
@@ -2352,6 +2357,9 @@ if (res && res.message && res.type !== "normal") {
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
+        
+    // 🔄 RESET DUEL
+    match.phaseDuelResolved = false;
     }
 
     startMatchCycle(chat, ovl, match);
@@ -2383,6 +2391,9 @@ await ovl.sendMessage(chat, {
 // 🔄 Reset attaque
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
+
+    // 🔄 RESET DUEL
+    match.phaseDuelResolved = false;
 
 // 🔁 Switch tour
 match.joueurTour =
@@ -3247,7 +3258,13 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 
     const next = match.attacker;
 
-    match.phaseDuelResolved = true;
+    const unresolvedTypes = [
+    "contre",
+    "CONTINUED_CHASE"
+];
+
+match.phaseDuelResolved =
+    !unresolvedTypes.includes(result.type);
 
     return {
         ok: result.ok,
