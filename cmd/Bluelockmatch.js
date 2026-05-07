@@ -2247,6 +2247,28 @@ async function handlePaveGame(ms, ovl) {
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
+
+// ===============================
+// ⚔️ MATCH UP TRIGGER (OBLIGATOIRE)
+// ===============================
+const defense = action.toLowerCase();
+
+const matchUpKeywords = [
+    "bloque", "bloquer", "blocage", "bloquant", 
+    "ferme", "fermer",
+    "devant", "se met devant",
+    "coupe", "coupe la route",
+    "intercepte", "interception",
+    "empêche", "empêchant", "empêcher", "gêne",
+    "pression",
+    "posture", "position",
+    "jambes fléchies", "écartées",
+    "stance", "position basse"
+];
+
+const isMatchUpDefense = matchUpKeywords.some(k =>
+    defense.includes(k)
+);
     // ===============================
 // ⚽ UPDATE BALL HOLDER (SMART)
 // ===============================
@@ -2516,7 +2538,7 @@ if (!match.pendingAttack) {
 }
 
 // ===============================
-// 🛡️ DEFENSE
+// 🛡️ DEFENSE → MATCH UP PRIORITY
 // ===============================
 const defense = action;
 
@@ -2524,9 +2546,6 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
-// ===============================
-// 🔥 PRIORITÉ AU DUEL / MATCH UP
-// ===============================
 if (res && res.message && res.type !== "normal") {
 
     await ovl.sendMessage(chat, {
@@ -2534,21 +2553,22 @@ if (res && res.message && res.type !== "normal") {
         mentions: [match.joueurTour]
     });
 
+    const next =
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
+
     // ===============================
-    // ⚔️ DUEL CONTINUE (MATCH UP ACTIF)
+    // ⚔️ MATCH UP OBLIGATOIRE
     // ===============================
     if (
         res.type === "contre" ||
-        res.type === "CONTINUED_CHASE"
+        res.type === "CONTINUED_CHASE" ||
+        res.type === "INTERCEPTION"
     ) {
 
-        const attacker =
-            findPlayer(match.pendingAttack);
+        const attacker = findPlayer(match.pendingAttack);
+        let defender = findPlayer(defense);
 
-        let defender =
-            findPlayer(defense);
-
-        if (!defender || attacker?.nom === defender?.nom) {
+        if (!defender || defender.nom === attacker?.nom) {
             defender = allPlayers.find(p => p.nom !== attacker?.nom);
         }
 
@@ -2558,20 +2578,16 @@ if (res && res.message && res.type !== "normal") {
             defender,
             attackAction: match.pendingAttack,
             defenseAction: defense,
-            stage: "MATCHUP_ACTIVE"
+            stage: "MATCHUP"
         };
-
-        // 🔥 IMPORTANT : NEXT DOIT SORTIR ICI
-        const next =
-            match.joueurTour === match.id1 ? match.id2 : match.id1;
 
         await ovl.sendMessage(chat, {
             text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${attacker?.nom?.toUpperCase() || "?"} 🆚 ${defender?.nom?.toUpperCase() || "?"}
+${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
 
-🏃 Duel en cours...
+⚽🛡️ Duel en cours...
 
 ➡️ @${getTagFromJid(next)} NEXT
 
@@ -2583,16 +2599,12 @@ ${attacker?.nom?.toUpperCase() || "?"} 🆚 ${defender?.nom?.toUpperCase() || "?
     } else {
 
         // ===============================
-        // ✅ DUEL TERMINÉ = RÉSOLUTION
+        // ⚔️ RÉSOLUTION DIRECTE
         // ===============================
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
-
-        match.phaseDuelResolved = false;
-
-        const next =
-            match.joueurTour === match.id1 ? match.id2 : match.id1;
+        match.phaseDuelResolved = true;
 
         await ovl.sendMessage(chat, {
             text:
