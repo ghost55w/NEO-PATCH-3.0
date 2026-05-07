@@ -2251,7 +2251,7 @@ async function handlePaveGame(ms, ovl) {
 // ===============================
 // ⚔️ MATCH UP TRIGGER (OBLIGATOIRE)
 // ===============================
-const defense = action.toLowerCase();
+const defenseText = action.toLowerCase();
 
 const matchUpKeywords = [
     "bloque", "bloquer", "blocage", "bloquant", 
@@ -2267,7 +2267,7 @@ const matchUpKeywords = [
 ];
 
 const isMatchUpDefense = matchUpKeywords.some(k =>
-    defense.includes(k)
+    defenseText.includes(k)
 );
     // ===============================
 // ⚽ UPDATE BALL HOLDER (SMART)
