@@ -2409,25 +2409,30 @@ if (!match.pendingAttack) {
 // ===============================
 // 🛡️ DEFENSE
 // ===============================
+// ===============================
+// ⚔️ MATCH UP PRIORITY (CONTEST SYSTEM)
+// ===============================
+
 const defense = action;
 
 // ===============================
-// 🧠 DETECTION DEFENSE (UNE SEULE FOIS)
+// 🧠 DETECTION CONTESTATION
 // ===============================
-const defenseIntentKeywords = [
+const contestKeywords = [
     "bloque", "devant", "stoppe", "tacle",
     "en face", "ferme", "coupe la route",
-    "intercepte", "gêne", "empêche"
+    "intercepte", "gêne", "empêche",
+    "marque", "pressing", "colle"
 ];
 
-const isDefenseIntent = defenseIntentKeywords.some(k =>
+const isContesting = contestKeywords.some(k =>
     (defense || "").toLowerCase().includes(k)
 );
 
 // ===============================
-// ⚔️ MATCH UP PRIORITAIRE (IMPORTANT)
+// ⚔️ MATCH UP SEULEMENT SI CONTESTATION
 // ===============================
-if (isDefenseIntent && match.pendingAttack) {
+if (match.pendingAttack && isContesting) {
 
     const res = await handleDuelMatch(
         match,
@@ -2442,7 +2447,7 @@ if (isDefenseIntent && match.pendingAttack) {
             mentions: [match.joueurTour]
         });
 
-        // 🔁 continuité du duel
+        // 🔁 continuité duel
         if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
             match.phaseDuel = {
