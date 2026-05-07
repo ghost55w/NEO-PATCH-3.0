@@ -2515,7 +2515,6 @@ if (!match.pendingAttack) {
     return true;
 }
 
-
 // ===============================
 // 🛡️ DEFENSE
 // ===============================
@@ -2525,68 +2524,95 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
-
 // ===============================
-// 🔥 PRIORITÉ AU MATCH UP / DUEL
+// 🔥 PRIORITÉ AU DUEL / MATCH UP
 // ===============================
 if (res && res.message && res.type !== "normal") {
 
-    const resume = genererResumeFull(match.pendingAttack, match);
-    const note = noterPave(match.pendingAttack);
-
     await ovl.sendMessage(chat, {
-    text: res.message,
-    mentions: [match.joueurTour]
-});
+        text: res.message,
+        mentions: [match.joueurTour]
+    });
 
-// ⚔️ Duel continue
-if (
-    res.type === "contre" ||
-    res.type === "CONTINUED_CHASE"
-) {
-
-    const attacker =
-        findPlayer(match.pendingAttack);
-
-    let defender =
-        findPlayer(defense);
-
+    // ===============================
+    // ⚔️ DUEL CONTINUE (MATCH UP ACTIF)
+    // ===============================
     if (
-        !defender ||
-        defender.nom === attacker.nom
+        res.type === "contre" ||
+        res.type === "CONTINUED_CHASE"
     ) {
 
-        defender = allPlayers.find(
-            p => p.nom !== attacker.nom
-        );
-    }
+        const attacker =
+            findPlayer(match.pendingAttack);
 
-    match.phaseDuel = {
-        active: true,
-        attacker,
-        defender,
-        blockAction: defense,
+        let defender =
+            findPlayer(defense);
 
-        // 🔥 NEW FLOW
-        stage: "waiting_attack_action",
+        if (!defender || attacker?.nom === defender?.nom) {
+            defender = allPlayers.find(p => p.nom !== attacker?.nom);
+        }
 
-        attackAction: null,
-        defenseAction: null
-    };
+        match.phaseDuel = {
+            active: true,
+            attacker,
+            defender,
+            attackAction: match.pendingAttack,
+            defenseAction: defense,
+            stage: "MATCHUP_ACTIVE"
+        };
 
-} else {
-        // ✅ Duel terminé
+        // 🔥 IMPORTANT : NEXT DOIT SORTIR ICI
+        const next =
+            match.joueurTour === match.id1 ? match.id2 : match.id1;
+
+        await ovl.sendMessage(chat, {
+            text:
+`*🛡️⚽ MATCH UP⚔️ !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+${attacker?.nom?.toUpperCase() || "?"} 🆚 ${defender?.nom?.toUpperCase() || "?"}
+
+🏃 Duel en cours...
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions: [next]
+        });
+
+    } else {
+
+        // ===============================
+        // ✅ DUEL TERMINÉ = RÉSOLUTION
+        // ===============================
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
-        
-    // 🔄 RESET DUEL
-    match.phaseDuelResolved = false;
+
+        match.phaseDuelResolved = false;
+
+        const next =
+            match.joueurTour === match.id1 ? match.id2 : match.id1;
+
+        await ovl.sendMessage(chat, {
+            text:
+`*⚔️ RÉSOLUTION DU DUEL !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+${res.message}
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions: [next]
+        });
     }
 
     startMatchCycle(chat, ovl, match);
     return true;
 }
+
   
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
@@ -3469,18 +3495,14 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
         msg: `🧱 ${defender.nom} stoppe l'action`
     };
 }
-    
+  // ===============================
+// ⚖️ FALLBACK
+// ===============================
+if (!result) {
+    result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
+}
 
-    // ===============================
-    // ⚖️ FALLBACK
-    // ===============================
-    if (!result) {
-        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
-    }
-
-    const next = match.attacker;
-
-    const unresolvedTypes = [
+const unresolvedTypes = [
     "contre",
     "CONTINUED_CHASE"
 ];
@@ -3488,21 +3510,14 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 match.phaseDuelResolved =
     !unresolvedTypes.includes(result.type);
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
-`*🛡️⚽ MATCH UP⚔️ !*
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
+// 🧠 IMPORTANT : plus de MATCH UP ici
+// 👉 on retourne JUSTE le résultat du duel
 
-${result.msg}
-
-➡️ @${getTagFromJid(next)} NEXT
-
-╰───────────────────
-              🔷BLUELOCK⚽🥅`
-    };
+return {
+    ok: result.ok,
+    type: result.type,
+    message: result.msg
+};     
 }
 
 
