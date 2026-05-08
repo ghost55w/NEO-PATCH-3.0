@@ -2538,9 +2538,28 @@ if (!match.pendingAttack) {
 }
 
 // ===============================
-// 🛡️ DEFENSE → MATCH UP PRIORITY
+// 🛡️ DEFENSE → MATCH UP PRIORITY (FIXED)
 // ===============================
 const defense = action;
+const def = defense.toLowerCase();
+
+// ⚔️ DETECTION MATCH UP (POSITIONNEL / STATIQUE)
+const staticDefenseKeywords = [
+    "bloque", "bloquer", "blocage", "bloquant",
+    "ferme", "fermer",
+    "devant", "se met devant",
+    "coupe", "coupe la route",
+    "intercepte", "interception",
+    "empêche", "empêchant", "gêne",
+    "pression",
+    "posture", "position",
+    "jambes fléchies", "écartées",
+    "stance", "position basse"
+];
+
+const isMatchUpDefense = staticDefenseKeywords.some(k =>
+    def.includes(k)
+);
 
 const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
@@ -2548,23 +2567,23 @@ match.hasPlayed = true;
 
 if (res && res.message && res.type !== "normal") {
 
+    const next =
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
+
     await ovl.sendMessage(chat, {
         text: res.message,
         mentions: [match.joueurTour]
     });
 
-    const next =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
+    // ===============================
+    // ⚔️ MATCH UP OBLIGATOIRE (FIX LOGIC)
+    // ===============================
+    const shouldMatchUp =
+        isMatchUpDefense ||
+        res.type === "contre" ||
+        res.type === "INTERCEPTION";
 
-    // ===============================
-    // ⚔️ MATCH UP OBLIGATOIRE
-    // ===============================
-    if (
-    res.type === "contre" ||
-    res.type === "CONTINUED_CHASE" ||
-    res.type === "INTERCEPTION" ||
-    isMatchUpDefense
-) {
+    if (shouldMatchUp) {
 
         const attacker = findPlayer(match.pendingAttack);
         let defender = findPlayer(defense);
@@ -2586,6 +2605,7 @@ if (res && res.message && res.type !== "normal") {
             text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
 ${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
 
 ⚽🛡️ Duel en cours...
@@ -2600,7 +2620,7 @@ ${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
     } else {
 
         // ===============================
-        // ⚔️ RÉSOLUTION DIRECTE
+        // ⚔️ RÉSOLUTION CLASSIQUE
         // ===============================
         match.phaseDuel = null;
         match.pendingAttack = null;
