@@ -2560,10 +2560,11 @@ if (res && res.message && res.type !== "normal") {
     // ⚔️ MATCH UP OBLIGATOIRE
     // ===============================
     if (
-        res.type === "contre" ||
-        res.type === "CONTINUED_CHASE" ||
-        res.type === "INTERCEPTION"
-    ) {
+    res.type === "contre" ||
+    res.type === "CONTINUED_CHASE" ||
+    res.type === "INTERCEPTION" ||
+    isMatchUpDefense
+) {
 
         const attacker = findPlayer(match.pendingAttack);
         let defender = findPlayer(defense);
