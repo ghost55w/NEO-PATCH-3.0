@@ -3057,20 +3057,77 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase(); 
 
+    // ===============================
+// 🧱 DEFENSE STATIQUE (SMART)
+// ===============================
+const staticDefenseKeywords = [
+
+    // 🧱 blocage
+    "bloque", "bloquer", "bloquant",
+    "blocage", "barrage", "barre",
+
+    // 🚫 fermeture angle
+    "ferme", "fermer", "fermant",
+    "ferme l'angle", "coupe l'angle",
+
+    // 🧍 positionnement
+    "devant",
+    "se met devant",
+    "se place devant",
+    "fait face",
+    "en face",
+
+    // 🚧 obstacle
+    "coupe la route",
+    "empêche",
+    "gêne",
+    "ralentit",
+    "stoppe",
+    "freine",
+
+    // 🛡️ posture
+    "posture basse",
+    "stance",
+    "position basse",
+    "position défensive",
+
+    // 🦵 jambes
+    "jambes fléchies",
+    "fléchies",
+    "jambes écartées",
+    "écartées",
+
+    // ⚔️ duel défensif
+    "pression",
+    "marquage",
+    "cadre",
+    "contenance"
+];
+
+const isStaticDefense = staticDefenseKeywords.some(k =>
+    def.includes(k)
+);
+
 // ===============================
 // 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
 // ===============================
 const actionAttacker = attaqueText;
 const actionDefender = defenseText;
 
-const chaseResult = resolveChase(
-    match,
-    attacker,
-    defender,
-    match.ball,
-    actionAttacker,
-    actionDefender
-);
+let chaseResult = null;
+
+if (!isStaticDefense) {
+
+    chaseResult = resolveChase(
+        match,
+        attacker,
+        defender,
+        match.ball,
+        actionAttacker,
+        actionDefender
+    );
+
+}
 
 // ===============================
 // ⚡ VITESSE BASE (UNE SEULE FOIS)
@@ -3112,7 +3169,10 @@ let result = null;
 // ===============================
 // 🏃 CHASE PRIORITY LOGIC
 // ===============================
-if (chaseResult.reason === "INTERCEPTION") {
+if (
+    isChaseDefense &&
+    chaseResult?.reason === "INTERCEPTION"
+) {
 
     match.ball.holder = defender.nom;
     match.ball.state = "controle";
@@ -3123,7 +3183,11 @@ if (chaseResult.reason === "INTERCEPTION") {
         msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
     };
 }
-else if (chaseResult.reason === "CONSERVATION") {
+
+else if (
+    isChaseDefense &&
+    chaseResult?.reason === "CONSERVATION"
+) {
 
     match.ball.holder = attacker.nom;
     match.ball.state = "controle";
@@ -3134,7 +3198,11 @@ else if (chaseResult.reason === "CONSERVATION") {
         msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
     };
 }
-else if (chaseResult.reason === "CHASE_CONTINUES") {
+
+else if (
+    isChaseDefense &&
+    chaseResult?.reason === "CHASE_CONTINUES"
+) {
 
     match.ball.state = "loose";
 
@@ -3143,7 +3211,7 @@ else if (chaseResult.reason === "CHASE_CONTINUES") {
         type: "CONTINUED_CHASE",
         msg: `🏃 Duel de course toujours en cours...`
     };
-} 
+}
 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
