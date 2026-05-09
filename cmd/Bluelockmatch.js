@@ -2578,49 +2578,31 @@ const isActiveDefense = activeDefenseKeywords.some(k =>
 );
 
 // ===============================
-// 🧠 RESOLUTION DUEL ENGINE
+// 🧠 MATCH UP DIRECT FLOW (AVANT DUEL ENGINE)
 // ===============================
-const res = await handleDuelMatch(match, match.pendingAttack, defense);
-
-match.hasPlayed = true;
-
-if (res && res.message && res.type !== "normal") {
+if (isStaticDefense && !isActiveDefense) {
 
     const next =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
-
-    await ovl.sendMessage(chat, {
-        text: res.message,
-        mentions: [match.joueurTour]
-    });
-
-// ===============================
-// 🧠 MATCH UP TRIGGER CLEAN
-// ===============================
-const shouldMatchUp =
-    isStaticDefense &&
-    !isActiveDefense &&
-    (
-        res.type === "contre" ||
-        res.type === "INTERCEPTION"
-    );
-
-if (shouldMatchUp) {
+        match.joueurTour === match.id1
+            ? match.id2
+            : match.id1;
 
     const attacker = findPlayer(match.pendingAttack);
+
     let defender = findPlayer(defense);
 
     if (!defender || defender.nom === attacker?.nom) {
         defender = allPlayers.find(p => p.nom !== attacker?.nom);
     }
 
+    // ⚔️ Création MATCH UP
     match.phaseDuel = {
         active: true,
         attacker,
         defender,
         attackAction: match.pendingAttack,
         defenseAction: defense,
-        stage: "MATCHUP"
+        stage: "waiting_attack_action"
     };
 
     await ovl.sendMessage(chat, {
@@ -2639,9 +2621,23 @@ ${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
         mentions: [next]
     });
 
+    match.joueurTour = next;
+
     startMatchCycle(chat, ovl, match);
     return true;
 }
+
+
+// ===============================
+// 🧠 RESOLUTION DUEL ENGINE
+// ===============================
+const res = await handleDuelMatch(
+    match,
+    match.pendingAttack,
+    defense
+);
+
+match.hasPlayed = true;
 
     // =====================================================
     // 🔴 DEFENSE ACTIVE → RÉSOLUTION DUEL DIRECT
