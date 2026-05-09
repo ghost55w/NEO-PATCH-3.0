@@ -2498,7 +2498,7 @@ await ovl.sendMessage(chat, {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-    
+} 
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
@@ -2578,31 +2578,49 @@ const isActiveDefense = activeDefenseKeywords.some(k =>
 );
 
 // ===============================
-// 🧠 MATCH UP DIRECT FLOW (AVANT DUEL ENGINE)
+// 🧠 RESOLUTION DUEL ENGINE
 // ===============================
-if (isStaticDefense && !isActiveDefense) {
+const res = await handleDuelMatch(match, match.pendingAttack, defense);
+
+match.hasPlayed = true;
+
+if (res && res.message && res.type !== "normal") {
 
     const next =
-        match.joueurTour === match.id1
-            ? match.id2
-            : match.id1;
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
+
+    await ovl.sendMessage(chat, {
+        text: res.message,
+        mentions: [match.joueurTour]
+    });
+
+// ===============================
+// 🧠 MATCH UP TRIGGER CLEAN
+// ===============================
+const shouldMatchUp =
+    isStaticDefense &&
+    !isActiveDefense &&
+    (
+        res.type === "contre" ||
+        res.type === "INTERCEPTION"
+    );
+
+if (shouldMatchUp) {
 
     const attacker = findPlayer(match.pendingAttack);
-
     let defender = findPlayer(defense);
 
     if (!defender || defender.nom === attacker?.nom) {
         defender = allPlayers.find(p => p.nom !== attacker?.nom);
     }
 
-    // ⚔️ Création MATCH UP
     match.phaseDuel = {
         active: true,
         attacker,
         defender,
         attackAction: match.pendingAttack,
         defenseAction: defense,
-        stage: "waiting_attack_action"
+        stage: "MATCHUP"
     };
 
     await ovl.sendMessage(chat, {
@@ -2621,27 +2639,9 @@ ${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
         mentions: [next]
     });
 
-    match.joueurTour = next;
-
     startMatchCycle(chat, ovl, match);
     return true;
 }
-
-// ❌ SI MATCH UP ACTIF → NE PAS RÉSOUDRE LE DUEL DIRECTEMENT
-if (match.phaseDuel?.stage === "waiting_attack_action") {
-    return true;
-}
-    
-// ===============================
-// 🧠 RESOLUTION DUEL ENGINE
-// ===============================
-const res = await handleDuelMatch(
-    match,
-    match.pendingAttack,
-    defense
-);
-
-match.hasPlayed = true;
 
     // =====================================================
     // 🔴 DEFENSE ACTIVE → RÉSOLUTION DUEL DIRECT
