@@ -2627,7 +2627,11 @@ ${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
     return true;
 }
 
-
+// ❌ SI MATCH UP ACTIF → NE PAS RÉSOUDRE LE DUEL DIRECTEMENT
+if (match.phaseDuel?.stage === "waiting_attack_action") {
+    return true;
+}
+    
 // ===============================
 // 🧠 RESOLUTION DUEL ENGINE
 // ===============================
