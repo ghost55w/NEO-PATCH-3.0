@@ -2263,7 +2263,7 @@ if (detectedPlayers.length >= 2) {
 // ===============================
 if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
+    const res = await handleDuelMatch(match, text, match.phaseDuel.defender);
 
     await ovl.sendMessage(chat, {
         text: res.message
@@ -2387,7 +2387,7 @@ ${attacker?.nom?.toUpperCase()} 🆚 ${defender?.nom?.toUpperCase()}
         mentions: [next]
     });
 
-    match.pendingAttack = null;
+    
     match.waitingDefenseFrom = null;
 
     startMatchCycle(chat, ovl, match);
