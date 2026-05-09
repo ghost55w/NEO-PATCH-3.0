@@ -2498,7 +2498,7 @@ await ovl.sendMessage(chat, {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-} 
+    
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
