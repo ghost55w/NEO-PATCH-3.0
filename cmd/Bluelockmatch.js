@@ -2802,15 +2802,26 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 const actionAttacker = attaqueText;
 const actionDefender = defenseText;
 
-const chaseResult = resolveChase(
-    match,
-    attacker,
-    defender,
-    match.ball,
-    actionAttacker,
-    actionDefender
-);
+let chaseResult = null;
 
+if (isChase) {
+    chaseResult = resolveChase(
+        match,
+        attacker,
+        defender,
+        match.ball,
+        attaqueText,
+        defenseText
+    );
+}
+
+    // ===============================
+// ❌ IGNORE CHASE SI DEFENSE ACTIVE
+// ===============================
+if (isActiveDefense) {
+    chaseResult = null;
+}
+    
 // ===============================
 // ⚡ VITESSE BASE (UNE SEULE FOIS)
 // ===============================
@@ -2873,7 +2884,7 @@ else if (chaseResult.reason === "CONSERVATION") {
         msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
     };
 }
-else if (chaseResult.reason === "CHASE_CONTINUES") {
+else if (chaseResult && chaseResult.reason === "CHASE_CONTINUES" && !isActiveDefense) { {
 
     match.ball.state = "loose";
 
@@ -3035,10 +3046,100 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 
     const atk = attacker.stats || {};
     const def = defender.stats || {};
-
+    
     const tA = attackText.toLowerCase();
     const tD = defenseText.toLowerCase();
 
+// ===============================
+// 🧠 NORMALISATION TEXTE
+// ===============================
+const normalize = (txt) =>
+    txt
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+const defNorm = normalize(def);
+
+    // ===============================
+// 🟡 DEFENSE PASSIVE
+// ===============================
+const passiveDefense = [
+
+    // interposition
+    "interpos", "se met devant", "se place",
+    "fait barrage", "barre la route",
+    "bloque le passage",
+
+    // posture
+    "posture", "posture basse", "posture debout",
+    "position defensive",
+
+    // jambes
+    "jambes ecartees", "jambes flechies", "jambes serrees",
+
+    // attitude
+    "attend", "observe", "reste en place",
+
+    // corps
+    "bras ecarte", "ouvre les bras"
+];
+
+const isPassiveDefense = passiveDefense.some(k => defNorm.includes(k));
+
+    // ===============================
+// 🔴 DEFENSE ACTIVE
+// ===============================
+const activeDefense = [
+
+    // tacles
+    "tacl", "tacle glisse", "tacle debout", "tacle circulaire",
+
+    // interception
+    "intercept",
+
+    // contact physique
+    "epaule", "coup d epaule",
+    "duel physique", "contact", "bouscule",
+
+    // bras / main
+    "paume", "bras", "main",
+
+    // ballon direct
+    "tend le pied", "pied tendu",
+    "met le pied",
+    "recup", "recuper",
+    "degage",
+    "contre le ballon",
+    "devie",
+    "sort le ballon"
+];
+
+const isActiveDefense = activeDefense.some(k => defNorm.includes(k));
+    
+// ===============================
+// 🏃 CHASE (UNIQUEMENT SI POURSUITE)
+// ===============================
+const chaseKeywords = [
+    "poursuit", "poursuivre", "poursuivi",
+    "suit", "suivre",
+    "rattrape", "rattraper",
+    "revient sur",
+    "court apres",
+    "sprinte derriere",
+    "colle",
+    "en poursuite"
+];
+
+const isChase = chaseKeywords.some(k => defNorm.includes(k));
+    
+
+
+    
+// 🔹 Détection intelligente (racines incluses)
+const isDecisiveDefense = decisiveKeywords.some(k =>
+    defNorm.includes(k)
+);
     // ===============================
     // 🧭 BODY ORIENTATION UPDATE
     // ===============================
