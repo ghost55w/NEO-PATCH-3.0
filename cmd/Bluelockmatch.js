@@ -1687,6 +1687,8 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 
     const isDribble = DRIBBLES.some(d => tA.includes(d));
 
+    if (!isDribble) return null;
+
     // ===============================
     // 🧠 INTENTION DRIBBLE
     // ===============================
@@ -1706,7 +1708,7 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
             tA.includes("gauche") ? "left" :
             tA.includes("droite") ? "right" : null,
 
-        distance: extractDistance(tA),
+        distance: typeof extractDistance === "function" ? extractDistance(tA) : null,
 
         sprint:
             tA.includes("vmax") ||
@@ -1717,19 +1719,16 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     // ===============================
     // ⚖️ VALIDATION DRIBBLE
     // ===============================
-    if (isDribble) {
+    if (!intent.foot) {
+        return { ok: false, type: "faute", msg: `❌ Dribble raté : pied non précisé` };
+    }
 
-        if (!intent.foot) {
-            return { ok: false, type: "faute", msg: `❌ Dribble raté : pied non précisé` };
-        }
+    if (!intent.surface) {
+        return { ok: false, type: "faute", msg: `❌ Dribble raté : surface du pied non précisée` };
+    }
 
-        if (!intent.surface) {
-            return { ok: false, type: "faute", msg: `❌ Dribble raté : surface du pied non précisée` };
-        }
-
-        if (intent.distance !== null && intent.distance < 0.3) {
-            return { ok: false, type: "faute", msg: `❌ Contrôle trop collé au pied` };
-        }
+    if (intent.distance !== null && intent.distance < 0.3) {
+        return { ok: false, type: "faute", msg: `❌ Contrôle trop collé au pied` };
     }
 
     // ===============================
@@ -1744,8 +1743,11 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     else reactionWindow = "anytime";
 
     // ===============================
-    // 🧠 BODY ADVANTAGE
+    // 🧠 BODY STATE (SAFE FIX)
     // ===============================
+    const attackerState = attacker.bodyState || "front";
+    const defenderState = defender.bodyState || "front";
+
     const bodyAdvantage =
         (attackerState === "front" && defenderState === "back") ? 5 :
         (attackerState === "left" && defenderState === "right") ? 3 :
@@ -1814,6 +1816,46 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
             msg: `🛑 ${defender.nom} récupère le ballon proprement`
         };
     }
+
+    // ===============================
+    // ⚔️ FINAL DUEL
+    // ===============================
+    const atkPower = (atk.dri || 50) + bodyAdvantage;
+    const defPower = def.def || 50;
+
+    const gap = atkPower - defPower;
+
+    if (gap > 0) {
+
+        if (intent.sprint) {
+            return {
+                ok: true,
+                type: "escape",
+                msg: `🚀 ${attacker.nom} élimine ${defender.nom} et accélère`
+            };
+        }
+
+        return {
+            ok: true,
+            type: "win",
+            msg: `🔥 ${attacker.nom} élimine ${defender.nom}`
+        };
+    }
+
+    if (Math.abs(gap) <= 5) {
+        return {
+            ok: false,
+            type: "contre",
+            msg: `⚔️ Duel serré entre ${attacker.nom} et ${defender.nom}`
+        };
+    }
+
+    return {
+        ok: false,
+        type: "stop",
+        msg: `🧱 ${defender.nom} stoppe l'action`
+    };
+}
 
 
 // ===============================
