@@ -2457,15 +2457,18 @@ async function handlePaveGame(ms, ovl) {
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
-    // ===============================
-// ⚽ UPDATE BALL HOLDER (SMART)
 // ===============================
-const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+// ⚽ UPDATE BALL HOLDER (SMART SAFE)
+// ===============================
+if (!match.pendingAttack) { // ✅ UNIQUEMENT en attaque
 
-if (detectedPlayers.length >= 2) {
-    match.ballHolder = detectedPlayers[1]; // receveur
-} else if (detectedPlayers.length === 1) {
-    match.ballHolder = detectedPlayers[0];
+    const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+
+    if (detectedPlayers.length >= 2) {
+        match.ballHolder = detectedPlayers[1]; // receveur
+    } else if (detectedPlayers.length === 1) {
+        match.ballHolder = detectedPlayers[0];
+    }
 }
     
 // ===============================
