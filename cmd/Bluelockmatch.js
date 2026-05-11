@@ -3050,89 +3050,127 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     const tA = attackText.toLowerCase();
     const tD = defenseText.toLowerCase();
 
+
 // ===============================
-// 🧠 NORMALISATION TEXTE
+// 🧠 NORMALISATION AVANCÉE
 // ===============================
 const normalize = (txt) =>
     txt
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " "); // supprime symboles
 
 const defNorm = normalize(def);
 
-    // ===============================
-// 🟡 DEFENSE PASSIVE
 // ===============================
-const passiveDefense = [
+// 🧠 MATCH FLEXIBLE (tolérance fautes)
+// ===============================
+const includesApprox = (text, keyword) => {
+    if (text.includes(keyword)) return true;
 
-    // interposition
-    "interpos", "se met devant", "se place",
-    "fait barrage", "barre la route",
-    "bloque le passage",
+    // tolérance simple (1 erreur)
+    for (let i = 0; i < keyword.length; i++) {
+        const variant =
+            keyword.slice(0, i) + keyword.slice(i + 1);
+        if (text.includes(variant)) return true;
+    }
+
+    return false;
+};
+
+const matchKeywords = (text, keywords) =>
+    keywords.some(k => includesApprox(text, k));
+
+
+// ===============================
+// 🟡 DEFENSE PASSIVE (RICHE)
+// ===============================
+const passiveKeywords = [
+    // positionnement
+    "se place", "se positionne", "reste en place",
+    "se met devant", "se met en opposition",
+    "se tient devant", "fait face",
+
+    // blocage
+    "bloque", "blocage", "fait barrage",
+    "barre la route", "coupe la route",
+    "ferme l angle", "ferme espace",
+    "obstrue", "gene le passage",
 
     // posture
-    "posture", "posture basse", "posture debout",
-    "position defensive",
+    "attend", "observe", "temporise",
+    "reste immobile", "ralentit",
 
-    // jambes
-    "jambes ecartees", "jambes flechies", "jambes serrees",
-
-    // attitude
-    "attend", "observe", "reste en place",
-
-    // corps
-    "bras ecarte", "ouvre les bras"
+    // variations / fautes
+    "blok", "blokage", "barage", "barre"
 ];
 
-const isPassiveDefense = passiveDefense.some(k => defNorm.includes(k));
+const isPassiveDefense = matchKeywords(defNorm, passiveKeywords);
 
-    // ===============================
-// 🔴 DEFENSE ACTIVE
+
 // ===============================
-const activeDefense = [
-
+// 🔴 DEFENSE ACTIVE (RICHE)
+// ===============================
+const activeKeywords = [
     // tacles
-    "tacl", "tacle glisse", "tacle debout", "tacle circulaire",
+    "tacle", "tacl", "tacle glisse", "tacle glisser",
+    "tacle debout", "tacle circulaire",
 
     // interception
-    "intercept",
+    "intercept", "interception", "intersepte",
 
-    // contact physique
-    "epaule", "coup d epaule",
-    "duel physique", "contact", "bouscule",
-
-    // bras / main
-    "paume", "bras", "main",
+    // contact
+    "epaule", "coup d epaule", "epole",
+    "contact", "bouscule", "pousse",
+    "charge", "impact",
 
     // ballon direct
+    "recup", "recuper", "recupere",
+    "degage", "degage", "degagement",
+    "contre le ballon", "devie",
+    "sort le ballon", "enleve le ballon",
+
+    // pied
     "tend le pied", "pied tendu",
-    "met le pied",
-    "recup", "recuper",
-    "degage",
-    "contre le ballon",
-    "devie",
-    "sort le ballon"
+    "met le pied", "allonge la jambe",
+
+    // fautes typo
+    "intersept", "recupr", "degaj"
 ];
 
-const isActiveDefense = activeDefense.some(k => defNorm.includes(k));
-    
+const isActiveDefense = matchKeywords(defNorm, activeKeywords);
+
+
 // ===============================
-// 🏃 CHASE (UNIQUEMENT SI POURSUITE)
+// 🏃 CHASE (RICHE + NATUREL)
 // ===============================
 const chaseKeywords = [
+    // poursuite
     "poursuit", "poursuivre", "poursuivi",
-    "suit", "suivre",
-    "rattrape", "rattraper",
-    "revient sur",
-    "court apres",
-    "sprinte derriere",
-    "colle",
-    "en poursuite"
+    "poursuiv", "poursui",
+
+    // suivre
+    "suit", "suivre", "suivi",
+    "sui",
+
+    // rattraper
+    "rattrape", "rattraper", "ratrape", "ratrap",
+
+    // course
+    "court apres", "cour apres", "cours apres",
+    "sprinte", "sprint", "sprin",
+    "accelere derriere",
+
+    // pression
+    "colle", "met la pression",
+    "revient sur", "revien sur",
+
+    // variations fautes
+    "pourchasse", "chasse", "poursu"
 ];
 
-const isChase = chaseKeywords.some(k => defNorm.includes(k));
-    
+const isChase = matchKeywords(defNorm, chaseKeywords);
 
 
     
