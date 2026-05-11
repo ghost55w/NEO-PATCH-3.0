@@ -2884,7 +2884,7 @@ else if (chaseResult.reason === "CONSERVATION") {
         msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
     };
 }
-else if (chaseResult && chaseResult.reason === "CHASE_CONTINUES" && !isActiveDefense) { {
+else if (chaseResult && chaseResult.reason === "CHASE_CONTINUES" && !isActiveDefense) {
 
     match.ball.state = "loose";
 
@@ -2893,7 +2893,7 @@ else if (chaseResult && chaseResult.reason === "CHASE_CONTINUES" && !isActiveDef
         type: "CONTINUED_CHASE",
         msg: `🏃 Duel de course toujours en cours...`
     };
-} 
+}
 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
