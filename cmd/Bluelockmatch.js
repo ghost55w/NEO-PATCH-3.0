@@ -2895,14 +2895,14 @@ async function handlePasses(match, action, joueur) {
 async function handleDuelMatch(match, attaqueText, defenseText) {
 
     // ===============================
-    // ❌ 0️⃣ VALIDATION INPUT
+    // ❌ VALIDATION INPUT
     // ===============================
     if (!attaqueText || !defenseText) {
         return { ok: false, type: "erreur", message: "❌ Duel invalide" };
     }
 
     // ===============================
-    // 🚫 0️⃣ DUEL DÉJÀ RÉSOLU
+    // 🚫 DUEL DÉJÀ RÉSOLU
     // ===============================
     if (match.phaseDuelResolved) {
         return {
@@ -2918,10 +2918,11 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     ];
 
     // ===============================
-    // 🔍 1️⃣ FIND PLAYER SYSTEM
+    // 🔍 FIND PLAYER SYSTEM
     // ===============================
     const findPlayer = (txt) => {
         const t = pureName(txt);
+
         return allPlayers.find(p => {
             const n = pureName(p.nom);
             return t.includes(n) || n.includes(t);
@@ -2929,7 +2930,7 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     };
 
     // ===============================
-    // ⚽ 2️⃣ ATTACKER / DEFENDER INIT
+    // ⚽ ATTACKER / DEFENDER INIT
     // ===============================
     let attacker = match.ballHolder
         ? allPlayers.find(p => p.nom === match.ballHolder) || allPlayers[0]
@@ -2947,8 +2948,11 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
 
+    const atk = attaqueText.toLowerCase();
+    const def = defenseText.toLowerCase();
+
     // ===============================
-    // 3️⃣ NORMALISATION
+    // 1️⃣ NORMALISATION TEXTE
     // ===============================
     const normalize = (txt) =>
         txt
@@ -2960,76 +2964,76 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atkNorm = normalize(attaqueText);
     const defNorm = normalize(defenseText);
 
+    // ===============================
+    // 2️⃣ INTENTIONS GLOBALES
+    // ===============================
+    const matchKeywords = (text, keywords) =>
+        keywords.some(k => text.includes(k));
+
+    const passiveKeywords = [
+        "se place","devant","barrer","bloque","ferme",
+        "coupe la route","fait barrage","reste en place",
+        "bloquant","bloqueur","blocage"
+    ];
+
+    const activeKeywords = [
+        "tacle","intercept","epaule","contact",
+        "recup","degage","bouscule","pousse"
+    ];
+
+    const chaseKeywords = [
+        "poursuit","suit","rattrape","colle",
+        "sprinte","court apres","revient sur"
+    ];
+
+    const isPassiveDefense = matchKeywords(defNorm, passiveKeywords);
+    const isActiveDefense = matchKeywords(defNorm, activeKeywords);
+    const isChase = matchKeywords(defNorm, chaseKeywords);
+
     let result = null;
 
-    // ===============================
-    // ⚡ 3️⃣ VITESSE BASE
-    // ===============================
     const atkVmax = atkStats.acc || 50;
-    const defBaseVmax = defStats.acc || 50;
+    const defVmax = defStats.acc || 50;
 
     // ===============================
-    // 🧍 4️⃣ BODY ORIENTATION
+    // 🧭 BODY ORIENTATION (IMPORTANT GLOBAL)
     // ===============================
+    function updateBody(player, text) {
+        if (!player.bodyAngle) player.bodyAngle = 0;
+
+        if (text.includes("pivot droite")) player.bodyAngle += 90;
+        if (text.includes("pivot gauche")) player.bodyAngle -= 90;
+        if (text.includes("360")) player.bodyAngle += 360;
+
+        player.bodyState =
+            player.bodyAngle % 360 === 0 ? "front" :
+            player.bodyAngle % 360 === 90 ? "right" :
+            player.bodyAngle % 360 === 270 ? "left" : "back";
+    }
+
     updateBody(attacker, attaqueText);
     updateBody(defender, defenseText);
 
-    const attackerState = attacker.bodyState || "front";
-    const defenderState = defender.bodyState || "front";
-
-    const bodyAdvantage =
-        (attackerState === "front" && defenderState === "back") ? 5 :
-        (attackerState === "left" && defenderState === "right") ? 3 :
-        (attackerState === "right" && defenderState === "left") ? 3 : 0;
+    const attackerState = attacker.bodyState;
+    const defenderState = defender.bodyState;
 
     // ===============================
-    // ⚽ 5️⃣ DRIBBLE ENGINE (PRIORITÉ)
-    // ===============================
-    const dribbleResult = resolveDribbleDuel(
-        match,
-        attacker,
-        defender,
-        attaqueText,
-        defenseText
-    );
-
-    if (dribbleResult) {
-        result = dribbleResult;
-    }
-
-    // ===============================
-    // 🧠 6️⃣ INTENTIONS GLOBALES
-    // ===============================
-    const isPassiveDefense = [
-        "se place", "bloque", "ferme", "coupe", "barrage"
-    ].some(k => defNorm.includes(k));
-
-    const isActiveDefense = [
-        "tacle", "intercept", "epaule", "contact", "recup"
-    ].some(k => defNorm.includes(k));
-
-    const isChase = [
-        "poursuit", "suit", "rattrape", "colle", "sprinte"
-    ].some(k => defNorm.includes(k));
-
-    const diffSpeed = (atkStats.acc || 50) - (defStats.acc || 50);
-
-    // ===============================
-    // 🟡 7️⃣ DEFENSE PASSIVE
+    // 🟡 3️⃣ DEFENSE PASSIVE
     // ===============================
     if (!result && isPassiveDefense) {
 
-        const atkPower = (atkStats.acc || 50) + (atkStats.dri || 50) * 0.3;
         const defPower = (defStats.def || 50) + (defStats.phy || 50) * 0.3;
+        const atkPower = (atkStats.acc || 50) + (atkStats.dri || 50) * 0.3;
 
-        if (diffSpeed > 15) {
+        const speedGap = atkVmax - defVmax;
+
+        if (speedGap > 15) {
             result = {
                 ok: true,
                 type: "win",
                 msg: `💨 ${attacker.nom} dépasse la défense`
             };
         }
-
         else if (defPower > atkPower) {
             result = {
                 ok: false,
@@ -3037,42 +3041,38 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
                 msg: `🧱 ${defender.nom} bloque`
             };
         }
-
         else {
             result = {
                 ok: false,
                 type: "contre",
-                msg: `⚔️ ${defender.nom} gêne`
+                msg: `⚔️ Blocage défensif`
             };
         }
     }
 
     // ===============================
-    // 🔴 8️⃣ DEFENSE ACTIVE
+    // 🔴 4️⃣ DEFENSE ACTIVE + PHYSIQUE
     // ===============================
     if (!result && isActiveDefense) {
 
         const atkPhy = atkStats.phy || 50;
         const defPhy = defStats.phy || 50;
-
         const diffPhy = defPhy - atkPhy;
 
         if (diffPhy > 15) {
             result = {
                 ok: false,
                 type: "chute",
-                msg: `💥 ${attacker.nom} chute`
+                msg: `💥 ${attacker.nom} tombe`
             };
         }
-
         else if (diffPhy > 0) {
             result = {
                 ok: false,
                 type: "déséquilibre",
-                msg: `⚖️ ${attacker.nom} déséquilibré`
+                msg: `⚖️ ${attacker.nom} perd l'équilibre`
             };
         }
-
         else {
             result = {
                 ok: true,
@@ -3083,49 +3083,88 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     }
 
     // ===============================
-    // 🏃 9️⃣ CHASE SYSTEM
+    // 🏃 5️⃣ CHASE SYSTEM
     // ===============================
     if (!result && isChase) {
 
-        if (diffSpeed > 15) {
+        const speedDiff = atkVmax - defVmax;
+
+        if (speedDiff > 15) {
             result = {
                 ok: true,
                 type: "CONSERVATION",
                 msg: `⚡ ${attacker.nom} garde l'avance`
             };
         }
-
-        else if (diffSpeed < -10) {
+        else if (speedDiff < -10) {
             result = {
                 ok: false,
                 type: "INTERCEPTION",
                 msg: `🛑 ${defender.nom} intercepte`
             };
         }
-
         else {
             result = {
                 ok: false,
                 type: "CONTINUED_CHASE",
-                msg: `🏃 Course serrée`
+                msg: `🏃 Duel en course`
             };
         }
     }
 
     // ===============================
-    // ⚖️ 🔟 FALLBACK
+    // ⚽ 6️⃣ DRIBBLE SYSTEM (OPTIONNEL INLINE OU CALL)
+    // ===============================
+    const dribbleResult = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        attaqueText,
+        defenseText
+    );
+
+    if (dribbleResult) result = dribbleResult;
+
+    // ===============================
+    // ⚔️ 7️⃣ FINAL DUEL
     // ===============================
     if (!result) {
-        result = {
-            ok: false,
-            type: "contre",
-            msg: "⚔️ Duel en cours..."
-        };
+
+        const atkPower = (atkStats.dri || 50) +
+            ((attackerState === "front" && defenderState === "back") ? 5 : 0);
+
+        const defPower = defStats.def || 50;
+
+        const gap = atkPower - defPower;
+
+        if (gap > 0) {
+            result = {
+                ok: true,
+                type: "win",
+                msg: `🔥 ${attacker.nom} passe`
+            };
+        }
+        else if (Math.abs(gap) <= 5) {
+            result = {
+                ok: false,
+                type: "contre",
+                msg: `⚔️ Duel serré`
+            };
+        }
+        else {
+            result = {
+                ok: false,
+                type: "stop",
+                msg: `🧱 Stop défensif`
+            };
+        }
     }
 
     // ===============================
-    // 🏁 1️⃣1️⃣ FINALISATION MATCH
+    // 🧾 FINAL RETURN
     // ===============================
+    const next = match.attacker;
+
     const unresolved = ["contre", "CONTINUED_CHASE"];
 
     match.phaseDuelResolved = !unresolved.includes(result.type);
@@ -3140,10 +3179,13 @@ ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
 ${result.msg}
 
+➡️ @${getTagFromJid(next)} NEXT
+
 ╰───────────────────
 🔷BLUELOCK⚽🥅`
     };
 }
+        
     
 
 /* ===============================
