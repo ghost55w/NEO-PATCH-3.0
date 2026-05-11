@@ -1857,6 +1857,25 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
 
+// ===============================
+// 🧠 GET PLAYER FROM DB
+// ===============================
+function getPlayerFromText(text, match) {
+
+    const allPlayers = (match.lineup1 || []).concat(match.lineup2 || []);
+    const lower = text.toLowerCase();
+
+    for (const p of allPlayers) {
+        if (!p.nom) continue;
+
+        if (lower.includes(p.nom.toLowerCase())) {
+            return p.nom; // ✅ vrai joueur
+        }
+    }
+
+    return null;
+}
+
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2457,17 +2476,16 @@ async function handlePaveGame(ms, ovl) {
     await new Promise(r => setTimeout(r, 60000));
 
     const action = actionCheck;
-// ===============================
-// ⚽ UPDATE BALL HOLDER (SMART SAFE)
-// ===============================
-if (!match.pendingAttack) { // ✅ UNIQUEMENT en attaque
 
-    const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
+// ===============================
+// ⚽ UPDATE BALL HOLDER (DB BASED)
+// ===============================
+if (!match.pendingAttack) {
 
-    if (detectedPlayers.length >= 2) {
-        match.ballHolder = detectedPlayers[1]; // receveur
-    } else if (detectedPlayers.length === 1) {
-        match.ballHolder = detectedPlayers[0];
+    const playerName = getPlayerFromText(text, match);
+
+    if (playerName) {
+        match.ballHolder = playerName; 
     }
 }
     
@@ -2974,21 +2992,39 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         }) || null;
     };
 
-    // ===============================
-    // ⚽ ATTACKER / DEFENDER INIT
-    // ===============================
-    let attacker = match.ballHolder
-        ? allPlayers.find(p => p.nom === match.ballHolder) || allPlayers[0]
-        : findPlayer(attaqueText);
 
-    let defender = findPlayer(defenseText);
+ // ===============================
+// ⚽ ATTACKER / DEFENDER (DB SAFE)
+// ===============================
 
-    const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
-    if (tacticalTarget) defender = tacticalTarget;
+// ✅ ATTAQUANT = porteur de balle réel
+let attacker = match.ballHolder
+    ? allPlayers.find(p => p.nom === match.ballHolder)
+    : null;
 
-    if (!attacker || !defender) {
-        return { ok: false, type: "erreur", message: "❌ Joueurs introuvables" };
-    }
+// fallback sécurité (rare)
+if (!attacker) {
+    attacker = findPlayer(attaqueText);
+}
+
+// ✅ DÉFENSEUR = joueur réel qui joue ce tour
+let defender = allPlayers.find(p =>
+    normalizeJid(p.id || p.jid) === match.joueurTour
+);
+
+// fallback si jamais
+if (!defender) {
+    defender = findPlayer(defenseText);
+}
+
+// 🔒 sécurité anti clone
+if (attacker && defender && attacker.nom === defender.nom) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Duel invalide (même joueur détecté)"
+    };
+}
 
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
