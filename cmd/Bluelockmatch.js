@@ -1746,6 +1746,16 @@ async function verifierFiche(message, chat, ovl) {
         [match.team2Nom]: "defense"
     };
 
+match.duelState = {
+    active: false,
+    attacker: null,
+    defender: null,
+    stage: "idle",
+    lastAction: null
+};
+
+match.phaseDuelResolved = false;
+        
     const imagesMatchConfirm = [
         "https://files.catbox.moe/7m2axj.jpg",
         "https://files.catbox.moe/mtou2n.jpg"
@@ -2291,6 +2301,13 @@ if (!match.pendingAttack) {
 
     match.pendingAttack = action;
     match.hasPlayed = true;
+    // ===============================
+    // ⚽ DUEL ACTIVATION
+    // ===============================
+    match.duelState.active = true;
+    match.duelState.attacker = match.attacker || match.joueurTour;
+    match.duelState.stage = "chase";
+    match.duelState.lastAction = "attack_passive";
 
     // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
@@ -2321,45 +2338,56 @@ if (!match.pendingAttack) {
 
 
 // ===============================
-// 🛡️ DEFENSE
-// ===============================
+ // 🛡️ DEFENSE
+ // ===============================
 const defense = action;
 
-const res = await handleDuelMatch(match, match.pendingAttack, defense);
+// ===============================
+// 💥 DUEL RESOLUTION (SYSTEM UNIQUE)
+// ===============================
+let res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
 
 // ===============================
-// 🔥 PRIORITÉ AU MATCH UP / DUEL
+// 🔥 PRIORITÉ AU DUEL / MATCH UP
 // ===============================
 if (res && res.message && res.type !== "normal") {
 
-    const resume = genererResumeFull(match.pendingAttack, match);
-    const note = noterPave(match.pendingAttack);
-
     await ovl.sendMessage(chat, {
-    text: res.message,
-    mentions: [match.joueurTour]
-});
+        text: res.message,
+        mentions: [match.joueurTour]
+    });
 
-    // ⚔️ Duel continue
-    if (res.type === "contre") {
+    // ===============================
+    // ⚔️ CAS : DUEL CONTINUE
+    // ===============================
+    if (res.type === "contre" || res.type === "CONTINUED_CHASE") {
 
-        match.phaseDuel = {
-            attaque: match.pendingAttack,
-            defense
-        };
+        // 🔄 on garde le duel actif (chase)
+        if (match.duelState) {
+            match.duelState.stage = "chase";
+        }
 
     } else {
 
-        // ✅ Duel terminé
-        match.phaseDuel = null;
+        // ===============================
+        // ✅ FIN DU DUEL (RESET PROPRE)
+        // ===============================
+
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
-        
-    // 🔄 RESET DUEL
-    match.phaseDuelResolved = false;
+
+        match.duelState = {
+            active: false,
+            attacker: null,
+            defender: null,
+            stage: "resolved",
+            lastAction: "resolved"
+        };
+
+        match.phaseDuelResolved = false;
     }
 
     startMatchCycle(chat, ovl, match);
@@ -2729,7 +2757,22 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 
     if (!attaqueText || !defenseText) {
         return { ok: false, type: "erreur", message: "❌ Duel invalide" };
+ }
+
+    // ===============================
+// 🚫 STOP DUPLICATE MATCH UP
+// ===============================
+if (match.duelState?.active && match.duelState.stage !== "resolved") {
+
+    // 🏃 Duel déjà en cours → on ne recrée rien
+    if (match.duelState.stage === "chase") {
+        return {
+            ok: false,
+            type: "CONTINUED_CHASE",
+            message: "🏃 Duel de course toujours en cours..."
+        };
     }
+}
 
     // ===============================
     // 🚫 GARDIEN DUEL DÉJÀ RÉSOLU
@@ -2875,9 +2918,12 @@ else if (chaseResult.reason === "CONSERVATION") {
 }
 else if (chaseResult.reason === "CHASE_CONTINUES") {
 
+    match.duelState.defender = defender;
+    match.duelState.stage = "chase";
+
     match.ball.state = "loose";
 
-    result = {
+    return {
         ok: false,
         type: "CONTINUED_CHASE",
         msg: `🏃 Duel de course toujours en cours...`
@@ -3250,15 +3296,24 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     
 
     // ===============================
-    // ⚖️ FALLBACK
-    // ===============================
-    if (!result) {
-        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
-    }
+// ⚖️ FALLBACK
+// ===============================
+if (!result) {
+    result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
+}
 
-    const next = match.attacker;
+// ===============================
+// 🔁 SAFE NEXT PLAYER
+// ===============================
+const next =
+    match.joueurTour ||
+    match.attacker ||
+    match.duelState?.attacker;
 
-    const unresolvedTypes = [
+// ===============================
+// 🧠 RESOLUTION STATE
+// ===============================
+const unresolvedTypes = [
     "contre",
     "CONTINUED_CHASE"
 ];
@@ -3266,10 +3321,13 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 match.phaseDuelResolved =
     !unresolvedTypes.includes(result.type);
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
+// ===============================
+// 📩 RETURN MATCH UP
+// ===============================
+return {
+    ok: result.ok,
+    type: result.type,
+    message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
@@ -3280,11 +3338,8 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    };
-}
-
-
-    
+};
+}    
 
 
 /* ===============================
