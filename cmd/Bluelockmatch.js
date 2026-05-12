@@ -2536,14 +2536,14 @@ if (!match.pendingAttack) {
     let newHolder = null;
 
     // ===============================
-    // 1️⃣ PRIORITY DB (SAFE SOURCE)
+    // 1️⃣ DB PRIORITY
     // ===============================
     if (attackerPlayer?.nom) {
         newHolder = attackerPlayer.nom;
     }
 
     // ===============================
-    // 2️⃣ FALLBACK: PAVE DETECTION
+    // 2️⃣ FALLBACK PAVÉ
     // ===============================
     else {
         const playerName = extractPlayerFromPave(safeText);
@@ -2555,7 +2555,7 @@ if (!match.pendingAttack) {
     }
 
     // ===============================
-    // 3️⃣ APPLY ONLY ONCE
+    // 3️⃣ APPLY
     // ===============================
     if (newHolder) {
         match.ballHolder = newHolder;
