@@ -2175,7 +2175,7 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    if (squadName === team1 && !match.equipe1) {
+   if (squadName === team1 && !match.equipe1) {
 
     match.id1 = senderJid;
     match.lineup1 = joueursValides;
@@ -2194,9 +2194,8 @@ if (match.etat === "attente_lineup") {
     await ovl.sendMessage(chat, {
         text: `✅ Formation validée pour *${match.team1Nom}*`
     });
-}
 
-    } else if (squadName === team2 && !match.equipe2) {
+} else if (squadName === team2 && !match.equipe2) {
 
     match.id2 = senderJid;
     match.lineup2 = joueursValides;
@@ -2215,13 +2214,13 @@ if (match.etat === "attente_lineup") {
     await ovl.sendMessage(chat, {
         text: `✅ Formation validée pour *${match.team2Nom}*`
     });
-}
 
-    } else {
-        return ovl.sendMessage(chat, {
-            text: "❌ Équipe non reconnue ou déjà envoyée"
-        });
-    }
+} else {
+
+    return ovl.sendMessage(chat, {
+        text: "❌ Équipe non reconnue ou déjà envoyée"
+    });
+} 
 
     if (match.equipe1 && match.equipe2 && !match.starting) {
         match.starting = true;
