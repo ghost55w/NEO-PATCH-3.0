@@ -1876,6 +1876,35 @@ function getPlayerFromText(text, match) {
     return null;
 }
 
+// ===============================
+// 🔍 EXTRACT PLAYER FROM PAVE
+// ===============================
+function extractPlayerFromPave(text) {
+
+    // capture nom après (C2) ou autre
+    const match = text.match(/\)\s*([A-Za-z]+)/);
+
+    return match ? match[1] : null;
+}
+
+// ===============================
+// 📋 GET TEAM PLAYERS FROM LINEUP TEXT
+// ===============================
+function getTeamPlayers(lineupText) {
+
+    const players = [];
+    const regex = /\d+\s+👤.*?\)\s*([A-Za-z ]+)\s*\(/g;
+
+    let match;
+    while ((match = regex.exec(lineupText)) !== null) {
+        players.push(match[1].trim());
+    }
+
+    return players;
+}
+
+
+        
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2148,23 +2177,45 @@ if (match.etat === "attente_lineup") {
 
     if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid; // ✅ 
-        match.lineup1 = joueursValides;
-        match.equipe1 = true;
+    match.id1 = senderJid;
+    match.lineup1 = joueursValides;
+    match.equipe1 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team1Nom}*`
-        });
+    // ===============================
+    // 🧠 PLAYER MAP (TEAM 1)
+    // ===============================
+    match.playerMap = match.playerMap || {};
+    match.playerMap[match.id1] = {};
+
+    for (const p of joueursValides) {
+        match.playerMap[match.id1][p.nom] = p;
+    }
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team1Nom}*`
+    });
+}
 
     } else if (squadName === team2 && !match.equipe2) {
 
-        match.id2 = senderJid; // ✅ 
-        match.lineup2 = joueursValides;
-        match.equipe2 = true;
+    match.id2 = senderJid;
+    match.lineup2 = joueursValides;
+    match.equipe2 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team2Nom}*`
-        });
+    // ===============================
+    // 🧠 PLAYER MAP (TEAM 2)
+    // ===============================
+    match.playerMap = match.playerMap || {};
+    match.playerMap[match.id2] = {};
+
+    for (const p of joueursValides) {
+        match.playerMap[match.id2][p.nom] = p;
+    }
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team2Nom}*`
+    });
+}
 
     } else {
         return ovl.sendMessage(chat, {
@@ -2478,17 +2529,38 @@ async function handlePaveGame(ms, ovl) {
     const action = actionCheck;
 
 // ===============================
-// ⚽ UPDATE BALL HOLDER (DB BASED)
+// ⚽ DETECT BALL HOLDER (PRIORITY SYSTEM)
 // ===============================
 if (!match.pendingAttack) {
 
-    const playerName = getPlayerFromText(text, match);
+    let newHolder = null;
 
-    if (playerName) {
-        match.ballHolder = playerName; 
+    // ===============================
+    // 1️⃣ PRIORITY DB (SAFE SOURCE)
+    // ===============================
+    if (attackerPlayer?.nom) {
+        newHolder = attackerPlayer.nom;
+    }
+
+    // ===============================
+    // 2️⃣ FALLBACK: PAVE DETECTION
+    // ===============================
+    else {
+        const playerName = extractPlayerFromPave(safeText);
+        const team = match.playerMap?.[senderJid];
+
+        if (team && playerName && team[playerName]) {
+            newHolder = playerName;
+        }
+    }
+
+    // ===============================
+    // 3️⃣ APPLY ONLY ONCE
+    // ===============================
+    if (newHolder) {
+        match.ballHolder = newHolder;
     }
 }
-    
 // ===============================
 // ⚔️ DUEL PRIORITY
 // ===============================
@@ -2992,39 +3064,38 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         }) || null;
     };
 
-
- // ===============================
-// ⚽ ATTACKER / DEFENDER (DB SAFE)
+// ===============================
+// ⚽ ATTACKER / DEFENDER (FINAL CLEAN)
 // ===============================
 
-// ✅ ATTAQUANT = porteur de balle réel
-let attacker = match.ballHolder
-    ? allPlayers.find(p => p.nom === match.ballHolder)
-    : null;
+const attackerName = match.ballHolder;
 
-// fallback sécurité (rare)
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
-}
+// défenseur = joueur réel du tour adverse
+const defenderTeam =
+    match.playerMap?.[match.joueurTour] || {};
 
-// ✅ DÉFENSEUR = joueur réel qui joue ce tour
-let defender = allPlayers.find(p =>
-    normalizeJid(p.id || p.jid) === match.joueurTour
-);
+const defenderName =
+    Object.keys(defenderTeam)[0]; // ou logique ciblée plus tard
 
-// fallback si jamais
-if (!defender) {
-    defender = findPlayer(defenseText);
-}
+const attacker = match.playerMap?.[sender]?.[attackerName];
+const defender = defenderTeam?.[defenderName];
 
-// 🔒 sécurité anti clone
-if (attacker && defender && attacker.nom === defender.nom) {
+if (!attacker || !defender) {
     return {
         ok: false,
         type: "erreur",
-        message: "❌ Duel invalide (même joueur détecté)"
+        message: "❌ Joueur introuvable"
     };
 }
+
+if (attacker.nom === defender.nom) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Duel invalide (même joueur)"
+    };
+}
+ 
 
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
