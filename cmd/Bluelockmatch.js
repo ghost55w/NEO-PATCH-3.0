@@ -2258,25 +2258,35 @@ if (detectedPlayers.length >= 2) {
     match.ballHolder = detectedPlayers[0];
 }
     
+
 // ===============================
 // ⚔️ DUEL PRIORITY
 // ===============================
 if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
+    const res = await handleDuelMatch(
+        match,
+        match.pendingAttack || "",
+        text
+    );
+
+    if (!res) return false;
 
     await ovl.sendMessage(chat, {
         text: res.message
     });
 
     const duelStillRunning = [
-    "contre",
-    "CONTINUED_CHASE"
-];
+        "contre",
+        "CONTINUED_CHASE",
+        "ignore"
+    ];
 
-if (!duelStillRunning.includes(res.type)) {
-    match.phaseDuel = null;
-}
+    if (!duelStillRunning.includes(res.type)) {
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+    }
 
     return true;
 }
@@ -3355,33 +3365,37 @@ else if (result.type === "stop") {
 // ===============================
 const unresolvedTypes = [
     "contre",
-    "CONTINUED_CHASE"
+    "CONTINUED_CHASE",
+    "ignore"
 ];
 
 match.phaseDuelResolved =
-    !unresolvedTypes.includes(result.type);
+    !unresolvedTypes.includes(result?.type);
 
 // ===============================
-// 📤 RETURN
+// 🎯 NEXT PLAYER
+// ===============================
+const next = match.joueurTour;
+
+// ===============================
+// 📤 RETURN FINAL MATCH UP
 // ===============================
 return {
-    ok: result.ok,
-    type: result.type,
+    ok: result?.ok ?? false,
+    type: result?.type ?? "erreur",
     message:
-`${title}
+`*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
-${result.msg}
+${result?.msg ?? "⚔️ Duel en cours..."}
 
 ➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
 };
-}    
-
-
+} 
     
 
 
