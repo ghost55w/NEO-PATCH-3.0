@@ -2796,21 +2796,126 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase(); 
 
+    // ===============================
+// 🎯 PRIORITÉ ACTION TECHNIQUE (SYNC AVEC MOTEUR)
 // ===============================
-// 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
+
+// ⚽ utilise EXACTEMENT les mêmes dribbles que ton moteur
+const DRIBBLES = [
+    "crochet extérieur", "crochet intérieur",
+    "double contact", "roulette", "elastico",
+    "petit pont", "rainbow", "step over",
+    "feinte de corps", "feinte de frappe",
+    "feinte de passe", "changement de direction",
+    "pivot du torse", "contrôle semelle",
+    "conduite intérieure", "conduite extérieure",
+    "double crochet", "dribble rapide",
+    "protection de balle", "tourne sur lui même",
+    "sortie en accélération", "push balle",
+    "dribble court", "dribble long"
+];
+
+const isDribbleAction = DRIBBLES.some(d => atk.includes(d));
+
+// 🛡️ détection tacle simple (défense)
+const isTackleAction =
+    def.includes("tacle") ||
+    def.includes("intercepte") ||
+    def.includes("contre") ||
+    def.includes("pied") ||
+    def.includes("talon");
+
 // ===============================
-const actionAttacker = attaqueText;
-const actionDefender = defenseText;
+// 🚀 SI ACTION TECHNIQUE → PRIORITÉ
+// ===============================
+if (isDribbleAction || isTackleAction) {
 
-const chaseResult = resolveChase(
-    match,
-    attacker,
-    defender,
-    match.ball,
-    actionAttacker,
-    actionDefender
-);
+    const duel = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        attaqueText,
+        defenseText
+    );
 
+    result = {
+        ok: duel.ok,
+        type: duel.type,
+        msg: duel.msg
+    };
+
+    // 🔥 casse la boucle de duel
+    match.phaseDuelResolved = true;
+}
+
+// ===============================
+// 🏃 CHASE (UNIQUEMENT SI PERTINENT)
+// ===============================
+const chaseKeywords = [
+    "poursuit", "poursuivre",
+    "rattrape", "rattraper",
+    "course", "sprinte", "court",
+    "chasse", "revient sur"
+];
+
+let isChase =
+    chaseKeywords.some(k => atk.includes(k) || def.includes(k)) ||
+    (extractDistance(atk) && extractDistance(atk) > 2.5);
+
+// 🔒 Empêche chase si duel proche
+const distance = extractDistance(atk) || 1;
+if (distance <= 2) isChase = false;
+
+// ===============================
+// 🚀 EXECUTION CHASE
+// ===============================
+if (!result && isChase) {
+
+    const chaseResult = resolveChase(
+        match,
+        attacker,
+        defender,
+        match.ball,
+        attaqueText,
+        defenseText
+    );
+
+    if (chaseResult.reason === "INTERCEPTION") {
+
+        match.ball.holder = defender.nom;
+        match.ball.state = "controle";
+
+        result = {
+            ok: false,
+            type: "INTERCEPTION",
+            msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
+        };
+    }
+
+    else if (chaseResult.reason === "CONSERVATION") {
+
+        match.ball.holder = attacker.nom;
+        match.ball.state = "controle";
+
+        result = {
+            ok: true,
+            type: "CONSERVATION",
+            msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
+        };
+    }
+
+    else if (chaseResult.reason === "CHASE_CONTINUES") {
+
+        match.ball.state = "loose";
+
+        result = {
+            ok: false,
+            type: "CONTINUED_CHASE",
+            msg: `🏃 Duel de course toujours en cours...`
+        };
+    }
+}
+    
 // ===============================
 // ⚡ VITESSE BASE (UNE SEULE FOIS)
 // ===============================
