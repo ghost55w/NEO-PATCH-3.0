@@ -2296,13 +2296,12 @@ if (match.phaseDuel) {
 // ===============================
 if (!match.pendingAttack) {
 
-    const next =
+    const nextPlayer =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
 
     match.pendingAttack = action;
     match.hasPlayed = true;
 
-    // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
@@ -2315,20 +2314,20 @@ if (!match.pendingAttack) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${getTagFromJid(nextPlayer)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [next]
+        mentions: [nextPlayer]
     });
 
-    match.waitingDefenseFrom = next;
+    match.waitingDefenseFrom = nextPlayer;
     match.turnType = "defense";
 
     startMatchCycle(chat, ovl, match);
     return true;
 }
-
+    
 
 // ===============================
 // 🛡️ DEFENSE
@@ -3327,7 +3326,7 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 }
     
 // ===============================
-// ⚖️ FALLBACK
+// ⚖️ FALLBACK 
 // ===============================
 if (!result) {
     result = {
@@ -3338,30 +3337,12 @@ if (!result) {
 }
 
 // ===============================
-// 🎯 NEXT PLAYER
+// 🎯 NEXT PLAYER (FIX SCOPE BUG)
 // ===============================
-const next = match.joueurTour;
+const nextPlayer = match.joueurTour;
 
 // ===============================
-// 🎨 TITRE DYNAMIQUE
-// ===============================
-let title = "*🛡️⚽ MATCH UP⚔️ !*";
-
-if (result.type === "INTERCEPTION") {
-    title = "*🛑 INTERCEPTION !*";
-}
-else if (result.type === "CONSERVATION") {
-    title = "*⚡ CONSERVATION !*";
-}
-else if (result.type === "win") {
-    title = "*🔥 ACTION RÉUSSIE !*";
-}
-else if (result.type === "stop") {
-    title = "*🧱 DÉFENSE SOLIDE !*";
-}
-
-// ===============================
-// 🧠 RESOLUTION DU DUEL
+// 🧠 RESOLUTION
 // ===============================
 const unresolvedTypes = [
     "contre",
@@ -3370,27 +3351,22 @@ const unresolvedTypes = [
 ];
 
 match.phaseDuelResolved =
-    !unresolvedTypes.includes(result?.type);
+    !unresolvedTypes.includes(result.type);
 
 // ===============================
-// 🎯 NEXT PLAYER
-// ===============================
-const next = match.joueurTour;
-
-// ===============================
-// 📤 RETURN FINAL MATCH UP
+// 📤 RETURN MATCH UP
 // ===============================
 return {
-    ok: result?.ok ?? false,
-    type: result?.type ?? "erreur",
+    ok: result.ok,
+    type: result.type,
     message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
-${result?.msg ?? "⚔️ Duel en cours..."}
+${result.msg}
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${getTagFromJid(nextPlayer)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
