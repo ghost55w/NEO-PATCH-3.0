@@ -2797,6 +2797,10 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const def = defenseText.toLowerCase(); 
 
     // ===============================
+// 🎯 RESULT GLOBAL (AVANT UTILISATION)
+// ===============================
+let result = null; 
+    // ===============================
 // 🎯 PRIORITÉ ACTION TECHNIQUE (SYNC AVEC MOTEUR)
 // ===============================
 
@@ -2947,47 +2951,6 @@ else if (postureDebout.some(w => def.includes(w))) {
 let defVmax = posture === "debout"
     ? defBaseVmax * 0.5   // 🧱 lent mais stable
     : defBaseVmax;        // ⚡ posture basse = vmax
-
-// ===============================
-// 🎯 RESULT GLOBAL (AVANT UTILISATION)
-// ===============================
-let result = null;
-
-// ===============================
-// 🏃 CHASE PRIORITY LOGIC
-// ===============================
-if (chaseResult.reason === "INTERCEPTION") {
-
-    match.ball.holder = defender.nom;
-    match.ball.state = "controle";
-
-    result = {
-        ok: false,
-        type: "INTERCEPTION",
-        msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
-    };
-}
-else if (chaseResult.reason === "CONSERVATION") {
-
-    match.ball.holder = attacker.nom;
-    match.ball.state = "controle";
-
-    result = {
-        ok: true,
-        type: "CONSERVATION",
-        msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
-    };
-}
-else if (chaseResult.reason === "CHASE_CONTINUES") {
-
-    match.ball.state = "loose";
-
-    result = {
-        ok: false,
-        type: "CONTINUED_CHASE",
-        msg: `🏃 Duel de course toujours en cours...`
-    };
-} 
 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
@@ -3353,17 +3316,44 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
     
+// ===============================
+// ⚖️ FALLBACK
+// ===============================
+if (!result) {
+    result = {
+        ok: false,
+        type: "contre",
+        msg: "⚔️ Duel en cours..."
+    };
+}
 
-    // ===============================
-    // ⚖️ FALLBACK
-    // ===============================
-    if (!result) {
-        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
-    }
+// ===============================
+// 🎯 NEXT PLAYER
+// ===============================
+const next = match.joueurTour;
 
-    const next = match.attacker;
+// ===============================
+// 🎨 TITRE DYNAMIQUE
+// ===============================
+let title = "*🛡️⚽ MATCH UP⚔️ !*";
 
-    const unresolvedTypes = [
+if (result.type === "INTERCEPTION") {
+    title = "*🛑 INTERCEPTION !*";
+}
+else if (result.type === "CONSERVATION") {
+    title = "*⚡ CONSERVATION !*";
+}
+else if (result.type === "win") {
+    title = "*🔥 ACTION RÉUSSIE !*";
+}
+else if (result.type === "stop") {
+    title = "*🧱 DÉFENSE SOLIDE !*";
+}
+
+// ===============================
+// 🧠 RESOLUTION DU DUEL
+// ===============================
+const unresolvedTypes = [
     "contre",
     "CONTINUED_CHASE"
 ];
@@ -3371,11 +3361,14 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 match.phaseDuelResolved =
     !unresolvedTypes.includes(result.type);
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
-`*🛡️⚽ MATCH UP⚔️ !*
+// ===============================
+// 📤 RETURN
+// ===============================
+return {
+    ok: result.ok,
+    type: result.type,
+    message:
+`${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
@@ -3385,8 +3378,8 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    };
-}
+};
+}    
 
 
     
