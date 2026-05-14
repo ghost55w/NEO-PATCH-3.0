@@ -3386,6 +3386,9 @@ else if (result.type === "win") {
 else if (result.type === "stop") {
     title = "*🧱 DÉFENSE SOLIDE !*";
 }
+else if (result.type === "escape") {
+    title = "*🚀 ACCÉLÉRATION !*";
+}
 
 // ===============================
 // 🧠 RESOLUTION DU DUEL
@@ -3399,14 +3402,14 @@ match.phaseDuelResolved =
     !unresolvedTypes.includes(result.type);
 
 // ===============================
-// 📤 RETURN PHASE 1 = MATCH UP
+// 📤 RETURN FINAL
 // ===============================
-if (!match.phaseDuel) {
+return {
+    ok: result.ok,
+    type: result.type,
+    msg: result.msg,
 
-    return {
-        ok: result.ok,
-        type: result.type,
-        message:
+    message:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
@@ -3417,18 +3420,8 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    };
-}
-
-// ===============================
-// 📤 RETURN PHASE 2 = VERDICT FINAL
-// ===============================
-return {
-    ok: result.ok,
-    type: result.type,
-    msg: result.msg
 };
-} 
+}
 
     
 
