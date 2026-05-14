@@ -2349,7 +2349,6 @@ if (match.phaseDuel) {
     startMatchCycle(chat, ovl, match);
     return true;
 }
-}    
 
 // ===============================
 // 🎯 ATTAQUE
