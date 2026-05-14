@@ -2181,30 +2181,53 @@ if (match.phaseDuel && match.duelLock && match.phaseDuelResolved) {
         .replace(/\r/g, "")
         .trim();
     
-    // ===============================
-// ⚔️ TRIGGER CONFRONTATION DEFENSE
+    
 // ===============================
-const confrontationTriggers = [
+// ⚔️ MATCH-UP (BLOCAGE ESPACE)
+// ===============================
+const spaceBlockTriggers = [
+    "bloque le passage",
+    "barrer le passage",
+    "chemin", 
+    "voie", 
+    "bloque", 
     "se place devant",
     "se met devant",
-    "barrer le passage",
-    "ferme",
     "ferme l'axe",
-    "coupe la trajectoire",
-    "bloque le passage",
+    "ferme la trajectoire",
+    "se met en opposition",
     "fait face",
-    "opposition",
-    "gêne la progression",
     "empêche de passer",
-    "vient au contact",
-    "marquage",
-    "pressing",
-    "s'interpose"
+    "gêne la progression"
 ];
 
-const isConfrontationIntent = confrontationTriggers.some(k =>
+const isSpaceBlock = spaceBlockTriggers.some(k =>
     text.toLowerCase().includes(k)
 );
+
+// ===============================
+// 🧱 DEFENSE CONTACT (PAS MATCH-UP)
+// ===============================
+const contactBlockTriggers = [
+    "bloque le ballon",
+    "pose la paume",
+    "pose la main", 
+    "duel", 
+    "stoppe",
+    "arrête",
+    "tacle",
+    "intercepte",
+    "contact",
+    "pousse",
+    "épaule",
+    "corps à corps",
+    "bouscule"
+];
+
+const isContactBlock = contactBlockTriggers.some(k =>
+    text.toLowerCase().includes(k)
+);
+
 
     // ===============================
     // 🎯 DETECTION PAVÉ
@@ -2371,8 +2394,8 @@ if (!match.pendingAttack) {
 // ===============================
 const defense = action;
 
-// ⚔️ déclenche duel seulement si vraie confrontation
-if (isConfrontationIntent && !match.phaseDuel) {
+// ⚔️ MATCH-UP uniquement blocage d'espace
+if (isSpaceBlock && !isContactBlock && !match.phaseDuel)
 
     match.phaseDuel = {
         attaque: match.pendingAttack,
