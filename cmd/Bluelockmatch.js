@@ -2130,6 +2130,12 @@ async function handlePaveGame(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
+    // 🧠 CLEANUP ANTI DOUBLON DUEL
+if (match.phaseDuel && match.duelLock && match.phaseDuelResolved) {
+    match.phaseDuel = null;
+    match.duelLock = false;
+}
+
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
@@ -2263,6 +2269,13 @@ if (detectedPlayers.length >= 2) {
 // ===============================
 if (match.phaseDuel) {
 
+    // 🧠 empêche double appel du match-up
+    if (match.duelLock) {
+        return false;
+    }
+
+    match.duelLock = true;
+
     const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
 
     await ovl.sendMessage(chat, {
@@ -2270,16 +2283,25 @@ if (match.phaseDuel) {
     });
 
     const duelStillRunning = [
-    "contre",
-    "CONTINUED_CHASE"
-];
+        "contre",
+        "CONTINUED_CHASE"
+    ];
 
-if (!duelStillRunning.includes(res.type)) {
-    match.phaseDuel = null;
-}
+    if (!duelStillRunning.includes(res.type)) {
 
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+
+        // 🔓 RESET PROPRE DUEL
+        match.phaseDuelResolved = true;
+        match.duelLock = false;
+    }
+
+    startMatchCycle(chat, ovl, match);
     return true;
 }
+    
 
 // ===============================
 // 🎯 ATTAQUE
@@ -3266,6 +3288,7 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
 match.phaseDuelResolved =
     !unresolvedTypes.includes(result.type);
 
+    match.duelLock = false;
     return {
         ok: result.ok,
         type: result.type,
