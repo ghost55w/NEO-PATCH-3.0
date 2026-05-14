@@ -2395,7 +2395,7 @@ if (!match.pendingAttack) {
 const defense = action;
 
 // ⚔️ MATCH-UP uniquement blocage d'espace
-if (isSpaceBlock && !isContactBlock && !match.phaseDuel)
+if (isSpaceBlock && !isContactBlock && !match.phaseDuel) {
 
     match.phaseDuel = {
         attaque: match.pendingAttack,
@@ -2406,9 +2406,6 @@ if (isSpaceBlock && !isContactBlock && !match.phaseDuel)
 
     match.hasPlayed = true;
 
-    // ===============================
-    // 🔥 MATCH UP RESULT
-    // ===============================
     if (res && res.message && res.type !== "normal") {
 
         await ovl.sendMessage(chat, {
@@ -2417,25 +2414,21 @@ if (isSpaceBlock && !isContactBlock && !match.phaseDuel)
         });
 
         if (res.type === "contre") {
-
             match.phaseDuel = {
                 attaque: match.pendingAttack,
                 defense
             };
-
         } else {
-
-            // ✅ Duel terminé
             match.phaseDuel = null;
             match.pendingAttack = null;
             match.waitingDefenseFrom = null;
-
             match.phaseDuelResolved = true;
         }
 
         startMatchCycle(chat, ovl, match);
         return true;
     }
+}
 
 // ===============================
 // 📉 DEFENSE NORMALE (PAS DE DUEL)
