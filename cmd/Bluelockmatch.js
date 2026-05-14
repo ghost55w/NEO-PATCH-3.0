@@ -2427,7 +2427,6 @@ if (isSpaceBlock && !isContactBlock && !match.phaseDuel) {
         startMatchCycle(chat, ovl, match);
         return true;
     }
-}
 
 // ===============================
 // 📉 DEFENSE NORMALE (PAS DE DUEL)
