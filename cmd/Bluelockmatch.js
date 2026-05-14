@@ -2427,7 +2427,7 @@ if (isSpaceBlock && !isContactBlock && !match.phaseDuel) {
         startMatchCycle(chat, ovl, match);
         return true;
     }
-} 
+} // ✅ 👉 CETTE ACCOLADE MANQUAIT
 
 
 // ===============================
