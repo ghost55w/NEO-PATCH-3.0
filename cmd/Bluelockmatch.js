@@ -2180,6 +2180,31 @@ if (match.phaseDuel && match.duelLock && match.phaseDuelResolved) {
         .replace(/\u200F/g, "")
         .replace(/\r/g, "")
         .trim();
+    
+    // ===============================
+// ⚔️ TRIGGER CONFRONTATION DEFENSE
+// ===============================
+const confrontationTriggers = [
+    "se place devant",
+    "se met devant",
+    "barrer le passage",
+    "ferme",
+    "ferme l'axe",
+    "coupe la trajectoire",
+    "bloque le passage",
+    "fait face",
+    "opposition",
+    "gêne la progression",
+    "empêche de passer",
+    "vient au contact",
+    "marquage",
+    "pressing",
+    "s'interpose"
+];
+
+const isConfrontationIntent = confrontationTriggers.some(k =>
+    text.toLowerCase().includes(k)
+);
 
     // ===============================
     // 🎯 DETECTION PAVÉ
@@ -2306,7 +2331,10 @@ if (match.phaseDuel) {
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
-if (!match.pendingAttack) {
+    // 🚫 ignore si c'est pas le tour défense
+if (match.turnType !== "defense") return false;
+// ⚔️ MATCH-UP déclenché par la défense
+if (isConfrontationIntent && !match.phaseDuel) {
 
     const next =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
