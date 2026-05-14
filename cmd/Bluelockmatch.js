@@ -2258,35 +2258,25 @@ if (detectedPlayers.length >= 2) {
     match.ballHolder = detectedPlayers[0];
 }
     
-
 // ===============================
 // ⚔️ DUEL PRIORITY
 // ===============================
 if (match.phaseDuel) {
 
-    const res = await handleDuelMatch(
-        match,
-        match.pendingAttack || "",
-        text
-    );
-
-    if (!res) return false;
+    const res = await handleDuelMatch(match, text, match.phaseDuel.defense);
 
     await ovl.sendMessage(chat, {
         text: res.message
     });
 
     const duelStillRunning = [
-        "contre",
-        "CONTINUED_CHASE",
-        "ignore"
-    ];
+    "contre",
+    "CONTINUED_CHASE"
+];
 
-    if (!duelStillRunning.includes(res.type)) {
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-    }
+if (!duelStillRunning.includes(res.type)) {
+    match.phaseDuel = null;
+}
 
     return true;
 }
@@ -2296,12 +2286,13 @@ if (match.phaseDuel) {
 // ===============================
 if (!match.pendingAttack) {
 
-    const nextPlayer =
+    const next =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
 
     match.pendingAttack = action;
     match.hasPlayed = true;
 
+    // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
@@ -2314,20 +2305,20 @@ if (!match.pendingAttack) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(nextPlayer)} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [nextPlayer]
+        mentions: [next]
     });
 
-    match.waitingDefenseFrom = nextPlayer;
+    match.waitingDefenseFrom = next;
     match.turnType = "defense";
 
     startMatchCycle(chat, ovl, match);
     return true;
 }
-    
+
 
 // ===============================
 // 🛡️ DEFENSE
@@ -2805,130 +2796,21 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase(); 
 
-    // ===============================
-// 🎯 RESULT GLOBAL (AVANT UTILISATION)
 // ===============================
-let result = null; 
-    // ===============================
-// 🎯 PRIORITÉ ACTION TECHNIQUE (SYNC AVEC MOTEUR)
+// 🧠 CHASE SYSTEM (CORRIGÉ + PRIORITAIRE)
 // ===============================
+const actionAttacker = attaqueText;
+const actionDefender = defenseText;
 
-// ⚽ utilise EXACTEMENT les mêmes dribbles que ton moteur
-const DRIBBLES = [
-    "crochet extérieur", "crochet intérieur",
-    "double contact", "roulette", "elastico",
-    "petit pont", "rainbow", "step over",
-    "feinte de corps", "feinte de frappe",
-    "feinte de passe", "changement de direction",
-    "pivot du torse", "contrôle semelle",
-    "conduite intérieure", "conduite extérieure",
-    "double crochet", "dribble rapide",
-    "protection de balle", "tourne sur lui même",
-    "sortie en accélération", "push balle",
-    "dribble court", "dribble long"
-];
+const chaseResult = resolveChase(
+    match,
+    attacker,
+    defender,
+    match.ball,
+    actionAttacker,
+    actionDefender
+);
 
-const isDribbleAction = DRIBBLES.some(d => atk.includes(d));
-
-// 🛡️ détection tacle simple (défense)
-const isTackleAction =
-    def.includes("tacle") ||
-    def.includes("intercepte") ||
-    def.includes("contre") ||
-    def.includes("pied") ||
-    def.includes("talon");
-
-// ===============================
-// 🚀 SI ACTION TECHNIQUE → PRIORITÉ
-// ===============================
-if (isDribbleAction || isTackleAction) {
-
-    const duel = resolveDribbleDuel(
-        match,
-        attacker,
-        defender,
-        attaqueText,
-        defenseText
-    );
-
-    result = {
-        ok: duel.ok,
-        type: duel.type,
-        msg: duel.msg
-    };
-
-    // 🔥 casse la boucle de duel
-    match.phaseDuelResolved = true;
-}
-
-// ===============================
-// 🏃 CHASE (UNIQUEMENT SI PERTINENT)
-// ===============================
-const chaseKeywords = [
-    "poursuit", "poursuivre",
-    "rattrape", "rattraper",
-    "course", "sprinte", "court",
-    "chasse", "revient sur"
-];
-
-let isChase =
-    chaseKeywords.some(k => atk.includes(k) || def.includes(k)) ||
-    (extractDistance(atk) && extractDistance(atk) > 2.5);
-
-// 🔒 Empêche chase si duel proche
-const distance = extractDistance(atk) || 1;
-if (distance <= 2) isChase = false;
-
-// ===============================
-// 🚀 EXECUTION CHASE
-// ===============================
-if (!result && isChase) {
-
-    const chaseResult = resolveChase(
-        match,
-        attacker,
-        defender,
-        match.ball,
-        attaqueText,
-        defenseText
-    );
-
-    if (chaseResult.reason === "INTERCEPTION") {
-
-        match.ball.holder = defender.nom;
-        match.ball.state = "controle";
-
-        result = {
-            ok: false,
-            type: "INTERCEPTION",
-            msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
-        };
-    }
-
-    else if (chaseResult.reason === "CONSERVATION") {
-
-        match.ball.holder = attacker.nom;
-        match.ball.state = "controle";
-
-        result = {
-            ok: true,
-            type: "CONSERVATION",
-            msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
-        };
-    }
-
-    else if (chaseResult.reason === "CHASE_CONTINUES") {
-
-        match.ball.state = "loose";
-
-        result = {
-            ok: false,
-            type: "CONTINUED_CHASE",
-            msg: `🏃 Duel de course toujours en cours...`
-        };
-    }
-}
-    
 // ===============================
 // ⚡ VITESSE BASE (UNE SEULE FOIS)
 // ===============================
@@ -2960,6 +2842,47 @@ else if (postureDebout.some(w => def.includes(w))) {
 let defVmax = posture === "debout"
     ? defBaseVmax * 0.5   // 🧱 lent mais stable
     : defBaseVmax;        // ⚡ posture basse = vmax
+
+// ===============================
+// 🎯 RESULT GLOBAL (AVANT UTILISATION)
+// ===============================
+let result = null;
+
+// ===============================
+// 🏃 CHASE PRIORITY LOGIC
+// ===============================
+if (chaseResult.reason === "INTERCEPTION") {
+
+    match.ball.holder = defender.nom;
+    match.ball.state = "controle";
+
+    result = {
+        ok: false,
+        type: "INTERCEPTION",
+        msg: `🛑 ${defender.nom} intercepte le ballon dans la course !`
+    };
+}
+else if (chaseResult.reason === "CONSERVATION") {
+
+    match.ball.holder = attacker.nom;
+    match.ball.state = "controle";
+
+    result = {
+        ok: true,
+        type: "CONSERVATION",
+        msg: `⚡ ${attacker.nom} garde le contrôle du ballon !`
+    };
+}
+else if (chaseResult.reason === "CHASE_CONTINUES") {
+
+    match.ball.state = "loose";
+
+    result = {
+        ok: false,
+        type: "CONTINUED_CHASE",
+        msg: `🏃 Duel de course toujours en cours...`
+    };
+} 
 
 // ===============================
 // 🧱 DEFENSE PASSIVE + VITESSE
@@ -3325,53 +3248,42 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
     
-// ===============================
-// ⚖️ FALLBACK 
-// ===============================
-if (!result) {
-    result = {
-        ok: false,
-        type: "contre",
-        msg: "⚔️ Duel en cours..."
-    };
-}
 
-// ===============================
-// 🎯 NEXT PLAYER (FIX SCOPE BUG)
-// ===============================
-const nextPlayer = match.joueurTour;
+    // ===============================
+    // ⚖️ FALLBACK
+    // ===============================
+    if (!result) {
+        result = { ok: false, type: "contre", msg: "⚔️ Duel en cours..." };
+    }
 
-// ===============================
-// 🧠 RESOLUTION
-// ===============================
-const unresolvedTypes = [
+    const next = match.attacker;
+
+    const unresolvedTypes = [
     "contre",
-    "CONTINUED_CHASE",
-    "ignore"
+    "CONTINUED_CHASE"
 ];
 
 match.phaseDuelResolved =
     !unresolvedTypes.includes(result.type);
 
-// ===============================
-// 📤 RETURN MATCH UP
-// ===============================
-return {
-    ok: result.ok,
-    type: result.type,
-    message:
+    return {
+        ok: result.ok,
+        type: result.type,
+        message:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
 
 ${result.msg}
 
-➡️ @${getTagFromJid(nextPlayer)} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-};
-} 
+    };
+}
+
+
     
 
 
