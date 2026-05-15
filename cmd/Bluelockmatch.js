@@ -3060,13 +3060,13 @@ Pied non précisé
 `⚖️ Duel sans vainqueur clair`;
         }
 
-        // ==================================================
-        // 📢 FINAL RESULT
-        // ==================================================
+       // ==================================================
+// 📢 FINAL RESULT
+// ==================================================
 
-        await ovl.sendMessage(chat, {
+await ovl.sendMessage(chat, {
 
-            text:
+    text:
 `*♻️ RÉSOLUTION DU DUEL ⚔️*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -3077,9 +3077,10 @@ ${result}
 ➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`
-mentions: [next]
-  });
+🔷BLUELOCK⚽🥅`,
+
+    mentions: [next]
+}); 
 
         // ==================================================
         // 🧹 CLEAR DUEL
