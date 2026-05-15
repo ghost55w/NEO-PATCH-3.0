@@ -2122,7 +2122,7 @@ ${kickoffText}
 
 
 /* ===============================
-📩 LECTURE PAVÉ ENGINE
+📩 LECTURE PAVÉ ENGINE 
 =================================*/
 async function handlePaveGame(ms, ovl) {
 
@@ -2133,14 +2133,18 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    // 🚫 FIND PLAYER CARD
+    // 👤 FIND PLAYER CARD
     // ===============================
-    const allPlayers = (match.lineup1 || []).concat(match.lineup2 || []);
+    const allPlayers =
+        (match.lineup1 || [])
+        .concat(match.lineup2 || []);
 
     const playerCard = allPlayers.find(p =>
         normalizeJid(p.id || p.jid) === sender ||
         match.names?.[sender] === p.nom
     );
+
+    if (!playerCard) return false;
 
     // ===============================
     // 🚫 LOCK CHECK
@@ -2160,6 +2164,9 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
+    // ===============================
+    // 📥 RAW MESSAGE
+    // ===============================
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -2176,7 +2183,7 @@ async function handlePaveGame(ms, ovl) {
         .trim();
 
     // ===============================
-    // 🎯 DETECTION PAVÉ
+    // 🎯 VALID PAVÉ CHECK
     // ===============================
     const isPave =
         text.includes("💬:") &&
@@ -2187,18 +2194,20 @@ async function handlePaveGame(ms, ovl) {
     if (!isPave) return false;
 
     // ===============================
-    // ❌ PAVÉ VIDE OU MAL FORMÉ
+    // 🧠 ACTION EXTRACTION
     // ===============================
-    const actionCheck = extraireAction(text);
+    const action = extraireAction(text);
 
-    if (!actionCheck || actionCheck.trim().length < 5) {
+    // ===============================
+    // ❌ INVALID ACTION
+    // ===============================
+    if (!action || action.trim().length < 5) {
 
         await ovl.sendMessage(chat, {
             react: { text: "❌", key: ms.key }
         });
 
         const loser = normalizeJid(match.joueurTour);
-
         const next = match.defender || match.id2;
 
         const loserName =
@@ -2223,7 +2232,7 @@ async function handlePaveGame(ms, ovl) {
 🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-               🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
             mentions: [next, loser]
         });
 
@@ -2238,17 +2247,853 @@ async function handlePaveGame(ms, ovl) {
     }
 
     // ===============================
-    // ♻️ ANALYSE
+    // ♻️ REACTION
     // ===============================
     await ovl.sendMessage(chat, {
-    react: { text: "♻️", key: ms.key }
-});
+        react: { text: "♻️", key: ms.key }
+    });
 
-    await new Promise(r => setTimeout(r, 60000));
+    // ===============================
+    // ⏳ SIMULATION PROCESSING
+    // ===============================
+    await new Promise(r => setTimeout(r, 1500));
 
-    const action = actionCheck;
-} 
-    
+    // ===============================
+    // ⚔️ DUEL HANDLER CALL (IMPORTANT)
+    // ===============================
+
+    const duelResult = await handleDuelMatch(ms, ovl, action, match);
+
+    if (duelResult) {
+
+        // si duel géré → on stop ici
+        return true;
+    }
+
+    return false;
+}
+
+/* ======================================================
+⚔️ DUEL MATCH ENGINE 🆚 ⚽ 
+====================================================== */
+
+async function handleDuelMatch(ms, ovl, action) {
+
+    const chat = ms.key.remoteJid;
+    const match = matchsActifs.get(chat);
+
+    if (!match) return false;
+
+    const sender =
+        normalizeJid(getSenderJid(ms));
+
+    // ======================================================
+    // 👤 FIND PLAYER CARD
+    // ======================================================
+
+    const allPlayers =
+        (match.lineup1 || [])
+        .concat(match.lineup2 || []);
+
+    const playerCard = allPlayers.find(p =>
+        normalizeJid(p.id || p.jid) === sender ||
+        match.names?.[sender] === p.nom
+    );
+
+    if (!playerCard) return false;
+
+    // ======================================================
+    // ❌ INVALID ACTION
+    // ======================================================
+
+    if (!action || action.trim().length < 5) {
+
+        await ovl.sendMessage(chat, {
+            text:
+`❌ ACTION OU INTENTION NON RECONNUE
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+        });
+
+        return true;
+    }
+
+    // ======================================================
+    // 🧠 NORMALIZE
+    // ======================================================
+
+    const lower = action.toLowerCase();
+
+    // ======================================================
+    // 🧠 ROOT MATCH SYSTEM
+    // ======================================================
+
+    function hasIntent(text, roots = []) {
+
+        return roots.some(root => {
+
+            const regex =
+                new RegExp(`\\b${root}\\w*`, "i");
+
+            return regex.test(text);
+        });
+    }
+
+    // ======================================================
+    // 📏 DISTANCE EXTRACTOR
+    // ======================================================
+
+    function extractDistance(text) {
+
+        const match =
+            text.match(/(\d+(?:\.\d+)?)\s?(m|cm)/i);
+
+        if (!match) return null;
+
+        let value = parseFloat(match[1]);
+
+        if (match[2] === "cm") {
+            value /= 100;
+        }
+
+        return value;
+    }
+
+    // ======================================================
+    // ⚽ DRIBBLES DATABASE
+    // ======================================================
+
+    const DRIBBLES = [
+
+        "crochet extérieur",
+        "crochet intérieur",
+        "double contact",
+        "roulette",
+        "elastico",
+        "petit pont",
+        "rainbow",
+        "step over",
+        "feinte de corps",
+        "feinte de frappe",
+        "feinte de passe",
+        "pivot du torse",
+        "double crochet",
+        "push balle"
+    ];
+
+    // ======================================================
+    // ======================================================
+    // ⚔️ PHASE 1 — MATCH UP
+    // ======================================================
+    // ======================================================
+
+    if (!match.currentDuel) {
+
+        // ==================================================
+        // ⚽ PASSIVE ATTACK DETECTION
+        // ==================================================
+
+        const isPassiveAttack =
+            hasIntent(lower, [
+
+                "avanc",
+                "fonc",
+                "progress",
+                "condu",
+                "drib",
+                "cour",
+                "sprint",
+                "deplac",
+                "dirig",
+                "vmax",
+                "accel"
+            ]);
+
+        // ==================================================
+        // 🛡️ PASSIVE DEFENSE DETECTION
+        // ==================================================
+
+        const isPassiveDefense =
+            hasIntent(lower, [
+
+                "bloqu",
+                "barr",
+                "emp",
+                "gene",
+                "face",
+                "defens",
+                "conten",
+                "coupe",
+                "route"
+            ]);
+
+        // ==================================================
+        // ❌ UNKNOWN ACTION
+        // ==================================================
+
+        if (
+            !isPassiveAttack &&
+            !isPassiveDefense
+        ) {
+
+            await ovl.sendMessage(chat, {
+                text:
+`❌ ACTION OU INTENTION NON RECONNUE
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+            });
+
+            return true;
+        }
+
+        // ==================================================
+        // ⚔️ MATCH UP CHECK
+        // ==================================================
+
+        const previous =
+            match.previousDuelAction;
+
+        if (previous) {
+
+            const attackVsDefense =
+
+                (
+                    previous.type ===
+                    "PASSIVE_ATTACK" &&
+
+                    isPassiveDefense
+                ) ||
+
+                (
+                    previous.type ===
+                    "PASSIVE_DEFENSE" &&
+
+                    isPassiveAttack
+                );
+
+            if (attackVsDefense) {
+
+                const attacker =
+                    previous.type ===
+                    "PASSIVE_ATTACK"
+                        ? previous.player
+                        : playerCard.nom;
+
+                const defender =
+                    previous.type ===
+                    "PASSIVE_DEFENSE"
+                        ? previous.player
+                        : playerCard.nom;
+
+                // ==========================================
+                // 👤 FIND CARDS
+                // ==========================================
+
+                const atkCard =
+                    allPlayers.find(p =>
+                        p.nom === attacker
+                    );
+
+                const defCard =
+                    allPlayers.find(p =>
+                        p.nom === defender
+                    );
+
+                // ==========================================
+                // 💾 CREATE DUEL
+                // ==========================================
+
+                match.currentDuel = {
+
+                    attacker,
+                    defender,
+
+                    attackerCard: atkCard,
+                    defenderCard: defCard,
+
+                    phase: 2,
+
+                    state:
+                        "ATTACK_TURN",
+
+                    attackAction: null,
+                    defenseAction: null,
+
+                    createdAt:
+                        Date.now()
+                };
+
+                match.previousDuelAction =
+                    null;
+
+                // ==========================================
+                // 📢 MATCH UP MESSAGE
+                // ==========================================
+
+                await ovl.sendMessage(chat, {
+
+                    text:
+`*🛡️⚽ MATCH UP⚔️ !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+${defender.toUpperCase()} 🆚 ${attacker.toUpperCase()}
+
+⚽🥅 Duel imminent ...
+
+➡️ ${attacker.toUpperCase()} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+                });
+
+                return true;
+            }
+        }
+
+        // ==================================================
+        // ⚽ SAVE PASSIVE ATTACK
+        // ==================================================
+
+        if (isPassiveAttack) {
+
+            match.previousDuelAction = {
+
+                player:
+                    playerCard.nom,
+
+                jid: sender,
+
+                type:
+                    "PASSIVE_ATTACK",
+
+                action
+            };
+
+            return true;
+        }
+
+        // ==================================================
+        // 🛡️ SAVE PASSIVE DEFENSE
+        // ==================================================
+
+        if (isPassiveDefense) {
+
+            match.previousDuelAction = {
+
+                player:
+                    playerCard.nom,
+
+                jid: sender,
+
+                type:
+                    "PASSIVE_DEFENSE",
+
+                action
+            };
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // ======================================================
+    // ======================================================
+    // ⚽ PHASE 2 — ACTIVE DUEL
+    // ======================================================
+    // ======================================================
+
+    const duel =
+        match.currentDuel;
+
+    // ======================================================
+    // ⚽ ATTACK TURN
+    // ======================================================
+
+    if (duel.state === "ATTACK_TURN") {
+
+        // ==================================================
+        // ❌ WRONG PLAYER
+        // ==================================================
+
+        if (
+            playerCard.nom !==
+            duel.attacker
+        ) {
+
+            return true;
+        }
+
+        // ==================================================
+        // 🧠 ATTACK INTENTS
+        // ==================================================
+
+        const attackIntent = {
+
+            dribble:
+                hasIntent(lower, [
+
+                    "drib",
+                    "crochet",
+                    "roulette",
+                    "elast",
+                    "double",
+                    "feinte",
+                    "pivot",
+                    "push"
+                ]),
+
+            sprint:
+                hasIntent(lower, [
+
+                    "vmax",
+                    "accel",
+                    "fonc",
+                    "sprint"
+                ]),
+
+            pass:
+                hasIntent(lower, [
+
+                    "pass",
+                    "transmet"
+                ]),
+
+            shot:
+                hasIntent(lower, [
+
+                    "tir",
+                    "frapp",
+                    "shoot"
+                ])
+        };
+
+        // ==================================================
+        // 🧠 TECHNICAL ANALYSIS
+        // ==================================================
+
+        const attackData = {
+
+            foot:
+
+                hasIntent(lower, [
+                    "pied gauche"
+                ]) ? "left" :
+
+                hasIntent(lower, [
+                    "pied droit"
+                ]) ? "right" :
+
+                null,
+
+            surface:
+
+                hasIntent(lower, [
+                    "extérieur"
+                ]) ? "outside" :
+
+                hasIntent(lower, [
+                    "intérieur"
+                ]) ? "inside" :
+
+                hasIntent(lower, [
+                    "semelle"
+                ]) ? "sole" :
+
+                hasIntent(lower, [
+                    "pointe"
+                ]) ? "toe" :
+
+                null,
+
+            direction:
+
+                hasIntent(lower, [
+                    "gauche"
+                ]) ? "left" :
+
+                hasIntent(lower, [
+                    "droite"
+                ]) ? "right" :
+
+                "front",
+
+            speed:
+
+                attackIntent.sprint
+                    ? "vmax"
+                    : "normal",
+
+            distance:
+                extractDistance(lower),
+
+            dribble:
+
+                DRIBBLES.find(d =>
+                    lower.includes(d)
+                ) || null
+        };
+
+        // ==================================================
+        // ❌ INVALID DRIBBLE
+        // ==================================================
+
+        if (attackIntent.dribble) {
+
+            if (!attackData.foot) {
+
+                await ovl.sendMessage(chat, {
+
+                    text:
+`❌ DRIBBLE RATÉ :
+Pied non précisé
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+                });
+
+                return true;
+            }
+
+            if (!attackData.surface) {
+
+                await ovl.sendMessage(chat, {
+
+                    text:
+`❌ DRIBBLE RATÉ :
+Surface du pied absente
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+                });
+
+                return true;
+            }
+        }
+
+        // ==================================================
+        // 🧠 REACTION WINDOW
+        // ==================================================
+
+        const diff =
+            (duel.attackerCard.dri || 50) -
+            (duel.defenderCard.def || 50);
+
+        let reactionWindow;
+
+        if (diff >= 11) {
+
+            reactionWindow =
+                "after_sprint";
+        }
+
+        else if (diff >= 1) {
+
+            reactionWindow =
+                "after_dribble";
+        }
+
+        else {
+
+            reactionWindow =
+                "free";
+        }
+
+        // ==================================================
+        // 💾 SAVE ATTACK
+        // ==================================================
+
+        duel.attackAction = {
+
+            raw: action,
+
+            intent:
+                attackIntent,
+
+            data:
+                attackData,
+
+            reactionWindow
+        };
+
+        duel.state =
+            "DEFENSE_TURN";
+
+        // ==================================================
+        // 📊 NOTE SYSTEM
+        // ==================================================
+
+        let note = 6;
+
+        if (attackIntent.dribble) note += 2;
+        if (attackIntent.sprint) note += 1;
+        if (attackData.surface) note += 1;
+
+        if (note > 10) note = 10;
+
+        // ==================================================
+        // 📢 ATTACK MESSAGE
+        // ==================================================
+
+        await ovl.sendMessage(chat, {
+
+            text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️♻️ : ${duel.attacker} tente de passer ${duel.defender}...
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+➡️ ${duel.defender.toUpperCase()} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+        });
+
+        return true;
+    }
+
+    // ======================================================
+    // 🛡️ DEFENSE TURN
+    // ======================================================
+
+    if (duel.state === "DEFENSE_TURN") {
+
+        // ==================================================
+        // ❌ WRONG PLAYER
+        // ==================================================
+
+        if (
+            playerCard.nom !==
+            duel.defender
+        ) {
+
+            return true;
+        }
+
+        // ==================================================
+        // 🧠 DEFENSE INTENTS
+        // ==================================================
+
+        const defenseIntent = {
+
+            tackle:
+                hasIntent(lower, [
+                    "tacl",
+                    "intercept",
+                    "contre"
+                ]),
+
+            slide:
+                hasIntent(lower, [
+                    "gliss"
+                ])
+        };
+
+        // ==================================================
+        // 🧠 DEFENSE DATA
+        // ==================================================
+
+        const defenseData = {
+
+            tackleType:
+
+                defenseIntent.slide
+                    ? "slide"
+                    : "standing",
+
+            foot:
+
+                hasIntent(lower, [
+                    "pied gauche"
+                ]) ? "left" :
+
+                hasIntent(lower, [
+                    "pied droit"
+                ]) ? "right" :
+
+                null,
+
+            speed:
+
+                hasIntent(lower, [
+                    "vmax"
+                ]) ? "vmax" :
+                "normal",
+
+            distance:
+                extractDistance(lower)
+        };
+
+        // ==================================================
+        // ❌ INVALID TACKLE
+        // ==================================================
+
+        if (defenseIntent.tackle) {
+
+            if (!defenseData.foot) {
+
+                await ovl.sendMessage(chat, {
+
+                    text:
+`❌ TACLE RATÉ :
+Pied non précisé
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+                });
+
+                return true;
+            }
+
+            let maxReach = 1;
+
+            if (
+                defenseData.tackleType ===
+                "slide"
+            ) {
+                maxReach = 1.5;
+            }
+
+            if (
+                duel.defender === "Aryu"
+            ) {
+                maxReach = 2;
+            }
+
+            if (
+                defenseData.distance &&
+                defenseData.distance >
+                maxReach
+            ) {
+
+                await ovl.sendMessage(chat, {
+
+                    text:
+`❌ TACLE HORS PORTÉE
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+                });
+
+                return true;
+            }
+        }
+
+        // ==================================================
+        // 💾 SAVE DEFENSE
+        // ==================================================
+
+        duel.defenseAction = {
+
+            raw: action,
+
+            intent:
+                defenseIntent,
+
+            data:
+                defenseData
+        };
+
+        duel.state =
+            "RESOLUTION";
+
+        // ==================================================
+        // ⚖️ RESOLUTION
+        // ==================================================
+
+        const atk =
+            duel.attackAction;
+
+        const def =
+            duel.defenseAction;
+
+        const diff =
+            (duel.attackerCard.dri || 50) -
+            (duel.defenderCard.def || 50);
+
+        let result;
+
+        // ==================================================
+        // ⚽ DRIBBLE VS TACKLE
+        // ==================================================
+
+        if (
+            atk.intent.dribble &&
+            def.intent.tackle
+        ) {
+
+            if (diff >= 11) {
+
+                result =
+`⚡ ${duel.attacker} dépasse totalement ${duel.defender}
+
+🏆 VAINQUEUR :
+➡️ ${duel.attacker}`;
+            }
+
+            else if (diff >= 1) {
+
+                result =
+`⚽ ${duel.attacker} réussit son dribble
+
+🏆 VAINQUEUR :
+➡️ ${duel.attacker}`;
+            }
+
+            else {
+
+                result =
+`🛡️ ${duel.defender} récupère le ballon
+
+🏆 VAINQUEUR :
+➡️ ${duel.defender}`;
+            }
+        }
+
+        else {
+
+            result =
+`⚖️ Duel sans vainqueur clair`;
+        }
+
+        // ==================================================
+        // 📢 FINAL RESULT
+        // ==================================================
+
+        await ovl.sendMessage(chat, {
+
+            text:
+`*♻️ RÉSOLUTION DU DUEL ⚔️*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+${result}
+
+⚽ Le match continue après ce duel intense...
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+mentions: [next]
+  });
+
+        // ==================================================
+        // 🧹 CLEAR DUEL
+        // ==================================================
+
+        match.currentDuel = null;
+
+        return true;
+    }
+
+    return false;
+}
+
+
  // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
     // ===============================
