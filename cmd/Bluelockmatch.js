@@ -2122,13 +2122,19 @@ ${kickoffText}
 
 
 /* ===============================
-📩 LECTURE PAVÉ ENGINE 
+📩 LECTURE PAVÉ ENGINE (CLEAN CORE)
 =================================*/
 async function handlePaveGame(ms, ovl) {
 
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match) return false;
+
+    // 🧠 CLEANUP ANTI DOUBLON DUEL
+    if (match.phaseDuel && match.duelLock && match.phaseDuelResolved) {
+        match.phaseDuel = null;
+        match.duelLock = false;
+    }
 
     const sender = normalizeJid(getSenderJid(ms));
 
@@ -2165,7 +2171,7 @@ async function handlePaveGame(ms, ovl) {
     }
 
     // ===============================
-    // 📥 RAW MESSAGE
+    // 📥 RAW TEXT
     // ===============================
     const raw =
         ms.message?.conversation ||
@@ -2192,7 +2198,29 @@ async function handlePaveGame(ms, ovl) {
         text.includes("BLUELOCK");
 
     if (!isPave) return false;
+    
+// ===============================
+// ♻️ ANALYSE PAVÉ
+// ===============================
 
+if (match.analysisLock) return false;
+
+match.analysisLock = true;
+
+// réaction immédiate
+await ovl.sendMessage(chat, {
+    react: { text: "♻️", key: ms.key }
+});
+
+// temps d'analyse (1 minute)
+await new Promise(r => setTimeout(r, 60000));
+
+// extraction action après analyse
+const action = actionCheck;
+
+// unlock analyse
+match.analysisLock = false;
+} 
     // ===============================
     // 🧠 ACTION EXTRACTION
     // ===============================
@@ -2247,26 +2275,34 @@ async function handlePaveGame(ms, ovl) {
     }
 
     // ===============================
-    // ♻️ REACTION
+    // ⚔️ DUEL PRIORITY
     // ===============================
-    await ovl.sendMessage(chat, {
-        react: { text: "♻️", key: ms.key }
-    });
+    if (match.phaseDuel) {
 
-    // ===============================
-    // ⏳ SIMULATION PROCESSING
-    // ===============================
-    await new Promise(r => setTimeout(r, 1500));
+        if (match.duelLock) return false;
 
-    // ===============================
-    // ⚔️ DUEL HANDLER CALL (IMPORTANT)
-    // ===============================
+        match.duelLock = true;
 
-    const duelResult = await handleDuelMatch(ms, ovl, action, match);
+        const res = await handleDuelMatch(ms, ovl, action, match);
 
-    if (duelResult) {
+        if (res?.message) {
+            await ovl.sendMessage(chat, {
+                text: res.message,
+                mentions: [match.joueurTour]
+            });
+        }
 
-        // si duel géré → on stop ici
+        const duelStillRunning = ["contre", "CONTINUED_CHASE"];
+
+        if (!duelStillRunning.includes(res?.type)) {
+            match.phaseDuel = null;
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = null;
+            match.phaseDuelResolved = true;
+            match.duelLock = false;
+        }
+
+        startMatchCycle(chat, ovl, match);
         return true;
     }
 
