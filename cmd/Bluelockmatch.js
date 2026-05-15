@@ -2121,7 +2121,7 @@ ${kickoffText}
 }
 
 /* ===============================
-📩 LECTURE PAVÉ ENGINE (CLEAN CORE)
+📩 PAVÉ ENGINE (ANCIEN CORE RESTAURÉ)
 =================================*/
 async function handlePaveGame(ms, ovl) {
 
@@ -2129,14 +2129,11 @@ async function handlePaveGame(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
-    // 🧠 CLEANUP ANTI DOUBLON DUEL
-    if (match.phaseDuel && match.duelLock && match.phaseDuelResolved) {
-        match.phaseDuel = null;
-        match.duelLock = false;
-    }
-
     const sender = normalizeJid(getSenderJid(ms));
 
+    // ===============================
+    // 👤 FIND PLAYER CARD
+    // ===============================
     const allPlayers =
         (match.lineup1 || []).concat(match.lineup2 || []);
 
@@ -2145,8 +2142,14 @@ async function handlePaveGame(ms, ovl) {
         match.names?.[sender] === p.nom
     );
 
+    // ===============================
+    // 🚫 INVALID PLAYER
+    // ===============================
     if (!playerCard) return false;
 
+    // ===============================
+    // 🚫 LOCK CHECK
+    // ===============================
     if (playerCard && match.lockedPlayers?.has(playerCard.nom)) {
 
         await ovl.sendMessage(chat, {
@@ -2162,6 +2165,9 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
+    // ===============================
+    // 📥 RAW MESSAGE EXTRACTION
+    // ===============================
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -2176,6 +2182,9 @@ async function handlePaveGame(ms, ovl) {
         .replace(/\u200F/g, "")
         .trim();
 
+    // ===============================
+    // 🎯 VALID PAVÉ CHECK
+    // ===============================
     const isPave =
         text.includes("💬:") &&
         text.includes("⚽:") &&
@@ -2185,25 +2194,22 @@ async function handlePaveGame(ms, ovl) {
     if (!isPave) return false;
 
     // ===============================
-    // ♻️ ANALYSE
+    // ♻️ ANALYSE (REACTION + WAIT)
     // ===============================
-    if (match.analysisLock) return false;
-
-    match.analysisLock = true;
-
     await ovl.sendMessage(chat, {
         react: { text: "♻️", key: ms.key }
     });
 
+    // ⏳ temps d'analyse (60s)
     await new Promise(r => setTimeout(r, 60000));
 
-    const actionCheck = extraireAction(text);
-    const action = actionCheck;
-
-    match.analysisLock = false;
+    // ===============================
+    // 🧠 ACTION EXTRACTION
+    // ===============================
+    const action = extraireAction(text);
 
     // ===============================
-    // ❌ INVALID ACTION
+    // ❌ ACTION INVALID
     // ===============================
     if (!action || action.trim().length < 5) {
 
@@ -2220,6 +2226,7 @@ async function handlePaveGame(ms, ovl) {
         const nextName =
             match.names?.[next] || next.split("@")[0];
 
+        // 🔒 LOCK PLAYER
         match.lockedPlayers = match.lockedPlayers || new Set();
         match.lockedPlayers.add(loserName);
 
@@ -2240,6 +2247,7 @@ async function handlePaveGame(ms, ovl) {
             mentions: [next, loser]
         });
 
+        // 🔁 SWITCH TURN
         match.attacker = next;
         match.defender = next === match.id1 ? match.id2 : match.id1;
         match.joueurTour = next;
@@ -2251,40 +2259,11 @@ async function handlePaveGame(ms, ovl) {
     }
 
     // ===============================
-    // ⚔️ DUEL PRIORITY
+    // ✅ VALID ACTION (PASS THROUGH ENGINE)
     // ===============================
-    if (match.phaseDuel) {
 
-        if (match.duelLock) return false;
-
-        match.duelLock = true;
-
-        const res = await handleDuelMatch(ms, ovl, action, match);
-
-        if (res?.message) {
-            await ovl.sendMessage(chat, {
-                text: res.message,
-                mentions: [match.joueurTour]
-            });
-        }
-
-        const duelStillRunning = ["contre", "CONTINUED_CHASE"];
-
-        if (!duelStillRunning.includes(res?.type)) {
-            match.phaseDuel = null;
-            match.pendingAttack = null;
-            match.waitingDefenseFrom = null;
-            match.phaseDuelResolved = true;
-            match.duelLock = false;
-        }
-
-        startMatchCycle(chat, ovl, match);
-        return true;
-    }
-
-    return false;
+    return true;
 }
-
 
 /* ======================================================
 ⚔️ DUEL MATCH ENGINE 🆚 ⚽ 
