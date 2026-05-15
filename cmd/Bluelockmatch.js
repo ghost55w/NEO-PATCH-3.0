@@ -2120,7 +2120,6 @@ ${kickoffText}
     startMatchCycle(chat, ovl, match);
 }
 
-
 /* ===============================
 📩 LECTURE PAVÉ ENGINE (CLEAN CORE)
 =================================*/
@@ -2138,12 +2137,8 @@ async function handlePaveGame(ms, ovl) {
 
     const sender = normalizeJid(getSenderJid(ms));
 
-    // ===============================
-    // 👤 FIND PLAYER CARD
-    // ===============================
     const allPlayers =
-        (match.lineup1 || [])
-        .concat(match.lineup2 || []);
+        (match.lineup1 || []).concat(match.lineup2 || []);
 
     const playerCard = allPlayers.find(p =>
         normalizeJid(p.id || p.jid) === sender ||
@@ -2152,9 +2147,6 @@ async function handlePaveGame(ms, ovl) {
 
     if (!playerCard) return false;
 
-    // ===============================
-    // 🚫 LOCK CHECK
-    // ===============================
     if (playerCard && match.lockedPlayers?.has(playerCard.nom)) {
 
         await ovl.sendMessage(chat, {
@@ -2170,9 +2162,6 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
-    // ===============================
-    // 📥 RAW TEXT
-    // ===============================
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -2185,12 +2174,8 @@ async function handlePaveGame(ms, ovl) {
         .replace(/\u200B/g, "")
         .replace(/\u200E/g, "")
         .replace(/\u200F/g, "")
-        .replace(/\r/g, "")
         .trim();
 
-    // ===============================
-    // 🎯 VALID PAVÉ CHECK
-    // ===============================
     const isPave =
         text.includes("💬:") &&
         text.includes("⚽:") &&
@@ -2198,33 +2183,24 @@ async function handlePaveGame(ms, ovl) {
         text.includes("BLUELOCK");
 
     if (!isPave) return false;
-    
-// ===============================
-// ♻️ ANALYSE PAVÉ
-// ===============================
 
-if (match.analysisLock) return false;
-
-match.analysisLock = true;
-
-// réaction immédiate
-await ovl.sendMessage(chat, {
-    react: { text: "♻️", key: ms.key }
-});
-
-// temps d'analyse (1 minute)
-await new Promise(r => setTimeout(r, 60000));
-
-// extraction action après analyse
-const action = actionCheck;
-
-// unlock analyse
-match.analysisLock = false;
-} 
     // ===============================
-    // 🧠 ACTION EXTRACTION
+    // ♻️ ANALYSE
     // ===============================
-    const action = extraireAction(text);
+    if (match.analysisLock) return false;
+
+    match.analysisLock = true;
+
+    await ovl.sendMessage(chat, {
+        react: { text: "♻️", key: ms.key }
+    });
+
+    await new Promise(r => setTimeout(r, 60000));
+
+    const actionCheck = extraireAction(text);
+    const action = actionCheck;
+
+    match.analysisLock = false;
 
     // ===============================
     // ❌ INVALID ACTION
@@ -2308,6 +2284,7 @@ match.analysisLock = false;
 
     return false;
 }
+
 
 /* ======================================================
 ⚔️ DUEL MATCH ENGINE 🆚 ⚽ 
