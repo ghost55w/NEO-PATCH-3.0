@@ -2121,7 +2121,7 @@ ${kickoffText}
 }
 
 /* ===============================
-📩 PAVÉ ENGINE (ANCIEN CORE RESTAURÉ)
+📩 LECTURE PAVÉ ENGINE (CLEAN + DUEL ONLY)
 =================================*/
 async function handlePaveGame(ms, ovl) {
 
@@ -2132,20 +2132,14 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    // 👤 FIND PLAYER CARD
+    // 🚫 FIND PLAYER CARD
     // ===============================
-    const allPlayers =
-        (match.lineup1 || []).concat(match.lineup2 || []);
+    const allPlayers = (match.lineup1 || []).concat(match.lineup2 || []);
 
     const playerCard = allPlayers.find(p =>
         normalizeJid(p.id || p.jid) === sender ||
         match.names?.[sender] === p.nom
     );
-
-    // ===============================
-    // 🚫 INVALID PLAYER
-    // ===============================
-    if (!playerCard) return false;
 
     // ===============================
     // 🚫 LOCK CHECK
@@ -2165,9 +2159,6 @@ async function handlePaveGame(ms, ovl) {
         return true;
     }
 
-    // ===============================
-    // 📥 RAW MESSAGE EXTRACTION
-    // ===============================
     const raw =
         ms.message?.conversation ||
         ms.message?.extendedTextMessage?.text ||
@@ -2180,10 +2171,11 @@ async function handlePaveGame(ms, ovl) {
         .replace(/\u200B/g, "")
         .replace(/\u200E/g, "")
         .replace(/\u200F/g, "")
+        .replace(/\r/g, "")
         .trim();
 
     // ===============================
-    // 🎯 VALID PAVÉ CHECK
+    // 🎯 DETECTION PAVÉ
     // ===============================
     const isPave =
         text.includes("💬:") &&
@@ -2194,22 +2186,18 @@ async function handlePaveGame(ms, ovl) {
     if (!isPave) return false;
 
     // ===============================
-    // ♻️ ANALYSE (REACTION + WAIT)
+    // ♻️ ANALYSE
     // ===============================
     await ovl.sendMessage(chat, {
         react: { text: "♻️", key: ms.key }
     });
 
-    // ⏳ temps d'analyse (60s)
     await new Promise(r => setTimeout(r, 60000));
 
-    // ===============================
-    // 🧠 ACTION EXTRACTION
-    // ===============================
     const action = extraireAction(text);
 
     // ===============================
-    // ❌ ACTION INVALID
+    // ❌ PAVÉ INVALIDE
     // ===============================
     if (!action || action.trim().length < 5) {
 
@@ -2226,7 +2214,6 @@ async function handlePaveGame(ms, ovl) {
         const nextName =
             match.names?.[next] || next.split("@")[0];
 
-        // 🔒 LOCK PLAYER
         match.lockedPlayers = match.lockedPlayers || new Set();
         match.lockedPlayers.add(loserName);
 
@@ -2247,7 +2234,6 @@ async function handlePaveGame(ms, ovl) {
             mentions: [next, loser]
         });
 
-        // 🔁 SWITCH TURN
         match.attacker = next;
         match.defender = next === match.id1 ? match.id2 : match.id1;
         match.joueurTour = next;
@@ -2259,8 +2245,28 @@ async function handlePaveGame(ms, ovl) {
     }
 
     // ===============================
-    // ✅ VALID ACTION (PASS THROUGH ENGINE)
+    // ⚔️ DUEL ONLY (FULL LOGIC IN handleDuelMatch)
     // ===============================
+    const res = await handleDuelMatch(match, text, match.phaseDuel?.defense);
+
+    if (res?.message) {
+        await ovl.sendMessage(chat, {
+            text: res.message,
+            mentions: [match.joueurTour]
+        });
+    }
+
+    // ===============================
+    // 🔄 RESET DUEL STATE (ONLY IF FINISHED)
+    // ===============================
+    const duelStillRunning = ["contre", "CONTINUED_CHASE"];
+
+    if (!duelStillRunning.includes(res?.type)) {
+        match.phaseDuel = null;
+        match.phaseDuelResolved = true;
+    }
+
+    startMatchCycle(chat, ovl, match);
 
     return true;
 }
