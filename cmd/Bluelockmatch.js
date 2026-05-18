@@ -1647,6 +1647,102 @@ function findPlayerStrict(text, players) {
     return found || null;
 }
 
+/* ===============================
+🧠 INTENT HELPER
+=================================*/
+
+function hasIntent(txt = "", patterns = []) {
+
+    txt = txt.toLowerCase();
+
+    return patterns.some(pattern => {
+
+        const words = pattern
+            .toLowerCase()
+            .split(" ")
+            .filter(Boolean);
+
+        return words.every(word =>
+            txt.includes(word)
+        );
+    });
+}
+
+
+/* ===============================
+🛑 PASSIVE BLOCK PATTERNS
+=================================*/
+
+const PASSIVE_BLOCK_PATTERNS = [
+
+    // blocage simple
+    "bloque",
+    "blocage",
+
+    // route / trajectoire
+    "coupe la route",
+    "coupe la trajectoire",
+    "barre la route",
+    "barre le chemin",
+    "bloque la trajectoire",
+
+    // accès / passage
+    "bloque le passage",
+    "ferme le passage",
+    "obstrue le passage",
+    "bouche le passage",
+    "bouche l'accès",
+    "ferme l'accès",
+
+    // positionnement
+    "se met devant",
+    "reste devant",
+    "vient devant",
+    "s'interpose",
+
+    // empêcher
+    "empêche d'avancer",
+    "empêche la progression",
+    "ralentit la progression"
+
+];
+
+
+/* ===============================
+⚽ DRIBBLE PATTERNS
+=================================*/
+
+const DRIBBLE_PATTERNS = [
+
+    // conduite
+    "conduite de balle",
+    "conduit le ballon",
+    "avance balle aux pieds",
+    "progresse balle aux pieds",
+
+    // dribbles
+    "dribble",
+    "feinte",
+    "crochet",
+    "roulette",
+    "double contact",
+    "flip flap",
+
+    // progression
+    "fonce",
+    "sprint",
+    "accélère",
+    "perce",
+    "transperce",
+
+    // élimination
+    "élimine",
+    "dépasse",
+    "efface",
+    "prend de vitesse"
+
+];
+
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2244,9 +2340,38 @@ async function handlePaveGame(ms, ovl) {
     react: { text: "♻️", key: ms.key }
 });
 
-    await new Promise(r => setTimeout(r, 60000));
+    await new Promise(r => setTimeout(r, 1000));
 
-    const action = actionCheck;
+   const action = actionCheck;
+
+
+/* ===============================
+🧠 ACTION TEXT
+=================================*/
+
+const actionText = action.toLowerCase();
+
+
+/* ===============================
+⚽ OFFENSIVE INTENT
+=================================*/
+
+const isDribbleAction = hasIntent(
+    actionText,
+    DRIBBLE_PATTERNS
+);
+
+
+/* ===============================
+🛡️ PASSIVE DEFENSE INTENT
+=================================*/
+
+const isPassiveDefense = hasIntent(
+    actionText,
+    PASSIVE_BLOCK_PATTERNS
+); 
+
+
     // ===============================
 // ⚽ UPDATE BALL HOLDER (SMART)
 // ===============================
@@ -2409,7 +2534,7 @@ match.hasPlayed = true;
 if (
     res &&
     (
-        res.type === "contre" ||
+        res.type === "PASSIVE_BLOCK" ||
         res.type === "CONTINUED_CHASE"
     )
 ) {
