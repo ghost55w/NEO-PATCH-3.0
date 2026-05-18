@@ -3133,52 +3133,39 @@ if (!result) {
 }
     
 
-    // ===============================
-    // 🎯 NEXT PLAYER
-    // ===============================
-    const next = match.joueurTour;
+// ===============================
+// 🎯 NEXT PLAYER
+// ===============================
+let next = match.joueurTour;
 
-    // ===============================
-    // 🎨 TITRE
-    // ===============================
-    let title =
-`*🛡️⚽ MATCH UP⚔️ !*`;
+if (result?.type === "INTERCEPTION") {
+    next = defender.id || defender.jid;
+}
 
-    if (result.type === "INTERCEPTION") {
+// ===============================
+// 🎨 TITRE
+// ===============================
+let title = `*🛡️⚽ MATCH UP⚔️ !*`;
 
-        title =
-`*🛑 INTERCEPTION !*`;
-    }
+const type = result?.type;
 
-    else if (
-        result.type === "CONSERVATION"
-    ) {
-
-        title =
-`*⚡ CONSERVATION !*`;
-    }
-
-    else if (
-        result.type === "win"
-    ) {
-
-        title =
-`*🔥 ACTION RÉUSSIE !*`;
-    }
-
-    else if (
-        result.type === "stop"
-    ) {
-
-        title =
-`*🧱 DÉFENSE SOLIDE !*`;
-    }
+if (type === "INTERCEPTION") {
+    title = `*🛑 INTERCEPTION !*`;
+}
+else if (type === "CONSERVATION") {
+    title = `*⚡ CONSERVATION !*`;
+}
+else if (type === "win") {
+    title = `*🔥 ACTION RÉUSSIE !*`;
+}
+else if (type === "stop") {
+    title = `*🧱 DÉFENSE SOLIDE !*`;
+}
 
 // ===============================
 // 📤 RETURN
 // ===============================
 return {
-
     ok: result.ok,
     type: result.type,
 
@@ -3198,7 +3185,7 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-};
+};    
 }
 
 // ===============================
