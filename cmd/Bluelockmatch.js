@@ -2527,16 +2527,12 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
-
 // ===============================
 // 🔥 MATCH UP INIT
 // ===============================
 if (
     res &&
-    (
-        res.type === "PASSIVE_BLOCK" ||
-        res.type === "CONTINUED_CHASE"
-    )
+    res.type === "PASSIVE_BLOCK"
 ) {
 
     // ⚔️ Création phase duel
