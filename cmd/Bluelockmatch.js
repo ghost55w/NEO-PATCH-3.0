@@ -3075,17 +3075,28 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         }
     }
 
+
+if (isPassive && !result) {
+
+    return {
+        ok: false,
+        type: "PASSIVE_BLOCK",
+        attacker,
+        defender,
+        msg: `⚔️ ${defender.nom} gêne la progression`
+    };
+}
+
+
 // ⚖️ FALLBACK
 if (!result) {
 
     result = {
         ok: false,
-        type: isPassive ? "PASSIVE_BLOCK" : "contre",
-        msg: isPassive
-            ? `⚔️ ${defender.nom} gêne la progression`
-            : `⚔️ Duel en cours...`
+        type: "contre",
+        msg: `⚔️ Duel en cours...`
     };
-}
+}    
     
 
     // ===============================
