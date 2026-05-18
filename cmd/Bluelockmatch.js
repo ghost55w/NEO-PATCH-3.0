@@ -2702,7 +2702,42 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     // ===============================
     let result = null;
 
-    // ===============================
+// ===============================
+// 🧱 DÉFENSE PASSIVE
+// ===============================
+
+const passiveKeywords = [
+    "bloque le passage",
+    "bloque",
+    "posture défensive",
+    "défense basse",
+    "jambes fléchies",
+    "barre la route",
+    "empêche l'avancée",
+    "ferme le passage",
+    "obstrue",
+    "reste devant",
+    "fait écran"
+];
+
+const isPassive =
+    passiveKeywords.some(
+        k =>
+            atk.includes(k) ||
+            def.includes(k)
+    );
+
+if (!result && isPassive) {
+
+    result = {
+        ok: false,
+        type: "PASSIVE_BLOCK",
+        msg:
+`🧱 ${defender.nom} ferme parfaitement l'espace et stoppe l'avancée !`
+    };
+}
+
+// ===============================
     // ⚽ DRIBBLES OFFICIELS
     // ===============================
     const DRIBBLES = [
@@ -2763,92 +2798,150 @@ if (hasRealDribble || isTackleAction) {
 }
 
     // ===============================
-    // 🏃 CHASE SYSTEM
-    // ===============================
-    const chaseKeywords = [
-        "poursuit",
-        "poursuivre",
-        "rattrape",
-        "rattraper",
-        "course",
-        "sprinte",
-        "court",
-        "chasse",
-        "revient sur"
-    ];
+// 💪 DUEL PHYSIQUE
+// ===============================
 
-    let isChase =
-        chaseKeywords.some(
-            k => atk.includes(k) || def.includes(k)
-        ) ||
-        (
-            extractDistance(atk) &&
-            extractDistance(atk) > 2.5
-        );
+if (!result && isPhysical) {
 
-    // 🔒 pas de chase proche
-    const distance = extractDistance(atk) || 1;
+    const physicalResult = resolvePhysicalDuel(
+        attacker,
+        defender
+    );
 
-    if (distance <= 2) {
-        isChase = false;
+    if (
+        physicalResult.winner === attacker.nom
+    ) {
+
+        result = {
+            ok: true,
+            type: "PHYSICAL_WIN",
+            msg:
+`💥 ${attacker.nom} résiste au duel physique !`
+        };
     }
 
+    else {
+
+        result = {
+            ok: false,
+            type: "PHYSICAL_LOSS",
+            msg:
+`🧱 ${defender.nom} gagne le duel physique !`
+        };
+    }
+}
+
     // ===============================
-    // 🚀 EXECUTION CHASE
-    // ===============================
-    if (!result && isChase) {
+// 🏃 CHASE SYSTEM
+// ===============================
 
-        const chaseResult = resolveChase(
-            match,
-            attacker,
-            defender,
-            match.ball,
-            attaqueText,
-            defenseText
-        );
+const chaseKeywords = [
+    "poursuit",
+    "poursuivre",
+    "rattrape",
+    "rattraper",
+    "course",
+    "sprinte",
+    "court",
+    "chasse",
+    "revient sur"
+];
 
-        if (chaseResult.reason === "INTERCEPTION") {
+let isChase =
+    chaseKeywords.some(
+        k =>
+            atk.includes(k) ||
+            def.includes(k)
+    ) ||
+    (
+        extractDistance(atk) &&
+        extractDistance(atk) > 2.5
+    );
 
-            match.ball.holder = defender.nom;
-            match.ball.state = "controle";
+// 🔒 pas de chase proche
+const distance =
+    extractDistance(atk) || 1;
 
-            result = {
-                ok: false,
-                type: "INTERCEPTION",
-                msg:
+if (distance <= 2) {
+    isChase = false;
+}
+
+// 🔒 chase uniquement ballon libre
+if (
+    match.ball?.state === "controle"
+) {
+    isChase = false;
+}
+
+// ===============================
+// 🚀 EXECUTION CHASE
+// ===============================
+
+if (!result && isChase) {
+
+    const chaseResult = resolveChase(
+        match,
+        attacker,
+        defender,
+        match.ball,
+        attaqueText,
+        defenseText
+    );
+
+    if (
+        chaseResult.reason ===
+        "INTERCEPTION"
+    ) {
+
+        match.ball.holder =
+            defender.nom;
+
+        match.ball.state =
+            "controle";
+
+        result = {
+            ok: false,
+            type: "INTERCEPTION",
+            msg:
 `🛑 ${defender.nom} intercepte le ballon dans la course !`
-            };
-        }
-
-        else if (
-            chaseResult.reason === "CONSERVATION"
-        ) {
-
-            match.ball.holder = attacker.nom;
-            match.ball.state = "controle";
-
-            result = {
-                ok: true,
-                type: "CONSERVATION",
-                msg:
-`⚡ ${attacker.nom} garde le contrôle du ballon !`
-            };
-        }
-
-        else if (
-            chaseResult.reason === "CHASE_CONTINUES"
-        ) {
-
-            match.ball.state = "loose";
-
-            result = {
-                ok: false,
-                type: "CONTINUED_CHASE",
-                msg:
-`🏃 Duel de course toujours en cours...`
-            };
-        }
+        };
     }
+
+    else if (
+        chaseResult.reason ===
+        "CONSERVATION"
+    ) {
+
+        match.ball.holder =
+            attacker.nom;
+
+        match.ball.state =
+            "controle";
+
+        result = {
+            ok: true,
+            type: "CONSERVATION",
+            msg:
+`⚡ ${attacker.nom} garde le contrôle du ballon !`
+        };
+    }
+
+    else if (
+        chaseResult.reason ===
+        "CHASE_CONTINUES"
+    ) {
+
+        match.ball.state = "loose";
+
+        result = {
+            ok: false,
+            type: "CONTINUED_CHASE",
+            msg:
+`🏃 Duel de course toujours en cours...`
+        };
+    }
+}
+
 
     // ===============================
     // ⚡ VITESSE
