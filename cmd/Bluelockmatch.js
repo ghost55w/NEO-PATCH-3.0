@@ -2770,7 +2770,7 @@ const passiveKeywords = [
 
 const isPassive =
     passiveKeywords.some(
-        k => def.includes(k)
+        k => atk.includes(k) || def.includes(k)
     );
 
 if (!result && isPassive) {
@@ -2783,39 +2783,35 @@ if (!result && isPassive) {
         (atkStats.acc || 50) +
         (atkStats.dri || 50) * 0.3;
 
-    const speedGap =
-        atkVmax - defVmax;
+    const speedGap = atkVmax - defVmax;
 
-    // 💨 dépassement vitesse
+    // 💨 dépassement
     if (speedGap > 15) {
 
         result = {
             ok: true,
             type: "win",
-            msg:
-`💨 ${attacker.nom} dépasse la défense malgré le blocage !`
+            msg: `💨 ${attacker.nom} dépasse la défense malgré le blocage !`
         };
     }
 
-    // 🧱 blocage réussi
+    // 🧱 blocage total
     else if (defPower > atkPower) {
 
         result = {
             ok: false,
-            type: "PASSIVE_BLOCK",
-            msg:
-`🧱 ${defender.nom} bloque parfaitement la progression`
+            type: "stop",
+            msg: `🧱 ${defender.nom} bloque la route parfaitement !`
         };
     }
 
-    // ⚔️ duel neutre
+    // ⚔️ gêne
     else {
 
         result = {
             ok: false,
             type: "PASSIVE_BLOCK",
-            msg:
-`⚔️ ${defender.nom} ralentit fortement ${attacker.nom}`
+            msg: `⚔️ ${defender.nom} gêne la progression`
         };
     }
 }
