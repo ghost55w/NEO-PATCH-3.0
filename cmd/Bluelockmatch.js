@@ -3197,8 +3197,8 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     const atk = attacker.stats || {};
     const def = defender.stats || {};
 
-    const tA = attackText.toLowerCase();
-    const tD = defenseText.toLowerCase();
+    const tA = (attackText || "").toLowerCase();
+    const tD = (defenseText || "").toLowerCase();
 
     // ===============================
     // 🧭 BODY ORIENTATION UPDATE
@@ -3223,26 +3223,22 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     const defenderState = defender.bodyState || "front";
 
     // ===============================
-    // ⚽ DRIBBLES RECONNUS (25+)
+    // ⚽ DRIBBLES RECONNUS
     // ===============================
     const DRIBBLES = [
-        "crochet extérieur", "crochet intérieur",
-        "double contact", "roulette", "elastico",
-        "petit pont", "rainbow", "step over",
-        "feinte de corps", "feinte de frappe",
-        "feinte de passe", "changement de direction",
-        "pivot du torse", "contrôle semelle",
-        "conduite intérieure", "conduite extérieure",
-        "double crochet", "dribble rapide",
-        "protection de balle", "tourne sur lui même",
-        "sortie en accélération", "push balle",
-        "dribble court", "dribble long"
+        "crochet extérieur","crochet intérieur","double contact","roulette",
+        "elastico","petit pont","rainbow","step over","feinte de corps",
+        "feinte de frappe","feinte de passe","changement de direction",
+        "pivot du torse","contrôle semelle","conduite intérieure",
+        "conduite extérieure","double crochet","dribble rapide",
+        "protection de balle","tourne sur lui même",
+        "sortie en accélération","push balle","dribble court","dribble long"
     ];
 
     const isDribble = DRIBBLES.some(d => tA.includes(d));
 
     // ===============================
-    // 🧠 INTENTION DRIBBLE
+    // 🧠 INTENTION
     // ===============================
     const intent = {
         foot:
@@ -3274,28 +3270,27 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     if (isDribble) {
 
         if (!intent.foot) {
-            return { ok: false, type: "faute", msg: `❌ Dribble raté : pied non précisé` };
+            return { ok: false, type: "faute", msg: "❌ Dribble raté : pied non précisé" };
         }
 
         if (!intent.surface) {
-            return { ok: false, type: "faute", msg: `❌ Dribble raté : surface du pied non précisée` };
+            return { ok: false, type: "faute", msg: "❌ Dribble raté : surface du pied non précisée" };
         }
 
         if (intent.distance !== null && intent.distance < 0.3) {
-            return { ok: false, type: "faute", msg: `❌ Contrôle trop collé au pied` };
+            return { ok: false, type: "faute", msg: "❌ Contrôle trop collé au pied" };
         }
     }
 
     // ===============================
-    // 🧠 TIMING SYSTEM
+    // 🧠 TIMING
     // ===============================
     const diff = (atk.dri || 50) - (def.def || 50);
 
-    let reactionWindow;
-
-    if (diff > 10) reactionWindow = "after_sprint";
-    else if (diff > 0) reactionWindow = "after_combo";
-    else reactionWindow = "anytime";
+    let reactionWindow =
+        diff > 10 ? "after_sprint" :
+        diff > 0 ? "after_combo" :
+        "anytime";
 
     // ===============================
     // 🧠 BODY ADVANTAGE
@@ -3320,19 +3315,18 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
             if (tackle.type === "circle") distance = 1 + Math.random() * 2;
         }
 
-        let dx = 0;
-        let dy = 0;
+        let dx = 0, dy = 0;
 
         if (tackle.type === "stand") dy = -distance;
 
         if (tackle.type === "slide") {
-            if (tackle.direction === "left") dx = -distance;
-            else if (tackle.direction === "right") dx = distance;
-            else dy = -distance;
+            dx = tackle.direction === "left" ? -distance :
+                 tackle.direction === "right" ? distance : 0;
+            if (!tackle.direction) dy = -distance;
         }
 
         if (tackle.type === "circle") {
-            const angle = tackle.direction === "left" ? -45 : 45;
+            const angle = (tackle.direction === "left" ? -45 : 45);
             dx = distance * Math.cos(angle);
             dy = distance * Math.sin(angle);
         }
@@ -3341,14 +3335,14 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     }
 
     // ===============================
-    // ❌ ANTICIPATION RULES
+    // ❌ ANTICIPATION
     // ===============================
     if (tackle.ok && reactionWindow === "after_combo") {
         return { ok: false, type: "divination", msg: `❌ ${defender.nom} anticipe trop tôt` };
     }
 
     if (tackle.ok && reactionWindow === "after_sprint") {
-        return { ok: false, type: "divination", msg: `❌ Anticipation illégale` };
+        return { ok: false, type: "divination", msg: "❌ Anticipation illégale" };
     }
 
     // ===============================
@@ -3378,19 +3372,12 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     const gap = atkPower - defPower;
 
     if (gap > 0) {
-
-        if (intent.sprint) {
-            return {
-                ok: true,
-                type: "escape",
-                msg: `🚀 ${attacker.nom} élimine ${defender.nom} et accélère`
-            };
-        }
-
         return {
             ok: true,
-            type: "win",
-            msg: `🔥 ${attacker.nom} élimine ${defender.nom}`
+            type: intent.sprint ? "escape" : "win",
+            msg: intent.sprint
+                ? `🚀 ${attacker.nom} élimine ${defender.nom} et accélère`
+                : `🔥 ${attacker.nom} élimine ${defender.nom}`
         };
     }
 
