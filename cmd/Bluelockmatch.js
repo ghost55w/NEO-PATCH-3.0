@@ -2746,18 +2746,21 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         def.includes("talon");
 
     // ===============================
-    // ⚽ RÉSOLUTION TECHNIQUE
-    // ===============================
-    if (isDribbleAction || isTackleAction) {
+// ⚽ RÉSOLUTION TECHNIQUE
+// ===============================
+const hasRealDribble =
+    DRIBBLES.some(d => atk.includes(d));
 
-        result = resolveDribbleDuel(
-            match,
-            attacker,
-            defender,
-            attaqueText,
-            defenseText
-        );
-    }
+if (hasRealDribble || isTackleAction) {
+
+    result = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        attaqueText,
+        defenseText
+    );
+}
 
     // ===============================
     // 🏃 CHASE SYSTEM
