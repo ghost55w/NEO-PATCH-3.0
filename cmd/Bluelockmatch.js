@@ -2371,17 +2371,6 @@ const isPassiveDefense = hasIntent(
     PASSIVE_BLOCK_PATTERNS
 ); 
 
-
-    // ===============================
-// ⚽ UPDATE BALL HOLDER (SMART)
-// ===============================
-const detectedPlayers = text.match(/[A-Z][a-zA-Z0-9]+/g) || [];
-
-if (detectedPlayers.length >= 2) {
-    match.ballHolder = detectedPlayers[1]; // receveur
-} else if (detectedPlayers.length === 1) {
-    match.ballHolder = detectedPlayers[0];
-}
     
 // ===============================
 // ⚔️ DUEL PHASE SYSTEM
@@ -2389,16 +2378,14 @@ if (detectedPlayers.length >= 2) {
 if (match.phaseDuel?.active) {
 
     // ===============================
-    // 🟥 PAVÉ ATTAQUE DU DUEL
+    // 🟥 ATTAQUE DU DUEL
     // ===============================
-    if (!match.phaseDuel.attackPave) {
+    if (match.phaseDuel.step === "attack") {
 
         match.phaseDuel.attackPave = action;
+        match.phaseDuel.step = "defense";
 
-        const next =
-            match.joueurTour === match.id1
-                ? match.id2
-                : match.id1;
+        const next = match.phaseDuel.defender.id || match.phaseDuel.defender.jid;
 
         await ovl.sendMessage(chat, {
             text:
@@ -2414,45 +2401,32 @@ if (match.phaseDuel?.active) {
         });
 
         match.waitingDefenseFrom = next;
-
-        startMatchCycle(chat, ovl, match);
         return true;
     }
 
     // ===============================
-    // 🟦 PAVÉ DEFENSE DU DUEL
+    // 🟦 DEFENSE DU DUEL
     // ===============================
-    match.phaseDuel.defensePave = action;
+    if (match.phaseDuel.step === "defense") {
 
-    const duel = resolveDribbleDuel(
-        match,
-        match.phaseDuel.attacker,
-        match.phaseDuel.defender,
-        match.phaseDuel.attackPave,
-        match.phaseDuel.defensePave
-    );
+        match.phaseDuel.defensePave = action;
 
-    let title = "*🛡️⚽ DUEL !*";
+        const duel = resolveDribbleDuel(
+            match,
+            match.phaseDuel.attacker,
+            match.phaseDuel.defender,
+            match.phaseDuel.attackPave,
+            match.phaseDuel.defensePave
+        );
 
-    if (duel.type === "INTERCEPTION") {
-        title = "*🛑 INTERCEPTION !*";
-    }
+        let title = "*🛡️⚽ MATCH UP⚔️ !*";
 
-    else if (
-        duel.type === "win" ||
-        duel.type === "escape"
-    ) {
-        title = "*🔥 DRIBBLE RÉUSSI !*";
-    }
+        if (duel.type === "INTERCEPTION") title = "*🛑 INTERCEPTION !*";
+        else if (duel.type === "win" || duel.type === "escape") title = "*🔥 DRIBBLE RÉUSSI !*";
+        else if (duel.type === "stop") title = "*🧱 TACLE RÉUSSI !*";
 
-    else if (
-        duel.type === "stop"
-    ) {
-        title = "*🧱 TACLE RÉUSSI !*";
-    }
-
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${match.phaseDuel.defender.nom.toUpperCase()} 🆚 ${match.phaseDuel.attacker.nom.toUpperCase()}
@@ -2461,28 +2435,36 @@ ${duel.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    });
+        });
 
-    // ===============================
-    // 🔄 RESET DUEL
-    // ===============================
-    match.phaseDuel = null;
+        // RESET
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.turnType = "attaque";
 
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
-
-    match.turnType = "attaque";
-
-    startMatchCycle(chat, ovl, match);
-
-    return true;
+        startMatchCycle(chat, ovl, match);
+        return true;
+    }
 }
-
 
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
 if (!match.pendingAttack) {
+
+    // ✅ AJOUT SAFE (NE CASSE RIEN)
+    const currentPlayer = match.joueurTour;
+
+    const attackerPlayer =
+        [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p =>
+            normalizeJid(p.id || p.jid) === currentPlayer
+        );
+
+    if (attackerPlayer) {
+        match.ballHolder = attackerPlayer.nom;
+    }
 
     const next =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
@@ -2527,17 +2509,15 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
+
 // ===============================
 // 🔥 MATCH UP INIT
 // ===============================
-if (
-    res &&
-    res.type === "PASSIVE_BLOCK"
-) {
+if (res && res.type === "PASSIVE_BLOCK") {
 
-    // ⚔️ Création phase duel
     match.phaseDuel = {
         active: true,
+        step: "attack", // 🔥 clé du système
 
         attacker: res.attacker,
         defender: res.defender,
@@ -2564,13 +2544,10 @@ ${res.msg}
         mentions: [match.joueurTour]
     });
 
-    // ⚠️ ON GARDE pendingAttack
-    // ⚠️ PAS DE RESET
-
-    startMatchCycle(chat, ovl, match);
-    return true;
+    return true; // ⚠️ STOP ICI
 }
-  
+
+    
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
 // ===============================
@@ -2749,7 +2726,7 @@ let defVmax =
         : defBaseVmax;
 
 // ===============================
-// 🧱 DÉFENSE PASSIVE
+// 🧱 DÉFENSE PASSIVE SIMPLE 
 // ===============================
 const passiveKeywords = [
     "se place",
@@ -2769,53 +2746,21 @@ const passiveKeywords = [
 ];
 
 const isPassive =
-    passiveKeywords.some(
-        k => atk.includes(k) || def.includes(k)
+    passiveKeywords.some(k =>
+        atk.includes(k) || def.includes(k)
     );
 
-if (!result && isPassive) {
-
-    const defPower =
-        (defStats.def || 50) +
-        (defStats.phy || 50) * 0.3;
-
-    const atkPower =
-        (atkStats.acc || 50) +
-        (atkStats.dri || 50) * 0.3;
-
-    const speedGap = atkVmax - defVmax;
-
-    // 💨 dépassement
-    if (speedGap > 15) {
-
-        result = {
-            ok: true,
-            type: "win",
-            msg: `💨 ${attacker.nom} dépasse la défense malgré le blocage !`
-        };
-    }
-
-    // 🧱 blocage total
-    else if (defPower > atkPower) {
-
-        result = {
-            ok: false,
-            type: "stop",
-            msg: `🧱 ${defender.nom} bloque la route parfaitement !`
-        };
-    }
-
-    // ⚔️ gêne
-    else {
-
-        result = {
-            ok: false,
-            type: "PASSIVE_BLOCK",
-            msg: `⚔️ ${defender.nom} gêne la progression`
-        };
-    }
+// 🔥 PRIORITÉ ABSOLUE
+if (isPassive) {
+    return {
+        ok: false,
+        type: "PASSIVE_BLOCK",
+        attacker,
+        defender,
+        msg: `⚔️ ${defender.nom} gêne la progression`
+    };
 }
-
+}  
 // ===============================
 // ⚽ DRIBBLES OFFICIELS
 // ===============================
