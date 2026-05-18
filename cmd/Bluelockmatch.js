@@ -3004,15 +3004,20 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 `*🧱 DÉFENSE SOLIDE !*`;
     }
 
-    // ===============================
-    // 📤 RETURN
-    // ===============================
-    return {
+// ===============================
+// 📤 RETURN
+// ===============================
+return {
 
-        ok: result.ok,
-        type: result.type,
+    ok: result.ok,
+    type: result.type,
 
-        message:
+    attacker,
+    defender,
+
+    msg: result.msg,
+
+    message:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
@@ -3023,7 +3028,7 @@ ${result.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    };
+};
 }
 
 // ===============================
