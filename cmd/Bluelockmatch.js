@@ -2954,7 +2954,7 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 
             result = {
                 ok: false,
-                type: "contre",
+                type: "PASSIVE_BLOCK",
                 msg:
 `⚔️ ${defender.nom} gêne la progression`
             };
