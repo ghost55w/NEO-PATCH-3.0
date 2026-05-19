@@ -2344,7 +2344,36 @@ async function handlePaveGame(ms, ovl) {
 
    const action = actionCheck;
 
+if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
+    match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
+
+    const next = match.phaseDuel.defender.id || match.phaseDuel.defender.jid;
+
+    const resume = genererResumeFull(action, match);
+    const note = noterPave(action);
+
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+➡️ @${getTagFromJid(next)} NEXT 
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`,
+        mentions: [next]
+    });
+
+    match.waitingDefenseFrom = next;
+    return true;
+}
+    
 /* ===============================
 🧠 ACTION TEXT
 =================================*/
@@ -2371,43 +2400,15 @@ const isPassiveDefense = hasIntent(
     PASSIVE_BLOCK_PATTERNS
 ); 
 
-    
 // ===============================
-// ⚔️ DUEL PHASE SYSTEM
+// ⚔️ DUEL PHASE SYSTEM 
 // ===============================
 if (match.phaseDuel?.active) {
 
     // ===============================
-    // 🟥 ATTAQUE DU DUEL
+    // 🟦 DEFENSE + RESOLUTION
     // ===============================
-    if (match.phaseDuel.step === "attack") {
-
-        match.phaseDuel.attackPave = action;
-        match.phaseDuel.step = "defense";
-
-        const next = match.phaseDuel.defender.id || match.phaseDuel.defender.jid;
-
-        await ovl.sendMessage(chat, {
-            text:
-`⚔️ Duel lancé !
-
-🧠 Action offensive enregistrée.
-
-➡️ @${getTagFromJid(next)} DEFENSE
-
-╰───────────────────
-              🔷BLUELOCK⚽🥅`,
-            mentions: [next]
-        });
-
-        match.waitingDefenseFrom = next;
-        return true;
-    }
-
-    // ===============================
-    // 🟦 DEFENSE DU DUEL
-    // ===============================
-    if (match.phaseDuel.step === "defense") {
+    if (match.phaseDuel.step === "defense_pave") {
 
         match.phaseDuel.defensePave = action;
 
@@ -2421,9 +2422,15 @@ if (match.phaseDuel?.active) {
 
         let title = "*🛡️⚽ MATCH UP⚔️ !*";
 
-        if (duel.type === "INTERCEPTION") title = "*🛑 INTERCEPTION !*";
-        else if (duel.type === "win" || duel.type === "escape") title = "*🔥 DRIBBLE RÉUSSI !*";
-        else if (duel.type === "stop") title = "*🧱 TACLE RÉUSSI !*";
+        if (duel.type === "INTERCEPTION") {
+            title = "*🛑 INTERCEPTION !*";
+        }
+        else if (duel.type === "win" || duel.type === "escape") {
+            title = "*🔥 DRIBBLE RÉUSSI !*";
+        }
+        else if (duel.type === "stop") {
+            title = "*🧱 TACLE RÉUSSI !*";
+        }
 
         await ovl.sendMessage(chat, {
             text:
@@ -2437,7 +2444,9 @@ ${duel.msg}
               🔷BLUELOCK⚽🥅`
         });
 
-        // RESET
+        // ===============================
+        // 🔄 RESET DU DUEL
+        // ===============================
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -2517,7 +2526,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
 
     match.phaseDuel = {
         active: true,
-        step: "attack", // 🔥 clé du système
+
+        step: "attack_pave", // ✅ 
 
         attacker: res.attacker,
         defender: res.defender,
@@ -2544,9 +2554,8 @@ ${res.msg}
         mentions: [match.joueurTour]
     });
 
-    return true; // ⚠️ STOP ICI
+    return true;
 }
-
     
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
