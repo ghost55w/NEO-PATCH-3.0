@@ -2760,7 +2760,7 @@ if (isPassive) {
         msg: `⚔️ ${defender.nom} gêne la progression`
     };
 }
-}  
+
 // ===============================
 // ⚽ DRIBBLES OFFICIELS
 // ===============================
