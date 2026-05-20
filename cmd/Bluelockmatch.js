@@ -2482,32 +2482,34 @@ ${duel.msg}
 // ===============================
 if (!match.pendingAttack) {
 
-    // ✅ AJOUT SAFE (NE CASSE RIEN)
+    // joueur actuel = source unique (kick off flow)
     const currentPlayer = match.joueurTour;
 
     const attackerPlayer =
         [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p =>
-            normalizeJid(p.id || p.jid) === currentPlayer
+        .find(
+            p =>
+                normalizeJid(p.id || p.jid) ===
+                normalizeJid(currentPlayer)
         );
 
+    // garde la possession
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
     }
 
-    const next =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
+    // ✅ PAS DE RECALCUL
+    const next = match.joueurTour;
 
     match.pendingAttack = action;
     match.hasPlayed = true;
 
-    // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
     await ovl.sendMessage(chat, {
         text:
-`*🛡️⚡⚽ ATTAQUE !*
+`🛡️⚡⚽ ATTAQUE !
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 🎙️ RESUME♻️ : ${resume}
@@ -2517,10 +2519,11 @@ if (!match.pendingAttack) {
 ➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [next]
     });
 
+    // défense attendue du flow actuel
     match.waitingDefenseFrom = next;
     match.turnType = "defense";
 
