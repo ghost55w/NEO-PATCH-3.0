@@ -2351,22 +2351,26 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
-    const next = defender.id || defender.jid;
 
-    let resume = genererResumeFull(action, match);
-    const duelActionText = action.toLowerCase(); // ← renommé pour éviter double déclaration
+    // 🔥 FIX 1 : NEXT sécurisé
+    const next = match.joueurTour || defender?.id || defender?.jid;
 
-    if (hasIntent(duelActionText, DRIBBLE_PATTERNS)) {
-        resume = `${attacker.nom} enchaîne un dribble pour tenter de passer ${defender.nom}.`;
+    const actionText = action.toLowerCase();
+
+    // 🔥 FIX 2 : résumé FORCÉ avec contexte duel
+    let resume = "";
+
+    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
+        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (
-        duelActionText.includes("acceleration") ||
-        duelActionText.includes("vmax")
-    ) {
-        resume = `${attacker.nom} accélère pour prendre de vitesse ${defender.nom}.`;
+    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
-    else if (duelActionText.includes("feinte")) {
-        resume = `${attacker.nom} tente une feinte pour déséquilibrer ${defender.nom}.`;
+    else if (actionText.includes("feinte")) {
+        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+    }
+    else {
+        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
     }
 
     const note = noterPave(action);
@@ -2540,13 +2544,31 @@ match.hasPlayed = true;
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
+    const allPlayers = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
+
+// attaquant = porteur actuel du ballon
+const attacker =
+    allPlayers.find(
+        p => p.nom === match.ballHolder
+    ) || res.attacker;
+
+// défenseur = joueur dont c'est le tour (celui qui bloque)
+const defender =
+    allPlayers.find(
+        p =>
+            normalizeJid(p.id || p.jid) ===
+            normalizeJid(match.joueurTour)
+    ) || res.defender;
+
     match.phaseDuel = {
         active: true,
+        step: "attack_pave",
 
-        step: "attack_pave", // ✅ 
-
-        attacker: res.attacker,
-        defender: res.defender,
+        attacker,
+        defender,
 
         attackPave: null,
         defensePave: null,
@@ -2559,7 +2581,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
         text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${res.defender.nom.toUpperCase()} 🆚 ${res.attacker.nom.toUpperCase()}
+${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
