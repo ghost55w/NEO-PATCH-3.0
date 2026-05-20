@@ -2478,6 +2478,48 @@ ${duel.msg}
 }
 
 // ===============================
+// 🔥 SUITE DU DUEL (attaquant rejoue)
+// ===============================
+if (match.phaseDuel && match.pendingAttack) {
+
+    const attacker = normalizeJid(match.joueurTour);
+
+    // défenseur = adversaire
+    const next =
+        attacker === normalizeJid(match.id1)
+            ? normalizeJid(match.id2)
+            : normalizeJid(match.id1);
+
+    // on remplace l’attaque en cours (dribble, feinte, accélération...)
+    match.pendingAttack = action;
+    match.hasPlayed = true;
+    match.waitingDefenseFrom = next;
+    match.turnType = "defense";
+
+    const resume = genererResumeFull(action, match);
+    const note = noterPave(action);
+
+    await ovl.sendMessage(chat, {
+        text:
+`🛡️⚡⚽ ATTAQUE !
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [next]
+    });
+
+    startMatchCycle(chat, ovl, match);
+    return true;
+}
+                
+// ===============================
 // 🎯 ATTAQUE
 // ===============================
 if (!match.pendingAttack) {
