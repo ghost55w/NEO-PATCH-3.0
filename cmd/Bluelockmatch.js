@@ -2352,32 +2352,25 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // ✅ NEXT = défenseur
-    const next =
-        normalizeJid(defender.id || defender.jid);
+    // 🔥 FIX 1 : NEXT sécurisé
+    const next = match.joueurTour || defender?.id || defender?.jid;
 
     const actionText = action.toLowerCase();
 
+    // 🔥 FIX 2 : résumé FORCÉ avec contexte duel
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-        resume =
-            `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("acceleration") ||
-        actionText.includes("vmax")
-    ) {
-        resume =
-            `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
     else if (actionText.includes("feinte")) {
-        resume =
-            `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
     }
     else {
-        resume =
-            `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
     }
 
     const note = noterPave(action);
@@ -2399,7 +2392,6 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     });
 
     match.waitingDefenseFrom = next;
-    match.joueurTour = next;   
     return true;
 }
     
