@@ -2484,16 +2484,14 @@ ${duel.msg}
 }
 
 // ===============================
-// 🔥 SUITE DU DUEL (attaquant rejoue)
+// 🔥 SUITE DU DUEL
 // ===============================
 if (match.phaseDuel && match.pendingAttack) {
 
     const next = getNextPlayer(match);
 
     match.pendingAttack = action;
-    match.hasPlayed = true;
     match.waitingDefenseFrom = next;
-    match.turnType = "defense";
 
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
@@ -2596,6 +2594,9 @@ if (res && res.type === "PASSIVE_BLOCK") {
             p => normalizeJid(p.id || p.jid) === sender
         ) || res.defender;
 
+    // ⚠️ IMPORTANT : on ne change PAS le joueurTour
+    // match.joueurTour reste inchangé
+
     match.phaseDuel = {
         active: true,
         step: "attack_pave",
@@ -2626,7 +2627,6 @@ ${res.msg}
 
     match.waitingDefenseFrom = next;
 
-    startMatchCycle(chat, ovl, match);
     return true;
 }
     
