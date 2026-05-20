@@ -2349,9 +2349,26 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     match.phaseDuel.attackPave = action;
     match.phaseDuel.step = "defense_pave";
 
-    const next = match.phaseDuel.defender.id || match.phaseDuel.defender.jid;
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
+    const next = defender.id || defender.jid;
 
-    const resume = genererResumeFull(action, match);
+    let resume = genererResumeFull(action, match);
+    const duelActionText = action.toLowerCase(); // ← renommé pour éviter double déclaration
+
+    if (hasIntent(duelActionText, DRIBBLE_PATTERNS)) {
+        resume = `${attacker.nom} enchaîne un dribble pour tenter de passer ${defender.nom}.`;
+    }
+    else if (
+        duelActionText.includes("acceleration") ||
+        duelActionText.includes("vmax")
+    ) {
+        resume = `${attacker.nom} accélère pour prendre de vitesse ${defender.nom}.`;
+    }
+    else if (duelActionText.includes("feinte")) {
+        resume = `${attacker.nom} tente une feinte pour déséquilibrer ${defender.nom}.`;
+    }
+
     const note = noterPave(action);
 
     await ovl.sendMessage(chat, {
@@ -2363,7 +2380,7 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT 
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
@@ -2412,10 +2429,13 @@ if (match.phaseDuel?.active) {
 
         match.phaseDuel.defensePave = action;
 
+        const attacker = match.phaseDuel.attacker;
+        const defender = match.phaseDuel.defender;
+
         const duel = resolveDribbleDuel(
             match,
-            match.phaseDuel.attacker,
-            match.phaseDuel.defender,
+            attacker,
+            defender,
             match.phaseDuel.attackPave,
             match.phaseDuel.defensePave
         );
@@ -2424,11 +2444,9 @@ if (match.phaseDuel?.active) {
 
         if (duel.type === "INTERCEPTION") {
             title = "*🛑 INTERCEPTION !*";
-        }
-        else if (duel.type === "win" || duel.type === "escape") {
+        } else if (duel.type === "win" || duel.type === "escape") {
             title = "*🔥 DRIBBLE RÉUSSI !*";
-        }
-        else if (duel.type === "stop") {
+        } else if (duel.type === "stop") {
             title = "*🧱 TACLE RÉUSSI !*";
         }
 
@@ -2436,7 +2454,7 @@ if (match.phaseDuel?.active) {
             text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${match.phaseDuel.defender.nom.toUpperCase()} 🆚 ${match.phaseDuel.attacker.nom.toUpperCase()}
+${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${duel.msg}
 
@@ -2444,9 +2462,7 @@ ${duel.msg}
               🔷BLUELOCK⚽🥅`
         });
 
-        // ===============================
-        // 🔄 RESET DU DUEL
-        // ===============================
+        // RESET
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
