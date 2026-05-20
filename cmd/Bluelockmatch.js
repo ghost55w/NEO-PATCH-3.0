@@ -1743,7 +1743,13 @@ const DRIBBLE_PATTERNS = [
 
 ];
 
+function getNextPlayer(match) {
+    return match.joueurTour === match.id1
+        ? match.id2
+        : match.id1;
+}
 
+        
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -2482,15 +2488,8 @@ ${duel.msg}
 // ===============================
 if (match.phaseDuel && match.pendingAttack) {
 
-    const attacker = normalizeJid(match.joueurTour);
+    const next = getNextPlayer(match);
 
-    // défenseur = adversaire
-    const next =
-        attacker === normalizeJid(match.id1)
-            ? normalizeJid(match.id2)
-            : normalizeJid(match.id1);
-
-    // on remplace l’attaque en cours (dribble, feinte, accélération...)
     match.pendingAttack = action;
     match.hasPlayed = true;
     match.waitingDefenseFrom = next;
@@ -2522,26 +2521,21 @@ if (match.phaseDuel && match.pendingAttack) {
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
-if (!match.pendingAttack) {
+ if (!match.pendingAttack) {
 
-    // joueur actuel = source unique (kick off flow)
     const currentPlayer = match.joueurTour;
 
     const attackerPlayer =
         [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(
-            p =>
-                normalizeJid(p.id || p.jid) ===
-                normalizeJid(currentPlayer)
+        .find(p =>
+            normalizeJid(p.id || p.jid) === currentPlayer
         );
 
-    // garde la possession
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
     }
 
-    // ✅ PAS DE RECALCUL
-    const next = match.joueurTour;
+    const next = getNextPlayer(match);
 
     match.pendingAttack = action;
     match.hasPlayed = true;
@@ -2565,13 +2559,13 @@ if (!match.pendingAttack) {
         mentions: [next]
     });
 
-    // défense attendue du flow actuel
     match.waitingDefenseFrom = next;
     match.turnType = "defense";
 
     startMatchCycle(chat, ovl, match);
     return true;
 }
+
 
 
 // ===============================
@@ -2590,53 +2584,49 @@ match.hasPlayed = true;
 if (res && res.type === "PASSIVE_BLOCK") {
 
     const allPlayers = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
 
-// attaquant = porteur actuel du ballon
-const attacker =
-    allPlayers.find(
-        p => p.nom === match.ballHolder
-    ) || res.attacker;
+    const attacker =
+        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
 
-// défenseur = joueur dont c'est le tour (celui qui bloque)
-const defender =
-    allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) ===
-            normalizeJid(match.joueurTour)
-    ) || res.defender;
+    const defender =
+        allPlayers.find(
+            p => normalizeJid(p.id || p.jid) === sender
+        ) || res.defender;
 
     match.phaseDuel = {
         active: true,
         step: "attack_pave",
-
         attacker,
         defender,
-
         attackPave: null,
         defensePave: null,
-
         starterAttack: match.pendingAttack,
-        starterDefense: defense
+        starterDefense: null
     };
+
+    const next = getNextPlayer(match);
 
     await ovl.sendMessage(chat, {
         text:
-`*🛡️⚽ MATCH UP⚔️ !*
+`🛡️⚽ MATCH UP⚔️ !
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
+🔷BLUELOCK⚽🥅`,
+        mentions: [next]
     });
 
+    match.waitingDefenseFrom = next;
+
+    startMatchCycle(chat, ovl, match);
     return true;
 }
     
