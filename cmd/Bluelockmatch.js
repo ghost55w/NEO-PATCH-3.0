@@ -2358,18 +2358,19 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // 🔥 FIX 1 : NEXT sécurisé
-    const next = match.joueurTour || defender?.id || defender?.jid;
+    const next = defender.id || defender.jid;
 
     const actionText = action.toLowerCase();
 
-    // 🔥 FIX 2 : résumé FORCÉ avec contexte duel
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
         resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+    else if (
+        actionText.includes("acceleration") ||
+        actionText.includes("vmax")
+    ) {
         resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
     else if (actionText.includes("feinte")) {
@@ -2397,7 +2398,11 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
         mentions: [next]
     });
 
+    // 🔥 ICI on force le défenseur
     match.waitingDefenseFrom = next;
+    match.joueurTour = next;
+    match.turnType = "defense";
+
     return true;
 }
     
