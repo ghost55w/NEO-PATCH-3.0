@@ -2362,31 +2362,36 @@ if (match.phaseDuel?.active) {
     const attackerJid = normalizeJid(attacker.id || attacker.jid);
     const defenderJid = normalizeJid(defender.id || defender.jid);
 
-    // ===============================
-    // 🥊 Attaquant joue son pavé duel
-    // ===============================
-    if (
-        match.phaseDuel.step === "attack_pave" &&
-        senderJid === attackerJid
-    ) {
+// ===============================
+// ⚽ ATTAQUANT → PAVÉ DUEL
+// ===============================
+if (
+    match.phaseDuel?.active &&
+    match.phaseDuel.step === "attack_pave"
+) {
 
-        match.phaseDuel.attackPave = action;
-        match.phaseDuel.step = "defense_pave";
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
 
-        const next = defender.id || defender.jid;
-        const note = noterPave(action);
+    const senderJid = normalizeJid(sender);
+    const attackerJid = normalizeJid(attacker.id || attacker.jid);
 
-        let resume = "";
-        const actionText = action.toLowerCase();
+    if (senderJid !== attackerJid) return false;
 
-        if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-            resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
-        } else {
-            resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
-        }
+    match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
 
-        await ovl.sendMessage(chat, {
-            text:
+    const next = defender.id || defender.jid;
+    const note = noterPave(action);
+
+    const actionText = action.toLowerCase();
+
+    const resume = hasIntent(actionText, DRIBBLE_PATTERNS)
+        ? `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`
+        : `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+
+    await ovl.sendMessage(chat, {
+        text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -2398,42 +2403,53 @@ if (match.phaseDuel?.active) {
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-            mentions: [next]
-        });
+        mentions: [next]
+    });
 
-        match.waitingDefenseFrom = next;
-        match.joueurTour = next;
-        return true;
+    match.waitingDefenseFrom = next;
+    match.joueurTour = next;
+
+    return true;
+}
+
+// ===============================
+// 🛡️ DÉFENSE → RÉSOLUTION DUEL
+// ===============================
+if (
+    match.phaseDuel?.active &&
+    match.phaseDuel.step === "defense_pave"
+) {
+
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
+
+    const senderJid = normalizeJid(sender);
+    const defenderJid = normalizeJid(defender.id || defender.jid);
+
+    if (senderJid !== defenderJid) return false;
+
+    match.phaseDuel.defensePave = action;
+
+    const duel = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        match.phaseDuel.attackPave,
+        match.phaseDuel.defensePave
+    );
+
+    let title = "*🛡️⚽ MATCH UP⚔️ !*";
+
+    if (duel.type === "INTERCEPTION") {
+        title = "*🛑 INTERCEPTION !*";
+    } else if (duel.type === "win" || duel.type === "escape") {
+        title = "*🔥 DRIBBLE RÉUSSI !*";
+    } else if (duel.type === "stop") {
+        title = "*🧱 TACLE RÉUSSI !*";
     }
 
-    // ===============================
-    // 🛡️ Défenseur répond → résolution
-    // ===============================
-    if (
-        match.phaseDuel.step === "defense_pave" &&
-        senderJid === defenderJid
-    ) {
-
-        match.phaseDuel.defensePave = action;
-
-        const duel = resolveDribbleDuel(
-            match,
-            attacker,
-            defender,
-            match.phaseDuel.attackPave,
-            match.phaseDuel.defensePave
-        );
-
-        let title = "*🛡️⚽ MATCH UP⚔️ !*";
-
-        if (duel.type === "INTERCEPTION") title = "*🛑 INTERCEPTION !*";
-        else if (duel.type === "win" || duel.type === "escape")
-            title = "*🔥 DRIBBLE RÉUSSI !*";
-        else if (duel.type === "stop")
-            title = "*🧱 TACLE RÉUSSI !*";
-
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2442,17 +2458,18 @@ ${duel.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`
-        });
+    });
 
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.turnType = "attaque";
+    // RESET PROPRE
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+    match.turnType = "attaque";
 
-        startMatchCycle(chat, ovl, match);
-        return true;
-    }
+    startMatchCycle(chat, ovl, match);
 
+    return true;
+}
 
     match.phaseDuel.step === "attack_pave" &&
     senderJid === attackerJid
