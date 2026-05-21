@@ -2587,7 +2587,9 @@ if (res && res.type === "PASSIVE_BLOCK") {
     ];
 
     const attacker =
-        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
+        allPlayers.find(
+            p => normalizeJid(p.id || p.jid) === match.joueurTour
+        ) || res.attacker;
 
     const defender =
         allPlayers.find(
@@ -2605,8 +2607,11 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: null
     };
 
-    // 🔥 NEXT = attaquant pour répondre au duel
-    const next = normalizeJid(attacker.id || attacker.jid);
+    // 🔥 NEXT = suit juste le flow global
+    const next =
+        normalizeJid(sender) === normalizeJid(match.id1)
+            ? match.id2
+            : match.id1;
 
     await ovl.sendMessage(chat, {
         text:
@@ -2623,9 +2628,11 @@ ${res.msg}
         mentions: [next]
     });
 
+    // on suit le flow normal
     match.waitingDefenseFrom = next;
+
     return true;
-} 
+}
     
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
