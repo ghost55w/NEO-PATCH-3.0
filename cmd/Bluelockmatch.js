@@ -2594,9 +2594,6 @@ if (res && res.type === "PASSIVE_BLOCK") {
             p => normalizeJid(p.id || p.jid) === sender
         ) || res.defender;
 
-    // ⚠️ IMPORTANT : on ne change PAS le joueurTour
-    // match.joueurTour reste inchangé
-
     match.phaseDuel = {
         active: true,
         step: "attack_pave",
@@ -2608,7 +2605,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: null
     };
 
-    const next = getNextPlayer(match);
+    // 🔥 NEXT = attaquant pour répondre au duel
+    const next = normalizeJid(attacker.id || attacker.jid);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2626,9 +2624,8 @@ ${res.msg}
     });
 
     match.waitingDefenseFrom = next;
-
     return true;
-}
+} 
     
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
