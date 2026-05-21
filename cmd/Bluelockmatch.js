@@ -2452,9 +2452,8 @@ ${duel.msg}
         startMatchCycle(chat, ovl, match);
         return true;
     }
-}
 
-if (
+
     match.phaseDuel.step === "attack_pave" &&
     senderJid === attackerJid
 ) {
