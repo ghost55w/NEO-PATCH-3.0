@@ -2491,7 +2491,11 @@ ${duel.msg}
 // ===============================
 // 🔥 SUITE DU DUEL
 // ===============================
-if (match.phaseDuel && match.pendingAttack) {
+if (
+    match.phaseDuel &&
+    !match.phaseDuel.active &&
+    match.pendingAttack
+) {
 
     const next = getNextPlayer(match);
 
