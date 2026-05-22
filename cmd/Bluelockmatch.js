@@ -2358,18 +2358,19 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // 🔥 FIX 1 : NEXT sécurisé
-    const next = match.joueurTour || defender?.id || defender?.jid;
+    const next = defender.id || defender.jid;
 
     const actionText = action.toLowerCase();
 
-    // 🔥 FIX 2 : résumé FORCÉ avec contexte duel
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
         resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+    else if (
+        actionText.includes("acceleration") ||
+        actionText.includes("vmax")
+    ) {
         resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
     else if (actionText.includes("feinte")) {
@@ -2397,7 +2398,11 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
         mentions: [next]
     });
 
+    // 🔥 ICI on force le défenseur
     match.waitingDefenseFrom = next;
+    match.joueurTour = next;
+    match.turnType = "defense";
+
     return true;
 }
     
@@ -2486,7 +2491,11 @@ ${duel.msg}
 // ===============================
 // 🔥 SUITE DU DUEL
 // ===============================
-if (match.phaseDuel && match.pendingAttack) {
+if (
+    match.phaseDuel &&
+    !match.phaseDuel.active &&
+    match.pendingAttack
+) {
 
     const next = getNextPlayer(match);
 
@@ -2587,15 +2596,14 @@ if (res && res.type === "PASSIVE_BLOCK") {
     ];
 
     const attacker =
-        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
+        allPlayers.find(
+            p => normalizeJid(p.id || p.jid) === match.joueurTour
+        ) || res.attacker;
 
     const defender =
         allPlayers.find(
             p => normalizeJid(p.id || p.jid) === sender
         ) || res.defender;
-
-    // ⚠️ IMPORTANT : on ne change PAS le joueurTour
-    // match.joueurTour reste inchangé
 
     match.phaseDuel = {
         active: true,
@@ -2608,7 +2616,11 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: null
     };
 
-    const next = getNextPlayer(match);
+    // 🔥 NEXT = suit juste le flow global
+    const next =
+        normalizeJid(sender) === normalizeJid(match.id1)
+            ? match.id2
+            : match.id1;
 
     await ovl.sendMessage(chat, {
         text:
@@ -2625,6 +2637,7 @@ ${res.msg}
         mentions: [next]
     });
 
+    // on suit le flow normal
     match.waitingDefenseFrom = next;
 
     return true;
