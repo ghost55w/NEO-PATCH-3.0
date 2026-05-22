@@ -2616,11 +2616,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: null
     };
 
-    // 🔥 NEXT = suit juste le flow global
-    const next =
-        normalizeJid(sender) === normalizeJid(match.id1)
-            ? match.id2
-            : match.id1;
+    // 🔥 Le NEXT est TOUJOURS le défenseur du duel
+    const next = normalizeJid(defender.id || defender.jid);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2634,11 +2631,12 @@ ${res.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [next]
+        mentions: next ? [next] : []
     });
 
-    // on suit le flow normal
+    // 🔥 On force le vrai joueur attendu
     match.waitingDefenseFrom = next;
+    match.joueurTour = next;
 
     return true;
 }
