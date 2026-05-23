@@ -2495,7 +2495,7 @@ ${duel.msg}
 }
 
 // ===============================
-// 🔥 SUITE DU DUEL
+// 🔥 SUITE DU DUEL (FIXÉ)
 // ===============================
 if (
     match.phaseDuel &&
@@ -2505,8 +2505,14 @@ if (
 
     const next = getNextPlayer(match);
 
+    // ❌ sécurité obligatoire
+    if (!next) {
+        console.log("❌ NEXT ERROR DUEL SUITE", match);
+        return;
+    }
+
     match.pendingAttack = action;
-    match.waitingDefenseFrom = next;
+    match.waitingDefenseFrom = normalizeJid(next);
 
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
@@ -2526,6 +2532,9 @@ if (
 🔷BLUELOCK⚽🥅`,
         mentions: [next]
     });
+
+    // 🔥 SYNC CRITIQUE
+    match.joueurTour = normalizeJid(next);
 
     startMatchCycle(chat, ovl, match);
     return true;
