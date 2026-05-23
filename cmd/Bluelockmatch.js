@@ -2356,6 +2356,9 @@ async function handlePaveGame(ms, ovl) {
 
    const action = actionCheck;
 
+// ===============================
+// ⚔️ DUEL ATTACK PHASE
+// ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     match.phaseDuel.attackPave = action;
@@ -2364,7 +2367,14 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    const next = defender.id || defender.jid;
+    // 🔥 FLOW GLOBAL UNIQUE
+    const next = getNextPlayer(match);
+
+    // 🔒 sécurité
+    if (!next) {
+        console.log("❌ DUEL NEXT NULL");
+        return true;
+    }
 
     const actionText = action.toLowerCase();
 
@@ -2404,9 +2414,9 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
         mentions: [next]
     });
 
-    // 🔥 ICI on force le défenseur
-    match.waitingDefenseFrom = next;
-    match.joueurTour = next;
+    // 🔥 SYNCHRO GLOBALE
+    match.waitingDefenseFrom = normalizeJid(next);
+    match.joueurTour = normalizeJid(next);
     match.turnType = "defense";
 
     return true;
@@ -2494,51 +2504,6 @@ ${duel.msg}
     }
 }
 
-// ===============================
-// 🔥 SUITE DU DUEL (FIXÉ)
-// ===============================
-if (
-    match.phaseDuel &&
-    !match.phaseDuel.active &&
-    match.pendingAttack
-) {
-
-    const next = getNextPlayer(match);
-
-    // ❌ sécurité obligatoire
-    if (!next) {
-        console.log("❌ NEXT ERROR DUEL SUITE", match);
-        return;
-    }
-
-    match.pendingAttack = action;
-    match.waitingDefenseFrom = normalizeJid(next);
-
-    const resume = genererResumeFull(action, match);
-    const note = noterPave(action);
-
-    await ovl.sendMessage(chat, {
-        text:
-`🛡️⚡⚽ ATTAQUE !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-
-🎙️ RESUME♻️ : ${resume}
-
-📊 NOTE DU PAVÉ : ${note}/10
-
-➡️ @${getTagFromJid(next)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-        mentions: [next]
-    });
-
-    // 🔥 SYNC CRITIQUE
-    match.joueurTour = normalizeJid(next);
-
-    startMatchCycle(chat, ovl, match);
-    return true;
-}
                 
 // ===============================
 // 🎯 ATTAQUE
