@@ -2600,7 +2600,6 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ...(match.lineup2 || [])
     ];
 
-    // ✅ Joueur actuel = attaquant
     const currentTurn = normalizeJid(match.joueurTour);
 
     const attacker =
@@ -2626,8 +2625,10 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: null
     };
 
-    // 🔥 Même système global que partout
-    const next = getNextPlayer(match);
+    // 🔥 IMPORTANT :
+    // le défenseur vient déjà de jouer
+    // donc NEXT = attaquant
+    const next = normalizeJid(attacker.id || attacker.jid);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2644,7 +2645,7 @@ ${res.msg}
         mentions: next ? [next] : []
     });
 
-    // ✅ Sync moteur globale
+    // ✅ Le duel attend maintenant l'attaquant
     match.waitingDefenseFrom = next;
     match.joueurTour = next;
 
