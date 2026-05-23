@@ -1743,12 +1743,17 @@ const DRIBBLE_PATTERNS = [
 
 ];
 
-function getNextPlayer(match) {
-    return match.joueurTour === match.id1
-        ? match.id2
-        : match.id1;
-}
 
+function getNextPlayer(match) {
+
+    const current = normalizeJid(match.joueurTour);
+    const id1 = normalizeJid(match.id1);
+    const id2 = normalizeJid(match.id2);
+
+    return current === id1
+        ? id2
+        : id1;
+}
         
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2586,7 +2591,7 @@ match.hasPlayed = true;
 
 
 // ===============================
-// 🔥 MATCH UP INIT
+// 🛡️⚽ MATCH UP INIT
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
@@ -2595,15 +2600,20 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ...(match.lineup2 || [])
     ];
 
+    // ✅ Joueur actuel = attaquant
+    const currentTurn = normalizeJid(match.joueurTour);
+
     const attacker =
         allPlayers.find(
-            p => normalizeJid(p.id || p.jid) === match.joueurTour
+            p => normalizeJid(p.id || p.jid) === currentTurn
         ) || res.attacker;
 
     const defender =
         allPlayers.find(
-            p => normalizeJid(p.id || p.jid) === sender
+            p => normalizeJid(p.id || p.jid) === normalizeJid(sender)
         ) || res.defender;
+
+    if (!attacker || !defender) return true;
 
     match.phaseDuel = {
         active: true,
@@ -2616,8 +2626,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: null
     };
 
-    // 🔥 Le NEXT est TOUJOURS le défenseur du duel
-    const next = normalizeJid(defender.id || defender.jid);
+    // 🔥 Même système global que partout
+    const next = getNextPlayer(match);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2634,12 +2644,13 @@ ${res.msg}
         mentions: next ? [next] : []
     });
 
-    // 🔥 On force le vrai joueur attendu
+    // ✅ Sync moteur globale
     match.waitingDefenseFrom = next;
     match.joueurTour = next;
 
     return true;
 }
+
     
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
