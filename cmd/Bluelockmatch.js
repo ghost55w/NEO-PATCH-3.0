@@ -1745,14 +1745,11 @@ const DRIBBLE_PATTERNS = [
 
 
 function getNextPlayer(match) {
-
     const current = normalizeJid(match.joueurTour);
     const id1 = normalizeJid(match.id1);
     const id2 = normalizeJid(match.id2);
 
-    return current === id1
-        ? id2
-        : id1;
+    return current === id1 ? id2 : id1;
 }
         
 // ===============================
@@ -2205,15 +2202,19 @@ if (kickoffText) {
             url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
         },
         caption:
-`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
+`🎙️⚽ KICK OFF 🥅‼️ @${displayName} débute avec la possession !
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
-            🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [jidStart]
     });
+
+    // 🔥 BASE DU FLOW
+    match.joueurTour = normalizeJid(jidStart);
 }
+    
     // =========================
     // 🚀 START ENGINE
     // =========================
@@ -2533,15 +2534,13 @@ if (
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
- if (!match.pendingAttack) {
+if (!match.pendingAttack) {
 
-    const currentPlayer = match.joueurTour;
+    const currentPlayer = normalizeJid(match.joueurTour);
 
     const attackerPlayer =
         [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p =>
-            normalizeJid(p.id || p.jid) === currentPlayer
-        );
+        .find(p => normalizeJid(p.id || p.jid) === currentPlayer);
 
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
@@ -2574,10 +2573,12 @@ if (
     match.waitingDefenseFrom = next;
     match.turnType = "defense";
 
+    // 🔥 SYNCHRO OBLIGATOIRE
+    match.joueurTour = normalizeJid(next);
+
     startMatchCycle(chat, ovl, match);
     return true;
 }
-
 
 
 // ===============================
@@ -2603,16 +2604,14 @@ if (res && res.type === "PASSIVE_BLOCK") {
     const currentTurn = normalizeJid(match.joueurTour);
 
     const attacker =
-        allPlayers.find(
-            p => normalizeJid(p.id || p.jid) === currentTurn
+        allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) === currentTurn
         ) || res.attacker;
 
     const defender =
-        allPlayers.find(
-            p => normalizeJid(p.id || p.jid) === normalizeJid(sender)
+        allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) === normalizeJid(sender)
         ) || res.defender;
-
-    if (!attacker || !defender) return true;
 
     match.phaseDuel = {
         active: true,
@@ -2620,15 +2619,11 @@ if (res && res.type === "PASSIVE_BLOCK") {
         attacker,
         defender,
         attackPave: null,
-        defensePave: null,
-        starterAttack: match.pendingAttack,
-        starterDefense: null
+        defensePave: null
     };
 
-    // 🔥 IMPORTANT :
-    // le défenseur vient déjà de jouer
-    // donc NEXT = attaquant
-    const next = normalizeJid(attacker.id || attacker.jid);
+    // 🔥 NEXT = toujours logique globale (A ↔ B)
+    const next = getNextPlayer(match);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2642,12 +2637,12 @@ ${res.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: next ? [next] : []
+        mentions: [next]
     });
 
-    // ✅ Le duel attend maintenant l'attaquant
+    // 🔥 SYNCHRO UNIQUE (RÈGLE DORÉE)
+    match.joueurTour = normalizeJid(next);
     match.waitingDefenseFrom = next;
-    match.joueurTour = next;
 
     return true;
 }
