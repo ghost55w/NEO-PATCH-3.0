@@ -2422,32 +2422,6 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     return true;
 }
     
-/* ===============================
-🧠 ACTION TEXT
-=================================*/
-
-const actionText = action.toLowerCase();
-
-
-/* ===============================
-⚽ OFFENSIVE INTENT
-=================================*/
-
-const isDribbleAction = hasIntent(
-    actionText,
-    DRIBBLE_PATTERNS
-);
-
-
-/* ===============================
-🛡️ PASSIVE DEFENSE INTENT
-=================================*/
-
-const isPassiveDefense = hasIntent(
-    actionText,
-    PASSIVE_BLOCK_PATTERNS
-); 
-
 // ===============================
 // ⚔️ DUEL PHASE SYSTEM 
 // ===============================
@@ -2503,8 +2477,34 @@ ${duel.msg}
         return true;
     }
 }
+    
+/* ===============================
+🧠 ACTION TEXT
+=================================*/
 
-                
+const actionText = action.toLowerCase();
+
+
+/* ===============================
+⚽ OFFENSIVE INTENT
+=================================*/
+
+const isDribbleAction = hasIntent(
+    actionText,
+    DRIBBLE_PATTERNS
+);
+
+
+/* ===============================
+🛡️ PASSIVE DEFENSE INTENT
+=================================*/
+
+const isPassiveDefense = hasIntent(
+    actionText,
+    PASSIVE_BLOCK_PATTERNS
+); 
+
+               
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
