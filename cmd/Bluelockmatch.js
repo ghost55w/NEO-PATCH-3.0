@@ -2367,9 +2367,9 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // 🔥 FLOW GLOBAL UNIQUE
-    const next = getNextPlayer(match);
-
+    // ✅ MATCH UP = vrai défenseur
+    const next = normalizeJid(defender.id || defender.jid);
+    
     // 🔒 sécurité
     if (!next) {
         console.log("❌ DUEL NEXT NULL");
@@ -2415,9 +2415,9 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     });
 
     // 🔥 SYNCHRO GLOBALE
-    match.waitingDefenseFrom = normalizeJid(next);
-    match.joueurTour = normalizeJid(next);
-    match.turnType = "defense";
+match.waitingDefenseFrom = next;
+match.joueurTour = next;
+match.turnType = "defense";    
 
     return true;
 }
@@ -2431,6 +2431,14 @@ if (match.phaseDuel?.active) {
     // 🟦 DEFENSE + RESOLUTION
     // ===============================
     if (match.phaseDuel.step === "defense_pave") {
+
+        const expectedDefender = normalizeJid(
+    match.phaseDuel.defender.id ||
+    match.phaseDuel.defender.jid
+);
+
+        // ❌ autre joueur → ignore
+        if (sender !== expectedDefender) return true;
 
         match.phaseDuel.defensePave = action;
 
@@ -2570,22 +2578,8 @@ match.hasPlayed = true;
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
-    const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
-    const currentTurn = normalizeJid(match.joueurTour);
-
-    const attacker =
-        allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) === currentTurn
-        ) || res.attacker;
-
-    const defender =
-        allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) === normalizeJid(sender)
-        ) || res.defender;
+    const attacker = res.attacker;
+    const defender = res.defender;
 
     match.phaseDuel = {
         active: true,
@@ -2596,8 +2590,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
         defensePave: null
     };
 
-    // 🔥 NEXT = toujours logique globale (A ↔ B)
-    const next = getNextPlayer(match);
+    const next = normalizeJid(attacker.id || attacker.jid);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2614,8 +2607,8 @@ ${res.msg}
         mentions: [next]
     });
 
-    // 🔥 SYNCHRO UNIQUE (RÈGLE DORÉE)
-    match.joueurTour = normalizeJid(next);
+    // 🔥 vrai attaquant commence
+    match.joueurTour = next;
     match.waitingDefenseFrom = next;
 
     return true;
