@@ -2432,15 +2432,12 @@ if (match.phaseDuel?.active) {
     // ===============================
     if (match.phaseDuel.step === "defense_pave") {
 
-        const defenderJid = normalizeJid(
-            match.phaseDuel.defender?.id ||
-            match.phaseDuel.defender?.jid
-        );
+        const expectedPlayer = normalizeJid(match.joueurTour);
 
-        // ❌ si ce n'est pas le vrai défenseur → ignore
-        if (sender !== defenderJid) {
-            return true;
-        }
+// ❌ mauvais joueur
+if (normalizeJid(sender) !== expectedPlayer) {
+    return true;
+}
 
         match.phaseDuel.defensePave = action;
 
