@@ -2367,9 +2367,9 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // ✅ MATCH UP = vrai défenseur
-    const next = normalizeJid(defender.id || defender.jid);
-    
+    // 🔥 FLOW GLOBAL UNIQUE
+    const next = getNextPlayer(match);
+
     // 🔒 sécurité
     if (!next) {
         console.log("❌ DUEL NEXT NULL");
@@ -2415,9 +2415,9 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     });
 
     // 🔥 SYNCHRO GLOBALE
-match.waitingDefenseFrom = next;
-match.joueurTour = next;
-match.turnType = "defense";    
+    match.waitingDefenseFrom = normalizeJid(next);
+    match.joueurTour = normalizeJid(next);
+    match.turnType = "defense";
 
     return true;
 }
@@ -2432,13 +2432,15 @@ if (match.phaseDuel?.active) {
     // ===============================
     if (match.phaseDuel.step === "defense_pave") {
 
-        const expectedDefender = normalizeJid(
-    match.phaseDuel.defender.id ||
-    match.phaseDuel.defender.jid
-);
+        const defenderJid = normalizeJid(
+            match.phaseDuel.defender?.id ||
+            match.phaseDuel.defender?.jid
+        );
 
-        // ❌ autre joueur → ignore
-        if (sender !== expectedDefender) return true;
+        // ❌ si ce n'est pas le vrai défenseur → ignore
+        if (sender !== defenderJid) {
+            return true;
+        }
 
         match.phaseDuel.defensePave = action;
 
@@ -2578,8 +2580,22 @@ match.hasPlayed = true;
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
-    const attacker = res.attacker;
-    const defender = res.defender;
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    const currentTurn = normalizeJid(match.joueurTour);
+
+    const attacker =
+        allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) === currentTurn
+        ) || res.attacker;
+
+    const defender =
+        allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) === normalizeJid(sender)
+        ) || res.defender;
 
     match.phaseDuel = {
         active: true,
@@ -2590,7 +2606,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
         defensePave: null
     };
 
-    const next = normalizeJid(attacker.id || attacker.jid);
+    // 🔥 NEXT = toujours logique globale (A ↔ B)
+    const next = getNextPlayer(match);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2607,8 +2624,8 @@ ${res.msg}
         mentions: [next]
     });
 
-    // 🔥 vrai attaquant commence
-    match.joueurTour = next;
+    // 🔥 SYNCHRO UNIQUE (RÈGLE DORÉE)
+    match.joueurTour = normalizeJid(next);
     match.waitingDefenseFrom = next;
 
     return true;
