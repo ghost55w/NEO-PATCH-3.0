@@ -2356,15 +2356,14 @@ async function handlePaveGame(ms, ovl) {
 
    const action = actionCheck;
 
-    // ===============================
-// ⚔️ DUEL ATTACK PHASE
-// ===============================
+/* ===============================
+⚔️ DUEL — PAVÉ ATTAQUE
+=================================*/
 if (
     match.phaseDuel?.active &&
     match.phaseDuel.step === "attack_pave"
 ) {
 
-    // 🔥 JOUEUR RÉEL ATTENDU
     const expected =
         match.phaseDuel.expectedPlayer;
 
@@ -2372,41 +2371,40 @@ if (
         return true;
     }
 
+    const action = parseAction(ms.body || "");
+    if (!action) return true;
+
+    // ===============================
+    // SAVE ATTACK
+    // ===============================
     match.phaseDuel.attackPave = action;
-    match.phaseDuel.step = "defense_pave";
 
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
+    // ===============================
+    // RESUME + NOTE
+    // ===============================
+    const resume =
+        genererResumeFull(action, match);
 
-    // 🔥 FLOW GLOBAL VISUEL
-    const next = getNextPlayer(match);
+    const note =
+        noterPave(action);
 
-    const actionText = action.toLowerCase();
+    // ===============================
+    // NEXT = DEFENDER
+    // ===============================
+    const defender =
+        match.phaseDuel.defender;
 
-    let resume = "";
+    match.phaseDuel.expectedPlayer =
+        normalizeJid(
+            defender.id || defender.jid
+        );
 
-    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-        resume =
-`${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
-    }
-    else if (
-        actionText.includes("acceleration") ||
-        actionText.includes("vmax")
-    ) {
-        resume =
-`${attacker.nom} accélère pour dépasser ${defender.nom}.`;
-    }
-    else if (actionText.includes("feinte")) {
-        resume =
-`${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
-    }
-    else {
-        resume =
-`${attacker.nom} enchaîne une action face à ${defender.nom}.`;
-    }
+    match.phaseDuel.step =
+        "defense_pave";
 
-    const note = noterPave(action);
-
+    // ===============================
+    // SEND MESSAGE
+    // ===============================
     await ovl.sendMessage(chat, {
         text:
 `*🛡️⚡⚽ ATTAQUE !*
@@ -2416,27 +2414,16 @@ if (
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${defender.nom || defender.name} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [next]
+        mentions: [
+            normalizeJid(
+                defender.id || defender.jid
+            )
+        ]
     });
-
-    // 🔥 LE MOTEUR ATTEND LE DÉFENSEUR
-    match.phaseDuel.expectedPlayer =
-        normalizeJid(
-            defender.id || defender.jid
-        );
-
-    // 🔥 FLOW GLOBAL INTACT
-    match.waitingDefenseFrom =
-        normalizeJid(next);
-
-    match.joueurTour =
-        normalizeJid(next);
-
-    match.turnType = "defense";
 
     return true;
 }
