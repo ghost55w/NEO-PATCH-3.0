@@ -2364,15 +2364,26 @@ if (
     match.phaseDuel.step === "attack_pave"
 ) {
 
+    // ===============================
+    // REAL EXPECTED USER
+    // ===============================
     const expected =
-        match.phaseDuel.expectedPlayer;
+        normalizeJid(
+            match.phaseDuel.expectedPlayer
+        );
 
     if (sender !== expected) {
         return true;
     }
 
-    const action = parseAction(ms.body || "");
-    if (!action) return true;
+    // ===============================
+    // TON PARSER ORIGINAL
+    // ===============================
+    const action = actionCheck;
+
+    if (!action) {
+        return true;
+    }
 
     // ===============================
     // SAVE ATTACK
@@ -2389,21 +2400,23 @@ if (
         noterPave(action);
 
     // ===============================
-    // NEXT = DEFENDER
+    // NEXT REAL USER
+    // (USER FLOW, PAS CARD FLOW)
     // ===============================
-    const defender =
-        match.phaseDuel.defender;
+    const nextUser =
+        getNextPlayer(match);
 
     match.phaseDuel.expectedPlayer =
-        normalizeJid(
-            defender.id || defender.jid
-        );
+        normalizeJid(nextUser);
 
+    // ===============================
+    // SWITCH STEP
+    // ===============================
     match.phaseDuel.step =
         "defense_pave";
 
     // ===============================
-    // SEND MESSAGE
+    // SEND ATTACK MESSAGE
     // ===============================
     await ovl.sendMessage(chat, {
         text:
@@ -2414,14 +2427,12 @@ if (
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${defender.nom || defender.name} NEXT
+➡️ @${getPlayerName(nextUser)} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [
-            normalizeJid(
-                defender.id || defender.jid
-            )
+            normalizeJid(nextUser)
         ]
     });
 
@@ -2675,21 +2686,21 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ) || res.defender;
 
     match.phaseDuel = {
-        active: true,
-        step: "attack_pave",
+    active: true,
+    step: "attack_pave",
 
-        attacker,
-        defender,
+    attacker,
+    defender,
 
-        attackPave: null,
-        defensePave: null,
+    attackPave: null,
+    defensePave: null,
 
-        // 🔥 JOUEUR RÉEL ATTENDU
-        expectedPlayer:
-            normalizeJid(
-                attacker.id || attacker.jid
-            )
-    };
+    // USER WhatsApp attendu
+    expectedPlayer:
+        normalizeJid(
+            getNextPlayer(match)
+        )
+};
 
     // 🔥 FLOW GLOBAL VISUEL
     const next = getNextPlayer(match);
