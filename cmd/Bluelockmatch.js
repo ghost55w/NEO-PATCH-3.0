@@ -2356,68 +2356,48 @@ async function handlePaveGame(ms, ovl) {
 
    const action = actionCheck;
 
-/* ===============================
-⚔️ DUEL — PAVÉ ATTAQUE
-=================================*/
-if (
-    match.phaseDuel?.active &&
-    match.phaseDuel.step === "attack_pave"
-) {
+// ===============================
+// ⚔️ DUEL ATTACK PHASE
+// ===============================
+if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
-    // ===============================
-    // REAL EXPECTED USER
-    // ===============================
-    const expected =
-        normalizeJid(
-            match.phaseDuel.expectedPlayer
-        );
-
-    if (sender !== expected) {
-        return true;
-    }
-
-    // ===============================
-    // TON PARSER ORIGINAL
-    // ===============================
-    const action = actionCheck;
-
-    if (!action) {
-        return true;
-    }
-
-    // ===============================
-    // SAVE ATTACK
-    // ===============================
     match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
 
-    // ===============================
-    // RESUME + NOTE
-    // ===============================
-    const resume =
-        genererResumeFull(action, match);
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
 
-    const note =
-        noterPave(action);
+    // 🔥 FLOW GLOBAL UNIQUE
+    const next = getNextPlayer(match);
 
-    // ===============================
-    // NEXT REAL USER
-    // (USER FLOW, PAS CARD FLOW)
-    // ===============================
-    const nextUser =
-        getNextPlayer(match);
+    // 🔒 sécurité
+    if (!next) {
+        console.log("❌ DUEL NEXT NULL");
+        return true;
+    }
 
-    match.phaseDuel.expectedPlayer =
-        normalizeJid(nextUser);
+    const actionText = action.toLowerCase();
 
-    // ===============================
-    // SWITCH STEP
-    // ===============================
-    match.phaseDuel.step =
-        "defense_pave";
+    let resume = "";
 
-    // ===============================
-    // SEND ATTACK MESSAGE
-    // ===============================
+    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
+        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+    }
+    else if (
+        actionText.includes("acceleration") ||
+        actionText.includes("vmax")
+    ) {
+        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+    }
+    else if (actionText.includes("feinte")) {
+        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+    }
+    else {
+        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+    }
+
+    const note = noterPave(action);
+
     await ovl.sendMessage(chat, {
         text:
 `*🛡️⚡⚽ ATTAQUE !*
@@ -2427,128 +2407,56 @@ if (
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getPlayerName(nextUser)} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`,
-        mentions: [
-            normalizeJid(nextUser)
-        ]
+              🔷BLUELOCK⚽🥅`,
+        mentions: [next]
     });
+
+    // 🔥 SYNCHRO GLOBALE
+    match.waitingDefenseFrom = normalizeJid(next);
+    match.joueurTour = normalizeJid(next);
+    match.turnType = "defense";
 
     return true;
 }
     
 // ===============================
-// 🎯 DEBUG DUEL
-// ===============================
-console.log("🎯 DUEL DEBUG", {
-    sender,
-    joueurTour: match.joueurTour,
-    waitingDefenseFrom: match.waitingDefenseFrom,
-
-    duelActive: match.phaseDuel?.active,
-    duelStep: match.phaseDuel?.step,
-
-    attacker:
-        match.phaseDuel?.attacker?.nom,
-
-    defender:
-        match.phaseDuel?.defender?.nom,
-
-    attackPave:
-        match.phaseDuel?.attackPave
-            ? "OK"
-            : "NULL",
-
-    defensePave:
-        match.phaseDuel?.defensePave
-            ? "OK"
-            : "NULL",
-
-    pendingAttack:
-        match.pendingAttack
-            ? "OK"
-            : "NULL",
-
-    turnType: match.turnType
-});
-
-// ===============================
-// ⚔️ DUEL PHASE SYSTEM
+// ⚔️ DUEL PHASE SYSTEM 
 // ===============================
 if (match.phaseDuel?.active) {
 
-    console.log(
-        "⚔️ ENTER DUEL BLOCK",
-        match.phaseDuel.step
-    );
-
     // ===============================
-// 🟦 DEFENSE + RESOLUTION
-// ===============================
-if (match.phaseDuel.step === "defense_pave") {
+    // 🟦 DEFENSE + RESOLUTION
+    // ===============================
+    if (match.phaseDuel.step === "defense_pave") {
 
-    console.log("🛡️ ENTER DEFENSE_PAVE");
+        match.phaseDuel.defensePave = action;
 
-    // 🔥 JOUEUR RÉEL ATTENDU
-    const expected =
-        match.phaseDuel.expectedPlayer;
+        const attacker = match.phaseDuel.attacker;
+        const defender = match.phaseDuel.defender;
 
-    console.log("🧠 EXPECTED CHECK", {
-        sender,
-        expected
-    });
+        const duel = resolveDribbleDuel(
+            match,
+            attacker,
+            defender,
+            match.phaseDuel.attackPave,
+            match.phaseDuel.defensePave
+        );
 
-    // ❌ mauvais joueur
-    if (sender !== expected) {
+        let title = "*🛡️⚽ MATCH UP⚔️ !*";
 
-        console.log("❌ WRONG PLAYER");
+        if (duel.type === "INTERCEPTION") {
+            title = "*🛑 INTERCEPTION !*";
+        } else if (duel.type === "win" || duel.type === "escape") {
+            title = "*🔥 DRIBBLE RÉUSSI !*";
+        } else if (duel.type === "stop") {
+            title = "*🧱 TACLE RÉUSSI !*";
+        }
 
-        return true;
-    }
-
-    console.log("✅ GOOD DEFENDER");
-
-    match.phaseDuel.defensePave = action;
-
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
-
-    console.log("⚔️ BEFORE RESOLVE", {
-        attacker: attacker?.nom,
-        defender: defender?.nom,
-        attackPave: match.phaseDuel.attackPave,
-        defensePave: match.phaseDuel.defensePave
-    });
-
-    const duel = resolveDribbleDuel(
-        match,
-        attacker,
-        defender,
-        match.phaseDuel.attackPave,
-        match.phaseDuel.defensePave
-    );
-
-    console.log("🔥 DUEL RESULT", duel);
-
-    let title = "*🛡️⚽ MATCH UP⚔️ !*";
-
-    if (duel.type === "INTERCEPTION") {
-        title = "*🛑 INTERCEPTION !*";
-    }
-    else if (
-        duel.type === "win" ||
-        duel.type === "escape"
-    ) {
-        title = "*🔥 DRIBBLE RÉUSSI !*";
-    }
-    else if (duel.type === "stop") {
-        title = "*🧱 TACLE RÉUSSI !*";
-    }
-
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2556,24 +2464,19 @@ ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 ${duel.msg}
 
 ╰───────────────────
-🔷BLUELOCK⚽🥅`
-    });
+              🔷BLUELOCK⚽🥅`
+        });
 
-    // 🔥 RESET
-    match.phaseDuel = null;
+        // RESET
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.turnType = "attaque";
 
-    match.pendingAttack = null;
-
-    match.waitingDefenseFrom = null;
-
-    match.turnType = "attaque";
-
-    startMatchCycle(chat, ovl, match);
-
-    return true;
-} 
+        startMatchCycle(chat, ovl, match);
+        return true;
+    }
 }
-
     
 /* ===============================
 🧠 ACTION TEXT
@@ -2662,7 +2565,6 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 match.hasPlayed = true;
 
 
-
 // ===============================
 // 🛡️⚽ MATCH UP INIT
 // ===============================
@@ -2686,23 +2588,15 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ) || res.defender;
 
     match.phaseDuel = {
-    active: true,
-    step: "attack_pave",
+        active: true,
+        step: "attack_pave",
+        attacker,
+        defender,
+        attackPave: null,
+        defensePave: null
+    };
 
-    attacker,
-    defender,
-
-    attackPave: null,
-    defensePave: null,
-
-    // USER WhatsApp attendu
-    expectedPlayer:
-        normalizeJid(
-            getNextPlayer(match)
-        )
-};
-
-    // 🔥 FLOW GLOBAL VISUEL
+    // 🔥 NEXT = toujours logique globale (A ↔ B)
     const next = getNextPlayer(match);
 
     await ovl.sendMessage(chat, {
@@ -2720,7 +2614,7 @@ ${res.msg}
         mentions: [next]
     });
 
-    // 🔥 GARDE LE FLOW GLOBAL
+    // 🔥 SYNCHRO UNIQUE (RÈGLE DORÉE)
     match.joueurTour = normalizeJid(next);
     match.waitingDefenseFrom = next;
 
