@@ -2499,6 +2499,7 @@ ${duel.msg}
 
     return true;
 }
+} 
     
 /* ===============================
 🧠 ACTION TEXT
