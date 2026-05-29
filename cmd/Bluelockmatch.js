@@ -2428,35 +2428,57 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 if (match.phaseDuel?.active) {
 
     // ===============================
-    // 🟦 DEFENSE + RESOLUTION
-    // ===============================
-    if (match.phaseDuel.step === "defense_pave") {
+   // 🟦 DEFENSE + RESOLUTION
+// ===============================
+if (match.phaseDuel.step === "defense_pave") {
 
-        match.phaseDuel.defensePave = action;
-
-        const attacker = match.phaseDuel.attacker;
-        const defender = match.phaseDuel.defender;
-
-        const duel = resolveDribbleDuel(
-            match,
-            attacker,
-            defender,
-            match.phaseDuel.attackPave,
-            match.phaseDuel.defensePave
+    // 🔥 vrai user attendu
+    const expected =
+        normalizeJid(
+            match.waitingDefenseFrom
         );
 
-        let title = "*🛡️⚽ MATCH UP⚔️ !*";
+    console.log("🧠 DEFENDER CHECK", {
+        sender,
+        expected
+    });
 
-        if (duel.type === "INTERCEPTION") {
-            title = "*🛑 INTERCEPTION !*";
-        } else if (duel.type === "win" || duel.type === "escape") {
-            title = "*🔥 DRIBBLE RÉUSSI !*";
-        } else if (duel.type === "stop") {
-            title = "*🧱 TACLE RÉUSSI !*";
-        }
+    // ❌ mauvais joueur
+    if (sender !== expected) {
 
-        await ovl.sendMessage(chat, {
-            text:
+        console.log("❌ WRONG DEFENDER");
+
+        return true;
+    }
+
+    match.phaseDuel.defensePave = action;
+
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
+
+    const duel = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        match.phaseDuel.attackPave,
+        match.phaseDuel.defensePave
+    );
+
+    let title = "*🛡️⚽ MATCH UP⚔️ !*";
+
+    if (duel.type === "INTERCEPTION") {
+        title = "*🛑 INTERCEPTION !*";
+    } else if (
+        duel.type === "win" ||
+        duel.type === "escape"
+    ) {
+        title = "*🔥 DRIBBLE RÉUSSI !*";
+    } else if (duel.type === "stop") {
+        title = "*🧱 TACLE RÉUSSI !*";
+    }
+
+    await ovl.sendMessage(chat, {
+        text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2465,17 +2487,17 @@ ${duel.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-        });
+    });
 
-        // RESET
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.turnType = "attaque";
+    // RESET
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+    match.turnType = "attaque";
 
-        startMatchCycle(chat, ovl, match);
-        return true;
-    }
+    startMatchCycle(chat, ovl, match);
+
+    return true;
 }
     
 /* ===============================
