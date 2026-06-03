@@ -2397,8 +2397,14 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // 🔥 FLOW GLOBAL UNIQUE
-    const next = getNextPlayer(match);
+    // 🔥 NEXT = TEAM TURN (PAS PLAYER)
+    const nextTeamId =
+        match.teamTurn === 1 ? match.id1 : match.id2;
+
+    const nextTeamName =
+        match.teamTurn === 1 ? match.team1Nom : match.team2Nom;
+
+    const next = nextTeamId;
 
     // 🔒 sécurité
     if (!next) {
@@ -2437,78 +2443,79 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${nextTeamName} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
         mentions: [next]
     });
 
-    // 🔥 SYNCHRO GLOBALE
-    match.waitingDefenseFrom = normalizeJid(next);
-    match.joueurTour = normalizeJid(next);
+    // 🔥 SYNCHRO = TEAM TURN ONLY
+    match.waitingDefenseFrom = next; // TEAM ID
+    match.teamWaitingDefense = match.teamTurn; // option debug
+
     match.turnType = "defense";
 
     return true;
 }
-    
+
 // ===============================
-// ⚔️ DUEL PHASE SYSTEM 
+// ⚔️ DUEL PHASE SYSTEM
 // ===============================
 if (match.phaseDuel?.active) {
 
     // ===============================
-   // 🟦 DEFENSE + RESOLUTION
-// ===============================
-if (match.phaseDuel.step === "defense_pave") {
+    // 🟦 DEFENSE + RESOLUTION
+    // ===============================
+    if (match.phaseDuel.step === "defense_pave") {
 
-    // 🔥 vrai user attendu
-    const expected =
-        normalizeJid(
-            match.waitingDefenseFrom
+        // 🔥 TEAM ATTENDUE (PAS JOUEUR)
+        const expectedTeam = normalizeJid(match.waitingDefenseFrom);
+
+        console.log("🧠 DEFENDER CHECK", {
+            sender,
+            expectedTeam
+        });
+
+        // ❌ mauvais joueur / mauvaise team
+        const senderTeam =
+            sender === match.id1 ? match.id1 :
+            sender === match.id2 ? match.id2 :
+            null;
+
+        if (!senderTeam || senderTeam !== expectedTeam) {
+            console.log("❌ WRONG DEFENDER TEAM");
+            return true;
+        }
+
+        match.phaseDuel.defensePave = action;
+
+        const attacker = match.phaseDuel.attacker;
+        const defender = match.phaseDuel.defender;
+
+        const duel = resolveDribbleDuel(
+            match,
+            attacker,
+            defender,
+            match.phaseDuel.attackPave,
+            match.phaseDuel.defensePave
         );
 
-    console.lg("🧠 DEFENDER CHECK", {
-        sender,
-        expected
-    });
+        let title = "*🛡️⚽ MATCH UP⚔️ !*";
 
-    // ❌ mauvais joueur
-    if (sender !== expected) {
+        if (duel.type === "INTERCEPTION") {
+            title = "*🛑 INTERCEPTION !*";
+        } else if (
+            duel.type === "win" ||
+            duel.type === "escape"
+        ) {
+            title = "*🔥 DRIBBLE RÉUSSI !*";
+        } else if (duel.type === "stop") {
+            title = "*🧱 TACLE RÉUSSI !*";
+        }
 
-        console.log("❌ WRONG DEFENDER");
-
-        return true;
-    }
-
-    match.phaseDuel.defensePave = action;
-
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
-
-    const duel = resolveDribbleDuel(
-        match,
-        attacker,
-        defender,
-        match.phaseDuel.attackPave,
-        match.phaseDuel.defensePave
-    );
-
-    let title = "*🛡️⚽ MATCH UP⚔️ !*";
-
-    if (duel.type === "INTERCEPTION") {
-        title = "*🛑 INTERCEPTION !*";
-    } else if (
-        duel.type === "win" ||
-        duel.type === "escape"
-    ) {
-        title = "*🔥 DRIBBLE RÉUSSI !*";
-    } else if (duel.type === "stop") {
-        title = "*🧱 TACLE RÉUSSI !*";
-    }
-
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2517,41 +2524,48 @@ ${duel.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-    });
+        });
 
-    // ===============================
-// 🎯 GAGNANT DU DUEL
-// ===============================
-if (duel.type === "INTERCEPTION") {
+        // ===============================
+        // 🎯 GAGNANT DU DUEL (TEAM SAFE FLOW)
+        // ===============================
+        if (duel.type === "INTERCEPTION") {
 
-    match.ballHolder = defender.nom;
+            match.ballHolder = defender.nom;
 
-    match.joueurTour = normalizeJid(
-        defender.id || defender.jid
-    );
+            // 👉 team qui récupère
+            match.teamTurn =
+                sender === match.id1 ? 1 : 2;
+
+            match.joueurTour =
+                sender === match.id1 ? match.id1 : match.id2;
+        }
+        else {
+
+            match.ballHolder = attacker.nom;
+
+            // 👉 team attaque continue
+            match.teamTurn =
+                match.teamTurn === 1 ? 2 : 1;
+
+            match.joueurTour =
+                match.teamTurn === 1 ? match.id1 : match.id2;
+        }
+
+        // ===============================
+        // ♻️ RESET DUEL
+        // ===============================
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.turnType = "attaque";
+
+        startMatchCycle(chat, ovl, match);
+
+        return true;
+    }
 }
-else {
-
-    match.ballHolder = attacker.nom;
-
-    match.joueurTour = normalizeJid(
-        attacker.id || attacker.jid
-    );
-}
-
-// ===============================
-// ♻️ RESET DUEL
-// ===============================
-match.phaseDuel = null;
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
-match.turnType = "attaque";
-
-startMatchCycle(chat, ovl, match);
-
-    return true;
-}
-} 
+ 
     
 /* ===============================
 🧠 ACTION TEXT
