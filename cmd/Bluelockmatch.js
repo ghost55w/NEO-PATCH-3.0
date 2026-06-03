@@ -2189,8 +2189,9 @@ const kickoffText = kickoffStart(match);
 if (kickoffText) {
 
     const displayName =
-        match.names?.[jidStart] ||
-        jidStart.split("@")[0];
+        jidStart === match.id1
+            ? match.team1Nom
+            : match.team2Nom;
 
     const imagesKickOff = [
         "https://files.catbox.moe/onotk4.jpg",
@@ -2199,7 +2200,11 @@ if (kickoffText) {
 
     await ovl.sendMessage(chat, {
         image: {
-            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
+            url: imagesKickOff[
+                Math.floor(
+                    Math.random() * imagesKickOff.length
+                )
+            ]
         },
         caption:
 `🎙️⚽ KICK OFF 🥅‼️ @${displayName} débute avec la possession !
@@ -2211,7 +2216,6 @@ ${kickoffText}
         mentions: [jidStart]
     });
 
-    // 🔥 BASE DU FLOW
     match.joueurTour = normalizeJid(jidStart);
 }
     
