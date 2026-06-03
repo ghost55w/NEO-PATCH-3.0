@@ -1749,7 +1749,17 @@ function getNextTeam(match) {
         ? match.id2
         : match.id1;
 }
-        
+
+function getTeamFromSender(match, sender) {
+
+    const jid = normalizeJid(sender);
+
+    if (jid === normalizeJid(match.id1)) return 1;
+    if (jid === normalizeJid(match.id2)) return 2;
+
+    return null;
+}
+                                           
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -2397,16 +2407,17 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // 🔥 NEXT = TEAM TURN (PAS PLAYER)
-    const nextTeamId =
-        match.teamTurn === 1 ? match.id1 : match.id2;
+    // 🔥 NEXT = TEAM (pas player)
+    const nextTeam = match.teamTurn === 1 ? 2 : 1;
 
     const nextTeamName =
-        match.teamTurn === 1 ? match.team1Nom : match.team2Nom;
+        nextTeam === 1 ? match.team1Nom : match.team2Nom;
+
+    const nextTeamId =
+        nextTeam === 1 ? match.id1 : match.id2;
 
     const next = nextTeamId;
 
-    // 🔒 sécurité
     if (!next) {
         console.log("❌ DUEL NEXT NULL");
         return true;
@@ -2419,10 +2430,7 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
         resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("acceleration") ||
-        actionText.includes("vmax")
-    ) {
+    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
         resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
     else if (actionText.includes("feinte")) {
@@ -2450,10 +2458,8 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
         mentions: [next]
     });
 
-    // 🔥 SYNCHRO = TEAM TURN ONLY
-    match.waitingDefenseFrom = next; // TEAM ID
-    match.teamWaitingDefense = match.teamTurn; // option debug
-
+    // 🔥 IMPORTANT : on garde TEAM TURN
+    match.waitingDefenseFrom = nextTeamId;
     match.turnType = "defense";
 
     return true;
@@ -2467,55 +2473,45 @@ if (match.phaseDuel?.active) {
     // ===============================
     // 🟦 DEFENSE + RESOLUTION
     // ===============================
-    if (match.phaseDuel.step === "defense_pave") {
+    if (match.phaseDuel?.active && match.phaseDuel.step === "defense_pave") {
 
-        // 🔥 TEAM ATTENDUE (PAS JOUEUR)
-        const expectedTeam = normalizeJid(match.waitingDefenseFrom);
+    const expectedTeam = match.waitingDefenseFrom;
 
-        console.log("🧠 DEFENDER CHECK", {
-            sender,
-            expectedTeam
-        });
+    const senderTeam = getTeamFromSender(match, sender);
 
-        // ❌ mauvais joueur / mauvaise team
-        const senderTeam =
-            sender === match.id1 ? match.id1 :
-            sender === match.id2 ? match.id2 :
-            null;
+    console.log("🧠 DEFENDER CHECK", {
+        sender,
+        senderTeam,
+        expectedTeam
+    });
 
-        if (!senderTeam || senderTeam !== expectedTeam) {
-            console.log("❌ WRONG DEFENDER TEAM");
-            return true;
-        }
+    // ❌ mauvais team
+    if (senderTeam !== expectedTeam) {
+        console.log("❌ WRONG DEFENDER TEAM");
+        return true;
+    }
 
-        match.phaseDuel.defensePave = action;
+    match.phaseDuel.defensePave = action;
 
-        const attacker = match.phaseDuel.attacker;
-        const defender = match.phaseDuel.defender;
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
 
-        const duel = resolveDribbleDuel(
-            match,
-            attacker,
-            defender,
-            match.phaseDuel.attackPave,
-            match.phaseDuel.defensePave
-        );
+    const duel = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        match.phaseDuel.attackPave,
+        match.phaseDuel.defensePave
+    );
 
-        let title = "*🛡️⚽ MATCH UP⚔️ !*";
+    let title = "*🛡️⚽ MATCH UP⚔️ !*";
 
-        if (duel.type === "INTERCEPTION") {
-            title = "*🛑 INTERCEPTION !*";
-        } else if (
-            duel.type === "win" ||
-            duel.type === "escape"
-        ) {
-            title = "*🔥 DRIBBLE RÉUSSI !*";
-        } else if (duel.type === "stop") {
-            title = "*🧱 TACLE RÉUSSI !*";
-        }
+    if (duel.type === "INTERCEPTION") title = "*🛑 INTERCEPTION !*";
+    else if (duel.type === "win" || duel.type === "escape") title = "*🔥 DRIBBLE RÉUSSI !*";
+    else if (duel.type === "stop") title = "*🧱 TACLE RÉUSSI !*";
 
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2524,49 +2520,42 @@ ${duel.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-        });
+    });
 
-        // ===============================
-        // 🎯 GAGNANT DU DUEL (TEAM SAFE FLOW)
-        // ===============================
-        if (duel.type === "INTERCEPTION") {
+    // ===============================
+    // 🎯 SWITCH PROPRE TEAM FLOW
+    // ===============================
 
-            match.ballHolder = defender.nom;
+    if (duel.type === "INTERCEPTION") {
 
-            // 👉 team qui récupère
-            match.teamTurn =
-                sender === match.id1 ? 1 : 2;
+        match.ballHolder = defender.nom;
 
-            match.joueurTour =
-                sender === match.id1 ? match.id1 : match.id2;
-        }
-        else {
+        // équipe du défenseur prend la main
+        match.teamTurn = senderTeam;
 
-            match.ballHolder = attacker.nom;
+    } else {
 
-            // 👉 team attaque continue
-            match.teamTurn =
-                match.teamTurn === 1 ? 2 : 1;
+        match.ballHolder = attacker.nom;
 
-            match.joueurTour =
-                match.teamTurn === 1 ? match.id1 : match.id2;
-        }
-
-        // ===============================
-        // ♻️ RESET DUEL
-        // ===============================
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.turnType = "attaque";
-
-        startMatchCycle(chat, ovl, match);
-
-        return true;
+        // switch normal équipe
+        match.teamTurn = match.teamTurn === 1 ? 2 : 1;
     }
+
+    match.joueurTour =
+        match.teamTurn === 1 ? match.id1 : match.id2;
+
+    // RESET
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+    match.turnType = "attaque";
+
+    startMatchCycle(chat, ovl, match);
+
+    return true;
 }
- 
-    
+
+     
 /* ===============================
 🧠 ACTION TEXT
 =================================*/
