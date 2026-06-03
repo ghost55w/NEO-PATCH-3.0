@@ -1744,12 +1744,10 @@ const DRIBBLE_PATTERNS = [
 ];
 
 
-function getNextPlayer(match) {
-    const current = normalizeJid(match.joueurTour);
-    const id1 = normalizeJid(match.id1);
-    const id2 = normalizeJid(match.id2);
-
-    return current === id1 ? id2 : id1;
+function getNextTeam(match) {
+    return match.teamTurn === 1
+        ? match.id2
+        : match.id1;
 }
         
 // ===============================
