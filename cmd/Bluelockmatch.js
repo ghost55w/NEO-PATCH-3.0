@@ -2535,8 +2535,9 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
         nextTeam === 1 ? match.team1Nom : match.team2Nom;
 
     const nextTeamId =
-        nextTeam === 1 ? match.id1 : match.id2;
-
+    nextTeam === 1
+        ? match.team1Jid
+        : match.team2Jid;
     const next = nextTeamId;
 
     if (!next) {
@@ -2582,6 +2583,8 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     // 🔥 IMPORTANT : on garde TEAM TURN
     match.waitingDefenseFrom = nextTeamId;
     match.turnType = "defense";
+     match.waitingPlayer = nextTeamId;
+match.joueurTour = nextTeamId;                 
 
     return true;
 }
@@ -2662,8 +2665,13 @@ ${duel.msg}
         match.teamTurn = match.teamTurn === 1 ? 2 : 1;
     }
 
-    match.joueurTour =
-        match.teamTurn === 1 ? match.id1 : match.id2;
+   const nextPlayer =
+    match.teamTurn === 1
+        ? match.team1Jid
+        : match.team2Jid;
+
+match.joueurTour = nextPlayer;
+match.waitingPlayer = nextPlayer; 
 
     // RESET
     match.phaseDuel = null;
@@ -2745,11 +2753,10 @@ if (!match.pendingAttack) {
     });
 
     match.waitingDefenseFrom = next;
-    match.turnType = "defense";
+match.turnType = "defense";
 
-    // 🔥 SYNCHRO OBLIGATOIRE
-    match.joueurTour = normalizeJid(next);
-
+match.joueurTour = normalizeJid(next);
+match.waitingPlayer = normalizeJid(next);
     startMatchCycle(chat, ovl, match);
     return true;
 }
@@ -2816,8 +2823,9 @@ ${res.msg}
 
     // 🔥 SYNCHRO UNIQUE (RÈGLE DORÉE)
     match.joueurTour = normalizeJid(next);
-    match.waitingDefenseFrom = next;
-
+match.waitingPlayer = normalizeJid(next);
+match.waitingDefenseFrom = next;
+    
     return true;
 }
 
@@ -2852,9 +2860,13 @@ match.waitingDefenseFrom = null;
     match.phaseDuelResolved = false;
 
 // 🔁 Switch tour
-match.joueurTour =
-    match.joueurTour === match.id1 ? match.id2 : match.id1;
+const nextPlayer =
+    match.joueurTour === match.team1Jid
+        ? match.team2Jid
+        : match.team1Jid;
 
+match.joueurTour = nextPlayer;
+match.waitingPlayer = nextPlayer;
 match.turnType = "attaque";
 
 startMatchCycle(chat, ovl, match);
