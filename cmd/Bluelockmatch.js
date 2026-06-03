@@ -2221,38 +2221,43 @@ async function lancerMatch(chat, ovl) {
     }
 
     // =========================
-    // 🎯 KICKOFF MESSAGE
-    // =========================
-    const kickoffText = kickoffStart(match);
+// 🎯 KICKOFF MESSAGE
+// =========================
+const kickoffText = kickoffStart(match);
 
-    if (kickoffText) {
+if (kickoffText) {
 
-        const displayName =
-            match.teamTurn === 1
-                ? match.team1Nom
-                : match.team2Nom;
+    // 🔥 USER QUI JOUE (PAS TEAM)
+    const jidStart =
+        match.teamTurn === 1
+            ? match.id1
+            : match.id2;
 
-        const imagesKickOff = [
-            "https://files.catbox.moe/onotk4.jpg",
-            "https://files.catbox.moe/kfw0bl.jpg"
-        ];
+    const displayName =
+        match.names?.[jidStart] ||
+        jidStart.split("@")[0];
 
-        await ovl.sendMessage(chat, {
-            image: {
-                url: imagesKickOff[
-                    Math.floor(Math.random() * imagesKickOff.length)
-                ]
-            },
-            caption:
+    const imagesKickOff = [
+        "https://files.catbox.moe/onotk4.jpg",
+        "https://files.catbox.moe/kfw0bl.jpg"
+    ];
+
+    await ovl.sendMessage(chat, {
+        image: {
+            url: imagesKickOff[
+                Math.floor(Math.random() * imagesKickOff.length)
+            ]
+        },
+        caption:
 `🎙️⚽ KICK OFF 🥅‼️ @${displayName} débute avec la possession !
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [jidStart]
-        });
-    }
+        mentions: [jidStart] // 🔥 IMPORTANT
+    });
+}
 
     // =========================
     // 🚀 START ENGINE
