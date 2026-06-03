@@ -2359,54 +2359,41 @@ async function handlePaveGame(ms, ovl) {
 // ===============================
 // ⚔️ DUEL ATTACK PHASE
 // ===============================
-if (
-    match.phaseDuel?.active &&
-    match.phaseDuel.step === "attack_pave"
-) {
-
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
-
-    // 🔒 Seul l'attaquant du duel peut jouer
-    const attackerJid = normalizeJid(
-        attacker.id || attacker.jid
-    );
-
-    if (sender !== attackerJid) {
-        return true;
-    }
+if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     match.phaseDuel.attackPave = action;
     match.phaseDuel.step = "defense_pave";
 
-    const defenderJid = normalizeJid(
-        defender.id || defender.jid
-    );
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
+
+    // 🔥 FLOW GLOBAL UNIQUE
+    const next = getNextPlayer(match);
+
+    // 🔒 sécurité
+    if (!next) {
+        console.log("❌ DUEL NEXT NULL");
+        return true;
+    }
 
     const actionText = action.toLowerCase();
 
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-        resume =
-            `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
     else if (
         actionText.includes("acceleration") ||
         actionText.includes("vmax")
     ) {
-        resume =
-            `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("feinte")
-    ) {
-        resume =
-            `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+    else if (actionText.includes("feinte")) {
+        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
     }
     else {
-        resume =
-            `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
     }
 
     const note = noterPave(action);
@@ -2420,21 +2407,20 @@ if (
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(defenderJid)} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [defenderJid]
+        mentions: [next]
     });
 
-    // 🔥 Le duel reste entre les 2 joueurs
-    match.waitingDefenseFrom = defenderJid;
-    match.joueurTour = defenderJid;
+    // 🔥 SYNCHRO GLOBALE
+    match.waitingDefenseFrom = normalizeJid(next);
+    match.joueurTour = normalizeJid(next);
     match.turnType = "defense";
 
     return true;
 }
-
     
 // ===============================
 // ⚔️ DUEL PHASE SYSTEM 
