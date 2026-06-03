@@ -2421,7 +2421,33 @@ async function handlePaveGame(ms, ovl) {
         text.includes("BLUELOCK");
 
     if (!isPave) return false;
+// ===============================
+// 🚫 PAS TON TOUR
+// ===============================
+if (
+    match.waitingPlayer &&
+    sender !== normalizeJid(match.waitingPlayer)
+) {
 
+    const expected =
+        match.names?.[match.waitingPlayer] ||
+        match.waitingPlayer.split("@")[0];
+
+    await ovl.sendMessage(chat, {
+        text:
+`⛔ CE N'EST PAS TON TOUR
+
+⚡ Joueur attendu :
+@${expected}
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [match.waitingPlayer]
+    });
+
+    return true;
+}
+    
     // ===============================
     // ❌ PAVÉ VIDE OU MAL FORMÉ
     // ===============================
@@ -2433,10 +2459,13 @@ async function handlePaveGame(ms, ovl) {
             react: { text: "❌", key: ms.key }
         });
 
-        const loser = normalizeJid(match.joueurTour);
+        const loser = normalizeJid(
+    match.waitingPlayer ||
+    match.attacker
+);
 
-        const next = match.defender || match.id2;
-
+const next = match.defender;
+        
         const loserName =
             match.names?.[loser] || loser.split("@")[0];
 
@@ -2463,9 +2492,13 @@ async function handlePaveGame(ms, ovl) {
             mentions: [next, loser]
         });
 
-        match.attacker = next;
-        match.defender = next === match.id1 ? match.id2 : match.id1;
-        match.joueurTour = next;
+        const oldAttacker = match.attacker;
+
+match.attacker = next;
+match.defender = oldAttacker;
+
+match.joueurTour = next;
+match.waitingPlayer = next;
 
         match.hasPlayed = true;
         startMatchCycle(chat, ovl, match);
