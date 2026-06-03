@@ -598,6 +598,10 @@ function startMatchCycle(chat, ovl, match) {
     }
 
     const attacker = match.attacker;
+    const defender = match.defender;
+
+// 🔥 Joueur qui doit jouer ce tour
+match.waitingPlayer = attacker;
 
     const attackerName =
         match.names?.[attacker] ||
@@ -671,7 +675,8 @@ Il reste *1 MINUTE* pour jouer !
             match.defender = oldAttacker;
 
             // 🔥 FIX CRITIQUE
-            match.joueurTour = newAttacker;
+match.joueurTour = newAttacker;
+match.waitingPlayer = newAttacker;
 
             // 📊 POSSESSION
             match.possessions[newAttacker] =
@@ -726,7 +731,8 @@ Il reste *1 MINUTE* pour jouer !
         match.defender = oldAttacker;
 
         // 🔥 FIX CRITIQUE
-        match.joueurTour = newAttacker;
+match.joueurTour = newAttacker;
+match.waitingPlayer = newAttacker;
 
         match.possessions[newAttacker] =
             (match.possessions[newAttacker] || 0) + 1;
@@ -744,6 +750,7 @@ match.hasPlayed = false;
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
 match.phaseDuel = null;
+match.expectedPlayer = null;
 
         const nextName =
             match.names?.[newAttacker] ||
