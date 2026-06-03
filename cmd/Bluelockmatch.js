@@ -2583,23 +2583,30 @@ const isPassiveDefense = hasIntent(
     PASSIVE_BLOCK_PATTERNS
 ); 
 
-               
+
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
 if (!match.pendingAttack) {
 
+    // ⚽ joueur actuellement porteur
     const currentPlayer = normalizeJid(match.joueurTour);
 
     const attackerPlayer =
         [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p => normalizeJid(p.id || p.jid) === currentPlayer);
+        .find(p =>
+            normalizeJid(p.id || p.jid) === currentPlayer
+        );
 
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
     }
 
-    const next = getNextPlayer(match);
+    // 🔥 TEAM ADVERSE ATTENDUE
+    const next =
+        match.teamTurn === 1
+            ? match.team2Id
+            : match.team1Id;
 
     match.pendingAttack = action;
     match.hasPlayed = true;
@@ -2623,16 +2630,21 @@ if (!match.pendingAttack) {
         mentions: [next]
     });
 
-    match.waitingDefenseFrom = next;
-    match.turnType = "defense";
+    // 🔥 ON ATTEND LA TEAM ADVERSE
+    match.waitingDefenseFrom = normalizeJid(next);
 
-    // 🔥 SYNCHRO OBLIGATOIRE
+    // 🔥 TEAM ACTIVE
+    match.currentTeamId = normalizeJid(next);
+
+    // compatibilité avec l'ancien système
     match.joueurTour = normalizeJid(next);
 
+    match.turnType = "defense";
+
     startMatchCycle(chat, ovl, match);
+
     return true;
 }
-
 
 // ===============================
 // 🛡️ DEFENSE
@@ -2643,28 +2655,14 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
-
+    
 // ===============================
 // 🛡️⚽ MATCH UP INIT
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
-    const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
-    const currentTurn = normalizeJid(match.joueurTour);
-
-    const attacker =
-        allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) === currentTurn
-        ) || res.attacker;
-
-    const defender =
-        allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) === normalizeJid(sender)
-        ) || res.defender;
+    const attacker = res.attacker;
+    const defender = res.defender;
 
     match.phaseDuel = {
         active: true,
@@ -2675,8 +2673,11 @@ if (res && res.type === "PASSIVE_BLOCK") {
         defensePave: null
     };
 
-    // 🔥 NEXT = toujours logique globale (A ↔ B)
-    const next = getNextPlayer(match);
+    // 🔥 TEAM QUI DOIT RÉPONDRE
+    const next =
+        match.teamTurn === 1
+            ? match.team2Id
+            : match.team1Id;
 
     await ovl.sendMessage(chat, {
         text:
@@ -2693,19 +2694,28 @@ ${res.msg}
         mentions: [next]
     });
 
-    // 🔥 SYNCHRO UNIQUE (RÈGLE DORÉE)
+    // 🔥 ON ATTEND LA TEAM ADVERSE
+    match.currentTeamId = normalizeJid(next);
     match.joueurTour = normalizeJid(next);
-    match.waitingDefenseFrom = next;
+    match.waitingDefenseFrom = normalizeJid(next);
 
     return true;
 }
 
-    
-// ===============================
+  // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
 // ===============================
 const resumeDefense = genererResumeFull(defense, match);
-const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
+const noteDefense = Math.max(
+    2,
+    Math.min(5, noterPave(defense))
+);
+
+// 🔥 prochaine équipe
+const nextTeam =
+    match.teamTurn === 1
+        ? match.team2Id
+        : match.team1Id;
 
 await ovl.sendMessage(chat, {
     text:
@@ -2716,31 +2726,38 @@ await ovl.sendMessage(chat, {
 
 📊 NOTE DU PAVÉ : ${noteDefense}/10
 
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
+➡️ @${getTagFromJid(nextTeam)} NEXT
 
 ╰───────────────────
                🔷BLUELOCK⚽🥅`,
-    mentions: [match.joueurTour]
+    mentions: [nextTeam]
 });
 
 // 🔄 Reset attaque
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
+match.phaseDuelResolved = false;
 
-    // 🔄 RESET DUEL
-    match.phaseDuelResolved = false;
+// 🔁 Changement d'équipe active
+match.teamTurn =
+    match.teamTurn === 1
+        ? 2
+        : 1;
 
-// 🔁 Switch tour
-match.joueurTour =
-    match.joueurTour === match.id1 ? match.id2 : match.id1;
+match.currentTeamId =
+    match.teamTurn === 1
+        ? match.team1Id
+        : match.team2Id;
+
+// compatibilité ancien système
+match.joueurTour = match.currentTeamId;
 
 match.turnType = "attaque";
 
 startMatchCycle(chat, ovl, match);
 
-return true;        
-} 
-    
+return true;  
+  
 
 // ===============================
 // ⚽ DUELS ET MATCH UP 🆚
@@ -3228,13 +3245,24 @@ if (!result) {
     
 
 // ===============================
-// 🎯 NEXT PLAYER
+// 🎯 NEXT PLAYER (TEAM BASED)
 // ===============================
-let next = match.joueurTour;
+let nextTeam;
 
 if (result?.type === "INTERCEPTION") {
-    next = defender.id || defender.jid;
+    // équipe du défenseur récupère le ballon
+    nextTeam = match.teamTurn === 1 ? 2 : 1;
+} else {
+    // rotation normale des équipes
+    nextTeam = match.teamTurn === 1 ? 2 : 1;
 }
+
+// 🔥 sync équipe
+match.teamTurn = nextTeam;
+
+// 🔥 joueur associé à la team (starter automatique)
+match.joueurTour =
+    nextTeam === 1 ? match.id1 : match.id2;
 
 // ===============================
 // 🎨 TITRE
@@ -3288,12 +3316,26 @@ ${result.msg}
 
 function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) {
 
+    // 🔒 SAFE GUARD (évite crash silencieux)
+    if (!attacker || !defender) {
+        return {
+            ok: false,
+            type: "error",
+            msg: "❌ Duel invalide (joueurs manquants)"
+        };
+    }
+
     const atk = attacker.stats || {};
     const def = defender.stats || {};
 
     const tA = (attackText || "").toLowerCase();
     const tD = (defenseText || "").toLowerCase();
 
+    // 🔥 IMPORTANT : sync ballholder si absent
+    if (!match.ballHolder && attacker?.nom) {
+        match.ballHolder = attacker.nom;
+    }
+    
     // ===============================
     // 🧭 BODY ORIENTATION UPDATE
     // ===============================
