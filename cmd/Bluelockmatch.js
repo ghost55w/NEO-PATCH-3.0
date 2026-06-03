@@ -1759,6 +1759,36 @@ function getTeamFromSender(match, sender) {
 
     return null;
 }
+
+function getCurrentPlayerJid(match) {
+
+    return match.currentTurn === "team1"
+        ? match.team1Jid
+        : match.team2Jid;
+}
+
+function getNextPlayerJid(match) {
+
+    return match.currentTurn === "team1"
+        ? match.team2Jid
+        : match.team1Jid;
+}
+
+function switchTurn(match) {
+
+    if (match.currentTurn === "team1") {
+
+        match.currentTurn = "team2";
+        match.waitingPlayer =
+            match.team2Jid;
+
+    } else {
+
+        match.currentTurn = "team1";
+        match.waitingPlayer =
+            match.team1Jid;
+    }
+}
                                            
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -1836,27 +1866,58 @@ async function verifierFiche(message, chat, ovl) {
         return;
     }
 
-    match.team1Nom = match.team1;
-    match.team2Nom = match.team2;
-    match.etat = "attente_lineup";
+    // ===============================
+// 🎮 IDENTITÉ MATCH
+// ===============================
+match.team1Nom = match.team1;
+match.team2Nom = match.team2;
 
-    match.equipe1 = null;
-    match.equipe2 = null;
+match.team1Jid = normalizeJid(j1);
+match.team2Jid = normalizeJid(j2);
 
-    match.possessionIndex = {
-        [match.team1Nom]: 0,
-        [match.team2Nom]: 0
-    };
+// 🔥 tour réel basé sur les users
+match.currentTurn = "team1";
 
-    match.actionsRestantes = {
-        [match.team1Nom]: 4,
-        [match.team2Nom]: 4
-    };
+match.waitingPlayer =
+    match.team1Jid;
 
-    match.role = {
-        [match.team1Nom]: "attack",
-        [match.team2Nom]: "defense"
-    };
+match.etat = "attente_lineup";
+
+// ===============================
+// 📋 LINEUPS
+// ===============================
+match.equipe1 = null;
+match.equipe2 = null;
+
+// ===============================
+// ⚽ POSSESSION
+// ===============================
+match.possessionIndex = {
+    [match.team1Nom]: 0,
+    [match.team2Nom]: 0
+};
+
+// ===============================
+// 🎯 ACTIONS
+// ===============================
+match.actionsRestantes = {
+    [match.team1Nom]: 4,
+    [match.team2Nom]: 4
+};
+
+// ===============================
+// 🥊 DUEL
+// ===============================
+match.phaseDuel = null;
+match.pendingAttack = null;
+
+// ===============================
+// 🎭 ROLES
+// ===============================
+match.role = {
+    [match.team1Nom]: "attack",
+    [match.team2Nom]: "defense"
+};
 
     const imagesMatchConfirm = [
         "https://files.catbox.moe/7m2axj.jpg",
@@ -2031,25 +2092,45 @@ if (match.etat === "attente_lineup") {
 
     if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid; // ✅ 
-        match.lineup1 = joueursValides;
-        match.equipe1 = true;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team1Nom}*`
+    if (
+        normalizeJid(senderJid) !==
+        match.team1Jid
+    ) {
+        return ovl.sendMessage(chat, {
+            text:
+`❌ Seul ${match.team1Nom}
+peut envoyer cette composition.`
         });
+    }
+
+    match.lineup1 = joueursValides;
+    match.equipe1 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team1Nom}*`
+    });
 
     } else if (squadName === team2 && !match.equipe2) {
 
-        match.id2 = senderJid; // ✅ 
-        match.lineup2 = joueursValides;
-        match.equipe2 = true;
-
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team2Nom}*`
+    if (
+        normalizeJid(senderJid) !==
+        match.team2Jid
+    ) {
+        return ovl.sendMessage(chat, {
+            text:
+`❌ Seul ${match.team2Nom}
+peut envoyer cette composition.`
         });
+    }
 
-    } else {
+    match.lineup2 = joueursValides;
+    match.equipe2 = true;
+
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team2Nom}*`
+    });
+
+} else {
         return ovl.sendMessage(chat, {
             text: "❌ Équipe non reconnue ou déjà envoyée"
         });
