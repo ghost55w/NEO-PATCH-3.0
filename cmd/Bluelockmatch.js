@@ -431,7 +431,7 @@ Le match commence dans *1 minute* 🥅⚽...
 }
 
 // ===============================
-// 🚀 KICKOFF
+// 🚀 Kickoff ⚽🥅 
 // ===============================
 async function launchKickoff(match, ovl) {
 
@@ -439,28 +439,39 @@ async function launchKickoff(match, ovl) {
 
     match.engine.status = "LIVE";
 
-    const first = chance(0.5) ? "team1" : "team2";
+    const first = chance(0.5)
+        ? "team1"
+        : "team2";
+
     match.engine.possession = first;
 
-    const teamPlayers = match.lineup[first].players;
+    const teamPlayers =
+        match.lineup[first].players;
 
-    const starter = getKickoffPlayer(teamPlayers);
+    const starter =
+        getKickoffPlayer(teamPlayers);
 
-    const team = first === "team1"
-        ? match.players.team1
-        : match.players.team2;
+    const team =
+        first === "team1"
+            ? match.players.team1
+            : match.players.team2;
+
+    const imagesKickOff = [
+        "https://files.catbox.moe/onotk4.jpg",
+        "https://files.catbox.moe/kfw0bl.jpg"
+    ];
 
     await ovl.sendMessage(chat, {
-        image: { url: rand([
-            "https://i.imgur.com/kick1.jpg",
-            "https://i.imgur.com/kick2.jpg",
-            "https://i.imgur.com/kick3.jpg"
-        ]) },
+        image: {
+            url: rand(imagesKickOff)
+        },
         mentions: [team.jid],
         caption: `
-🎙️⚽ *KICK OFF 🥅‼️* @${team.name} débute avec la possession !
+🎙️⚽ *KICK OFF 🥅‼️*
 
-🔥 ${starter.name} (OVR ${starter.ovr}) lance le jeu ⚽...
+@${team.name} débute avec la possession !
+
+🔥 (C2) ${starter.name} lance le jeu ⚽...
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅
