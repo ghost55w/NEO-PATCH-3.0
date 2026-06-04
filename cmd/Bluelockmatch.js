@@ -508,17 +508,6 @@ ${match.players.team1.name} vs ${match.players.team2.name}
     arbiter.delete(chat);
 }
 
-// ===============================
-// 🔌 ROUTER
-// ===============================
-async function handleBlueLock(ms, ovl) {
-
-    if (await handleMatchSetup(ms, ovl)) return true;
-    if (await handleLineup(ms, ovl)) return true;
-
-    return false;
-}
-
 /* ===============================
 ⛔ COMMANDE +STOPMATCH⚽
 ================================= */
@@ -628,5 +617,42 @@ ovlcmd({
         });
     }
 });
+
+// ===============================
+// 📄 COMPATIBILITÉ ANCIEN SYSTÈME
+// ===============================
+async function verifierFiche(texte, ms_org, ovl) {
+
+    const fakeMs = {
+        key: {
+            remoteJid: ms_org
+        },
+        message: {
+            conversation: texte
+        }
+    };
+
+    return await handleMatchSetup(fakeMs, ovl);
+}
+
+async function messageMatch(ms, ovl) {
+
+    if (await handleLineup(ms, ovl)) return true;
+
+    // plus tard :
+    // handleKickoff()
+    // handleActions()
+    // handlePave()
+    // handleDuel()
+
+    return false;
+}
+
+module.exports = {
+    verifierFiche,
+    messageMatch,
+    matchsActifs,
+    arbiter
+}; 
 
 module.exports = { handleBlueLock };
