@@ -560,15 +560,23 @@ function validatePave(text, joueur, match) {
 // ⏱️ STOP TIMER TOUR
 // ===============================
 function stopTurnTimer(match) {
+    if (!match) return;
+
+    // 🧹 stop timer principal
     if (match.turnTimer) {
         clearTimeout(match.turnTimer);
         match.turnTimer = null;
     }
 
+    // ⚠️ stop warning timer
     if (match.warningTimer) {
         clearTimeout(match.warningTimer);
         match.warningTimer = null;
     }
+
+    // 🔒 sécurité anti cycle fantôme
+    match.currentTurnId = null;
+}
 } 
 /* ===============================
 ⌚ TIMER GLOBAL 
