@@ -230,6 +230,25 @@ function getKickoffPlayer(players) {
 
 
 // ===============================
+// TIMER DE MATCH⚽🥅 
+// ===============================
+function startTurnTimer(match, playerId) {
+
+    if (match.turnTimeout) {
+        clearTimeout(match.turnTimeout);
+    }
+
+    match.waitingPlayer = playerId;
+
+    match.turnTimeout = setTimeout(async () => {
+
+        await handleLatencyOut(match);
+
+    }, 6 * 60 * 1000);
+}
+
+
+// ===============================
 // ⚽ MATCH COMMAND
 // ===============================
 ovlcmd({
@@ -419,15 +438,29 @@ async function startCountdown(match, ovl) {
 
     const chat = match.chat;
 
+    const imagesReady = [
+        "https://files.catbox.moe/dlj5z6.jpg",
+        "https://files.catbox.moe/fdadd0.jpeg",
+        "https://files.catbox.moe/4104s3.jpg"
+    ];
+
+    const imageRandom =
+        imagesReady[
+            Math.floor(Math.random() * imagesReady.length)
+        ];
+
     await ovl.sendMessage(chat, {
-        image: { url: "https://i.imgur.com/img1.jpg" },
-        caption: `
-⏳ Les deux formations sont prêtes.
-Le match commence dans *1 minute* 🥅⚽...
-`
+        image: { url: imageRandom },
+        caption:
+`⏳ Les deux formations sont prêtes.
+
+Le match commence dans *1 minute* 🥅⚽...`
     });
 
-    setTimeout(() => launchKickoff(match, ovl), 60000);
+    match.timerKickoff = setTimeout(
+        () => launchKickoff(match, ovl),
+        60000
+    );
 }
 
 // ===============================
