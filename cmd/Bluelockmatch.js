@@ -181,15 +181,10 @@ function parseLineupWithCards(text) {
         if (!card) continue;
 
         players.push({
-            ...card,
-
-            lineupPosition: position,
-
-            zone:
-                POSITION_POSTES[position]
-                    ? POSITION_POSTES[position]
-                    : null
-        });
+    ...card,
+    lineupPosition: position,
+    zone: null
+});
     }
 
     return players;
@@ -216,14 +211,33 @@ function buildTeam(lineupText, owner) {
 // ===============================
 function getKickoffPlayer(players) {
 
-    let mc = players.find(p => p.position === "MC");
+    let mc = players.find(
+        p => p.lineupPosition === "MC"
+    );
+
     if (mc) return mc;
 
-    const mids = players.filter(p => ["MG", "MC", "MD"].includes(p.position));
-    if (mids.length) return mids.sort((a, b) => b.ovr - a.ovr)[0];
+    const mids = players.filter(
+        p => ["MG", "MC", "MD"]
+            .includes(p.lineupPosition)
+    );
 
-    const atk = players.filter(p => ["AG", "AC", "AD"].includes(p.position));
-    if (atk.length) return atk.sort((a, b) => b.ovr - a.ovr)[0];
+    if (mids.length) {
+        return mids.sort(
+            (a, b) => b.ovr - a.ovr
+        )[0];
+    }
+
+    const atk = players.filter(
+        p => ["AG", "AC", "AD"]
+            .includes(p.lineupPosition)
+    );
+
+    if (atk.length) {
+        return atk.sort(
+            (a, b) => b.ovr - a.ovr
+        )[0];
+    }
 
     return players[0];
 }
@@ -245,6 +259,48 @@ function startTurnTimer(match, playerId) {
         await handleLatencyOut(match);
 
     }, 6 * 60 * 1000);
+}
+
+// ===============================
+// MOTEUR PROVISOIRE⚽ 
+// ===============================
+function startMatchEngine(match, ovl) {
+
+    const chat = match.chat;
+
+    const loop = async () => {
+
+        if (match.engine.turn >= 20) {
+            return endMatch(match, ovl);
+        }
+
+        match.engine.turn++;
+
+        await ovl.sendMessage(chat, {
+            text: `
+⚽ TOUR ${match.engine.turn}/20
+
+🔥 Possession:
+${match.engine.possession === "team1"
+? match.players.team1.name
+: match.players.team2.name}
+`
+        });
+
+        match.engine.possessionTurns++;
+
+        if (match.engine.possessionTurns >= 5) {
+            match.engine.possessionTurns = 0;
+            match.engine.possession =
+                match.engine.possession === "team1"
+                ? "team2"
+                : "team1";
+        }
+
+        setTimeout(loop, 6 * 60 * 1000);
+    };
+
+    loop();
 }
 
 
@@ -510,7 +566,10 @@ async function launchKickoff(match, ovl) {
 🔷BLUELOCK⚽🥅
 `
     });
-
+startTurnTimer(
+    match,
+    starter.id || starter.name
+);
     startMatchEngine(match, ovl);
 }
 
@@ -600,16 +659,17 @@ ovlcmd({
         ================================= */
 
         const timers = [
-            "timeout",
-            "timerMatch",
-            "timerKickoff",
-            "timerTour",
-            "timerAction",
-            "timerGlobal",
-            "timerPave",
-            "turnTimer",
-            "warningTimer"
-        ];
+    "timeout",
+    "timerMatch",
+    "timerKickoff",
+    "timerTour",
+    "timerAction",
+    "timerGlobal",
+    "timerPave",
+    "turnTimer",
+    "turnTimeout",
+    "warningTimer"
+];
 
         for (const timer of timers) {
 
@@ -720,5 +780,3 @@ module.exports = {
     matchsActifs,
     arbiter
 }; 
-
-module.exports = { handleBlueLock };
