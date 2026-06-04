@@ -674,6 +674,7 @@ Il reste *1 MINUTE* pour jouer !
                 mentions: [newAttacker]
             });
 
+            stopTurnTimer(match);
             // 🔁 SWITCH
             match.attacker = newAttacker;
             match.defender = oldAttacker;
@@ -2197,6 +2198,9 @@ if (kickoffText) {
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
+    // 🔥 ASSURE QUE LE TOUR EST INITIALISÉ
+    match.joueurTour = jidStart;
+
     await ovl.sendMessage(chat, {
         image: {
             url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
@@ -2211,17 +2215,17 @@ ${kickoffText}
         mentions: [jidStart]
     });
 }
-    // =========================
-    // 🚀 START ENGINE
-    // =========================
-    match.kickoffSent = true;
 
-    if (match.turnTimer) {
-        clearTimeout(match.turnTimer);
-        match.turnTimer = null;
-    }
+// =========================
+// 🚀 START ENGINE SAFE
+// =========================
+match.kickoffSent = true;
 
-    startMatchCycle(chat, ovl, match);
+// 🔥 SAFE TIMER RESET (IMPORTANT)
+stopTurnTimer(match);
+
+// 🚀 START ENGINE PROPRE
+startMatchCycle(chat, ovl, match);
 }
 
 
@@ -2474,12 +2478,16 @@ ${duel.msg}
               🔷BLUELOCK⚽🥅`
         });
 
+        // 🔥 STOP TIMER AVANT RESET (IMPORTANT)
+stopTurnTimer(match);
+
         // RESET
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
         match.turnType = "attaque";
-
+        
+// 🚀 RELANCE ENGINE PROPRE
         startMatchCycle(chat, ovl, match);
         return true;
     }
@@ -2506,6 +2514,7 @@ if (!match.pendingAttack) {
     const next =
         match.joueurTour === match.id1 ? match.id2 : match.id1;
 
+    stopTurnTimer(match);
     match.pendingAttack = action;
     match.hasPlayed = true;
 
@@ -2542,6 +2551,7 @@ if (!match.pendingAttack) {
 // ===============================
 const defense = action;
 
+    stopTurnTimer(match);
 const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
@@ -2552,6 +2562,8 @@ match.hasPlayed = true;
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
+    stopTurnTimer(match);
+    
     const allPlayers = [
     ...(match.lineup1 || []),
     ...(match.lineup2 || [])
