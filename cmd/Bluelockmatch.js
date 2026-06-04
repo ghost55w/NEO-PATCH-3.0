@@ -2564,21 +2564,23 @@ const defender =
     ) || res.defender;
 
     match.phaseDuel = {
-        active: true,
-        step: "attack_pave",
+    active: true,
+    step: "attack_pave",
+    attacker,
+    defender,
+    attackPave: null,
+    defensePave: null,
+    starterAttack: match.pendingAttack,
+    starterDefense: defense
+};
 
-        attacker,
-        defender,
+// 🔥 LOCK DU TOUR SUR LE DEFENSEUR
+match.joueurTour = defender.id || defender.jid;
+match.turnType = "duel";
+match.waitingDefenseFrom = match.joueurTour;
 
-        attackPave: null,
-        defensePave: null,
-
-        starterAttack: match.pendingAttack,
-        starterDefense: defense
-    };
-
-    await ovl.sendMessage(chat, {
-        text:
+await ovl.sendMessage(chat, {
+    text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2589,11 +2591,11 @@ ${res.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
-    });
+    mentions: [match.joueurTour]
+});
 
-    return true;
-}
+return true;
+} 
     
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
