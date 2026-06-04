@@ -13,7 +13,7 @@ const matchsActifs = new Map();
 // ===============================
 // 📍 POSITION MAP
 // ===============================
-const POSITION_POSTES = {
+const POSITION_ATTAQUE = {
 
     AG: { zoneX: "gauche", zoneY: "B1" },
     AC: { zoneX: "axe", zoneY: "B1" },
@@ -23,10 +23,32 @@ const POSITION_POSTES = {
     MC: { zoneX: "axe", zoneY: "C1" },
     MD: { zoneX: "droite", zoneY: "C1" },
 
-    DG: { zoneX: "gauche", zoneY: "A2" },
-    DC: { zoneX: "axe", zoneY: "A2" },
-    DD: { zoneX: "droite", zoneY: "A2" }
+    DG: { zoneX: "gauche", zoneY: "C2" },
+    DC: { zoneX: "axe", zoneY: "C2" },
+    DD: { zoneX: "droite", zoneY: "C2" }
 };
+
+const POSITION_DEFENSE = {
+
+    AG: { zoneX: "gauche", zoneY: "C2" },
+    AC: { zoneX: "axe", zoneY: "C2" },
+    AD: { zoneX: "droite", zoneY: "C2" },
+
+    MG: { zoneX: "gauche", zoneY: "C1" },
+    MC: { zoneX: "axe", zoneY: "C1" },
+    MD: { zoneX: "droite", zoneY: "C1" },
+
+    DG: { zoneX: "gauche", zoneY: "A1" },
+    DC: { zoneX: "axe", zoneY: "A1" },
+    DD: { zoneX: "droite", zoneY: "A1" }
+};
+
+function getPlayerZone(position, isAttacking) {
+
+    return isAttacking
+        ? POSITION_ATTAQUE[position]
+        : POSITION_DEFENSE[position];
+}
 
 // ===============================
 // 🧠 ARBITRE
