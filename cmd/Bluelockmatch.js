@@ -118,28 +118,55 @@ function parseLineupWithCards(text) {
     const players = [];
     const lines = text.split("\n");
 
-    for (const l of lines) {
+    for (const line of lines) {
 
-        const m = l.match(/\d+\s+👤\((.+?)\)\s+(.+?)(?:\s+\((\d+)\))?/);
+        const clean = line.trim();
 
-        if (!m) continue;
+        // Titulaires
+        let match = clean.match(
+            /^\d+\s+👤\(([^)]+)\)\s+(.+?)\s+\(\d+\)/
+        );
 
-        const position = m[1].trim();
-        const name = m[2].trim();
+        let position = null;
+        let name = null;
+
+        if (match) {
+
+            position = match[1].trim();
+
+            name = match[2]
+                .replace(/[^\p{L}\p{N}\s\-']/gu, "")
+                .trim();
+
+        } else {
+
+            // Banc
+            match = clean.match(
+                /^\d+\s+👤\s*(.+?)\s+\(\d+\)/
+            );
+
+            if (!match) continue;
+
+            position = "BENCH";
+
+            name = match[1]
+                .replace(/[^\p{L}\p{N}\s\-']/gu, "")
+                .trim();
+        }
 
         const card = findCardByName(name);
 
         if (!card) continue;
 
         players.push({
-            name: card.name,
-            position,
-            ovr: card.ovr,
-            phy: card.phy,
-            sho: card.sho,
-            pass: card.pass,
-            dri: card.dri,
-            zone: POSITION_POSTES[position] || null
+            ...card,
+
+            lineupPosition: position,
+
+            zone:
+                POSITION_POSTES[position]
+                    ? POSITION_POSTES[position]
+                    : null
         });
     }
 
@@ -179,12 +206,14 @@ function getKickoffPlayer(players) {
     return players[0];
 }
 
+
 // ===============================
 // ⚽ MATCH COMMAND
 // ===============================
 ovlcmd({
     pattern: "match⚽",
-    category: "game"
+    category: "game",
+    react: "⚽"
 }, async (ms, ovl) => {
 
     const chat = ms.key.remoteJid;
@@ -194,16 +223,17 @@ ovlcmd({
 🔷⚽ *MATCH BLUE LOCK* 🥅
 
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🥅👤Team 1: 
-🥅👤Team 2:  
-🥅🧤Gardien: 
-⌛ Score win: 
+🥅👤Team 1:
+🥅👤Team 2:
+🥅🧤Gardien:
+⌛ Score win:
 
 ╰───────────────────
              🔷BLUELOCK⚽🥅
 `
     });
 });
+
 
 // ===============================
 // 🧠 MATCH SETUP
@@ -259,18 +289,18 @@ async function handleMatchSetup(ms, ovl) {
     // ===============================
     match.score1 = 0;
     match.score2 = 0;
+// ===============================
+// 🎲 IMAGE MATCH CONFIRMÉ
+// ===============================
+const imagesMatchConfirm = [
+    "https://files.catbox.moe/7m2axj.jpg",
+    "https://files.catbox.moe/mtou2n.jpg"
+];
 
-    // ===============================
-    // 🎲 IMAGE ALÉATOIRE
-    // ===============================
-    const imagesReady = [
-        "https://files.catbox.moe/dlj5z6.jpg",
-        "https://files.catbox.moe/fdadd0.jpeg",
-        "https://files.catbox.moe/4104s3.jpg"
+const imageRandom =
+    imagesMatchConfirm[
+        Math.floor(Math.random() * imagesMatchConfirm.length)
     ];
-
-    const imageRandom =
-        imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
     // ===============================
     // 📢 MATCH VALIDÉ
