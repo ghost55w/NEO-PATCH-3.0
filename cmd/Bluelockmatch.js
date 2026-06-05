@@ -2498,7 +2498,6 @@ stopTurnTimer(match);
 // ===============================
 if (!match.pendingAttack) {
 
-    // ✅ AJOUT SAFE (NE CASSE RIEN)
     const currentPlayer = match.joueurTour;
 
     const attackerPlayer =
@@ -2511,16 +2510,17 @@ if (!match.pendingAttack) {
         match.ballHolder = attackerPlayer.nom;
     }
 
-    const next =
-        match.joueurTour === match.id1 ? match.id2 : match.id1;
-
+    // 🔥 STOP TIMER
     stopTurnTimer(match);
+
     match.pendingAttack = action;
     match.hasPlayed = true;
 
-    // 🔥 NEW PARSER
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
+
+    const next = match.joueurTour;
+    const nextTag = getTagFromJid(next);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2531,7 +2531,7 @@ if (!match.pendingAttack) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
