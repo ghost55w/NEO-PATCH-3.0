@@ -577,7 +577,7 @@ function stopTurnTimer(match) {
     // 🔒 sécurité anti cycle fantôme
     match.currentTurnId = null;
 }
-} 
+
 /* ===============================
 ⌚ TIMER GLOBAL 
 =================================*/
