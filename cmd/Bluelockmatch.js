@@ -2364,12 +2364,11 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // 🔥 FIX 1 : NEXT sécurisé
-    const next = match.joueurTour || defender?.id || defender?.jid;
+    // ✅ Attacker a joué -> Defender répond
+    const next = defender?.id || defender?.jid;
 
     const actionText = action.toLowerCase();
 
-    // 🔥 FIX 2 : résumé FORCÉ avec contexte duel
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
@@ -2406,7 +2405,8 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     match.waitingDefenseFrom = next;
     return true;
 }
-    
+        
+
 /* ===============================
 🧠 ACTION TEXT
 =================================*/
