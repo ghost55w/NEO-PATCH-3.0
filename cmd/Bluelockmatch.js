@@ -2467,7 +2467,7 @@ if (match.phaseDuel?.active) {
         }
 
         await ovl.sendMessage(chat, {
-            text:
+    text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
@@ -2476,23 +2476,45 @@ ${duel.msg}
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-        });
+});
 
-        // 🔥 STOP TIMER AVANT RESET (IMPORTANT)
+// 🔥 STOP TIMER AVANT RESET
 stopTurnTimer(match);
 
-        // RESET
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.turnType = "attaque";
-        
-// 🚀 RELANCE ENGINE PROPRE
-        startMatchCycle(chat, ovl, match);
-        return true;
-    }
+// ===============================
+// 🎯 POSSESSION APRÈS DUEL
+// ===============================
+
+if (
+    duel.type === "INTERCEPTION" ||
+    duel.type === "stop"
+) {
+    match.attacker = defender.id || defender.jid;
+    match.defender = attacker.id || attacker.jid;
+}
+else {
+    match.attacker = attacker.id || attacker.jid;
+    match.defender = defender.id || defender.jid;
 }
 
+match.joueurTour = match.attacker;
+
+// ===============================
+// ♻️ RESET DU DUEL
+// ===============================
+
+match.phaseDuel = null;
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
+match.turnType = "attaque";
+
+// 🚀 RELANCE ENGINE
+startMatchCycle(chat, ovl, match);
+
+return true;
+    } 
+}   
+     
 // ===============================
 // 🎯 ATTAQUE
 // ===============================
@@ -2519,11 +2541,21 @@ if (!match.pendingAttack) {
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
-    const next = match.joueurTour;
-    const nextTag = getTagFromJid(next);
+// ===============================
+// 🎯 PROCHAIN JOUEUR = L'AUTRE
+// ===============================
+const current = match.joueurTour;
 
-    await ovl.sendMessage(chat, {
-        text:
+const next =
+    current === match.id1
+        ? match.id2
+        : match.id1;
+
+const nextTag = getTagFromJid(next);
+
+
+await ovl.sendMessage(chat, {
+    text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -2531,18 +2563,19 @@ if (!match.pendingAttack) {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${nextTag} NEXT
+➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [next]
-    });
+    mentions: [next]
+});
 
-    match.waitingDefenseFrom = next;
-    match.turnType = "defense";
 
-    startMatchCycle(chat, ovl, match);
-    return true;
+match.waitingDefenseFrom = next;
+match.turnType = "defense";
+
+startMatchCycle(chat, ovl, match);
+return true;    
 }
 
 
@@ -2556,66 +2589,62 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
 
-
 // ===============================
 // 🔥 MATCH UP INIT
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
     stopTurnTimer(match);
-    
+
     const allPlayers = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
 
-// attaquant = porteur actuel du ballon
-const attacker =
-    allPlayers.find(
-        p => p.nom === match.ballHolder
-    ) || res.attacker;
+    // ⚽ attaquant = porteur du ballon
+    const attacker =
+        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
 
-// défenseur = joueur dont c'est le tour (celui qui bloque)
-const defender =
-    allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) ===
-            normalizeJid(match.joueurTour)
-    ) || res.defender;
+    // 🛡️ défenseur = joueur du tour actuel
+    const defender =
+        allPlayers.find(
+            p =>
+                normalizeJid(p.id || p.jid) === normalizeJid(match.joueurTour)
+        ) || res.defender;
 
+    // ===============================
+    // ⚔️ INIT DU DUEL
+    // ===============================
     match.phaseDuel = {
-    active: true,
-    step: "attack_pave",
-    attacker,
-    defender,
-    attackPave: null,
-    defensePave: null,
-    starterAttack: match.pendingAttack,
-    starterDefense: defense
-};
+        active: true,
+        step: "attack_pave",
+        attacker,
+        defender,
+        attackPave: null,
+        defensePave: null,
+        starterAttack: match.pendingAttack,
+        starterDefense: defense
+    };
 
-// 🔥 LOCK DU TOUR SUR LE DEFENSEUR
-match.joueurTour = defender.id || defender.jid;
-match.turnType = "duel";
-match.waitingDefenseFrom = match.joueurTour;
+    // ❗ IMPORTANT : NE PAS TOUCHER match.joueurTour ICI
 
-await ovl.sendMessage(chat, {
-    text:
+    await ovl.sendMessage(chat, {
+        text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
+➡️ @${getTagFromJid(defender.id || defender.jid)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-    mentions: [match.joueurTour]
-});
+        mentions: [defender.id || defender.jid]
+    });
 
-return true;
-} 
+    return true;
+}
     
 // ===============================
 // 📉 FALLBACK : DEFENSE PASSIVE
@@ -2639,24 +2668,25 @@ await ovl.sendMessage(chat, {
     mentions: [match.joueurTour]
 });
 
-// 🔄 Reset attaque
+// ===============================
+// 🔄 RESET SIMPLE
+// ===============================
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
+match.phaseDuelResolved = false;
 
-    // 🔄 RESET DUEL
-    match.phaseDuelResolved = false;
-
-// 🔁 Switch tour
-match.joueurTour =
-    match.joueurTour === match.id1 ? match.id2 : match.id1;
+// ❗ IMPORTANT : switch uniquement si PAS de duel actif
+if (!match.phaseDuel?.active) {
+    match.joueurTour =
+        match.joueurTour === match.id1 ? match.id2 : match.id1;
+}
 
 match.turnType = "attaque";
 
 startMatchCycle(chat, ovl, match);
 
-return true;        
+return true;
 } 
-    
 
 // ===============================
 // ⚽ DUELS ET MATCH UP 🆚
