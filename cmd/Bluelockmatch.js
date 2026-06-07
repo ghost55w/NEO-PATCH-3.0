@@ -2192,7 +2192,7 @@ stopTurnTimer(match);
 
 // ❌ AUCUN START ENGINE
 return;
-
+}
 
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
