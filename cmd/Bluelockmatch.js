@@ -102,7 +102,12 @@ function parseLineupFull(text) {
 
     if (!joueurs.length) return null;
 
-    const teamName = text.match(/SQUAD⚽🥅[^:]*:\s*(.+)/i)?.[1]?.trim();
+    // ✅ FIX IMPORTANT : parsing teamName robuste (emoji safe + flexible)
+    const teamName = text
+        .match(/SQUAD[^:]*:\s*(.+)/i)?.[1]
+        ?.replace(/[*_]/g, "")
+        ?.replace(/╰.*|▔.*/g, "")
+        ?.trim();
 
     return { teamName, joueurs };
 }
