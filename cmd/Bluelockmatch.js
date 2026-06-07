@@ -2206,7 +2206,7 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    / 🚫 FIND PLAYER CARD
+    🚫 FIND PLAYER CARD
     // ===============================
     const allPlayers = (match.lineup1 || []).concat(match.lineup2 || []);
 
@@ -2329,9 +2329,7 @@ async function handlePaveGame(ms, ovl) {
 
 const actionText = action.toLowerCase();
 
-   // ===============================
-// ⚽ ATTAQUE PHASE DUEL
-// ===============================
+   
 // ===============================
 // ⚽ ATTAQUE PHASE DUEL
 // ===============================
