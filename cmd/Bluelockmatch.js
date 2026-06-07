@@ -2206,7 +2206,7 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    🚫 FIND PLAYER CARD
+    //🚫 FIND PLAYER CARD
     // ===============================
     const allPlayers = (match.lineup1 || []).concat(match.lineup2 || []);
 
