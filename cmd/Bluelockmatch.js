@@ -1754,6 +1754,34 @@ const DRIBBLE_PATTERNS = [
 
 
 // ===============================
+// JOUEUR TOUR 
+// ===============================
+function setJoueurTour(match, player) {
+    const jid = player?.id || player?.jid;
+
+    if (!jid) {
+        console.log("❌ setJoueurTour refusé: player invalide");
+        return;
+    }
+
+    match.joueurTour = normalizeJid(jid);
+}
+
+function safeGetNextPlayer(match) {
+    const current = normalizeJid(match.joueurTour);
+
+    if (current === normalizeJid(match.id1)) return match.id2;
+    if (current === normalizeJid(match.id2)) return match.id1;
+
+    console.log("⚠️ joueurTour cassé, reset auto");
+
+    // fallback safe
+    return match.id1;
+}
+
+
+
+// ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
 ovlcmd({
@@ -2364,9 +2392,6 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // ✅ Attacker a joué -> Defender répond
-    const next = defender?.id || defender?.jid;
-
     const actionText = action.toLowerCase();
 
     let resume = "";
@@ -2386,6 +2411,10 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     const note = noterPave(action);
 
+    // 🔥 FIX IMPORTANT : fallback sécurisé
+    const next = normalizeJid(defender?.id || defender?.jid);
+const nextTag = getTagFromJid(next);
+
     await ovl.sendMessage(chat, {
         text:
 `*🛡️⚡⚽ ATTAQUE !*
@@ -2395,7 +2424,7 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
@@ -2406,7 +2435,6 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     return true;
 }
         
-
 /* ===============================
 🧠 ACTION TEXT
 =================================*/
