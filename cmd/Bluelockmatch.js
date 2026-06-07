@@ -1857,16 +1857,14 @@ if (match.etat === "attente_lineup") {
         return ovl.sendMessage(chat, { text: "❌ Nom d'équipe introuvable" });
     }
 
+    // 🔥 OLD STYLE NORMALIZE (comme avant, simple)
     const normalizeTeam = str =>
-        str.replace(/\p{Emoji}/gu, "").toLowerCase().trim();
+        (str || "").toLowerCase().trim();
 
     const squadName = normalizeTeam(squadNameRaw);
     const team1 = normalizeTeam(match.team1Nom);
     const team2 = normalizeTeam(match.team2Nom);
 
-    // ===============================
-    // 👤 SENDER
-    // ===============================
     const senderJid = ms.key.participant || ms.key.remoteJid;
 
     const joueursValides = [];
@@ -1924,47 +1922,34 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    // ===============================
-    // 🔥 TEAM 1
-    // ===============================
+    // 🔥 OLD STYLE CONDITIONS RESTORED
     if (squadName === team1 && !match.equipe1) {
 
         match.id1 = senderJid;
         match.lineup1 = joueursValides;
         match.equipe1 = true;
 
-        match.team1Jid = senderJid;
-
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team1Nom}*`
         });
-    }
 
-    // ===============================
-    // 🔥 TEAM 2
-    // ===============================
-    else if (squadName === team2 && !match.equipe2) {
+    } else if (squadName === team2 && !match.equipe2) {
 
         match.id2 = senderJid;
         match.lineup2 = joueursValides;
         match.equipe2 = true;
 
-        match.team2Jid = senderJid;
-
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team2Nom}*`
         });
-    }
 
-    else {
+    } else {
         return ovl.sendMessage(chat, {
             text: "❌ Équipe non reconnue ou déjà envoyée"
         });
     }
 
-    // ===============================
-    // 🚀 START MATCH
-    // ===============================
+    // 🔥 OLD STYLE START MATCH
     if (match.equipe1 && match.equipe2 && !match.starting) {
 
         match.starting = true;
@@ -1983,15 +1968,6 @@ if (match.etat === "attente_lineup") {
         const imageRandom =
             imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-        // ===============================
-        // 🔥 INIT SAFE FLOW (IMPORTANT)
-        // ===============================
-        match.attackerTeam = "team1";
-        match.defenderTeam = "team2";
-        match.teamTurn = "team1"; // kickoff par défaut (ou random si tu veux)
-
-        match.joueurTour = match.id1; // team 1 commence
-
         await ovl.sendMessage(chat, {
             image: { url: imageRandom },
             caption: `⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽...`
@@ -2001,7 +1977,7 @@ if (match.etat === "attente_lineup") {
     }
 
     return;
-} 
+}
 }
 
            
