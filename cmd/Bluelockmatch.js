@@ -2594,7 +2594,6 @@ match.hasPlayed = true;
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
-    // ⛔ STOP TIMER GLOBAL
     stopTurnTimer(match);
 
     const allPlayers = [
@@ -2614,7 +2613,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ) || res.defender;
 
     // ===============================
-    // ⚔️ DUEL STATE (AUCUN IMPACT SUR LE FLOW)
+    // ⚔️ STATE DU DUEL (SANS IMPACT FLOW)
     // ===============================
     match.phaseDuel = {
         active: true,
@@ -2627,11 +2626,13 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: defense
     };
 
-    // ❗ IMPORTANT :
-    // NE JAMAIS MODIFIER match.joueurTour ICI
-    // NE PAS TOUCHER AU FLOW GLOBAL
+    // ❗ IMPORTANT : NE PAS TOUCHER match.joueurTour ICI
 
-    const defenderId = defender.id || defender.jid;
+    // ===============================
+    // 🔥 NEXT FIABLE (SOURCE UNIQUE)
+    // ===============================
+    const nextId = match.joueurTour; // 🔒 source unique de vérité
+    const nextTag = getTagFromJid(nextId);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2641,11 +2642,11 @@ ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
-➡️ @${getTagFromJid(defenderId)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [defenderId]
+        mentions: [nextId]
     });
 
     return true;
