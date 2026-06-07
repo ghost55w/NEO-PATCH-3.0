@@ -556,225 +556,6 @@ function validatePave(text, joueur, match) {
 }
 
 
-// ===============================
-// ⏱️ STOP TIMER TOUR
-// ===============================
-function stopTurnTimer(match) {
-    if (!match) return;
-
-    // 🧹 stop timer principal
-    if (match.turnTimer) {
-        clearTimeout(match.turnTimer);
-        match.turnTimer = null;
-    }
-
-    // ⚠️ stop warning timer
-    if (match.warningTimer) {
-        clearTimeout(match.warningTimer);
-        match.warningTimer = null;
-    }
-
-    // 🔒 sécurité anti cycle fantôme
-    match.currentTurnId = null;
-}
-
-/* ===============================
-⌚ TIMER GLOBAL 
-=================================*/
-function startMatchCycle(chat, ovl, match) {
-
-    if (!match || match.etat !== "en_cours") return;
-
-    // 🧹 clean anciens timers
-    clearTimeout(match.turnTimer);
-    clearTimeout(match.warningTimer);
-
-    match.turnTimer = null;
-    match.warningTimer = null;
-
-    if (!match.tour) match.tour = 1;
-    if (!match.toursRestants) match.toursRestants = 5;
-
-    // 🔒 lock tour ID
-    const currentTurnId = Date.now();
-    match.currentTurnId = currentTurnId;
-
-    // 🔥 SAFE CHECK
-    if (!match.attacker || !match.defender) {
-        console.log("❌ Match cassé: attacker/defender null");
-        return;
-    }
-
-    const attacker = match.attacker;
-
-    const attackerName =
-        match.names?.[attacker] ||
-        attacker.split("@")[0];
-
-    // ===============================
-    // ⚠️ WARNING (1 MIN RESTANTE)
-    // ===============================
-    match.warningTimer = setTimeout(async () => {
-
-        if (match.currentTurnId !== currentTurnId) return;
-        if (match.hasPlayed) return;
-
-        await ovl.sendMessage(chat, {
-            text:
-`⚠️ ATTENTION @${attackerName} ❗⏳
-
-Il reste *1 MINUTE* pour jouer !
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [attacker]
-        });
-
-    }, 5 * 60 * 1000);
-
-    // ===============================
-    // ⏱️ FIN DE TOUR (6 MIN)
-    // ===============================
-    match.turnTimer = setTimeout(async () => {
-
-        console.log("⏱️ FIN TOUR déclenché");
-
-        if (match.currentTurnId !== currentTurnId) {
-            console.log("⚠️ Timer ignoré (ancien cycle)");
-            return;
-        }
-
-        match.turnTimer = null;
-
-        if (match.warningTimer) {
-            clearTimeout(match.warningTimer);
-            match.warningTimer = null;
-        }
-
-        // ===============================
-        // ✅ SI LE JOUEUR A JOUÉ
-        // ===============================
-        if (match.hasPlayed) {
-
-            const oldAttacker = match.attacker;
-            const newAttacker = match.defender;
-
-            const newName =
-                match.names?.[newAttacker] ||
-                newAttacker.split("@")[0];
-
-            await ovl.sendMessage(chat, {
-                text:
-`⚡ ACTION VALIDÉE ✅
-
-🔁 @${newName} NEXT !
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-                mentions: [newAttacker]
-            });
-
-            stopTurnTimer(match);
-            // 🔁 SWITCH
-            match.attacker = newAttacker;
-            match.defender = oldAttacker;
-
-            // 🔥 FIX CRITIQUE
-            match.joueurTour = newAttacker;
-
-            // 📊 POSSESSION
-            match.possessions[newAttacker] =
-                (match.possessions[newAttacker] || 0) + 1;
-
-            // ⏳ TOURS
-            match.toursRestants -= 1;
-
-            if (match.toursRestants <= 0) {
-                match.toursRestants = 5;
-                match.tour++;
-            }
-
-            // 🔄 RESET
-            match.hasPlayed = false;
-            match.pendingAttack = null;
-            match.waitingDefenseFrom = null;
-
-            // 🚀 RELANCE
-            startMatchCycle(chat, ovl, match);
-            return;
-        }
-
-        // ===============================
-        // ❌ LATENCE OUT
-        // ===============================
-        const oldAttacker = match.attacker;
-        const newAttacker = match.defender;
-
-        const oldName =
-            match.names?.[oldAttacker] ||
-            oldAttacker.split("@")[0];
-
-        const newName =
-            match.names?.[newAttacker] ||
-            newAttacker.split("@")[0];
-
-        await ovl.sendMessage(chat, {
-            text:
-`⛔ LATENCE OUT ❌‼️
-
-⚽ @${oldName} n’a pas joué à temps !
-🔁 @${newName} récupère la possession ⚡
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [oldAttacker, newAttacker]
-        });
-
-        // 🔁 SWITCH
-        match.attacker = newAttacker;
-        match.defender = oldAttacker;
-
-        // 🔥 FIX CRITIQUE
-        match.joueurTour = newAttacker;
-
-        match.possessions[newAttacker] =
-            (match.possessions[newAttacker] || 0) + 1;
-
-        // ⏳ TOURS
-        match.toursRestants -= 1;
-
-        if (match.toursRestants <= 0) {
-            match.toursRestants = 5;
-            match.tour++;
-        }
-        
-        // 🔄 RESET COMPLET TOUR
-match.hasPlayed = false;
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
-match.phaseDuel = null;
-
-        const nextName =
-            match.names?.[newAttacker] ||
-            newAttacker.split("@")[0];
-
-        await ovl.sendMessage(chat, {
-            text:
-`🎙️⚽: NOUVEAU TOUR ⚡
-
-@${nextName} à toi de jouer !
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [newAttacker]
-        });
-
-        // 🚀 RELANCE
-        startMatchCycle(chat, ovl, match);
-
-    }, 6 * 60 * 1000);
-}
-    
 //KICK OFF
 function tirageKickOff() {
     return Math.random() < 0.5 ? "A" : "B";
@@ -1779,7 +1560,66 @@ function safeGetNextPlayer(match) {
     return match.id1;
 }
 
+function normalizeJidSafe(jid) {
+    if (!jid) return null;
+    return jid.includes("@") ? jid : null;
+}
 
+function setJoueurTour(match, player) {
+    const jid = player?.id || player?.jid || player;
+
+    const safe = normalizeJidSafe(jid);
+
+    if (!safe) {
+        console.log("❌ LOCK V2: tentative joueurTour invalide rejetée", player);
+        return false;
+    }
+
+    match.joueurTour = safe;
+    match._lastJoueurTourUpdate = Date.now();
+    return true;
+                     }
+
+
+function getNextPlayer(match) {
+    const id1 = normalizeJidSafe(match.id1);
+    const id2 = normalizeJidSafe(match.id2);
+    const current = normalizeJidSafe(match.joueurTour);
+
+    if (!id1 || !id2) return null;
+
+    if (current === id1) return id2;
+    if (current === id2) return id1;
+
+    console.log("⚠️ LOCK V2: joueurTour cassé → reset id1");
+    return id1;
+}
+
+// ===============================
+// 🧠 UTILS ENGINE (LOCK SYSTEM V2)
+// ===============================
+
+function normalizeJidSafe(jid) {
+    if (!jid) return null;
+    return jid.includes("@") ? jid : null;
+}
+
+function getTagSafe(jid) {
+    const safe = normalizeJidSafe(jid);
+    if (!safe) return "⚠️";
+
+    return getTagFromJid(safe);
+}
+
+function setJoueurTour(match, player) {
+    const jid = player?.id || player?.jid || player;
+    const safe = normalizeJidSafe(jid);
+
+    if (!safe) return false;
+
+    match.joueurTour = safe;
+    return true;
+}
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -1834,13 +1674,31 @@ async function verifierFiche(message, chat, ovl) {
 
     if (!team1 || !team2) return;
 
-    match.team1 = team1[1].trim();
-    match.team2 = team2[1].trim();
+    // ===============================
+    // 🧠 RAW NAMES
+    // ===============================
+    match.team1Name = team1[1].trim();
+    match.team2Name = team2[1].trim();
     match.gardien = gardien ? gardien[1].trim() : "Non défini";
     match.scoreWin = score ? score[1].trim() : "2";
+// ===============================
+// 🧤 GAME SETTINGS (IMPORTANT)
+// ===============================
 
-    const j1 = await trouverUser(match.team1);
-    const j2 = await trouverUser(match.team2);
+match.gardienLevel = gardien
+    ? Math.max(70, parseInt(gardien[1].trim()) || 70)
+    : 70;
+
+match.winScore = score
+    ? parseInt(score[1].match(/\d+/)?.[0]) || 2
+    : 2;
+    
+
+    // ===============================
+    // 👤 RESOLVE USERS (JID)
+    // ===============================
+    const j1 = await trouverUser(match.team1Name);
+    const j2 = await trouverUser(match.team2Name);
 
     if (!j1 || !j2) {
         const err = formatErreurGlobal("❌ Joueur introuvable");
@@ -1857,28 +1715,41 @@ async function verifierFiche(message, chat, ovl) {
         return;
     }
 
-    match.team1Nom = match.team1;
-    match.team2Nom = match.team2;
+    // ===============================
+    // 🔷 TEAMS (SOURCE OF TRUTH)
+    // ===============================
+    match.id1 = j1;
+    match.id2 = j2;
+
+    match.team1 = j1;
+    match.team2 = j2;
+
     match.etat = "attente_lineup";
 
     match.equipe1 = null;
     match.equipe2 = null;
 
+    // ===============================
+    // 📊 STATS INIT
+    // ===============================
     match.possessionIndex = {
-        [match.team1Nom]: 0,
-        [match.team2Nom]: 0
+        [j1]: 0,
+        [j2]: 0
     };
 
     match.actionsRestantes = {
-        [match.team1Nom]: 4,
-        [match.team2Nom]: 4
+        [j1]: 4,
+        [j2]: 4
     };
 
     match.role = {
-        [match.team1Nom]: "attack",
-        [match.team2Nom]: "defense"
+        [j1]: "attack",
+        [j2]: "defense"
     };
 
+    // ===============================
+    // 🎨 CONFIRMATION
+    // ===============================
     const imagesMatchConfirm = [
         "https://files.catbox.moe/7m2axj.jpg",
         "https://files.catbox.moe/mtou2n.jpg"
@@ -1892,8 +1763,8 @@ async function verifierFiche(message, chat, ovl) {
         caption: `🔷⚽ MATCH BLUE LOCK 🥅
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 🎙️: ✅ Équipes confirmées !
-👤 Team 1: ${match.team1}
-👤 Team 2: ${match.team2}
+👤 Team 1: ${match.team1Name}
+👤 Team 2: ${match.team2Name}
 🧤 Gardien: ${match.gardien}
 
 ╰───────────────────
@@ -1901,11 +1772,11 @@ async function verifierFiche(message, chat, ovl) {
     });
 
     await ovl.sendMessage(chat, {
-        text: `📢 ${match.team1} et ${match.team2} ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène, ⚠️Ne tapez pas la commande ici.*`
+        text: `📢 ${match.team1Name} et ${match.team2Name} ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène, ⚠️Ne tapez pas la commande ici.*`
     });
 
     // ===============================
-    // ⏳ TIMER 2 MIN LINEUP
+    // ⏳ TIMER LINEUP
     // ===============================
     match.timerLineup = setTimeout(async () => {
 
@@ -1962,15 +1833,7 @@ async function messageMatch(ms, ovl) {
 
     console.log("📩 MESSAGE REÇU (hors pavé)");
 
-    // ===============================
-// 📋 DETECTION FICHE MATCH
-// ===============================
-if (match.etat === "attente_fiche") {
-    await verifierFiche(safeText, chat, ovl);
-    return;
-}
-
-// ===============================
+   // ===============================
 // 📋 GESTION LINEUP
 // ===============================
 if (match.etat === "attente_lineup") {
@@ -1996,7 +1859,9 @@ if (match.etat === "attente_lineup") {
     const team1 = normalizeTeam(match.team1Nom);
     const team2 = normalizeTeam(match.team2Nom);
 
-    // ✅ SENDER JID 
+    // ===============================
+    // 👤 SENDER
+    // ===============================
     const senderJid = ms.key.participant || ms.key.remoteJid;
 
     const joueursValides = [];
@@ -2004,7 +1869,9 @@ if (match.etat === "attente_lineup") {
     const playersDB = Object.values(cardsBlueLock);
 
     for (const j of parsed.joueurs) {
+
         const inputName = pureName(j.name);
+
         const data =
             playersDB.find(p => pureName(p.name) === inputName) ||
             playersDB.find(p => pureName(p.name).includes(inputName)) ||
@@ -2015,6 +1882,7 @@ if (match.etat === "attente_lineup") {
         }
 
         const nomClean = pureName(data.name);
+
         if (nomsUtilises.has(nomClean)) {
             return ovl.sendMessage(chat, { text: `❌ Joueur en double: ${data.name}` });
         }
@@ -2022,6 +1890,7 @@ if (match.etat === "attente_lineup") {
         nomsUtilises.add(nomClean);
 
         const posteData = POSITION_POSTES[j.poste];
+
         if (!posteData) {
             return ovl.sendMessage(chat, { text: `❌ Poste invalide: ${j.poste}` });
         }
@@ -2050,33 +1919,49 @@ if (match.etat === "attente_lineup") {
         });
     }
 
+    // ===============================
+    // 🔥 TEAM 1
+    // ===============================
     if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid; // ✅ 
+        match.id1 = senderJid;
         match.lineup1 = joueursValides;
         match.equipe1 = true;
+
+        match.team1Jid = senderJid;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team1Nom}*`
         });
+    }
 
-    } else if (squadName === team2 && !match.equipe2) {
+    // ===============================
+    // 🔥 TEAM 2
+    // ===============================
+    else if (squadName === team2 && !match.equipe2) {
 
-        match.id2 = senderJid; // ✅ 
+        match.id2 = senderJid;
         match.lineup2 = joueursValides;
         match.equipe2 = true;
+
+        match.team2Jid = senderJid;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team2Nom}*`
         });
+    }
 
-    } else {
+    else {
         return ovl.sendMessage(chat, {
             text: "❌ Équipe non reconnue ou déjà envoyée"
         });
     }
 
+    // ===============================
+    // 🚀 START MATCH
+    // ===============================
     if (match.equipe1 && match.equipe2 && !match.starting) {
+
         match.starting = true;
 
         if (match.timerLineup) {
@@ -2090,7 +1975,17 @@ if (match.etat === "attente_lineup") {
             "https://files.catbox.moe/4104s3.jpg"
         ];
 
-        const imageRandom = imagesReady[Math.floor(Math.random() * imagesReady.length)];
+        const imageRandom =
+            imagesReady[Math.floor(Math.random() * imagesReady.length)];
+
+        // ===============================
+        // 🔥 INIT SAFE FLOW (IMPORTANT)
+        // ===============================
+        match.attackerTeam = "team1";
+        match.defenderTeam = "team2";
+        match.teamTurn = "team1"; // kickoff par défaut (ou random si tu veux)
+
+        match.joueurTour = match.id1; // team 1 commence
 
         await ovl.sendMessage(chat, {
             image: { url: imageRandom },
@@ -2101,8 +1996,9 @@ if (match.etat === "attente_lineup") {
     }
 
     return;
-}
 } 
+}
+
            
     // ===============================
 // 🚀 LANCEMENT MATCH
@@ -2116,102 +2012,119 @@ async function lancerMatch(chat, ovl) {
     match.kickoffStarted = true;
 
     const isTeam1 = Math.random() < 0.5;
-    
-match.kickoffTeam = isTeam1 ? 1 : 2;
-    
-    match.possession = isTeam1 ? match.team1Nom : match.team2Nom;
-    match.phase = "kickoff";
-    match.etat = "en_cours";
-match.ball = {
-    holder: null,
-    position: { x: 0, y: 0 },
-    state: "libre"
-};
-    
+
+    match.kickoffTeam = isTeam1 ? 1 : 2;
+
+    // ===============================
+    // 👥 TEAMS (USER IDS)
+    // ===============================
+    match.id1 = match.id1; // Team 1 user
+    match.id2 = match.id2; // Team 2 user
+
+    // ===============================
+    // ⚽ POSSESSION INIT
+    // ===============================
     match.joueurTour = isTeam1 ? match.id1 : match.id2;
+
+    const currentTeam = match.joueurTour;
+    const opponentTeam =
+        currentTeam === match.id1 ? match.id2 : match.id1;
+
+    // ===============================
+    // 🧠 POSSESSION LOGIC CLEAN
+    // ===============================
+    match.possession = currentTeam;
+
+    // IMPORTANT : ATTACK = celui qui joue
+    match.attacker = currentTeam;
+    match.defender = opponentTeam;
+
+    // ===============================
+    // 🔄 RESET MATCH STATE
+    // ===============================
+    match.etat = "en_cours";
+    match.phase = "kickoff";
 
     match.turnType = "attaque";
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
     match.phaseDuel = null;
 
-    // CLEAN timers
- ["timerGlobal","warningTimer","kickoffTimer"].forEach(t => {
+    match.ball = {
+        holder: null,
+        position: { x: 0, y: 0 },
+        state: "libre"
+    };
+
+    // ===============================
+    // 📊 INIT STATS
+    // ===============================
+    match.possessions = {
+        [match.id1]: 0,
+        [match.id2]: 0
+    };
+
+    match.tour = 1;
+    match.toursRestants = 5;
+
+    // ===============================
+    // 🧹 CLEAN TIMERS (UNIQUEMENT LOCAL)
+    // ===============================
+    ["warningTimer", "kickoffTimer"].forEach(t => {
         if (match[t]) {
             clearTimeout(match[t]);
             match[t] = null;
         }
     });
 
-    match.waitingKickoff = false;
+    // ===============================
+    // 🧠 SAFE TERRAIN INIT
+    // ===============================
+    try {
 
-    // =========================
-    // 🔥 INIT SAFE
-    // =========================
-    const jidStart = match.joueurTour;
-    const jidOpposite = jidStart === match.id1 ? match.id2 : match.id1;
+        const equipeAttack =
+            currentTeam === match.id1
+                ? match.lineup1
+                : match.lineup2;
 
-    match.tour = 1;
-    match.toursRestants = 5;
+        const equipeDefense =
+            currentTeam === match.id1
+                ? match.lineup2
+                : match.lineup1;
 
-    match.attacker = jidStart;
-    match.defender = jidOpposite;
+        if (equipeAttack && equipeDefense) {
 
-    // ✅ INIT POSSESSIONS
-match.possessions = {
-    [match.id1]: 0,
-    [match.id2]: 0
-};
+            if (typeof getZoneYParLigne === "function") {
+                equipeAttack.forEach(j => {
+                    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+                });
 
-// =========================
-// ⚠️ SAFE TERRAIN INIT (ANTI CRASH)
-// =========================
-try {
+                equipeDefense.forEach(j => {
+                    j.zoneY = getZoneYParLigne(j.ligne, "defense");
+                });
+            }
 
-    const equipeAttack =
-        match.possession === match.team1Nom
-            ? match.lineup1
-            : match.lineup2;
+            if (typeof initPlayerPosition === "function") {
+                match.lineup1?.forEach(j => initPlayerPosition(j));
+                match.lineup2?.forEach(j => initPlayerPosition(j));
+            }
 
-    const equipeDefense =
-        match.possession === match.team1Nom
-            ? match.lineup2
-            : match.lineup1;
+            if (typeof assignerVisAVis === "function") {
+                match.positions = [
+                    ...(match.lineup1 || []),
+                    ...(match.lineup2 || [])
+                ];
 
-    if (equipeAttack && equipeDefense) {
-
-        if (typeof getZoneYParLigne === "function") {
-            equipeAttack.forEach(j => {
-                j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-            });
-
-            equipeDefense.forEach(j => {
-                j.zoneY = getZoneYParLigne(j.ligne, "defense");
-            });
+                assignerVisAVis(match);
+            }
         }
 
-        if (typeof initPlayerPosition === "function") {
-            match.lineup1?.forEach(j => initPlayerPosition(j));
-            match.lineup2?.forEach(j => initPlayerPosition(j));
-        }
-
-        if (typeof assignerVisAVis === "function") {
-            match.positions = [
-                ...(match.lineup1 || []),
-                ...(match.lineup2 || [])
-            ];
-
-            assignerVisAVis(match);
-        }
-
+    } catch (e) {
+        console.log("⚠️ Terrain init error ignorée:", e);
     }
 
-} catch (e) {
-    console.log("⚠️ Erreur init terrain ignorée :", e);
-}
-
 // =========================
-// 🎯 KICKOFF (GARANTI)
+// 🎯 KICKOFF (CLEAN V2)
 // =========================
 const kickoffText = kickoffStart(match);
 
@@ -2226,21 +2139,46 @@ if (kickoffText) {
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
-    // 🔥 ASSURE QUE LE TOUR EST INITIALISÉ
-    match.joueurTour = jidStart;
+    // ===============================
+    // 🔥 TEAMS FIXES
+    // ===============================
+    const team1 = match.id1;
+    const team2 = match.id2;
+
+    const startTeam = normalizeJidSafe(jidStart);
+
+    const opponentTeam =
+        startTeam === normalizeJidSafe(team1)
+            ? team2
+            : team1;
+
+    // ===============================
+    // ⚽ POSSESSION INIT
+    // ===============================
+    match.possession = startTeam;      // team qui commence
+    match.nextTeam = opponentTeam;     // team en attente
+
+    // ⚠️ IMPORTANT : PAS attacker/defender ici
+    match.attacker = null;
+    match.defender = null;
+
+    // ===============================
+    // 🎮 TOUR SYSTEM CLEAN
+    // ===============================
+    match.joueurTour = startTeam;
 
     await ovl.sendMessage(chat, {
         image: {
             url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
         },
         caption:
-`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
+`🎙️⚽ KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
-        mentions: [jidStart]
+        mentions: [startTeam]
     });
 }
 
@@ -2249,12 +2187,11 @@ ${kickoffText}
 // =========================
 match.kickoffSent = true;
 
-// 🔥 SAFE TIMER RESET (IMPORTANT)
+// juste clean sécurité si besoin
 stopTurnTimer(match);
 
-// 🚀 START ENGINE PROPRE
-startMatchCycle(chat, ovl, match);
-}
+// ❌ AUCUN START ENGINE
+return;
 
 
 /* ===============================
@@ -2269,7 +2206,7 @@ async function handlePaveGame(ms, ovl) {
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
-    // 🚫 FIND PLAYER CARD
+    / 🚫 FIND PLAYER CARD
     // ===============================
     const allPlayers = (match.lineup1 || []).concat(match.lineup2 || []);
 
@@ -2384,6 +2321,20 @@ async function handlePaveGame(ms, ovl) {
 
    const action = actionCheck;
 
+
+        
+/* ===============================
+🧠 ACTION TEXT
+=================================*/
+
+const actionText = action.toLowerCase();
+
+   // ===============================
+// ⚽ ATTAQUE PHASE DUEL
+// ===============================
+// ===============================
+// ⚽ ATTAQUE PHASE DUEL
+// ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     match.phaseDuel.attackPave = action;
@@ -2411,9 +2362,15 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     const note = noterPave(action);
 
-    // 🔥 FIX IMPORTANT : fallback sécurisé
-    const next = normalizeJid(defender?.id || defender?.jid);
-const nextTag = getTagFromJid(next);
+    // ===============================
+    // 🔥 NEXT = TEAM LOGIC
+    // ===============================
+    const next =
+        match.teamTurn === match.id1
+            ? match.id2
+            : match.id1;
+
+    const nextTag = getTagFromJid(next);
 
     await ovl.sendMessage(chat, {
         text:
@@ -2427,21 +2384,76 @@ const nextTag = getTagFromJid(next);
 ➡️ @${nextTag} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [next]
     });
 
     match.waitingDefenseFrom = next;
+
+    // ===============================
+    // ⚠️ WARNING 1 MIN
+    // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
+
+    match.warningTimer = setTimeout(async () => {
+
+        if (match.phaseDuel?.step !== "defense_pave") return;
+
+        const warnTag = getTagFromJid(next);
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${warnTag} ❗⏳
+
+Il reste *1 MINUTE* pour défendre !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [next]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⏱️ LATENCE LOCALE (6 MIN)
+    // ===============================
+    if (match.defenseTimer) clearTimeout(match.defenseTimer);
+
+    match.defenseTimer = setTimeout(() => {
+
+        if (match.phaseDuel?.step === "defense_pave") {
+
+            const attacker = match.phaseDuel.attacker;
+            const defender = match.phaseDuel.defender;
+
+            // 🔁 LATENCE OUT → SWITCH POSSESSION
+            match.teamTurn =
+                match.teamTurn === match.id1 ? match.id2 : match.id1;
+
+            match.phaseDuel = null;
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = null;
+
+            const opponent =
+                next === match.id1 ? match.id2 : match.id1;
+
+            ovl.sendMessage(chat, {
+                text:
+`⛔ LATENCE OUT ❌
+
+🔁 ${defender.nom} récupère la possession !
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+                mentions: [opponent]
+            });
+        }
+
+    }, 6 * 60 * 1000);
+
     return true;
 }
-        
-/* ===============================
-🧠 ACTION TEXT
-=================================*/
-
-const actionText = action.toLowerCase();
-
-
+    
 /* ===============================
 ⚽ OFFENSIVE INTENT
 =================================*/
@@ -2466,81 +2478,128 @@ const isPassiveDefense = hasIntent(
 // ===============================
 if (match.phaseDuel?.active) {
 
+// ===============================
+// 🟦 DEFENSE + RESOLUTION
+// ===============================
+if (match.phaseDuel.step === "defense_pave") {
+
+    match.phaseDuel.defensePave = action;
+
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
+
+    const duel = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        match.phaseDuel.attackPave,
+        match.phaseDuel.defensePave
+    );
+
+    let title = "*🛡️⚽ MATCH UP⚔️ !*";
+
+    if (duel.type === "INTERCEPTION") {
+        title = "*🛑 INTERCEPTION !*";
+    } else if (duel.type === "win" || duel.type === "escape") {
+        title = "*🔥 DRIBBLE RÉUSSI !*";
+    } else if (duel.type === "stop") {
+        title = "*🧱 TACLE RÉUSSI !*";
+    }
+
     // ===============================
-    // 🟦 DEFENSE + RESOLUTION
+    // 🎯 NEXT TEAM
     // ===============================
-    if (match.phaseDuel.step === "defense_pave") {
+    let nextTeam;
 
-        match.phaseDuel.defensePave = action;
+    if (duel.type === "INTERCEPTION" || duel.type === "stop") {
+        nextTeam = defender.id || defender.jid;
+    } else {
+        nextTeam = attacker.id || attacker.jid;
+    }
 
-        const attacker = match.phaseDuel.attacker;
-        const defender = match.phaseDuel.defender;
+    const nextTag = getTagFromJid(nextTeam);
 
-        const duel = resolveDribbleDuel(
-            match,
-            attacker,
-            defender,
-            match.phaseDuel.attackPave,
-            match.phaseDuel.defensePave
-        );
+    stopTurnTimer(match);
 
-        let title = "*🛡️⚽ MATCH UP⚔️ !*";
-
-        if (duel.type === "INTERCEPTION") {
-            title = "*🛑 INTERCEPTION !*";
-        } else if (duel.type === "win" || duel.type === "escape") {
-            title = "*🔥 DRIBBLE RÉUSSI !*";
-        } else if (duel.type === "stop") {
-            title = "*🧱 TACLE RÉUSSI !*";
-        }
-
-        await ovl.sendMessage(chat, {
-    text:
+    // ===============================
+    // 📩 MESSAGE NEXT
+    // ===============================
+    await ovl.sendMessage(chat, {
+        text:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${duel.msg}
 
+➡️ @${nextTag} NEXT
+
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`
-});
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextTeam]
+    });
 
-// 🔥 STOP TIMER AVANT RESET
-stopTurnTimer(match);
+    // ===============================
+    // ⚠️ WARNING 1 MIN
+    // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
 
-// ===============================
-// 🎯 POSSESSION APRÈS DUEL
-// ===============================
+    match.warningTimer = setTimeout(async () => {
 
-if (
-    duel.type === "INTERCEPTION" ||
-    duel.type === "stop"
-) {
-    match.attacker = defender.id || defender.jid;
-    match.defender = attacker.id || attacker.jid;
+        if (match.joueurTour !== nextTeam) return;
+
+        const tag = getTagFromJid(nextTeam);
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${tag} ❗⏳
+
+Il reste *1 MINUTE* pour jouer !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [nextTeam]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⏱️ LATENCE OUT (6 MIN)
+    // ===============================
+    if (match.turnTimer) clearTimeout(match.turnTimer);
+
+    match.turnTimer = setTimeout(async () => {
+
+        if (match.joueurTour !== nextTeam) return;
+
+        const opponent =
+            nextTeam === match.id1 ? match.id2 : match.id1;
+
+        match.attacker = opponent;
+        match.defender = nextTeam;
+        match.joueurTour = opponent;
+
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⛔ LATENCE OUT ❌
+
+🔁 Changement de possession
+
+➡️ @${getTagFromJid(opponent)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions: [opponent]
+        });
+
+    }, 6 * 60 * 1000);
+
+    return true;
 }
-else {
-    match.attacker = attacker.id || attacker.jid;
-    match.defender = defender.id || defender.jid;
-}
-
-match.joueurTour = match.attacker;
-
-// ===============================
-// ♻️ RESET DU DUEL
-// ===============================
-
-match.phaseDuel = null;
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
-match.turnType = "attaque";
-
-// 🚀 RELANCE ENGINE
-startMatchCycle(chat, ovl, match);
-
-return true;
-    } 
 }   
      
 // ===============================
@@ -2548,19 +2607,18 @@ return true;
 // ===============================
 if (!match.pendingAttack) {
 
-    const currentPlayer = match.joueurTour;
+    const attackerTeam = match.joueurTour;
 
     const attackerPlayer =
         [...(match.lineup1 || []), ...(match.lineup2 || [])]
         .find(p =>
-            normalizeJid(p.id || p.jid) === currentPlayer
+            normalizeJid(p.id || p.jid) === attackerTeam
         );
 
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
     }
 
-    // 🔥 STOP TIMER
     stopTurnTimer(match);
 
     match.pendingAttack = action;
@@ -2569,21 +2627,83 @@ if (!match.pendingAttack) {
     const resume = genererResumeFull(action, match);
     const note = noterPave(action);
 
-// ===============================
-// 🎯 PROCHAIN JOUEUR = L'AUTRE
-// ===============================
-const current = match.joueurTour;
+    const nextTeam =
+        attackerTeam === match.id1
+            ? match.id2
+            : match.id1;
 
-const next =
-    current === match.id1
-        ? match.id2
-        : match.id1;
+    const nextTag = getTagFromJid(nextTeam);
 
-const nextTag = getTagFromJid(next);
+    // ===============================
+    // ⏳ LATENCE 6 MIN
+    // ===============================
+    match.waitingDefenseFrom = nextTeam;
+    match.joueurTour = nextTeam;
+    match.turnType = "defense";
 
+    // ===============================
+    // ⚠️ WARNING 1 MIN
+    // ===============================
+    match.warningTimer = setTimeout(async () => {
 
-await ovl.sendMessage(chat, {
-    text:
+        if (match.phaseDuel || !match.pendingAttack) return;
+
+        const tag = getTagFromJid(nextTeam);
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${tag} ❗⏳
+
+Il reste *1 MINUTE* pour répondre !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [nextTeam]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⏳ LATENCE OUT (6 MIN)
+    // ===============================
+    match.turnTimer = setTimeout(async () => {
+
+        if (match.phaseDuel || !match.pendingAttack) return;
+
+        const oldAttacker = attackerTeam;
+        const newAttacker = nextTeam;
+
+        const oldTag = getTagFromJid(oldAttacker);
+        const newTag = getTagFromJid(newAttacker);
+
+        match.attacker = newAttacker;
+        match.defender = oldAttacker;
+        match.joueurTour = newAttacker;
+
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.phaseDuel = null;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⛔ *LATENCE OUT ❌*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+⚽ @${oldTag} n’a pas répondu !
+🔁 @${newTag} récupère la possession
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions: [oldAttacker, newAttacker]
+        });
+
+    }, 6 * 60 * 1000);
+
+    // ===============================
+    // 📩 MESSAGE NEXT
+    // ===============================
+    await ovl.sendMessage(chat, {
+        text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -2591,19 +2711,14 @@ await ovl.sendMessage(chat, {
 
 📊 NOTE DU PAVÉ : ${note}/10
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
-    mentions: [next]
-});
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextTeam]
+    });
 
-
-match.waitingDefenseFrom = next;
-match.turnType = "defense";
-
-startMatchCycle(chat, ovl, match);
-return true;    
+    return true;
 }
 
 
@@ -2612,7 +2727,8 @@ return true;
 // ===============================
 const defense = action;
 
-    stopTurnTimer(match);
+stopTurnTimer(match);
+
 const res = await handleDuelMatch(match, match.pendingAttack, defense);
 
 match.hasPlayed = true;
@@ -2629,11 +2745,9 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ...(match.lineup2 || [])
     ];
 
-    // ⚽ attaquant = porteur du ballon
     const attacker =
         allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
 
-    // 🛡️ défenseur = joueur du tour actuel (FLOW GLOBAL)
     const defender =
         allPlayers.find(
             p =>
@@ -2641,7 +2755,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ) || res.defender;
 
     // ===============================
-    // ⚔️ STATE DU DUEL (SANS IMPACT FLOW)
+    // ⚔️ DUEL STATE
     // ===============================
     match.phaseDuel = {
         active: true,
@@ -2654,12 +2768,10 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: defense
     };
 
-    // ❗ IMPORTANT : NE PAS TOUCHER match.joueurTour ICI
-
     // ===============================
-    // 🔥 NEXT FIABLE (SOURCE UNIQUE)
+    // 🔥 NEXT (SOURCE UNIQUE)
     // ===============================
-    const nextId = match.joueurTour; // 🔒 source unique de vérité
+    const nextId = match.joueurTour;
     const nextTag = getTagFromJid(nextId);
 
     await ovl.sendMessage(chat, {
@@ -2673,9 +2785,65 @@ ${res.msg}
 ➡️ @${nextTag} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [nextId]
     });
+
+    // ===============================
+    // ⚠️ WARNING 1 MIN
+    // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
+
+    match.warningTimer = setTimeout(async () => {
+
+        if (match.phaseDuel?.step !== "attack_pave") return;
+
+        const warnTag = getTagFromJid(nextId);
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${warnTag} ❗⏳
+
+Il reste *1 MINUTE* pour jouer le duel !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [nextId]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⏱️ LATENCE DUEL (6 MIN)
+    // ===============================
+    if (match.defenseTimer) clearTimeout(match.defenseTimer);
+
+    match.defenseTimer = setTimeout(() => {
+
+        if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
+
+            const attacker = match.phaseDuel.attacker;
+            const defender = match.phaseDuel.defender;
+
+            match.phaseDuel = null;
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = null;
+
+            ovl.sendMessage(chat, {
+                text:
+`⛔ LATENCE OUT ❌
+
+🔁 MATCH UP TERMINÉ
+
+➡️ Possession conservée par le jeu
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+                mentions: [nextId]
+            });
+        }
+
+    }, 6 * 60 * 1000);
 
     return true;
 }
@@ -2686,6 +2854,9 @@ ${res.msg}
 const resumeDefense = genererResumeFull(defense, match);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
+const nextId = match.joueurTour;
+const nextTag = getTagFromJid(nextId);
+
 await ovl.sendMessage(chat, {
     text:
 `*🛡️⚔️⚽ DÉFENSE !*
@@ -2695,12 +2866,67 @@ await ovl.sendMessage(chat, {
 
 📊 NOTE DU PAVÉ : ${noteDefense}/10
 
-➡️ @${getTagFromJid(match.joueurTour)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
-               🔷BLUELOCK⚽🥅`,
-    mentions: [match.joueurTour]
+🔷BLUELOCK⚽🥅`,
+    mentions: [nextId]
 });
+
+// ===============================
+// ⚠️ WARNING 1 MIN
+// ===============================
+if (match.warningTimer) clearTimeout(match.warningTimer);
+
+match.warningTimer = setTimeout(async () => {
+
+    if (match.phaseDuel?.active) return; // sécurité duel
+
+    const warnTag = getTagFromJid(nextId);
+
+    await ovl.sendMessage(chat, {
+        text:
+`⚠️ @${warnTag} ❗⏳
+
+Il reste *1 MINUTE* pour jouer !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextId]
+    });
+
+}, 5 * 60 * 1000);
+
+// ===============================
+// ⏱️ LATENCE 6 MIN
+// ===============================
+if (match.defenseTimer) clearTimeout(match.defenseTimer);
+
+match.defenseTimer = setTimeout(() => {
+
+    if (match.phaseDuel?.active) return;
+
+    if (match.joueurTour !== nextId) return;
+
+    const opponent =
+        nextId === match.id1 ? match.id2 : match.id1;
+
+    match.joueurTour = opponent;
+
+    ovl.sendMessage(chat, {
+        text:
+`⛔ LATENCE OUT ❌
+
+🔁 CHANGEMENT DE POSSESSION
+
+➡️ @${getTagFromJid(opponent)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [opponent]
+    });
+
+}, 6 * 60 * 1000);
 
 // ===============================
 // 🔄 RESET SIMPLE
@@ -2720,7 +2946,6 @@ match.turnType = "attaque";
 startMatchCycle(chat, ovl, match);
 
 return true;
-} 
 
 // ===============================
 // ⚽ DUELS ET MATCH UP 🆚
