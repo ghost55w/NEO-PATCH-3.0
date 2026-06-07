@@ -2941,9 +2941,8 @@ if (!match.phaseDuel?.active) {
 
 match.turnType = "attaque";
 
-startMatchCycle(chat, ovl, match);
-
 return true;
+}
 
 // ===============================
 // ⚽ DUELS ET MATCH UP 🆚
