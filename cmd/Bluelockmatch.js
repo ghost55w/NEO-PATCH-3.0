@@ -1977,7 +1977,8 @@ if (match.etat === "attente_lineup") {
     }
 
     return;
-}
+            }
+
 }
 
            
