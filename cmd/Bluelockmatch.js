@@ -2590,10 +2590,11 @@ const res = await handleDuelMatch(match, match.pendingAttack, defense);
 match.hasPlayed = true;
 
 // ===============================
-// 🔥 MATCH UP INIT
+// 🔥 MATCH UP INIT ⚽ 🆚 
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
+    // ⛔ STOP TIMER GLOBAL
     stopTurnTimer(match);
 
     const allPlayers = [
@@ -2605,7 +2606,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
     const attacker =
         allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
 
-    // 🛡️ défenseur = joueur du tour actuel
+    // 🛡️ défenseur = joueur du tour actuel (FLOW GLOBAL)
     const defender =
         allPlayers.find(
             p =>
@@ -2613,7 +2614,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ) || res.defender;
 
     // ===============================
-    // ⚔️ INIT DU DUEL
+    // ⚔️ DUEL STATE (AUCUN IMPACT SUR LE FLOW)
     // ===============================
     match.phaseDuel = {
         active: true,
@@ -2626,7 +2627,11 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: defense
     };
 
-    // ❗ IMPORTANT : NE PAS TOUCHER match.joueurTour ICI
+    // ❗ IMPORTANT :
+    // NE JAMAIS MODIFIER match.joueurTour ICI
+    // NE PAS TOUCHER AU FLOW GLOBAL
+
+    const defenderId = defender.id || defender.jid;
 
     await ovl.sendMessage(chat, {
         text:
@@ -2636,11 +2641,11 @@ ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
-➡️ @${getTagFromJid(defender.id || defender.jid)} NEXT
+➡️ @${getTagFromJid(defenderId)} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`,
-        mentions: [defender.id || defender.jid]
+        mentions: [defenderId]
     });
 
     return true;
