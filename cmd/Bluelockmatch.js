@@ -1031,19 +1031,22 @@ function kickoffStart(match) {
     const teamA = match.lineup1 || [];
     const teamB = match.lineup2 || [];
 
-    // 🔥 détection robuste du MC
-    const mcA = teamA.find(p => p.poste?.toUpperCase().includes("MC"));
-    const mcB = teamB.find(p => p.poste?.toUpperCase().includes("MC"));
+    const mcA = teamA.find(
+        p => p.poste?.toUpperCase().includes("MC")
+    );
+
+    const mcB = teamB.find(
+        p => p.poste?.toUpperCase().includes("MC")
+    );
 
     let starter = null;
 
-    // 🧠 équipe qui engage
     if (match.kickoffTeam === 1) {
-        starter = mcA || teamA[0]; // fallback safe
-    } 
+        starter = mcA || teamA[0];
+    }
     else if (match.kickoffTeam === 2) {
-        starter = mcB || teamB[0]; // fallback safe
-    } 
+        starter = mcB || teamB[0];
+    }
     else {
         return "";
     }
@@ -2151,61 +2154,37 @@ async function lancerMatch(chat, ovl) {
     }
 
 // =========================
-// 🎯 KICKOFF (CLEAN V2)
+// 🎯 KICKOFF (GARANTI)
 // =========================
 const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
 
+    const teamStart = startTeam;
+
     const displayName =
-        match.names?.[jidStart] ||
-        jidStart.split("@")[0];
+        match.names?.[teamStart] ||
+        teamStart.split("@")[0];
 
     const imagesKickOff = [
         "https://files.catbox.moe/onotk4.jpg",
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
-    // ===============================
-    // 🔥 TEAMS FIXES
-    // ===============================
-    const team1 = match.id1;
-    const team2 = match.id2;
-
-    const startTeam = normalizeJidSafe(jidStart);
-
-    const opponentTeam =
-        startTeam === normalizeJidSafe(team1)
-            ? team2
-            : team1;
-
-    // ===============================
-    // ⚽ POSSESSION INIT
-    // ===============================
-    match.possession = startTeam;      // team qui commence
-    match.nextTeam = opponentTeam;     // team en attente
-
-    // ⚠️ IMPORTANT : PAS attacker/defender ici
-    match.attacker = null;
-    match.defender = null;
-
-    // ===============================
-    // 🎮 TOUR SYSTEM CLEAN
-    // ===============================
-    match.joueurTour = startTeam;
-
     await ovl.sendMessage(chat, {
         image: {
-            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
+            url: imagesKickOff[
+                Math.floor(Math.random() * imagesKickOff.length)
+            ]
         },
         caption:
-`🎙️⚽ KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
+`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
-        mentions: [startTeam]
+        mentions: [teamStart]
     });
 }
 
