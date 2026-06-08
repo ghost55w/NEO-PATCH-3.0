@@ -2160,14 +2160,16 @@ const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
 
-    // ===============================
-    // 👥 TEAM QUI ENGAGE
-    // ===============================
-    const teamStart = match.joueurTour; // ⚠️ possession déjà définie plus haut
+// ===============================
+// 👥 TEAM START (WHATSAPP + DISPLAY)
+// ===============================
+const teamStart = match.joueurTour;
 
-    const displayName =
-        match.names?.[teamStart] ||
-        teamStart.split("@")[0];
+// 👉 NOM AFFICHÉ (propre)
+const displayName =
+    teamStart === match.id1
+        ? match.team1Name
+        : match.team2Name;
 
     const imagesKickOff = [
         "https://files.catbox.moe/onotk4.jpg",
@@ -2177,19 +2179,19 @@ if (kickoffText) {
     // ===============================
     // ⚽ MESSAGE KICK OFF
     // ===============================
-    await ovl.sendMessage(chat, {
-        image: {
-            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
-        },
-        caption:
+await ovl.sendMessage(chat, {
+    image: {
+        url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
+    },
+    caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
             🔷BLUELOCK⚽🥅`,
-        mentions: [teamStart]
-    });
+    mentions: [teamStart]
+});
 
     // ===============================
     // ⏱️ WARNING TIMER (5 MIN)
