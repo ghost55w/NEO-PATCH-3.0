@@ -2160,7 +2160,10 @@ const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
 
-    const teamStart = startTeam;
+    // ===============================
+    // 👥 TEAM QUI ENGAGE
+    // ===============================
+    const teamStart = match.joueurTour; // ⚠️ possession déjà définie plus haut
 
     const displayName =
         match.names?.[teamStart] ||
@@ -2171,11 +2174,12 @@ if (kickoffText) {
         "https://files.catbox.moe/kfw0bl.jpg"
     ];
 
+    // ===============================
+    // ⚽ MESSAGE KICK OFF
+    // ===============================
     await ovl.sendMessage(chat, {
         image: {
-            url: imagesKickOff[
-                Math.floor(Math.random() * imagesKickOff.length)
-            ]
+            url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
         },
         caption:
 `🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
@@ -2186,19 +2190,66 @@ ${kickoffText}
             🔷BLUELOCK⚽🥅`,
         mentions: [teamStart]
     });
+
+    // ===============================
+    // ⏱️ WARNING TIMER (5 MIN)
+    // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
+
+    match.warningTimer = setTimeout(async () => {
+
+        const m = matchsActifs.get(chat);
+        if (!m) return;
+        if (m.phaseDuel?.active) return;
+
+        const attacker = m.joueurTour;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${attacker.split("@")[0]}
+
+⏳ Il reste *1 MINUTE* pour jouer !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [attacker]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⛔ TIMEOUT (6 MIN → NEXT TEAM)
+    // ===============================
+    if (match.turnTimer) clearTimeout(match.turnTimer);
+
+    match.turnTimer = setTimeout(async () => {
+
+        const m = matchsActifs.get(chat);
+        if (!m) return;
+        if (m.phaseDuel?.active) return;
+
+        const current = m.joueurTour;
+        const next = current === m.id1 ? m.id2 : m.id1;
+
+        m.joueurTour = next;
+        m.waitingAttackFrom = null;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⛔ LATENCE OUT ❌
+
+🔁 CHANGEMENT DE POSSESSION
+
+➡️ @${next.split("@")[0]} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions: [next]
+        });
+
+    }, 6 * 60 * 1000);
 }
 
-// =========================
-// 🚀 START ENGINE SAFE
-// =========================
-match.kickoffSent = true;
-
-// juste clean sécurité si besoin
-stopTurnTimer(match);
-
-// ❌ AUCUN START ENGINE
-return;
-}
 
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
