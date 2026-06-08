@@ -179,6 +179,48 @@ function distanceZone(z1, z2) {
     return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
 }
 
+//Trouver le Vis à VIS
+function findVisAVis(player, opponentTeam) {
+
+    const target = getVisAVisPoste(player.poste);
+
+    if (!target) return null;
+
+    return opponentTeam.find(p => 
+        POSITION_POSTES[p.poste]?.ligne === target.ligne &&
+        POSITION_POSTES[p.poste]?.zoneX === target.zoneX
+    ) || null;
+}
+
+function getVisAVisPoste(poste) {
+
+    const p = POSITION_POSTES[poste];
+    if (!p) return null;
+
+    let targetLigne;
+    let targetZoneX = p.zoneX;
+
+    // ===============================
+    // 🔁 MIRROR LIGNE
+    // ===============================
+    if (p.ligne === "attaque") targetLigne = "defense";
+    else if (p.ligne === "defense") targetLigne = "attaque";
+    else targetLigne = "milieu";
+
+    // ===============================
+    // 🔁 MIRROR GAUCHE / DROITE
+    // ===============================
+    let mirrorZoneX = p.zoneX;
+
+    if (p.zoneX === "gauche") mirrorZoneX = "droite";
+    else if (p.zoneX === "droite") mirrorZoneX = "gauche";
+
+    return {
+        ligne: targetLigne,
+        zoneX: mirrorZoneX
+    };
+}
+
 
 // Extractions terrain
 function extraireDistance(txt) {
@@ -2318,32 +2360,70 @@ async function handlePaveGame(ms, ovl) {
 
     if (!isPave) return false;
 
+// ===============================
+// ❌ PAVÉ VIDE OU MAL FORMÉ
+// ===============================
+if (!actionCheck || actionCheck.trim().length < 5) {
+
+    await ovl.sendMessage(chat, {
+        react: { text: "❌", key: ms.key }
+    });
+
     // ===============================
-    // ❌ PAVÉ VIDE OU MAL FORMÉ
+    // 👤 JOUEUR PERDANT
     // ===============================
-    const actionCheck = extraireAction(text);
+    const loser = normalizeJid(match.joueurTour);
 
-    if (!actionCheck || actionCheck.trim().length < 5) {
+    const loserPlayer =
+        [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p => normalizeJid(p.id || p.jid) === loser);
 
-        await ovl.sendMessage(chat, {
-            react: { text: "❌", key: ms.key }
-        });
+    const loserName = loserPlayer?.nom || loser.split("@")[0];
 
-        const loser = normalizeJid(match.joueurTour);
+    // ===============================
+    // ⚽ NEXT VIA VIS-A-VIS (PRIORITÉ)
+    // ===============================
+    let nextPlayer = null;
 
-        const next = match.defender || match.id2;
+    if (loserPlayer) {
+        nextPlayer = findVisAVis(loserPlayer, 
+            loserPlayer === match.lineup1?.find(p => p.id === loserPlayer.id)
+                ? match.lineup2
+                : match.lineup1
+        );
+    }
 
-        const loserName =
-            match.names?.[loser] || loser.split("@")[0];
+    // 🔁 FALLBACK SAFE
+    if (!nextPlayer) {
+        const fallbackTeam =
+            loser === match.id1 ? match.id2 : match.id1;
 
-        const nextName =
-            match.names?.[next] || next.split("@")[0];
+        nextPlayer = [...(match.lineup1 || []), ...(match.lineup2 || [])]
+            .find(p => normalizeJid(p.id || p.jid) === fallbackTeam);
+    }
 
-        match.lockedPlayers = match.lockedPlayers || new Set();
-        match.lockedPlayers.add(loserName);
+    const next = nextPlayer?.id || nextPlayer?.jid || match.id2;
+    const nextName = nextPlayer?.nom || next.split("@")[0];
 
-        await ovl.sendMessage(chat, {
-            text:
+    // ===============================
+    // 🚫 LOCK UPDATE
+    // ===============================
+    match.lockedPlayers = match.lockedPlayers || new Set();
+    match.lockedPlayers.add(loserName);
+
+    // ===============================
+    // 🔁 POSSESSION UPDATE CLEAN
+    // ===============================
+    match.joueurTour = next;
+    match.attacker = next;
+    match.defender = loser;
+    match.pendingAttack = null;
+
+    // ===============================
+    // 📩 MESSAGE CONTRE-ATTAQUE
+    // ===============================
+    await ovl.sendMessage(chat, {
+        text:
 `❌ PAVÉ INVALIDE
 
 🎙️ REASON : Action vide ou mal structurée
@@ -2355,20 +2435,31 @@ async function handlePaveGame(ms, ovl) {
 🚫 @${loserName} est LOCK jusqu’au prochain tour
 
 ╰───────────────────
-               🔷BLUELOCK⚽🥅`,
-            mentions: [next, loser]
-        });
+🔷BLUELOCK⚽🥅`,
+        mentions: [next, loser]
+    });
 
-        match.attacker = next;
-        match.defender = next === match.id1 ? match.id2 : match.id1;
-        match.joueurTour = next;
-
-        match.hasPlayed = true;
-        startMatchCycle(chat, ovl, match);
-
-        return true;
+    // ===============================
+    // ⛔ CLEAN TIMERS (CRUCIAL)
+    // ===============================
+    if (match.turnTimer) {
+        clearTimeout(match.turnTimer);
+        match.turnTimer = null;
     }
 
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
+
+    // ===============================
+    // 🧠 IMPORTANT
+    // ===============================
+    match.phaseDuel = null;
+
+    return true;
+}
+    
     // ===============================
     // ♻️ ANALYSE
     // ===============================
