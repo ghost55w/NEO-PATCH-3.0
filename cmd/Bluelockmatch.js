@@ -2808,16 +2808,17 @@ if (!match.pendingAttack) {
     const note = noterPave(action);
 
     // ===============================
-    // 🔥 NEXT UNIFORM SYSTEM (IMPORTANT FIX)
+    // 🔥 NEXT (FIX MODERNE MAIS SAFE)
     // ===============================
-    const nextPlayer = getNextPlayer(
-        match,
-        attackerPlayer,
-        null,
-        "attack_normal"
-    );
+    const nextPlayer =
+        getNextPlayer(
+            match,
+            attackerPlayer,
+            null,
+            "attack_normal"
+        ) || getVisavisPlayer(match, attackerPlayer);
 
-    const nextId = nextPlayer?.id || nextPlayer?.jid;
+    const nextId = nextPlayer?.id || nextPlayer?.jid || attackerId;
     const nextTag = getTagFromJid(nextId);
 
     // ===============================
@@ -2862,7 +2863,7 @@ Il reste *1 MINUTE* pour répondre !
             getVisavisPlayer(match, attackerPlayer) ||
             allPlayers.find(p => normalizeJid(p.id || p.jid) === attackerId);
 
-        const fallbackId = fallback?.id || fallback?.jid;
+        const fallbackId = fallback?.id || fallback?.jid || attackerId;
 
         match.attacker = fallbackId;
         match.defender = attackerId;
