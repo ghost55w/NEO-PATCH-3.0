@@ -2357,6 +2357,8 @@ async function handlePaveGame(ms, ovl) {
 // ===============================
 // ❌ PAVÉ VIDE OU MAL FORMÉ
 // ===============================
+ const actionCheck = extraireAction(text);
+    
 if (!actionCheck || actionCheck.trim().length < 5) {
 
     await ovl.sendMessage(chat, {
