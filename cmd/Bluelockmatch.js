@@ -2483,9 +2483,6 @@ const actionText = action.toLowerCase();
 // ===============================
 // ⚽ ATTAQUE PHASE DUEL
 // ===============================
-// ===============================
-// ⚽ ATTAQUE PHASE DUEL
-// ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     match.phaseDuel.attackPave = action;
@@ -2618,7 +2615,6 @@ Il reste *1 MINUTE* pour défendre !
 
     return true;
 }
-} 
     
 /* ===============================
 ⚽ OFFENSIVE INTENT
