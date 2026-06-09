@@ -2948,13 +2948,9 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ...(match.lineup2 || [])
     ];
 
-    // attaquant = porteur actuel du ballon
     const attacker =
-        allPlayers.find(
-            p => p.nom === match.ballHolder
-        ) || res.attacker;
+        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
 
-    // défenseur = joueur dont c'est le tour
     const defender =
         allPlayers.find(
             p =>
@@ -2962,27 +2958,36 @@ if (res && res.type === "PASSIVE_BLOCK") {
                 normalizeJid(match.joueurTour)
         ) || res.defender;
 
-    // ===============================
-    // ⚔️ DUEL STATE
-    // ===============================
     match.phaseDuel = {
         active: true,
         step: "attack_pave",
-
         attacker,
         defender,
-
         attackPave: null,
         defensePave: null,
-
         starterAttack: match.pendingAttack,
         starterDefense: defense
     };
 
-    // 🔥 NEXT = attaquant du duel
+    // 🔥 NEXT FIX (IMPORTANT)
+    const nextPlayer =
+        getVisavisPlayer(match, attacker) ||
+        getNextPlayer(match, attacker, defender, "attack_pave");
+
     const nextId =
-        attacker?.id ||
-        attacker?.jid;
+        nextPlayer?.id ||
+        nextPlayer?.jid ||
+        match.joueurTour;
+
+    const nextTag = getTagFromJid(nextId);
+
+    // ⚽ SYNC SAFE
+    match.joueurTour = nextId;
+    match.waitingDefenseFrom = nextId;
+
+    match.attacker = attacker.id || attacker.jid;
+    match.defender = defender.id || defender.jid;
+    match.ballHolder = attacker.nom;
 
     await ovl.sendMessage(chat, {
         text:
@@ -2992,79 +2997,15 @@ ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
-➡️ @${getTagFromJid(nextId)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
-              🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
         mentions: [nextId]
     });
 
     return true;
 }
-    
-    // ===============================
-    // ⚠️ WARNING 1 MIN
-    // ===============================
-    if (match.warningTimer) clearTimeout(match.warningTimer);
-
-    match.warningTimer = setTimeout(async () => {
-
-        if (match.phaseDuel?.step !== "attack_pave") return;
-        if (match.joueurTour !== nextId) return;
-
-        await ovl.sendMessage(chat, {
-            text:
-`⚠️ @${nextTag} ❗⏳
-
-Il reste *1 MINUTE* pour jouer le duel !
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [nextId]
-        });
-
-    }, 5 * 60 * 1000);
-
-    // ===============================
-    // ⏱️ LATENCE OUT (SAFE)
-    // ===============================
-    if (match.defenseTimer) clearTimeout(match.defenseTimer);
-
-    match.defenseTimer = setTimeout(() => {
-
-        if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
-
-            const fallback =
-                getVisavisPlayer(match, attacker) || defender;
-
-            const finalNext = fallback?.id || fallback?.jid || nextId;
-
-            match.joueurTour = finalNext;
-            match.attacker = finalNext;
-            match.ballHolder = fallback?.nom || attacker.nom;
-
-            match.phaseDuel = null;
-            match.pendingAttack = null;
-            match.waitingDefenseFrom = null;
-
-            ovl.sendMessage(chat, {
-                text:
-`⛔ LATENCE OUT ❌
-
-🔁 MATCH UP TERMINÉ
-
-➡️ @${getTagFromJid(finalNext)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-                mentions: [finalNext]
-            });
-        }
-
-    }, 6 * 60 * 1000);
-
-    return true;
-                }
 
     // ===============================
     // ⚠️ WARNING 1 MIN
