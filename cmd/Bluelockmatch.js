@@ -2953,9 +2953,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
 
     const defender =
         allPlayers.find(
-            p =>
-                normalizeJid(p.id || p.jid) ===
-                normalizeJid(match.joueurTour)
+            p => normalizeJid(p.id || p.jid) === normalizeJid(match.joueurTour)
         ) || res.defender;
 
     match.phaseDuel = {
@@ -2969,19 +2967,15 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: defense
     };
 
-    // 🔥 NEXT FIX (IMPORTANT)
-    const nextPlayer =
-        getVisavisPlayer(match, attacker) ||
-        getNextPlayer(match, attacker, defender, "attack_pave");
-
+    // 🔥 NEXT FIX ULTRA CLEAN (PAS DE DOUBLE LOGIC)
     const nextId =
-        nextPlayer?.id ||
-        nextPlayer?.jid ||
+        attacker?.id ||
+        attacker?.jid ||
         match.joueurTour;
 
     const nextTag = getTagFromJid(nextId);
 
-    // ⚽ SYNC SAFE
+    // ⚽ SYNC CLEAN
     match.joueurTour = nextId;
     match.waitingDefenseFrom = nextId;
 
@@ -3006,7 +3000,6 @@ ${res.msg}
 
     return true;
 }
-
     // ===============================
     // ⚠️ WARNING 1 MIN
     // ===============================
