@@ -2939,23 +2939,27 @@ const res = await handleDuelMatch(
 match.hasPlayed = true;
 
 // ===============================
-// 🔥 MATCH UP INIT ⚽ 🆚
+// 🔥 MATCH UP INIT ⚽🆚 
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
-
-    stopTurnTimer(match);
 
     const allPlayers = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
+    // attaquant = porteur actuel du ballon
     const attacker =
-        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
+        allPlayers.find(
+            p => p.nom === match.ballHolder
+        ) || res.attacker;
 
+    // défenseur = joueur dont c'est le tour
     const defender =
         allPlayers.find(
-            p => normalizeJid(p.id || p.jid) === normalizeJid(match.joueurTour)
+            p =>
+                normalizeJid(p.id || p.jid) ===
+                normalizeJid(match.joueurTour)
         ) || res.defender;
 
     // ===============================
@@ -2964,37 +2968,22 @@ if (res && res.type === "PASSIVE_BLOCK") {
     match.phaseDuel = {
         active: true,
         step: "attack_pave",
+
         attacker,
         defender,
+
         attackPave: null,
         defensePave: null,
+
         starterAttack: match.pendingAttack,
         starterDefense: defense
     };
 
-    // ===============================
-    // 🔥 NEXT (UNIFIED LOGIC FIX)
-    // ===============================
-    const nextPlayer =
-        getVisavisPlayer(match, attacker) ||
-        defender;
+    // 🔥 NEXT = attaquant du duel
+    const nextId =
+        attacker?.id ||
+        attacker?.jid;
 
-    const nextId = nextPlayer?.id || nextPlayer?.jid;
-    const nextTag = getTagFromJid(nextId);
-
-    // ===============================
-    // ⚽ SYNC GLOBAL STATE (IMPORTANT)
-    // ===============================
-    match.joueurTour = nextId;
-    match.attacker = attacker.id || attacker.jid;
-    match.defender = defender.id || defender.jid;
-    match.ballHolder = attacker.nom;
-
-    match.waitingDefenseFrom = nextId;
-
-    // ===============================
-    // 📩 MESSAGE MATCH UP
-    // ===============================
     await ovl.sendMessage(chat, {
         text:
 `*🛡️⚽ MATCH UP⚔️ !*
@@ -3003,12 +2992,79 @@ ${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
 
 ${res.msg}
 
-➡️ @${nextTag} NEXT
+➡️ @${getTagFromJid(nextId)} NEXT
+
+╰───────────────────
+              🔷BLUELOCK⚽🥅`,
+        mentions: [nextId]
+    });
+
+    return true;
+}
+    
+    // ===============================
+    // ⚠️ WARNING 1 MIN
+    // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
+
+    match.warningTimer = setTimeout(async () => {
+
+        if (match.phaseDuel?.step !== "attack_pave") return;
+        if (match.joueurTour !== nextId) return;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${nextTag} ❗⏳
+
+Il reste *1 MINUTE* pour jouer le duel !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [nextId]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⏱️ LATENCE OUT (SAFE)
+    // ===============================
+    if (match.defenseTimer) clearTimeout(match.defenseTimer);
+
+    match.defenseTimer = setTimeout(() => {
+
+        if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
+
+            const fallback =
+                getVisavisPlayer(match, attacker) || defender;
+
+            const finalNext = fallback?.id || fallback?.jid || nextId;
+
+            match.joueurTour = finalNext;
+            match.attacker = finalNext;
+            match.ballHolder = fallback?.nom || attacker.nom;
+
+            match.phaseDuel = null;
+            match.pendingAttack = null;
+            match.waitingDefenseFrom = null;
+
+            ovl.sendMessage(chat, {
+                text:
+`⛔ LATENCE OUT ❌
+
+🔁 MATCH UP TERMINÉ
+
+➡️ @${getTagFromJid(finalNext)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
-    });
+                mentions: [finalNext]
+            });
+        }
+
+    }, 6 * 60 * 1000);
+
+    return true;
+                }
 
     // ===============================
     // ⚠️ WARNING 1 MIN
