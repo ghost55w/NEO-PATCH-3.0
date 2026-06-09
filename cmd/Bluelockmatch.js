@@ -1,4 +1,4 @@
-// ===============================
+P// ===============================
 // 📦 IMPORTS
 // ===============================
 const { ovlcmd } = require('../lib/ovlcmd');
@@ -2997,10 +2997,7 @@ ${res.msg}
 🔷BLUELOCK⚽🥅`,
         mentions: [nextId]
     });
-
-    return true;
-}
-    // ===============================
+// ===============================
     // ⚠️ WARNING 1 MIN
     // ===============================
     if (match.warningTimer) clearTimeout(match.warningTimer);
@@ -3022,7 +3019,7 @@ Il reste *1 MINUTE* pour jouer le duel !
         });
 
     }, 5 * 60 * 1000);
-
+    
     // ===============================
     // ⏱️ LATENCE OUT (SAFE)
     // ===============================
