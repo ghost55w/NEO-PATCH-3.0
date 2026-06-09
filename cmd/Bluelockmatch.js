@@ -2201,39 +2201,33 @@ async function lancerMatch(chat, ovl) {
 const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
-
 // ===============================
-// 👥 TEAM START (WHATSAPP + DISPLAY)
+// 👥 TEAM START
 // ===============================
 const teamStart = match.joueurTour;
+const tag = getTagFromJid(teamStart);
 
-// 👉 NOM AFFICHÉ (propre)
-const displayName =
-    teamStart === match.id1
-        ? match.team1Name
-        : match.team2Name;
+const imagesKickOff = [
+    "https://files.catbox.moe/onotk4.jpg",
+    "https://files.catbox.moe/kfw0bl.jpg"
+];
 
-    const imagesKickOff = [
-        "https://files.catbox.moe/onotk4.jpg",
-        "https://files.catbox.moe/kfw0bl.jpg"
-    ];
-
-    // ===============================
-    // ⚽ MESSAGE KICK OFF
-    // ===============================
+// ===============================
+// ⚽ MESSAGE KICK OFF
+// ===============================
 await ovl.sendMessage(chat, {
     image: {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
     caption:
-`🎙️⚽: KICK OFF 🥅‼️ @${displayName} débute avec la possession ! ⚽
+`🎙️⚽ KICK OFF 🥅‼️ @${tag} débute avec la possession ! ⚽
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
-            🔷BLUELOCK⚽🥅`,
+🔷BLUELOCK⚽🥅`,
     mentions: [teamStart]
-});
+}); 
 
     // ===============================
     // ⏱️ WARNING TIMER (5 MIN)
