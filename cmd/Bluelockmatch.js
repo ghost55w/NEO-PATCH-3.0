@@ -2806,31 +2806,22 @@ if (!match.pendingAttack) {
 
     // ===============================
     // 🔥 NEXT
-    // ===============================
-    const nextPlayer =
-        getNextPlayer(
-            match,
-            attackerPlayer,
-            null,
-            "attack_normal"
-        ) || getVisavisPlayer(match, attackerPlayer);
+    // ===============================  
+const nextId =
+    attackerId === match.id1
+        ? match.id2
+        : match.id1;
 
-    const nextId =
-        nextPlayer?.id ||
-        nextPlayer?.jid ||
-        attackerId;
-
-    const nextTag = getTagFromJid(nextId);
+const nextTag = getTagFromJid(nextId);
 
     // ===============================
     // ⚽ ÉTAT MATCH
     // ===============================
     match.waitingDefenseFrom = nextId;
-    match.turnType = "defense";
+match.joueurTour = nextId;
 
-    match.attacker = attackerId;
-    match.defender = nextId;
-    match.joueurTour = nextId;
+match.attacker = attackerId;
+match.defender = nextId;
 
     // ===============================
     // ⚠️ WARNING
