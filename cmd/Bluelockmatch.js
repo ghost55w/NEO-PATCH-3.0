@@ -2780,28 +2780,23 @@ Il reste *1 MINUTE* pour jouer !
     }
 }   
      
+
 // ===============================
-// 🎯 ATTAQUE⚽ 
+// 🎯 ATTAQUE⚽
 // ===============================
 if (!match.pendingAttack) {
 
     const attackerId = match.joueurTour;
 
-    const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
     const attackerPlayer =
-        allPlayers.find(p =>
+        [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p =>
             normalizeJid(p.id || p.jid) === attackerId
         );
 
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
     }
-
-    stopTurnTimer(match);
 
     match.pendingAttack = action;
     match.hasPlayed = true;
@@ -2810,7 +2805,7 @@ if (!match.pendingAttack) {
     const note = noterPave(action);
 
     // ===============================
-    // 🔥 NEXT (FIX MODERNE MAIS SAFE)
+    // 🔥 NEXT
     // ===============================
     const nextPlayer =
         getNextPlayer(
@@ -2820,24 +2815,29 @@ if (!match.pendingAttack) {
             "attack_normal"
         ) || getVisavisPlayer(match, attackerPlayer);
 
-    const nextId = nextPlayer?.id || nextPlayer?.jid || attackerId;
+    const nextId =
+        nextPlayer?.id ||
+        nextPlayer?.jid ||
+        attackerId;
+
     const nextTag = getTagFromJid(nextId);
 
     // ===============================
-    // ⚽ SYNC GLOBAL STATE
+    // ⚽ ÉTAT MATCH
     // ===============================
     match.waitingDefenseFrom = nextId;
-    match.joueurTour = nextId;
+    match.turnType = "defense";
 
     match.attacker = attackerId;
     match.defender = nextId;
+    match.joueurTour = nextId;
 
     // ===============================
-    // ⚠️ WARNING 1 MIN
+    // ⚠️ WARNING
     // ===============================
     match.warningTimer = setTimeout(async () => {
 
-        if (match.phaseDuel || !match.pendingAttack) return;
+        if (!match.pendingAttack) return;
         if (match.joueurTour !== nextId) return;
 
         await ovl.sendMessage(chat, {
@@ -2854,29 +2854,31 @@ Il reste *1 MINUTE* pour répondre !
     }, 5 * 60 * 1000);
 
     // ===============================
-    // ⏳ LATENCE OUT (6 MIN)
+    // ⏳ LATENCE OUT
     // ===============================
     match.turnTimer = setTimeout(async () => {
 
-        if (match.phaseDuel || !match.pendingAttack) return;
+        if (!match.pendingAttack) return;
         if (match.joueurTour !== nextId) return;
 
         const fallback =
             getVisavisPlayer(match, attackerPlayer) ||
-            allPlayers.find(p => normalizeJid(p.id || p.jid) === attackerId);
+            attackerPlayer;
 
-        const fallbackId = fallback?.id || fallback?.jid || attackerId;
+        const fallbackId =
+            fallback?.id ||
+            fallback?.jid ||
+            attackerId;
+
+        const oldTag = getTagFromJid(attackerId);
+        const newTag = getTagFromJid(fallbackId);
+
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
 
         match.attacker = fallbackId;
         match.defender = attackerId;
         match.joueurTour = fallbackId;
-
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-        match.phaseDuel = null;
-
-        const oldTag = getTagFromJid(attackerId);
-        const newTag = getTagFromJid(fallbackId);
 
         await ovl.sendMessage(chat, {
             text:
@@ -2894,7 +2896,7 @@ Il reste *1 MINUTE* pour répondre !
     }, 6 * 60 * 1000);
 
     // ===============================
-    // 📩 MESSAGE NEXT
+    // 📩 MESSAGE
     // ===============================
     await ovl.sendMessage(chat, {
         text:
