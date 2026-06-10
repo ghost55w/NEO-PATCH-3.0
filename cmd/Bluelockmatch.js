@@ -2914,9 +2914,6 @@ Il reste *1 MINUTE* pour répondre !
 // ===============================
 const defense = action;
 
-// ⛔ stop timer propre
-stopTurnTimer(match);
-
 // ===============================
 // ⚠️ VALIDATION
 // ===============================
