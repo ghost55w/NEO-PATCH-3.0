@@ -2962,17 +2962,19 @@ if (res && res.type === "PASSIVE_BLOCK") {
         starterDefense: defense
     };
 
-    // 🔥 NEXT FIX ULTRA CLEAN (PAS DE DOUBLE LOGIC)
-    const nextId =
-        attacker?.id ||
-        attacker?.jid ||
-        match.joueurTour;
+    // ===============================
+// 🔥 NEXT MATCH UP
+// ===============================
+const nextId =
+    defender.id === match.id1
+        ? match.id2
+        : match.id1;
 
-    const nextTag = getTagFromJid(nextId);
+const nextTag = getTagFromJid(nextId);
 
     // ⚽ SYNC CLEAN
     match.joueurTour = nextId;
-    match.waitingDefenseFrom = nextId;
+match.waitingDefenseFrom = nextId;
 
     match.attacker = attacker.id || attacker.jid;
     match.defender = defender.id || defender.jid;
