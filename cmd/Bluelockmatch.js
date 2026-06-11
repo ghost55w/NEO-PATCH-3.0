@@ -2940,13 +2940,13 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ...(match.lineup2 || [])
     ];
 
-    const attacker =
-        allPlayers.find(p => p.nom === match.ballHolder) || res.attacker;
+   const attacker = allPlayers.find(
+    p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
+) || res.attacker;
 
-    const defender =
-        allPlayers.find(
-            p => normalizeJid(p.id || p.jid) === normalizeJid(match.joueurTour)
-        ) || res.defender;
+const defender = allPlayers.find(
+    p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
+) || res.defender; 
 
     match.phaseDuel = {
         active: true,
@@ -2962,9 +2962,7 @@ if (res && res.type === "PASSIVE_BLOCK") {
     // ===============================
 // 🔥 NEXT MATCH UP
 // ===============================
-const nextId =
-    attacker.id ||
-    attacker.jid;
+const nextId = match.attacker;
 
 const nextTag = getTagFromJid(nextId);
 
