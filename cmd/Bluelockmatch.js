@@ -1,4 +1,4 @@
-// ===============================
+Ui// ===============================
 // 📦 IMPORTS
 // ===============================
 const { ovlcmd } = require('../lib/ovlcmd');
@@ -2965,9 +2965,7 @@ const nextTag = getTagFromJid(nextId);
     // ⚽ SYNC CLEAN
     match.joueurTour = nextId;
 match.waitingDefenseFrom = nextId;
-
-    match.attacker = attacker.id || attacker.jid;
-    match.defender = defender.id || defender.jid;
+    
     match.ballHolder = attacker.nom;
 
     await ovl.sendMessage(chat, {
