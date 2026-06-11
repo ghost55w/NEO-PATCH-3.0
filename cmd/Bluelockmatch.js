@@ -2510,18 +2510,15 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const note = noterPave(action);
 
     // ===============================
-    // 🔥 NEXT UNIFORM SYSTEM
-    // ===============================
-    const nextPlayer = getNextPlayer(
-        match,
-        attacker,
-        defender,
-        "attack_pave"
-    );
+// 🔥 NEXT = DEFENSEUR DU DUEL
+// ===============================
+const nextId =
+    match.defender ||
+    defender.id ||
+    defender.jid;
 
-    const nextId = nextPlayer?.id || nextPlayer?.jid;
-    const nextTag = getTagFromJid(nextId);
-
+const nextTag = getTagFromJid(nextId);
+    
     // ===============================
     // ⚽ STATE SYNC (IMPORTANT)
     // ===============================
