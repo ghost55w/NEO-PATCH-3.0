@@ -2963,9 +2963,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
 // 🔥 NEXT MATCH UP
 // ===============================
 const nextId =
-    defender.id === match.id1
-        ? match.id2
-        : match.id1;
+    attacker.id ||
+    attacker.jid;
 
 const nextTag = getTagFromJid(nextId);
 
