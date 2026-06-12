@@ -3339,22 +3339,55 @@ const isTackleAction =
 
 // ===============================
 // ⚽ DUEL TECHNIQUE
+// DRIBBLE vs TACLE
 // ===============================
 if (
     !result &&
-    (
-        isDribbleAction ||
-        isTackleAction
-    )
+    isDribbleAction &&
+    isTackleAction
 ) {
 
-    result = resolveDribbleDuel(
-        match,
-        attacker,
-        defender,
-        attaqueText,
-        defenseText
-    );
+    const attackStat =
+        atkStats.dri || 50;
+
+    const defenseStat =
+        defStats.def || 50;
+
+    const attackerWins =
+        attackStat > defenseStat;
+
+    if (attackerWins) {
+
+        match.joueurTour =
+            attacker.id || attacker.jid;
+
+        result = {
+            ok: true,
+            type: "DRIBBLE_WIN",
+
+            attacker,
+            defender,
+
+            msg:
+`🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+        };
+
+    } else {
+
+        match.joueurTour =
+            defender.id || defender.jid;
+
+        result = {
+            ok: false,
+            type: "DRIBBLE_LOSE",
+
+            attacker,
+            defender,
+
+            msg:
+`⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
+        };
+    }
 }
 
 // ===============================
@@ -3606,42 +3639,79 @@ if (!result) {
     };
 }
     
+// ===============================
+// 🎨 TYPE SAFE
+// ===============================
+const duelType = result?.type;
 
 // ===============================
-// 🎯 NEXT PLAYER
+// 🔥 NEXT (POSSESSION LOGIC)
 // ===============================
-let next = match.joueurTour;
+let nextId;
 
-if (result?.type === "INTERCEPTION") {
-    next = defender.id || defender.jid;
+// 🟢 Attaquant gagne → garde la balle
+if (
+    duelType === "DRIBBLE_WIN" ||
+    duelType === "CONSERVATION" ||
+    result.ok === true
+) {
+    nextId = attacker.id || attacker.jid;
+    match.ballHolder = attacker.nom;
 }
+
+// 🔴 Défenseur gagne → récupère la balle
+else if (
+    duelType === "DRIBBLE_LOSE" ||
+    duelType === "INTERCEPTION" ||
+    result.ok === false
+) {
+    nextId = defender.id || defender.jid;
+    match.ballHolder = defender.nom;
+}
+
+// 🟡 fallback sécurité
+else {
+    nextId = match.joueurTour;
+}
+
+const nextTag = getTagFromJid(nextId);
 
 // ===============================
 // 🎨 TITRE
 // ===============================
 let title = `*🛡️⚽ MATCH UP⚔️ !*`;
 
-const type = result?.type;
-
-if (type === "INTERCEPTION") {
+if (
+    duelType === "DRIBBLE_WIN" ||
+    duelType === "DRIBBLE_LOSE"
+) {
+    title = `*🛡️RÉSOLUTION DU DUEL⚽🆚*`;
+}
+else if (duelType === "INTERCEPTION") {
     title = `*🛑 INTERCEPTION !*`;
 }
-else if (type === "CONSERVATION") {
+else if (duelType === "CONSERVATION") {
     title = `*⚡ CONSERVATION !*`;
 }
-else if (type === "win") {
+else if (duelType === "win") {
     title = `*🔥 ACTION RÉUSSIE !*`;
 }
-else if (type === "stop") {
+else if (duelType === "stop") {
     title = `*🧱 DÉFENSE SOLIDE !*`;
 }
+
+// ===============================
+// 📊 STATS SAFE
+// ===============================
+const attackStat = result.attackStat ?? attacker?.stats?.dri ?? 50;
+const defenseStat = result.defenseStat ?? defender?.stats?.def ?? 50;
 
 // ===============================
 // 📤 RETURN
 // ===============================
 return {
     ok: result.ok,
-    type: result.type,
+    type: duelType,
 
     attacker,
     defender,
@@ -3651,16 +3721,23 @@ return {
     message:
 `${title}
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}
+${
+duelType === "DRIBBLE_WIN" ||
+duelType === "DRIBBLE_LOSE"
+?
+`♻️ ${defender.nom} : Défense ${defenseStat} 🆚 ${attacker.nom} : Dribble ${attackStat}`
+:
+`${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}`
+}
 
 ${result.msg}
 
-➡️ @${getTagFromJid(next)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
               🔷BLUELOCK⚽🥅`
-};    
-}
+};
+} 
 
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
