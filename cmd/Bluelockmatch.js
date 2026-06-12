@@ -2624,15 +2624,20 @@ const isPassiveDefense = hasIntent(
     PASSIVE_BLOCK_PATTERNS
 ); 
 
-// ===============================
+
+ // ===============================
 // ⚔️ DUEL PHASE DEFENSE
 // ===============================
 if (match.phaseDuel?.active) {
 
-    // ===============================
-    // 🟦 DEFENSE + RESOLUTION
-    // ===============================
+    console.log("PHASE DUEL ACTIVE");
+    console.log("STEP =", match.phaseDuel.step);
+
     if (match.phaseDuel.step === "defense_pave") {
+
+        console.log("DEFENSE PAVE DETECTED");
+
+        match.phaseDuel.defensePave = action;
 
         match.phaseDuel.defensePave = action;
 
