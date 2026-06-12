@@ -2624,7 +2624,8 @@ const isPassiveDefense = hasIntent(
     PASSIVE_BLOCK_PATTERNS
 ); 
 
-
+console.log("phaseDuel =", match.phaseDuel);
+console.log("step =", match.phaseDuel?.step);
  // ===============================
 // ⚔️ DUEL PHASE DEFENSE
 // ===============================
