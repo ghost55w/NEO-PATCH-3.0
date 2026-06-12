@@ -2629,162 +2629,105 @@ const isPassiveDefense = hasIntent(
     PASSIVE_BLOCK_PATTERNS
 ); 
 
-console.log("phaseDuel =", match.phaseDuel);
-console.log("step =", match.phaseDuel?.step);
 // ===============================
-// ⚔️ DUEL PHASE DEFENSE
+// 🛡️ DUEL PHASE DEFENSE
 // ===============================
-if (match.phaseDuel?.active && match.phaseDuel?.attackPave) {
+if (
+    match.phaseDuel?.active &&
+    match.phaseDuel?.step === "defense_pave"
+) {
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // ⚠️ sécurité : éviter double exécution
+    // évite double réponse
     if (match.phaseDuel.defensePave) return true;
 
     match.phaseDuel.defensePave = action;
+    match.phaseDuel.step = "resolve_duel";
+
+    const actionText = action.toLowerCase();
 
     // ===============================
-    // 🧠 RESOLUTION DIRECTE (SOURCE UNIQUE)
+    // 🧠 RESUME DEFENSE
     // ===============================
-    const duel = resolveDribbleDuel(
+    let resume = "";
+
+    if (
+        actionText.includes("tacle")
+    ) {
+        resume =
+            `${defender.nom} tente un tacle pour stopper l'action.`;
+    }
+    else if (
+        actionText.includes("intercepte")
+    ) {
+        resume =
+            `${defender.nom} tente une interception.`;
+    }
+    else if (
+        actionText.includes("bloque")
+    ) {
+        resume =
+            `${defender.nom} tente de fermer l'espace.`;
+    }
+    else if (
+        actionText.includes("contre")
+    ) {
+        resume =
+            `${defender.nom} tente un contre défensif.`;
+    }
+    else {
+        resume =
+            `${defender.nom} répond à l'action offensive.`;
+    }
+
+    const note = noterPave(action);
+
+    // ===============================
+    // ⏱️ STOP TIMERS DEFENSE
+    // ===============================
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
+
+    if (match.defenseTimer) {
+        clearTimeout(match.defenseTimer);
+        match.defenseTimer = null;
+    }
+
+    // ===============================
+    // 📩 MESSAGE DEFENSE
+    // ===============================
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚔️ DÉFENSE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${resume}
+
+📊 NOTE DU PAVÉ : ${note}/10
+
+⏳ Résolution du duel...
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`
+    });
+
+    // ===============================
+    // 🚀 RESOLUTION CENTRALE
+    // ===============================
+    const duelResult = await handleDuelMatch(
         match,
-        attacker,
-        defender,
         match.phaseDuel.attackPave,
         match.phaseDuel.defensePave
     );
 
-    // ===============================
-    // 🎨 TITLE
-    // ===============================
-    let title = "*🛡️⚽ MATCH UP⚔️ !*";
-
-    if (duel.type === "INTERCEPTION") {
-        title = "*🛑 INTERCEPTION !*";
-    } else if (duel.type === "win" || duel.type === "escape") {
-        title = "*🔥 DRIBBLE RÉUSSI !*";
-    } else if (duel.type === "stop") {
-        title = "*🧱 TACLE RÉUSSI !*";
-    }
-
-    // ===============================
-    // 🔥 NEXT
-    // ===============================
-    const nextPlayer = getNextPlayer(
-        match,
-        attacker,
-        defender,
-        duel.type
-    );
-
-    const nextId = nextPlayer?.id || nextPlayer?.jid;
-    const nextTag = getTagFromJid(nextId);
-
-    stopTurnTimer(match);
-
-    // ===============================
-    // ⚽ STATE UPDATE (CLEAN)
-    // ===============================
-    match.ballHolder = nextPlayer?.nom;
-    match.joueurTour = nextId;
-    match.attacker = nextId;
-
-    match.defender =
-        (nextId === attacker.id || nextId === attacker.jid)
-            ? defender.id || defender.jid
-            : attacker.id || attacker.jid;
-
-    // ===============================
-    // 🧹 CLEAN DUEL STATE (IMPORTANT)
-    // ===============================
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
-
-    // ===============================
-    // 📩 MESSAGE
-    // ===============================
-    await ovl.sendMessage(chat, {
-        text:
-`${title}
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
-
-${duel.msg}
-
-➡️ @${nextTag} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
-    });
-
-    // ===============================
-    // ⚠️ WARNING
-    // ===============================
-    if (match.warningTimer) clearTimeout(match.warningTimer);
-
-    match.warningTimer = setTimeout(async () => {
-
-        if (match.joueurTour !== nextId) return;
-
-        const tag = getTagFromJid(nextId);
-
-        await ovl.sendMessage(chat, {
-            text:
-`⚠️ @${tag} ❗⏳
-
-Il reste *1 MINUTE* pour jouer !
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [nextId]
-        });
-
-    }, 5 * 60 * 1000);
-
-    // ===============================
-    // ⏱️ TIMEOUT
-    // ===============================
-    if (match.turnTimer) clearTimeout(match.turnTimer);
-
-    match.turnTimer = setTimeout(() => {
-
-        if (match.joueurTour !== nextId) return;
-
-        const fallback =
-            getVisavisPlayer(match, attacker) || defender;
-
-        const fallbackId = fallback?.id || fallback?.jid;
-
-        match.joueurTour = fallbackId;
-        match.attacker = fallbackId;
-        match.defender = attacker.id || attacker.jid;
-
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-
-        const opponentTag = getTagFromJid(fallbackId);
-
-        ovl.sendMessage(chat, {
-            text:
-`⛔ LATENCE OUT ❌
-
-🔁 Changement de possession
-
-➡️ @${opponentTag} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-            mentions: [fallbackId]
-        });
-
-    }, 6 * 60 * 1000);
+    console.log("🔥 DUEL RESULT =", duelResult);
 
     return true;
-    }
+}
 
 
 // ===============================
