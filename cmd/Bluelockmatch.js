@@ -2785,7 +2785,7 @@ Il reste *1 MINUTE* pour jouer !
 
     return true;
     }
-} 
+
 
 // ===============================
 // 🎯 ATTAQUE⚽
