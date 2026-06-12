@@ -2365,6 +2365,19 @@ if (!actionCheck || actionCheck.trim().length < 5) {
         react: { text: "❌", key: ms.key }
     });
 
+    // ⚠️ seulement si vraiment en phase attaque
+    if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
+
+        match.phaseDuel.attackPave = null;
+        match.phaseDuel.step = "defense_pave";
+
+        // option: pénalité légère sans casser le duel
+    }
+
+    return true;
+}
+
+    
     // ===============================
     // 👤 JOUEUR PERDANT
     // ===============================
@@ -2449,12 +2462,19 @@ if (!actionCheck || actionCheck.trim().length < 5) {
     }
 
     // ===============================
-    // 🧠 IMPORTANT
-    // ===============================
-    match.phaseDuel = null;
+// 🧠 IMPORTANT
+// ===============================
 
-    return true;
+// on NE détruit pas un duel actif
+// sauf si le système est hors duel
+if (!match.phaseDuel?.active) {
+    match.phaseDuel = null;
 }
+
+// nettoyage léger uniquement
+match.pendingAttack = null;
+
+return true;
     
     // ===============================
     // ♻️ ANALYSE
