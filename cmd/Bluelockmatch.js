@@ -2512,10 +2512,7 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     // ===============================
 // 🔥 NEXT = DEFENSEUR DU DUEL
 // ===============================
-const nextId =
-    defender?.id ||
-    defender?.jid;
-
+const nextId = match.defender;
 const nextTag = getTagFromJid(nextId);
     
     // ===============================
