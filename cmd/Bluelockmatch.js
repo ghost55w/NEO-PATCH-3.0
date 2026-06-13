@@ -3134,6 +3134,9 @@ return true;
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
 
+    console.log("ATTACKER =", attacker?.nom);
+console.log("DEFENDER =", defender?.nom);
+    
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -3165,27 +3168,31 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 
     let attacker = null;
 
-    // ===============================
-    // ⚽ PORTEUR PRIORITAIRE
-    // ===============================
-    if (match.ballHolder) {
+// ===============================
+// ⚽ PORTEUR PRIORITAIRE
+// ===============================
+if (match.ballHolder) {
 
-        attacker = allPlayers.find(
-            p => p.nom === match.ballHolder
-        );
+    attacker = allPlayers.find(
+        p => p.nom === match.ballHolder
+    );
 
-        if (!attacker) {
-            attacker = allPlayers[0];
-        }
-    }
-
-    // fallback
     if (!attacker) {
-        attacker = findPlayer(attaqueText);
+        attacker = allPlayers[0];
     }
+}
 
-    let defender = findPlayer(defenseText);
+// fallback
+if (!attacker) {
+    attacker =
+        match.phaseDuel?.attacker ||
+        findPlayer(attaqueText);
+}
 
+let defender =
+    match.phaseDuel?.defender ||
+    findPlayer(defenseText);
+    
     // ===============================
     // 🧠 TARGET TACTIQUE
     // ===============================
