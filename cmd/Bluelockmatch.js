@@ -2466,6 +2466,13 @@ if (!actionCheck || actionCheck.trim().length < 5) {
     await new Promise(r => setTimeout(r, 1000));
 
    const action = actionCheck;
+
+console.log("========== DEBUG DUEL ==========");
+console.log("phaseDuel =", match.phaseDuel);
+console.log("joueurTour =", match.joueurTour);
+console.log("sender =", sender);
+console.log("waitingDefenseFrom =", match.waitingDefenseFrom);
+console.log("================================");
         
 /* ===============================
 🧠 ACTION TEXT
@@ -3126,7 +3133,7 @@ return true;
 // ⚽ DUELS ET MATCH UP 🆚
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
-    
+
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -3158,31 +3165,27 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 
     let attacker = null;
 
-// ===============================
-// ⚽ PORTEUR PRIORITAIRE
-// ===============================
-if (match.ballHolder) {
+    // ===============================
+    // ⚽ PORTEUR PRIORITAIRE
+    // ===============================
+    if (match.ballHolder) {
 
-    attacker = allPlayers.find(
-        p => p.nom === match.ballHolder
-    );
+        attacker = allPlayers.find(
+            p => p.nom === match.ballHolder
+        );
 
-    if (!attacker) {
-        attacker = allPlayers[0];
+        if (!attacker) {
+            attacker = allPlayers[0];
+        }
     }
-}
 
-// fallback
-if (!attacker) {
-    attacker =
-        match.phaseDuel?.attacker ||
-        findPlayer(attaqueText);
-}
+    // fallback
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
 
-let defender =
-    match.phaseDuel?.defender ||
-    findPlayer(defenseText);
-    
+    let defender = findPlayer(defenseText);
+
     // ===============================
     // 🧠 TARGET TACTIQUE
     // ===============================
