@@ -3129,14 +3129,12 @@ match.defenseTimer = setTimeout(() => {
 return true;
 }
 
+
 // ===============================
 // ⚽ DUELS ET MATCH UP 🆚
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
 
-    console.log("ATTACKER =", attacker?.nom);
-console.log("DEFENDER =", defender?.nom);
-    
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -3145,76 +3143,29 @@ console.log("DEFENDER =", defender?.nom);
         };
     }
 
-    const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
     // ===============================
-    // 🔍 FIND PLAYER
+    // 🎯 JOUEURS DU DUEL
     // ===============================
-    const findPlayer = (txt) => {
+    const attacker = match.phaseDuel?.attacker;
+    const defender = match.phaseDuel?.defender;
 
-        const t = pureName(txt);
-
-        return allPlayers.find(p => {
-
-            const n = pureName(p.nom);
-
-            return t.includes(n) || n.includes(t);
-
-        }) || null;
-    };
-
-    let attacker = null;
-
-// ===============================
-// ⚽ PORTEUR PRIORITAIRE
-// ===============================
-if (match.ballHolder) {
-
-    attacker = allPlayers.find(
-        p => p.nom === match.ballHolder
-    );
-
-    if (!attacker) {
-        attacker = allPlayers[0];
-    }
-}
-
-// fallback
-if (!attacker) {
-    attacker =
-        match.phaseDuel?.attacker ||
-        findPlayer(attaqueText);
-}
-
-let defender =
-    match.phaseDuel?.defender ||
-    findPlayer(defenseText);
-    
-    // ===============================
-    // 🧠 TARGET TACTIQUE
-    // ===============================
-    const tacticalTarget =
-        detectTargetPlayer(defenseText, allPlayers);
-
-    if (tacticalTarget) {
-        defender = tacticalTarget;
-    }
+    console.log("ATTACKER =", attacker?.nom);
+    console.log("DEFENDER =", defender?.nom);
 
     // ===============================
     // ❌ VALIDATION
     // ===============================
     if (!attacker || !defender) {
-
         return {
             ok: false,
             type: "erreur",
-            message: "❌ Joueurs introuvables"
+            message: "❌ Joueurs du duel introuvables"
         };
     }
 
+    // ===============================
+    // 📊 STATS
+    // ===============================
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
 
@@ -3226,6 +3177,7 @@ let defender =
     // ===============================
     let result = null;
 
+    
 // ===============================
 // ⚡ VITESSE
 // ===============================
