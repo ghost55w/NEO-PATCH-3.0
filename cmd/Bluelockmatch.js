@@ -2466,13 +2466,6 @@ if (!actionCheck || actionCheck.trim().length < 5) {
     await new Promise(r => setTimeout(r, 1000));
 
    const action = actionCheck;
-
-console.log("========== DEBUG DUEL ==========");
-console.log("phaseDuel =", match.phaseDuel);
-console.log("joueurTour =", match.joueurTour);
-console.log("sender =", sender);
-console.log("waitingDefenseFrom =", match.waitingDefenseFrom);
-console.log("================================");
         
 /* ===============================
 🧠 ACTION TEXT
@@ -3133,9 +3126,6 @@ return true;
 // ⚽ DUELS ET MATCH UP 🆚
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
-
-    console.log("ATTACKER =", attacker?.nom);
-console.log("DEFENDER =", defender?.nom);
     
     if (!attaqueText || !defenseText) {
         return {
