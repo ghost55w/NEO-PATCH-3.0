@@ -2715,24 +2715,53 @@ if (
 🔷BLUELOCK⚽🥅`
     });
 
-    // ===============================
-    // 🚀 RESOLUTION CENTRALE
-    // ===============================
+  // ===============================
+// 🚀 RESOLUTION CENTRALE
+// ===============================
+try {
+
+    await ovl.sendMessage(chat, {
+        text: "🧪 DEBUG 1 : avant handleDuelMatch"
+    });
+
     const duelResult = await handleDuelMatch(
-    match,
-    match.phaseDuel.attackPave,
-    match.phaseDuel.defensePave
-);
+        match,
+        match.phaseDuel.attackPave,
+        match.phaseDuel.defensePave
+    );
 
-console.log("🔥 DUEL RESULT =", duelResult);
+    await ovl.sendMessage(chat, {
+        text: "🧪 DEBUG 2 : après handleDuelMatch"
+    });
 
-await ovl.sendMessage(chat, {
-    text: duelResult.message,
-    mentions: [
-        match.phaseDuel.attacker.id,
-        match.phaseDuel.defender.id
-    ]
-});
+    await ovl.sendMessage(chat, {
+        text:
+`🧪 DEBUG RESULT
+
+${JSON.stringify(duelResult, null, 2)}`
+    });
+
+    const attackerId = match.phaseDuel?.attacker?.id;
+    const defenderId = match.phaseDuel?.defender?.id;
+
+    await ovl.sendMessage(chat, {
+        text: duelResult?.message || "❌ Aucun message retourné.",
+        mentions: [
+            attackerId,
+            defenderId
+        ].filter(Boolean)
+    });
+
+} catch (err) {
+
+    await ovl.sendMessage(chat, {
+        text:
+`❌ ERREUR DUEL
+
+${err?.stack || err?.message || String(err)}`
+    });
+
+}
 
 return true;
 } 
