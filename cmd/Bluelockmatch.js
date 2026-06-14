@@ -2716,9 +2716,9 @@ if (
     });
 
     // ===============================
-    // 🚀 RESOLUTION CENTRALE
-    // ===============================
-    const duelResult = await handleDuelMatch(
+// 🚀 RESOLUTION CENTRALE
+// ===============================
+const duelResult = await handleDuelMatch(
     match,
     match.phaseDuel.attackPave,
     match.phaseDuel.defensePave
@@ -2726,16 +2726,62 @@ if (
 
 console.log("🔥 DUEL RESULT =", duelResult);
 
+if (!duelResult) {
+    console.log("❌ duelResult undefined");
+    return true;
+}
+
+const duelType = duelResult.type;
+
+// ===============================
+// 🔥 POSSESSION
+// ===============================
+let nextPlayer;
+
+if (duelResult.ok) {
+    nextPlayer = attacker;
+    match.ballHolder = attacker.nom;
+}
+else {
+    nextPlayer = defender;
+    match.ballHolder = defender.nom;
+}
+
+const nextId =
+    nextPlayer.id ||
+    nextPlayer.jid;
+
+const nextTag =
+    getTagFromJid(nextId);
+
+// ===============================
+// ⚽ SYNC
+// ===============================
+match.joueurTour = nextId;
+match.attacker = nextId;
+
+match.phaseDuel = null;
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
+
+// ===============================
+// 📩 MESSAGE FINAL
+// ===============================
 await ovl.sendMessage(chat, {
-    text: duelResult.message,
-    mentions: [
-        match.phaseDuel.attacker.id,
-        match.phaseDuel.defender.id
-    ]
+    text:
+`*🛡️⚽ RÉSOLUTION DU DUEL !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+${duelResult.msg}
+
+➡️ @${nextTag} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+    mentions: [nextId]
 });
 
 return true;
-} 
 
 // ===============================
 // 🎯 ATTAQUE⚽
