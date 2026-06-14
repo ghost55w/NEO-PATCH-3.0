@@ -2718,26 +2718,24 @@ if (
     // ===============================
     // 🚀 RESOLUTION CENTRALE
     // ===============================
-    const duelResult = await handleDuelMatch(
-    match,
-    match.phaseDuel.attackPave,
-    match.phaseDuel.defensePave
-);
+    const duelResult = await handleDuelMatch(...);
 
+// 🧱 CAS MATCH UP
 if (duelResult?.type === "PASSIVE_BLOCK") {
 
     match.phaseDuel.step = "match_up";
+    match.phaseDuel.defensePave = null;
 
-    await sendMatchUp(
-        chat,
-        ovl,
-        match,
-        duelResult
-    );
+    await sendMatchUp(chat, ovl, match, {
+        attacker: duelResult.attacker,
+        defender: duelResult.defender,
+        msg: duelResult.msg
+    });
 
     return true;
 }
 
+// ⚽ CAS NORMAL DUEL
 await ovl.sendMessage(chat, {
     text: duelResult.message,
     mentions: [
@@ -2748,7 +2746,6 @@ await ovl.sendMessage(chat, {
 
 return true;
 } 
-
 
 // ===============================
 // 🎯 ATTAQUE⚽
@@ -3392,8 +3389,16 @@ if (!result && isDribbleAction && isTackleAction) {
             msg: "❌ Contrôle trop collé au pied"
         };
     }
-if (result) return buildResult(result);
-    
+if (result) {
+    return {
+        ok: result.ok,
+        type: result.type,
+        attacker,
+        defender,
+        msg: result.msg,
+        message: result.msg
+    };
+}
     // ===============================
     // 🧠 BODY ADVANTAGE
     // ===============================
@@ -3482,8 +3487,16 @@ let reactionWindow =
             msg: `🛑 ${defender.nom} récupère le ballon proprement`
         };
     }
-if (result) return buildResult(result);
-    
+if (result) {
+    return {
+        ok: result.ok,
+        type: result.type,
+        attacker,
+        defender,
+        msg: result.msg,
+        message: result.msg
+    };
+}
     // ===============================
     // ⚔️ DRIBBLE FINAL
     // ===============================
@@ -3758,7 +3771,16 @@ if (!result && isPhysical) {
         }
     }
 }
-if (result) return buildResult(result);
+if (result) {
+    return {
+        ok: result.ok,
+        type: result.type,
+        attacker,
+        defender,
+        msg: result.msg,
+        message: result.msg
+    };
+}
     
 
 // ===============================
