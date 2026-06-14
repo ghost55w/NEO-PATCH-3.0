@@ -2718,25 +2718,14 @@ if (
  // ===============================
     // 🚀 RESOLUTION CENTRALE
     // ===============================
-    const duelResult = await handleDuelMatch(
-    match,
-    match.phaseDuel.attackPave,
-    match.phaseDuel.defensePave
-);
-
-console.log("🔥 DUEL RESULT =", duelResult);
+    const duelResult = await handleDuelMatch(...);
 
 await ovl.sendMessage(chat, {
-    text: duelResult.message,
-    mentions: [
-        match.phaseDuel.attacker.id,
-        match.phaseDuel.defender.id
-    ]
+    text: duelResult.message
 });
 
 return true;
 } 
-
         
 // ===============================
 // 🎯 ATTAQUE⚽
