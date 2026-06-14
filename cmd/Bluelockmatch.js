@@ -3436,11 +3436,6 @@ let reactionWindow =
     // ===============================
     // ❌ ANTICIPATION
     // ===============================
-    let reactionWindow =
-        diff > 10 ? "after_sprint" :
-        diff > 0 ? "after_combo" :
-        "anytime";
-
     if (tackle.ok && reactionWindow === "after_combo") {
         result = {
             ok: false,
