@@ -3379,7 +3379,8 @@ if (!result && isDribbleAction && isTackleAction) {
             msg: "❌ Contrôle trop collé au pied"
         };
     }
-
+if (result) return buildResult(result);
+    
     // ===============================
     // 🧠 BODY ADVANTAGE
     // ===============================
@@ -3435,8 +3436,6 @@ let reactionWindow =
     // ===============================
     // ❌ ANTICIPATION
     // ===============================
-    const diff = (atkStats.dri || 50) - (defStats.def || 50);
-
     let reactionWindow =
         diff > 10 ? "after_sprint" :
         diff > 0 ? "after_combo" :
@@ -3475,7 +3474,8 @@ let reactionWindow =
             msg: `🛑 ${defender.nom} récupère le ballon proprement`
         };
     }
-
+if (result) return buildResult(result);
+    
     // ===============================
     // ⚔️ DRIBBLE FINAL
     // ===============================
@@ -3509,123 +3509,6 @@ let reactionWindow =
                 ok: false,
                 type: "stop",
                 msg: `🧱 ${defender.nom} stoppe l'action`
-            };
-        }
-    }
-}
-
-
-// ===============================
-// 💪 DUELS PHYSIQUES
-// ===============================
-const physicalKeywords = [
-    "épaule",
-    "coup d'épaule",
-    "avant bras",
-    "paume",
-    "contact",
-    "pousser",
-    "bouscule"
-];
-
-const isPhysical =
-    physicalKeywords.some(
-        k =>
-            atk.includes(k) ||
-            def.includes(k)
-    );
-
-if (!result && isPhysical) {
-
-    const atkPhy = atkStats.phy || 50;
-    const defPhy = defStats.phy || 50;
-
-    const diffPhy = defPhy - atkPhy;
-
-    // ===============================
-    // 🧱 VALIDATION ÉPAULE
-    // ===============================
-    const isShoulder =
-        def.includes("épaule");
-
-    const validTarget =
-        def.includes("épaule droite") ||
-        def.includes("épaule gauche");
-
-    // ❌ faute
-    if (isShoulder && !validTarget) {
-
-        const zone = match.zone || "C2";
-
-        const isPenalty =
-            zone === "A1";
-
-        result = {
-            ok: false,
-            type: "faute",
-            msg:
-`❌ Faute ! (${isPenalty ? "PENALTY" : "COUP FRANC"})`
-        };
-    }
-
-    // ===============================
-    // 💥 RÉSOLUTION PHYSIQUE
-    // ===============================
-    else {
-
-        // 💥 chute
-        if (diffPhy > 15) {
-
-            match.fallenPlayer =
-                attacker.nom;
-
-            result = {
-                ok: false,
-                type: "chute",
-                msg:
-`💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
-            };
-        }
-
-        // ⚖️ déséquilibre
-        else if (diffPhy > 0) {
-
-            match.unbalancedPlayer =
-                attacker.nom;
-
-            result = {
-                ok: false,
-                type: "déséquilibre",
-                msg:
-`⚖️ ${attacker.nom} perd l'équilibre`
-            };
-        }
-
-        // 🤜🤛 équilibre
-        else if (diffPhy === 0) {
-
-            match.unbalancedPlayer =
-                attacker.nom;
-
-            result = {
-                ok: false,
-                type: "déséquilibre",
-                msg:
-`🤜🤛 Duel physique équilibré`
-            };
-        }
-
-        // 💪 résistance
-        else {
-
-            match.unbalancedPlayer =
-                defender.nom;
-
-            result = {
-                ok: true,
-                type: "win_physical",
-                msg:
-`💪 ${attacker.nom} résiste au contact`
             };
         }
     }
@@ -3749,7 +3632,126 @@ if (!result && isChase) {
 `🏃 Duel de course toujours en cours...`
         };
     }
+                } 
+
+    
+// ===============================
+// 💪 DUELS PHYSIQUES
+// ===============================
+const physicalKeywords = [
+    "épaule",
+    "coup d'épaule",
+    "avant bras",
+    "paume",
+    "contact",
+    "pousser",
+    "bouscule"
+];
+
+const isPhysical =
+    physicalKeywords.some(
+        k =>
+            atk.includes(k) ||
+            def.includes(k)
+    );
+
+if (!result && isPhysical) {
+
+    const atkPhy = atkStats.phy || 50;
+    const defPhy = defStats.phy || 50;
+
+    const diffPhy = defPhy - atkPhy;
+
+    // ===============================
+    // 🧱 VALIDATION ÉPAULE
+    // ===============================
+    const isShoulder =
+        def.includes("épaule");
+
+    const validTarget =
+        def.includes("épaule droite") ||
+        def.includes("épaule gauche");
+
+    // ❌ faute
+    if (isShoulder && !validTarget) {
+
+        const zone = match.zone || "C2";
+
+        const isPenalty =
+            zone === "A1";
+
+        result = {
+            ok: false,
+            type: "faute",
+            msg:
+`❌ Faute ! (${isPenalty ? "PENALTY" : "COUP FRANC"})`
+        };
+    }
+
+    // ===============================
+    // 💥 RÉSOLUTION PHYSIQUE
+    // ===============================
+    else {
+
+        // 💥 chute
+        if (diffPhy > 15) {
+
+            match.fallenPlayer =
+                attacker.nom;
+
+            result = {
+                ok: false,
+                type: "chute",
+                msg:
+`💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
+            };
+        }
+
+        // ⚖️ déséquilibre
+        else if (diffPhy > 0) {
+
+            match.unbalancedPlayer =
+                attacker.nom;
+
+            result = {
+                ok: false,
+                type: "déséquilibre",
+                msg:
+`⚖️ ${attacker.nom} perd l'équilibre`
+            };
+        }
+
+        // 🤜🤛 équilibre
+        else if (diffPhy === 0) {
+
+            match.unbalancedPlayer =
+                attacker.nom;
+
+            result = {
+                ok: false,
+                type: "déséquilibre",
+                msg:
+`🤜🤛 Duel physique équilibré`
+            };
+        }
+
+        // 💪 résistance
+        else {
+
+            match.unbalancedPlayer =
+                defender.nom;
+
+            result = {
+                ok: true,
+                type: "win_physical",
+                msg:
+`💪 ${attacker.nom} résiste au contact`
+            };
+        }
+    }
 }
+if (result) return buildResult(result);
+    
 
 // ===============================
 // ⚖️ FALLBACK
