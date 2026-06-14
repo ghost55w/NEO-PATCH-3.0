@@ -2715,10 +2715,14 @@ if (
 🔷BLUELOCK⚽🥅`
     });
 
- // ===============================
-    // 🚀 RESOLUTION CENTRALE
     // ===============================
-    const duelResult = await handleDuelMatch(...);
+// 🚀 RESOLUTION CENTRALE
+// ===============================
+const duelResult = await handleDuelMatch(
+    match,
+    match.phaseDuel.attackPave,
+    match.phaseDuel.defensePave
+);
 
 await ovl.sendMessage(chat, {
     text: duelResult.message
