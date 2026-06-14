@@ -2737,14 +2737,7 @@ await ovl.sendMessage(chat, {
 return true;
 } 
 
-        match.phaseDuel.attacker.id,
-        match.phaseDuel.defender.id
-    ]
-});
-
-return true;
-} 
-
+        
 // ===============================
 // 🎯 ATTAQUE⚽
 // ===============================
