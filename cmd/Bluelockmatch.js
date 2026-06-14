@@ -2724,7 +2724,19 @@ if (
     match.phaseDuel.defensePave
 );
 
-console.log("🔥 DUEL RESULT =", duelResult);
+if (duelResult?.type === "PASSIVE_BLOCK") {
+
+    match.phaseDuel.step = "match_up";
+
+    await sendMatchUp(
+        chat,
+        ovl,
+        match,
+        duelResult
+    );
+
+    return true;
+}
 
 await ovl.sendMessage(chat, {
     text: duelResult.message,
@@ -2735,7 +2747,6 @@ await ovl.sendMessage(chat, {
 });
 
 return true;
-} 
 
 // ===============================
 // 🎯 ATTAQUE⚽
