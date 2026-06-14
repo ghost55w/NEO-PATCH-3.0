@@ -2715,30 +2715,28 @@ if (
 🔷BLUELOCK⚽🥅`
     });
 
-    // ===============================
+ // ===============================
     // 🚀 RESOLUTION CENTRALE
     // ===============================
-    const duelResult = await handleDuelMatch(...);
+    const duelResult = await handleDuelMatch(
+    match,
+    match.phaseDuel.attackPave,
+    match.phaseDuel.defensePave
+);
 
-// 🧱 CAS MATCH UP
-if (duelResult?.type === "PASSIVE_BLOCK") {
+console.log("🔥 DUEL RESULT =", duelResult);
 
-    match.phaseDuel.step = "match_up";
-    match.phaseDuel.defensePave = null;
-
-    await sendMatchUp(chat, ovl, match, {
-        attacker: duelResult.attacker,
-        defender: duelResult.defender,
-        msg: duelResult.msg
-    });
-
-    return true;
-}
-
-// ⚽ CAS NORMAL DUEL
 await ovl.sendMessage(chat, {
     text: duelResult.message,
     mentions: [
+        match.phaseDuel.attacker.id,
+        match.phaseDuel.defender.id
+    ]
+});
+
+return true;
+} 
+
         match.phaseDuel.attacker.id,
         match.phaseDuel.defender.id
     ]
