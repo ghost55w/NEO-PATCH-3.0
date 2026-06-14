@@ -2747,6 +2747,8 @@ await ovl.sendMessage(chat, {
 });
 
 return true;
+} 
+
 
 // ===============================
 // 🎯 ATTAQUE⚽
