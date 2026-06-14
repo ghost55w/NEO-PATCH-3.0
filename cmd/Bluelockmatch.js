@@ -3343,7 +3343,6 @@ const isTackleAction =
     def.includes("contre") ||
     def.includes("pied") ||
     def.includes("talon");
-
 // ===============================
 // ⚽ DUEL TECHNIQUE
 // DRIBBLE vs TACLE
@@ -3354,48 +3353,29 @@ if (
     isTackleAction
 ) {
 
-    const attackStat =
-        atkStats.dri || 50;
+    const duel = resolveDribbleDuel(
+        match,
+        attacker,
+        defender,
+        attaqueText,
+        defenseText
+    );
 
-    const defenseStat =
-        defStats.def || 50;
+    result = {
+        ...duel,
 
-    const attackerWins =
-        attackStat > defenseStat;
+        attacker,
+        defender,
 
-    if (attackerWins) {
+        attackStat:
+            atkStats.dri || 50,
 
-        match.joueurTour =
-            attacker.id || attacker.jid;
+        defenseStat:
+            defStats.def || 50
+    };
 
-        result = {
-            ok: true,
-            type: "DRIBBLE_WIN",
-
-            attacker,
-            defender,
-
-            msg:
-`🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-        };
-
-    } else {
-
-        match.joueurTour =
-            defender.id || defender.jid;
-
-        result = {
-            ok: false,
-            type: "DRIBBLE_LOSE",
-
-            attacker,
-            defender,
-
-            msg:
-`⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
-        };
-    }
 }
+
 
 // ===============================
 // 💪 DUELS PHYSIQUES
@@ -3658,6 +3638,8 @@ let nextId;
 
 // 🟢 Attaquant gagne → garde la balle
 if (
+    duelType === "win" ||
+    duelType === "escape" ||
     duelType === "DRIBBLE_WIN" ||
     duelType === "CONSERVATION" ||
     result.ok === true
@@ -3668,8 +3650,12 @@ if (
 
 // 🔴 Défenseur gagne → récupère la balle
 else if (
-    duelType === "DRIBBLE_LOSE" ||
+    duelType === "stop" ||
+    duelType === "contre" ||
     duelType === "INTERCEPTION" ||
+    duelType === "faute" ||
+    duelType === "divination" ||
+    duelType === "DRIBBLE_LOSE" ||
     result.ok === false
 ) {
     nextId = defender.id || defender.jid;
@@ -3705,6 +3691,24 @@ else if (duelType === "win") {
 }
 else if (duelType === "stop") {
     title = `*🧱 DÉFENSE SOLIDE !*`;
+}
+    else if (duelType === "win") {
+    title = `*🔥 DRIBBLE RÉUSSI !*`;
+}
+else if (duelType === "escape") {
+    title = `*🚀 ACCÉLÉRATION !*`;
+}
+else if (duelType === "stop") {
+    title = `*🧱 DÉFENSE SOLIDE !*`;
+}
+else if (duelType === "contre") {
+    title = `*⚔️ DUEL ÉQUILIBRÉ !*`;
+}
+else if (duelType === "divination") {
+    title = `*❌ ANTICIPATION ILLÉGALE !*`;
+}
+else if (duelType === "faute") {
+    title = `*🚨 FAUTE TECHNIQUE !*`;
 }
 
 // ===============================
