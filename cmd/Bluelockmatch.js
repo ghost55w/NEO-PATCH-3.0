@@ -3139,11 +3139,22 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
 // ===============================
 // 👥 PARTICIPANTS DU DUEL
 // ===============================
+const allPlayers = [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
+
 const attacker =
-    match.phaseDuel?.attacker || null;
+    match.phaseDuel?.attacker ||
+    allPlayers.find(
+        p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
+    );
 
 const defender =
-    match.phaseDuel?.defender || null;
+    match.phaseDuel?.defender ||
+    allPlayers.find(
+        p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
+    );
 
 // ===============================
 // ❌ VALIDATION
