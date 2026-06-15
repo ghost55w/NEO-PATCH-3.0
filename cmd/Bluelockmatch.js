@@ -3693,104 +3693,18 @@ if (!result) {
 }
     
 // ===============================
-// 🎨 TYPE SAFE
-// ===============================
-const duelType = result?.type;
-
-// ===============================
-// 🔥 NEXT (POSSESSION LOGIC)
-// ===============================
-let nextId;
-
-// 🟢 Attaquant gagne → garde la balle
-if (
-    duelType === "DRIBBLE_WIN" ||
-    duelType === "CONSERVATION" ||
-    result.ok === true
-) {
-    nextId = attacker.id || attacker.jid;
-    match.ballHolder = attacker.nom;
-}
-
-// 🔴 Défenseur gagne → récupère la balle
-else if (
-    duelType === "DRIBBLE_LOSE" ||
-    duelType === "INTERCEPTION" ||
-    result.ok === false
-) {
-    nextId = defender.id || defender.jid;
-    match.ballHolder = defender.nom;
-}
-
-// 🟡 fallback sécurité
-else {
-    nextId = match.joueurTour;
-}
-
-const nextTag = getTagFromJid(nextId);
-
-// ===============================
-// 🎨 TITRE
-// ===============================
-let title = `*🛡️⚽ MATCH UP⚔️ !*`;
-
-if (
-    duelType === "DRIBBLE_WIN" ||
-    duelType === "DRIBBLE_LOSE"
-) {
-    title = `*🛡️RÉSOLUTION DU DUEL⚽🆚*`;
-}
-else if (duelType === "INTERCEPTION") {
-    title = `*🛑 INTERCEPTION !*`;
-}
-else if (duelType === "CONSERVATION") {
-    title = `*⚡ CONSERVATION !*`;
-}
-else if (duelType === "win") {
-    title = `*🔥 ACTION RÉUSSIE !*`;
-}
-else if (duelType === "stop") {
-    title = `*🧱 DÉFENSE SOLIDE !*`;
-}
-
-// ===============================
-// 📊 STATS SAFE
-// ===============================
-const attackStat = result.attackStat ?? attacker?.stats?.dri ?? 50;
-const defenseStat = result.defenseStat ?? defender?.stats?.def ?? 50;
-
-// ===============================
-// 📤 RETURN
+// 📤 RETURN SIMPLE
 // ===============================
 return {
     ok: result.ok,
-    type: duelType,
+    type: result.type,
 
     attacker,
     defender,
 
-    msg: result.msg,
-
-    message:
-`${title}
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${
-duelType === "DRIBBLE_WIN" ||
-duelType === "DRIBBLE_LOSE"
-?
-`♻️ ${defender.nom} : Défense ${defenseStat} 🆚 ${attacker.nom} : Dribble ${attackStat}`
-:
-`${defender.nom.toUpperCase()} 🆚 ${attacker.nom.toUpperCase()}`
-}
-
-${result.msg}
-
-➡️ @${nextTag} NEXT
-
-╰───────────────────
-              🔷BLUELOCK⚽🥅`
+    msg: result.msg
 };
-} 
+
 
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
