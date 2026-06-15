@@ -2747,7 +2747,7 @@ else {
     match.ballHolder = defender.nom;
 }
 
-const nextId =
+let nextId =
     nextPlayer.id ||
     nextPlayer.jid;
 
