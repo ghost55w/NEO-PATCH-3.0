@@ -2747,9 +2747,7 @@ else {
     match.ballHolder = defender.nom;
 }
 
-let nextId =
-    nextPlayer.id ||
-    nextPlayer.jid;
+nextId = nextPlayer.id || nextPlayer.jid;
 
 const nextTag =
     getTagFromJid(nextId);
