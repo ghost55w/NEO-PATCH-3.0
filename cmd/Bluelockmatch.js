@@ -3704,7 +3704,7 @@ return {
 
     msg: result.msg
 };
-
+} 
 
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
