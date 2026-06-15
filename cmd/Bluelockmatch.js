@@ -2780,6 +2780,7 @@ ${duelResult.msg}
 });
 
 return true;
+} 
 
 // ===============================
 // 🎯 ATTAQUE⚽
