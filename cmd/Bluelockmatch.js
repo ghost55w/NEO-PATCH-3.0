@@ -2718,19 +2718,33 @@ if (
     // ===============================
 // 🚀 RESOLUTION CENTRALE
 // ===============================
-const duelResult = await handleDuelMatch(
-    match,
-    match.phaseDuel.attackPave,
-    match.phaseDuel.defensePave
-);
+// ===============================
+// 🚀 RESOLUTION CENTRALE
+// ===============================
+let duelResult;
 
-console.log("🔥 DUEL RESULT =", duelResult);
+try {
+
+    duelResult = await handleDuelMatch(
+        match,
+        match.phaseDuel.attackPave,
+        match.phaseDuel.defensePave
+    );
+
+    console.log("🔥 DUEL RESULT =", duelResult);
+
+} catch (err) {
+
+    console.log("❌ ERREUR DUEL");
+    console.error(err);
+
+    return true;
+}
 
 if (!duelResult) {
     console.log("❌ duelResult undefined");
     return true;
 }
-
 const duelType = duelResult.type;
 
 // ===============================
