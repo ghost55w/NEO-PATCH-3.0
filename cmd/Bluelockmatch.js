@@ -2517,15 +2517,15 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     // ===============================
 // 🔥 NEXT = DEFENSEUR DU DUEL
 // ===============================
-const nextId = match.defender;
-const nextTag = getTagFromJid(nextId);
+const duelNextId = match.defender;
+const nextTag = getTagFromJid(duelNextId);
     
-    // ===============================
-    // ⚽ STATE SYNC (IMPORTANT)
-    // ===============================
-    match.ballHolder = attacker.nom;
-    match.joueurTour = nextId;
-    match.waitingDefenseFrom = nextId;
+// ===============================
+// ⚽ STATE SYNC (IMPORTANT)
+// ===============================
+match.ballHolder = attacker.nom;
+match.joueurTour = duelNextId;
+match.waitingDefenseFrom = duelNextId;
 
     // ===============================
     // 📩 MESSAGE ATTACK
@@ -2543,7 +2543,7 @@ const nextTag = getTagFromJid(nextId);
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
+        mentions: [duelNextId]
     });
 
     // ===============================
@@ -2553,7 +2553,7 @@ const nextTag = getTagFromJid(nextId);
 
     match.warningTimer = setTimeout(async () => {
 
-        if (match.joueurTour !== nextId) return;
+        if (match.joueurTour !== duelNextId) return;
 
         await ovl.sendMessage(chat, {
             text:
@@ -2563,7 +2563,7 @@ Il reste *1 MINUTE* pour défendre !
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [nextId]
+            mentions: [duelNextId]
         });
 
     }, 5 * 60 * 1000);
@@ -2575,7 +2575,7 @@ Il reste *1 MINUTE* pour défendre !
 
     match.defenseTimer = setTimeout(() => {
 
-        if (match.joueurTour !== nextId) return;
+        if (match.joueurTour !== duelNextId) return;
 
         const fallback =
             getVisavisPlayer(match, attacker) || defender;
