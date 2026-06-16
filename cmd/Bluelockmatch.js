@@ -3311,41 +3311,6 @@ let defVmax =
         ? defBaseVmax * 0.5
         : defBaseVmax;
 
-// ===============================
-// 🧱 DÉFENSE PASSIVE SIMPLE 
-// ===============================
-const passiveKeywords = [
-    "se place",
-    "devant",
-    "barrer",
-    "bloque",
-    "ferme",
-    "coupe la route",
-    "bloque le passage",
-    "posture défensive",
-    "défense basse",
-    "barre la route",
-    "empêche l'avancée",
-    "obstrue",
-    "reste devant",
-    "fait écran"
-];
-
-const isPassive =
-    passiveKeywords.some(k =>
-        atk.includes(k) || def.includes(k)
-    );
-
-// 🔥 PRIORITÉ ABSOLUE
-if (isPassive) {
-    return {
-        ok: false,
-        type: "PASSIVE_BLOCK",
-        attacker,
-        defender,
-        msg: `⚔️ ${defender.nom} gêne la progression`
-    };
-}
 
 // ===============================
 // ⚽ DRIBBLES OFFICIELS
@@ -3390,7 +3355,6 @@ const isTackleAction =
     def.includes("pied") ||
     def.includes("talon");
 
-
 // ===============================
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
 // ===============================
@@ -3427,6 +3391,42 @@ if (isDribbleAction && isTackleAction) {
     }
 }
 
+ // ===============================
+// 🧱 DÉFENSE PASSIVE SIMPLE 
+// ===============================
+const passiveKeywords = [
+    "se place",
+    "devant",
+    "barrer",
+    "bloque",
+    "ferme",
+    "coupe la route",
+    "bloque le passage",
+    "posture défensive",
+    "défense basse",
+    "barre la route",
+    "empêche l'avancée",
+    "obstrue",
+    "reste devant",
+    "fait écran"
+];
+
+const isPassive =
+    passiveKeywords.some(k =>
+        atk.includes(k) || def.includes(k)
+    );
+
+// 🔥 PRIORITÉ ABSOLUE
+if (isPassive) {
+    return {
+        ok: false,
+        type: "PASSIVE_BLOCK",
+        attacker,
+        defender,
+        msg: `⚔️ ${defender.nom} gêne la progression`
+    };
+}
+    
 // ===============================
 // 💪 DUELS PHYSIQUES
 // ===============================
