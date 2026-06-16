@@ -2720,9 +2720,9 @@ await ovl.sendMessage(chat, {
 // ===============================
 const attackPave = match.phaseDuel.attackPave;
 const defensePave = match.phaseDuel.defensePave;
-const attacker = match.phaseDuel.attacker;
-const defender = match.phaseDuel.defender;
-
+const duelAttacker = match.phaseDuel.attacker;
+const duelDefender = match.phaseDuel.defender;
+    
 // ===============================
 // 🧠 RESOLUTION
 // ===============================
@@ -2736,14 +2736,15 @@ setTimeout(async () => {
         defensePave
     );
 
+    
     // ===============================
-    // 🎯 NEXT LOGIC PROPRE
-    // ===============================
-    const nextPlayer = duelResult.ok
-        ? attacker
-        : defender;
+// 🎯 NEXT LOGIC PROPRE
+// ===============================
+const nextPlayer = duelResult.ok
+    ? duelAttacker
+    : duelDefender;
 
-    const nextId = nextPlayer.id || nextPlayer.jid;
+const nextId = nextPlayer.id || nextPlayer.jid;
 
     // ===============================
     // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
