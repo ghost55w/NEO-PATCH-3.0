@@ -2750,18 +2750,17 @@ const nextId = nextPlayer.id || nextPlayer.jid;
     // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
     // ===============================
     await ovl.sendMessage(chat, {
-        text:
+    text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${duelResult.msg}
 
-➡️ PROCHAIN JOUEUR : @${getTagFromJid(nextId)}
+➡️ @${getTagFromJid(nextId)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId],
-        edit: sentMsg.key   
-    });
+    mentions: [nextId]
+});
 
     // ===============================
     // 🧹 CLEAN
