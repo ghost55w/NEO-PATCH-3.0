@@ -2715,9 +2715,18 @@ if (
 🔷BLUELOCK⚽🥅`
     });
 
-    // ===============================
-// 🚀 RESOLUTION CENTRALE
 // ===============================
+// 🔍 DEBUG DUEL
+// ===============================
+console.log("========== DUEL DEBUG ==========");
+console.log("phaseDuel =", match.phaseDuel);
+console.log("attackPave =", match.phaseDuel?.attackPave);
+console.log("defensePave =", match.phaseDuel?.defensePave);
+console.log("attacker =", match.phaseDuel?.attacker);
+console.log("defender =", match.phaseDuel?.defender);
+console.log("ballHolder =", match.ballHolder);
+console.log("================================");
+
 // ===============================
 // 🚀 RESOLUTION CENTRALE
 // ===============================
@@ -2738,11 +2747,6 @@ try {
     console.log("❌ ERREUR DUEL");
     console.error(err);
 
-    return true;
-}
-
-if (!duelResult) {
-    console.log("❌ duelResult undefined");
     return true;
 }
 const duelType = duelResult.type;
@@ -3193,6 +3197,13 @@ return true;
 // ⚽ DUELS ET MATCH UP 🆚
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
+    
+    console.log("========== HANDLE DUEL ==========");
+console.log("attaqueText =", attaqueText);
+console.log("defenseText =", defenseText);
+console.log("ballHolder =", match.ballHolder);
+console.log("phaseDuel =", match.phaseDuel);
+console.log("=================================");
 
     if (!attaqueText || !defenseText) {
         return {
@@ -3256,6 +3267,8 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         defender = tacticalTarget;
     }
 
+    console.log("🔍 attacker trouvé =", attacker);
+console.log("🔍 defender trouvé =", defender);
     // ===============================
     // ❌ VALIDATION
     // ===============================
@@ -3709,6 +3722,7 @@ if (!result) {
 // ===============================
 // 📤 RETURN SIMPLE
 // ===============================
+    console.log("🏁 RESULT FINAL =", result);
 return {
     ok: result.ok,
     type: result.type,
