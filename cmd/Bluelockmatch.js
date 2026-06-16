@@ -2741,53 +2741,13 @@ const duelResult = {
 const duelType = duelResult.type;
 
 // ===============================
-// 🔥 POSSESSION
-// ===============================
-let nextPlayer;
-
-if (duelResult.ok) {
-    nextPlayer = attacker;
-    match.ballHolder = attacker.nom;
-}
-else {
-    nextPlayer = defender;
-    match.ballHolder = defender.nom;
-}
-
-nextId = nextPlayer.id || nextPlayer.jid;
-
-const nextTag =
-    getTagFromJid(nextId);
-
-// ===============================
-// ⚽ SYNC
-// ===============================
-match.joueurTour = nextId;
-match.attacker = nextId;
-
-match.phaseDuel = null;
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
-
-// ===============================
-// 📩 MESSAGE FINAL
+// 🧪 TEST APRES DUELRESULT
 // ===============================
 await ovl.sendMessage(chat, {
-    text:
-`*🛡️⚽ RÉSOLUTION DU DUEL !*
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-
-${duelResult.msg}
-
-➡️ @${nextTag} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-    mentions: [nextId]
+    text: "🚨 TEST 1"
 });
 
 return true;
-} 
 
 // ===============================
 // 🎯 ATTAQUE⚽
