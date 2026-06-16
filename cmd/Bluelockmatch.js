@@ -2716,15 +2716,15 @@ await ovl.sendMessage(chat, {
 });
 
 // ===============================
-// 🧠 SNAPSHOT (IMPORTANT)
+// 🧠 SNAPSHOT
 // ===============================
 const attackPave = match.phaseDuel.attackPave;
 const defensePave = match.phaseDuel.defensePave;
-const duelAttacker = match.phaseDuel.attacker;
-const duelDefender = match.phaseDuel.defender;
+const attacker = match.phaseDuel.attacker;
+const defender = match.phaseDuel.defender;
 
 // ===============================
-// 🧠 PASSAGE EN ASYNC RESOLUTION
+// 🧠 RESOLUTION
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
 
@@ -2736,32 +2736,42 @@ setTimeout(async () => {
         defensePave
     );
 
+    // ===============================
+    // 🎯 NEXT LOGIC PROPRE
+    // ===============================
     const nextPlayer = duelResult.ok
         ? attacker
         : defender;
 
     const nextId = nextPlayer.id || nextPlayer.jid;
 
+    // ===============================
+    // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
+    // ===============================
     await ovl.sendMessage(chat, {
         text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${duelResult.msg}
 
-➡️ @${getTagFromJid(nextId)} NEXT
+➡️ PROCHAIN JOUEUR : @${getTagFromJid(nextId)}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
+        mentions: [nextId],
+        edit: sentMsg.key   
     });
 
-    // cleanup SAFE
+    // ===============================
+    // 🧹 CLEAN
+    // ===============================
     match.phaseDuel = null;
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
-}, 500);
+}, 1000);
 } 
+    
 // ===============================
 // 🎯 ATTAQUE⚽
 // ===============================
