@@ -2697,11 +2697,11 @@ if (
         match.defenseTimer = null;
     }
 
-    // ===============================
-    // 📩 MESSAGE DEFENSE
-    // ===============================
-    await ovl.sendMessage(chat, {
-        text:
+// ===============================
+// 📩 MESSAGE DEFENSE
+// ===============================
+await ovl.sendMessage(chat, {
+    text:
 `*🛡️⚔️ DÉFENSE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -2713,41 +2713,54 @@ if (
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`
-    });
-
-// ===============================
-// 🔍 DEBUG DUEL
-// ===============================
-console.log("========== DUEL DEBUG ==========");
-console.log("phaseDuel =", match.phaseDuel);
-console.log("attackPave =", match.phaseDuel?.attackPave);
-console.log("defensePave =", match.phaseDuel?.defensePave);
-console.log("attacker =", match.phaseDuel?.attacker);
-console.log("defender =", match.phaseDuel?.defender);
-console.log("ballHolder =", match.ballHolder);
-console.log("================================");
-
-// ===============================
-// 🚀 RESOLUTION CENTRALE
-// ===============================
-// ===============================
-// 🧪 TEST FORCÉ
-// ===============================
-const duelResult = {
-    ok: true,
-    type: "TEST",
-    msg: "✅ TEST RESOLUTION"
-};
-const duelType = duelResult.type;
-
-// ===============================
-// 🧪 TEST APRES DUELRESULT
-// ===============================
-await ovl.sendMessage(chat, {
-    text: "🚨 TEST 1"
 });
 
-return true;
+// ===============================
+// 🧠 SNAPSHOT (IMPORTANT)
+// ===============================
+const attackPave = match.phaseDuel.attackPave;
+const defensePave = match.phaseDuel.defensePave;
+const attacker = match.phaseDuel.attacker;
+const defender = match.phaseDuel.defender;
+
+// ===============================
+// 🧠 PASSAGE EN ASYNC RESOLUTION
+// ===============================
+match.phaseDuel.step = "resolve_duel_pending";
+
+setTimeout(async () => {
+
+    const duelResult = await handleDuelMatch(
+        match,
+        attackPave,
+        defensePave
+    );
+
+    const nextPlayer = duelResult.ok
+        ? attacker
+        : defender;
+
+    const nextId = nextPlayer.id || nextPlayer.jid;
+
+    await ovl.sendMessage(chat, {
+        text:
+`🛡️⚽ RÉSOLUTION DU DUEL !
+
+${duelResult.msg}
+
+➡️ @${getTagFromJid(nextId)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [nextId]
+    });
+
+    // cleanup SAFE
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+}, 500);
 } 
 // ===============================
 // 🎯 ATTAQUE⚽
