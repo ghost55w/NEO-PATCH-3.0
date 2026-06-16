@@ -2730,25 +2730,14 @@ console.log("================================");
 // ===============================
 // 🚀 RESOLUTION CENTRALE
 // ===============================
-let duelResult;
-
-try {
-
-    duelResult = await handleDuelMatch(
-        match,
-        match.phaseDuel.attackPave,
-        match.phaseDuel.defensePave
-    );
-
-    console.log("🔥 DUEL RESULT =", duelResult);
-
-} catch (err) {
-
-    console.log("❌ ERREUR DUEL");
-    console.error(err);
-
-    return true;
-}
+// ===============================
+// 🧪 TEST FORCÉ
+// ===============================
+const duelResult = {
+    ok: true,
+    type: "TEST",
+    msg: "✅ TEST RESOLUTION"
+};
 const duelType = duelResult.type;
 
 // ===============================
