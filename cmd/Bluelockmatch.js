@@ -2720,8 +2720,8 @@ await ovl.sendMessage(chat, {
 // ===============================
 const attackPave = match.phaseDuel.attackPave;
 const defensePave = match.phaseDuel.defensePave;
-const attacker = match.phaseDuel.attacker;
-const defender = match.phaseDuel.defender;
+const duelAttacker = match.phaseDuel.attacker;
+const duelDefender = match.phaseDuel.defender;
 
 // ===============================
 // 🧠 PASSAGE EN ASYNC RESOLUTION
