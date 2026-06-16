@@ -3379,55 +3379,39 @@ const isTackleAction =
     def.includes("pied") ||
     def.includes("talon");
 
+
 // ===============================
-// ⚽ DUEL TECHNIQUE
-// DRIBBLE vs TACLE
+// ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
 // ===============================
-if (
-    !result &&
-    isDribbleAction &&
-    isTackleAction
-) {
+if (isDribbleAction && isTackleAction) {
 
-    const attackStat =
-        atkStats.dri || 50;
+    const attackStat = atkStats.dri || 50;
+    const defenseStat = defStats.def || 50;
 
-    const defenseStat =
-        defStats.def || 50;
-
-    const attackerWins =
-        attackStat > defenseStat;
+    const attackerWins = attackStat > defenseStat;
 
     if (attackerWins) {
 
-        match.joueurTour =
-            attacker.id || attacker.jid;
+        match.joueurTour = attacker.id || attacker.jid;
 
-        result = {
+        return {
             ok: true,
             type: "DRIBBLE_WIN",
-
             attacker,
             defender,
-
-            msg:
-`🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
         };
 
     } else {
 
-        match.joueurTour =
-            defender.id || defender.jid;
+        match.joueurTour = defender.id || defender.jid;
 
-        result = {
+        return {
             ok: false,
             type: "DRIBBLE_LOSE",
-
             attacker,
             defender,
-
-            msg:
-`⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
+            msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
         };
     }
 }
@@ -3696,6 +3680,8 @@ return {
 };
 } 
 
+                        
+
 // ===============================
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
 // ===============================
@@ -3871,6 +3857,7 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
         };
     }
 
+
     // ===============================
     // ⚔️ FINAL DUEL
     // ===============================
@@ -3903,7 +3890,7 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
         msg: `🧱 ${defender.nom} stoppe l'action`
     };
 }
-   
+
 
 // ===============================
     // DÉPLACEMENTS ET POSITIONS TRACKING
