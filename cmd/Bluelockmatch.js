@@ -2771,6 +2771,7 @@ ${duelResult.msg}
     match.waitingDefenseFrom = null;
 
 }, 1000);
+    return true;
 } 
     
 // ===============================
