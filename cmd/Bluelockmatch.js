@@ -3155,12 +3155,19 @@ if (!match.pendingAttack) return false;
 // ===============================
 // ⚔️ RESOLUTION DUEL
 // ===============================
+// ===============================
+// ⚔️ RESOLUTION DUEL
+// ===============================
+console.log("🚨 AVANT HANDLEDUEL");
+
 const res = await handleDuelMatch(
     match,
     match.pendingAttack,
     defense
 );
-console.log("RES DUEL =", res);
+
+console.log("🚨 APRES HANDLEDUEL");
+console.log("🚨 RES DUEL =", res);
     
 match.hasPlayed = true;
 
