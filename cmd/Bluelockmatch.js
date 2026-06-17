@@ -3412,13 +3412,6 @@ return true;
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
     
-    console.log("========== HANDLE DUEL ==========");
-console.log("attaqueText =", attaqueText);
-console.log("defenseText =", defenseText);
-console.log("ballHolder =", match.ballHolder);
-console.log("phaseDuel =", match.phaseDuel);
-console.log("=================================");
-
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -4012,27 +4005,6 @@ else {
     ballState = "loose";
 }
 
-// ===============================
-// 🎯 DRIBBLE DETECTION
-// ===============================
-let detectedDribble =
-    DRIBBLES.find(d =>
-        atk.includes(d)
-    );
-
-// 🎨 fallback créatif
-const looksLikeDribble =
-    atk.includes("dribble") ||
-    atk.includes("crochet") ||
-    atk.includes("feinte") ||
-    atk.includes("élimine") ||
-    atk.includes("dépasse") ||
-    atk.includes("contourne");
-
-if (!detectedDribble && looksLikeDribble) {
-    detectedDribble = "creative";
-}
-
     // ===============================
     // 🎯 RESULT GLOBAL
     // ===============================
@@ -4083,25 +4055,6 @@ let defVmax =
     posture === "debout"
         ? defBaseVmax * 0.5
         : defBaseVmax;
-
-
-
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ===============================
 // 🎯 DÉTECTION TACLE
