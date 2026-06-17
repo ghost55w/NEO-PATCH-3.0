@@ -3160,7 +3160,8 @@ const res = await handleDuelMatch(
     match.pendingAttack,
     defense
 );
-
+console.log("RES DUEL =", res);
+    
 match.hasPlayed = true;
 
 // ===============================
@@ -4125,6 +4126,10 @@ const isPassive =
         atk.includes(k) || def.includes(k)
     );
 
+console.log("atk =", atk);
+console.log("def =", def);
+console.log("isPassive =", isPassive);
+    
 // 🔥 PRIORITÉ ABSOLUE
 if (isPassive) {
     return {
