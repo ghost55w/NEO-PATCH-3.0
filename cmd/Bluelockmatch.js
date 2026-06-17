@@ -3935,14 +3935,21 @@ let detectedDribble =
 // ===============================
 // 🎨 DRIBBLE CRÉATIF
 // ===============================
-if (!detectedDribble) {
+const looksLikeDribble =
+    atk.includes("dribble") ||
+    atk.includes("crochet") ||
+    atk.includes("feinte") ||
+    atk.includes("élimine") ||
+    atk.includes("contourne") ||
+    atk.includes("petit pont");
 
+if (!detectedDribble && looksLikeDribble) {
     detectedDribble = "creative";
 }
 
 const isDribbleAction =
-    detectedDribble !== null;
-
+    !!detectedDribble;
+    
 // ===============================
 // 🎯 VALIDATION DRIBBLE
 // ===============================
