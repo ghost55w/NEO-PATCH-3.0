@@ -3924,32 +3924,26 @@ const DRIBBLES = [
 }
 
 };
-   // ===============================
+   
+// ===============================
 // 🎯 DÉTECTION TECHNIQUE
 // ===============================
+const explicitDribble =
+    atk.includes("fait un dribble") ||
+    atk.includes("tente un dribble") ||
+    atk.includes("réalise un dribble");
+
 let detectedDribble =
-    DRIBBLES.find(d =>
-        atk.includes(d)
-    );
+    DRIBBLES.find(d => atk.includes(d));
 
-// ===============================
-// 🎨 DRIBBLE CRÉATIF
-// ===============================
-const looksLikeDribble =
-    atk.includes("dribble") ||
-    atk.includes("crochet") ||
-    atk.includes("feinte") ||
-    atk.includes("élimine") ||
-    atk.includes("contourne") ||
-    atk.includes("petit pont");
-
-if (!detectedDribble && looksLikeDribble) {
+// Dribble créatif uniquement si le joueur annonce un dribble
+if (!detectedDribble && explicitDribble) {
     detectedDribble = "creative";
 }
 
 const isDribbleAction =
     !!detectedDribble;
-    
+
 // ===============================
 // 🎯 VALIDATION DRIBBLE
 // ===============================
@@ -3978,18 +3972,15 @@ if (isDribbleAction) {
         return {
             ok: false,
             type: "BAD_DRIBBLE",
-
             attacker,
             defender,
-
             msg:
 `❌ ${attacker.nom} exécute mal son dribble.`,
-
             details:
                 dribbleCheck.reason
         };
     }
-}     
+}        
        
     // ===============================
 // ⚽ ÉTAT DU BALLON
