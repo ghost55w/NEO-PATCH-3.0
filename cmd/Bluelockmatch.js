@@ -1889,7 +1889,36 @@ function validateDribbleBlueprint(
                 ? reasons.join(" | ")
                 : "Dribble correctement exécuté"
     };
-                }        
+    }        
+
+function formatDribbleVsTackle(result, attacker, defender, atkStats, defStats, nextId) {
+
+    const atkDri = atkStats.dri || 50;
+    const defDef = defStats.def || 50;
+
+    const actionText =
+        result.ok
+            ? `🔥⚽ ${attacker.nom} élimine ${defender.nom} avec un dribble et progresse dans le camp adverse ...`
+            : `⚔️ ${defender.nom} remporte le duel et stoppe l'action de ${attacker.nom} ...`;
+
+    const statsLine =
+        result.ok
+            ? `👤 ${attacker.nom} : dribble - ${atkDri}\n👤 ${defender.nom} : defense - ${defDef}`
+            : `👤 ${attacker.nom} : dribble - ${atkDri}\n👤 ${defender.nom} : defense - ${defDef}`;
+
+    return `
+🛡️⚽ RÉSOLUTION DU DUEL !
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+${actionText}
+
+${statsLine}
+
+➡️ @${getTagFromJid(nextId)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`.trim();
+}
 
 // ===============================
 // 🎮 COMMANDE MATCH
@@ -2947,7 +2976,7 @@ const duelDefender = match.phaseDuel.defender;
 // 🧠 RESOLUTION
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
-
+    
 setTimeout(async () => {
 
     const duelResult = await handleDuelMatch(
@@ -2956,41 +2985,33 @@ setTimeout(async () => {
         defensePave
     );
 
-    
-    // ===============================
-// 🎯 NEXT LOGIC PROPRE
-// ===============================
-const nextPlayer = duelResult.ok
-    ? duelAttacker
-    : duelDefender;
+    const nextPlayer = duelResult.ok
+        ? duelResult.attacker
+        : duelResult.defender;
 
-const nextId = nextPlayer.id || nextPlayer.jid;
+    const nextId = nextPlayer.id || nextPlayer.jid;
 
-    // ===============================
-    // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
-    // ===============================
+    const finalMessage = formatDribbleVsTackle(
+        duelResult,
+        duelResult.attacker,
+        duelResult.defender,
+        duelResult.attacker.stats,
+        duelResult.defender.stats,
+        nextId
+    );
+
     await ovl.sendMessage(chat, {
-    text:
-`🛡️⚽ RÉSOLUTION DU DUEL !
+        text: finalMessage,
+        mentions: [nextId]
+    });
 
-${duelResult.msg}
-
-➡️ @${getTagFromJid(nextId)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-    mentions: [nextId]
-});
-
-    // ===============================
-    // 🧹 CLEAN
-    // ===============================
     match.phaseDuel = null;
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
 }, 1000);
-    return true;
+
+return true;
 } 
     
 // ===============================
@@ -3479,6 +3500,27 @@ console.log("🔍 defender trouvé =", defender);
 
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase();
+
+    // ===============================
+// ⚽ ÉTAT DU BALLON
+// ===============================
+const pushDistance =
+    extractDistance(atk) || 0;
+
+let ballState = "control";
+
+if (pushDistance <= 1) {
+    ballState = "control";
+} 
+else if (pushDistance <= 3) {
+    ballState = "pressure";
+} 
+else if (pushDistance <= 5) {
+    ballState = "exposed";
+} 
+else {
+    ballState = "loose";
+}
 
 // ===============================
 // 🎯 DRIBBLE DETECTION
