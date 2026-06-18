@@ -647,133 +647,135 @@ ballDistanceMin: 0.5
 };
 
 // ===============================
-// ⚙️ VALIDATION DRIBBLE BLUEPRINT
+// 🎯 SCORE DRIBBLE
 // ===============================
-function validateDribbleBlueprint(dribbleName, actionText) {
+function calculateDribbleScore(
+    dribbleName,
+    actionText
+) {
 
-    const blueprint = DRIBBLE_BLUEPRINTS[dribbleName];
+    const blueprint =
+        DRIBBLE_BLUEPRINTS[dribbleName];
 
     if (!blueprint) {
-        return {
-            valid: false,
-            reason: `Blueprint introuvable pour : ${dribbleName}`
-        };
+        return 0;
     }
 
-    const text = actionText.toLowerCase();
+    const text =
+        actionText.toLowerCase();
 
-    // ===============================
-    // 🧠 VALIDATION DES STEPS
-    // ===============================
-    const steps = Object.values(blueprint);
+    let score = 0;
+    let maxScore = 0;
 
-    for (let i = 0; i < steps.length; i++) {
+    const steps =
+        Object.values(blueprint);
 
-        const step = steps[i];
-        const validation = step.validation;
+    for (const step of steps) {
+
+        const validation =
+            step.validation;
 
         // ===============================
-        // 🧪 SURFACES (optionnel)
+        // 🦶 SURFACES
         // ===============================
         if (validation.surfaces) {
 
-            const okSurface = validation.surfaces.some(s =>
-                text.includes(s)
-            );
+            maxScore += 20;
 
-            if (!okSurface) {
-               return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-}; 
+            const ok =
+                validation.surfaces.some(s =>
+                    text.includes(
+                        s.toLowerCase()
+                    )
+                );
+
+            if (ok) {
+                score += 20;
             }
         }
 
         // ===============================
-        // 🎯 DIRECTION BALL
+        // 🎯 DIRECTION
         // ===============================
         if (validation.ballDirection) {
 
-            const okDir = validation.ballDirection.some(d =>
-                text.includes(d)
-            );
+            maxScore += 20;
 
-            if (!okDir) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
+            const ok =
+                validation.ballDirection.some(d =>
+                    text.includes(
+                        d.toLowerCase()
+                    )
+                );
+
+            if (ok) {
+                score += 20;
             }
         }
 
         // ===============================
-        // 🚀 ACCELERATION (flag simple)
+        // 🚀 ACCELERATION
         // ===============================
         if (validation.acceleration) {
 
-            if (
-                !text.includes("accélère") &&
-                !text.includes("acceleration") &&
-                !text.includes("vmax") &&
-                !text.includes("sprinte")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
+            maxScore += 20;
+
+            const accelWords = [
+                "accélère",
+                "acceleration",
+                "vmax",
+                "sprinte",
+                "explose",
+                "démarre"
+            ];
+
+            const ok =
+                accelWords.some(w =>
+                    text.includes(w)
+                );
+
+            if (ok) {
+                score += 20;
             }
         }
 
-        // ===============================
-        // 🧍 BODY FEINT
-        // ===============================
-        if (validation.bodyFeint) {
-
-            if (
-                !text.includes("feinte") &&
-                !text.includes("corps")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
-        }
-
-        // ===============================
-        // 🧲 FAKE SHOT
-        // ===============================
-        if (validation.fakeShot) {
-
-            if (
-                !text.includes("frappe") &&
-                !text.includes("tir") &&
-                !text.includes("arme")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
-        }
-
-        // ===============================
-        // 🆙 BALL LIFT
-        // ===============================
-        if (validation.ballLift) {
-
-            if (
-                !text.includes("soulève") &&
-                !text.includes("lob") &&
-                !text.includes("au-dessus")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
-        }
     }
+
+    return Math.round(
+        (score / Math.max(maxScore, 1))
+        * 100
+    );
+}
+    
+// ===============================
+// ⚙️ VALIDATION DRIBBLE
+// ===============================
+function validateDribbleBlueprint(
+    dribbleName,
+    actionText
+) {
+
+    const score =
+        calculateDribbleScore(
+            dribbleName,
+            actionText
+        );
+
+    return {
+
+        valid: score >= 70,
+
+        score,
+
+        dribble: dribbleName,
+
+        reason:
+            score >= 70
+                ? null
+                : `Dribble ${dribbleName} mal réalisé ❌`
+    };
+}
+        
 
     // ===============================
     // ✅ SUCCESS
