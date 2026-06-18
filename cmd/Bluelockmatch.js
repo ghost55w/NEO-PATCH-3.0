@@ -646,6 +646,143 @@ ballDistanceMin: 0.5
 
 };
 
+// ===============================
+// ⚙️ VALIDATION DRIBBLE BLUEPRINT
+// ===============================
+function validateDribbleBlueprint(dribbleName, actionText) {
+
+    const blueprint = DRIBBLE_BLUEPRINTS[dribbleName];
+
+    if (!blueprint) {
+        return {
+            valid: false,
+            reason: `Blueprint introuvable pour : ${dribbleName}`
+        };
+    }
+
+    const text = actionText.toLowerCase();
+
+    // ===============================
+    // 🧠 VALIDATION DES STEPS
+    // ===============================
+    const steps = Object.values(blueprint);
+
+    for (let i = 0; i < steps.length; i++) {
+
+        const step = steps[i];
+        const validation = step.validation;
+
+        // ===============================
+        // 🧪 SURFACES (optionnel)
+        // ===============================
+        if (validation.surfaces) {
+
+            const okSurface = validation.surfaces.some(s =>
+                text.includes(s)
+            );
+
+            if (!okSurface) {
+                return {
+                    valid: false,
+                    reason: `Surface invalide pour step ${i + 1}`
+                };
+            }
+        }
+
+        // ===============================
+        // 🎯 DIRECTION BALL
+        // ===============================
+        if (validation.ballDirection) {
+
+            const okDir = validation.ballDirection.some(d =>
+                text.includes(d)
+            );
+
+            if (!okDir) {
+                return {
+                    valid: false,
+                    reason: `Direction de balle invalide (step ${i + 1})`
+                };
+            }
+        }
+
+        // ===============================
+        // 🚀 ACCELERATION (flag simple)
+        // ===============================
+        if (validation.acceleration) {
+
+            if (
+                !text.includes("accélère") &&
+                !text.includes("acceleration") &&
+                !text.includes("sprinte")
+            ) {
+                return {
+                    valid: false,
+                    reason: `Accélération manquante (step ${i + 1})`
+                };
+            }
+        }
+
+        // ===============================
+        // 🧍 BODY FEINT
+        // ===============================
+        if (validation.bodyFeint) {
+
+            if (
+                !text.includes("feinte") &&
+                !text.includes("corps")
+            ) {
+                return {
+                    valid: false,
+                    reason: `Feinte de corps manquante (step ${i + 1})`
+                };
+            }
+        }
+
+        // ===============================
+        // 🧲 FAKE SHOT
+        // ===============================
+        if (validation.fakeShot) {
+
+            if (
+                !text.includes("frappe") &&
+                !text.includes("tir") &&
+                !text.includes("arme")
+            ) {
+                return {
+                    valid: false,
+                    reason: `Feinte de frappe invalide (step ${i + 1})`
+                };
+            }
+        }
+
+        // ===============================
+        // 🆙 BALL LIFT
+        // ===============================
+        if (validation.ballLift) {
+
+            if (
+                !text.includes("soulève") &&
+                !text.includes("lob") &&
+                !text.includes("au-dessus")
+            ) {
+                return {
+                    valid: false,
+                    reason: `Ballon non soulevé (step ${i + 1})`
+                };
+            }
+        }
+    }
+
+    // ===============================
+    // ✅ SUCCESS
+    // ===============================
+    return {
+        valid: true,
+        dribble: dribbleName
+    };
+}
+
 
 /* ===============================
 📐 MATH / TERRAIN ENGINE
