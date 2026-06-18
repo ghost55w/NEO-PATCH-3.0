@@ -682,10 +682,10 @@ function validateDribbleBlueprint(dribbleName, actionText) {
             );
 
             if (!okSurface) {
-                return {
-                    valid: false,
-                    reason: `Surface invalide pour step ${i + 1}`
-                };
+               return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+}; 
             }
         }
 
@@ -700,9 +700,9 @@ function validateDribbleBlueprint(dribbleName, actionText) {
 
             if (!okDir) {
                 return {
-                    valid: false,
-                    reason: `Direction de balle invalide (step ${i + 1})`
-                };
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
 
@@ -718,9 +718,9 @@ function validateDribbleBlueprint(dribbleName, actionText) {
                 !text.includes("sprinte")
             ) {
                 return {
-                    valid: false,
-                    reason: `Accélération manquante (step ${i + 1})`
-                };
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
 
@@ -734,9 +734,9 @@ function validateDribbleBlueprint(dribbleName, actionText) {
                 !text.includes("corps")
             ) {
                 return {
-                    valid: false,
-                    reason: `Feinte de corps manquante (step ${i + 1})`
-                };
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
 
@@ -751,9 +751,9 @@ function validateDribbleBlueprint(dribbleName, actionText) {
                 !text.includes("arme")
             ) {
                 return {
-                    valid: false,
-                    reason: `Feinte de frappe invalide (step ${i + 1})`
-                };
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
 
@@ -768,9 +768,9 @@ function validateDribbleBlueprint(dribbleName, actionText) {
                 !text.includes("au-dessus")
             ) {
                 return {
-                    valid: false,
-                    reason: `Ballon non soulevé (step ${i + 1})`
-                };
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
     }
