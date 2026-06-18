@@ -3964,28 +3964,38 @@ const isDribbleAction =
     !!detectedDribble;
 
 // ===============================
+// 🧠 TIMELINE ACTIONS
+// ===============================
+const sequence = parseActionSequence(attaqueText);
+    
+// ===============================
 // 🎯 VALIDATION DRIBBLE
 // ===============================
 let dribbleCheck = null;
 
 if (isDribbleAction) {
 
-    dribbleCheck =
-        validateDribbleBlueprint(
-            detectedDribble,
-            attaqueText
-        );
+    // ===============================
+    // 🧠 TIMELINE ACTIONS
+    // ===============================
+    const sequence = parseActionSequence(attaqueText);
 
-    console.log(
-        "🎯 DRIBBLE DETECTED =",
-        detectedDribble
+    // ===============================
+    // 🎯 VALIDATION DRIBBLE BLUEPRINT + SEQUENCE
+    // ===============================
+    dribbleCheck = validateDribbleBlueprint(
+        detectedDribble,
+        attaqueText,
+        sequence
     );
 
-    console.log(
-        "🎯 DRIBBLE CHECK =",
-        dribbleCheck
-    );
+    console.log("🎯 DRIBBLE DETECTED =", detectedDribble);
+    console.log("🎯 SEQUENCE =", sequence);
+    console.log("🎯 DRIBBLE CHECK =", dribbleCheck);
 
+    // ===============================
+    // ❌ ÉCHEC DRIBBLE
+    // ===============================
     if (!dribbleCheck.valid) {
 
         return {
@@ -3993,10 +4003,12 @@ if (isDribbleAction) {
             type: "BAD_DRIBBLE",
             attacker,
             defender,
-            msg:
-`❌ ${attacker.nom} exécute mal son dribble.`,
-            details:
-                dribbleCheck.reason
+
+            // 🔥 IMPORTANT
+            msg: `❌ Dribble ${detectedDribble} mal réalisé`,
+
+            // option debug
+            details: dribbleCheck.reason
         };
     }
 }
@@ -4021,10 +4033,116 @@ const isTackleAction =
 // ===============================
 if (isDribbleAction && isTackleAction) {
 
-    const attackStat = atkStats.dri || 50;
-    const defenseStat = defStats.def || 50;
+    // ===============================
+    // 🎯 SCORES INITIAUX
+    // ===============================
+    let attackScore = atkStats.dri || 50;
+    let defenseScore = defStats.def || 50;
 
-    const attackerWins = attackStat > defenseStat;
+    // ===============================
+    // ⚽ BONUS MAÎTRISE (DOMINATION TECHNIQUE)
+    // ===============================
+    if (atkStats.dri > defStats.def) {
+        attackScore += 10;
+    } else if (defStats.def > atkStats.dri) {
+        defenseScore += 5;
+    }
+
+    // ===============================
+    // 🎯 QUALITÉ DRIBBLE (BLUEPRINT SCORE)
+    // ===============================
+    const dribbleBonus = dribbleCheck?.score || 0;
+    const dribbleSpeed = dribbleCheck?.speed || atkStats.acc || 50;
+
+    attackScore += dribbleBonus * 0.4;
+
+    // ===============================
+    // 🛡️ QUALITÉ TACLE (SI DISPONIBLE)
+    // ===============================
+    const tackleBonus = tackleCheck?.score || 0;
+    defenseScore += tackleBonus * 0.4;
+
+    // ===============================
+    // 📏 TACLE RANGE SYSTEM (RÉALISTE)
+    // ===============================
+    const TACKLE_RANGE = {
+        standing_front: 0.5,
+        standing_circular: 0.5,
+        sliding_front: 1.0,
+        sliding_circular: 1.0
+    };
+
+    const tackleType = match.tackleType || "standing_front";
+    const tackleRange = TACKLE_RANGE[tackleType] || 0.5;
+
+    const distance = match.ballDistanceToDefender || 1;
+
+    // ===============================
+    // ❌ TACLE HORS PORTÉE
+    // ===============================
+    if (distance > tackleRange) {
+
+        defenseScore -= 25;
+        attackScore += 15;
+
+    } else {
+
+        // ===============================
+        // ⚔️ BONUS TYPE DE TACLE
+        // ===============================
+        if (tackleType.includes("standing")) {
+            defenseScore += 5; // équilibre + poursuite
+        }
+
+        if (tackleType.includes("sliding")) {
+            defenseScore += 10; // couverture + portée
+            match.defenseChaseDelay = 2; // récupération lente
+        }
+    }
+
+    // ===============================
+    // ⚡ RÉACTION DÉFENSEUR
+    // ===============================
+    const reaction = defStats.rea || 50;
+    const speed = atkStats.acc || 50;
+
+    if (reaction > speed) {
+        defenseScore += 10;
+    } else {
+        attackScore += 10;
+    }
+
+    // ===============================
+    // 🧠 TIMING DRIBBLE VS RÉACTION
+    // ===============================
+    if (reaction < dribbleSpeed) {
+        attackScore += 10;
+    }
+
+    // ===============================
+    // 🧠 BONUS POSITIONNEMENT
+    // ===============================
+    const attackerAngleAdvantage =
+        match.attackerSideAdvantage || 0;
+
+    const defenderAngleAdvantage =
+        match.defenderAngleCover || 0;
+
+    attackScore += attackerAngleAdvantage;
+    defenseScore += defenderAngleAdvantage;
+
+    // ===============================
+    // 🧾 DEBUG LOGS
+    // ===============================
+    console.log("⚽ ATTACK SCORE =", attackScore);
+    console.log("🛡️ DEFENSE SCORE =", defenseScore);
+    console.log("📏 DISTANCE =", distance);
+    console.log("🦵 TACKLE TYPE =", tackleType);
+
+    // ===============================
+    // 🏁 RÉSOLUTION DU DUEL
+    // ===============================
+    const attackerWins = attackScore > defenseScore;
 
     if (attackerWins) {
 
@@ -4035,7 +4153,7 @@ if (isDribbleAction && isTackleAction) {
             type: "DRIBBLE_WIN",
             attacker,
             defender,
-            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+            msg: `🔥⚽ ${attacker.nom} élimine son adversaire avec un dribble maîtrisé...`
         };
 
     } else {
@@ -4047,11 +4165,11 @@ if (isDribbleAction && isTackleAction) {
             type: "DRIBBLE_LOSE",
             attacker,
             defender,
-            msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
+            msg: `⚽🥅 ${defender.nom} stoppe l’action et récupère le ballon...`
         };
     }
 }
-
+    
  // ===============================
 // 🧱 DÉFENSE PASSIVE SIMPLE 
 // ===============================
