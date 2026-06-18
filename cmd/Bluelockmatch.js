@@ -1672,255 +1672,6 @@ function setJoueurTour(match, player) {
 }
 
 // ===============================
-// 🎯 VALIDATION DRIBBLE
-// ===============================
-function validateDribbleBlueprint(
-    dribbleName,
-    attaqueText
-) {
-
-    const blueprint =
-        DRIBBLE_BLUEPRINTS[dribbleName] ||
-        DRIBBLE_BLUEPRINTS["creative"];
-
-    const text =
-        attaqueText.toLowerCase();
-
-    let totalChecks = 0;
-    let passedChecks = 0;
-
-    const reasons = [];
-
-    // ===============================
-    // STEP CHECKER
-    // ===============================
-    const checkStep = (step) => {
-
-        if (!step?.validation) return;
-
-        const v = step.validation;
-
-        // ===============================
-        // SURFACES
-        // ===============================
-        if (v.surfaces) {
-
-            totalChecks++;
-
-            const found =
-                v.surfaces.some(
-                    s => text.includes(s)
-                );
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Surface du pied non précisée`
-                );
-            }
-        }
-
-        // ===============================
-        // DIRECTION
-        // ===============================
-        if (v.ballDirection) {
-
-            totalChecks++;
-
-            const found =
-                v.ballDirection.some(
-                    d => text.includes(d)
-                );
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Direction du ballon absente`
-                );
-            }
-        }
-
-        // ===============================
-        // ACCELERATION
-        // ===============================
-        if (v.acceleration) {
-
-            totalChecks++;
-
-            const found =
-                text.includes("vmax") ||
-                text.includes("accél") ||
-                text.includes("sprint");
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Aucune accélération décrite`
-                );
-            }
-        }
-
-        // ===============================
-        // FEINTE CORPS
-        // ===============================
-        if (v.bodyFeint) {
-
-            totalChecks++;
-
-            const found =
-
-                text.includes("épaule") ||
-                text.includes("buste") ||
-                text.includes("corps") ||
-                text.includes("bassin") ||
-                text.includes("feinte");
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Feinte corporelle absente`
-                );
-            }
-        }
-
-        // ===============================
-        // FEINTE FRAPPE
-        // ===============================
-        if (v.fakeShot) {
-
-            totalChecks++;
-
-            const found =
-
-                text.includes("frappe") ||
-                text.includes("tir") ||
-                text.includes("arme");
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Feinte de frappe absente`
-                );
-            }
-        }
-
-        // ===============================
-        // SOULEVER BALLON
-        // ===============================
-        if (v.ballLift) {
-
-            totalChecks++;
-
-            const found =
-
-                text.includes("soulève") ||
-                text.includes("lobe") ||
-                text.includes("décolle") ||
-                text.includes("air");
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Ballon jamais soulevé`
-                );
-            }
-        }
-
-        // ===============================
-        // ROTATION
-        // ===============================
-        if (v.bodyRotation) {
-
-            totalChecks++;
-
-            const found =
-
-                text.includes("tourne") ||
-                text.includes("rotation") ||
-                text.includes("pivot");
-
-            if (found) {
-                passedChecks++;
-            } else {
-                reasons.push(
-                    `Rotation absente`
-                );
-            }
-        }
-    };
-
-    // ===============================
-    // EXECUTION
-    // ===============================
-    checkStep(blueprint.step1);
-    checkStep(blueprint.step2);
-    checkStep(blueprint.step3);
-
-    // ===============================
-    // SCORE
-    // ===============================
-    const score =
-        totalChecks === 0
-            ? 0
-            : Math.round(
-                (passedChecks / totalChecks) * 100
-            );
-
-    return {
-
-        valid: score >= 70,
-
-        score,
-
-        completedChecks:
-            passedChecks,
-
-        totalChecks,
-
-        reason:
-
-            reasons.length
-                ? reasons.join(" | ")
-                : "Dribble correctement exécuté"
-    };
-    }        
-
-function formatDribbleVsTackle(result, attacker, defender, atkStats, defStats, nextId) {
-
-    const atkDri = atkStats.dri || 50;
-    const defDef = defStats.def || 50;
-
-    const actionText =
-        result.ok
-            ? `🔥⚽ ${attacker.nom} élimine ${defender.nom} avec un dribble et progresse dans le camp adverse ...`
-            : `⚔️ ${defender.nom} remporte le duel et stoppe l'action de ${attacker.nom} ...`;
-
-    const statsLine =
-        result.ok
-            ? `👤 ${attacker.nom} : dribble - ${atkDri}\n👤 ${defender.nom} : defense - ${defDef}`
-            : `👤 ${attacker.nom} : dribble - ${atkDri}\n👤 ${defender.nom} : defense - ${defDef}`;
-
-    return `
-🛡️⚽ RÉSOLUTION DU DUEL !
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-${actionText}
-
-${statsLine}
-
-➡️ @${getTagFromJid(nextId)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`.trim();
-}
-
-// ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
 ovlcmd({
@@ -2976,7 +2727,7 @@ const duelDefender = match.phaseDuel.defender;
 // 🧠 RESOLUTION
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
-    
+
 setTimeout(async () => {
 
     const duelResult = await handleDuelMatch(
@@ -2985,33 +2736,41 @@ setTimeout(async () => {
         defensePave
     );
 
-    const nextPlayer = duelResult.ok
-        ? duelResult.attacker
-        : duelResult.defender;
+    
+    // ===============================
+// 🎯 NEXT LOGIC PROPRE
+// ===============================
+const nextPlayer = duelResult.ok
+    ? duelAttacker
+    : duelDefender;
 
-    const nextId = nextPlayer.id || nextPlayer.jid;
+const nextId = nextPlayer.id || nextPlayer.jid;
 
-    const finalMessage = formatDribbleVsTackle(
-        duelResult,
-        duelResult.attacker,
-        duelResult.defender,
-        duelResult.attacker.stats,
-        duelResult.defender.stats,
-        nextId
-    );
-
+    // ===============================
+    // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
+    // ===============================
     await ovl.sendMessage(chat, {
-        text: finalMessage,
-        mentions: [nextId]
-    });
+    text:
+`🛡️⚽ RÉSOLUTION DU DUEL !
 
+${duelResult.msg}
+
+➡️ @${getTagFromJid(nextId)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+    mentions: [nextId]
+});
+
+    // ===============================
+    // 🧹 CLEAN
+    // ===============================
     match.phaseDuel = null;
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
 }, 1000);
-
-return true;
+    return true;
 } 
     
 // ===============================
@@ -3155,20 +2914,12 @@ if (!match.pendingAttack) return false;
 // ===============================
 // ⚔️ RESOLUTION DUEL
 // ===============================
-// ===============================
-// ⚔️ RESOLUTION DUEL
-// ===============================
-console.log("🚨 AVANT HANDLEDUEL");
-
 const res = await handleDuelMatch(
     match,
     match.pendingAttack,
     defense
 );
 
-console.log("🚨 APRES HANDLEDUEL");
-console.log("🚨 RES DUEL =", res);
-    
 match.hasPlayed = true;
 
 // ===============================
@@ -3420,6 +3171,13 @@ return true;
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
     
+    console.log("========== HANDLE DUEL ==========");
+console.log("attaqueText =", attaqueText);
+console.log("defenseText =", defenseText);
+console.log("ballHolder =", match.ballHolder);
+console.log("phaseDuel =", match.phaseDuel);
+console.log("=================================");
+
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -3502,515 +3260,6 @@ console.log("🔍 defender trouvé =", defender);
     const atk = attaqueText.toLowerCase();
     const def = defenseText.toLowerCase();
 
-// ===============================   
-// ⚽ DRIBBLES OFFICIELS
-// ===============================
-const DRIBBLES = [
-    "crochet extérieur",
-    "crochet intérieur",
-    "double contact",
-    "roulette",
-    "elastico",
-    "petit pont",
-    "rainbow",
-    "step over",
-    "feinte de corps",
-    "feinte de frappe",
-];
-
-   const DRIBBLE_BLUEPRINTS = {
-// ===============================
-// DOUBLE CONTACT
-// ===============================
-"double contact": {
-
-    step1: {
-        description:
-            "Première touche latérale pour déplacer le ballon hors de la ligne du défenseur.",
-
-        validation: {
-            ballDirection: ["gauche", "droite"],
-            ballDistanceMax: 1,
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied"
-            ]
-        }
-    },
-
-    step2: {
-        description:
-            "Deuxième touche immédiate pour attaquer l'espace libre.",
-
-        validation: {
-            ballDirection: ["avant", "diagonale"],
-            ballDistanceMin: 0.5,
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied",
-                "pointe du pied"
-            ],
-            acceleration: true
-        }
-    }
-},
-// ===============================
-// CROCHET EXTERIEUR
-// ===============================
-"crochet extérieur": {
-
-    step1: {
-        description:
-            "Le ballon est emmené vers l'extérieur avec l'extérieur du pied.",
-
-        validation: {
-            surfaces: ["extérieur du pied"],
-            ballDirection: ["gauche", "droite"],
-            ballDistanceMax: 1.5
-        }
-    },
-
-    step2: {
-        description:
-            "Sortie rapide dans la nouvelle direction.",
-
-        validation: {
-            acceleration: true,
-            ballDistanceMin: 0.5
-        }
-    }
-},
-
-// ===============================
-// CROCHET INTERIEUR
-// ===============================
-"crochet intérieur": {
-
-    step1: {
-        description:
-            "Le ballon est ramené vers l'intérieur avec l'intérieur du pied.",
-
-        validation: {
-            surfaces: ["intérieur du pied"],
-            ballDirection: ["gauche", "droite"],
-            ballDistanceMax: 1.5
-        }
-    },
-
-    step2: {
-        description:
-            "Protection puis accélération dans la nouvelle trajectoire.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-// ===============================
-// ROULETTE
-// ===============================
-"roulette": {
-
-    step1: {
-        description:
-            "Le ballon est tiré sous la semelle.",
-
-        validation: {
-            surfaces: ["semelle"],
-            ballDistanceMax: 1
-        }
-    },
-
-    step2: {
-        description:
-            "Rotation du corps autour du ballon.",
-
-        validation: {
-            bodyRotation: true
-        }
-    },
-
-    step3: {
-        description:
-            "Le ballon ressort dans la nouvelle direction.",
-
-        validation: {
-            directionChange: true,
-            acceleration: true
-        }
-    }
-},
-
-// ===============================
-// ELASTICO
-// ===============================
-"elastico": {
-
-    step1: {
-        description:
-            "Feinte extérieure avec l'extérieur du pied.",
-
-        validation: {
-            surfaces: ["extérieur du pied"],
-            ballDirection: ["gauche", "droite"]
-        }
-    },
-
-    step2: {
-        description:
-            "Retour instantané vers l'intérieur.",
-
-        validation: {
-            surfaces: ["intérieur du pied"],
-            directionChange: true
-        }
-    },
-
-    step3: {
-        description:
-            "Sortie rapide après le changement de direction.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},       
-// ===============================
-// RAINBOW
-// ===============================
-"rainbow": {
-
-    step1: {
-        description:
-            "Le ballon est soulevé derrière ou sous les jambes.",
-
-        validation: {
-            ballLift: true
-        }
-    },
-
-    step2: {
-        description:
-            "Le ballon passe au-dessus du défenseur.",
-
-        validation: {
-            ballHeightMin: 1.5
-        }
-    },
-
-    step3: {
-        description:
-            "Accélération pour récupérer le ballon.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-
-// ===============================
-// PETIT PONT
-// ===============================
-"petit pont": {
-
-    step1: {
-        description:
-            "Le ballon est poussé entre les jambes ou dans l'espace libre.",
-
-        validation: {
-            ballDirection: ["avant"],
-            ballDistanceMin: 0.5,
-            ballDistanceMax: 3,
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied",
-                "pointe du pied"
-            ]
-        }
-    },
-
-    step2: {
-        description:
-            "Le joueur contourne ou dépasse le défenseur.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-// ===============================
-// STEP OVER
-// ===============================
-"step over": {
-
-    step1: {
-        description:
-            "Une jambe passe autour du ballon pour vendre une direction.",
-
-        validation: {
-            bodyFeint: true
-        }
-    },
-
-    step2: {
-        description:
-            "Le ballon est poussé dans la direction opposée.",
-
-        validation: {
-            directionChange: true,
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied"
-            ]
-        }
-    },
-
-    step3: {
-        description:
-            "Sortie en accélération.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-
-// ===============================
-// FEINTE DE CORPS
-// ===============================
-"feinte de corps": {
-
-    step1: {
-        description:
-            "Le corps simule une direction sans toucher immédiatement le ballon.",
-
-        validation: {
-            bodyFeint: true
-        }
-    },
-
-    step2: {
-        description:
-            "Le ballon est emmené dans la direction opposée.",
-
-        validation: {
-            directionChange: true,
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied"
-            ]
-        }
-    },
-
-    step3: {
-        description:
-            "Accélération après avoir déséquilibré le défenseur.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-// ===============================
-// FEINTE DE FRAPPE
-// ===============================
-"feinte de frappe": {
-
-    step1: {
-        description:
-            "Le joueur arme une frappe crédible.",
-
-        validation: {
-            fakeShot: true
-        }
-    },
-
-    step2: {
-        description:
-            "Le ballon est conservé ou déplacé au dernier instant.",
-
-        validation: {
-            directionChange: true,
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied",
-                "semelle"
-            ]
-        }
-    },
-
-    step3: {
-        description:
-            "Sortie rapide après la feinte.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-// ===============================
-// SOMBRERO
-// ===============================
-"sombrero": {
-
-    step1: {
-        description:
-            "Le ballon est soulevé au-dessus du défenseur.",
-
-        validation: {
-            ballLift: true,
-            ballHeightMin: 1.5
-        }
-    },
-
-    step2: {
-        description:
-            "Le ballon passe derrière ou au-dessus du défenseur.",
-
-        validation: {
-            ballDirection: ["avant"]
-        }
-    },
-
-    step3: {
-        description:
-            "Le joueur contourne puis récupère le ballon.",
-
-        validation: {
-            acceleration: true
-        }
-    }
-},
-// ===============================
-// DRIBBLE CREATIF
-// ===============================
-"creative": {
-
-    step1: {
-        description:
-            "Première action technique pour sortir le ballon de la ligne défensive.",
-
-        validation: {
-            ballDirection: [
-                "gauche",
-                "droite",
-                "avant",
-                "diagonale"
-            ],
-
-            ballDistanceMax: 1.5,
-
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied",
-                "semelle",
-                "pointe du pied",
-                "talon"
-            ]
-        }
-    },
-
-    step2: {
-        description:
-            "Deuxième action créant un avantage technique.",
-
-        validation: {
-            secondTouchRequired: true,
-            directionChange: true
-        }
-    },
-
-    step3: {
-        description:
-            "Exploitation de l'espace créé.",
-
-        validation: {
-            acceleration: true,
-            ballDistanceMin: 0.5
-        }
-    }
-}
-
-};
-   
-// ===============================
-// 🎯 DÉTECTION TECHNIQUE
-// ===============================
-const explicitDribble =
-    atk.includes("fait un dribble") ||
-    atk.includes("tente un dribble") ||
-    atk.includes("réalise un dribble");
-
-let detectedDribble =
-    DRIBBLES.find(d => atk.includes(d));
-
-// Dribble créatif uniquement si le joueur annonce un dribble
-if (!detectedDribble && explicitDribble) {
-    detectedDribble = "creative";
-}
-
-const isDribbleAction =
-    !!detectedDribble;
-
-// ===============================
-// 🎯 VALIDATION DRIBBLE
-// ===============================
-let dribbleCheck = null;
-
-if (isDribbleAction) {
-
-    dribbleCheck =
-        validateDribbleBlueprint(
-            detectedDribble,
-            attaqueText
-        );
-
-    console.log(
-        "🎯 DRIBBLE DETECTED =",
-        detectedDribble
-    );
-
-    console.log(
-        "🎯 DRIBBLE CHECK =",
-        dribbleCheck
-    );
-
-    if (!dribbleCheck.valid) {
-
-        return {
-            ok: false,
-            type: "BAD_DRIBBLE",
-            attacker,
-            defender,
-            msg:
-`❌ ${attacker.nom} exécute mal son dribble.`,
-            details:
-                dribbleCheck.reason
-        };
-    }
-}        
-       
-    // ===============================
-// ⚽ ÉTAT DU BALLON
-// ===============================
-const pushDistance =
-    extractDistance(atk) || 0;
-
-let ballState = "control";
-
-if (pushDistance <= 1) {
-    ballState = "control";
-} 
-else if (pushDistance <= 3) {
-    ballState = "pressure";
-} 
-else if (pushDistance <= 5) {
-    ballState = "exposed";
-} 
-else {
-    ballState = "loose";
-}
-
     // ===============================
     // 🎯 RESULT GLOBAL
     // ===============================
@@ -4062,9 +3311,43 @@ let defVmax =
         ? defBaseVmax * 0.5
         : defBaseVmax;
 
+
 // ===============================
-// 🎯 DÉTECTION TACLE
+// ⚽ DRIBBLES OFFICIELS
 // ===============================
+const DRIBBLES = [
+    "crochet extérieur",
+    "crochet intérieur",
+    "double contact",
+    "roulette",
+    "elastico",
+    "petit pont",
+    "rainbow",
+    "step over",
+    "feinte de corps",
+    "feinte de frappe",
+    "feinte de passe",
+    "changement de direction",
+    "pivot du torse",
+    "contrôle semelle",
+    "conduite intérieure",
+    "conduite extérieure",
+    "double crochet",
+    "dribble rapide",
+    "protection de balle",
+    "tourne sur lui même",
+    "sortie en accélération",
+    "push balle",
+    "dribble court",
+    "dribble long"
+];
+
+// ===============================
+// 🎯 DÉTECTION TECHNIQUE
+// ===============================
+const isDribbleAction =
+    DRIBBLES.some(d => atk.includes(d));
+
 const isTackleAction =
     def.includes("tacle") ||
     def.includes("intercepte") ||
@@ -4133,10 +3416,6 @@ const isPassive =
         atk.includes(k) || def.includes(k)
     );
 
-console.log("atk =", atk);
-console.log("def =", def);
-console.log("isPassive =", isPassive);
-    
 // 🔥 PRIORITÉ ABSOLUE
 if (isPassive) {
     return {
