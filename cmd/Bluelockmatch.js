@@ -3945,6 +3945,10 @@ let defVmax =
         : defBaseVmax;
 
 
+// ===============================
+    // 🧠 TIMELINE ACTIONS
+    // ===============================
+    const sequence = parseActionSequence(attaqueText);
 
 // ===============================
 // 🎯 DÉTECTION DRIBBLE
@@ -3964,21 +3968,11 @@ const isDribbleAction =
     !!detectedDribble;
 
 // ===============================
-// 🧠 TIMELINE ACTIONS
-// ===============================
-const sequence = parseActionSequence(attaqueText);
-    
-// ===============================
 // 🎯 VALIDATION DRIBBLE
 // ===============================
 let dribbleCheck = null;
 
 if (isDribbleAction) {
-
-    // ===============================
-    // 🧠 TIMELINE ACTIONS
-    // ===============================
-    const sequence = parseActionSequence(attaqueText);
 
     // ===============================
     // 🎯 VALIDATION DRIBBLE BLUEPRINT + SEQUENCE
