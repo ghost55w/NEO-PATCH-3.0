@@ -714,6 +714,7 @@ function validateDribbleBlueprint(dribbleName, actionText) {
             if (
                 !text.includes("accélère") &&
                 !text.includes("acceleration") &&
+                !text.includes("vmax") &&
                 !text.includes("sprinte")
             ) {
                 return {
@@ -783,6 +784,22 @@ function validateDribbleBlueprint(dribbleName, actionText) {
     };
 }
 
+// ===============================
+// 🧠 INTENTION DRIBBLE
+// ===============================
+function detectIntentDribble(text) {
+
+    const t = text.toLowerCase();
+
+    return (
+        t.includes("fait un dribble") ||
+        t.includes("tente un dribble") ||
+        t.includes("réalise un dribble") ||
+        t.includes("essaie de dribbler") ||
+        t.includes("dribbler") ||
+        t.includes("dribble son adversaire")
+    );
+}
 
 /* ===============================
 📐 MATH / TERRAIN ENGINE
