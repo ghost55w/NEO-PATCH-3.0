@@ -3926,44 +3926,72 @@ let defVmax =
         : defBaseVmax;
 
 
-// ===============================
-// ⚽ DRIBBLES OFFICIELS
-// ===============================
-const DRIBBLES = [
-    "crochet extérieur",
-    "crochet intérieur",
-    "double contact",
-    "roulette",
-    "elastico",
-    "petit pont",
-    "rainbow",
-    "step over",
-    "feinte de corps",
-    "feinte de frappe",
-    "feinte de passe",
-    "changement de direction",
-    "pivot du torse",
-    "contrôle semelle",
-    "conduite intérieure",
-    "conduite extérieure",
-    "double crochet",
-    "dribble rapide",
-    "protection de balle",
-    "tourne sur lui même",
-    "sortie en accélération",
-    "push balle",
-    "dribble court",
-    "dribble long"
-];
 
 // ===============================
-// 🎯 DÉTECTION TECHNIQUE
+// 🎯 DÉTECTION DRIBBLE
 // ===============================
+const explicitDribble =
+    detectIntentDribble(atk);
+
+let detectedDribble =
+    DRIBBLES.find(d => atk.includes(d));
+
+// DRIBBLE CREATIF⚽ 
+if (!detectedDribble && explicitDribble) {
+    detectedDribble = "creative";
+}
+
 const isDribbleAction =
-    DRIBBLES.some(d => atk.includes(d));
+    !!detectedDribble;
 
+// ===============================
+// 🎯 VALIDATION DRIBBLE
+// ===============================
+let dribbleCheck = null;
+
+if (isDribbleAction) {
+
+    dribbleCheck =
+        validateDribbleBlueprint(
+            detectedDribble,
+            attaqueText
+        );
+
+    console.log(
+        "🎯 DRIBBLE DETECTED =",
+        detectedDribble
+    );
+
+    console.log(
+        "🎯 DRIBBLE CHECK =",
+        dribbleCheck
+    );
+
+    if (!dribbleCheck.valid) {
+
+        return {
+            ok: false,
+            type: "BAD_DRIBBLE",
+            attacker,
+            defender,
+            msg:
+`❌ ${attacker.nom} exécute mal son dribble.`,
+            details:
+                dribbleCheck.reason
+        };
+    }
+}
+
+    
+// ===============================
+// 🛡️  DÉTECTION TACLE
+// ===============================
 const isTackleAction =
     def.includes("tacle") ||
+    def.includes("tacle debout") ||
+    def.includes("tacle glissé") ||
+    def.includes("tacle circulaire") ||
+    def.includes("tacle frontal") ||
     def.includes("intercepte") ||
     def.includes("contre") ||
     def.includes("pied") ||
