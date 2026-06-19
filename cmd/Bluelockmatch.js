@@ -777,14 +777,6 @@ function validateDribbleBlueprint(
 }
         
 
-    // ===============================
-    // ✅ SUCCESS
-    // ===============================
-    return {
-        valid: true,
-        dribble: dribbleName
-    };
-}
 
 // ===============================
 // 🧠 INTENTION DRIBBLE
