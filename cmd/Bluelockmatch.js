@@ -751,6 +751,71 @@ function calculateDribbleScore(
     );
 }
 
+// ===============================
+// 📍 CALCUL POSITION PAR DISTANCE
+// ===============================
+function applyDistanceMovement(joueur, texte) {
+
+    if (!joueur?.position) return false;
+
+    const distance = extraireDistance(texte);
+
+    if (!distance) return false;
+
+    // sécurité
+    const d = Math.min(distance, 10);
+
+    const t = texte.toLowerCase();
+
+    // ===============================
+    // 🥅 VERS LE CAMP ADVERSE
+    // ===============================
+    if (
+        t.includes("vers le but") ||
+        t.includes("vers le camp adverse") ||
+        t.includes("devant lui") ||
+        t.includes("vers l'avant") ||
+        t.includes("attaque")
+    ) {
+
+        joueur.position.y -= d;
+        return true;
+    }
+
+    // ===============================
+    // 🔙 RETOUR
+    // ===============================
+    if (
+        t.includes("recule") ||
+        t.includes("vers son camp") ||
+        t.includes("arrière")
+    ) {
+
+        joueur.position.y += d;
+        return true;
+    }
+
+    // ===============================
+    // ⬅️ GAUCHE
+    // ===============================
+    if (t.includes("gauche")) {
+
+        joueur.position.x -= d;
+        return true;
+    }
+
+    // ===============================
+    // ➡️ DROITE
+    // ===============================
+    if (t.includes("droite")) {
+
+        joueur.position.x += d;
+        return true;
+    }
+
+    return false;
+}
+
 
 
 
@@ -1108,6 +1173,153 @@ function validateTackleBlueprint(
                 ? null
                 : `Tacle ${tackleName} mal exécuté ❌`
     };
+}
+
+// ===============================
+// 🏃 DÉPLACEMENTS OFFICIELS
+// ===============================
+const MOVES = [
+    "course",
+    "sprint",
+    "zigzag",
+    "acceleration",
+    "course circulaire"
+];
+
+// ===============================
+// 🧠 INTENTION MOVE
+// ===============================
+function detectIntentMove(text) {
+
+    const t = text.toLowerCase();
+
+    return MOVES.some(move =>
+        t.includes(move)
+    );
+}
+
+// ===============================
+// ⚽ BALL SYNC
+// ===============================
+function syncBallPosition(match, joueur) {
+
+    if (!match.ball) return;
+
+    const holder =
+        match.ballHolder ||
+        match.ball.holder;
+
+    if (holder !== joueur.nom) return;
+
+    match.ball.position = {
+        x: joueur.position.x,
+        y: joueur.position.y
+    };
+}
+
+// ===============================
+// 📍 APPLY MOVE
+// ===============================
+function applyMove(match, joueur, texte) {
+
+    const distance =
+        extraireDistance(texte) || 0;
+
+    if (!distance) return false;
+
+    const d =
+        Math.min(distance, 10);
+
+    const t =
+        texte.toLowerCase();
+
+    // ===============================
+    // 🥅 AVANT
+    // ===============================
+    if (
+        t.includes("avant") ||
+        t.includes("camp adverse") ||
+        t.includes("but adverse")
+    ) {
+        joueur.position.y -= d;
+    }
+
+    // ===============================
+    // 🔙 ARRIÈRE
+    // ===============================
+    else if (
+        t.includes("arrière") ||
+        t.includes("son camp")
+    ) {
+        joueur.position.y += d;
+    }
+
+    // ===============================
+    // ⬅️ GAUCHE
+    // ===============================
+    else if (
+        t.includes("gauche")
+    ) {
+        joueur.position.x -= d;
+    }
+
+    // ===============================
+    // ➡️ DROITE
+    // ===============================
+    else if (
+        t.includes("droite")
+    ) {
+        joueur.position.x += d;
+    }
+
+    joueur.position.x =
+        Math.max(
+            0,
+            Math.min(
+                FIELD.width,
+                joueur.position.x
+            )
+        );
+
+    joueur.position.y =
+        Math.max(
+            0,
+            Math.min(
+                FIELD.length,
+                joueur.position.y
+            )
+        );
+
+    syncPlayer(match, joueur);
+    syncBallPosition(match, joueur);
+
+    return true;
+}
+
+// ===============================
+// 🔁 MULTI MOVE
+// ===============================
+async function handleReplayMoves(
+    match,
+    joueur1,
+    texte1,
+    joueur2,
+    texte2
+) {
+
+    applyMove(
+        match,
+        joueur1,
+        texte1
+    );
+
+    applyMove(
+        match,
+        joueur2,
+        texte2
+    );
+
+    return true;
 }
 
 
@@ -4342,47 +4554,90 @@ const isTackleAction =
     def.includes("pied") ||
     def.includes("talon");
 
+
 // ===============================
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
 // ===============================
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
-const defenseStat = defStats.def || 50;
+    const defenseStat = defStats.def || 50;
 
-const dribbleCheck = validateDribbleBlueprint(
-    dribbleName,
-    attaqueText
-);
+    const dribbleCheck = validateDribbleBlueprint(
+        dribbleName,
+        attaqueText
+    );
 
-const attackerWins =
-    attackStat > defenseStat &&
-    dribbleCheck.valid &&
-    dribbleCheck.score >= 60;
+    const tackleCheck = validateTackleBlueprint(
+        tackleName,
+        defenseText
+    );
+
+    const attackerWins =
+        attackStat > defenseStat &&
+        dribbleCheck.valid &&
+        dribbleCheck.score >= 60;
+
+    const defenderWins =
+        defenseStat > attackStat &&
+        tackleCheck.valid &&
+        tackleCheck.score >= 60;
+// ===============================
+    // ⚽ DRIBBLE RÉUSSI 
+    // ===============================
     if (attackerWins) {
 
-        match.joueurTour = attacker.id || attacker.jid;
+    match.joueurTour =
+        attacker.id || attacker.jid;
 
-        return {
-            ok: true,
-            type: "DRIBBLE_WIN",
-            attacker,
-            defender,
-            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-        };
+    // ===============================
+    // 📍 CONTINUER LE MOUVEMENT
+    // ===============================
+    await handleDeplacements(
+        match,
+        attacker,
+        attaqueText
+    );
 
-    } else {
+    return {
+        ok: true,
+        type: "DRIBBLE_WIN",
+        attacker,
+        defender,
+        msg:
+        `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+    };
+    } 
+    
+    // ===============================
+    // 🛡️ TACLE RÉUSSI
+    // ===============================
+    if (defenderWins) {
 
-        match.joueurTour = defender.id || defender.jid;
+        match.joueurTour =
+            defender.id || defender.jid;
 
         return {
             ok: false,
-            type: "DRIBBLE_LOSE",
+            type: "TACKLE_WIN",
             attacker,
             defender,
-            msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
+            msg:
+                `🛡️⚽ ${defender.nom} exécute parfaitement son tacle et récupère le ballon...`
         };
     }
+
+    // ===============================
+    // ⚖️ AUCUNE ACTION VALIDE
+    // ===============================
+    return {
+        ok: false,
+        type: "DUEL_FAIL",
+        attacker,
+        defender,
+        msg:
+            `⚖️ Aucun des deux joueurs ne parvient à prendre l'avantage dans le duel...`
+    };
 }
 
  // ===============================
@@ -4906,10 +5161,53 @@ async function handleDeplacements(match, joueur, texte) {
         return { ok: false, erreur: "❌ Joueur sans position" };
     }
 
+    // ===============================
+// 📍 MOUVEMENT LIBRE
+// ===============================
+applyMove(
+    match,
+    joueur,
+    texte
+);
+
     const zoneArrivee = extraireZoneArrivee(texte);
     const zoneDepart = extraireZoneDepart(texte);
     const distance = extraireDistance(texte);
     const direction = extraireDirectionLargeur(texte);
+
+ // ===============================
+// 📍 MOUVEMENT PAR DISTANCE
+// ===============================
+if (!zoneArrivee && distance) {
+
+    const movedByDistance =
+        applyDistanceMovement(
+            joueur,
+            texte
+        );
+
+    if (movedByDistance) {
+
+        joueur.position.x = Math.max(
+            0,
+            Math.min(FIELD.width, joueur.position.x)
+        );
+
+        joueur.position.y = Math.max(
+            0,
+            Math.min(FIELD.length, joueur.position.y)
+        );
+
+        syncPlayer(match, joueur);
+        syncBallPosition(match, joueur);
+
+        return {
+            ok: true,
+            message:
+                "✅ Déplacement calculé automatiquement"
+        };
+    }
+}
 
     let moved = false;
     let total = 0;
