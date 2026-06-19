@@ -801,6 +801,163 @@ function detectIntentDribble(text) {
     );
 }
 
+// ===============================
+// 🛡️ TACLES OFFICIELS
+// ===============================
+const TACKLES = [
+    "tacle frontal",
+    "tacle glissé",
+    "tacle circulaire",
+    "pied en opposition"
+];
+
+// ===============================
+// 🛡️ TACKLE BLUEPRINTS (REFERENCE TEXT)
+// ===============================
+const TACKLE_BLUEPRINTS = {
+
+    "tacle frontal": 
+        "Faire un tacle frontal debout avec la pointe du pied droit ou gauche en interception directe du ballon.",
+
+    "tacle glissé":
+        "Faire un tacle glissé avec la semelle du pied droit ou gauche. Si le défenseur est sur le profil de l'attaquant, utiliser l'extérieur du pied. Vmax obligatoire pour avoir une défense maximale.",
+
+    "tacle circulaire":
+        "Faire un balayage circulaire avec l'intérieur du pied droit ou gauche en pivotant de 60°, 90° ou 180° maximum selon la situation.",
+
+    "pied en opposition":
+        "Placer le pied tendu en opposition pour bloquer le passage avec le tibia ou le talon en anticipation de la course adverse."
+};
+
+// ===============================
+// 🧠 TACKLE INTENTS
+// ===============================
+const TACKLE_INTENTS = [
+    "tacle",
+    "tacler",
+    "intercepter",
+    "interception",
+    "récupérer le ballon",
+    "couper la trajectoire",
+    "bloquer le passage",
+    "couper la route",
+    "contrer",
+    "défendre",
+    "challenge défensif"
+];
+
+// ===============================
+// 🧠 TACKLE SYNONYMS
+// ===============================
+const TACKLE_SYNONYMS = {
+
+    "pointe du pied": [
+        "pointe",
+        "bout du pied"
+    ],
+
+    "semelle": [
+        "sous le pied"
+    ],
+
+    "intérieur du pied": [
+        "interieur du pied",
+        "face interne"
+    ],
+
+    "extérieur du pied": [
+        "exterieur du pied",
+        "face externe"
+    ],
+
+    "vmax": [
+        "vitesse maximale",
+        "pleine vitesse",
+        "à fond",
+        "à pleine vitesse"
+    ]
+};
+
+    // ===============================
+// 🧠 DETECT TACKLE INTENT
+// ===============================
+function detectIntentTackle(text) {
+
+    const t = text.toLowerCase();
+
+    return TACKLE_INTENTS.some(intent =>
+        t.includes(intent)
+    );
+}
+
+// ===============================
+// 🔍 FIND TACKLE BLUEPRINT
+// ===============================
+function findBestTackleBlueprint(text) {
+
+    let best = null;
+    let bestScore = 0;
+
+    for (const [name, description] of Object.entries(TACKLE_BLUEPRINTS)) {
+
+        const score =
+            calculateSimilarity(
+                text,
+                description
+            );
+
+        if (score > bestScore) {
+            bestScore = score;
+            best = name;
+        }
+    }
+
+    return {
+        tackle: best,
+        score: bestScore
+    };
+}
+
+// ===============================
+// 🛡️ VALIDATE TACKLE
+// ===============================
+function validateTackleBlueprint(
+    tackleName,
+    actionText
+) {
+
+    const blueprint =
+        TACKLE_BLUEPRINTS[tackleName];
+
+    if (!blueprint) {
+        return {
+            valid: false,
+            reason: "Blueprint introuvable"
+        };
+    }
+
+    const similarity =
+        calculateSimilarity(
+            actionText,
+            blueprint
+        );
+
+    return {
+
+        valid: similarity >= 70,
+
+        score: similarity,
+
+        tackle: tackleName,
+
+        reason:
+            similarity >= 70
+                ? null
+                : `Tacle ${tackleName} mal exécuté ❌`
+    };
+}
+
+
 /* ===============================
 📐 MATH / TERRAIN ENGINE
 =================================*/
@@ -4038,10 +4195,17 @@ const isTackleAction =
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
-    const defenseStat = defStats.def || 50;
+const defenseStat = defStats.def || 50;
 
-    const attackerWins = attackStat > defenseStat;
+const dribbleCheck = validateDribbleBlueprint(
+    dribbleName,
+    attaqueText
+);
 
+const attackerWins =
+    attackStat > defenseStat &&
+    dribbleCheck.valid &&
+    dribbleCheck.score >= 60;
     if (attackerWins) {
 
         match.joueurTour = attacker.id || attacker.jid;
