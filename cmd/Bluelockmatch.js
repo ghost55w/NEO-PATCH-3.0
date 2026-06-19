@@ -647,6 +647,116 @@ ballDistanceMin: 0.5
 };
 
 // ===============================
+// 🧠 DRIBBLE INTENTS
+// ===============================
+const DRIBBLE_INTENTS = {
+
+    "double contact": [
+        "double contact",
+        "double touche",
+        "deux touches"
+    ],
+
+    "crochet extérieur": [
+        "crochet extérieur",
+        "extérieur du pied",
+        "crochète vers l'extérieur"
+    ],
+
+    "crochet intérieur": [
+        "crochet intérieur",
+        "intérieur du pied",
+        "crochète vers l'intérieur"
+    ],
+
+    "roulette": [
+        "roulette",
+        "tourne sur lui même",
+        "rotation sur le ballon"
+    ],
+
+    "elastico": [
+        "elastico",
+        "flip flap"
+    ],
+
+    "petit pont": [
+        "petit pont",
+        "entre les jambes"
+    ],
+
+    "rainbow": [
+        "rainbow",
+        "arc en ciel"
+    ],
+
+    "step over": [
+        "step over",
+        "passe la jambe",
+        "tour du ballon"
+    ],
+
+    "feinte de corps": [
+        "feinte de corps",
+        "déséquilibre",
+        "feinte physique"
+    ],
+
+    "feinte de frappe": [
+        "feinte de frappe",
+        "arme une frappe",
+        "faux tir"
+    ]
+};
+
+// ===============================
+// 🧠 BUILD BLUEPRINT TEXT
+// ===============================
+function buildDribbleBlueprintText(dribbleName) {
+
+    const blueprint =
+        DRIBBLE_BLUEPRINTS[dribbleName];
+
+    if (!blueprint) return "";
+
+    let text = "";
+
+    Object.values(blueprint).forEach(step => {
+
+        if (step.description) {
+            text += " " + step.description;
+        }
+
+    });
+
+    return text.trim();
+}
+
+// ===============================
+// 📊 DRIBBLE SCORE
+// ===============================
+function calculateDribbleScore(
+    dribbleName,
+    actionText
+) {
+
+    const reference =
+        buildDribbleBlueprintText(
+            dribbleName
+        );
+
+    return similarity(
+        pureName(actionText),
+        pureName(reference)
+    );
+}
+
+
+
+
+
+
+// ===============================
 // ⚙️ VALIDATION DRIBBLE BLUEPRINT
 // ===============================
 function validateDribbleBlueprint(dribbleName, actionText) {
@@ -776,12 +886,55 @@ function validateDribbleBlueprint(dribbleName, actionText) {
     }
 
     // ===============================
+// 📊 SCORE DE SIMILARITÉ
+// ===============================
+const score =
+    calculateDribbleScore(
+        dribbleName,
+        actionText
+    );
+
+if (score < 70) {
+
+    return {
+        valid: false,
+        score,
+        dribble: dribbleName,
+        reason:
+            `Dribble ${dribbleName} mal réalisé ❌`
+    };
+}
+
+    // ===============================
     // ✅ SUCCESS
     // ===============================
     return {
-        valid: true,
-        dribble: dribbleName
-    };
+    valid: true,
+    score,
+    dribble: dribbleName
+};
+}
+
+// ===============================
+// 🔍 FIND DRIBBLE INTENT
+// ===============================
+function detectDribbleType(text) {
+
+    const t = pureName(text);
+
+    for (const [dribble, synonyms]
+        of Object.entries(DRIBBLE_INTENTS)) {
+
+        if (
+            synonyms.some(s =>
+                t.includes(pureName(s))
+            )
+        ) {
+            return dribble;
+        }
+    }
+
+    return "creative";
 }
 
 // ===============================
