@@ -647,136 +647,142 @@ ballDistanceMin: 0.5
 };
 
 // ===============================
-// 🎯 SCORE DRIBBLE
+// ⚙️ VALIDATION DRIBBLE BLUEPRINT
 // ===============================
-function calculateDribbleScore(
-    dribbleName,
-    actionText
-) {
+function validateDribbleBlueprint(dribbleName, actionText) {
 
-    const blueprint =
-        DRIBBLE_BLUEPRINTS[dribbleName];
+    const blueprint = DRIBBLE_BLUEPRINTS[dribbleName];
 
     if (!blueprint) {
-        return 0;
+        return {
+            valid: false,
+            reason: `Blueprint introuvable pour : ${dribbleName}`
+        };
     }
 
-    const text =
-        actionText.toLowerCase();
+    const text = actionText.toLowerCase();
 
-    let score = 0;
-    let maxScore = 0;
+    // ===============================
+    // 🧠 VALIDATION DES STEPS
+    // ===============================
+    const steps = Object.values(blueprint);
 
-    const steps =
-        Object.values(blueprint);
+    for (let i = 0; i < steps.length; i++) {
 
-    for (const step of steps) {
-
-        const validation =
-            step.validation;
+        const step = steps[i];
+        const validation = step.validation;
 
         // ===============================
-        // 🦶 SURFACES
+        // 🧪 SURFACES (optionnel)
         // ===============================
         if (validation.surfaces) {
 
-            maxScore += 20;
+            const okSurface = validation.surfaces.some(s =>
+                text.includes(s)
+            );
 
-            const ok =
-                validation.surfaces.some(s =>
-                    text.includes(
-                        s.toLowerCase()
-                    )
-                );
-
-            if (ok) {
-                score += 20;
+            if (!okSurface) {
+               return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+}; 
             }
         }
 
         // ===============================
-        // 🎯 DIRECTION
+        // 🎯 DIRECTION BALL
         // ===============================
         if (validation.ballDirection) {
 
-            maxScore += 20;
+            const okDir = validation.ballDirection.some(d =>
+                text.includes(d)
+            );
 
-            const ok =
-                validation.ballDirection.some(d =>
-                    text.includes(
-                        d.toLowerCase()
-                    )
-                );
-
-            if (ok) {
-                score += 20;
+            if (!okDir) {
+                return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
 
         // ===============================
-        // 🚀 ACCELERATION
+        // 🚀 ACCELERATION (flag simple)
         // ===============================
         if (validation.acceleration) {
 
-            maxScore += 20;
-
-            const accelWords = [
-                "accélère",
-                "acceleration",
-                "vmax",
-                "sprinte",
-                "explose",
-                "démarre"
-            ];
-
-            const ok =
-                accelWords.some(w =>
-                    text.includes(w)
-                );
-
-            if (ok) {
-                score += 20;
+            if (
+                !text.includes("accélère") &&
+                !text.includes("acceleration") &&
+                !text.includes("vmax") &&
+                !text.includes("sprinte")
+            ) {
+                return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
             }
         }
 
+        // ===============================
+        // 🧍 BODY FEINT
+        // ===============================
+        if (validation.bodyFeint) {
+
+            if (
+                !text.includes("feinte") &&
+                !text.includes("corps")
+            ) {
+                return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
+            }
+        }
+
+        // ===============================
+        // 🧲 FAKE SHOT
+        // ===============================
+        if (validation.fakeShot) {
+
+            if (
+                !text.includes("frappe") &&
+                !text.includes("tir") &&
+                !text.includes("arme")
+            ) {
+                return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
+            }
+        }
+
+        // ===============================
+        // 🆙 BALL LIFT
+        // ===============================
+        if (validation.ballLift) {
+
+            if (
+                !text.includes("soulève") &&
+                !text.includes("lob") &&
+                !text.includes("au-dessus")
+            ) {
+                return {
+    valid: false,
+    reason: `Dribble ${dribbleName} mal réalisé ❌`
+};
+            }
+        }
     }
 
-    return Math.round(
-        (score / Math.max(maxScore, 1))
-        * 100
-    );
-}
-    
-// ===============================
-// ⚙️ VALIDATION DRIBBLE
-// ===============================
-function validateDribbleBlueprint(
-    dribbleName,
-    actionText
-) {
-
-    const score =
-        calculateDribbleScore(
-            dribbleName,
-            actionText
-        );
-
+    // ===============================
+    // ✅ SUCCESS
+    // ===============================
     return {
-
-        valid: score >= 70,
-
-        score,
-
-        dribble: dribbleName,
-
-        reason:
-            score >= 70
-                ? null
-                : `Dribble ${dribbleName} mal réalisé ❌`
+        valid: true,
+        dribble: dribbleName
     };
 }
-        
-
 
 // ===============================
 // 🧠 INTENTION DRIBBLE
@@ -2912,7 +2918,7 @@ ${kickoffText}
 
     }, 6 * 60 * 1000);
 }
-    
+            } 
 
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
@@ -3937,10 +3943,6 @@ let defVmax =
         : defBaseVmax;
 
 
-// ===============================
-    // 🧠 TIMELINE ACTIONS
-    // ===============================
-    const sequence = parseActionSequence(attaqueText);
 
 // ===============================
 // 🎯 DÉTECTION DRIBBLE
@@ -3966,22 +3968,22 @@ let dribbleCheck = null;
 
 if (isDribbleAction) {
 
-    // ===============================
-    // 🎯 VALIDATION DRIBBLE BLUEPRINT + SEQUENCE
-    // ===============================
-    dribbleCheck = validateDribbleBlueprint(
-        detectedDribble,
-        attaqueText,
-        sequence
+    dribbleCheck =
+        validateDribbleBlueprint(
+            detectedDribble,
+            attaqueText
+        );
+
+    console.log(
+        "🎯 DRIBBLE DETECTED =",
+        detectedDribble
     );
 
-    console.log("🎯 DRIBBLE DETECTED =", detectedDribble);
-    console.log("🎯 SEQUENCE =", sequence);
-    console.log("🎯 DRIBBLE CHECK =", dribbleCheck);
+    console.log(
+        "🎯 DRIBBLE CHECK =",
+        dribbleCheck
+    );
 
-    // ===============================
-    // ❌ ÉCHEC DRIBBLE
-    // ===============================
     if (!dribbleCheck.valid) {
 
         return {
@@ -3989,12 +3991,10 @@ if (isDribbleAction) {
             type: "BAD_DRIBBLE",
             attacker,
             defender,
-
-            // 🔥 IMPORTANT
-            msg: `❌ Dribble ${detectedDribble} mal réalisé`,
-
-            // option debug
-            details: dribbleCheck.reason
+            msg:
+`❌ ${attacker.nom} exécute mal son dribble.`,
+            details:
+                dribbleCheck.reason
         };
     }
 }
@@ -4019,116 +4019,10 @@ const isTackleAction =
 // ===============================
 if (isDribbleAction && isTackleAction) {
 
-    // ===============================
-    // 🎯 SCORES INITIAUX
-    // ===============================
-    let attackScore = atkStats.dri || 50;
-    let defenseScore = defStats.def || 50;
+    const attackStat = atkStats.dri || 50;
+    const defenseStat = defStats.def || 50;
 
-    // ===============================
-    // ⚽ BONUS MAÎTRISE (DOMINATION TECHNIQUE)
-    // ===============================
-    if (atkStats.dri > defStats.def) {
-        attackScore += 10;
-    } else if (defStats.def > atkStats.dri) {
-        defenseScore += 5;
-    }
-
-    // ===============================
-    // 🎯 QUALITÉ DRIBBLE (BLUEPRINT SCORE)
-    // ===============================
-    const dribbleBonus = dribbleCheck?.score || 0;
-    const dribbleSpeed = dribbleCheck?.speed || atkStats.acc || 50;
-
-    attackScore += dribbleBonus * 0.4;
-
-    // ===============================
-    // 🛡️ QUALITÉ TACLE (SI DISPONIBLE)
-    // ===============================
-    const tackleBonus = tackleCheck?.score || 0;
-    defenseScore += tackleBonus * 0.4;
-
-    // ===============================
-    // 📏 TACLE RANGE SYSTEM (RÉALISTE)
-    // ===============================
-    const TACKLE_RANGE = {
-        standing_front: 0.5,
-        standing_circular: 0.5,
-        sliding_front: 1.0,
-        sliding_circular: 1.0
-    };
-
-    const tackleType = match.tackleType || "standing_front";
-    const tackleRange = TACKLE_RANGE[tackleType] || 0.5;
-
-    const distance = match.ballDistanceToDefender || 1;
-
-    // ===============================
-    // ❌ TACLE HORS PORTÉE
-    // ===============================
-    if (distance > tackleRange) {
-
-        defenseScore -= 25;
-        attackScore += 15;
-
-    } else {
-
-        // ===============================
-        // ⚔️ BONUS TYPE DE TACLE
-        // ===============================
-        if (tackleType.includes("standing")) {
-            defenseScore += 5; // équilibre + poursuite
-        }
-
-        if (tackleType.includes("sliding")) {
-            defenseScore += 10; // couverture + portée
-            match.defenseChaseDelay = 2; // récupération lente
-        }
-    }
-
-    // ===============================
-    // ⚡ RÉACTION DÉFENSEUR
-    // ===============================
-    const reaction = defStats.rea || 50;
-    const speed = atkStats.acc || 50;
-
-    if (reaction > speed) {
-        defenseScore += 10;
-    } else {
-        attackScore += 10;
-    }
-
-    // ===============================
-    // 🧠 TIMING DRIBBLE VS RÉACTION
-    // ===============================
-    if (reaction < dribbleSpeed) {
-        attackScore += 10;
-    }
-
-    // ===============================
-    // 🧠 BONUS POSITIONNEMENT
-    // ===============================
-    const attackerAngleAdvantage =
-        match.attackerSideAdvantage || 0;
-
-    const defenderAngleAdvantage =
-        match.defenderAngleCover || 0;
-
-    attackScore += attackerAngleAdvantage;
-    defenseScore += defenderAngleAdvantage;
-
-    // ===============================
-    // 🧾 DEBUG LOGS
-    // ===============================
-    console.log("⚽ ATTACK SCORE =", attackScore);
-    console.log("🛡️ DEFENSE SCORE =", defenseScore);
-    console.log("📏 DISTANCE =", distance);
-    console.log("🦵 TACKLE TYPE =", tackleType);
-
-    // ===============================
-    // 🏁 RÉSOLUTION DU DUEL
-    // ===============================
-    const attackerWins = attackScore > defenseScore;
+    const attackerWins = attackStat > defenseStat;
 
     if (attackerWins) {
 
@@ -4139,7 +4033,7 @@ if (isDribbleAction && isTackleAction) {
             type: "DRIBBLE_WIN",
             attacker,
             defender,
-            msg: `🔥⚽ ${attacker.nom} élimine son adversaire avec un dribble maîtrisé...`
+            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
         };
 
     } else {
@@ -4151,11 +4045,11 @@ if (isDribbleAction && isTackleAction) {
             type: "DRIBBLE_LOSE",
             attacker,
             defender,
-            msg: `⚽🥅 ${defender.nom} stoppe l’action et récupère le ballon...`
+            msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
         };
     }
 }
-    
+
  // ===============================
 // 🧱 DÉFENSE PASSIVE SIMPLE 
 // ===============================
