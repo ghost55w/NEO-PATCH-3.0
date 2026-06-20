@@ -3117,45 +3117,55 @@ const actionText = action.toLowerCase();
 // ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
-    match.phaseDuel.attackPave = action;
-    match.phaseDuel.step = "defense_pave";
-
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
     const actionText = action.toLowerCase();
 
+    match.phaseDuel.attackPave = action;
+
     // ===============================
-// 🧠 DRIBBLE CHECK (IMPORTANT)
-// ===============================
-let dribbleCheck = null;
+    // 🧠 DRIBBLE CHECK (IMPORTANT)
+    // ===============================
+    let dribbleCheck = null;
 
-if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
+    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
 
-    const dribbleName = detectDribble(actionText);
+        const dribbleName = detectDribble(actionText);
 
-    if (dribbleName) {
-        dribbleCheck = validateDribbleBlueprint(dribbleName, action);
+        if (dribbleName) {
+            dribbleCheck = validateDribbleBlueprint(dribbleName, action);
+        }
     }
-}
 
-// ===============================
-// ❌ FAIL ATTAQUE = STOP DUEL IMMÉDIAT
-// ===============================
-if (
-    dribbleCheck &&
-    (!dribbleCheck.valid || dribbleCheck.score < 60)
-) {
+    // ===============================
+    // ❌ FAIL ATTAQUE = STOP DUEL IMMÉDIAT
+    // ===============================
+    if (
+        dribbleCheck &&
+        (!dribbleCheck.valid || dribbleCheck.score < 60)
+    ) {
 
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+        // 🚫 CLEAN DUEL STATE
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
 
-    match.ballHolder = defender.nom;
-    match.joueurTour = defender.id || defender.jid;
+        if (match.warningTimer) {
+            clearTimeout(match.warningTimer);
+            match.warningTimer = null;
+        }
 
-    await ovl.sendMessage(chat, {
-        text:
+        if (match.defenseTimer) {
+            clearTimeout(match.defenseTimer);
+            match.defenseTimer = null;
+        }
+
+        match.ballHolder = defender.nom;
+        match.joueurTour = defender.id || defender.jid;
+
+        await ovl.sendMessage(chat, {
+            text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -3169,11 +3179,11 @@ if (
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [defender.id || defender.jid]
-    });
+            mentions: [defender.id || defender.jid]
+        });
 
-    return true; // 💥 CRUCIAL
-}
+        return true;
+    }
 
     // ===============================
     // 🧠 RESUME ACTION
@@ -3196,17 +3206,19 @@ if (
     const note = noterPave(action);
 
     // ===============================
-// 🔥 NEXT = DEFENSEUR DU DUEL
-// ===============================
-const duelNextId = match.defender;
-const nextTag = getTagFromJid(duelNextId);
-    
-// ===============================
-// ⚽ STATE SYNC (IMPORTANT)
-// ===============================
-match.ballHolder = attacker.nom;
-match.joueurTour = duelNextId;
-match.waitingDefenseFrom = duelNextId;
+    // 🔥 NEXT = DEFENSEUR DU DUEL
+    // ===============================
+    const duelNextId = match.defender;
+    const nextTag = getTagFromJid(duelNextId);
+
+    // ===============================
+    // ⚽ STATE SYNC (IMPORTANT)
+    // ===============================
+    match.ballHolder = attacker.nom;
+    match.joueurTour = duelNextId;
+    match.waitingDefenseFrom = duelNextId;
+
+    match.phaseDuel.step = "defense_pave";
 
     // ===============================
     // 📩 MESSAGE ATTACK
@@ -3228,7 +3240,7 @@ match.waitingDefenseFrom = duelNextId;
     });
 
     // ===============================
-    // ⚠️ WARNING
+    // ⚠️ WARNING TIMER
     // ===============================
     if (match.warningTimer) clearTimeout(match.warningTimer);
 
@@ -3250,7 +3262,7 @@ Il reste *1 MINUTE* pour défendre !
     }, 5 * 60 * 1000);
 
     // ===============================
-    // ⏱️ LATENCE OUT (UNIFORM FIX)
+    // ⏱️ DEFENSE TIMER
     // ===============================
     if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
@@ -3277,7 +3289,7 @@ Il reste *1 MINUTE* pour défendre !
             text:
 `⛔ LATENCE OUT ❌
 
-🔁 ${defender.nom} récupère la possession !
+🔁 ${fallback?.nom || "Joueur"} récupère la possession !
 
 ➡️ @${fallbackTag} NEXT
 
@@ -3290,6 +3302,9 @@ Il reste *1 MINUTE* pour défendre !
 
     return true;
 }
+
+    
+
     
 /* ===============================
 ⚽ OFFENSIVE INTENT
