@@ -3871,14 +3871,20 @@ if (
     normalizeJid(attacker.id || attacker.jid)
 ) {
 
+    // on invalide le mauvais match
+    defender = null;
+}
+
+// ===============================
+// 🔁 FALLBACK PROPRE (IMPORTANT)
+// ===============================
+if (!defender) {
+
     defender =
         allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid)
-            &&
-            pureName(defenseText).includes(pureName(p.nom))
+            normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
         )
-        ||
-        allPlayers.find(p =>
+        || allPlayers.find(p =>
             normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid)
         );
 }
