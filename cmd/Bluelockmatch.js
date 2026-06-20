@@ -870,8 +870,8 @@ function validateDribbleBlueprint(dribbleName, actionText) {
         if (validation.ballDirection) {
 
             const okDir = validation.ballDirection.some(d =>
-                text.includes(d)
-            );
+    hasDirection(text, d)
+);
 
             if (!okDir) {
                 return {
@@ -1322,6 +1322,48 @@ async function handleReplayMoves(
     return true;
 }
 
+// ===============================
+// 🧠 DIRECTION SYNONYMS
+// ===============================
+const DIRECTION_SYNONYMS = {
+    avant: [
+        "avant",
+        "devant",
+        "devant lui",
+        "vers l'avant",
+        "tout droit"
+    ],
+
+    gauche: [
+        "gauche",
+        "sur la gauche"
+    ],
+
+    droite: [
+        "droite",
+        "sur la droite"
+    ],
+
+    diagonale: [
+        "diagonale",
+        "en diagonale"
+    ]
+};
+
+// ===============================
+// 🧠 CHECK DIRECTION
+// ===============================
+function hasDirection(text, dir) {
+
+    const words =
+        DIRECTION_SYNONYMS[dir] || [dir];
+
+    return words.some(w =>
+        text.toLowerCase().includes(
+            w.toLowerCase()
+        )
+    );
+        }
 
 /* ===============================
 📐 MATH / TERRAIN ENGINE
@@ -3633,14 +3675,12 @@ console.log("================================");
 
 const actionText = action.toLowerCase();
 
-   
 // ===============================
 // ⚽ ATTAQUE PHASE DUEL
 // ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     match.phaseDuel.attackPave = action;
-    match.phaseDuel.step = "defense_pave";
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
@@ -3648,37 +3688,136 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const actionText = action.toLowerCase();
 
     // ===============================
+    // 🧠 CHECK DRIBBLE DUEL
+    // ===============================
+    let dribbleCheck = null;
+
+    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
+
+        const dribbleName =
+            detectDribble(actionText);
+
+        if (dribbleName) {
+
+            dribbleCheck =
+                validateDribbleBlueprint(
+                    dribbleName,
+                    action
+                );
+        }
+    }
+// ===============================
+// ❌ DRIBBLE RATÉ
+// ===============================
+if (
+    dribbleCheck &&
+    (
+        !dribbleCheck.valid ||
+        dribbleCheck.score < 60
+    )
+) {
+
+    const winnerId =
+        defender.id || defender.jid;
+
+    const nextTag =
+        getTagFromJid(winnerId);
+
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+    match.ballHolder =
+        defender.nom;
+
+    match.joueurTour =
+        winnerId;
+
+    match.attacker =
+        winnerId;
+
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ❌ ${attacker.nom} exécute mal son dribble ${dribbleName} et perd immédiatement le ballon.
+
+📊 NOTE DU PAVÉ : 0/10
+
+⚽🥅 ${defender.nom} récupère la possession.
+
+➡️ @${nextTag} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [winnerId]
+    });
+
+    return true;
+} 
+    
+    // ===============================
     // 🧠 RESUME ACTION
     // ===============================
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+
+        resume =
+`${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+
     }
-    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
-        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+    else if (
+        actionText.includes("acceleration") ||
+        actionText.includes("vmax")
+    ) {
+
+        resume =
+`${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+
     }
-    else if (actionText.includes("feinte")) {
-        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+    else if (
+        actionText.includes("feinte")
+    ) {
+
+        resume =
+`${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+
     }
     else {
-        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+
+        resume =
+`${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+
     }
 
-    const note = noterPave(action);
+    const note =
+        noterPave(action);
 
     // ===============================
-// 🔥 NEXT = DEFENSEUR DU DUEL
-// ===============================
-const duelNextId = match.defender;
-const nextTag = getTagFromJid(duelNextId);
-    
-// ===============================
-// ⚽ STATE SYNC (IMPORTANT)
-// ===============================
-match.ballHolder = attacker.nom;
-match.joueurTour = duelNextId;
-match.waitingDefenseFrom = duelNextId;
+    // 🔥 NEXT = DEFENSEUR DU DUEL
+    // ===============================
+    const duelNextId =
+        match.defender;
+
+    const nextTag =
+        getTagFromJid(duelNextId);
+
+    // ===============================
+    // ⚽ STATE SYNC
+    // ===============================
+    match.phaseDuel.step =
+        "defense_pave";
+
+    match.ballHolder =
+        attacker.nom;
+
+    match.joueurTour =
+        duelNextId;
+
+    match.waitingDefenseFrom =
+        duelNextId;
 
     // ===============================
     // 📩 MESSAGE ATTACK
@@ -3699,69 +3838,9 @@ match.waitingDefenseFrom = duelNextId;
         mentions: [duelNextId]
     });
 
-    // ===============================
-    // ⚠️ WARNING
-    // ===============================
-    if (match.warningTimer) clearTimeout(match.warningTimer);
-
-    match.warningTimer = setTimeout(async () => {
-
-        if (match.joueurTour !== duelNextId) return;
-
-        await ovl.sendMessage(chat, {
-            text:
-`⚠️ @${nextTag} ❗⏳
-
-Il reste *1 MINUTE* pour défendre !
-
-╰─────────────────▱▱▱
-🔷BLUELOCK⚽🥅`,
-            mentions: [duelNextId]
-        });
-
-    }, 5 * 60 * 1000);
-
-    // ===============================
-    // ⏱️ LATENCE OUT (UNIFORM FIX)
-    // ===============================
-    if (match.defenseTimer) clearTimeout(match.defenseTimer);
-
-    match.defenseTimer = setTimeout(() => {
-
-        if (match.joueurTour !== duelNextId) return;
-
-        const fallback =
-            getVisavisPlayer(match, attacker) || defender;
-
-        const fallbackId = fallback?.id || fallback?.jid;
-
-        match.joueurTour = fallbackId;
-        match.attacker = fallbackId;
-        match.ballHolder = fallback?.nom;
-
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-
-        const fallbackTag = getTagFromJid(fallbackId);
-
-        ovl.sendMessage(chat, {
-            text:
-`⛔ LATENCE OUT ❌
-
-🔁 ${defender.nom} récupère la possession !
-
-➡️ @${fallbackTag} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-            mentions: [fallbackId]
-        });
-
-    }, 6 * 60 * 1000);
-
     return true;
-}
+}   
+
     
 /* ===============================
 ⚽ OFFENSIVE INTENT
@@ -3800,6 +3879,52 @@ if (
     match.phaseDuel.step = "resolve_duel";
 
     const actionText = action.toLowerCase();
+
+ // ===============================
+// 🛡️ DETECTION TACLE
+// ===============================
+const detectedTackle =
+    detectTackle(actionText);
+
+const tackleCheck = detectedTackle
+    ? validateTackleBlueprint(detectedTackle, action)
+    : null;
+
+   // ===============================
+// ❌ TACLE MAL EXÉCUTÉ = FIN DU DUEL
+// ===============================
+if (
+    detectedTackle &&
+    (
+        !tackleCheck?.valid ||
+        tackleCheck.score < 60
+    )
+) {
+
+    const winner = attacker;
+
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+    match.ballHolder = attacker.nom;
+    match.joueurTour = attacker.id || attacker.jid;
+
+    await ovl.sendMessage(chat, {
+        text:
+`❌ ${defender.nom} exécute mal son tacle ${detectedTackle}.
+
+⚽ ${attacker.nom} conserve le ballon.
+
+➡️ @${getTagFromJid(attacker.id || attacker.jid)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [attacker.id || attacker.jid]
+    });
+
+    return true;
+} 
 
     // ===============================
     // 🧠 RESUME DEFENSE
@@ -4493,68 +4618,22 @@ const explicitDribble =
 let detectedDribble =
     DRIBBLES.find(d => atk.includes(d));
 
-// DRIBBLE CREATIF⚽ 
+// fallback creative
 if (!detectedDribble && explicitDribble) {
     detectedDribble = "creative";
 }
 
-const isDribbleAction =
-    !!detectedDribble;
+const isDribbleAction = !!detectedDribble;
 
-// ===============================
-// 🎯 VALIDATION DRIBBLE
-// ===============================
-let dribbleCheck = null;
-
-if (isDribbleAction) {
-
-    dribbleCheck =
-        validateDribbleBlueprint(
-            detectedDribble,
-            attaqueText
-        );
-
-    console.log(
-        "🎯 DRIBBLE DETECTED =",
-        detectedDribble
-    );
-
-    console.log(
-        "🎯 DRIBBLE CHECK =",
-        dribbleCheck
-    );
-
-    if (!dribbleCheck.valid) {
-
-        return {
-            ok: false,
-            type: "BAD_DRIBBLE",
-            attacker,
-            defender,
-            msg:
-`❌ ${attacker.nom} exécute mal son dribble.`,
-            details:
-                dribbleCheck.reason
-        };
-    }
-}
-
-    
 // ===============================
 // 🛡️  DÉTECTION TACLE
 // ===============================
 const isTackleAction =
-    def.includes("tacle") ||
-    def.includes("tacle debout") ||
-    def.includes("tacle glissé") ||
-    def.includes("tacle circulaire") ||
-    def.includes("tacle frontal") ||
-    def.includes("intercepte") ||
-    def.includes("contre") ||
-    def.includes("pied") ||
-    def.includes("talon");
+    detectIntentTackle(def) || TACKLES.some(t => def.includes(t));
 
-
+const detectedTackle =
+    TACKLES.find(t => def.includes(t)) || null;
+    
 // ===============================
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
 // ===============================
