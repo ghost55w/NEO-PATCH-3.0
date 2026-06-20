@@ -3110,8 +3110,7 @@ console.log("================================");
 =================================*/
 
 const actionText = action.toLowerCase();
-
-   
+  
 // ===============================
 // ⚽ ATTAQUE PHASE DUEL
 // ===============================
@@ -3121,8 +3120,6 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const defender = match.phaseDuel.defender;
 
     const actionText = action.toLowerCase();
-
-    match.phaseDuel.attackPave = action;
 
     // ===============================
     // 🧠 DRIBBLE CHECK (IMPORTANT)
@@ -3146,27 +3143,16 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
         (!dribbleCheck.valid || dribbleCheck.score < 60)
     ) {
 
-        // 🚫 CLEAN DUEL STATE
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
-
-        if (match.warningTimer) {
-            clearTimeout(match.warningTimer);
-            match.warningTimer = null;
-        }
-
-        if (match.defenseTimer) {
-            clearTimeout(match.defenseTimer);
-            match.defenseTimer = null;
-        }
 
         match.ballHolder = defender.nom;
         match.joueurTour = defender.id || defender.jid;
 
         await ovl.sendMessage(chat, {
             text:
-`*🛡️⚡⚽ ATTAQUE !*
+`🛡️⚡⚽ ATTAQUE !
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 🎙️ RESUME♻️ : ❌ ${attacker.nom} rate son dribble et perd immédiatement le ballon.
@@ -3186,21 +3172,38 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     }
 
     // ===============================
-    // 🧠 RESUME ACTION
+    // 🧠 RESUME ACTION (TON STYLE EXACT)
     // ===============================
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+
+        resume =
+`${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
+
     }
-    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
-        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+    else if (
+        actionText.includes("acceleration") ||
+        actionText.includes("vmax")
+    ) {
+
+        resume =
+`${attacker.nom} accélère pour dépasser ${defender.nom}.`;
+
     }
-    else if (actionText.includes("feinte")) {
-        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+    else if (
+        actionText.includes("feinte")
+    ) {
+
+        resume =
+`${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
+
     }
     else {
-        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+
+        resume =
+`${attacker.nom} enchaîne une action face à ${defender.nom}.`;
+
     }
 
     const note = noterPave(action);
@@ -3208,24 +3211,25 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     // ===============================
     // 🔥 NEXT = DEFENSEUR DU DUEL
     // ===============================
-    const duelNextId = match.defender;
+    const duelNextId = defender.id || defender.jid;
     const nextTag = getTagFromJid(duelNextId);
 
     // ===============================
     // ⚽ STATE SYNC (IMPORTANT)
     // ===============================
+    match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
+
     match.ballHolder = attacker.nom;
     match.joueurTour = duelNextId;
     match.waitingDefenseFrom = duelNextId;
-
-    match.phaseDuel.step = "defense_pave";
 
     // ===============================
     // 📩 MESSAGE ATTACK
     // ===============================
     await ovl.sendMessage(chat, {
         text:
-`*🛡️⚡⚽ ATTAQUE !*
+`🛡️⚡⚽ ATTAQUE !
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 🎙️ RESUME♻️ : ${resume}
@@ -3262,7 +3266,7 @@ Il reste *1 MINUTE* pour défendre !
     }, 5 * 60 * 1000);
 
     // ===============================
-    // ⏱️ DEFENSE TIMER
+    // ⏱️ DEFENSE TIMEOUT
     // ===============================
     if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
@@ -3276,7 +3280,7 @@ Il reste *1 MINUTE* pour défendre !
         const fallbackId = fallback?.id || fallback?.jid;
 
         match.joueurTour = fallbackId;
-        match.attacker = fallbackId;
+        match.attacker = fallback;
         match.ballHolder = fallback?.nom;
 
         match.phaseDuel = null;
@@ -3289,7 +3293,7 @@ Il reste *1 MINUTE* pour défendre !
             text:
 `⛔ LATENCE OUT ❌
 
-🔁 ${fallback?.nom || "Joueur"} récupère la possession !
+🔁 ${defender.nom} récupère la possession !
 
 ➡️ @${fallbackTag} NEXT
 
@@ -3303,7 +3307,6 @@ Il reste *1 MINUTE* pour défendre !
     return true;
 }
 
-    
 
     
 /* ===============================
