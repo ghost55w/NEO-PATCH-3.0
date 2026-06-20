@@ -188,7 +188,6 @@ const DRIBBLES = [
 
 const DRIBBLE_BLUEPRINTS = {
 // ===============================
-// ===============================
 // DOUBLE CONTACT
 // ===============================
 "double contact": {
@@ -203,6 +202,7 @@ const DRIBBLE_BLUEPRINTS = {
             surfaces: [
                 "intérieur du pied",
                 "semelle"
+                "pointev"
             ],
 
             ballDirection: [
@@ -245,66 +245,68 @@ const DRIBBLE_BLUEPRINTS = {
 
     }
 
-}
-
-},
+}, 
 
 // ===============================
 // CROCHET EXTERIEUR
 // ===============================
 "crochet extérieur": {
 
-step1: {
-description:
-"Le ballon est emmené vers l'extérieur avec l'extérieur du pied.",
+    step1: {
 
-validation: {
-surfaces: ["extérieur du pied"],
-ballDirection: ["gauche", "droite"],
-ballDistanceMax: 1.5
-}
+        description:
+        "Le ballon est poussé vers l'extérieur avec l'extérieur du pied entre 30cm et 1m50 tandis que le corps pivote de 60° à 90° dans cette même direction.",
+
+        validation: {
+
+            surfaces: [
+                "extérieur du pied"
+            ],
+
+            ballDirection: [
+                "gauche",
+                "droite"
+            ],
+
+            ballDistanceMin: 0.3,
+            ballDistanceMax: 1.5,
+
+            bodyPivotMin: 60,
+            bodyPivotMax: 90
+        }
+
+    }
 
 },
-
-step2: {
-description:
-"Sortie rapide dans la nouvelle direction.",
-
-validation: {
-acceleration: true,
-ballDistanceMin: 0.5
-}
-
-}
-
-},
-
 // ===============================
 // CROCHET INTERIEUR
 // ===============================
 "crochet intérieur": {
 
-step1: {
-description:
-"Le ballon est ramené vers l'intérieur avec l'intérieur du pied.",
+    step1: {
 
-validation: {
-surfaces: ["intérieur du pied"],
-ballDirection: ["gauche", "droite"],
-ballDistanceMax: 1.5
-}
+        description:
+        "Le ballon est ramené vers l'intérieur avec l'intérieur du pied entre 30cm et 1m50 tandis que le corps pivote de 60° à 90° dans cette même direction.",
 
-},
+        validation: {
 
-step2: {
-description:
-"Protection puis accélération dans la nouvelle trajectoire.",
+            surfaces: [
+                "intérieur du pied"
+            ],
 
-validation: {
-acceleration: true
-}
+            ballDirection: [
+                "gauche",
+                "droite"
+            ],
 
-}
+            ballDistanceMin: 0.3,
+            ballDistanceMax: 1.5,
+
+            bodyPivotMin: 60,
+            bodyPivotMax: 90
+        }
+
+    }
 
 },
 // ===============================
