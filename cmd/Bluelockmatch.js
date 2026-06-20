@@ -3726,13 +3726,14 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     // ✔ DRIBBLE OK → PASS DEFENSE
     // ===============================
     match.phaseDuel.attackPave = action;
-    match.phaseDuel.step = "defense_pave";
 
-    match.ballHolder = attacker.nom;
-    match.joueurTour = defender.id || defender.jid;
+// NE PAS switch direct
+match.phaseDuel.nextStep = "defense_pave";
 
-    return true;
-}
+match.ballHolder = attacker.nom;
+match.joueurTour = defender.id || defender.jid;
+
+return true;
     
     // ===============================
     // 🧠 RESUME ACTION
