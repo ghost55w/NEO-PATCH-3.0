@@ -3110,11 +3110,15 @@ console.log("================================");
 =================================*/
 
 const actionText = action.toLowerCase();
-  
+
+   
 // ===============================
 // ⚽ ATTAQUE PHASE DUEL
 // ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
+
+    match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
@@ -3122,114 +3126,44 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const actionText = action.toLowerCase();
 
     // ===============================
-    // 🧠 DRIBBLE CHECK (IMPORTANT)
-    // ===============================
-    let dribbleCheck = null;
-
-    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-
-        const dribbleName = detectDribble(actionText);
-
-        if (dribbleName) {
-            dribbleCheck = validateDribbleBlueprint(dribbleName, action);
-        }
-    }
-
-    // ===============================
-    // ❌ FAIL ATTAQUE = STOP DUEL IMMÉDIAT
-    // ===============================
-    if (
-        dribbleCheck &&
-        (!dribbleCheck.valid || dribbleCheck.score < 60)
-    ) {
-
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
-
-        match.ballHolder = defender.nom;
-        match.joueurTour = defender.id || defender.jid;
-
-        await ovl.sendMessage(chat, {
-            text:
-`🛡️⚡⚽ ATTAQUE !
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-
-🎙️ RESUME♻️ : ❌ ${attacker.nom} rate son dribble et perd immédiatement le ballon.
-
-📊 NOTE DU PAVÉ : 0/10
-
-⚽🥅 ${defender.nom} récupère la possession.
-
-➡️ @${getTagFromJid(defender.id || defender.jid)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-            mentions: [defender.id || defender.jid]
-        });
-
-        return true;
-    }
-
-    // ===============================
-    // 🧠 RESUME ACTION (TON STYLE EXACT)
+    // 🧠 RESUME ACTION
     // ===============================
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-
-        resume =
-`${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
-
+        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("acceleration") ||
-        actionText.includes("vmax")
-    ) {
-
-        resume =
-`${attacker.nom} accélère pour dépasser ${defender.nom}.`;
-
+    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("feinte")
-    ) {
-
-        resume =
-`${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
-
+    else if (actionText.includes("feinte")) {
+        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
     }
     else {
-
-        resume =
-`${attacker.nom} enchaîne une action face à ${defender.nom}.`;
-
+        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
     }
 
     const note = noterPave(action);
 
     // ===============================
-    // 🔥 NEXT = DEFENSEUR DU DUEL
-    // ===============================
-    const duelNextId = defender.id || defender.jid;
-    const nextTag = getTagFromJid(duelNextId);
-
-    // ===============================
-    // ⚽ STATE SYNC (IMPORTANT)
-    // ===============================
-    match.phaseDuel.attackPave = action;
-    match.phaseDuel.step = "defense_pave";
-
-    match.ballHolder = attacker.nom;
-    match.joueurTour = duelNextId;
-    match.waitingDefenseFrom = duelNextId;
+// 🔥 NEXT = DEFENSEUR DU DUEL
+// ===============================
+const duelNextId = match.defender;
+const nextTag = getTagFromJid(duelNextId);
+    
+// ===============================
+// ⚽ STATE SYNC (IMPORTANT)
+// ===============================
+match.ballHolder = attacker.nom;
+match.joueurTour = duelNextId;
+match.waitingDefenseFrom = duelNextId;
 
     // ===============================
     // 📩 MESSAGE ATTACK
     // ===============================
     await ovl.sendMessage(chat, {
         text:
-`🛡️⚡⚽ ATTAQUE !
+`*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 🎙️ RESUME♻️ : ${resume}
@@ -3244,7 +3178,7 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     });
 
     // ===============================
-    // ⚠️ WARNING TIMER
+    // ⚠️ WARNING
     // ===============================
     if (match.warningTimer) clearTimeout(match.warningTimer);
 
@@ -3266,7 +3200,7 @@ Il reste *1 MINUTE* pour défendre !
     }, 5 * 60 * 1000);
 
     // ===============================
-    // ⏱️ DEFENSE TIMEOUT
+    // ⏱️ LATENCE OUT (UNIFORM FIX)
     // ===============================
     if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
@@ -3280,7 +3214,7 @@ Il reste *1 MINUTE* pour défendre !
         const fallbackId = fallback?.id || fallback?.jid;
 
         match.joueurTour = fallbackId;
-        match.attacker = fallback;
+        match.attacker = fallbackId;
         match.ballHolder = fallback?.nom;
 
         match.phaseDuel = null;
@@ -3306,8 +3240,6 @@ Il reste *1 MINUTE* pour défendre !
 
     return true;
 }
-
-
     
 /* ===============================
 ⚽ OFFENSIVE INTENT
@@ -3928,10 +3860,7 @@ console.log("=================================");
     }
 
     let defender = findPlayer(defenseText);
-
-// ===============================
-// 🚫 EMPÊCHER ATTAQUANT = DÉFENSEUR
-// ===============================
+    // Empêcher attaquant = défenseur
 if (
     defender &&
     attacker &&
@@ -3939,22 +3868,15 @@ if (
     normalizeJid(attacker.id || attacker.jid)
 ) {
 
-    // on invalide le mauvais match
-    defender = null;
-}
-
-// ===============================
-// 🔁 FALLBACK PROPRE (IMPORTANT)
-// ===============================
-if (!defender) {
-
-    defender =
-        allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-        )
-        || allPlayers.find(p =>
-            normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid)
-        );
+    defender = allPlayers.find(
+        p =>
+            normalizeJid(p.id || p.jid) !==
+            normalizeJid(attacker.id || attacker.jid)
+            &&
+            pureName(defenseText).includes(
+                pureName(p.nom)
+            )
+    );
 }
 
     // ===============================
@@ -4079,20 +4001,32 @@ if (isDribbleAction) {
         "🎯 DRIBBLE CHECK =",
         dribbleCheck
     );
+    
+if (!dribbleCheck.valid) {
 
-    if (!dribbleCheck.valid) {
+    // 🔄 PERTE DE BALLE
+    match.ballHolder = defender.nom;
 
-        return {
-            ok: false,
-            type: "BAD_DRIBBLE",
-            attacker,
-            defender,
-            msg:
-`❌ ${attacker.nom} exécute mal son dribble.`,
-            details:
-                dribbleCheck.reason
-        };
-    }
+    const defenderId = defender.id || defender.jid;
+
+    match.joueurTour = defenderId;
+    match.attacker = defenderId;
+    match.waitingDefenseFrom = null;
+
+    return {
+        ok: false,
+        type: "BAD_DRIBBLE",
+        attacker,
+        defender,
+        msg:
+`❌ ${attacker.nom} exécute mal son dribble.
+
+🔁 ${defender.nom} récupère la possession !`,
+        details:
+            dribbleCheck.reason
+    };
+}
+    
 }
 
     
