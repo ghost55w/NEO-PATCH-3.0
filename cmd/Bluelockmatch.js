@@ -646,7 +646,6 @@ ballDistanceMin: 0.5
 
 };
 
-
 // ===============================
 // 🧠 NORMALISATION TEXTE
 // ===============================
@@ -654,11 +653,18 @@ function normalizeText(text) {
     return text
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, ""); // enlève accents
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
 // ===============================
-// 🔍 MATCH FLEX (racines + synonymes)
+// 🔍 NORMALISATION LISTE
+// ===============================
+function normalizeList(arr) {
+    return arr.map(w => normalizeText(w));
+}
+
+// ===============================
+// 🔍 MATCH FLEX
 // ===============================
 function containsAny(text, words) {
     return words.some(w => text.includes(w));
@@ -696,90 +702,116 @@ function validateDribbleBlueprint(dribbleName, actionText) {
         const v = step.validation || {};
 
         // ===============================
-        // 🦶 SURFACES (pieds)
+        // 🦶 SURFACES
         // ===============================
         if (v.surfaces) {
-            addRule(20, containsAny(text, v.surfaces.map(s => normalizeText(s))));
+            addRule(
+                20,
+                containsAny(text, normalizeList(v.surfaces))
+            );
         }
 
         // ===============================
         // ↔️ DIRECTION
         // ===============================
         if (v.ballDirection) {
-            addRule(15, containsAny(text, v.ballDirection));
+            addRule(
+                15,
+                containsAny(text, normalizeList(v.ballDirection))
+            );
         }
 
         // ===============================
-        // 🚀 ACCÉLÉRATION (racines)
+        // 🚀 ACCÉLÉRATION
         // ===============================
         if (v.acceleration) {
-            addRule(15, containsAny(text, [
-                "acceler",
-                "vmax",
-                "sprint",
-                "explos",
-                "burst"
-            ]));
+            addRule(
+                15,
+                containsAny(text, [
+                    "acceler",
+                    "vmax",
+                    "vitesse max",
+                    "vitesse maximale",
+                    "sprint",
+                    "explos",
+                    "burst"
+                ].map(normalizeText))
+            );
         }
 
         // ===============================
         // 🎭 FEINTE
         // ===============================
         if (v.bodyFeint) {
-            addRule(15, containsAny(text, [
-                "feint",
-                "corps",
-                "epaule",
-                "buste",
-                "leurre"
-            ]));
+            addRule(
+                15,
+                containsAny(text, [
+                    "feint",
+                    "corps",
+                    "epaule",
+                    "buste",
+                    "leurre"
+                ].map(normalizeText))
+            );
         }
 
         // ===============================
-        // 🎯 FRAPPE / TIR
+        // 🎯 FAKE SHOT
         // ===============================
         if (v.fakeShot) {
-            addRule(15, containsAny(text, [
-                "frapp",
-                "tir",
-                "arm",
-                "simulation"
-            ]));
+            addRule(
+                15,
+                containsAny(text, [
+                    "frapp",
+                    "tir",
+                    "arm",
+                    "simulation"
+                ].map(normalizeText))
+            );
         }
 
         // ===============================
-        // ⬆️ LOB / SOULÈVEMENT
+        // ⬆️ BALL LIFT
         // ===============================
         if (v.ballLift) {
-            addRule(15, containsAny(text, [
-                "soule",
-                "lob",
-                "au-dessus",
-                "lift"
-            ]));
+            addRule(
+                15,
+                containsAny(text, [
+                    "soul",
+                    "lob",
+                    "au-dessus",
+                    "lift"
+                ].map(normalizeText))
+            );
         }
     }
 
     // ===============================
     // ⚽ BONUS ACTION BALL
     // ===============================
-    addRule(10, containsAny(text, [
-        "pouss",
-        "proj",
-        "touch",
-        "control"
-    ]));
+    addRule(
+        10,
+        containsAny(text, [
+            "pouss",
+            "proj",
+            "touch",
+            "control"
+        ].map(normalizeText))
+    );
 
     // ===============================
     // ⚡ BONUS ACTION FOOTBALL
     // ===============================
-    addRule(10, containsAny(text, [
-        "depass",
-        "elimin",
-        "contourn",
-        "prendre de vitesse",
-        "pass"
-    ]));
+    addRule(
+        10,
+        containsAny(text, [
+            "depass",
+            "elimin",
+            "contourn",
+            "prendre de vitesse",
+            "pass"
+        ].map(normalizeText))
+    );
 
     const similarity = maxScore > 0
         ? Math.round((score / maxScore) * 100)
@@ -807,6 +839,7 @@ function validateDribbleBlueprint(dribbleName, actionText) {
         reason: `Dribble ${dribbleName} mal réalisé (${similarity}%)`
     };
 }
+
 
 
 // ===============================
