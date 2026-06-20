@@ -646,6 +646,24 @@ ballDistanceMin: 0.5
 
 };
 
+
+// ===============================
+// 🧠 NORMALISATION TEXTE
+// ===============================
+function normalizeText(text) {
+    return text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""); // enlève accents
+}
+
+// ===============================
+// 🔍 MATCH FLEX (racines + synonymes)
+// ===============================
+function containsAny(text, words) {
+    return words.some(w => text.includes(w));
+}
+
 // ===============================
 // ⚙️ VALIDATION DRIBBLE BLUEPRINT
 // ===============================
@@ -656,133 +674,140 @@ function validateDribbleBlueprint(dribbleName, actionText) {
     if (!blueprint) {
         return {
             valid: false,
+            similarity: 0,
             reason: `Blueprint introuvable pour : ${dribbleName}`
         };
     }
 
-    const text = actionText.toLowerCase();
+    const text = normalizeText(actionText);
 
-    // ===============================
-    // 🧠 VALIDATION DES STEPS
-    // ===============================
+    let score = 0;
+    let maxScore = 0;
+
+    const addRule = (points, condition) => {
+        maxScore += points;
+        if (condition) score += points;
+    };
+
     const steps = Object.values(blueprint);
 
-    for (let i = 0; i < steps.length; i++) {
+    for (const step of steps) {
 
-        const step = steps[i];
-        const validation = step.validation;
+        const v = step.validation || {};
 
         // ===============================
-        // 🧪 SURFACES (optionnel)
+        // 🦶 SURFACES (pieds)
         // ===============================
-        if (validation.surfaces) {
-
-            const okSurface = validation.surfaces.some(s =>
-                text.includes(s)
-            );
-
-            if (!okSurface) {
-               return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-}; 
-            }
+        if (v.surfaces) {
+            addRule(20, containsAny(text, v.surfaces.map(s => normalizeText(s))));
         }
 
         // ===============================
-        // 🎯 DIRECTION BALL
+        // ↔️ DIRECTION
         // ===============================
-        if (validation.ballDirection) {
-
-            const okDir = validation.ballDirection.some(d =>
-                text.includes(d)
-            );
-
-            if (!okDir) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
+        if (v.ballDirection) {
+            addRule(15, containsAny(text, v.ballDirection));
         }
 
         // ===============================
-        // 🚀 ACCELERATION (flag simple)
+        // 🚀 ACCÉLÉRATION (racines)
         // ===============================
-        if (validation.acceleration) {
-
-            if (
-                !text.includes("accélère") &&
-                !text.includes("acceleration") &&
-                !text.includes("vmax") &&
-                !text.includes("sprinte")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
+        if (v.acceleration) {
+            addRule(15, containsAny(text, [
+                "acceler",
+                "vmax",
+                "sprint",
+                "explos",
+                "burst"
+            ]));
         }
 
         // ===============================
-        // 🧍 BODY FEINT
+        // 🎭 FEINTE
         // ===============================
-        if (validation.bodyFeint) {
-
-            if (
-                !text.includes("feinte") &&
-                !text.includes("corps")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
+        if (v.bodyFeint) {
+            addRule(15, containsAny(text, [
+                "feint",
+                "corps",
+                "epaule",
+                "buste",
+                "leurre"
+            ]));
         }
 
         // ===============================
-        // 🧲 FAKE SHOT
+        // 🎯 FRAPPE / TIR
         // ===============================
-        if (validation.fakeShot) {
-
-            if (
-                !text.includes("frappe") &&
-                !text.includes("tir") &&
-                !text.includes("arme")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
+        if (v.fakeShot) {
+            addRule(15, containsAny(text, [
+                "frapp",
+                "tir",
+                "arm",
+                "simulation"
+            ]));
         }
 
         // ===============================
-        // 🆙 BALL LIFT
+        // ⬆️ LOB / SOULÈVEMENT
         // ===============================
-        if (validation.ballLift) {
-
-            if (
-                !text.includes("soulève") &&
-                !text.includes("lob") &&
-                !text.includes("au-dessus")
-            ) {
-                return {
-    valid: false,
-    reason: `Dribble ${dribbleName} mal réalisé ❌`
-};
-            }
+        if (v.ballLift) {
+            addRule(15, containsAny(text, [
+                "soule",
+                "lob",
+                "au-dessus",
+                "lift"
+            ]));
         }
     }
 
     // ===============================
-    // ✅ SUCCESS
+    // ⚽ BONUS ACTION BALL
     // ===============================
+    addRule(10, containsAny(text, [
+        "pouss",
+        "proj",
+        "touch",
+        "control"
+    ]));
+
+    // ===============================
+    // ⚡ BONUS ACTION FOOTBALL
+    // ===============================
+    addRule(10, containsAny(text, [
+        "depass",
+        "elimin",
+        "contourn",
+        "prendre de vitesse",
+        "pass"
+    ]));
+
+    const similarity = maxScore > 0
+        ? Math.round((score / maxScore) * 100)
+        : 0;
+
+    console.log("🎯 DRIBBLE =", dribbleName);
+    console.log("🎯 SCORE =", score);
+    console.log("🎯 MAX =", maxScore);
+    console.log("🎯 SIMILARITY =", similarity + "%");
+
+    // ===============================
+    // ✅ RESULT
+    // ===============================
+    if (similarity >= 70) {
+        return {
+            valid: true,
+            dribble: dribbleName,
+            similarity
+        };
+    }
+
     return {
-        valid: true,
-        dribble: dribbleName
+        valid: false,
+        similarity,
+        reason: `Dribble ${dribbleName} mal réalisé (${similarity}%)`
     };
 }
+
 
 // ===============================
 // 🧠 INTENTION DRIBBLE
