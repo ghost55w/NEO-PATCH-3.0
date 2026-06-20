@@ -3371,12 +3371,27 @@ setTimeout(async () => {
     // ===============================
 // 🎯 NEXT LOGIC PROPRE
 // ===============================
-const nextPlayer = duelResult.ok
-    ? duelAttacker
-    : duelDefender;
+let nextId;
 
-const nextId = nextPlayer.id || nextPlayer.jid;
+// ⚽ L'attaquant gagne le duel
+if (duelResult.ok) {
 
+    nextId = duelAttacker.id || duelAttacker.jid;
+
+    match.ballHolder = duelAttacker.nom;
+    match.joueurTour = nextId;
+    match.attacker = nextId;
+}
+
+// 🛡️ Le défenseur gagne le duel
+else {
+
+    nextId = duelDefender.id || duelDefender.jid;
+
+    match.ballHolder = duelDefender.nom;
+    match.joueurTour = nextId;
+    match.attacker = nextId;
+}
     // ===============================
     // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
     // ===============================
