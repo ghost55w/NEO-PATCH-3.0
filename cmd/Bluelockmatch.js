@@ -647,181 +647,6 @@ ballDistanceMin: 0.5
 };
 
 // ===============================
-// 🧠 DRIBBLE INTENTS
-// ===============================
-const DRIBBLE_INTENTS = {
-
-    "double contact": [
-        "double contact",
-        "double touche",
-        "deux touches"
-    ],
-
-    "crochet extérieur": [
-        "crochet extérieur",
-        "extérieur du pied",
-        "crochète vers l'extérieur"
-    ],
-
-    "crochet intérieur": [
-        "crochet intérieur",
-        "intérieur du pied",
-        "crochète vers l'intérieur"
-    ],
-
-    "roulette": [
-        "roulette",
-        "tourne sur lui même",
-        "rotation sur le ballon"
-    ],
-
-    "elastico": [
-        "elastico",
-        "flip flap"
-    ],
-
-    "petit pont": [
-        "petit pont",
-        "entre les jambes"
-    ],
-
-    "rainbow": [
-        "rainbow",
-        "arc en ciel"
-    ],
-
-    "step over": [
-        "step over",
-        "passe la jambe",
-        "tour du ballon"
-    ],
-
-    "feinte de corps": [
-        "feinte de corps",
-        "déséquilibre",
-        "feinte physique"
-    ],
-
-    "feinte de frappe": [
-        "feinte de frappe",
-        "arme une frappe",
-        "faux tir"
-    ]
-};
-
-// ===============================
-// 🧠 BUILD BLUEPRINT TEXT
-// ===============================
-function buildDribbleBlueprintText(dribbleName) {
-
-    const blueprint =
-        DRIBBLE_BLUEPRINTS[dribbleName];
-
-    if (!blueprint) return "";
-
-    let text = "";
-
-    Object.values(blueprint).forEach(step => {
-
-        if (step.description) {
-            text += " " + step.description;
-        }
-
-    });
-
-    return text.trim();
-}
-
-// ===============================
-// 📊 DRIBBLE SCORE
-// ===============================
-function calculateDribbleScore(
-    dribbleName,
-    actionText
-) {
-
-    const reference =
-        buildDribbleBlueprintText(
-            dribbleName
-        );
-
-    return similarity(
-        pureName(actionText),
-        pureName(reference)
-    );
-}
-
-// ===============================
-// 📍 CALCUL POSITION PAR DISTANCE
-// ===============================
-function applyDistanceMovement(joueur, texte) {
-
-    if (!joueur?.position) return false;
-
-    const distance = extraireDistance(texte);
-
-    if (!distance) return false;
-
-    // sécurité
-    const d = Math.min(distance, 10);
-
-    const t = texte.toLowerCase();
-
-    // ===============================
-    // 🥅 VERS LE CAMP ADVERSE
-    // ===============================
-    if (
-        t.includes("vers le but") ||
-        t.includes("vers le camp adverse") ||
-        t.includes("devant lui") ||
-        t.includes("vers l'avant") ||
-        t.includes("attaque")
-    ) {
-
-        joueur.position.y -= d;
-        return true;
-    }
-
-    // ===============================
-    // 🔙 RETOUR
-    // ===============================
-    if (
-        t.includes("recule") ||
-        t.includes("vers son camp") ||
-        t.includes("arrière")
-    ) {
-
-        joueur.position.y += d;
-        return true;
-    }
-
-    // ===============================
-    // ⬅️ GAUCHE
-    // ===============================
-    if (t.includes("gauche")) {
-
-        joueur.position.x -= d;
-        return true;
-    }
-
-    // ===============================
-    // ➡️ DROITE
-    // ===============================
-    if (t.includes("droite")) {
-
-        joueur.position.x += d;
-        return true;
-    }
-
-    return false;
-}
-
-
-
-
-
-
-// ===============================
 // ⚙️ VALIDATION DRIBBLE BLUEPRINT
 // ===============================
 function validateDribbleBlueprint(dribbleName, actionText) {
@@ -870,8 +695,8 @@ function validateDribbleBlueprint(dribbleName, actionText) {
         if (validation.ballDirection) {
 
             const okDir = validation.ballDirection.some(d =>
-    hasDirection(text, d)
-);
+                text.includes(d)
+            );
 
             if (!okDir) {
                 return {
@@ -951,55 +776,12 @@ function validateDribbleBlueprint(dribbleName, actionText) {
     }
 
     // ===============================
-// 📊 SCORE DE SIMILARITÉ
-// ===============================
-const score =
-    calculateDribbleScore(
-        dribbleName,
-        actionText
-    );
-
-if (score < 70) {
-
-    return {
-        valid: false,
-        score,
-        dribble: dribbleName,
-        reason:
-            `Dribble ${dribbleName} mal réalisé ❌`
-    };
-}
-
-    // ===============================
     // ✅ SUCCESS
     // ===============================
     return {
-    valid: true,
-    score,
-    dribble: dribbleName
-};
-}
-
-// ===============================
-// 🔍 FIND DRIBBLE INTENT
-// ===============================
-function detectDribbleType(text) {
-
-    const t = pureName(text);
-
-    for (const [dribble, synonyms]
-        of Object.entries(DRIBBLE_INTENTS)) {
-
-        if (
-            synonyms.some(s =>
-                t.includes(pureName(s))
-            )
-        ) {
-            return dribble;
-        }
-    }
-
-    return "creative";
+        valid: true,
+        dribble: dribbleName
+    };
 }
 
 // ===============================
@@ -1018,352 +800,6 @@ function detectIntentDribble(text) {
         t.includes("dribble son adversaire")
     );
 }
-
-// ===============================
-// 🛡️ TACLES OFFICIELS
-// ===============================
-const TACKLES = [
-    "tacle frontal",
-    "tacle glissé",
-    "tacle circulaire",
-    "pied en opposition"
-];
-
-// ===============================
-// 🛡️ TACKLE BLUEPRINTS (REFERENCE TEXT)
-// ===============================
-const TACKLE_BLUEPRINTS = {
-
-    "tacle frontal": 
-        "Faire un tacle frontal debout avec la pointe du pied droit ou gauche en interception directe du ballon.",
-
-    "tacle glissé":
-        "Faire un tacle glissé avec la semelle du pied droit ou gauche. Si le défenseur est sur le profil de l'attaquant, utiliser l'extérieur du pied. Vmax obligatoire pour avoir une défense maximale.",
-
-    "tacle circulaire":
-        "Faire un balayage circulaire avec l'intérieur du pied droit ou gauche en pivotant de 60°, 90° ou 180° maximum selon la situation.",
-
-    "pied en opposition":
-        "Placer le pied tendu en opposition pour bloquer le passage avec le tibia ou le talon en anticipation de la course adverse."
-};
-
-// ===============================
-// 🧠 TACKLE INTENTS
-// ===============================
-const TACKLE_INTENTS = [
-    "tacle",
-    "tacler",
-    "intercepter",
-    "interception",
-    "récupérer le ballon",
-    "couper la trajectoire",
-    "bloquer le passage",
-    "couper la route",
-    "contrer",
-    "défendre",
-    "challenge défensif"
-];
-
-// ===============================
-// 🧠 TACKLE SYNONYMS
-// ===============================
-const TACKLE_SYNONYMS = {
-
-    "pointe du pied": [
-        "pointe",
-        "bout du pied"
-    ],
-
-    "semelle": [
-        "sous le pied"
-    ],
-
-    "intérieur du pied": [
-        "interieur du pied",
-        "face interne"
-    ],
-
-    "extérieur du pied": [
-        "exterieur du pied",
-        "face externe"
-    ],
-
-    "vmax": [
-        "vitesse maximale",
-        "pleine vitesse",
-        "à fond",
-        "à pleine vitesse"
-    ]
-};
-
-    // ===============================
-// 🧠 DETECT TACKLE INTENT
-// ===============================
-function detectIntentTackle(text) {
-
-    const t = text.toLowerCase();
-
-    return TACKLE_INTENTS.some(intent =>
-        t.includes(intent)
-    );
-}
-
-// ===============================
-// 🔍 FIND TACKLE BLUEPRINT
-// ===============================
-function findBestTackleBlueprint(text) {
-
-    let best = null;
-    let bestScore = 0;
-
-    for (const [name, description] of Object.entries(TACKLE_BLUEPRINTS)) {
-
-        const score =
-            calculateSimilarity(
-                text,
-                description
-            );
-
-        if (score > bestScore) {
-            bestScore = score;
-            best = name;
-        }
-    }
-
-    return {
-        tackle: best,
-        score: bestScore
-    };
-}
-
-// ===============================
-// 🛡️ VALIDATE TACKLE
-// ===============================
-function validateTackleBlueprint(
-    tackleName,
-    actionText
-) {
-
-    const blueprint =
-        TACKLE_BLUEPRINTS[tackleName];
-
-    if (!blueprint) {
-        return {
-            valid: false,
-            reason: "Blueprint introuvable"
-        };
-    }
-
-    const similarity =
-        calculateSimilarity(
-            actionText,
-            blueprint
-        );
-
-    return {
-
-        valid: similarity >= 70,
-
-        score: similarity,
-
-        tackle: tackleName,
-
-        reason:
-            similarity >= 70
-                ? null
-                : `Tacle ${tackleName} mal exécuté ❌`
-    };
-}
-
-// ===============================
-// 🏃 DÉPLACEMENTS OFFICIELS
-// ===============================
-const MOVES = [
-    "course",
-    "sprint",
-    "zigzag",
-    "acceleration",
-    "course circulaire"
-];
-
-// ===============================
-// 🧠 INTENTION MOVE
-// ===============================
-function detectIntentMove(text) {
-
-    const t = text.toLowerCase();
-
-    return MOVES.some(move =>
-        t.includes(move)
-    );
-}
-
-// ===============================
-// ⚽ BALL SYNC
-// ===============================
-function syncBallPosition(match, joueur) {
-
-    if (!match.ball) return;
-
-    const holder =
-        match.ballHolder ||
-        match.ball.holder;
-
-    if (holder !== joueur.nom) return;
-
-    match.ball.position = {
-        x: joueur.position.x,
-        y: joueur.position.y
-    };
-}
-
-// ===============================
-// 📍 APPLY MOVE
-// ===============================
-function applyMove(match, joueur, texte) {
-
-    const distance =
-        extraireDistance(texte) || 0;
-
-    if (!distance) return false;
-
-    const d =
-        Math.min(distance, 10);
-
-    const t =
-        texte.toLowerCase();
-
-    // ===============================
-    // 🥅 AVANT
-    // ===============================
-    if (
-        t.includes("avant") ||
-        t.includes("camp adverse") ||
-        t.includes("but adverse")
-    ) {
-        joueur.position.y -= d;
-    }
-
-    // ===============================
-    // 🔙 ARRIÈRE
-    // ===============================
-    else if (
-        t.includes("arrière") ||
-        t.includes("son camp")
-    ) {
-        joueur.position.y += d;
-    }
-
-    // ===============================
-    // ⬅️ GAUCHE
-    // ===============================
-    else if (
-        t.includes("gauche")
-    ) {
-        joueur.position.x -= d;
-    }
-
-    // ===============================
-    // ➡️ DROITE
-    // ===============================
-    else if (
-        t.includes("droite")
-    ) {
-        joueur.position.x += d;
-    }
-
-    joueur.position.x =
-        Math.max(
-            0,
-            Math.min(
-                FIELD.width,
-                joueur.position.x
-            )
-        );
-
-    joueur.position.y =
-        Math.max(
-            0,
-            Math.min(
-                FIELD.length,
-                joueur.position.y
-            )
-        );
-
-    syncPlayer(match, joueur);
-    syncBallPosition(match, joueur);
-
-    return true;
-}
-
-// ===============================
-// 🔁 MULTI MOVE
-// ===============================
-async function handleReplayMoves(
-    match,
-    joueur1,
-    texte1,
-    joueur2,
-    texte2
-) {
-
-    applyMove(
-        match,
-        joueur1,
-        texte1
-    );
-
-    applyMove(
-        match,
-        joueur2,
-        texte2
-    );
-
-    return true;
-}
-
-// ===============================
-// 🧠 DIRECTION SYNONYMS
-// ===============================
-const DIRECTION_SYNONYMS = {
-    avant: [
-        "avant",
-        "devant",
-        "devant lui",
-        "vers l'avant",
-        "tout droit"
-    ],
-
-    gauche: [
-        "gauche",
-        "sur la gauche"
-    ],
-
-    droite: [
-        "droite",
-        "sur la droite"
-    ],
-
-    diagonale: [
-        "diagonale",
-        "en diagonale"
-    ]
-};
-
-// ===============================
-// 🧠 CHECK DIRECTION
-// ===============================
-function hasDirection(text, dir) {
-
-    const words =
-        DIRECTION_SYNONYMS[dir] || [dir];
-
-    return words.some(w =>
-        text.toLowerCase().includes(
-            w.toLowerCase()
-        )
-    );
-        }
 
 /* ===============================
 📐 MATH / TERRAIN ENGINE
@@ -3675,127 +3111,52 @@ console.log("================================");
 
 const actionText = action.toLowerCase();
 
+   
 // ===============================
 // ⚽ ATTAQUE PHASE DUEL
 // ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
+
+    match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
     const actionText = action.toLowerCase();
 
-    let dribbleCheck = null;
-    const detectedDribble = detectDribble(actionText);
-
-    if (detectedDribble) {
-        dribbleCheck = validateDribbleBlueprint(detectedDribble, action);
-    }
-
-    // ===============================
-    // ❌ DRIBBLE FAIL = DEFENSE WIN DIRECT
-    // ===============================
-    if (dribbleCheck && (!dribbleCheck.valid || dribbleCheck.score < 60)) {
-
-        match.phaseDuel = null;
-        match.ballHolder = defender.nom;
-        match.joueurTour = defender.id || defender.jid;
-
-        await ovl.sendMessage(chat, {
-            text:
-`*🛡️⚡⚽ ATTAQUE !*
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-
-🎙️ RESUME♻️ : ❌ ${attacker.nom} exécute mal son dribble.
-
-📊 NOTE DU PAVÉ : 0/10
-
-⚽🥅 ${defender.nom} récupère le ballon.
-
-➡️ @${getTagFromJid(defender.id || defender.jid)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-            mentions: [defender.id || defender.jid]
-        });
-
-        return true;
-    }
-
-    // ===============================
-    // ✔ DRIBBLE OK → PASS DEFENSE
-    // ===============================
-    match.phaseDuel.attackPave = action;
-
-// NE PAS switch direct
-match.phaseDuel.nextStep = "defense_pave";
-
-match.ballHolder = attacker.nom;
-match.joueurTour = defender.id || defender.jid;
-
-return true;
-    
     // ===============================
     // 🧠 RESUME ACTION
     // ===============================
     let resume = "";
 
     if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-
-        resume =
-`${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
-
+        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("acceleration") ||
-        actionText.includes("vmax")
-    ) {
-
-        resume =
-`${attacker.nom} accélère pour dépasser ${defender.nom}.`;
-
+    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
     }
-    else if (
-        actionText.includes("feinte")
-    ) {
-
-        resume =
-`${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
-
+    else if (actionText.includes("feinte")) {
+        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
     }
     else {
-
-        resume =
-`${attacker.nom} enchaîne une action face à ${defender.nom}.`;
-
+        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
     }
 
-    const note =
-        noterPave(action);
+    const note = noterPave(action);
 
     // ===============================
-    // 🔥 NEXT = DEFENSEUR DU DUEL
-    // ===============================
-    const duelNextId =
-        match.defender;
-
-    const nextTag =
-        getTagFromJid(duelNextId);
-
-    // ===============================
-    // ⚽ STATE SYNC
-    // ===============================
-    match.phaseDuel.step =
-        "defense_pave";
-
-    match.ballHolder =
-        attacker.nom;
-
-    match.joueurTour =
-        duelNextId;
-
-    match.waitingDefenseFrom =
-        duelNextId;
+// 🔥 NEXT = DEFENSEUR DU DUEL
+// ===============================
+const duelNextId = match.defender;
+const nextTag = getTagFromJid(duelNextId);
+    
+// ===============================
+// ⚽ STATE SYNC (IMPORTANT)
+// ===============================
+match.ballHolder = attacker.nom;
+match.joueurTour = duelNextId;
+match.waitingDefenseFrom = duelNextId;
 
     // ===============================
     // 📩 MESSAGE ATTACK
@@ -3816,9 +3177,69 @@ return true;
         mentions: [duelNextId]
     });
 
-    return true;
-}   
+    // ===============================
+    // ⚠️ WARNING
+    // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
 
+    match.warningTimer = setTimeout(async () => {
+
+        if (match.joueurTour !== duelNextId) return;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${nextTag} ❗⏳
+
+Il reste *1 MINUTE* pour défendre !
+
+╰─────────────────▱▱▱
+🔷BLUELOCK⚽🥅`,
+            mentions: [duelNextId]
+        });
+
+    }, 5 * 60 * 1000);
+
+    // ===============================
+    // ⏱️ LATENCE OUT (UNIFORM FIX)
+    // ===============================
+    if (match.defenseTimer) clearTimeout(match.defenseTimer);
+
+    match.defenseTimer = setTimeout(() => {
+
+        if (match.joueurTour !== duelNextId) return;
+
+        const fallback =
+            getVisavisPlayer(match, attacker) || defender;
+
+        const fallbackId = fallback?.id || fallback?.jid;
+
+        match.joueurTour = fallbackId;
+        match.attacker = fallbackId;
+        match.ballHolder = fallback?.nom;
+
+        match.phaseDuel = null;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+
+        const fallbackTag = getTagFromJid(fallbackId);
+
+        ovl.sendMessage(chat, {
+            text:
+`⛔ LATENCE OUT ❌
+
+🔁 ${defender.nom} récupère la possession !
+
+➡️ @${fallbackTag} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions: [fallbackId]
+        });
+
+    }, 6 * 60 * 1000);
+
+    return true;
+}
     
 /* ===============================
 ⚽ OFFENSIVE INTENT
@@ -3844,56 +3265,19 @@ const isPassiveDefense = hasIntent(
 // ===============================
 if (
     match.phaseDuel?.active &&
-    match.phaseDuel.step === "defense_pave"
+    match.phaseDuel?.step === "defense_pave"
 ) {
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
+    // évite double réponse
     if (match.phaseDuel.defensePave) return true;
 
-    const actionText = action.toLowerCase();
-
-    let tackleCheck = null;
-    const detectedTackle = detectTackle(actionText);
-
-    if (detectedTackle) {
-        tackleCheck = validateTackleBlueprint(detectedTackle, action);
-    }
-
-    // ===============================
-    // ❌ TACLE FAIL = ATTAQUE WIN DIRECT
-    // ===============================
-    if (tackleCheck && (!tackleCheck.valid || tackleCheck.score < 60)) {
-
-        match.phaseDuel = null;
-        match.ballHolder = attacker.nom;
-        match.joueurTour = attacker.id || attacker.jid;
-
-        await ovl.sendMessage(chat, {
-            text:
-`❌ ${defender.nom} exécute mal son tacle.
-
-⚽ ${attacker.nom} garde le ballon.
-
-➡️ @${getTagFromJid(attacker.id || attacker.jid)} NEXT
-
-╰───────────────────
-🔷BLUELOCK⚽🥅`,
-            mentions: [attacker.id || attacker.jid]
-        });
-
-        return true;
-    }
-
-    // ===============================
-    // ✔ TACLE OK → CONTINUE RESOLVE
-    // ===============================
     match.phaseDuel.defensePave = action;
     match.phaseDuel.step = "resolve_duel";
 
-    return true;
-}
+    const actionText = action.toLowerCase();
 
     // ===============================
     // 🧠 RESUME DEFENSE
@@ -3975,23 +3359,7 @@ const duelDefender = match.phaseDuel.defender;
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
 
-// ===============================
-// 🧠 RESOLUTION (SAFE CHECK)
-// ===============================
 setTimeout(async () => {
-
-    // ❌ sécurité : si duel déjà terminé ailleurs
-    if (!match.phaseDuel) return;
-
-    if (
-        match.phaseDuel.step !== "resolve_duel_pending"
-    ) return;
-
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
-
-    const attackPave = match.phaseDuel.attackPave;
-    const defensePave = match.phaseDuel.defensePave;
 
     const duelResult = await handleDuelMatch(
         match,
@@ -3999,14 +3367,21 @@ setTimeout(async () => {
         defensePave
     );
 
-    const nextPlayer = duelResult.ok
-        ? attacker
-        : defender;
+    
+    // ===============================
+// 🎯 NEXT LOGIC PROPRE
+// ===============================
+const nextPlayer = duelResult.ok
+    ? duelAttacker
+    : duelDefender;
 
-    const nextId = nextPlayer.id || nextPlayer.jid;
+const nextId = nextPlayer.id || nextPlayer.jid;
 
+    // ===============================
+    // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
+    // ===============================
     await ovl.sendMessage(chat, {
-        text:
+    text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${duelResult.msg}
@@ -4015,19 +3390,19 @@ ${duelResult.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
-    });
+    mentions: [nextId]
+});
 
     // ===============================
-    // 🧹 CLEAN SAFE
+    // 🧹 CLEAN
     // ===============================
     match.phaseDuel = null;
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
 }, 1000);
-
-return true;
+    return true;
+} 
     
 // ===============================
 // 🎯 ATTAQUE⚽
@@ -4485,24 +3860,6 @@ console.log("=================================");
     }
 
     let defender = findPlayer(defenseText);
-    // Empêcher attaquant = défenseur
-if (
-    defender &&
-    attacker &&
-    normalizeJid(defender.id || defender.jid) ===
-    normalizeJid(attacker.id || attacker.jid)
-) {
-
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
-            &&
-            pureName(defenseText).includes(
-                pureName(p.nom)
-            )
-    );
-}
 
     // ===============================
     // 🧠 TARGET TACTIQUE
@@ -4596,22 +3953,67 @@ const explicitDribble =
 let detectedDribble =
     DRIBBLES.find(d => atk.includes(d));
 
-// fallback creative
+// DRIBBLE CREATIF⚽ 
 if (!detectedDribble && explicitDribble) {
     detectedDribble = "creative";
 }
 
-const isDribbleAction = !!detectedDribble;
+const isDribbleAction =
+    !!detectedDribble;
 
+// ===============================
+// 🎯 VALIDATION DRIBBLE
+// ===============================
+let dribbleCheck = null;
+
+if (isDribbleAction) {
+
+    dribbleCheck =
+        validateDribbleBlueprint(
+            detectedDribble,
+            attaqueText
+        );
+
+    console.log(
+        "🎯 DRIBBLE DETECTED =",
+        detectedDribble
+    );
+
+    console.log(
+        "🎯 DRIBBLE CHECK =",
+        dribbleCheck
+    );
+
+    if (!dribbleCheck.valid) {
+
+        return {
+            ok: false,
+            type: "BAD_DRIBBLE",
+            attacker,
+            defender,
+            msg:
+`❌ ${attacker.nom} exécute mal son dribble.`,
+            details:
+                dribbleCheck.reason
+        };
+    }
+}
+
+    
 // ===============================
 // 🛡️  DÉTECTION TACLE
 // ===============================
 const isTackleAction =
-    detectIntentTackle(def) || TACKLES.some(t => def.includes(t));
+    def.includes("tacle") ||
+    def.includes("tacle debout") ||
+    def.includes("tacle glissé") ||
+    def.includes("tacle circulaire") ||
+    def.includes("tacle frontal") ||
+    def.includes("intercepte") ||
+    def.includes("contre") ||
+    def.includes("pied") ||
+    def.includes("talon");
 
-const detectedTackle =
-    TACKLES.find(t => def.includes(t)) || null;
-    
 // ===============================
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
 // ===============================
@@ -4620,81 +4022,32 @@ if (isDribbleAction && isTackleAction) {
     const attackStat = atkStats.dri || 50;
     const defenseStat = defStats.def || 50;
 
-    const dribbleCheck = validateDribbleBlueprint(
-        dribbleName,
-        attaqueText
-    );
+    const attackerWins = attackStat > defenseStat;
 
-    const tackleCheck = validateTackleBlueprint(
-        tackleName,
-        defenseText
-    );
-
-    const attackerWins =
-        attackStat > defenseStat &&
-        dribbleCheck.valid &&
-        dribbleCheck.score >= 60;
-
-    const defenderWins =
-        defenseStat > attackStat &&
-        tackleCheck.valid &&
-        tackleCheck.score >= 60;
-// ===============================
-    // ⚽ DRIBBLE RÉUSSI 
-    // ===============================
     if (attackerWins) {
 
-    match.joueurTour =
-        attacker.id || attacker.jid;
+        match.joueurTour = attacker.id || attacker.jid;
 
-    // ===============================
-    // 📍 CONTINUER LE MOUVEMENT
-    // ===============================
-    await handleDeplacements(
-        match,
-        attacker,
-        attaqueText
-    );
+        return {
+            ok: true,
+            type: "DRIBBLE_WIN",
+            attacker,
+            defender,
+            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+        };
 
-    return {
-        ok: true,
-        type: "DRIBBLE_WIN",
-        attacker,
-        defender,
-        msg:
-        `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-    };
-    } 
-    
-    // ===============================
-    // 🛡️ TACLE RÉUSSI
-    // ===============================
-    if (defenderWins) {
+    } else {
 
-        match.joueurTour =
-            defender.id || defender.jid;
+        match.joueurTour = defender.id || defender.jid;
 
         return {
             ok: false,
-            type: "TACKLE_WIN",
+            type: "DRIBBLE_LOSE",
             attacker,
             defender,
-            msg:
-                `🛡️⚽ ${defender.nom} exécute parfaitement son tacle et récupère le ballon...`
+            msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
         };
     }
-
-    // ===============================
-    // ⚖️ AUCUNE ACTION VALIDE
-    // ===============================
-    return {
-        ok: false,
-        type: "DUEL_FAIL",
-        attacker,
-        defender,
-        msg:
-            `⚖️ Aucun des deux joueurs ne parvient à prendre l'avantage dans le duel...`
-    };
 }
 
  // ===============================
@@ -5218,53 +4571,10 @@ async function handleDeplacements(match, joueur, texte) {
         return { ok: false, erreur: "❌ Joueur sans position" };
     }
 
-    // ===============================
-// 📍 MOUVEMENT LIBRE
-// ===============================
-applyMove(
-    match,
-    joueur,
-    texte
-);
-
     const zoneArrivee = extraireZoneArrivee(texte);
     const zoneDepart = extraireZoneDepart(texte);
     const distance = extraireDistance(texte);
     const direction = extraireDirectionLargeur(texte);
-
- // ===============================
-// 📍 MOUVEMENT PAR DISTANCE
-// ===============================
-if (!zoneArrivee && distance) {
-
-    const movedByDistance =
-        applyDistanceMovement(
-            joueur,
-            texte
-        );
-
-    if (movedByDistance) {
-
-        joueur.position.x = Math.max(
-            0,
-            Math.min(FIELD.width, joueur.position.x)
-        );
-
-        joueur.position.y = Math.max(
-            0,
-            Math.min(FIELD.length, joueur.position.y)
-        );
-
-        syncPlayer(match, joueur);
-        syncBallPosition(match, joueur);
-
-        return {
-            ok: true,
-            message:
-                "✅ Déplacement calculé automatiquement"
-        };
-    }
-}
 
     let moved = false;
     let total = 0;
