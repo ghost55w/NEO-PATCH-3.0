@@ -3126,6 +3126,56 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const actionText = action.toLowerCase();
 
     // ===============================
+// 🧠 DRIBBLE CHECK (IMPORTANT)
+// ===============================
+let dribbleCheck = null;
+
+if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
+
+    const dribbleName = detectDribble(actionText);
+
+    if (dribbleName) {
+        dribbleCheck = validateDribbleBlueprint(dribbleName, action);
+    }
+}
+
+// ===============================
+// ❌ FAIL ATTAQUE = STOP DUEL IMMÉDIAT
+// ===============================
+if (
+    dribbleCheck &&
+    (!dribbleCheck.valid || dribbleCheck.score < 60)
+) {
+
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+    match.ballHolder = defender.nom;
+    match.joueurTour = defender.id || defender.jid;
+
+    await ovl.sendMessage(chat, {
+        text:
+`*🛡️⚡⚽ ATTAQUE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ❌ ${attacker.nom} rate son dribble et perd immédiatement le ballon.
+
+📊 NOTE DU PAVÉ : 0/10
+
+⚽🥅 ${defender.nom} récupère la possession.
+
+➡️ @${getTagFromJid(defender.id || defender.jid)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions: [defender.id || defender.jid]
+    });
+
+    return true; // 💥 CRUCIAL
+}
+
+    // ===============================
     // 🧠 RESUME ACTION
     // ===============================
     let resume = "";
