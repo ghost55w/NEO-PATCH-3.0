@@ -3860,7 +3860,10 @@ console.log("=================================");
     }
 
     let defender = findPlayer(defenseText);
-    // Empêcher attaquant = défenseur
+
+// ===============================
+// 🚫 EMPÊCHER ATTAQUANT = DÉFENSEUR
+// ===============================
 if (
     defender &&
     attacker &&
@@ -3868,15 +3871,16 @@ if (
     normalizeJid(attacker.id || attacker.jid)
 ) {
 
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
+    defender =
+        allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid)
             &&
-            pureName(defenseText).includes(
-                pureName(p.nom)
-            )
-    );
+            pureName(defenseText).includes(pureName(p.nom))
+        )
+        ||
+        allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid)
+        );
 }
 
     // ===============================
