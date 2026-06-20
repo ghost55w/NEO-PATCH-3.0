@@ -3680,82 +3680,59 @@ const actionText = action.toLowerCase();
 // ===============================
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
-    match.phaseDuel.attackPave = action;
-
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
     const actionText = action.toLowerCase();
 
-    // ===============================
-    // 🧠 CHECK DRIBBLE DUEL
-    // ===============================
     let dribbleCheck = null;
+    const detectedDribble = detectDribble(actionText);
 
-    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-
-        const dribbleName =
-            detectDribble(actionText);
-
-        if (dribbleName) {
-
-            dribbleCheck =
-                validateDribbleBlueprint(
-                    dribbleName,
-                    action
-                );
-        }
+    if (detectedDribble) {
+        dribbleCheck = validateDribbleBlueprint(detectedDribble, action);
     }
-// ===============================
-// ❌ DRIBBLE RATÉ
-// ===============================
-if (
-    dribbleCheck &&
-    (
-        !dribbleCheck.valid ||
-        dribbleCheck.score < 60
-    )
-) {
 
-    const winnerId =
-        defender.id || defender.jid;
+    // ===============================
+    // ❌ DRIBBLE FAIL = DEFENSE WIN DIRECT
+    // ===============================
+    if (dribbleCheck && (!dribbleCheck.valid || dribbleCheck.score < 60)) {
 
-    const nextTag =
-        getTagFromJid(winnerId);
+        match.phaseDuel = null;
+        match.ballHolder = defender.nom;
+        match.joueurTour = defender.id || defender.jid;
 
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
-
-    match.ballHolder =
-        defender.nom;
-
-    match.joueurTour =
-        winnerId;
-
-    match.attacker =
-        winnerId;
-
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
-🎙️ RESUME♻️ : ❌ ${attacker.nom} exécute mal son dribble ${dribbleName} et perd immédiatement le ballon.
+🎙️ RESUME♻️ : ❌ ${attacker.nom} exécute mal son dribble.
 
 📊 NOTE DU PAVÉ : 0/10
 
-⚽🥅 ${defender.nom} récupère la possession.
+⚽🥅 ${defender.nom} récupère le ballon.
 
-➡️ @${nextTag} NEXT
+➡️ @${getTagFromJid(defender.id || defender.jid)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [winnerId]
-    });
+            mentions: [defender.id || defender.jid]
+        });
+
+        return true;
+    }
+
+    // ===============================
+    // ✔ DRIBBLE OK → PASS DEFENSE
+    // ===============================
+    match.phaseDuel.attackPave = action;
+    match.phaseDuel.step = "defense_pave";
+
+    match.ballHolder = attacker.nom;
+    match.joueurTour = defender.id || defender.jid;
 
     return true;
-} 
+}
     
     // ===============================
     // 🧠 RESUME ACTION
@@ -3866,65 +3843,56 @@ const isPassiveDefense = hasIntent(
 // ===============================
 if (
     match.phaseDuel?.active &&
-    match.phaseDuel?.step === "defense_pave"
+    match.phaseDuel.step === "defense_pave"
 ) {
 
     const attacker = match.phaseDuel.attacker;
     const defender = match.phaseDuel.defender;
 
-    // évite double réponse
     if (match.phaseDuel.defensePave) return true;
-
-    match.phaseDuel.defensePave = action;
-    match.phaseDuel.step = "resolve_duel";
 
     const actionText = action.toLowerCase();
 
- // ===============================
-// 🛡️ DETECTION TACLE
-// ===============================
-const detectedTackle =
-    detectTackle(actionText);
+    let tackleCheck = null;
+    const detectedTackle = detectTackle(actionText);
 
-const tackleCheck = detectedTackle
-    ? validateTackleBlueprint(detectedTackle, action)
-    : null;
+    if (detectedTackle) {
+        tackleCheck = validateTackleBlueprint(detectedTackle, action);
+    }
 
-   // ===============================
-// ❌ TACLE MAL EXÉCUTÉ = FIN DU DUEL
-// ===============================
-if (
-    detectedTackle &&
-    (
-        !tackleCheck?.valid ||
-        tackleCheck.score < 60
-    )
-) {
+    // ===============================
+    // ❌ TACLE FAIL = ATTAQUE WIN DIRECT
+    // ===============================
+    if (tackleCheck && (!tackleCheck.valid || tackleCheck.score < 60)) {
 
-    const winner = attacker;
+        match.phaseDuel = null;
+        match.ballHolder = attacker.nom;
+        match.joueurTour = attacker.id || attacker.jid;
 
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+        await ovl.sendMessage(chat, {
+            text:
+`❌ ${defender.nom} exécute mal son tacle.
 
-    match.ballHolder = attacker.nom;
-    match.joueurTour = attacker.id || attacker.jid;
-
-    await ovl.sendMessage(chat, {
-        text:
-`❌ ${defender.nom} exécute mal son tacle ${detectedTackle}.
-
-⚽ ${attacker.nom} conserve le ballon.
+⚽ ${attacker.nom} garde le ballon.
 
 ➡️ @${getTagFromJid(attacker.id || attacker.jid)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [attacker.id || attacker.jid]
-    });
+            mentions: [attacker.id || attacker.jid]
+        });
+
+        return true;
+    }
+
+    // ===============================
+    // ✔ TACLE OK → CONTINUE RESOLVE
+    // ===============================
+    match.phaseDuel.defensePave = action;
+    match.phaseDuel.step = "resolve_duel";
 
     return true;
-} 
+}
 
     // ===============================
     // 🧠 RESUME DEFENSE
@@ -4006,7 +3974,23 @@ const duelDefender = match.phaseDuel.defender;
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
 
+// ===============================
+// 🧠 RESOLUTION (SAFE CHECK)
+// ===============================
 setTimeout(async () => {
+
+    // ❌ sécurité : si duel déjà terminé ailleurs
+    if (!match.phaseDuel) return;
+
+    if (
+        match.phaseDuel.step !== "resolve_duel_pending"
+    ) return;
+
+    const attacker = match.phaseDuel.attacker;
+    const defender = match.phaseDuel.defender;
+
+    const attackPave = match.phaseDuel.attackPave;
+    const defensePave = match.phaseDuel.defensePave;
 
     const duelResult = await handleDuelMatch(
         match,
@@ -4014,21 +3998,14 @@ setTimeout(async () => {
         defensePave
     );
 
-    
-    // ===============================
-// 🎯 NEXT LOGIC PROPRE
-// ===============================
-const nextPlayer = duelResult.ok
-    ? duelAttacker
-    : duelDefender;
+    const nextPlayer = duelResult.ok
+        ? attacker
+        : defender;
 
-const nextId = nextPlayer.id || nextPlayer.jid;
+    const nextId = nextPlayer.id || nextPlayer.jid;
 
-    // ===============================
-    // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
-    // ===============================
     await ovl.sendMessage(chat, {
-    text:
+        text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${duelResult.msg}
@@ -4037,19 +4014,19 @@ ${duelResult.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-    mentions: [nextId]
-});
+        mentions: [nextId]
+    });
 
     // ===============================
-    // 🧹 CLEAN
+    // 🧹 CLEAN SAFE
     // ===============================
     match.phaseDuel = null;
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
 }, 1000);
-    return true;
-} 
+
+return true;
     
 // ===============================
 // 🎯 ATTAQUE⚽
