@@ -188,43 +188,67 @@ const DRIBBLES = [
 
 const DRIBBLE_BLUEPRINTS = {
 // ===============================
+// ===============================
 // DOUBLE CONTACT
 // ===============================
 "double contact": {
 
-step1: {
-description:
-"Première touche latérale pour déplacer le ballon hors de la ligne du défenseur.",
+    step1: {
 
-validation: {
-ballDirection: ["gauche", "droite"],
-ballDistanceMax: 1,
-surfaces: [
-"intérieur du pied",
-"extérieur du pied"
-]
+        description:
+        "Première touche avec l'intérieur du pied ou la semelle pour ramener le ballon vers l'autre pied entre 30cm et 50cm tout en déplaçant le corps dans cette même direction.",
+
+        validation: {
+
+            surfaces: [
+                "intérieur du pied",
+                "semelle"
+            ],
+
+            ballDirection: [
+                "gauche",
+                "droite"
+            ],
+
+            ballDistanceMin: 0.3,
+            ballDistanceMax: 0.5,
+
+            oppositeFoot: true
+        }
+
+    },
+
+    step2: {
+
+        description:
+        "Deuxième touche avec l'intérieur du pied, l'extérieur du pied ou la pointe du pied pour pousser le ballon vers l'avant ou en diagonale puis accélérer jusqu'à la vitesse maximale.",
+
+        validation: {
+
+            surfaces: [
+                "intérieur du pied",
+                "extérieur du pied",
+                "pointe du pied"
+            ],
+
+            ballDirection: [
+                "avant",
+                "diagonale"
+            ],
+
+            ballDistanceMin: 0.5,
+
+            acceleration: true,
+
+            requireVmax: true
+        }
+
+    }
+
 }
 
 },
 
-step2: {
-description:
-"Deuxième touche immédiate pour attaquer l'espace libre.",
-
-validation: {
-ballDirection: ["avant", "diagonale"],
-ballDistanceMin: 0.5,
-surfaces: [
-"intérieur du pied",
-"extérieur du pied",
-"pointe du pied"
-],
-acceleration: true
-}
-
-}
-
-},
 // ===============================
 // CROCHET EXTERIEUR
 // ===============================
