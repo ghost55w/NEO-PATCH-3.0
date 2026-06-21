@@ -4012,28 +4012,20 @@ console.log("=================================");
         ...(match.lineup2 || [])
     ];
 
-    let attacker = null;
 
 // ===============================
-// 🔍 FIND PLAYER (STABLE VERSION)
+// 🔍 FIND PLAYER (SAFE VERSION)
 // ===============================
 const findPlayer = (txt, exclude = null) => {
 
     const t = pureName(txt);
 
     let candidates = allPlayers.filter(p => {
-
         const n = pureName(p.nom);
-
-        return (
-            t.includes(n) ||
-            n.includes(t)
-        );
+        return t.includes(n) || n.includes(t);
     });
 
-    // ===============================
-    // 🚫 ANTI DOUBLON SIMPLE
-    // ===============================
+    // ❗ anti doublon attacker/defender
     if (exclude) {
         candidates = candidates.filter(p =>
             normalizeJid(p.id || p.jid) !==
@@ -4041,67 +4033,42 @@ const findPlayer = (txt, exclude = null) => {
         );
     }
 
-    // ===============================
-    // 🎯 MATCH EXACT PRIORITY
-    // ===============================
-    const exact = candidates.find(p =>
-        pureName(p.nom) === t
-    );
+    // 🧠 priorité ball holder (si attaque)
+    if (match.ballHolder && !exclude) {
+        const holder = allPlayers.find(p => p.nom === match.ballHolder);
+        if (holder && pureName(txt).includes(pureName(holder.nom))) {
+            return holder;
+        }
+    }
 
+    // 🎯 match exact
+    const exact = candidates.find(p => pureName(p.nom) === t);
     if (exact) return exact;
 
-    // ===============================
-    // 🎯 FALLBACK SIMPLE
-    // ===============================
+    // 🎯 fallback meilleur score simple
     return candidates[0] || null;
 };
 
-let attacker = null;
 
 // ===============================
-// ⚽ PORTEUR PRIORITAIRE
+// ⚽ ATTACKER / DEFENDER (NO DUPLICATE DECLARATION)
 // ===============================
-if (match.ballHolder) {
 
-    attacker = allPlayers.find(
-        p => p.nom === match.ballHolder
-    );
+// ATTACKER
+let attacker =
+    match.ballHolder
+        ? allPlayers.find(p => p.nom === match.ballHolder)
+        : null;
 
-    if (!attacker) {
-        attacker = allPlayers[0];
-    }
-}
-
-// fallback attaque texte
 if (!attacker) {
     attacker = findPlayer(attaqueText);
 }
 
-// 🔥 sécurité finale
+// sécurité finale
 attacker = attacker || findPlayer(attaqueText);
 
-// ===============================
-// 🛡️ DEFENDER (SAFE VERSION)
-// ===============================
+// DEFENDER (IMPORTANT: exclude attacker)
 let defender = findPlayer(defenseText, attacker);
-
-// ===============================
-// 🚫 ANTI ATTACKER = DEFENDER
-// ===============================
-if (
-    defender &&
-    attacker &&
-    normalizeJid(defender.id || defender.jid) ===
-    normalizeJid(attacker.id || attacker.jid)
-) {
-
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
-    );
-}
-
     
     // ===============================
     // 🧠 TARGET TACTIQUE
