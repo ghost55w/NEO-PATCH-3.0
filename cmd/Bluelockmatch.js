@@ -4158,8 +4158,6 @@ if (isDribbleAction && isTackleAction) {
 
     if (attackerWins) {
 
-        match.joueurTour = attacker.id || attacker.jid;
-
         return {
             ok: true,
             type: "DRIBBLE_WIN",
@@ -4169,8 +4167,6 @@ if (isDribbleAction && isTackleAction) {
         };
 
     } else {
-
-        match.joueurTour = defender.id || defender.jid;
 
         return {
             ok: false,
