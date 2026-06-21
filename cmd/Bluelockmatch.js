@@ -3443,7 +3443,6 @@ const duelDefender = match.phaseDuel.defender;
 // 🧠 RESOLUTION
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
-
 setTimeout(async () => {
 
     const duelResult = await handleDuelMatch(
@@ -3452,36 +3451,27 @@ setTimeout(async () => {
         defensePave
     );
 
-    
     // ===============================
-// 🎯 NEXT LOGIC PROPRE
-// ===============================
-let nextId;
-
-// ⚽ L'attaquant gagne le duel
-if (duelResult.ok) {
-
-    nextId = duelAttacker.id || duelAttacker.jid;
-
-    match.ballHolder = duelAttacker.nom;
-    match.joueurTour = nextId;
-    match.attacker = nextId;
-}
-
-// 🛡️ Le défenseur gagne le duel
-else {
-
-    nextId = duelDefender.id || duelDefender.jid;
-
-    match.ballHolder = duelDefender.nom;
-    match.joueurTour = nextId;
-    match.attacker = nextId;
-}
+    // 🎯 POSSESSION (SOURCE UNIQUE)
     // ===============================
-    // ✏️ EDIT DU MESSAGE (AU LIEU D'ENVOYER UN 2E)
+    const winner =
+        duelResult.ok ? duelAttacker : duelDefender;
+
+    const winnerId = winner.id || winner.jid;
+
+    match.ballHolder = winnerId;
+    match.joueurTour = winnerId;
+
+    // ===============================
+    // 🎯 NEXT = BALLHOLDER (TOUJOURS)
+    // ===============================
+    const nextId = match.ballHolder;
+
+    // ===============================
+    // 📩 MESSAGE
     // ===============================
     await ovl.sendMessage(chat, {
-    text:
+        text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${duelResult.msg}
@@ -3490,8 +3480,8 @@ ${duelResult.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-    mentions: [nextId]
-});
+        mentions: [nextId]
+    });
 
     // ===============================
     // 🧹 CLEAN
@@ -3501,7 +3491,6 @@ ${duelResult.msg}
     match.waitingDefenseFrom = null;
 
 }, 1000);
-    return true;
 } 
     
 // ===============================
