@@ -21,36 +21,6 @@ const normalize = str =>
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]/g, "");
 
-//-------- VERIFICATION NIVEAU POUR ACHAT
-const checkLevelRequirement = (playerLevel, cardCategory, cardGrade) => {
-    let levelRequired = 0;
-
-    if (["or", "gold"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 10;
-        else if (cardGrade === "s") levelRequired = 5;
-    } else if (["argent", "silver"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 5;
-        else if (cardGrade === "s") levelRequired = 5;
-    } else if (["bronze"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 3;
-        else if (cardGrade === "s") levelRequired = 3;
-    } else if (["ss", "ss+", "ssp", "ss-", "ssm"].includes(cardGrade)) {
-        levelRequired = 15;
-    }
-
-    if (playerLevel < levelRequired) {
-        return {
-            ok: false,
-            message:
-                `❌ Tu n'as pas le niveau requis pour posséder cette carte.\n` +
-                `Niveau requis: ${levelRequired} ▲, ton niveau: ${playerLevel} ▲  
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░  
-                              🌀🔆`
-        };
-    }
-
-    return { ok: true };
-};
 
 //-------- JOUEURS QUI POSSÈDENT UNE CARTE
 const getCardOwners = async (cardName) => {
@@ -136,7 +106,7 @@ function generateFicheDuel(duel) {
 }
 
 
-// COMMANDE DE LANCEMENT DU MATCH🌀🆚// 
+// COMMANDE DE LANCEMENT DU MATCH🌀🆚//
 const duelsEnCours = {};
 const matchAttente = {};
 
