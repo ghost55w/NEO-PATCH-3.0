@@ -495,8 +495,8 @@ const DRIBBLE_BLUEPRINTS = {
                 "intérieur du pied",
                 "extérieur du pied"
             ]
-        }
-
+   }
+}
     },
 
 // ===============================
