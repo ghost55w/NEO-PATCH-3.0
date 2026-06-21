@@ -202,7 +202,7 @@ const DRIBBLE_BLUEPRINTS = {
             surfaces: [
                 "intérieur du pied",
                 "semelle"
-                "pointev"
+                "pointe du pied"
             ],
 
             ballDirection: [
