@@ -3523,11 +3523,11 @@ const attackPave = match.phaseDuel.attackPave;
 const defensePave = match.phaseDuel.defensePave;
 const duelAttacker = match.phaseDuel.attacker;
 const duelDefender = match.phaseDuel.defender;
-    
 // ===============================
 // 🧠 RESOLUTION
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
+
 setTimeout(async () => {
 
     const duelResult = await handleDuelMatch(
@@ -3537,20 +3537,35 @@ setTimeout(async () => {
     );
 
     // ===============================
-    // 🎯 POSSESSION (SOURCE UNIQUE)
+    // 🎯 WINNER SAFE RESOLUTION
     // ===============================
     const winner =
         duelResult.ok ? duelAttacker : duelDefender;
 
-    const winnerId = winner.id || winner.jid;
+    const winnerId =
+        winner?.id ||
+        winner?.jid ||
+        match.ballHolder ||
+        match.joueurTour;
 
+    // ❌ sécurité stricte anti "user"
+    if (
+        !winnerId ||
+        (!match.lineup1.some(p => normalizeJid(p.id || p.jid) === normalizeJid(winnerId)) &&
+         !match.lineup2.some(p => normalizeJid(p.id || p.jid) === normalizeJid(winnerId)))
+    ) {
+        console.log("❌ Winner invalide → fallback safe");
+        return;
+    }
+
+    // ===============================
+    // 🎯 POSSESSION UPDATE
+    // ===============================
     match.ballHolder = winnerId;
     match.joueurTour = winnerId;
 
-    // ===============================
-    // 🎯 NEXT = BALLHOLDER (TOUJOURS)
-    // ===============================
-    const nextId = match.ballHolder;
+    const nextId = winnerId;
+    const nextTag = getTagFromJid(nextId);
 
     // ===============================
     // 📩 MESSAGE
@@ -3561,7 +3576,7 @@ setTimeout(async () => {
 
 ${duelResult.msg}
 
-➡️ @${getTagFromJid(nextId)} NEXT
+➡️ @${nextTag} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
@@ -3575,8 +3590,8 @@ ${duelResult.msg}
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
-}, 1000);
-return true;
+}, 1000);    
+return true ;
 } 
     
 // ===============================
