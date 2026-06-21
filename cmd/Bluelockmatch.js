@@ -309,117 +309,106 @@ const DRIBBLE_BLUEPRINTS = {
     }
 
 },
+
 // ===============================
 // ROULETTE
 // ===============================
 "roulette": {
 
-step1: {
-description:
-"Le ballon est tiré sous la semelle.",
+    step1: {
 
-validation: {
-surfaces: ["semelle"],
-ballDistanceMax: 1
-}
+        description:
+        "Le ballon est tiré sous la semelle entre 30cm et 50cm tout en initiant une rotation complète du corps de 360°. Le joueur doit préciser si la rotation démarre vers la gauche ou vers la droite et accompagner le mouvement avec un déplacement du corps pouvant atteindre 50cm dans cette direction.",
+
+        validation: {
+
+            surfaces: [
+                "semelle"
+            ],
+
+            ballDistanceMin: 0.3,
+            ballDistanceMax: 0.5,
+
+            bodyRotationMin: 360,
+            bodyRotationMax: 360,
+
+            rotationDirection: [
+                "gauche",
+                "droite"
+            ],
+
+            bodyShiftMax: 0.5
+        }
+
+    },
+
+    step2: {
+
+        description:
+        "Après la rotation, le ballon ressort dans une nouvelle direction afin de poursuivre l'action.",
+
+        validation: {
+
+            directionChange: true,
+
+            ballDirection: [
+                "avant",
+                "diagonale",
+                "gauche",
+                "droite"
+            ]
+        }
+
+    }
 
 },
-
-step2: {
-description:
-"Rotation du corps autour du ballon.",
-
-validation: {
-bodyRotation: true
-}
-
-},
-
-step3: {
-description:
-"Le ballon ressort dans la nouvelle direction.",
-
-validation: {
-directionChange: true,
-acceleration: true
-}
-
-}
-
-},
-
 // ===============================
 // ELASTICO
 // ===============================
 "elastico": {
 
-step1: {
-description:
-"Feinte extérieure avec l'extérieur du pied.",
+    step1: {
 
-validation: {
-surfaces: ["extérieur du pied"],
-ballDirection: ["gauche", "droite"]
-}
+        description:
+        "Première touche avec l'extérieur du même pied entre 50 cm et 1 m vers l'extérieur, à gauche ou à droite selon le pied utilisé.",
 
-},
+        validation: {
 
-step2: {
-description:
-"Retour instantané vers l'intérieur.",
+            surfaces: [
+                "extérieur du pied"
+            ],
 
-validation: {
-surfaces: ["intérieur du pied"],
-directionChange: true
-}
+            ballDirection: [
+                "gauche",
+                "droite"
+            ],
 
-},
+            ballDistanceMin: 0.5,
+            ballDistanceMax: 1
+        }
 
-step3: {
-description:
-"Sortie rapide après le changement de direction.",
+    },
 
-validation: {
-acceleration: true
-}
+    step2: {
 
-}
+        description:
+        "Retour immédiat avec l'intérieur du même pied entre 50 cm et 1 m dans la direction opposée à la première touche.",
 
-},
-// ===============================
-// RAINBOW
-// ===============================
-"rainbow": {
+        validation: {
 
-step1: {
-description:
-"Le ballon est soulevé derrière ou sous les jambes.",
+            surfaces: [
+                "intérieur du pied"
+            ],
 
-validation: {
-ballLift: true
-}
+            sameFoot: true,
 
-},
+            oppositeDirection: true,
 
-step2: {
-description:
-"Le ballon passe au-dessus du défenseur.",
+            ballDistanceMin: 0.5,
+            ballDistanceMax: 1
+        }
 
-validation: {
-ballHeightMin: 1.5
-}
-
-},
-
-step3: {
-description:
-"Accélération pour récupérer le ballon.",
-
-validation: {
-acceleration: true
-}
-
-}
+    }
 
 },
 
@@ -428,32 +417,50 @@ acceleration: true
 // ===============================
 "petit pont": {
 
-step1: {
-description:
-"Le ballon est poussé entre les jambes ou dans l'espace libre.",
+    aliases: [
+        "nutmeg"
+    ],
 
-validation: {
-ballDirection: ["avant"],
-ballDistanceMin: 0.5,
-ballDistanceMax: 3,
-surfaces: [
-"intérieur du pied",
-"extérieur du pied",
-"pointe du pied"
-]
-}
+    requirements: {
 
-},
+        opponentLegGap: true
 
-step2: {
-description:
-"Le joueur contourne ou dépasse le défenseur.",
+    },
 
-validation: {
-acceleration: true
-}
+    step1: {
 
-}
+        description:
+        "Le ballon est poussé entre les jambes de l'adversaire avec l'intérieur, l'extérieur ou la pointe du pied.",
+
+        validation: {
+
+            ballDirection: [
+                "avant"
+            ],
+
+            ballDistanceMin: 0.5,
+            ballDistanceMax: 3,
+
+            surfaces: [
+                "intérieur du pied",
+                "extérieur du pied",
+                "pointe du pied"
+            ]
+        }
+
+    },
+
+    step2: {
+
+        description:
+        "Le joueur contourne ou dépasse l'adversaire pour récupérer le ballon.",
+
+        validation: {
+
+            acceleration: true
+        }
+
+    }
 
 },
 // ===============================
@@ -461,80 +468,71 @@ acceleration: true
 // ===============================
 "step over": {
 
-step1: {
-description:
-"Une jambe passe autour du ballon pour vendre une direction.",
+    step1: {
 
-validation: {
-bodyFeint: true
-}
+        description:
+        "Une jambe passe autour du ballon de l'intérieur vers l'extérieur ou de l'extérieur vers l'intérieur afin de vendre une direction.",
 
-},
+        validation: {
 
-step2: {
-description:
-"Le ballon est poussé dans la direction opposée.",
+            legCircleAroundBall: true,
 
-validation: {
-directionChange: true,
-surfaces: [
-"intérieur du pied",
-"extérieur du pied"
-]
-}
+            bodyFeint: true
+        }
 
-},
+    },
 
-step3: {
-description:
-"Sortie en accélération.",
+    step2: {
 
-validation: {
-acceleration: true
-}
+        description:
+        "Le ballon est poussé dans la direction opposée à la feinte.",
 
-}
+        validation: {
 
-},
+            directionChange: true,
+
+            surfaces: [
+                "intérieur du pied",
+                "extérieur du pied"
+            ]
+        }
+
+    },
 
 // ===============================
 // FEINTE DE CORPS
 // ===============================
 "feinte de corps": {
 
-step1: {
-description:
-"Le corps simule une direction sans toucher immédiatement le ballon.",
+    step1: {
 
-validation: {
-bodyFeint: true
-}
+        description:
+        "Le joueur simule une prise de direction avec le corps sans toucher immédiatement le ballon.",
 
-},
+        validation: {
 
-step2: {
-description:
-"Le ballon est emmené dans la direction opposée.",
+            bodyFeint: true
 
-validation: {
-directionChange: true,
-surfaces: [
-"intérieur du pied",
-"extérieur du pied"
-]
-}
+        }
 
-},
+    },
 
-step3: {
-description:
-"Accélération après avoir déséquilibré le défenseur.",
+    step2: {
 
-validation: {
-acceleration: true
-}
+        description:
+        "Le ballon est emmené dans la direction opposée à la feinte.",
 
-}
+        validation: {
+
+            directionChange: true,
+
+            surfaces: [
+                "intérieur du pied",
+                "extérieur du pied"
+            ]
+        }
+
+    }
 
 },
 // ===============================
@@ -542,136 +540,139 @@ acceleration: true
 // ===============================
 "feinte de frappe": {
 
-step1: {
-description:
-"Le joueur arme une frappe crédible.",
+    step1: {
 
-validation: {
-fakeShot: true
-}
+        description:
+        "Le joueur arme une frappe crédible afin de provoquer une réaction adverse.",
 
-},
+        validation: {
 
-step2: {
-description:
-"Le ballon est conservé ou déplacé au dernier instant.",
+            fakeShot: true
 
-validation: {
-directionChange: true,
-surfaces: [
-"intérieur du pied",
-"extérieur du pied",
-"semelle"
-]
-}
+        }
+
+    }
 
 },
 
-step3: {
-description:
-"Sortie rapide après la feinte.",
-
-validation: {
-acceleration: true
-}
-
-}
-
-},
+    
 // ===============================
 // SOMBRERO
 // ===============================
 "sombrero": {
 
-step1: {
-description:
-"Le ballon est soulevé au-dessus du défenseur.",
+    step1: {
 
-validation: {
-ballLift: true,
-ballHeightMin: 1.5
-}
+        description:
+        "Le joueur lève le ballon à 2m max en arrière avec la pointe du pied ou dans un mouvement ascendant pour passer au-dessus du défenseur.",
 
-},
+        validation: {
 
-step2: {
-description:
-"Le ballon passe derrière ou au-dessus du défenseur.",
+            ballLift: true,
 
-validation: {
-ballDirection: ["avant"]
-}
+            ballHeightMax: 2,
 
-},
+            ballDirection: [
+                "arriere",
+                "avant"
+            ],
 
-step3: {
-description:
-"Le joueur contourne puis récupère le ballon.",
+            surfaces: [
+                "pointe du pied",
+                "interieur du pied"
+            ]
+        }
 
-validation: {
-acceleration: true
-}
+    },
 
-}
+    step2: {
 
-},
+        description:
+        "Le ballon passe au-dessus de la tête du défenseur dans une trajectoire claire.",
+
+        validation: {
+
+            ballPassOver: true,
+
+            target: "au-dessus du défenseur",
+
+            trajectoryClear: true
+        }
+
+    },
+
+    step3: {
+
+        description:
+        "Le joueur effectue un pivot de 60° à 180° vers la gauche ou la droite pour aller récupérer le ballon après le passage.",
+
+        validation: {
+
+            pivot: true,
+
+            pivotAngleMin: 60,
+
+            pivotAngleMax: 180,
+
+            pivotDirection: [
+                "gauche",
+                "droite"
+            ],
+
+            ballRecovery: true
+        }
+
+    }
+
+}, 
 // ===============================
 // DRIBBLE CREATIF
 // ===============================
 "creative": {
 
-step1: {
-description:
-"Première action technique pour sortir le ballon de la ligne défensive.",
+    step1: {
 
-validation: {
-ballDirection: [
-"gauche",
-"droite",
-"avant",
-"diagonale"
-],
+        description:
+        "Première action technique pour sortir le ballon de la ligne défensive.",
 
-ballDistanceMax: 1.5,      
+        validation: {
 
-surfaces: [      
-    "intérieur du pied",      
-    "extérieur du pied",      
-    "semelle",      
-    "pointe du pied",      
-    "talon"      
-]
+            ballDirection: [
+                "gauche",
+                "droite",
+                "avant",
+                "diagonale"
+            ],
 
-}
+            ballDistanceMax: 1.5,
 
-},
+            surfaces: [
+                "intérieur du pied",
+                "extérieur du pied",
+                "semelle",
+                "pointe du pied",
+                "talon"
+            ]
+        }
 
-step2: {
-description:
-"Deuxième action créant un avantage technique.",
+    },
 
-validation: {
-secondTouchRequired: true,
-directionChange: true
-}
+    step2: {
 
-},
+        description:
+        "Deuxième action technique créant un avantage ou une nouvelle direction.",
 
-step3: {
-description:
-"Exploitation de l'espace créé.",
+        validation: {
 
-validation: {
-acceleration: true,
-ballDistanceMin: 0.5
-}
+            secondTouchRequired: true,
 
-}
+            directionChange: true
 
-}
+        }
 
-};
+    }
 
+}, 
 // ===============================
 // 🧠 NORMALISATION TEXTE
 // ===============================
