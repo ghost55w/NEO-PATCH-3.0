@@ -2398,81 +2398,6 @@ function setJoueurTour(match, player) {
 }
 
 // ===============================
-// 📍 POSITION ACTUELLE
-// ===============================
-function getCurrentPosition(match, player) {
-
-    const key =
-        normalizeJid(player.id || player.jid);
-
-    if (
-        match.playerPositions &&
-        match.playerPositions[key]
-    ) {
-        return match.playerPositions[key];
-    }
-
-    return player.position || null;
-}
-
-// ===============================
-// 📏 DISTANCE ENTRE JOUEURS
-// ===============================
-function getDistanceBetween(match, p1, p2) {
-
-    const pos1 = getCurrentPosition(match, p1);
-    const pos2 = getCurrentPosition(match, p2);
-
-    if (!pos1 || !pos2) return Infinity;
-
-    const dx = pos1.x - pos2.x;
-    const dy = pos1.y - pos2.y;
-
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-// ===============================
-// 🎯 JOUEUR LE PLUS PROCHE
-// ===============================
-function getNearestOpponent(match, player) {
-
-    const team1 = match.lineup1 || [];
-    const team2 = match.lineup2 || [];
-
-    const isTeam1 =
-        team1.some(
-            p =>
-                normalizeJid(p.id || p.jid) ===
-                normalizeJid(player.id || player.jid)
-        );
-
-    const opponents =
-        isTeam1 ? team2 : team1;
-
-    let nearest = null;
-    let minDist = Infinity;
-
-    for (const opp of opponents) {
-
-        const dist =
-            getDistanceBetween(
-                match,
-                player,
-                opp
-            );
-
-        if (dist < minDist) {
-
-            minDist = dist;
-            nearest = opp;
-        }
-    }
-
-    return nearest;
-}
-
-
-// ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
 ovlcmd({
@@ -3523,11 +3448,11 @@ const attackPave = match.phaseDuel.attackPave;
 const defensePave = match.phaseDuel.defensePave;
 const duelAttacker = match.phaseDuel.attacker;
 const duelDefender = match.phaseDuel.defender;
+    
 // ===============================
 // 🧠 RESOLUTION
 // ===============================
 match.phaseDuel.step = "resolve_duel_pending";
-
 setTimeout(async () => {
 
     const duelResult = await handleDuelMatch(
@@ -3537,35 +3462,20 @@ setTimeout(async () => {
     );
 
     // ===============================
-    // 🎯 WINNER SAFE RESOLUTION
+    // 🎯 POSSESSION (SOURCE UNIQUE)
     // ===============================
     const winner =
         duelResult.ok ? duelAttacker : duelDefender;
 
-    const winnerId =
-        winner?.id ||
-        winner?.jid ||
-        match.ballHolder ||
-        match.joueurTour;
+    const winnerId = winner.id || winner.jid;
 
-    // ❌ sécurité stricte anti "user"
-    if (
-        !winnerId ||
-        (!match.lineup1.some(p => normalizeJid(p.id || p.jid) === normalizeJid(winnerId)) &&
-         !match.lineup2.some(p => normalizeJid(p.id || p.jid) === normalizeJid(winnerId)))
-    ) {
-        console.log("❌ Winner invalide → fallback safe");
-        return;
-    }
-
-    // ===============================
-    // 🎯 POSSESSION UPDATE
-    // ===============================
     match.ballHolder = winnerId;
     match.joueurTour = winnerId;
 
-    const nextId = winnerId;
-    const nextTag = getTagFromJid(nextId);
+    // ===============================
+    // 🎯 NEXT = BALLHOLDER (TOUJOURS)
+    // ===============================
+    const nextId = match.ballHolder;
 
     // ===============================
     // 📩 MESSAGE
@@ -3576,7 +3486,7 @@ setTimeout(async () => {
 
 ${duelResult.msg}
 
-➡️ @${nextTag} NEXT
+➡️ @${getTagFromJid(nextId)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
@@ -3590,8 +3500,7 @@ ${duelResult.msg}
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
-}, 1000);    
-return true ;
+}, 1000);
 } 
     
 // ===============================
@@ -4012,64 +3921,63 @@ console.log("=================================");
         ...(match.lineup2 || [])
     ];
 
+    // ===============================
+    // 🔍 FIND PLAYER
+    // ===============================
+    const findPlayer = (txt) => {
 
-// ===============================
-// 🔍 FIND PLAYER (SAFE VERSION)
-// ===============================
-const findPlayer = (txt, exclude = null) => {
+        const t = pureName(txt);
 
-    const t = pureName(txt);
+        return allPlayers.find(p => {
 
-    let candidates = allPlayers.filter(p => {
-        const n = pureName(p.nom);
-        return t.includes(n) || n.includes(t);
-    });
+            const n = pureName(p.nom);
 
-    // ❗ anti doublon attacker/defender
-    if (exclude) {
-        candidates = candidates.filter(p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(exclude.id || exclude.jid)
+            return t.includes(n) || n.includes(t);
+
+        }) || null;
+    };
+
+    let attacker = null;
+
+    // ===============================
+    // ⚽ PORTEUR PRIORITAIRE
+    // ===============================
+    if (match.ballHolder) {
+
+        attacker = allPlayers.find(
+            p => p.nom === match.ballHolder
         );
-    }
 
-    // 🧠 priorité ball holder (si attaque)
-    if (match.ballHolder && !exclude) {
-        const holder = allPlayers.find(p => p.nom === match.ballHolder);
-        if (holder && pureName(txt).includes(pureName(holder.nom))) {
-            return holder;
+        if (!attacker) {
+            attacker = allPlayers[0];
         }
     }
 
-    // 🎯 match exact
-    const exact = candidates.find(p => pureName(p.nom) === t);
-    if (exact) return exact;
+    // fallback
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
 
-    // 🎯 fallback meilleur score simple
-    return candidates[0] || null;
-};
+    let defender = findPlayer(defenseText);
+    // Empêcher attaquant = défenseur
+if (
+    defender &&
+    attacker &&
+    normalizeJid(defender.id || defender.jid) ===
+    normalizeJid(attacker.id || attacker.jid)
+) {
 
-
-// ===============================
-// ⚽ ATTACKER / DEFENDER (NO DUPLICATE DECLARATION)
-// ===============================
-
-// ATTACKER
-let attacker =
-    match.ballHolder
-        ? allPlayers.find(p => p.nom === match.ballHolder)
-        : null;
-
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
+    defender = allPlayers.find(
+        p =>
+            normalizeJid(p.id || p.jid) !==
+            normalizeJid(attacker.id || attacker.jid)
+            &&
+            pureName(defenseText).includes(
+                pureName(p.nom)
+            )
+    );
 }
 
-// sécurité finale
-attacker = attacker || findPlayer(attaqueText);
-
-// DEFENDER (IMPORTANT: exclude attacker)
-let defender = findPlayer(defenseText, attacker);
-    
     // ===============================
     // 🧠 TARGET TACTIQUE
     // ===============================
@@ -4296,32 +4204,8 @@ const isPassive =
         atk.includes(k) || def.includes(k)
     );
 
+// 🔥 PRIORITÉ ABSOLUE
 if (isPassive) {
-
-    const mentionedPlayer =
-        extractFaceTarget(defenseText, allPlayers);
-
-    if (mentionedPlayer) {
-
-        const realOpponent =
-            getOppositePlayer(defender, match);
-
-        if (
-            realOpponent &&
-            normalizeJid(realOpponent.id || realOpponent.jid) !==
-            normalizeJid(mentionedPlayer.id || mentionedPlayer.jid)
-        ) {
-
-            return {
-                ok: false,
-                type: "BAD_MATCHUP",
-                attacker,
-                defender,
-                msg: `❌ Mauvais vis-à-vis.`
-            };
-        }
-    }
-
     return {
         ok: false,
         type: "PASSIVE_BLOCK",
@@ -4916,53 +4800,18 @@ async function handleDeplacements(match, joueur, texte) {
     }
 
     match.lastPositionUpdate = {
-    joueur: joueur.nom,
-    moved,
-    total,
-    time: Date.now()
-};
+        joueur: joueur.nom,
+        moved,
+        total,
+        time: Date.now()
+    };
 
-// ===============================
-// 📍 TRACKING POSITIONS TEMPS RÉEL
-// ===============================
-if (!match.playerPositions) {
-    match.playerPositions = {};
-}
-
-match.playerPositions[
-    normalizeJid(joueur.id || joueur.jid)
-] = {
-    x: joueur.position.x,
-    y: joueur.position.y,
-    zone: getZoneFromY(joueur.position.y),
-    updatedAt: Date.now()
-};
-
-// Mise à jour de tous les joueurs
-for (const p of [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-]) {
-
-    if (!p.position) continue;
-
-    match.playerPositions[
-        normalizeJid(p.id || p.jid)
-    ] = {
-        x: p.position.x,
-        y: p.position.y,
-        zone: getZoneFromY(p.position.y),
-        updatedAt: Date.now()
+    return {
+        ok: true,
+        message: moved ? "✅ Déplacement enregistré" : "ℹ️ Aucun mouvement"
     };
 }
 
-return {
-    ok: true,
-    message: moved
-        ? "✅ Déplacement enregistré"
-        : "ℹ️ Aucun mouvement"
-};
-} 
 
  // ===============================
     // ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
