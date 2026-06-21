@@ -3464,8 +3464,7 @@ setTimeout(async () => {
     // ===============================
     // 🎯 POSSESSION (SOURCE UNIQUE)
     // ===============================
-    console.log("duelAttacker =", duelAttacker);
-console.log("winner =", winner);
+    
     const winner =
         duelResult.ok ? duelAttacker : duelDefender;
 
