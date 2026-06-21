@@ -628,36 +628,60 @@ const DRIBBLE_BLUEPRINTS = {
 // ===============================
 // DRIBBLE CREATIF
 // ===============================
-const skills = {
+"creative": {
 
-    creative: {
+step1: {
+description:
+"Première action technique pour sortir le ballon de la ligne défensive.",
 
-        step1: {
-            description: "Première action technique pour sortir le ballon de la ligne défensive.",
-            validation: {
-                ballDirection: ["gauche", "droite", "avant", "diagonale"],
-                ballDistanceMax: 1.5,
-                surfaces: [
-                    "intérieur du pied",
-                    "extérieur du pied",
-                    "semelle",
-                    "pointe du pied",
-                    "talon"
-                ]
-            }
-        },
+validation: {
+ballDirection: [
+"gauche",
+"droite",
+"avant",
+"diagonale"
+],
 
-        step2: {
-            description: "Deuxième action technique créant un avantage ou une nouvelle direction.",
-            validation: {
-                secondTouchRequired: true,
-                directionChange: true
-            }
-        }
+ballDistanceMax: 1.5,      
 
-    } 
+surfaces: [      
+    "intérieur du pied",      
+    "extérieur du pied",      
+    "semelle",      
+    "pointe du pied",      
+    "talon"      
+]
 
-}; 
+}
+
+},
+
+step2: {
+description:
+"Deuxième action créant un avantage technique.",
+
+validation: {
+secondTouchRequired: true,
+directionChange: true
+}
+
+},
+
+step3: {
+description:
+"Exploitation de l'espace créé.",
+
+validation: {
+acceleration: true,
+ballDistanceMin: 0.5
+}
+
+}
+
+}
+
+};
+
 
 // ===============================
 // 🧠 NORMALISATION TEXTE
