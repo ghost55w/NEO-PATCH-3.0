@@ -628,53 +628,36 @@ const DRIBBLE_BLUEPRINTS = {
 // ===============================
 // DRIBBLE CREATIF
 // ===============================
-"creative": {
+const skills = {
 
-    step1: {
+    creative: {
 
-        description:
-        "Première action technique pour sortir le ballon de la ligne défensive.",
+        step1: {
+            description: "Première action technique pour sortir le ballon de la ligne défensive.",
+            validation: {
+                ballDirection: ["gauche", "droite", "avant", "diagonale"],
+                ballDistanceMax: 1.5,
+                surfaces: [
+                    "intérieur du pied",
+                    "extérieur du pied",
+                    "semelle",
+                    "pointe du pied",
+                    "talon"
+                ]
+            }
+        },
 
-        validation: {
-
-            ballDirection: [
-                "gauche",
-                "droite",
-                "avant",
-                "diagonale"
-            ],
-
-            ballDistanceMax: 1.5,
-
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied",
-                "semelle",
-                "pointe du pied",
-                "talon"
-            ]
+        step2: {
+            description: "Deuxième action technique créant un avantage ou une nouvelle direction.",
+            validation: {
+                secondTouchRequired: true,
+                directionChange: true
+            }
         }
 
-    },
+    } 
 
-    step2: {
-
-        description:
-        "Deuxième action technique créant un avantage ou une nouvelle direction.",
-
-        validation: {
-
-            secondTouchRequired: true,
-
-            directionChange: true
-
-        }
-
-    }
-
-} 
-};
-
+}; 
 
 // ===============================
 // 🧠 NORMALISATION TEXTE
@@ -691,7 +674,7 @@ function normalizeText(text) {
 // ===============================
 function normalizeList(arr) {
     return arr.map(w => normalizeText(w));
-}
+} 
 
 // ===============================
 // 🔍 MATCH FLEX
