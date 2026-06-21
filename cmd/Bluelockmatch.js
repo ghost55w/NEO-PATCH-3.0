@@ -4011,8 +4011,11 @@ console.log("=================================");
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
+
+    let attacker = null;
+
 // ===============================
-// 🔍 FIND PLAYER (VERSION SAFE)
+// 🔍 FIND PLAYER (STABLE VERSION)
 // ===============================
 const findPlayer = (txt, exclude = null) => {
 
@@ -4028,7 +4031,9 @@ const findPlayer = (txt, exclude = null) => {
         );
     });
 
-    // ❗ anti doublon (attacker ≠ defender)
+    // ===============================
+    // 🚫 ANTI DOUBLON SIMPLE
+    // ===============================
     if (exclude) {
         candidates = candidates.filter(p =>
             normalizeJid(p.id || p.jid) !==
@@ -4037,22 +4042,7 @@ const findPlayer = (txt, exclude = null) => {
     }
 
     // ===============================
-    // 🧠 PRIORITÉ 1 : BALL HOLDER (TRÈS IMPORTANT)
-    // ===============================
-    const ballHolderPlayer = allPlayers.find(p =>
-        p.nom === match.ballHolder
-    );
-
-    if (ballHolderPlayer && !exclude) {
-        const holderName = pureName(ballHolderPlayer.nom);
-
-        if (t.includes(holderName)) {
-            return ballHolderPlayer;
-        }
-    }
-
-    // ===============================
-    // 🎯 PRIORITÉ 2 : MATCH EXACT
+    // 🎯 MATCH EXACT PRIORITY
     // ===============================
     const exact = candidates.find(p =>
         pureName(p.nom) === t
@@ -4061,37 +4051,12 @@ const findPlayer = (txt, exclude = null) => {
     if (exact) return exact;
 
     // ===============================
-    // 🎯 PRIORITÉ 3 : MATCH LE PLUS PROBABLE
+    // 🎯 FALLBACK SIMPLE
     // ===============================
-    let best = null;
-    let bestScore = 0;
-
-    for (const p of candidates) {
-
-        const name = pureName(p.nom);
-
-        let score = 0;
-
-        if (t === name) score += 100;
-        if (t.includes(name)) score += 50;
-        if (name.includes(t)) score += 30;
-
-        // bonus si joueur proche du ballon
-        if (match.playerPositions) {
-            const pos = match.playerPositions[normalizeJid(p.id || p.jid)];
-            if (pos) score += 5;
-        }
-
-        if (score > bestScore) {
-            bestScore = score;
-            best = p;
-        }
-    }
-
-    return best || candidates[0] || null;
+    return candidates[0] || null;
 };
 
-    let attacker = null;
+let attacker = null;
 
 // ===============================
 // ⚽ PORTEUR PRIORITAIRE
@@ -4107,15 +4072,35 @@ if (match.ballHolder) {
     }
 }
 
-// fallback unique
+// fallback attaque texte
 if (!attacker) {
     attacker = findPlayer(attaqueText);
 }
 
+// 🔥 sécurité finale
+attacker = attacker || findPlayer(attaqueText);
+
 // ===============================
-// 🛡️ DEFENDER
+// 🛡️ DEFENDER (SAFE VERSION)
 // ===============================
-let defender = findPlayer(defenseText, attacker);  
+let defender = findPlayer(defenseText, attacker);
+
+// ===============================
+// 🚫 ANTI ATTACKER = DEFENDER
+// ===============================
+if (
+    defender &&
+    attacker &&
+    normalizeJid(defender.id || defender.jid) ===
+    normalizeJid(attacker.id || attacker.jid)
+) {
+
+    defender = allPlayers.find(
+        p =>
+            normalizeJid(p.id || p.jid) !==
+            normalizeJid(attacker.id || attacker.jid)
+    );
+}
 
     
     // ===============================
