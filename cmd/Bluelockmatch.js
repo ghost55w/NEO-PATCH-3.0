@@ -3466,17 +3466,15 @@ setTimeout(async () => {
     // ===============================
     
     const winner =
-        duelResult.ok ? duelAttacker : duelDefender;
+    duelResult.ok ? duelAttacker : duelDefender;
 
-    const winnerId = winner.id || winner.jid;
+const nextId = winner.id || winner.jid;
 
-    match.ballHolder = winnerId;
-    match.joueurTour = winnerId;
+// ⚽ Le personnage garde le ballon
+match.ballHolder = winner.nom;
 
-    // ===============================
-    // 🎯 NEXT = BALLHOLDER (TOUJOURS)
-    // ===============================
-    const nextId = match.ballHolder;
+// 👤 Le propriétaire du personnage joue
+match.joueurTour = nextId;
 
     // ===============================
     // 📩 MESSAGE
