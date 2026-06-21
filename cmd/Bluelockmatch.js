@@ -2398,6 +2398,81 @@ function setJoueurTour(match, player) {
 }
 
 // ===============================
+// 📍 POSITION ACTUELLE
+// ===============================
+function getCurrentPosition(match, player) {
+
+    const key =
+        normalizeJid(player.id || player.jid);
+
+    if (
+        match.playerPositions &&
+        match.playerPositions[key]
+    ) {
+        return match.playerPositions[key];
+    }
+
+    return player.position || null;
+}
+
+// ===============================
+// 📏 DISTANCE ENTRE JOUEURS
+// ===============================
+function getDistanceBetween(match, p1, p2) {
+
+    const pos1 = getCurrentPosition(match, p1);
+    const pos2 = getCurrentPosition(match, p2);
+
+    if (!pos1 || !pos2) return Infinity;
+
+    const dx = pos1.x - pos2.x;
+    const dy = pos1.y - pos2.y;
+
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ===============================
+// 🎯 JOUEUR LE PLUS PROCHE
+// ===============================
+function getNearestOpponent(match, player) {
+
+    const team1 = match.lineup1 || [];
+    const team2 = match.lineup2 || [];
+
+    const isTeam1 =
+        team1.some(
+            p =>
+                normalizeJid(p.id || p.jid) ===
+                normalizeJid(player.id || player.jid)
+        );
+
+    const opponents =
+        isTeam1 ? team2 : team1;
+
+    let nearest = null;
+    let minDist = Infinity;
+
+    for (const opp of opponents) {
+
+        const dist =
+            getDistanceBetween(
+                match,
+                player,
+                opp
+            );
+
+        if (dist < minDist) {
+
+            minDist = dist;
+            nearest = opp;
+        }
+    }
+
+    return nearest;
+}
+
+
+// ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
 ovlcmd({
@@ -3921,64 +3996,113 @@ console.log("=================================");
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
+// ===============================
+// 🔍 FIND PLAYER (VERSION SAFE)
+// ===============================
+const findPlayer = (txt, exclude = null) => {
 
-    // ===============================
-    // 🔍 FIND PLAYER
-    // ===============================
-    const findPlayer = (txt) => {
+    const t = pureName(txt);
 
-        const t = pureName(txt);
+    let candidates = allPlayers.filter(p => {
 
-        return allPlayers.find(p => {
+        const n = pureName(p.nom);
 
-            const n = pureName(p.nom);
-
-            return t.includes(n) || n.includes(t);
-
-        }) || null;
-    };
-
-    let attacker = null;
-
-    // ===============================
-    // ⚽ PORTEUR PRIORITAIRE
-    // ===============================
-    if (match.ballHolder) {
-
-        attacker = allPlayers.find(
-            p => p.nom === match.ballHolder
+        return (
+            t.includes(n) ||
+            n.includes(t)
         );
+    });
 
-        if (!attacker) {
-            attacker = allPlayers[0];
+    // ❗ anti doublon (attacker ≠ defender)
+    if (exclude) {
+        candidates = candidates.filter(p =>
+            normalizeJid(p.id || p.jid) !==
+            normalizeJid(exclude.id || exclude.jid)
+        );
+    }
+
+    // ===============================
+    // 🧠 PRIORITÉ 1 : BALL HOLDER (TRÈS IMPORTANT)
+    // ===============================
+    const ballHolderPlayer = allPlayers.find(p =>
+        p.nom === match.ballHolder
+    );
+
+    if (ballHolderPlayer && !exclude) {
+        const holderName = pureName(ballHolderPlayer.nom);
+
+        if (t.includes(holderName)) {
+            return ballHolderPlayer;
         }
     }
 
-    // fallback
-    if (!attacker) {
-        attacker = findPlayer(attaqueText);
+    // ===============================
+    // 🎯 PRIORITÉ 2 : MATCH EXACT
+    // ===============================
+    const exact = candidates.find(p =>
+        pureName(p.nom) === t
+    );
+
+    if (exact) return exact;
+
+    // ===============================
+    // 🎯 PRIORITÉ 3 : MATCH LE PLUS PROBABLE
+    // ===============================
+    let best = null;
+    let bestScore = 0;
+
+    for (const p of candidates) {
+
+        const name = pureName(p.nom);
+
+        let score = 0;
+
+        if (t === name) score += 100;
+        if (t.includes(name)) score += 50;
+        if (name.includes(t)) score += 30;
+
+        // bonus si joueur proche du ballon
+        if (match.playerPositions) {
+            const pos = match.playerPositions[normalizeJid(p.id || p.jid)];
+            if (pos) score += 5;
+        }
+
+        if (score > bestScore) {
+            bestScore = score;
+            best = p;
+        }
     }
 
-    let defender = findPlayer(defenseText);
-    // Empêcher attaquant = défenseur
-if (
-    defender &&
-    attacker &&
-    normalizeJid(defender.id || defender.jid) ===
-    normalizeJid(attacker.id || attacker.jid)
-) {
+    return best || candidates[0] || null;
+};
 
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
-            &&
-            pureName(defenseText).includes(
-                pureName(p.nom)
-            )
+    let attacker = null;
+
+// ===============================
+// ⚽ PORTEUR PRIORITAIRE
+// ===============================
+if (match.ballHolder) {
+
+    attacker = allPlayers.find(
+        p => p.nom === match.ballHolder
     );
+
+    if (!attacker) {
+        attacker = allPlayers[0];
+    }
 }
 
+// fallback unique
+if (!attacker) {
+    attacker = findPlayer(attaqueText);
+}
+
+// ===============================
+// 🛡️ DEFENDER
+// ===============================
+let defender = findPlayer(defenseText, attacker);  
+
+    
     // ===============================
     // 🧠 TARGET TACTIQUE
     // ===============================
@@ -4205,8 +4329,32 @@ const isPassive =
         atk.includes(k) || def.includes(k)
     );
 
-// 🔥 PRIORITÉ ABSOLUE
 if (isPassive) {
+
+    const mentionedPlayer =
+        extractFaceTarget(defenseText, allPlayers);
+
+    if (mentionedPlayer) {
+
+        const realOpponent =
+            getOppositePlayer(defender, match);
+
+        if (
+            realOpponent &&
+            normalizeJid(realOpponent.id || realOpponent.jid) !==
+            normalizeJid(mentionedPlayer.id || mentionedPlayer.jid)
+        ) {
+
+            return {
+                ok: false,
+                type: "BAD_MATCHUP",
+                attacker,
+                defender,
+                msg: `❌ Mauvais vis-à-vis.`
+            };
+        }
+    }
+
     return {
         ok: false,
         type: "PASSIVE_BLOCK",
@@ -4801,18 +4949,53 @@ async function handleDeplacements(match, joueur, texte) {
     }
 
     match.lastPositionUpdate = {
-        joueur: joueur.nom,
-        moved,
-        total,
-        time: Date.now()
-    };
+    joueur: joueur.nom,
+    moved,
+    total,
+    time: Date.now()
+};
 
-    return {
-        ok: true,
-        message: moved ? "✅ Déplacement enregistré" : "ℹ️ Aucun mouvement"
+// ===============================
+// 📍 TRACKING POSITIONS TEMPS RÉEL
+// ===============================
+if (!match.playerPositions) {
+    match.playerPositions = {};
+}
+
+match.playerPositions[
+    normalizeJid(joueur.id || joueur.jid)
+] = {
+    x: joueur.position.x,
+    y: joueur.position.y,
+    zone: getZoneFromY(joueur.position.y),
+    updatedAt: Date.now()
+};
+
+// Mise à jour de tous les joueurs
+for (const p of [
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+]) {
+
+    if (!p.position) continue;
+
+    match.playerPositions[
+        normalizeJid(p.id || p.jid)
+    ] = {
+        x: p.position.x,
+        y: p.position.y,
+        zone: getZoneFromY(p.position.y),
+        updatedAt: Date.now()
     };
 }
 
+return {
+    ok: true,
+    message: moved
+        ? "✅ Déplacement enregistré"
+        : "ℹ️ Aucun mouvement"
+};
+} 
 
  // ===============================
     // ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
