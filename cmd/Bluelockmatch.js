@@ -3469,25 +3469,17 @@ setTimeout(async () => {
 // Attaquant gagne
 if (duelResult.ok) {
 
-    // ballon à l'attaquant
     match.ballHolder = duelAttacker.nom;
 
-    // propriétaire de l'attaquant
-    nextId =
-        duelAttacker.id ||
-        duelAttacker.jid;
+    nextId = match.id1;
 
 }
 // Défenseur gagne
 else {
 
-    // ballon au défenseur
     match.ballHolder = duelDefender.nom;
 
-    // propriétaire du défenseur
-    nextId =
-        duelDefender.id ||
-        duelDefender.jid;
+    nextId = match.id2;
 }
 
 match.joueurTour = nextId;
