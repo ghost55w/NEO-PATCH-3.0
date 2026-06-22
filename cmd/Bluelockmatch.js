@@ -3468,12 +3468,33 @@ setTimeout(async () => {
     const winner =
     duelResult.ok ? duelAttacker : duelDefender;
 
-const nextId = winner.id || winner.jid;
+let nextId;
 
-// ⚽ Le personnage garde le ballon
-match.ballHolder = winner.nom;
+// Attaquant gagne
+if (duelResult.ok) {
 
-// 👤 Le propriétaire du personnage joue
+    // ballon à l'attaquant
+    match.ballHolder = duelAttacker.nom;
+
+    // coach adverse joue ensuite
+    nextId =
+        (duelAttacker.id || duelAttacker.jid) === match.id1
+            ? match.id2
+            : match.id1;
+
+}
+// Défenseur gagne
+else {
+
+    // ballon au défenseur
+    match.ballHolder = duelDefender.nom;
+
+    // coach du défenseur joue
+    nextId =
+        duelDefender.id ||
+        duelDefender.jid;
+}
+
 match.joueurTour = nextId;
 
     // ===============================
