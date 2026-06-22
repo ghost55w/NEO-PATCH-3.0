@@ -3466,20 +3466,25 @@ setTimeout(async () => {
     // ===============================
     let nextId;
 
+// Attaquant gagne
 if (duelResult.ok) {
 
-    // Sae gagne
+    // ballon à l'attaquant
     match.ballHolder = duelAttacker.nom;
 
+    // propriétaire de l'attaquant
     nextId =
         duelAttacker.id ||
         duelAttacker.jid;
 
-} else {
+}
+// Défenseur gagne
+else {
 
-    // Kunigami gagne
+    // ballon au défenseur
     match.ballHolder = duelDefender.nom;
 
+    // propriétaire du défenseur
     nextId =
         duelDefender.id ||
         duelDefender.jid;
