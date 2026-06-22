@@ -3464,20 +3464,29 @@ setTimeout(async () => {
     // ===============================
     // 🎯 POSSESSION (SOURCE UNIQUE)
     // ===============================
-    const winner =
-    duelResult.ok
-        ? duelAttacker
-        : duelDefender;
+    let nextId;
 
-// possession
-match.ballHolder = winner.nom;
+if (duelResult.ok) {
 
-// prochain joueur = propriétaire du vainqueur
-const nextId =
-    winner.id ||
-    winner.jid;
+    // Sae gagne
+    match.ballHolder = duelAttacker.nom;
+
+    nextId =
+        duelAttacker.id ||
+        duelAttacker.jid;
+
+} else {
+
+    // Kunigami gagne
+    match.ballHolder = duelDefender.nom;
+
+    nextId =
+        duelDefender.id ||
+        duelDefender.jid;
+}
 
 match.joueurTour = nextId;
+    
     
     // ===============================
     // 📩 MESSAGE
