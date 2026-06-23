@@ -2766,10 +2766,11 @@ async function lancerMatch(chat, ovl) {
     if (match.kickoffStarted) return;
     match.kickoffStarted = true;
 
-    const isTeam1 = Math.random() < 0.5;
+    const kickoffSide = Math.random() < 0.5 ? "team1" : "team2";
+match.kickoffTeam = kickoffSide;
 
-    match.kickoffTeam = isTeam1 ? 1 : 2;
-
+    match.joueurTour =
+    kickoffSide === "team1" ? match.id1 : match.id2;
     // ===============================
     // 👥 TEAMS (USER IDS)
     // ===============================
