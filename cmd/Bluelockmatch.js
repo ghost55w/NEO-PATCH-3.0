@@ -2607,15 +2607,13 @@ async function messageMatch(ms, ovl) {
 // ===============================
 // 📋 LINEUP HANDLER
 // ===============================
-
-// ===============================
-// 📋 LINEUP HANDLER (CLEAN VERSION)
-// ===============================
 if (match.etat === "attente_lineup") {
 
+    // ❌ stop si déjà complet
     if (match.equipe1 && match.equipe2) return;
 
-    if (!safeText.includes("SQUAD⚽🥅")) return;
+    // 🧼 SAFE TEXT CHECK (ROBUSTE)
+    if (!/SQUAD.*⚽.*🥅/i.test(safeText)) return;
 
     const parsed = parseLineupFull(safeText);
 
@@ -2625,6 +2623,32 @@ if (match.etat === "attente_lineup") {
         });
     }
 
+    const squadNameRaw = (parsed.teamName || "")
+        .replace(/🇨🇬|🇯🇵|🇮🇹|🇪🇸|🇬🇧/g, "")
+        .trim();
+
+    if (!squadNameRaw) {
+        return ovl.sendMessage(chat, {
+            text: "❌ Nom d'équipe introuvable"
+        });
+    }
+
+    // ===============================
+    // 🧠 NORMALISATION ROBUSTE
+    // ===============================
+    const normalize = str =>
+        (str || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/gi, "")
+            .trim();
+
+    const squadName = normalize(squadNameRaw);
+    const team1 = normalize(match.team1Name);
+    const team2 = normalize(match.team2Name);
+
+    // ===============================
+    // 👤 OWNER IDENTIFICATION
+    // ===============================
     const senderJid = ms.key.participant || ms.key.remoteJid;
 
     const joueursValides = [];
@@ -2670,15 +2694,7 @@ if (match.etat === "attente_lineup") {
         joueursValides.push({
             numero: j.numero,
             nom: data.name,
-            stats: {
-                ovr: data.ovr,
-                sho: data.sho,
-                dri: data.dri,
-                pas: data.pas,
-                acc: data.acc,
-                phy: data.phy,
-                def: data.def
-            },
+            stats: data,
             weapons: data.weapons || [],
             attitude: data.attitude || "calme",
             rank: data.rank,
@@ -2690,45 +2706,38 @@ if (match.etat === "attente_lineup") {
             visavis: null
         });
     }
-// ===============================
-// 🔷 TEAM ASSIGNATION (OWNER LOGIC SIMPLE)
-// ===============================
-const normalize = s =>
-    (s || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]/gi, "")
-        .trim();
 
-const squad = normalize(squadNameRaw);
-const t1 = normalize(match.team1Name);
-const t2 = normalize(match.team2Name);
+    // ===============================
+    // 🔷 TEAM ASSIGNATION (ROBUSTE)
+    // ===============================
 
-if (squad === t1 && !match.equipe1) {
+    if (squadName === team1 && !match.equipe1) {
 
-    match.id1 = senderJid;
-    match.lineup1 = joueursValides;
-    match.equipe1 = true;
+        match.id1 = senderJid;
+        match.lineup1 = joueursValides;
+        match.equipe1 = true;
 
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation validée pour *${match.team1Name}*`
-    });
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation validée pour *${match.team1Name}*`
+        });
 
-} else if (squad === t2 && !match.equipe2) {
+    } else if (squadName === team2 && !match.equipe2) {
 
-    match.id2 = senderJid;
-    match.lineup2 = joueursValides;
-    match.equipe2 = true;
+        match.id2 = senderJid;
+        match.lineup2 = joueursValides;
+        match.equipe2 = true;
 
-    await ovl.sendMessage(chat, {
-        text: `✅ Formation validée pour *${match.team2Name}*`
-    });
+        await ovl.sendMessage(chat, {
+            text: `✅ Formation validée pour *${match.team2Name}*`
+        });
 
-} else {
+    } else {
 
-    return ovl.sendMessage(chat, {
-        text: "❌ Équipe non reconnue ou déjà envoyée"
-    });
-}
+        return ovl.sendMessage(chat, {
+            text: "❌ Équipe non reconnue ou déjà envoyée"
+        });
+    }
+
     // ===============================
     // 🚀 START MATCH
     // ===============================
@@ -2759,7 +2768,7 @@ if (squad === t1 && !match.equipe1) {
     }
 
     return;
-}    
+}
 }
 
            
