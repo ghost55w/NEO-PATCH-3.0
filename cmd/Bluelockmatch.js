@@ -2695,7 +2695,7 @@ if (match.etat === "attente_lineup") {
     // 🔷 TEAM ASSIGNATION (OWNER ONLY)
     // ===============================
 
-    if (senderJid === match.id1 && !match.equipe1) {
+    if (pureName(squadName) === pureName(match.team1Name) && !match.equipe1) {
 
         match.lineup1 = joueursValides;
         match.equipe1 = true;
@@ -2705,7 +2705,7 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    else if (senderJid === match.id2 && !match.equipe2) {
+    else if (pureName(squadName) === pureName(match.team2Name) && !match.equipe2) {
 
         match.lineup2 = joueursValides;
         match.equipe2 = true;
