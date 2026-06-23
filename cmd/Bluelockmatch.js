@@ -3023,30 +3023,48 @@ async function handlePaveGame(ms, ovl) {
     const chat = ms.key.remoteJid;
     const match = matchsActifs.get(chat);
     if (!match) return false;
-
-    // ===============================
-// 🚫 VERIFICATION TOUR
-// ===============================
+    
 const senderJid =
     ms.key.participant ||
     ms.participant ||
     ms.key.remoteJid;
 
-if (
-    match.etat === "en_cours" &&
-    !match.phaseDuel?.active &&
-    senderJid !== match.joueurTour
-) {
+// ===============================
+    // 🚫 VERIFICATION TOUR
+    // ===============================
+    if (match.phaseDuel?.active) {
 
-    await ovl.sendMessage(chat, {
-        text:
-`❌ Joueur tour
+        if (
+            match.phaseDuel.step === "attack_pave" &&
+            senderJid !== match.attacker
+        ) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Joueur tour : Ce n'est pas à ton tour de jouer."
+            });
+            return true;
+        }
 
-Ce n'est pas à ton tour de jouer.`
-    });
+        if (
+            match.phaseDuel.step === "defense_pave" &&
+            senderJid !== match.defender
+        ) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Joueur tour : Ce n'est pas à ton tour de jouer."
+            });
+            return true;
+        }
 
-    return true;
-}
+    } else {
+
+        if (senderJid !== match.joueurTour) {
+            await ovl.sendMessage(chat, {
+                text: "❌ Joueur tour : Ce n'est pas à ton tour de jouer."
+            });
+            return true;
+        }
+
+    }
+    
 
     const sender = normalizeJid(getSenderJid(ms));
 
