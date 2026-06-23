@@ -2397,6 +2397,7 @@ function setJoueurTour(match, player) {
     return true;
 }
 
+
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -2427,12 +2428,17 @@ ovlcmd({
 
         await ovl.sendMessage(chat, { text: ficheMatch });
 
-        matchsActifs.set(chat, { etat: "attente_fiche", createur: sender });
+        matchsActifs.set(chat, {
+            etat: "attente_fiche",
+            createur: sender
+        });
 
     } catch (e) {
         console.log("Erreur match⚽ :", e);
     }
-}); 
+});
+
+
 // ===============================
 // 📋 DETECTION FICHE
 // ===============================
@@ -2451,7 +2457,7 @@ async function verifierFiche(message, chat, ovl) {
     if (!team1 || !team2) return;
 
     // ===============================
-    // 🧠 RAW NAMES (DISPLAY ONLY)
+    // 🧠 RAW NAMES
     // ===============================
     match.team1Name = team1[1].trim();
     match.team2Name = team2[1].trim();
@@ -2465,9 +2471,8 @@ async function verifierFiche(message, chat, ovl) {
         ? Math.max(70, parseInt(gardien[1].trim()) || 70)
         : 70;
 
-    match.winScore = score
-        ? parseInt(score[1].match(/\d+/)?.[0]) || 2
-        : 2;
+    match.winScore =
+        score ? parseInt(score[1].match(/\d+/)?.[0]) || 2 : 2;
 
     // ===============================
     // 👤 RESOLVE USERS (OWNERS)
@@ -2491,39 +2496,28 @@ async function verifierFiche(message, chat, ovl) {
     }
 
     // ===============================
-    // 🔷 TEAMS (SOURCE OF TRUTH)
+    // 🔷 TEAMS OWNERS (SOURCE OF TRUTH)
     // ===============================
-
-    // owners WhatsApp
-    match.id1 = j1;
-    match.id2 = j2;
-
-    // display names only
-    match.team1Name = match.team1Name;
-    match.team2Name = match.team2Name;
+    match.team1Owner = j1;
+    match.team2Owner = j2;
 
     match.etat = "attente_lineup";
 
-    // lineups
     match.equipe1 = null;
     match.equipe2 = null;
 
     // ===============================
-    // 📊 STATS INIT (BASED ON OWNERS)
+    // 📊 SAFE GAME STATE INIT
     // ===============================
-    match.possessionIndex = {
-        [match.id1]: 0,
-        [match.id2]: 0
+    match.teams = {
+        [j1]: "team1",
+        [j2]: "team2"
     };
 
-    match.actionsRestantes = {
-        [match.id1]: 4,
-        [match.id2]: 4
-    };
-
-    match.role = {
-        [match.id1]: "attack",
-        [match.id2]: "defense"
+    // IMPORTANT: seule source de possession future
+    match.possession = {
+        teamOwner: null,
+        player: null
     };
 
     // ===============================
@@ -2551,7 +2545,7 @@ async function verifierFiche(message, chat, ovl) {
     });
 
     await ovl.sendMessage(chat, {
-        text: `📢 ${match.team1Name} et ${match.team2Name} ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène, ⚠️Ne tapez pas la commande ici.*`
+        text: `📢 ${match.team1Name} et ${match.team2Name} ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène.*`
     });
 
     // ===============================
@@ -2564,14 +2558,9 @@ async function verifierFiche(message, chat, ovl) {
             matchsActifs.delete(chat);
 
             await ovl.sendMessage(chat, {
-                text:
-`⚽❌ *MATCH ANNULÉ🥅*  
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
-🎙️⚠️ Temps écoulé pour envoyer les lineups, le match est annulé. 
-
-╰─────────────────▱▱▱
-
-                      🔷BLUELOCK⚽🥅`
+                text: `⚽❌ *MATCH ANNULÉ🥅*  
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+🎙️ Temps écoulé pour envoyer les lineups.`
             });
         }
 
@@ -2618,12 +2607,14 @@ async function messageMatch(ms, ovl) {
 // ===============================
 // 📋 LINEUP HANDLER
 // ===============================
+
+// ===============================
+// 📋 LINEUP HANDLER (CLEAN VERSION)
+// ===============================
 if (match.etat === "attente_lineup") {
 
-    // ❌ sécurité : stop si déjà rempli
     if (match.equipe1 && match.equipe2) return;
 
-    // ❌ sécurité : message non lineup
     if (!safeText.includes("SQUAD⚽🥅")) return;
 
     const parsed = parseLineupFull(safeText);
@@ -2634,26 +2625,6 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    const squadNameRaw = parsed.teamName;
-    if (!squadNameRaw) {
-        return ovl.sendMessage(chat, {
-            text: "❌ Nom d'équipe introuvable"
-        });
-    }
-
-    // ===============================
-    // 🧠 NORMALISATION SIMPLE (DISPLAY ONLY)
-    // ===============================
-    const normalizeTeam = str =>
-        (str || "").toLowerCase().trim();
-
-    const squadName = normalizeTeam(squadNameRaw);
-    const team1 = normalizeTeam(match.team1Name);
-    const team2 = normalizeTeam(match.team2Name);
-
-    // ===============================
-    // 👤 OWNER IDENTIFICATION
-    // ===============================
     const senderJid = ms.key.participant || ms.key.remoteJid;
 
     const joueursValides = [];
@@ -2661,7 +2632,7 @@ if (match.etat === "attente_lineup") {
     const playersDB = Object.values(cardsBlueLock);
 
     // ===============================
-    // ⚽ BUILD LINEUP (PLAYER CARDS)
+    // ⚽ BUILD LINEUP
     // ===============================
     for (const j of parsed.joueurs) {
 
@@ -2696,9 +2667,6 @@ if (match.etat === "attente_lineup") {
             });
         }
 
-        // ===============================
-        // 🧩 PLAYER CARD STRUCTURE
-        // ===============================
         joueursValides.push({
             numero: j.numero,
             nom: data.name,
@@ -2724,12 +2692,12 @@ if (match.etat === "attente_lineup") {
     }
 
     // ===============================
-    // 🔷 TEAM 1 OWNER (id1)
+    // 🔷 TEAM ASSIGNATION (OWNER ONLY)
     // ===============================
-    if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid;              // 👈 OWNER TEAM 1
-        match.lineup1 = joueursValides;     // 👈 PLAYER CARDS
+    if (senderJid === match.id1 && !match.equipe1) {
+
+        match.lineup1 = joueursValides;
         match.equipe1 = true;
 
         await ovl.sendMessage(chat, {
@@ -2737,13 +2705,9 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    // ===============================
-    // 🔷 TEAM 2 OWNER (id2)
-    // ===============================
-    else if (squadName === team2 && !match.equipe2) {
+    else if (senderJid === match.id2 && !match.equipe2) {
 
-        match.id2 = senderJid;              // 👈 OWNER TEAM 2
-        match.lineup2 = joueursValides;     // 👈 PLAYER CARDS
+        match.lineup2 = joueursValides;
         match.equipe2 = true;
 
         await ovl.sendMessage(chat, {
@@ -2751,23 +2715,19 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    // ===============================
-    // ❌ INVALID TEAM
-    // ===============================
     else {
         return ovl.sendMessage(chat, {
-            text: "❌ Équipe non reconnue ou déjà envoyée"
+            text: "❌ Tu n'es pas autorisé à envoyer cette équipe ou elle est déjà validée"
         });
     }
 
     // ===============================
-    // 🚀 START MATCH (ONLY WHEN READY)
+    // 🚀 START MATCH
     // ===============================
     if (match.equipe1 && match.equipe2 && !match.starting) {
 
         match.starting = true;
 
-        // 🧹 cleanup timer lineup
         if (match.timerLineup) {
             clearTimeout(match.timerLineup);
             match.timerLineup = null;
@@ -2782,19 +2742,16 @@ if (match.etat === "attente_lineup") {
         const imageRandom =
             imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
-        // 🎬 kickoff warning
         await ovl.sendMessage(chat, {
             image: { url: imageRandom },
             caption: `⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽...`
         });
 
-        // ⏱️ start match engine
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
 
     return;
-}
-
+}    
 }
 
            
@@ -2820,23 +2777,35 @@ async function lancerMatch(chat, ovl) {
     match.id2 = match.id2; // Team 2 user
 
     // ===============================
-    // ⚽ POSSESSION INIT
-    // ===============================
-    match.joueurTour = isTeam1 ? match.id1 : match.id2;
+// ⚽ POSSESSION INIT (CLEAN FIX)
+// ===============================
+const isTeam1 = Math.random() < 0.5;
 
-    const currentTeam = match.joueurTour;
-    const opponentTeam =
-        currentTeam === match.id1 ? match.id2 : match.id1;
+const currentTeamOwner = isTeam1 ? match.id1 : match.id2;
+const opponentTeamOwner = isTeam1 ? match.id2 : match.id1;
 
-    // ===============================
-    // 🧠 POSSESSION LOGIC CLEAN
-    // ===============================
-    match.possession = currentTeam;
+// 🔥 OWNER TURN (NEO / DAMIAN)
+match.teamTour = currentTeamOwner;
 
-    // IMPORTANT : ATTACK = celui qui joue
-    match.attacker = currentTeam;
-    match.defender = opponentTeam;
+// ⚽ PLAYER TURN (CARTE ACTIVE)
+// 👉 on prend le porteur réel dans lineup
+const activeLineup = isTeam1 ? match.lineup1 : match.lineup2;
 
+// choix simple : premier joueur (ou porteur si tu l'as)
+const activePlayer =
+    activeLineup?.find(p => p.nom === match.ballHolder) ||
+    activeLineup?.[0];
+
+match.joueurTour = activePlayer; // 👈 PLAYER CARD SOURCE UNIQUE
+
+// ===============================
+// 🧠 POSSESSION LOGIC CLEAN
+// ===============================
+match.possession = currentTeamOwner;
+
+// ⚔️ DUEL SOURCE UNIQUE
+match.attacker = activePlayer;
+match.defender = null; // sera défini au moment du duel
     // ===============================
     // 🔄 RESET MATCH STATE
     // ===============================
