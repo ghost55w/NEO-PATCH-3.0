@@ -3946,7 +3946,25 @@ console.log("=================================");
         }) || null;
     };
 
-    let attacker = null;
+let attacker = null;
+let defender = null;
+
+// ===============================
+// 🔒 MATCH UP PRIORITAIRE
+// ===============================
+if (
+    match.phaseDuel?.attacker &&
+    match.phaseDuel?.defender
+) {
+
+    attacker = match.phaseDuel.attacker;
+    defender = match.phaseDuel.defender;
+
+    console.log("🔒 DUEL FORCÉ");
+    console.log("ATTACKER =", attacker.nom);
+    console.log("DEFENDER =", defender.nom);
+
+} else {
 
     // ===============================
     // ⚽ PORTEUR PRIORITAIRE
@@ -3962,34 +3980,30 @@ console.log("=================================");
         }
     }
 
-    // fallback
     if (!attacker) {
         attacker = findPlayer(attaqueText);
     }
 
-    let defender = findPlayer(defenseText);
-    // Empêcher attaquant = défenseur
-if (
-    defender &&
-    attacker &&
-    normalizeJid(defender.id || defender.jid) ===
-    normalizeJid(attacker.id || attacker.jid)
-) {
+    defender = findPlayer(defenseText);
 
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
-            &&
-            pureName(defenseText).includes(
-                pureName(p.nom)
-            )
-    );
-}
+    if (
+        defender &&
+        attacker &&
+        normalizeJid(defender.id || defender.jid) ===
+        normalizeJid(attacker.id || attacker.jid)
+    ) {
 
-    // ===============================
-    // 🧠 TARGET TACTIQUE
-    // ===============================
+        defender = allPlayers.find(
+            p =>
+                normalizeJid(p.id || p.jid) !==
+                normalizeJid(attacker.id || attacker.jid)
+                &&
+                pureName(defenseText).includes(
+                    pureName(p.nom)
+                )
+        );
+    }
+
     const tacticalTarget =
         detectTargetPlayer(defenseText, allPlayers);
 
@@ -3998,7 +4012,9 @@ if (
     }
 
     console.log("🔍 attacker trouvé =", attacker);
-console.log("🔍 defender trouvé =", defender);
+    console.log("🔍 defender trouvé =", defender);
+}
+    
     // ===============================
     // ❌ VALIDATION
     // ===============================
