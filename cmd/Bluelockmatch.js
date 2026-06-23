@@ -3234,13 +3234,6 @@ if (!actionCheck || actionCheck.trim().length < 5) {
     await new Promise(r => setTimeout(r, 1000));
 
    const action = actionCheck;
-
-console.log("========== DEBUG DUEL ==========");
-console.log("phaseDuel =", match.phaseDuel);
-console.log("joueurTour =", match.joueurTour);
-console.log("sender =", sender);
-console.log("waitingDefenseFrom =", match.waitingDefenseFrom);
-console.log("================================");
         
 /* ===============================
 🧠 ACTION TEXT
@@ -3257,30 +3250,32 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     match.phaseDuel.attackPave = action;
     match.phaseDuel.step = "defense_pave";
 
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
-
+    const attackPlayer = match.phaseDuel.attackPlayer;
+const defensePlayer = match.phaseDuel.defensePlayer;
     const actionText = action.toLowerCase();
 
     // ===============================
     // 🧠 RESUME ACTION
     // ===============================
-    let resume = "";
+    // ===============================
+// 🧠 RESUME ACTION
+// ===============================
+let resume = "";
 
-    if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
-        resume = `${attacker.nom} tente un dribble pour éliminer ${defender.nom}.`;
-    }
-    else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
-        resume = `${attacker.nom} accélère pour dépasser ${defender.nom}.`;
-    }
-    else if (actionText.includes("feinte")) {
-        resume = `${attacker.nom} tente une feinte pour tromper ${defender.nom}.`;
-    }
-    else {
-        resume = `${attacker.nom} enchaîne une action face à ${defender.nom}.`;
-    }
+if (hasIntent(actionText, DRIBBLE_PATTERNS)) {
+    resume = `${attackPlayer.nom} tente un dribble pour éliminer ${defensePlayer.nom}.`;
+}
+else if (actionText.includes("acceleration") || actionText.includes("vmax")) {
+    resume = `${attackPlayer.nom} accélère pour dépasser ${defensePlayer.nom}.`;
+}
+else if (actionText.includes("feinte")) {
+    resume = `${attackPlayer.nom} tente une feinte pour tromper ${defensePlayer.nom}.`;
+}
+else {
+    resume = `${attackPlayer.nom} enchaîne une action face à ${defensePlayer.nom}.`;
+}
 
-    const note = noterPave(action);
+const note = noterPave(action);
 
     // ===============================
 // 🔥 NEXT = DEFENSEUR DU DUEL
@@ -3291,7 +3286,7 @@ const nextTag = getTagFromJid(duelNextId);
 // ===============================
 // ⚽ STATE SYNC (IMPORTANT)
 // ===============================
-match.ballHolder = attacker.nom;
+match.ballHolder = attackPlayer.nom;
 match.joueurTour = duelNextId;
 match.waitingDefenseFrom = duelNextId;
 
@@ -3313,70 +3308,70 @@ match.waitingDefenseFrom = duelNextId;
 🔷BLUELOCK⚽🥅`,
         mentions: [duelNextId]
     });
+// ===============================
+// ⚠️ WARNING
+// ===============================
+if (match.warningTimer) clearTimeout(match.warningTimer);
 
-    // ===============================
-    // ⚠️ WARNING
-    // ===============================
-    if (match.warningTimer) clearTimeout(match.warningTimer);
+match.warningTimer = setTimeout(async () => {
 
-    match.warningTimer = setTimeout(async () => {
+    if (match.joueurTour !== duelNextId) return;
 
-        if (match.joueurTour !== duelNextId) return;
-
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `⚠️ @${nextTag} ❗⏳
 
 Il reste *1 MINUTE* pour défendre !
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [duelNextId]
-        });
+        mentions: [duelNextId]
+    });
 
-    }, 5 * 60 * 1000);
+}, 5 * 60 * 1000);
 
-    // ===============================
-    // ⏱️ LATENCE OUT (UNIFORM FIX)
-    // ===============================
-    if (match.defenseTimer) clearTimeout(match.defenseTimer);
+// ===============================
+// ⏱️ LATENCE OUT (UNIFORM FIX)
+// ===============================
+if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
-    match.defenseTimer = setTimeout(() => {
+match.defenseTimer = setTimeout(() => {
 
-        if (match.joueurTour !== duelNextId) return;
+    if (match.joueurTour !== duelNextId) return;
 
-        const fallback =
-            getVisavisPlayer(match, attacker) || defender;
+    const fallback =
+        getVisavisPlayer(match, attackPlayer) || defensePlayer;
 
-        const fallbackId = fallback?.id || fallback?.jid;
+    const fallbackId = fallback?.id || fallback?.jid;
 
-        match.joueurTour = fallbackId;
-        match.attacker = fallbackId;
-        match.ballHolder = fallback?.nom;
+    match.joueurTour = fallbackId;
+    match.attacker = fallbackId;
+    match.ballHolder = fallback?.nom;
 
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
 
-        const fallbackTag = getTagFromJid(fallbackId);
+    const fallbackTag = getTagFromJid(fallbackId);
 
-        ovl.sendMessage(chat, {
-            text:
+    ovl.sendMessage(chat, {
+        text:
 `⛔ LATENCE OUT ❌
 
-🔁 ${defender.nom} récupère la possession !
+🔁 ${defensePlayer.nom} récupère la possession !
 
 ➡️ @${fallbackTag} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-            mentions: [fallbackId]
-        });
+        mentions: [fallbackId]
+    });
 
-    }, 6 * 60 * 1000);
+}, 6 * 60 * 1000);
 
-    return true;
+return true;
 }
+    
     
 /* ===============================
 ⚽ OFFENSIVE INTENT
@@ -3396,7 +3391,6 @@ const isPassiveDefense = hasIntent(
     actionText,
     PASSIVE_BLOCK_PATTERNS
 ); 
-
 // ===============================
 // 🛡️ DUEL PHASE DEFENSE
 // ===============================
@@ -3405,8 +3399,8 @@ if (
     match.phaseDuel?.step === "defense_pave"
 ) {
 
-    const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
+    const attackPlayer = match.phaseDuel.attackPlayer;
+    const defensePlayer = match.phaseDuel.defensePlayer;
 
     // évite double réponse
     if (match.phaseDuel.defensePave) return true;
@@ -3416,41 +3410,41 @@ if (
 
     const actionText = action.toLowerCase();
 
-    // ===============================
-    // 🧠 RESUME DEFENSE
-    // ===============================
-    let resume = "";
+// ===============================
+// 🧠 RESUME DEFENSE
+// ===============================
+let resume = "";
 
-    if (
-        actionText.includes("tacle")
-    ) {
-        resume =
-            `${defender.nom} tente un tacle pour stopper l'action.`;
-    }
-    else if (
-        actionText.includes("intercepte")
-    ) {
-        resume =
-            `${defender.nom} tente une interception.`;
-    }
-    else if (
-        actionText.includes("bloque")
-    ) {
-        resume =
-            `${defender.nom} tente de fermer l'espace.`;
-    }
-    else if (
-        actionText.includes("contre")
-    ) {
-        resume =
-            `${defender.nom} tente un contre défensif.`;
-    }
-    else {
-        resume =
-            `${defender.nom} répond à l'action offensive.`;
-    }
+if (
+    actionText.includes("tacle")
+) {
+    resume =
+        `${defensePlayer.nom} tente un tacle pour stopper l'action.`;
+}
+else if (
+    actionText.includes("intercepte")
+) {
+    resume =
+        `${defensePlayer.nom} tente une interception.`;
+}
+else if (
+    actionText.includes("bloque")
+) {
+    resume =
+        `${defensePlayer.nom} tente de fermer l'espace.`;
+}
+else if (
+    actionText.includes("contre")
+) {
+    resume =
+        `${defensePlayer.nom} tente un contre défensif.`;
+}
+else {
+    resume =
+        `${defensePlayer.nom} répond à l'action offensive.`;
+}
 
-    const note = noterPave(action);
+const note = noterPave(action);
 
     // ===============================
     // ⏱️ STOP TIMERS DEFENSE
