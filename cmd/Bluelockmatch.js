@@ -3482,8 +3482,8 @@ await ovl.sendMessage(chat, {
 // ===============================
 const attackPave = match.phaseDuel.attackPave;
 const defensePave = match.phaseDuel.defensePave;
-const duelAttacker = match.phaseDuel.attacker;
-const duelDefender = match.phaseDuel.defender;
+const duelAttacker = match.phaseDuel.attackPlayer;
+const duelDefender = match.phaseDuel.defensePlayer;
     
 // ===============================
 // 🧠 RESOLUTION
@@ -3507,18 +3507,15 @@ if (duelResult.ok) {
 
     match.ballHolder = duelAttacker.nom;
 
-    nextId = match.id1;
+    nextId = match.attacker; // JID réel
 
 }
-// Défenseur gagne
 else {
 
     match.ballHolder = duelDefender.nom;
 
-    nextId = match.id2;
+    nextId = match.defender; // JID réel
 }
-
-match.joueurTour = nextId;
     
     
     // ===============================
@@ -3702,29 +3699,30 @@ match.hasPlayed = true;
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
-    const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
-   const attacker = allPlayers.find(
+    const attackPlayer = allPlayers.find(
     p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
 ) || res.attacker;
 
-const defender = allPlayers.find(
+const defensePlayer = allPlayers.find(
     p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-) || res.defender; 
+) || res.defender;
 
     match.phaseDuel = {
-        active: true,
-        step: "attack_pave",
-        attacker,
-        defender,
-        attackPave: null,
-        defensePave: null,
-        starterAttack: match.pendingAttack,
-        starterDefense: defense
-    };
+    active: true,
+    step: "attack_pave",
+
+    attacker: match.attacker, // JID
+    defender: match.defender, // JID
+
+    attackPlayer: attacker,
+    defensePlayer: defender,
+
+    attackPave: null,
+    defensePave: null,
+
+    starterAttack: match.pendingAttack,
+    starterDefense: defense
+};
 
     // ===============================
 // 🔥 NEXT MATCH UP
@@ -3743,7 +3741,7 @@ match.waitingDefenseFrom = nextId;
         text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${attacker.nom.toUpperCase()} 🆚 ${defender.nom.toUpperCase()}
+${attackPlayer.nom.toUpperCase()} 🆚 ${defensePlayer.nom.toUpperCase()}
 
 ${res.msg}
 
