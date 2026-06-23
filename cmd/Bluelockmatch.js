@@ -2891,16 +2891,20 @@ match.defender = null; // sera défini au moment du duel
     }
 
 // =========================
-// 🎯 KICKOFF (GARANTI)
+// 🎯 KICKOFF (GARANTI CLEAN)
 // =========================
 const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
+
 // ===============================
-// 👥 TEAM START
+// 👥 TEAM START (OWNER LOGIC)
 // ===============================
-const teamStart = match.joueurTour;
-const tag = getTagFromJid(teamStart);
+const teamOwner = match.teamTour || match.id1;
+const tag = getTagFromJid(teamOwner);
+
+// ⚽ PLAYER START (CARTE)
+const playerStart = match.joueurTour;
 
 const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
@@ -2915,74 +2919,83 @@ await ovl.sendMessage(chat, {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
     caption:
-`🎙️⚽ KICK OFF 🥅‼️ @${tag} débute avec la possession ! ⚽
+`🎙️⚽ KICK OFF 🥅‼️ @${tag} lance l’action !
+
+👤 Joueur actif : ${playerStart.nom}
+📍 Position : ${playerStart.poste} (${playerStart.ligne || "terrain"})
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-    mentions: [teamStart]
-}); 
-
+mentions: [teamOwner]
+});
+    
     // ===============================
     // ⏱️ WARNING TIMER (5 MIN)
     // ===============================
-    if (match.warningTimer) clearTimeout(match.warningTimer);
-
     match.warningTimer = setTimeout(async () => {
 
-        const m = matchsActifs.get(chat);
-        if (!m) return;
-        if (m.phaseDuel?.active) return;
+    const m = matchsActifs.get(chat);
+    if (!m) return;
+    if (m.phaseDuel?.active) return;
 
-        const attacker = m.joueurTour;
+    const player = m.joueurTour;
 
-        await ovl.sendMessage(chat, {
-            text:
-`⚠️ @${attacker.split("@")[0]}
+    await ovl.sendMessage(chat, {
+        text:
+`⚠️ @${getTagFromJid(m.teamTour || m.id1)}
 
 ⏳ Il reste *1 MINUTE* pour jouer !
 
+👤 Joueur actif: ${player.nom}
+
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-            mentions: [attacker]
-        });
+        mentions: [m.teamTour || m.id1]
+    });
 
-    }, 5 * 60 * 1000);
+}, 5 * 60 * 1000);
 
     // ===============================
     // ⛔ TIMEOUT (6 MIN → NEXT TEAM)
     // ===============================
-    if (match.turnTimer) clearTimeout(match.turnTimer);
-
     match.turnTimer = setTimeout(async () => {
 
-        const m = matchsActifs.get(chat);
-        if (!m) return;
-        if (m.phaseDuel?.active) return;
+    const m = matchsActifs.get(chat);
+    if (!m) return;
+    if (m.phaseDuel?.active) return;
 
-        const current = m.joueurTour;
-        const next = current === m.id1 ? m.id2 : m.id1;
+    const currentTeam = m.teamTour || m.id1;
+    const nextTeam =
+        currentTeam === m.id1 ? m.id2 : m.id1;
 
-        m.joueurTour = next;
-        m.waitingAttackFrom = null;
+    m.teamTour = nextTeam;
 
-        await ovl.sendMessage(chat, {
-            text:
+    // ⚠️ IMPORTANT : changer aussi le joueur actif
+    const nextLineup =
+        nextTeam === m.id1 ? m.lineup1 : m.lineup2;
+
+    m.joueurTour = nextLineup?.[0] || null;
+
+    m.waitingAttackFrom = null;
+
+    await ovl.sendMessage(chat, {
+        text:
 `⛔ LATENCE OUT ❌
 
 🔁 CHANGEMENT DE POSSESSION
 
-➡️ @${next.split("@")[0]} NEXT
+➡️ @${getTagFromJid(nextTeam)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-            mentions: [next]
-        });
+        mentions: [nextTeam]
+    });
 
-    }, 6 * 60 * 1000);
-}
-            } 
+}, 6 * 60 * 1000);
+} 
+} 
 
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
