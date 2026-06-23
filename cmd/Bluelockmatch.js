@@ -2397,7 +2397,6 @@ function setJoueurTour(match, player) {
     return true;
 }
 
-
 // ===============================
 // 🎮 COMMANDE MATCH
 // ===============================
@@ -2428,17 +2427,12 @@ ovlcmd({
 
         await ovl.sendMessage(chat, { text: ficheMatch });
 
-        matchsActifs.set(chat, {
-            etat: "attente_fiche",
-            createur: sender
-        });
+        matchsActifs.set(chat, { etat: "attente_fiche", createur: sender });
 
     } catch (e) {
         console.log("Erreur match⚽ :", e);
     }
-});
-
-
+}); 
 // ===============================
 // 📋 DETECTION FICHE
 // ===============================
@@ -2457,7 +2451,7 @@ async function verifierFiche(message, chat, ovl) {
     if (!team1 || !team2) return;
 
     // ===============================
-    // 🧠 RAW NAMES
+    // 🧠 RAW NAMES (DISPLAY ONLY)
     // ===============================
     match.team1Name = team1[1].trim();
     match.team2Name = team2[1].trim();
@@ -2471,8 +2465,9 @@ async function verifierFiche(message, chat, ovl) {
         ? Math.max(70, parseInt(gardien[1].trim()) || 70)
         : 70;
 
-    match.winScore =
-        score ? parseInt(score[1].match(/\d+/)?.[0]) || 2 : 2;
+    match.winScore = score
+        ? parseInt(score[1].match(/\d+/)?.[0]) || 2
+        : 2;
 
     // ===============================
     // 👤 RESOLVE USERS (OWNERS)
@@ -2496,28 +2491,39 @@ async function verifierFiche(message, chat, ovl) {
     }
 
     // ===============================
-    // 🔷 TEAMS OWNERS (SOURCE OF TRUTH)
+    // 🔷 TEAMS (SOURCE OF TRUTH)
     // ===============================
-    match.team1Owner = j1;
-    match.team2Owner = j2;
+
+    // owners WhatsApp
+    match.id1 = j1;
+    match.id2 = j2;
+
+    // display names only
+    match.team1Name = match.team1Name;
+    match.team2Name = match.team2Name;
 
     match.etat = "attente_lineup";
 
+    // lineups
     match.equipe1 = null;
     match.equipe2 = null;
 
     // ===============================
-    // 📊 SAFE GAME STATE INIT
+    // 📊 STATS INIT (BASED ON OWNERS)
     // ===============================
-    match.teams = {
-        [j1]: "team1",
-        [j2]: "team2"
+    match.possessionIndex = {
+        [match.id1]: 0,
+        [match.id2]: 0
     };
 
-    // IMPORTANT: seule source de possession future
-    match.possession = {
-        teamOwner: null,
-        player: null
+    match.actionsRestantes = {
+        [match.id1]: 4,
+        [match.id2]: 4
+    };
+
+    match.role = {
+        [match.id1]: "attack",
+        [match.id2]: "defense"
     };
 
     // ===============================
@@ -2545,7 +2551,7 @@ async function verifierFiche(message, chat, ovl) {
     });
 
     await ovl.sendMessage(chat, {
-        text: `📢 ${match.team1Name} et ${match.team2Name} ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène.*`
+        text: `📢 ${match.team1Name} et ${match.team2Name} ⏳ *Vous avez 2 minutes pour envoyer votre Lineup dans l'arène, ⚠️Ne tapez pas la commande ici.*`
     });
 
     // ===============================
@@ -2558,9 +2564,14 @@ async function verifierFiche(message, chat, ovl) {
             matchsActifs.delete(chat);
 
             await ovl.sendMessage(chat, {
-                text: `⚽❌ *MATCH ANNULÉ🥅*  
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-🎙️ Temps écoulé pour envoyer les lineups.`
+                text:
+`⚽❌ *MATCH ANNULÉ🥅*  
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░         
+🎙️⚠️ Temps écoulé pour envoyer les lineups, le match est annulé. 
+
+╰─────────────────▱▱▱
+
+                      🔷BLUELOCK⚽🥅`
             });
         }
 
@@ -2609,11 +2620,11 @@ async function messageMatch(ms, ovl) {
 // ===============================
 if (match.etat === "attente_lineup") {
 
-    // ❌ stop si déjà complet
+    // ❌ sécurité : stop si déjà rempli
     if (match.equipe1 && match.equipe2) return;
 
-    // 🧼 SAFE TEXT CHECK (ROBUSTE)
-    if (!/SQUAD.*⚽.*🥅/i.test(safeText)) return;
+    // ❌ sécurité : message non lineup
+    if (!safeText.includes("SQUAD⚽🥅")) return;
 
     const parsed = parseLineupFull(safeText);
 
@@ -2623,10 +2634,7 @@ if (match.etat === "attente_lineup") {
         });
     }
 
-    const squadNameRaw = (parsed.teamName || "")
-        .replace(/🇨🇬|🇯🇵|🇮🇹|🇪🇸|🇬🇧/g, "")
-        .trim();
-
+    const squadNameRaw = parsed.teamName;
     if (!squadNameRaw) {
         return ovl.sendMessage(chat, {
             text: "❌ Nom d'équipe introuvable"
@@ -2634,17 +2642,14 @@ if (match.etat === "attente_lineup") {
     }
 
     // ===============================
-    // 🧠 NORMALISATION ROBUSTE
+    // 🧠 NORMALISATION SIMPLE (DISPLAY ONLY)
     // ===============================
-    const normalize = str =>
-        (str || "")
-            .toLowerCase()
-            .replace(/[^a-z0-9]/gi, "")
-            .trim();
+    const normalizeTeam = str =>
+        (str || "").toLowerCase().trim();
 
-    const squadName = normalize(squadNameRaw);
-    const team1 = normalize(match.team1Name);
-    const team2 = normalize(match.team2Name);
+    const squadName = normalizeTeam(squadNameRaw);
+    const team1 = normalizeTeam(match.team1Name);
+    const team2 = normalizeTeam(match.team2Name);
 
     // ===============================
     // 👤 OWNER IDENTIFICATION
@@ -2656,7 +2661,7 @@ if (match.etat === "attente_lineup") {
     const playersDB = Object.values(cardsBlueLock);
 
     // ===============================
-    // ⚽ BUILD LINEUP
+    // ⚽ BUILD LINEUP (PLAYER CARDS)
     // ===============================
     for (const j of parsed.joueurs) {
 
@@ -2691,10 +2696,21 @@ if (match.etat === "attente_lineup") {
             });
         }
 
+        // ===============================
+        // 🧩 PLAYER CARD STRUCTURE
+        // ===============================
         joueursValides.push({
             numero: j.numero,
             nom: data.name,
-            stats: data,
+            stats: {
+                ovr: data.ovr,
+                sho: data.sho,
+                dri: data.dri,
+                pas: data.pas,
+                acc: data.acc,
+                phy: data.phy,
+                def: data.def
+            },
             weapons: data.weapons || [],
             attitude: data.attitude || "calme",
             rank: data.rank,
@@ -2708,43 +2724,50 @@ if (match.etat === "attente_lineup") {
     }
 
     // ===============================
-    // 🔷 TEAM ASSIGNATION (ROBUSTE)
+    // 🔷 TEAM 1 OWNER (id1)
     // ===============================
-
     if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid;
-        match.lineup1 = joueursValides;
+        match.id1 = senderJid;              // 👈 OWNER TEAM 1
+        match.lineup1 = joueursValides;     // 👈 PLAYER CARDS
         match.equipe1 = true;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team1Name}*`
         });
+    }
 
-    } else if (squadName === team2 && !match.equipe2) {
+    // ===============================
+    // 🔷 TEAM 2 OWNER (id2)
+    // ===============================
+    else if (squadName === team2 && !match.equipe2) {
 
-        match.id2 = senderJid;
-        match.lineup2 = joueursValides;
+        match.id2 = senderJid;              // 👈 OWNER TEAM 2
+        match.lineup2 = joueursValides;     // 👈 PLAYER CARDS
         match.equipe2 = true;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team2Name}*`
         });
+    }
 
-    } else {
-
+    // ===============================
+    // ❌ INVALID TEAM
+    // ===============================
+    else {
         return ovl.sendMessage(chat, {
             text: "❌ Équipe non reconnue ou déjà envoyée"
         });
     }
 
     // ===============================
-    // 🚀 START MATCH
+    // 🚀 START MATCH (ONLY WHEN READY)
     // ===============================
     if (match.equipe1 && match.equipe2 && !match.starting) {
 
         match.starting = true;
 
+        // 🧹 cleanup timer lineup
         if (match.timerLineup) {
             clearTimeout(match.timerLineup);
             match.timerLineup = null;
@@ -2759,16 +2782,19 @@ if (match.etat === "attente_lineup") {
         const imageRandom =
             imagesReady[Math.floor(Math.random() * imagesReady.length)];
 
+        // 🎬 kickoff warning
         await ovl.sendMessage(chat, {
             image: { url: imageRandom },
             caption: `⏳ Les deux formations sont prêtes.\nLe match commence dans *1 minute* 🥅⚽...`
         });
 
+        // ⏱️ start match engine
         match.timerMatch = setTimeout(() => lancerMatch(chat, ovl), 60000);
     }
 
     return;
 }
+
 }
 
            
@@ -2780,50 +2806,37 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-     // ===============================
-// 🚀 KICKOFF SIDE (UNE SEULE SOURCE)
-// ===============================
-if (match.kickoffStarted) return;
-match.kickoffStarted = true;
+    if (match.kickoffStarted) return;
+    match.kickoffStarted = true;
 
-const kickoffSide = Math.random() < 0.5 ? "team1" : "team2";
-match.kickoffTeam = kickoffSide;
+    const isTeam1 = Math.random() < 0.5;
 
-// ===============================
-// 👥 TEAM OWNERS
-// ===============================
-const team1Owner = match.id1;
-const team2Owner = match.id2;
+    match.kickoffTeam = isTeam1 ? 1 : 2;
 
-match.teamTour =
-    kickoffSide === "team1" ? team1Owner : team2Owner;
+    // ===============================
+    // 👥 TEAMS (USER IDS)
+    // ===============================
+    match.id1 = match.id1; // Team 1 user
+    match.id2 = match.id2; // Team 2 user
 
-// ===============================
-// ⚽ LINEUP ACTIF
-// ===============================
-const activeLineup =
-    kickoffSide === "team1" ? match.lineup1 : match.lineup2;
+    // ===============================
+    // ⚽ POSSESSION INIT
+    // ===============================
+    match.joueurTour = isTeam1 ? match.id1 : match.id2;
 
-// ⚽ joueur de départ SAFE
-const activePlayer = activeLineup?.[0];
+    const currentTeam = match.joueurTour;
+    const opponentTeam =
+        currentTeam === match.id1 ? match.id2 : match.id1;
 
-if (!activePlayer) {
-    console.log("❌ No active player found in kickoff");
-    return;
-}
+    // ===============================
+    // 🧠 POSSESSION LOGIC CLEAN
+    // ===============================
+    match.possession = currentTeam;
 
-match.joueurTour = activePlayer;
+    // IMPORTANT : ATTACK = celui qui joue
+    match.attacker = currentTeam;
+    match.defender = opponentTeam;
 
-// ===============================
-// 🧠 POSSESSION CLEAN
-// ===============================
-match.possession = match.teamTour;
-
-// ===============================
-// ⚔️ DUEL BASE
-// ===============================
-match.attacker = activePlayer;
-match.defender = null;
     // ===============================
     // 🔄 RESET MATCH STATE
     // ===============================
@@ -2863,68 +2876,62 @@ match.defender = null;
     });
 
     // ===============================
-// 🧠 SAFE TERRAIN INIT
-// ===============================
-try {
+    // 🧠 SAFE TERRAIN INIT
+    // ===============================
+    try {
 
-    const currentTeam = match.teamTour;
+        const equipeAttack =
+            currentTeam === match.id1
+                ? match.lineup1
+                : match.lineup2;
 
-    const equipeAttack =
-        currentTeam === match.id1
-            ? match.lineup1
-            : match.lineup2;
+        const equipeDefense =
+            currentTeam === match.id1
+                ? match.lineup2
+                : match.lineup1;
 
-    const equipeDefense =
-        currentTeam === match.id1
-            ? match.lineup2
-            : match.lineup1;
+        if (equipeAttack && equipeDefense) {
 
-    if (equipeAttack && equipeDefense) {
+            if (typeof getZoneYParLigne === "function") {
+                equipeAttack.forEach(j => {
+                    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+                });
 
-        if (typeof getZoneYParLigne === "function") {
-            equipeAttack.forEach(j => {
-                j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-            });
+                equipeDefense.forEach(j => {
+                    j.zoneY = getZoneYParLigne(j.ligne, "defense");
+                });
+            }
 
-            equipeDefense.forEach(j => {
-                j.zoneY = getZoneYParLigne(j.ligne, "defense");
-            });
+            if (typeof initPlayerPosition === "function") {
+                match.lineup1?.forEach(j => initPlayerPosition(j));
+                match.lineup2?.forEach(j => initPlayerPosition(j));
+            }
+
+            if (typeof assignerVisAVis === "function") {
+                match.positions = [
+                    ...(match.lineup1 || []),
+                    ...(match.lineup2 || [])
+                ];
+
+                assignerVisAVis(match);
+            }
         }
 
-        if (typeof initPlayerPosition === "function") {
-            match.lineup1?.forEach(j => initPlayerPosition(j));
-            match.lineup2?.forEach(j => initPlayerPosition(j));
-        }
-
-        if (typeof assignerVisAVis === "function") {
-            match.positions = [
-                ...(match.lineup1 || []),
-                ...(match.lineup2 || [])
-            ];
-
-            assignerVisAVis(match);
-        }
+    } catch (e) {
+        console.log("⚠️ Terrain init error ignorée:", e);
     }
 
-} catch (e) {
-    console.log("⚠️ Terrain init error ignorée:", e);
-}
-
 // =========================
-// 🎯 KICKOFF (GARANTI CLEAN)
+// 🎯 KICKOFF (GARANTI)
 // =========================
 const kickoffText = kickoffStart(match);
 
 if (kickoffText) {
-
 // ===============================
-// 👥 TEAM START (OWNER LOGIC)
+// 👥 TEAM START
 // ===============================
-const teamOwner = match.teamTour || match.id1;
-const tag = getTagFromJid(teamOwner);
-
-// ⚽ PLAYER START (CARTE)
-const playerStart = match.joueurTour;
+const teamStart = match.joueurTour;
+const tag = getTagFromJid(teamStart);
 
 const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
@@ -2939,83 +2946,74 @@ await ovl.sendMessage(chat, {
         url: imagesKickOff[Math.floor(Math.random() * imagesKickOff.length)]
     },
     caption:
-`🎙️⚽ KICK OFF 🥅‼️ @${tag} lance l’action !
-
-👤 Joueur actif : ${playerStart.nom}
-📍 Position : ${playerStart.poste} (${playerStart.ligne || "terrain"})
+`🎙️⚽ KICK OFF 🥅‼️ @${tag} débute avec la possession ! ⚽
 
 ${kickoffText}
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-mentions: [teamOwner]
-});
-    
+    mentions: [teamStart]
+}); 
+
     // ===============================
     // ⏱️ WARNING TIMER (5 MIN)
     // ===============================
+    if (match.warningTimer) clearTimeout(match.warningTimer);
+
     match.warningTimer = setTimeout(async () => {
 
-    const m = matchsActifs.get(chat);
-    if (!m) return;
-    if (m.phaseDuel?.active) return;
+        const m = matchsActifs.get(chat);
+        if (!m) return;
+        if (m.phaseDuel?.active) return;
 
-    const player = m.joueurTour;
+        const attacker = m.joueurTour;
 
-    await ovl.sendMessage(chat, {
-        text:
-`⚠️ @${getTagFromJid(m.teamTour || m.id1)}
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ @${attacker.split("@")[0]}
 
 ⏳ Il reste *1 MINUTE* pour jouer !
 
-👤 Joueur actif: ${player.nom}
-
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
-        mentions: [m.teamTour || m.id1]
-    });
+            mentions: [attacker]
+        });
 
-}, 5 * 60 * 1000);
+    }, 5 * 60 * 1000);
 
     // ===============================
     // ⛔ TIMEOUT (6 MIN → NEXT TEAM)
     // ===============================
+    if (match.turnTimer) clearTimeout(match.turnTimer);
+
     match.turnTimer = setTimeout(async () => {
 
-    const m = matchsActifs.get(chat);
-    if (!m) return;
-    if (m.phaseDuel?.active) return;
+        const m = matchsActifs.get(chat);
+        if (!m) return;
+        if (m.phaseDuel?.active) return;
 
-    const currentTeam = m.teamTour || m.id1;
-    const nextTeam =
-        currentTeam === m.id1 ? m.id2 : m.id1;
+        const current = m.joueurTour;
+        const next = current === m.id1 ? m.id2 : m.id1;
 
-    m.teamTour = nextTeam;
+        m.joueurTour = next;
+        m.waitingAttackFrom = null;
 
-    // ⚠️ IMPORTANT : changer aussi le joueur actif
-    const nextLineup =
-        nextTeam === m.id1 ? m.lineup1 : m.lineup2;
-
-    m.joueurTour = nextLineup?.[0] || null;
-
-    m.waitingAttackFrom = null;
-
-    await ovl.sendMessage(chat, {
-        text:
+        await ovl.sendMessage(chat, {
+            text:
 `⛔ LATENCE OUT ❌
 
 🔁 CHANGEMENT DE POSSESSION
 
-➡️ @${getTagFromJid(nextTeam)} NEXT
+➡️ @${next.split("@")[0]} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextTeam]
-    });
+            mentions: [next]
+        });
 
-}, 6 * 60 * 1000);
-} 
-} 
+    }, 6 * 60 * 1000);
+}
+            } 
 
 /* ===============================
 📩 LECTURE PAVÉ ENGINE
@@ -3948,25 +3946,7 @@ console.log("=================================");
         }) || null;
     };
 
-let attacker = null;
-let defender = null;
-
-// ===============================
-// 🔒 MATCH UP PRIORITAIRE
-// ===============================
-if (
-    match.phaseDuel?.attacker &&
-    match.phaseDuel?.defender
-) {
-
-    attacker = match.phaseDuel.attacker;
-    defender = match.phaseDuel.defender;
-
-    console.log("🔒 DUEL FORCÉ");
-    console.log("ATTACKER =", attacker.nom);
-    console.log("DEFENDER =", defender.nom);
-
-} else {
+    let attacker = null;
 
     // ===============================
     // ⚽ PORTEUR PRIORITAIRE
@@ -3982,30 +3962,34 @@ if (
         }
     }
 
+    // fallback
     if (!attacker) {
         attacker = findPlayer(attaqueText);
     }
 
-    defender = findPlayer(defenseText);
+    let defender = findPlayer(defenseText);
+    // Empêcher attaquant = défenseur
+if (
+    defender &&
+    attacker &&
+    normalizeJid(defender.id || defender.jid) ===
+    normalizeJid(attacker.id || attacker.jid)
+) {
 
-    if (
-        defender &&
-        attacker &&
-        normalizeJid(defender.id || defender.jid) ===
-        normalizeJid(attacker.id || attacker.jid)
-    ) {
+    defender = allPlayers.find(
+        p =>
+            normalizeJid(p.id || p.jid) !==
+            normalizeJid(attacker.id || attacker.jid)
+            &&
+            pureName(defenseText).includes(
+                pureName(p.nom)
+            )
+    );
+}
 
-        defender = allPlayers.find(
-            p =>
-                normalizeJid(p.id || p.jid) !==
-                normalizeJid(attacker.id || attacker.jid)
-                &&
-                pureName(defenseText).includes(
-                    pureName(p.nom)
-                )
-        );
-    }
-
+    // ===============================
+    // 🧠 TARGET TACTIQUE
+    // ===============================
     const tacticalTarget =
         detectTargetPlayer(defenseText, allPlayers);
 
@@ -4014,9 +3998,7 @@ if (
     }
 
     console.log("🔍 attacker trouvé =", attacker);
-    console.log("🔍 defender trouvé =", defender);
-}
-    
+console.log("🔍 defender trouvé =", defender);
     // ===============================
     // ❌ VALIDATION
     // ===============================
