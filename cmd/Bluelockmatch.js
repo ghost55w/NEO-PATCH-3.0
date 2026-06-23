@@ -2690,37 +2690,45 @@ if (match.etat === "attente_lineup") {
             visavis: null
         });
     }
+// ===============================
+// 🔷 TEAM ASSIGNATION (OWNER LOGIC SIMPLE)
+// ===============================
+const normalize = s =>
+    (s || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/gi, "")
+        .trim();
 
-    // ===============================
-    // 🔷 TEAM ASSIGNATION (OWNER ONLY)
-    // ===============================
+const squad = normalize(squadNameRaw);
+const t1 = normalize(match.team1Name);
+const t2 = normalize(match.team2Name);
 
-    if (pureName(squadName) === pureName(match.team1Name) && !match.equipe1) {
+if (squad === t1 && !match.equipe1) {
 
-        match.lineup1 = joueursValides;
-        match.equipe1 = true;
+    match.id1 = senderJid;
+    match.lineup1 = joueursValides;
+    match.equipe1 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team1Name}*`
-        });
-    }
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team1Name}*`
+    });
 
-    else if (pureName(squadName) === pureName(match.team2Name) && !match.equipe2) {
+} else if (squad === t2 && !match.equipe2) {
 
-        match.lineup2 = joueursValides;
-        match.equipe2 = true;
+    match.id2 = senderJid;
+    match.lineup2 = joueursValides;
+    match.equipe2 = true;
 
-        await ovl.sendMessage(chat, {
-            text: `✅ Formation validée pour *${match.team2Name}*`
-        });
-    }
+    await ovl.sendMessage(chat, {
+        text: `✅ Formation validée pour *${match.team2Name}*`
+    });
 
-    else {
-        return ovl.sendMessage(chat, {
-            text: "❌ Tu n'es pas autorisé à envoyer cette équipe ou elle est déjà validée"
-        });
-    }
+} else {
 
+    return ovl.sendMessage(chat, {
+        text: "❌ Équipe non reconnue ou déjà envoyée"
+    });
+}
     // ===============================
     // 🚀 START MATCH
     // ===============================
