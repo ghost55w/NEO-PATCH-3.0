@@ -3024,6 +3024,30 @@ async function handlePaveGame(ms, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return false;
 
+    // ===============================
+// 🚫 VERIFICATION TOUR
+// ===============================
+const senderJid =
+    ms.key.participant ||
+    ms.participant ||
+    ms.key.remoteJid;
+
+if (
+    match.etat === "en_cours" &&
+    !match.phaseDuel?.active &&
+    senderJid !== match.joueurTour
+) {
+
+    await ovl.sendMessage(chat, {
+        text:
+`❌ Joueur tour
+
+Ce n'est pas à ton tour de jouer.`
+    });
+
+    return true;
+}
+
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
