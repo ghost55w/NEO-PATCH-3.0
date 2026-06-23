@@ -2780,50 +2780,50 @@ async function lancerMatch(chat, ovl) {
     const match = matchsActifs.get(chat);
     if (!match) return;
 
-    if (match.kickoffStarted) return;
-    match.kickoffStarted = true;
+     // ===============================
+// 🚀 KICKOFF SIDE (UNE SEULE SOURCE)
+// ===============================
+if (match.kickoffStarted) return;
+match.kickoffStarted = true;
 
-    const kickoffSide = Math.random() < 0.5 ? "team1" : "team2";
+const kickoffSide = Math.random() < 0.5 ? "team1" : "team2";
 match.kickoffTeam = kickoffSide;
 
-    match.joueurTour =
-    kickoffSide === "team1" ? match.id1 : match.id2;
-    // ===============================
-    // 👥 TEAMS (USER IDS)
-    // ===============================
-    match.id1 = match.id1; // Team 1 user
-    match.id2 = match.id2; // Team 2 user
-
-    // ===============================
-// ⚽ POSSESSION INIT (CLEAN FIX)
 // ===============================
-const isTeam1 = Math.random() < 0.5;
+// 👥 TEAM OWNERS
+// ===============================
+const team1Owner = match.id1;
+const team2Owner = match.id2;
 
-const currentTeamOwner = isTeam1 ? match.id1 : match.id2;
-const opponentTeamOwner = isTeam1 ? match.id2 : match.id1;
-
-// 🔥 OWNER TURN (NEO / DAMIAN)
-match.teamTour = currentTeamOwner;
-
-// ⚽ PLAYER TURN (CARTE ACTIVE)
-// 👉 on prend le porteur réel dans lineup
-const activeLineup = isTeam1 ? match.lineup1 : match.lineup2;
-
-// choix simple : premier joueur (ou porteur si tu l'as)
-const activePlayer =
-    activeLineup?.find(p => p.nom === match.ballHolder) ||
-    activeLineup?.[0];
-
-match.joueurTour = activePlayer; // 👈 PLAYER CARD SOURCE UNIQUE
+match.teamTour =
+    kickoffSide === "team1" ? team1Owner : team2Owner;
 
 // ===============================
-// 🧠 POSSESSION LOGIC CLEAN
+// ⚽ LINEUP ACTIF
 // ===============================
-match.possession = currentTeamOwner;
+const activeLineup =
+    kickoffSide === "team1" ? match.lineup1 : match.lineup2;
 
-// ⚔️ DUEL SOURCE UNIQUE
+// ⚽ joueur de départ SAFE
+const activePlayer = activeLineup?.[0];
+
+if (!activePlayer) {
+    console.log("❌ No active player found in kickoff");
+    return;
+}
+
+match.joueurTour = activePlayer;
+
+// ===============================
+// 🧠 POSSESSION CLEAN
+// ===============================
+match.possession = match.teamTour;
+
+// ===============================
+// ⚔️ DUEL BASE
+// ===============================
 match.attacker = activePlayer;
-match.defender = null; // sera défini au moment du duel
+match.defender = null;
     // ===============================
     // 🔄 RESET MATCH STATE
     // ===============================
