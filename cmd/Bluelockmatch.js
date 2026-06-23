@@ -2863,50 +2863,52 @@ match.defender = null;
     });
 
     // ===============================
-    // 🧠 SAFE TERRAIN INIT
-    // ===============================
-    try {
+// 🧠 SAFE TERRAIN INIT
+// ===============================
+try {
 
-        const equipeAttack =
-            currentTeam === match.id1
-                ? match.lineup1
-                : match.lineup2;
+    const currentTeam = match.teamTour;
 
-        const equipeDefense =
-            currentTeam === match.id1
-                ? match.lineup2
-                : match.lineup1;
+    const equipeAttack =
+        currentTeam === match.id1
+            ? match.lineup1
+            : match.lineup2;
 
-        if (equipeAttack && equipeDefense) {
+    const equipeDefense =
+        currentTeam === match.id1
+            ? match.lineup2
+            : match.lineup1;
 
-            if (typeof getZoneYParLigne === "function") {
-                equipeAttack.forEach(j => {
-                    j.zoneY = getZoneYParLigne(j.ligne, "attaque");
-                });
+    if (equipeAttack && equipeDefense) {
 
-                equipeDefense.forEach(j => {
-                    j.zoneY = getZoneYParLigne(j.ligne, "defense");
-                });
-            }
+        if (typeof getZoneYParLigne === "function") {
+            equipeAttack.forEach(j => {
+                j.zoneY = getZoneYParLigne(j.ligne, "attaque");
+            });
 
-            if (typeof initPlayerPosition === "function") {
-                match.lineup1?.forEach(j => initPlayerPosition(j));
-                match.lineup2?.forEach(j => initPlayerPosition(j));
-            }
-
-            if (typeof assignerVisAVis === "function") {
-                match.positions = [
-                    ...(match.lineup1 || []),
-                    ...(match.lineup2 || [])
-                ];
-
-                assignerVisAVis(match);
-            }
+            equipeDefense.forEach(j => {
+                j.zoneY = getZoneYParLigne(j.ligne, "defense");
+            });
         }
 
-    } catch (e) {
-        console.log("⚠️ Terrain init error ignorée:", e);
+        if (typeof initPlayerPosition === "function") {
+            match.lineup1?.forEach(j => initPlayerPosition(j));
+            match.lineup2?.forEach(j => initPlayerPosition(j));
+        }
+
+        if (typeof assignerVisAVis === "function") {
+            match.positions = [
+                ...(match.lineup1 || []),
+                ...(match.lineup2 || [])
+            ];
+
+            assignerVisAVis(match);
+        }
     }
+
+} catch (e) {
+    console.log("⚠️ Terrain init error ignorée:", e);
+}
 
 // =========================
 // 🎯 KICKOFF (GARANTI CLEAN)
