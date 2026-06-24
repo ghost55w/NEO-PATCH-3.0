@@ -3029,43 +3029,6 @@ const senderJid =
     ms.participant ||
     ms.key.remoteJid;
 
-// ===============================
-    // 🚫 VERIFICATION TOUR
-    // ===============================
-    if (match.phaseDuel?.active) {
-
-        if (
-            match.phaseDuel.step === "attack_pave" &&
-            senderJid !== match.attacker
-        ) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Joueur tour : Ce n'est pas à ton tour de jouer."
-            });
-            return true;
-        }
-
-        if (
-            match.phaseDuel.step === "defense_pave" &&
-            senderJid !== match.defender
-        ) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Joueur tour : Ce n'est pas à ton tour de jouer."
-            });
-            return true;
-        }
-
-    } else {
-
-        if (senderJid !== match.joueurTour) {
-            await ovl.sendMessage(chat, {
-                text: "❌ Joueur tour : Ce n'est pas à ton tour de jouer."
-            });
-            return true;
-        }
-
-    }
-    
-
     const sender = normalizeJid(getSenderJid(ms));
 
     // ===============================
