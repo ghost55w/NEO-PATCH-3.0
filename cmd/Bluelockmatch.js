@@ -1792,7 +1792,7 @@ function initKickoffPositions(match) {
 
 
 // ===============================
-// 🎯 KICK-OFF ACTION AUTOMATIQUE 
+// 🎯 KICK-OFF ACTION AUTOMATIQUE
 // ===============================
 function kickoffStart(match) {
 
@@ -1821,13 +1821,21 @@ function kickoffStart(match) {
 
     if (!starter) return "";
 
+    // 🎯 Joueur possédant le ballon
+    match.ballHolderPlayer = starter;
+
+    // Compatibilité ancien moteur
     match.ballHolder = starter.nom;
-    match.activePlayer = starter.nom;
+
+    // Joueur actif
+    match.activePlayer = starter;
+
     match.phase = "active";
     match.zone = "C2";
 
     return `(C2) ${starter.nom} lance le jeu ⚽...`;
 }
+
 
 
 // ===============================
@@ -2490,41 +2498,54 @@ async function verifierFiche(message, chat, ovl) {
         return;
     }
 
-    // ===============================
-    // 🔷 TEAMS (SOURCE OF TRUTH)
-    // ===============================
+   // ===============================
+// 🔷 TEAMS (SOURCE OF TRUTH)
+// ===============================
+// WhatsApp owners
+match.team1 = j1;
+match.team2 = j2;
 
-    // owners WhatsApp
-    match.id1 = j1;
-    match.id2 = j2;
+// Display names
+match.team1Name = team1[1].trim();
+match.team2Name = team2[1].trim();
 
-    // display names only
-    match.team1Name = match.team1Name;
-    match.team2Name = match.team2Name;
+// Match state
+match.etat = "attente_lineup";
 
-    match.etat = "attente_lineup";
+// Future lineups
+match.lineup1 = null;
+match.lineup2 = null;
 
-    // lineups
-    match.equipe1 = null;
-    match.equipe2 = null;
+// Current turn
+match.joueurTour = null;
+
+// Ball owner
+match.ballHolderPlayer = null;
+
+// Pending actions
+match.pendingAttack = null;
+match.pendingDefense = null;
+
+// Duel state
+match.phaseDuel = null; 
 
     // ===============================
     // 📊 STATS INIT (BASED ON OWNERS)
     // ===============================
     match.possessionIndex = {
-        [match.id1]: 0,
-        [match.id2]: 0
-    };
+    [match.team1]: 0,
+    [match.team2]: 0
+};
 
-    match.actionsRestantes = {
-        [match.id1]: 4,
-        [match.id2]: 4
-    };
+match.actionsRestantes = {
+    [match.team1]: 4,
+    [match.team2]: 4
+};
 
-    match.role = {
-        [match.id1]: "attack",
-        [match.id2]: "defense"
-    };
+match.role = {
+    [match.team1]: "attack",
+    [match.team2]: "defense"
+};
 
     // ===============================
     // 🎨 CONFIRMATION
@@ -2559,7 +2580,7 @@ async function verifierFiche(message, chat, ovl) {
     // ===============================
     match.timerLineup = setTimeout(async () => {
 
-        if (!match.equipe1 || !match.equipe2) {
+        if (!match.lineup1 || !match.lineup2) {
 
             matchsActifs.delete(chat);
 
@@ -2621,7 +2642,7 @@ async function messageMatch(ms, ovl) {
 if (match.etat === "attente_lineup") {
 
     // ❌ sécurité : stop si déjà rempli
-    if (match.equipe1 && match.equipe2) return;
+   if (match.lineup1 && match.lineup2) return;
 
     // ❌ sécurité : message non lineup
     if (!safeText.includes("SQUAD⚽🥅")) return;
@@ -2700,6 +2721,7 @@ if (match.etat === "attente_lineup") {
         // 🧩 PLAYER CARD STRUCTURE
         // ===============================
         joueursValides.push({
+            owner: sender,
             numero: j.numero,
             nom: data.name,
             stats: {
@@ -2728,9 +2750,7 @@ if (match.etat === "attente_lineup") {
     // ===============================
     if (squadName === team1 && !match.equipe1) {
 
-        match.id1 = senderJid;              // 👈 OWNER TEAM 1
-        match.lineup1 = joueursValides;     // 👈 PLAYER CARDS
-        match.equipe1 = true;
+        match.lineup1 = joueursValides;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team1Name}*`
@@ -2742,9 +2762,7 @@ if (match.etat === "attente_lineup") {
     // ===============================
     else if (squadName === team2 && !match.equipe2) {
 
-        match.id2 = senderJid;              // 👈 OWNER TEAM 2
-        match.lineup2 = joueursValides;     // 👈 PLAYER CARDS
-        match.equipe2 = true;
+        match.lineup2 = joueursValides;
 
         await ovl.sendMessage(chat, {
             text: `✅ Formation validée pour *${match.team2Name}*`
@@ -2763,7 +2781,7 @@ if (match.etat === "attente_lineup") {
     // ===============================
     // 🚀 START MATCH (ONLY WHEN READY)
     // ===============================
-    if (match.equipe1 && match.equipe2 && !match.starting) {
+    if (match.lineup1 && match.lineup2 && !match.starting) {
 
         match.starting = true;
 
@@ -2812,22 +2830,19 @@ async function lancerMatch(chat, ovl) {
     const isTeam1 = Math.random() < 0.5;
 
     match.kickoffTeam = isTeam1 ? 1 : 2;
-
-    // ===============================
-    // 👥 TEAMS (USER IDS)
-    // ===============================
-    match.id1 = match.id1; // Team 1 user
-    match.id2 = match.id2; // Team 2 user
-
+    
     // ===============================
     // ⚽ POSSESSION INIT
     // ===============================
-    match.joueurTour = isTeam1 ? match.id1 : match.id2;
+    match.joueurTour = isTeam1
+    ? match.team1
+    : match.team2;
 
     const currentTeam = match.joueurTour;
     const opponentTeam =
-        currentTeam === match.id1 ? match.id2 : match.id1;
-
+    currentTeam === match.team1
+        ? match.team2
+        : match.team1;
     // ===============================
     // 🧠 POSSESSION LOGIC CLEAN
     // ===============================
@@ -2858,9 +2873,9 @@ async function lancerMatch(chat, ovl) {
     // 📊 INIT STATS
     // ===============================
     match.possessions = {
-        [match.id1]: 0,
-        [match.id2]: 0
-    };
+    [match.team1]: 0,
+    [match.team2]: 0
+};
 
     match.tour = 1;
     match.toursRestants = 5;
@@ -2881,16 +2896,22 @@ async function lancerMatch(chat, ovl) {
     try {
 
         const equipeAttack =
-            currentTeam === match.id1
-                ? match.lineup1
-                : match.lineup2;
+    currentTeam === match.team1
+        ? match.lineup1
+        : match.lineup2;
 
-        const equipeDefense =
-            currentTeam === match.id1
-                ? match.lineup2
-                : match.lineup1;
+const equipeDefense =
+    currentTeam === match.team1
+        ? match.lineup2
+        : match.lineup1;
 
         if (equipeAttack && equipeDefense) {
+            
+            const kickoffPlayer =
+        equipeAttack.find(p => p.poste === "MC") ||
+        equipeAttack[0];
+
+    match.ballHolderPlayer = kickoffPlayer;
 
             if (typeof getZoneYParLigne === "function") {
                 equipeAttack.forEach(j => {
@@ -3120,37 +3141,49 @@ if (!actionCheck || actionCheck.trim().length < 5) {
         );
     }
 
-    // 🔁 FALLBACK SAFE
-    if (!nextPlayer) {
-        const fallbackTeam =
-            loser === match.id1 ? match.id2 : match.id1;
+    // ===============================
+// 🔁 FALLBACK SAFE
+// ===============================
+if (!nextPlayer) {
+    const fallbackTeam =
+        loser === match.id1 ? match.id2 : match.id1;
 
-        nextPlayer = [...(match.lineup1 || []), ...(match.lineup2 || [])]
-            .find(p => normalizeJid(p.id || p.jid) === fallbackTeam);
-    }
+    nextPlayer = [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p =>
+            normalizeJid(p.owner) === normalizeJid(fallbackTeam)
+        );
+}
 
-    const next = nextPlayer?.id || nextPlayer?.jid || match.id2;
-    const nextName = nextPlayer?.nom || next.split("@")[0];
+// ===============================
+// 🎯 NEXT RESOLUTION (OWNER SYSTEM)
+// ===============================
+const next = nextPlayer?.owner || match.id2;
+const nextName = nextPlayer?.nom || next.split("@")[0];
 
-    // ===============================
-    // 🚫 LOCK UPDATE
-    // ===============================
-    match.lockedPlayers = match.lockedPlayers || new Set();
-    match.lockedPlayers.add(loserName);
+// ===============================
+// 🚫 LOCK UPDATE
+// ===============================
+match.lockedPlayers = match.lockedPlayers || new Set();
+match.lockedPlayers.add(loserName);
 
-    // ===============================
-    // 🔁 POSSESSION UPDATE CLEAN
-    // ===============================
-    match.joueurTour = next;
-    match.attacker = next;
-    match.defender = loser;
-    match.pendingAttack = null;
+// ===============================
+// 🔁 POSSESSION UPDATE CLEAN
+// ===============================
+match.joueurTour = next;
+match.attacker = next;
+match.defender = loser;
+match.pendingAttack = null;
 
-    // ===============================
-    // 📩 MESSAGE CONTRE-ATTAQUE
-    // ===============================
-    await ovl.sendMessage(chat, {
-        text:
+// 🎯 SOURCE DE VÉRITÉ BALL POSSESSION
+match.ballHolderPlayer = nextPlayer || null;
+match.ballHolder = nextPlayer?.nom || null;
+match.activePlayer = nextPlayer || null;
+
+// ===============================
+// 📩 MESSAGE CONTRE-ATTAQUE
+// ===============================
+await ovl.sendMessage(chat, {
+    text:
 `❌ PAVÉ INVALIDE
 
 🎙️ REASON : Action vide ou mal structurée
@@ -3163,30 +3196,30 @@ if (!actionCheck || actionCheck.trim().length < 5) {
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [next, loser]
-    });
+    mentions: [next, loser]
+});
 
-    // ===============================
-    // ⛔ CLEAN TIMERS (CRUCIAL)
-    // ===============================
-    if (match.turnTimer) {
-        clearTimeout(match.turnTimer);
-        match.turnTimer = null;
-    }
-
-    if (match.warningTimer) {
-        clearTimeout(match.warningTimer);
-        match.warningTimer = null;
-    }
-
-    // ===============================
-    // 🧠 IMPORTANT
-    // ===============================
-    match.phaseDuel = null;
-
-    return true;
+// ===============================
+// ⛔ CLEAN TIMERS
+// ===============================
+if (match.turnTimer) {
+    clearTimeout(match.turnTimer);
+    match.turnTimer = null;
 }
-    
+
+if (match.warningTimer) {
+    clearTimeout(match.warningTimer);
+    match.warningTimer = null;
+}
+
+// ===============================
+// 🧠 RESET DUEL
+// ===============================
+match.phaseDuel = null;
+
+return true;
+} 
+
     // ===============================
     // ♻️ ANALYSE
     // ===============================
@@ -3515,14 +3548,19 @@ if (!match.pendingAttack) {
 
     const attackerId = match.joueurTour;
 
+    // ===============================
+    // 🔍 FIND PLAYER (OWNER SYSTEM)
+    // ===============================
     const attackerPlayer =
         [...(match.lineup1 || []), ...(match.lineup2 || [])]
         .find(p =>
-            normalizeJid(p.id || p.jid) === attackerId
+            normalizeJid(p.owner) === normalizeJid(attackerId)
         );
 
     if (attackerPlayer) {
         match.ballHolder = attackerPlayer.nom;
+        match.ballHolderPlayer = attackerPlayer;
+        match.activePlayer = attackerPlayer;
     }
 
     match.pendingAttack = action;
@@ -3532,23 +3570,23 @@ if (!match.pendingAttack) {
     const note = noterPave(action);
 
     // ===============================
-    // 🔥 NEXT
-    // ===============================  
-const nextId =
-    attackerId === match.id1
-        ? match.id2
-        : match.id1;
+    // 🔥 NEXT (TOUJOURS TEAM IDS)
+    // ===============================
+    const nextId =
+        attackerId === match.id1
+            ? match.id2
+            : match.id1;
 
-const nextTag = getTagFromJid(nextId);
+    const nextTag = getTagFromJid(nextId);
 
     // ===============================
     // ⚽ ÉTAT MATCH
     // ===============================
     match.waitingDefenseFrom = nextId;
-match.joueurTour = nextId;
+    match.joueurTour = nextId;
 
-match.attacker = attackerId;
-match.defender = nextId;
+    match.attacker = attackerId;
+    match.defender = nextId;
 
     // ===============================
     // ⚠️ WARNING
@@ -3580,13 +3618,10 @@ Il reste *1 MINUTE* pour répondre !
         if (match.joueurTour !== nextId) return;
 
         const fallback =
-            getVisavisPlayer(match, attackerPlayer) ||
-            attackerPlayer;
+            getVisavisPlayer(match, attackerPlayer) || attackerPlayer;
 
         const fallbackId =
-            fallback?.id ||
-            fallback?.jid ||
-            attackerId;
+            fallback?.owner || attackerId;
 
         const oldTag = getTagFromJid(attackerId);
         const newTag = getTagFromJid(fallbackId);
@@ -3597,6 +3632,10 @@ Il reste *1 MINUTE* pour répondre !
         match.attacker = fallbackId;
         match.defender = attackerId;
         match.joueurTour = fallbackId;
+
+        match.ballHolderPlayer = fallback;
+        match.ballHolder = fallback?.nom;
+        match.activePlayer = fallback;
 
         await ovl.sendMessage(chat, {
             text:
@@ -3635,7 +3674,6 @@ Il reste *1 MINUTE* pour répondre !
     return true;
 }
 
-
 // ===============================
 // 🛡️ DEFENSE
 // ===============================
@@ -3658,58 +3696,55 @@ const res = await handleDuelMatch(
 match.hasPlayed = true;
 
 // ===============================
-// 🔥 MATCH UP INIT ⚽🆚 
+// 🔥 MATCH UP INIT ⚽🆚 (PASSIVE BLOCK)
 // ===============================
 if (res && res.type === "PASSIVE_BLOCK") {
 
-    const attackPlayer = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
-) || res.attacker;
+    const attackPlayer =
+        match.ballHolderPlayer ||
+        res.attacker;
 
-const defensePlayer = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-) || res.defender;
+    const defensePlayer =
+        (match.lineup1 || [])
+            .concat(match.lineup2 || [])
+            .find(p => p.nom === res.defender?.nom) ||
+        res.defender;
 
-console.log("🔥 MATCH UP INIT");
-console.log("attackPlayer =", attackPlayer?.nom);
-console.log("defensePlayer =", defensePlayer?.nom);
-console.log("res.type =", res?.type);   
+    console.log("🔥 MATCH UP INIT");
+    console.log("attackPlayer =", attackPlayer?.nom);
+    console.log("defensePlayer =", defensePlayer?.nom);
+    console.log("res.type =", res?.type);
 
-match.phaseDuel = {
-    active: true,
-    step: "attack_pave",
-
-    attacker: match.attacker,
-    defender: match.defender,
-
-    attackPlayer: attackPlayer,
-    defensePlayer: defensePlayer,
-
-    attackPave: null,
-    defensePave: null,
-
-    starterAttack: match.pendingAttack,
-    starterDefense: defense
-};    
+    match.phaseDuel = {
+        active: true,
+        step: "attack_pave",
+        attacker: match.attacker,
+        defender: match.defender,
+        attackPlayer,
+        defensePlayer,
+        attackPave: null,
+        defensePave: null,
+        starterAttack: match.pendingAttack,
+        starterDefense: defense
+    };
 
     // ===============================
-// 🔥 NEXT MATCH UP
-// ===============================
-const nextId = match.attacker;
+    // 🔥 NEXT MATCH UP (TEAM ONLY)
+    // ===============================
+    const nextId = match.attacker;
+    const nextTag = getTagFromJid(nextId);
 
-const nextTag = getTagFromJid(nextId);
-
-    // ⚽ SYNC CLEAN
     match.joueurTour = nextId;
-match.waitingDefenseFrom = nextId;
-    
-    match.ballHolder = attacker.nom;
+    match.waitingDefenseFrom = nextId;
+
+    match.ballHolder = attackPlayer?.nom || match.ballHolder;
 
     await ovl.sendMessage(chat, {
         text:
 `*🛡️⚽ MATCH UP⚔️ !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-${attackPlayer.nom.toUpperCase()} 🆚 ${defensePlayer.nom.toUpperCase()}
+
+${attackPlayer?.nom?.toUpperCase()} 🆚 ${defensePlayer?.nom?.toUpperCase()}
 
 ${res.msg}
 
@@ -3719,8 +3754,9 @@ ${res.msg}
 🔷BLUELOCK⚽🥅`,
         mentions: [nextId]
     });
-// ===============================
-    // ⚠️ WARNING 1 MIN
+
+    // ===============================
+    // ⚠️ WARNING TIMER
     // ===============================
     if (match.warningTimer) clearTimeout(match.warningTimer);
 
@@ -3733,7 +3769,7 @@ ${res.msg}
             text:
 `⚠️ @${nextTag} ❗⏳
 
-Il reste *1 MINUTE* pour jouer le duel !
+Il reste *1 MINUTE* pour le duel !
 
 ╰─────────────────▱▱▱
 🔷BLUELOCK⚽🥅`,
@@ -3741,80 +3777,78 @@ Il reste *1 MINUTE* pour jouer le duel !
         });
 
     }, 5 * 60 * 1000);
-    
+
     // ===============================
-    // ⏱️ LATENCE OUT (SAFE)
+    // ⏱️ LATENCE OUT (TEAM FALLBACK CLEAN)
     // ===============================
     if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
     match.defenseTimer = setTimeout(() => {
 
-        if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
+        if (!match.phaseDuel?.active) return;
+        if (match.joueurTour !== nextId) return;
 
-            const fallback =
-                getVisavisPlayer(match, attacker) || defender;
+        const fallbackTeam =
+            nextId === match.id1 ? match.id2 : match.id1;
 
-            const finalNext = fallback?.id || fallback?.jid || nextId;
+        match.joueurTour = fallbackTeam;
+        match.attacker = fallbackTeam;
+        match.defender = nextId;
 
-            match.joueurTour = finalNext;
-            match.attacker = finalNext;
-            match.ballHolder = fallback?.nom || attacker.nom;
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+        match.phaseDuel = null;
 
-            match.phaseDuel = null;
-            match.pendingAttack = null;
-            match.waitingDefenseFrom = null;
-
-            ovl.sendMessage(chat, {
-                text:
+        ovl.sendMessage(chat, {
+            text:
 `⛔ LATENCE OUT ❌
 
 🔁 MATCH UP TERMINÉ
 
-➡️ @${getTagFromJid(finalNext)} NEXT
+➡️ @${getTagFromJid(fallbackTeam)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-                mentions: [finalNext]
-            });
-        }
-
+            mentions: [fallbackTeam]
+        });
     }, 6 * 60 * 1000);
 
     return true;
 }
     
 // ===============================
-// 📉 FALLBACK : DEFENSE PASSIVE
+// 📉 FALLBACK : DEFENSE PASSIVE (CLEAN)
 // ===============================
 const resumeDefense = genererResumeFull(defense, match);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
-
 // ===============================
-// 🔥 NEXT UNIFIED (FIX IMPORTANT)
+// 🔥 NEXT TEAM (SOURCE OF TRUTH)
 // ===============================
-const baseNext =
-    match.joueurTour ||
-    match.id1;
-
-const fallbackPlayer =
-    [ ...(match.lineup1 || []), ...(match.lineup2 || []) ]
-    .find(p => normalizeJid(p.id || p.jid) === baseNext);
-
-const nextId =
-    fallbackPlayer?.id ||
-    fallbackPlayer?.jid ||
-    baseNext;
-
+const nextId = match.joueurTour || match.id1;
 const nextTag = getTagFromJid(nextId);
 
 // ===============================
-// ⚽ SYNC SAFE STATE
+// ⚽ FIND PLAYER ONLY IF POSSIBLE (OPTIONAL SAFE READ)
+// ===============================
+const nextPlayer =
+    (match.lineup1 || [])
+        .concat(match.lineup2 || [])
+        .find(p => p.nom === match.ballHolder);
+
+// ===============================
+// ⚽ SYNC SAFE STATE (IMPORTANT)
 // ===============================
 match.joueurTour = nextId;
 match.attacker = nextId;
-match.ballHolder = fallbackPlayer?.nom || match.ballHolder;
+match.defender =
+    nextId === match.id1 ? match.id2 : match.id1;
 
+// ⚽ BALL HOLDER = PLAYER OBJECT (NOT STRING TEAM)
+match.ballHolderPlayer = nextPlayer || match.ballHolderPlayer;
+match.ballHolder = match.ballHolderPlayer?.nom || match.ballHolder;
+
+// 🧹 RESET STATE
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
 match.phaseDuelResolved = false;
@@ -3839,7 +3873,7 @@ await ovl.sendMessage(chat, {
 });
 
 // ===============================
-// ⚠️ WARNING 1 MIN
+// ⚠️ WARNING TIMER
 // ===============================
 if (match.warningTimer) clearTimeout(match.warningTimer);
 
@@ -3862,7 +3896,7 @@ Il reste *1 MINUTE* pour jouer !
 }, 5 * 60 * 1000);
 
 // ===============================
-// ⏱️ LATENCE SAFE
+// ⏱️ LATENCE OUT (TEAM ONLY LOGIC)
 // ===============================
 if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
@@ -3871,19 +3905,20 @@ match.defenseTimer = setTimeout(() => {
     if (match.phaseDuel?.active) return;
     if (match.joueurTour !== nextId) return;
 
-    const opponent =
+    const fallbackTeam =
         nextId === match.id1 ? match.id2 : match.id1;
 
-    const fallbackOpponent =
-        [ ...(match.lineup1 || []), ...(match.lineup2 || []) ]
-        .find(p => normalizeJid(p.id || p.jid) === opponent);
+    const fallbackPlayer =
+        (match.lineup1 || [])
+            .concat(match.lineup2 || [])
+            .find(p => p.nom === match.ballHolder);
 
-    const finalOpponent =
-        fallbackOpponent?.id ||
-        fallbackOpponent?.jid ||
-        opponent;
+    match.joueurTour = fallbackTeam;
+    match.attacker = fallbackTeam;
+    match.defender = nextId;
 
-    match.joueurTour = finalOpponent;
+    match.ballHolderPlayer = fallbackPlayer || match.ballHolderPlayer;
+    match.ballHolder = match.ballHolderPlayer?.nom;
 
     ovl.sendMessage(chat, {
         text:
@@ -3891,27 +3926,23 @@ match.defenseTimer = setTimeout(() => {
 
 🔁 CHANGEMENT DE POSSESSION
 
-➡️ @${getTagFromJid(finalOpponent)} NEXT
+➡️ @${getTagFromJid(fallbackTeam)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [finalOpponent]
+        mentions: [fallbackTeam]
     });
 
 }, 6 * 60 * 1000);
-
-// ===============================
-// 🔁 CLEAN STATE (SAFE ORDER)
-// ===============================
 return true;
 }
        
 
 // ===============================
-// ⚽ DUELS ET MATCH UP 🆚
+// ⚽ DUELS ET MATCH UP 🆚 (CLEAN VERSION)
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
-    
+
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -3926,81 +3957,66 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     ];
 
     // ===============================
-    // 🔍 FIND PLAYER
+    // ⚽ ATTACKER (SOURCE OF TRUTH)
     // ===============================
-    const findPlayer = (txt) => {
+    let attacker =
+        match.phaseDuel?.attackPlayer ||
+        match.ballHolderPlayer ||
+        null;
 
+    // ===============================
+    // ⚽ DEFENDER (SOURCE OF TRUTH)
+    // ===============================
+    let defender =
+        match.phaseDuel?.defensePlayer ||
+        null;
+
+    // ===============================
+    // 🧠 FALLBACK SAFE ONLY (NO JID / NO TEAM LOGIC)
+    // ===============================
+    const findByName = (txt) => {
         const t = pureName(txt);
 
         return allPlayers.find(p => {
-
             const n = pureName(p.nom);
-
-            return t.includes(n) || n.includes(t);
-
+            return t === n || t.includes(n) || n.includes(t);
         }) || null;
     };
-let attacker = null;
-let defender = null;
 
-// ===============================
-// ⚽ JOUEURS DU MATCH UP
-// ===============================
-if (match.phaseDuel?.attackPlayer) {
-    attacker = match.phaseDuel.attackPlayer;
-}
-
-if (match.phaseDuel?.defensePlayer) {
-    defender = match.phaseDuel.defensePlayer;
-}
-
-// ===============================
-// ⚽ PORTEUR PRIORITAIRE (FALLBACK)
-// ===============================
-if (!attacker && match.ballHolder) {
-
-    attacker = allPlayers.find(
-        p => p.nom === match.ballHolder
-    );
-
+    // ⚠️ ATTACKER FALLBACK
     if (!attacker) {
-        attacker = allPlayers[0];
+        attacker =
+            findByName(attaqueText) ||
+            allPlayers.find(p => p.nom === match.ballHolder) ||
+            null;
     }
-}
 
-// fallback
-if (!attacker) {
-    attacker = findPlayer(attaqueText);
-}
-
-if (!defender) {
-    defender = findPlayer(defenseText);
-}
-    
+    // ⚠️ DEFENDER FALLBACK
+    if (!defender) {
+        defender = findByName(defenseText);
+    }
 
     // ===============================
-    // 🧠 TARGET TACTIQUE
+    // 🎯 TACTICAL OVERRIDE (OPTIONAL TARGET)
     // ===============================
-    const tacticalTarget =
-        detectTargetPlayer(defenseText, allPlayers);
-
+    const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
     if (tacticalTarget) {
         defender = tacticalTarget;
     }
 
-    console.log("🔍 attacker trouvé =", attacker);
-console.log("🔍 defender trouvé =", defender);
     // ===============================
     // ❌ VALIDATION
     // ===============================
     if (!attacker || !defender) {
-
         return {
             ok: false,
             type: "erreur",
             message: "❌ Joueurs introuvables"
         };
     }
+
+    console.log("🔍 attacker =", attacker.nom);
+    console.log("🔍 defender =", defender.nom);
 
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
@@ -4012,6 +4028,7 @@ console.log("🔍 defender trouvé =", defender);
     // 🎯 RESULT GLOBAL
     // ===============================
     let result = null;
+
 
 // ===============================
 // ⚡ VITESSE
@@ -4039,15 +4056,9 @@ const postureBasse = [
 
 let posture = "debout";
 
-if (
-    postureBasse.some(w => def.includes(w))
-) {
+if (postureBasse.some(w => def.includes(w))) {
     posture = "basse";
-}
-
-else if (
-    postureDebout.some(w => def.includes(w))
-) {
+} else if (postureDebout.some(w => def.includes(w))) {
     posture = "debout";
 }
 
@@ -4059,24 +4070,20 @@ let defVmax =
         ? defBaseVmax * 0.5
         : defBaseVmax;
 
-
-
 // ===============================
 // 🎯 DÉTECTION DRIBBLE
 // ===============================
-const explicitDribble =
-    detectIntentDribble(atk);
+const explicitDribble = detectIntentDribble(atk);
 
 let detectedDribble =
     DRIBBLES.find(d => atk.includes(d));
 
-// DRIBBLE CREATIF⚽ 
+// DRIBBLE CREATIF⚽
 if (!detectedDribble && explicitDribble) {
     detectedDribble = "creative";
 }
 
-const isDribbleAction =
-    !!detectedDribble;
+const isDribbleAction = !!detectedDribble;
 
 // ===============================
 // 🎯 VALIDATION DRIBBLE
@@ -4085,49 +4092,44 @@ let dribbleCheck = null;
 
 if (isDribbleAction) {
 
-    dribbleCheck =
-        validateDribbleBlueprint(
-            detectedDribble,
-            attaqueText
-        );
-
-    console.log(
-        "🎯 DRIBBLE DETECTED =",
-        detectedDribble
+    dribbleCheck = validateDribbleBlueprint(
+        detectedDribble,
+        attaqueText
     );
 
-    console.log(
-        "🎯 DRIBBLE CHECK =",
-        dribbleCheck
-    );
-    
-if (!dribbleCheck.valid) {
+    console.log("🎯 DRIBBLE DETECTED =", detectedDribble);
+    console.log("🎯 DRIBBLE CHECK =", dribbleCheck);
 
-    // 🔄 PERTE DE BALLE
-    const defenderId = normalizeJid(defender.id || defender.jid);
+    if (!dribbleCheck.valid) {
 
-match.ballHolder = defender.nom;
+        // 🔄 PERTE DE BALLE (CLEAN STATE ONLY)
+        match.ballHolderPlayer = defender;
 
-match.joueurTour = defenderId;
-match.attacker = defenderId;
-match.waitingDefenseFrom = null;
-    return {
-        ok: false,
-        type: "BAD_DRIBBLE",
-        attacker,
-        defender,
-        msg:
+        match.joueurTour =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+        match.attacker = match.joueurTour;
+        match.defender = defender;
+
+        match.pendingAttack = null;
+        match.waitingDefenseFrom = null;
+
+        return {
+            ok: false,
+            type: "BAD_DRIBBLE",
+            attacker,
+            defender,
+            msg:
 `❌ ${attacker.nom} exécute mal son dribble.
 
 🔁 ${defender.nom} récupère la possession !`,
-        details:
-            dribbleCheck.reason
-    };
+            details: dribbleCheck.reason
+        };
+    }
 }
-    
-}
-
-    
+        
 // ===============================
 // 🛡️  DÉTECTION TACLE
 // ===============================
@@ -4154,6 +4156,12 @@ if (isDribbleAction && isTackleAction) {
 
     if (attackerWins) {
 
+        // ===============================
+        // 🔥 ATTAQUANT GAGNE
+        // ===============================
+        match.ballHolderPlayer = attacker;
+        match.joueurTour = match.attacker;
+
         return {
             ok: true,
             type: "DRIBBLE_WIN",
@@ -4163,6 +4171,19 @@ if (isDribbleAction && isTackleAction) {
         };
 
     } else {
+
+        // ===============================
+        // ⚽ DÉFENSEUR GAGNE
+        // ===============================
+        match.ballHolderPlayer = defender;
+
+        match.joueurTour =
+            match.joueurTour === match.id1
+                ? match.id2
+                : match.id1;
+
+        match.attacker = match.joueurTour;
+        match.defender = defender;
 
         return {
             ok: false,
@@ -4174,8 +4195,8 @@ if (isDribbleAction && isTackleAction) {
     }
 }
 
- // ===============================
-// 🧱 DÉFENSE PASSIVE SIMPLE 
+// ===============================
+// 🧱 DÉFENSE PASSIVE SIMPLE
 // ===============================
 const passiveKeywords = [
     "se place",
@@ -4201,6 +4222,19 @@ const isPassive =
 
 // 🔥 PRIORITÉ ABSOLUE
 if (isPassive) {
+
+    // ===============================
+    // ⚽ UPDATE STATE (IMPORTANT)
+    // ===============================
+    match.ballHolderPlayer = defender;
+    match.joueurTour = match.joueurTour === match.id1 ? match.id2 : match.id1;
+
+    match.attacker = match.joueurTour;
+    match.defender = defender;
+
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
     return {
         ok: false,
         type: "PASSIVE_BLOCK",
@@ -4209,6 +4243,7 @@ if (isPassive) {
         msg: `⚔️ ${defender.nom} gêne la progression`
     };
 }
+
     
 // ===============================
 // 💪 DUELS PHYSIQUES
