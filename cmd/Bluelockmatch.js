@@ -3670,22 +3670,27 @@ const defensePlayer = allPlayers.find(
     p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
 ) || res.defender;
 
-    match.phaseDuel = {
+console.log("🔥 MATCH UP INIT");
+console.log("attackPlayer =", attackPlayer?.nom);
+console.log("defensePlayer =", defensePlayer?.nom);
+console.log("res.type =", res?.type);   
+
+match.phaseDuel = {
     active: true,
     step: "attack_pave",
 
-    attacker: match.attacker, // JID
-    defender: match.defender, // JID
+    attacker: match.attacker,
+    defender: match.defender,
 
-    attackPlayer: attacker,
-    defensePlayer: defender,
+    attackPlayer: attackPlayer,
+    defensePlayer: defensePlayer,
 
     attackPave: null,
     defensePave: null,
 
     starterAttack: match.pendingAttack,
     starterDefense: defense
-};
+};    
 
     // ===============================
 // 🔥 NEXT MATCH UP
