@@ -3944,13 +3944,6 @@ return true;
 // ===============================
 async function handleDuelMatch(match, attaqueText, defenseText) {
     
-    console.log("========== HANDLE DUEL ==========");
-console.log("attaqueText =", attaqueText);
-console.log("defenseText =", defenseText);
-console.log("ballHolder =", match.ballHolder);
-console.log("phaseDuel =", match.phaseDuel);
-console.log("=================================");
-
     if (!attaqueText || !defenseText) {
         return {
             ok: false,
@@ -3979,47 +3972,43 @@ console.log("=================================");
 
         }) || null;
     };
+let attacker = null;
+let defender = null;
 
-    let attacker = null;
-
-    // ===============================
-    // ⚽ PORTEUR PRIORITAIRE
-    // ===============================
-    if (match.ballHolder) {
-
-        attacker = allPlayers.find(
-            p => p.nom === match.ballHolder
-        );
-
-        if (!attacker) {
-            attacker = allPlayers[0];
-        }
-    }
-
-    // fallback
-    if (!attacker) {
-        attacker = findPlayer(attaqueText);
-    }
-
-    let defender = findPlayer(defenseText);
-    // Empêcher attaquant = défenseur
-if (
-    defender &&
-    attacker &&
-    normalizeJid(defender.id || defender.jid) ===
-    normalizeJid(attacker.id || attacker.jid)
-) {
-
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
-            &&
-            pureName(defenseText).includes(
-                pureName(p.nom)
-            )
-    );
+// ===============================
+// ⚽ JOUEURS DU MATCH UP
+// ===============================
+if (match.phaseDuel?.attackPlayer) {
+    attacker = match.phaseDuel.attackPlayer;
 }
+
+if (match.phaseDuel?.defensePlayer) {
+    defender = match.phaseDuel.defensePlayer;
+}
+
+// ===============================
+// ⚽ PORTEUR PRIORITAIRE (FALLBACK)
+// ===============================
+if (!attacker && match.ballHolder) {
+
+    attacker = allPlayers.find(
+        p => p.nom === match.ballHolder
+    );
+
+    if (!attacker) {
+        attacker = allPlayers[0];
+    }
+}
+
+// fallback
+if (!attacker) {
+    attacker = findPlayer(attaqueText);
+}
+
+if (!defender) {
+    defender = findPlayer(defenseText);
+}
+    
 
     // ===============================
     // 🧠 TARGET TACTIQUE
@@ -4147,14 +4136,13 @@ if (isDribbleAction) {
 if (!dribbleCheck.valid) {
 
     // 🔄 PERTE DE BALLE
-    match.ballHolder = defender.nom;
+    const defenderId = normalizeJid(defender.id || defender.jid);
 
-    const defenderId = defender.id || defender.jid;
+match.ballHolder = defender.nom;
 
-    match.joueurTour = defenderId;
-    match.attacker = defenderId;
-    match.waitingDefenseFrom = null;
-
+match.joueurTour = defenderId;
+match.attacker = defenderId;
+match.waitingDefenseFrom = null;
     return {
         ok: false,
         type: "BAD_DRIBBLE",
