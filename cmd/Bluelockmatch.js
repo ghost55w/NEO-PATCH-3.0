@@ -3465,21 +3465,13 @@ setTimeout(async () => {
     // 🎯 POSSESSION (SOURCE UNIQUE)
     // ===============================
     const winner =
-    duelResult.ok
-        ? duelResult.attacker
-        : duelResult.defender;
+        duelResult.ok ? duelAttacker : duelDefender;
 
-const winnerId =
-    winner?.id || winner?.jid;
-    if (!winnerId) {
+    const winnerId = winner.id || winner.jid;
 
-    console.log(
-        "❌ winnerId introuvable",
-        winner
-    );
+    match.ballHolder = winnerId;
+    match.joueurTour = winnerId;
 
-    return;
-    }
     // ===============================
     // 🎯 NEXT = BALLHOLDER (TOUJOURS)
     // ===============================
@@ -3509,7 +3501,6 @@ ${duelResult.msg}
     match.waitingDefenseFrom = null;
 
 }, 1000);
-    return true;
 } 
     
 // ===============================
@@ -3948,17 +3939,19 @@ console.log("=================================");
 
     let attacker = null;
 
-// ===============================
-// ⚽ PORTEUR PRIORITAIRE
-// ===============================
-if (match.ballHolder) {
+    // ===============================
+    // ⚽ PORTEUR PRIORITAIRE
+    // ===============================
+    if (match.ballHolder) {
 
-    attacker = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) ===
-            normalizeJid(match.ballHolder)
-    );
-} 
+        attacker = allPlayers.find(
+            p => p.nom === match.ballHolder
+        );
+
+        if (!attacker) {
+            attacker = allPlayers[0];
+        }
+    }
 
     // fallback
     if (!attacker) {
