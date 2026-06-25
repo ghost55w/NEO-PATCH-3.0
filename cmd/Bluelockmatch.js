@@ -3464,13 +3464,18 @@ setTimeout(async () => {
     // ===============================
     // 🎯 POSSESSION (SOURCE UNIQUE)
     // ===============================
-    const winner =
-        duelResult.ok ? duelAttacker : duelDefender;
+    const winnerId = duelResult.ok
+    ? match.phaseDuel.attackerJid
+    : match.phaseDuel.defenderJid;
 
-    const winnerId = winner.id || winner.jid;
+console.log("attackerJid =", match.phaseDuel.attackerJid);
+console.log("defenderJid =", match.phaseDuel.defenderJid);
+console.log("winnerId =", winnerId);
+    
+match.ballHolder = winnerId;
+match.joueurTour = winnerId;
 
-    match.ballHolder = winnerId;
-    match.joueurTour = winnerId;
+const nextId = winnerId;
 
     // ===============================
     // 🎯 NEXT = BALLHOLDER (TOUJOURS)
@@ -3672,15 +3677,21 @@ const defender = allPlayers.find(
 ) || res.defender; 
 
     match.phaseDuel = {
-        active: true,
-        step: "attack_pave",
-        attacker,
-        defender,
-        attackPave: null,
-        defensePave: null,
-        starterAttack: match.pendingAttack,
-        starterDefense: defense
-    };
+    active: true,
+    step: "attack_pave",
+
+    attacker,
+    defender,
+
+    attackerJid: match.attacker,
+    defenderJid: match.defender,
+
+    attackPave: null,
+    defensePave: null,
+
+    starterAttack: match.pendingAttack,
+    starterDefense: defense
+};
 
     // ===============================
 // 🔥 NEXT MATCH UP
