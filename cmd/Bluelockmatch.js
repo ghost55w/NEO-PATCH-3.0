@@ -3471,16 +3471,14 @@ setTimeout(async () => {
 console.log("attackerJid =", match.phaseDuel.attackerJid);
 console.log("defenderJid =", match.phaseDuel.defenderJid);
 console.log("winnerId =", winnerId);
-    
+
 match.ballHolder = winnerId;
 match.joueurTour = winnerId;
 
-const nextId = winnerId;
-
-    // ===============================
-    // 🎯 NEXT = BALLHOLDER (TOUJOURS)
-    // ===============================
-    const nextId = match.ballHolder;
+// ===============================
+// 🎯 NEXT = BALLHOLDER (TOUJOURS)
+// ===============================
+const nextId = match.ballHolder;
 
     // ===============================
     // 📩 MESSAGE
