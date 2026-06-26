@@ -3799,36 +3799,36 @@ const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
 
 // ===============================
-// 🔥 NEXT UNIFIED (FIX IMPORTANT)
+// 🔥 NEXT UNIFIED
 // ===============================
-const baseNext =
-    match.joueurTour ||
-    match.id1;
+const baseNext = match.joueurTour || match.id1;
 
 const fallbackPlayer =
     [ ...(match.lineup1 || []), ...(match.lineup2 || []) ]
     .find(p => normalizeJid(p.id || p.jid) === baseNext);
 
-const nextId =
-    fallbackPlayer?.id ||
-    fallbackPlayer?.jid ||
-    baseNext;
+const nextId = fallbackPlayer?.id || fallbackPlayer?.jid || baseNext;
 
 const nextTag = getTagFromJid(nextId);
+
 
 // ===============================
 // ⚽ SYNC SAFE STATE
 // ===============================
 match.joueurTour = nextId;
-match.attacker = nextId;
-match.ballHolder = fallbackPlayer?.nom || match.ballHolder;
+
+// ❌ NE PAS TOUCHER match.attacker
+// ❌ NE PAS TOUCHER match.defender
+
+match.ballHolderJid = nextId;
+match.ballHolderPlayer = fallbackPlayer?.nom || "unknown";
 
 match.pendingAttack = null;
 match.waitingDefenseFrom = null;
-match.phaseDuelResolved = false;
+
 
 // ===============================
-// 📩 MESSAGE DEFENSE
+// 📩 MESSAGE
 // ===============================
 await ovl.sendMessage(chat, {
     text:
@@ -3846,14 +3846,13 @@ await ovl.sendMessage(chat, {
     mentions: [nextId]
 });
 
-// ===============================
-// ⚠️ WARNING 1 MIN
+    // ===============================
+// ⚠️ WARNING
 // ===============================
 if (match.warningTimer) clearTimeout(match.warningTimer);
 
 match.warningTimer = setTimeout(async () => {
 
-    if (match.phaseDuel?.active) return;
     if (match.joueurTour !== nextId) return;
 
     await ovl.sendMessage(chat, {
@@ -3869,14 +3868,13 @@ Il reste *1 MINUTE* pour jouer !
 
 }, 5 * 60 * 1000);
 
-// ===============================
-// ⏱️ LATENCE SAFE
+    // ===============================
+// ⏱️ LATENCE OUT
 // ===============================
 if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
 match.defenseTimer = setTimeout(() => {
 
-    if (match.phaseDuel?.active) return;
     if (match.joueurTour !== nextId) return;
 
     const opponent =
@@ -3892,6 +3890,9 @@ match.defenseTimer = setTimeout(() => {
         opponent;
 
     match.joueurTour = finalOpponent;
+
+    match.ballHolderJid = finalOpponent;
+    match.ballHolderPlayer = fallbackOpponent?.nom || "unknown";
 
     ovl.sendMessage(chat, {
         text:
