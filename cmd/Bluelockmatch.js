@@ -3521,8 +3521,9 @@ if (!match.pendingAttack) {
         );
 
     if (attackerPlayer) {
-        match.ballHolder = attackerPlayer.nom;
-    }
+    match.ballHolderPlayer = attackerPlayer.nom;
+    match.ballHolderJid = attackerId;
+}
 
     match.pendingAttack = action;
     match.hasPlayed = true;
@@ -3950,19 +3951,22 @@ console.log("=================================");
     let attacker = null;
 
     // ===============================
-    // ⚽ PORTEUR PRIORITAIRE
-    // ===============================
-    if (match.ballHolder) {
+// ⚽ PORTEUR PRIORITAIRE
+// ===============================
+if (match.ballHolderPlayer) {
 
-        attacker = allPlayers.find(
-            p => p.nom === match.ballHolder
-        );
+    attacker = allPlayers.find(
+        p => p.nom === match.ballHolderPlayer
+    );
 
-        if (!attacker) {
-            attacker = allPlayers[0];
-        }
+    if (!attacker) {
+        attacker = allPlayers[0];
     }
+}
 
+console.log("ballHolderPlayer =", match.ballHolderPlayer);
+console.log("attacker trouvé =", attacker?.nom);
+    
     // fallback
     if (!attacker) {
         attacker = findPlayer(attaqueText);
