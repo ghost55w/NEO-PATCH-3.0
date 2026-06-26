@@ -3468,11 +3468,17 @@ setTimeout(async () => {
     ? match.phaseDuel.attackerJid
     : match.phaseDuel.defenderJid;
 
+const winnerPlayer = duelResult.ok
+    ? match.phaseDuel.attacker
+    : match.phaseDuel.defender;
+
 console.log("attackerJid =", match.phaseDuel.attackerJid);
 console.log("defenderJid =", match.phaseDuel.defenderJid);
 console.log("winnerId =", winnerId);
 
-match.ballHolder = winnerId;
+match.ballHolderPlayer = winnerPlayer.nom;
+match.ballHolderJid = winnerId;
+
 match.joueurTour = winnerId;
 
 // ===============================
@@ -3496,16 +3502,18 @@ ${duelResult.msg}
         mentions: [nextId]
     });
 
+    
     // ===============================
-    // 🧹 CLEAN
-    // ===============================
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+// 🧹 CLEAN
+// ===============================
+match.phaseDuel = null;
+match.pendingAttack = null;
+match.waitingDefenseFrom = null;
+match.hasPlayed = true;
 
 }, 1000);
-    return true;
-} 
+    return true; 
+}    
     
 // ===============================
 // 🎯 ATTAQUE⚽
