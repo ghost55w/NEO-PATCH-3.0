@@ -1,8 +1,13 @@
 const { ovlcmd } = require("../lib/ovlcmd");
-const { getData, setfiche } = require("../DataBase/allstars_divs_fiches");
-const { cards } = require('../DataBase/cards');
+
+const {
+    getData,
+    setfiche,
+    getAllFiches
+} = require("../DataBase/allstars_divs_fiches");
+
+const { cards } = require("../DataBase/cards");
 const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
-const { getData, setfiche, getAllFiches } = require("../DataBase/allstars_divs_fiches");
 const config = require("../set");
 
 //-------- UTILITAIRES
@@ -21,40 +26,12 @@ const normalize = str =>
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]/g, "");
 
-
-//-------- JOUEURS QUI POSSÈDENT UNE CARTE
-const getCardOwners = async (cardName) => {
-    const allFiches = await getAllFiches();
-    const owners = [];
-    const normalizedCard = normalize(cardName);
-
-    for (const fiche of allFiches) {
-        const playerCards = (fiche.cards || "")
-            .split("\n")
-            .map(c => normalize(c.trim()));
-
-        if (playerCards.includes(normalizedCard) && fiche.jid) {
-            owners.push(fiche.jid);
-        }
-    }
-    return owners;
-};
-//================= ARENES =================
-const arenes = [
-    { nom: 'Desert Montagneux⛰️', image: 'https://files.catbox.moe/aoximf.jpg' },
-    { nom: 'Ville en Ruines🏚️', image: 'https://files.catbox.moe/2qmvpa.jpg' },
-    { nom: 'Centre-ville🏙️', image: 'https://files.catbox.moe/pzlkf9.jpg' },
-    { nom: 'Arise🌇', image: 'https://files.catbox.moe/3vlsmw.jpg' },
-    { nom: 'Salle du temps ⌛', image: 'https://files.catbox.moe/j4e1pp.jpg' },
-    { nom: 'Valley de la fin🗿', image: 'https://files.catbox.moe/m0k1jp.jpg' },
-    { nom: 'École d\'exorcisme de Tokyo📿', image: 'https://files.catbox.moe/rgznzb.jpg' },
-    { nom: 'Marinford🏰', image: 'https://files.catbox.moe/4bygut.jpg' },
-    { nom: 'Cathédrale⛩️', image: 'https://files.catbox.moe/ie6jvx.jpg' }
-];
-
 //================= DUELS PAR GROUPE =================
 const duelsEnCours = {};
+const matchAttente = {};
+
 let lastArenaIndex = -1;
+
 
 //================= UTILS =================
 function tirerAr() {
@@ -107,9 +84,6 @@ function generateFicheDuel(duel) {
 
 
 // COMMANDE DE LANCEMENT DU MATCH🌀🆚//
-const duelsEnCours = {};
-const matchAttente = {};
-
 ovlcmd({
     pattern: "match🌀",
     desc: "Lancer un match VS",
