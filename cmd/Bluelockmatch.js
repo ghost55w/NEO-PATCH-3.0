@@ -4286,94 +4286,26 @@ console.log("=================================");
         };
     }
 
-    const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
-
-    // ===============================
-    // 🔍 FIND PLAYER
-    // ===============================
-    const findPlayer = (txt) => {
-
-        const t = pureName(txt);
-
-        return allPlayers.find(p => {
-
-            const n = pureName(p.nom);
-
-            return t.includes(n) || n.includes(t);
-
-        }) || null;
-    };
-
-    let attacker = null;
-
-    // ===============================
-// ⚽ PORTEUR PRIORITAIRE
 // ===============================
-if (match.ballHolderPlayer) {
+// 🎯 JOUEURS DU DUEL (SOURCE UNIQUE)
+// ===============================
+const attacker = match.phaseDuel?.attacker;
+const defender = match.phaseDuel?.defender;
 
-    attacker = allPlayers.find(
-        p => p.nom === match.ballHolderPlayer
-    );
+console.log("DUEL ATTACKER =", attacker?.nom);
+console.log("DUEL DEFENDER =", defender?.nom);
 
-    if (!attacker) {
-        attacker = allPlayers[0];
-    }
+// ===============================
+// ❌ VALIDATION
+// ===============================
+if (!attacker || !defender) {
+
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Joueurs introuvables"
+    };
 }
-
-console.log("ballHolderPlayer =", match.ballHolderPlayer);
-console.log("attacker trouvé =", attacker?.nom);
-    
-    // fallback
-    if (!attacker) {
-        attacker = findPlayer(attaqueText);
-    }
-
-    let defender = findPlayer(defenseText);
-    // Empêcher attaquant = défenseur
-if (
-    defender &&
-    attacker &&
-    normalizeJid(defender.id || defender.jid) ===
-    normalizeJid(attacker.id || attacker.jid)
-) {
-
-    defender = allPlayers.find(
-        p =>
-            normalizeJid(p.id || p.jid) !==
-            normalizeJid(attacker.id || attacker.jid)
-            &&
-            pureName(defenseText).includes(
-                pureName(p.nom)
-            )
-    );
-}
-
-    // ===============================
-    // 🧠 TARGET TACTIQUE
-    // ===============================
-    const tacticalTarget =
-        detectTargetPlayer(defenseText, allPlayers);
-
-    if (tacticalTarget) {
-        defender = tacticalTarget;
-    }
-
-    console.log("🔍 attacker trouvé =", attacker);
-console.log("🔍 defender trouvé =", defender);
-    // ===============================
-    // ❌ VALIDATION
-    // ===============================
-    if (!attacker || !defender) {
-
-        return {
-            ok: false,
-            type: "erreur",
-            message: "❌ Joueurs introuvables"
-        };
-    }
 
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
