@@ -3638,9 +3638,9 @@ Il reste *1 MINUTE* pour défendre !
         const fallbackId = fallback?.id || fallback?.jid;
 
         match.joueurTour = fallbackId;
-        match.attacker = fallbackId;
-        match.ballHolder = fallback?.nom;
-
+match.ballHolderJid = fallbackId;
+match.ballHolderPlayer = fallback?.nom || attackerPlayer.nom;
+        
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -3940,9 +3940,10 @@ Il reste *1 MINUTE* pour répondre !
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
 
-        match.attacker = fallbackId;
-        match.defender = attackerId;
-        match.joueurTour = fallbackId;
+match.joueurTour = fallbackId;
+match.ballHolderJid = fallbackId;
+match.ballHolderPlayer = fallback?.nom || attackerPlayer.nom;
+        
 
         await ovl.sendMessage(chat, {
             text:
@@ -4009,17 +4010,21 @@ match.hasPlayed = true;
 if (res && res.type === "PASSIVE_BLOCK") {
 
     const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
+    ...(match.lineup1 || []),
+    ...(match.lineup2 || [])
+];
 
-   const attacker = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
+const attacker = allPlayers.find(
+    p => normalizeJid(p.id || p.jid) === normalizeJid(
+        match.phaseDuel?.attacker || match.attacker
+    )
 ) || res.attacker;
 
 const defender = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-) || res.defender; 
+    p => normalizeJid(p.id || p.jid) === normalizeJid(
+        match.phaseDuel?.defender || match.defender
+    )
+) || res.defender;
 
     match.phaseDuel = {
     active: true,
@@ -4044,6 +4049,13 @@ const defender = allPlayers.find(
 const nextId = match.attacker;
 
 const nextTag = getTagFromJid(nextId);
+    // ===============================
+// ⚽ SAFE STATE (IMPORTANT)
+// ===============================
+
+// SAFE ONLY (NE PAS TOUCHER IDENTITÉ DU DUEL)
+match.joueurTour = nextId;
+match.ballHolder = attacker.nom;
 
     // ⚽ SYNC CLEAN
     match.joueurTour = nextId;
