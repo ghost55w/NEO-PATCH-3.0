@@ -897,6 +897,334 @@ function detectIntentDribble(text) {
     );
 }
 
+// ===============================
+// 🛡️ TACKLE BLUEPRINTS
+// ===============================
+const TACKLE_BLUEPRINTS = {
+
+    // ===============================
+    // 🧱 TACLE GLISSÉ
+    // ===============================
+    "tacle glissé": {
+
+        description:
+            "Le joueur effectue un tacle glissé vers l'avant, au sol, pour intercepter le ballon avec la jambe tendue avec la semelle gauche / du pied gauche où droit.",
+
+        validation: {
+
+            posture: [
+                "dos au sol",
+                "allongé",
+                "glissé",
+                "au sol"
+            ],
+
+            bodyRotation: {
+                allowed: false
+            },
+
+            contact: [
+                "ballon",
+                "balle"
+            ],
+
+            bodyPart: [
+                "pied tendu",
+                "semelle",
+                "jambe tendue",
+                "pied gauche",
+                "pied droit"
+            ],
+
+            direction: [
+                "devant",
+                "en face",
+                "forward",
+                "avant"
+            ],
+
+            distanceMax: 2,
+
+            speed: {
+                required: true,
+                keywords: [
+                    "vitesse max",
+                    "vitesse maximale",
+                    "vmax",
+                    "tacle glissé"
+                ]
+            }
+        }
+    },
+
+    // ===============================
+    // 🧱 TACLE DEBOUT
+    // ===============================
+    "tacle debout": {
+
+        description:
+            "Le défenseur reste debout sur ses appuis et fait un tacle frontal où vers l'avant / devant visant le ballon avec la pointe du/de pied droit où gauche pour récupérer proprement le ballon où pousser vers l'avant sans se jeter.",
+
+        descriptionCas2:
+            "Le défenseur reste debout sur ses appuis et fait un tacle en diagonale sur la droite avec l'extérieur du pied droit où sur la gauche avec l'extérieur du pied gauche visant le ballon pour pousser vers la gauche où la droite.",
+
+        validation: {
+
+            posture: [
+                "debout",
+                "fléchi",
+                "équilibré",
+                "appui",
+                "stable"
+            ],
+
+            bodyRotation: {
+                allowed: false
+            },
+
+            contact: [
+                "ballon",
+                "balle"
+            ],
+
+            bodyPart: [
+                "pied",
+                "extérieur du pied",
+                "pointe de pied"
+            ],
+
+            direction: [
+                "face",
+                "devant",
+                "en face",
+                "diagonale",
+                "gauche",
+                "droite"
+            ],
+
+            distanceMax: 1,
+
+            speed: {
+                required: false,
+                keywords: [
+                    "tacle debout",
+                    "tacle frontal"
+                ]
+            }
+        }
+    },
+
+    // ===============================
+    // 🌀 TACLE CIRCULAIRE
+    // ===============================
+    "tacle circulaire": {
+
+        description:
+            "Le défenseur effectue un mouvement circulaire sur la gauche où la droite à 60°, 90° où 180° pied droit où pied gauche tendu pour récupérer le ballon où frapper le ballon avec l'intérieur du pied.",
+
+        validation: {
+
+            posture: [
+                "rotation",
+                "pivot",
+                "tourne",
+                "mouvement circulaire"
+            ],
+
+            bodyRotation: {
+                allowed: true,
+                required: true,
+                angles: [60, 90, 180]
+            },
+
+            contact: [
+                "ballon",
+                "balle"
+            ],
+
+            bodyPart: [
+                "pied",
+                "jambe",
+                "extérieur du pied",
+                "semelle",
+                "intérieur du pied"
+            ],
+
+            direction: [
+                "gauche",
+                "droite",
+                "rotation",
+                "60°",
+                "90°",
+                "180°"
+            ],
+
+            distanceMax: 1,
+
+            speed: {
+                required: true,
+                keywords: [
+                    "rotation rapide",
+                    "tourne vite",
+                    "pivote",
+                    "pivot",
+                    "tacle circulaire",
+                    "vmax",
+                    "vitesse maximale"
+                ]
+            }
+        }
+    }
+};
+
+// ===============================
+// ⚙️ VALIDATION TACKLE BLUEPRINT (UPDATED)
+// ===============================
+function validateTackleBlueprint(tackleName, actionText) {
+
+    const blueprint = TACKLE_BLUEPRINTS[tackleName];
+
+    if (!blueprint) {
+        return {
+            valid: false,
+            similarity: 0,
+            reason: `Blueprint introuvable pour : ${tackleName}`
+        };
+    }
+
+    const text = normalizeText(actionText);
+
+    let score = 0;
+    let maxScore = 0;
+
+    const addRule = (points, condition) => {
+        maxScore += points;
+        if (condition) score += points;
+    };
+
+    const v = blueprint.validation || {};
+
+    // ===============================
+    // 🧍 POSTURE
+    // ===============================
+    if (v.posture) {
+        addRule(
+            20,
+            containsAny(text, normalizeList(v.posture))
+        );
+    }
+
+    // ===============================
+    // 🧠 BODY ROTATION (ANGLES)
+    // ===============================
+    if (v.bodyRotation) {
+
+        const rotationTextMatch =
+            text.includes("60") ||
+            text.includes("90") ||
+            text.includes("180") ||
+            text.includes("rotation") ||
+            text.includes("pivot");
+
+        const allowedOk = v.bodyRotation.allowed === true
+            ? rotationTextMatch
+            : !rotationTextMatch;
+
+        addRule(15, allowedOk);
+
+        if (v.bodyRotation.required) {
+            addRule(10, rotationTextMatch);
+        }
+    }
+
+    // ===============================
+    // ⚽ CONTACT BALL
+    // ===============================
+    if (v.contact) {
+        addRule(
+            15,
+            containsAny(text, normalizeList(v.contact))
+        );
+    }
+
+    // ===============================
+    // 🦶 BODY PART
+    // ===============================
+    if (v.bodyPart) {
+        addRule(
+            15,
+            containsAny(text, normalizeList(v.bodyPart))
+        );
+    }
+
+    // ===============================
+    // 🎯 DIRECTION
+    // ===============================
+    if (v.direction) {
+        addRule(
+            10,
+            containsAny(text, normalizeList(v.direction))
+        );
+    }
+
+    // ===============================
+    // 📏 DISTANCE MAX (soft check)
+    // ===============================
+    if (v.distanceMax) {
+
+        const hasCloseRange =
+            text.includes("proche") ||
+            text.includes("court") ||
+            text.includes("devant") ||
+            text.includes("face") ||
+            text.includes("rapproché");
+
+        addRule(10, hasCloseRange);
+    }
+
+    // ===============================
+    // ⚡ SPEED REQUIREMENT
+    // ===============================
+    if (v.speed?.required) {
+
+        addRule(
+            15,
+            containsAny(text, normalizeList(v.speed.keywords))
+        );
+    }
+
+    // ===============================
+    // 🎯 SCORE FINAL
+    // ===============================
+    const similarity = maxScore > 0
+        ? Math.round((score / maxScore) * 100)
+        : 0;
+
+    console.log("🛡️ TACKLE =", tackleName);
+    console.log("🎯 SCORE =", score);
+    console.log("📊 MAX =", maxScore);
+    console.log("📈 SIMILARITY =", similarity + "%");
+
+    // ===============================
+    // ✅ RESULT
+    // ===============================
+    if (similarity >= 70) {
+        return {
+            valid: true,
+            tackle: tackleName,
+            similarity
+        };
+    }
+
+    return {
+        valid: false,
+        similarity,
+        reason: `Tacle ${tackleName} mal exécuté (${similarity}%)`
+    };
+}
+
+
+
 /* ===============================
 📐 MATH / TERRAIN ENGINE
 =================================*/
@@ -4185,7 +4513,7 @@ if (isDribbleAction && isTackleAction) {
     const attackStat = atkStats.dri || 50;
     const defenseStat = defStats.def || 50;
 
-    const attackScore = dribbleCheck?.score || 0;
+    const attackScore = dribbleCheck?.similarity || dribbleCheck?.score || 0;
     const defenseScore = defenseBlueprintScore || 0;
 
     const attackTotal = attackStat + attackScore;
@@ -4193,6 +4521,31 @@ if (isDribbleAction && isTackleAction) {
 
     const attackerWins = attackTotal > defenseTotal;
 
+    // ===============================
+    // 🧱 CAS 1 : TACLE MAL EXÉCUTÉ (< 50 blueprint)
+    // ===============================
+    if (defenseScore < 50) {
+
+        match.joueurTour = attacker.id || attacker.jid;
+
+        return {
+            ok: true,
+            type: "DRIBBLE_WIN_TACKLE_FAIL",
+            attacker,
+            defender,
+            attackStat,
+            defenseStat,
+            attackScore,
+            defenseScore,
+            attackTotal,
+            defenseTotal,
+            msg: `🔥⚽ ${attacker.nom} passe facilement, le tacle est mal exécuté...`
+        };
+    }
+
+    // ===============================
+    // ⚔️ CAS 2 : DRIBBLE VS TACLE NORMAL
+    // ===============================
     if (attackerWins) {
 
         match.joueurTour = attacker.id || attacker.jid;
@@ -4211,7 +4564,7 @@ if (isDribbleAction && isTackleAction) {
             msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
         };
 
-    } else {
+    } else if (defenseTotal > attackTotal) {
 
         match.joueurTour = defender.id || defender.jid;
 
@@ -4229,6 +4582,30 @@ if (isDribbleAction && isTackleAction) {
             msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
         };
     }
+
+    // ===============================
+    // 🎲 CAS 3 : ÉGALITÉ PARFAITE
+    // ===============================
+    const winner = Math.random() < 0.5 ? attacker : defender;
+
+    const isAttackerWin = winner === attacker;
+
+    match.joueurTour = winner.id || winner.jid;
+
+    return {
+        ok: isAttackerWin,
+        type: "DUEL_DRAW_RANDOM",
+        attacker,
+        defender,
+        attackStat,
+        defenseStat,
+        attackScore,
+        defenseScore,
+        attackTotal,
+        defenseTotal,
+        msg: `⚔️ Duel extrêmement serré... ${winner.nom} prend l’avantage !`
+    };
+}
 }
  // ===============================
 // 🧱 DÉFENSE PASSIVE SIMPLE 
