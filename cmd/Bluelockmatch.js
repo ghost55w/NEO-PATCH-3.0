@@ -4015,12 +4015,16 @@ if (res && res.type === "PASSIVE_BLOCK") {
 ];
 
 const attacker = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.phaseDuel.attackerJid)
-);
+    p => normalizeJid(p.id || p.jid) === normalizeJid(
+        match.phaseDuel?.attacker || match.attacker
+    )
+) || res.attacker;
 
 const defender = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.phaseDuel.defenderJid)
-);
+    p => normalizeJid(p.id || p.jid) === normalizeJid(
+        match.phaseDuel?.defender || match.defender
+    )
+) || res.defender;
 
     match.phaseDuel = {
     active: true,
@@ -4029,8 +4033,8 @@ const defender = allPlayers.find(
     attacker,
     defender,
 
-   attackerJid: normalizeJid(match.phaseDuel?.attackerJid || match.attacker),
-defenderJid: normalizeJid(match.phaseDuel?.defenderJid || match.defender), 
+    attackerJid: match.attacker,
+    defenderJid: match.defender,
 
     attackPave: null,
     defensePave: null,
@@ -4111,6 +4115,7 @@ Il reste *1 MINUTE* pour jouer le duel !
             const finalNext = fallback?.id || fallback?.jid || nextId;
 
             match.joueurTour = finalNext;
+            match.attacker = finalNext;
             match.ballHolder = fallback?.nom || attacker.nom;
 
             match.phaseDuel = null;
