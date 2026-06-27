@@ -863,12 +863,13 @@ function validateDribbleBlueprint(dribbleName, actionText) {
     // ✅ RESULT
     // ===============================
     if (similarity >= 70) {
-        return {
-            valid: true,
-            dribble: dribbleName,
-            similarity
-        };
-    }
+    return {
+        valid: true,
+        dribble: dribbleName,
+        similarity,
+        score: similarity // 👈 
+    };
+}
 
     return {
         valid: false,
@@ -3486,24 +3487,33 @@ match.joueurTour = winnerId;
 // ===============================
 const nextId = match.ballHolderJid;
     
-    // ===============================
-    // 📩 MESSAGE
-    // ===============================
-    await ovl.sendMessage(chat, {
-        text:
+// ===============================
+// 🛡️⚽ MESSAGE RÉSOLUTION DUEL
+// ===============================
+await ovl.sendMessage(chat, {
+    text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${duelResult.msg}
+
+⚡ ${duelResult.attacker.nom}
+├ Dribble : ${duelResult.attackStat}
+├ Score Pavé : ${duelResult.attackScore}
+└ Total : ${duelResult.attackTotal} ${duelResult.ok ? "✅" : "❌"}
+
+🛡️ ${duelResult.defender.nom}
+├ Défense : ${duelResult.defenseStat}
+├ Score Pavé : ${duelResult.defenseScore}
+└ Total : ${duelResult.defenseTotal} ${duelResult.ok ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(nextId)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
-    });
+    mentions: [nextId]
+});    
 
-    
-    // ===============================
+// ===============================
 // 🧹 CLEAN
 // ===============================
 match.phaseDuel = null;
@@ -4165,6 +4175,7 @@ const isTackleAction =
     def.includes("contre") ||
     def.includes("pied") ||
     def.includes("talon");
+ 
 
 // ===============================
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
@@ -4174,7 +4185,13 @@ if (isDribbleAction && isTackleAction) {
     const attackStat = atkStats.dri || 50;
     const defenseStat = defStats.def || 50;
 
-    const attackerWins = attackStat > defenseStat;
+    const attackScore = dribbleCheck?.score || 0;
+    const defenseScore = defenseBlueprintScore || 0;
+
+    const attackTotal = attackStat + attackScore;
+    const defenseTotal = defenseStat + defenseScore;
+
+    const attackerWins = attackTotal > defenseTotal;
 
     if (attackerWins) {
 
@@ -4185,6 +4202,12 @@ if (isDribbleAction && isTackleAction) {
             type: "DRIBBLE_WIN",
             attacker,
             defender,
+            attackStat,
+            defenseStat,
+            attackScore,
+            defenseScore,
+            attackTotal,
+            defenseTotal,
             msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
         };
 
@@ -4197,11 +4220,16 @@ if (isDribbleAction && isTackleAction) {
             type: "DRIBBLE_LOSE",
             attacker,
             defender,
+            attackStat,
+            defenseStat,
+            attackScore,
+            defenseScore,
+            attackTotal,
+            defenseTotal,
             msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
         };
     }
 }
-
  // ===============================
 // 🧱 DÉFENSE PASSIVE SIMPLE 
 // ===============================
