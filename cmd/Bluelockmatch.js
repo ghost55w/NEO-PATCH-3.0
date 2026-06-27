@@ -4636,7 +4636,7 @@ if (isDribbleAction && isTackleAction) {
         msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
     };
 }
-}
+    
  // ===============================
 // 🧱 DÉFENSE PASSIVE SIMPLE 
 // ===============================
