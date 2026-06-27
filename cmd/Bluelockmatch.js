@@ -4489,64 +4489,119 @@ if (!dribbleCheck.valid) {
     
 }
 
-    
+ // ===============================
+// 🛡️ DÉTECTION TACLE 
 // ===============================
-// 🛡️  DÉTECTION TACLE
-// ===============================
-const isTackleAction =
+let detectedTackle = null;
+let tackleCheck = null;
+
+// on essaie de trouver un tacle connu
+detectedTackle = Object.keys(TACKLE_BLUEPRINTS)
+    .find(t => def.includes(t));
+
+// fallback si intention défensive mais tacle non explicite
+const explicitTackle =
     def.includes("tacle") ||
     def.includes("tacle debout") ||
     def.includes("tacle glissé") ||
     def.includes("tacle circulaire") ||
-    def.includes("tacle frontal") ||
-    def.includes("intercepte") ||
-    def.includes("contre") ||
-    def.includes("pied") ||
-    def.includes("talon");
- 
+    def.includes("tacler");
+
+if (!detectedTackle && explicitTackle) {
+    detectedTackle = "tacle debout"; // fallback intelligent
+}
+
+const isTackleAction = !!detectedTackle;   
+// ===============================
+// 🧱 VALIDATION TACLE
+// ===============================
+if (isTackleAction) {
+
+    tackleCheck = validateTackleBlueprint(
+        detectedTackle,
+        defenseText
+    );
+
+    console.log("🛡️ TACKLE DETECTED =", detectedTackle);
+    console.log("🛡️ TACKLE CHECK =", tackleCheck);
+
+    // ❌ tacle raté
+    if (!tackleCheck.valid) {
+
+        match.ballHolder = attacker.nom;
+
+        const attackerId = attacker.id || attacker.jid;
+
+        match.joueurTour = attackerId;
+        match.defender = attackerId;
+        match.waitingDefenseFrom = null;
+
+        return {
+            ok: true,
+            type: "BAD_TACKLE",
+            attacker,
+            defender,
+            msg:
+`❌ ${defender.nom} rate complètement son intervention défensive.
+
+⚡ ${attacker.nom} garde la possession !`,
+            details: tackleCheck.reason
+        };
+    }
+}
+
+    
 
 // ===============================
-// ⚽ PRIORITÉ 1 : DRIBBLE VS TACLE
+// ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
 // ===============================
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
     const defenseStat = defStats.def || 50;
 
-    const attackScore = dribbleCheck?.similarity || dribbleCheck?.score || 0;
-    const defenseScore = defenseBlueprintScore || 0;
+    const attackScore = dribbleCheck?.similarity || 0;
+    const defenseScore = tackleCheck?.similarity || 0;
 
     const attackTotal = attackStat + attackScore;
     const defenseTotal = defenseStat + defenseScore;
 
-    const attackerWins = attackTotal > defenseTotal;
+    let winner = null;
 
     // ===============================
-    // 🧱 CAS 1 : TACLE MAL EXÉCUTÉ (< 50 blueprint)
+    // 🧠 CAS 1 : DRIBBLE PARFAIT / TACLE RATÉ
     // ===============================
-    if (defenseScore < 50) {
-
-        match.joueurTour = attacker.id || attacker.jid;
-
-        return {
-            ok: true,
-            type: "DRIBBLE_WIN_TACKLE_FAIL",
-            attacker,
-            defender,
-            attackStat,
-            defenseStat,
-            attackScore,
-            defenseScore,
-            attackTotal,
-            defenseTotal,
-            msg: `🔥⚽ ${attacker.nom} passe facilement, le tacle est mal exécuté...`
-        };
+    if (dribbleCheck?.valid && !tackleCheck?.valid) {
+        winner = "attacker";
     }
 
     // ===============================
-    // ⚔️ CAS 2 : DRIBBLE VS TACLE NORMAL
+    // 🧠 CAS 2 : TACLE PARFAIT / DRIBBLE RATÉ
     // ===============================
-    if (attackerWins) {
+    else if (!dribbleCheck?.valid && tackleCheck?.valid) {
+        winner = "defender";
+    }
+
+    // ===============================
+    // 🧠 CAS 3 : LES DEUX VALIDES
+    // ===============================
+    else if (dribbleCheck?.valid && tackleCheck?.valid) {
+        winner = attackTotal > defenseTotal ? "attacker" : "defender";
+    }
+
+    // ===============================
+    // 🧠 CAS 4 : LES DEUX RATÉS
+    // ===============================
+    else {
+        if (attackTotal > defenseTotal) winner = "attacker";
+        else if (defenseTotal > attackTotal) winner = "defender";
+        else winner = Math.random() > 0.5 ? "attacker" : "defender";
+    }
+
+    // ===============================
+    // ⚔️ RESULT FINAL
+    // ===============================
+    if (winner === "attacker") {
 
         match.joueurTour = attacker.id || attacker.jid;
 
@@ -4563,38 +4618,13 @@ if (isDribbleAction && isTackleAction) {
             defenseTotal,
             msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
         };
-
-    } else if (defenseTotal > attackTotal) {
-
-        match.joueurTour = defender.id || defender.jid;
-
-        return {
-            ok: false,
-            type: "DRIBBLE_LOSE",
-            attacker,
-            defender,
-            attackStat,
-            defenseStat,
-            attackScore,
-            defenseScore,
-            attackTotal,
-            defenseTotal,
-            msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
-        };
     }
 
-    // ===============================
-    // 🎲 CAS 3 : ÉGALITÉ PARFAITE
-    // ===============================
-    const winner = Math.random() < 0.5 ? attacker : defender;
-
-    const isAttackerWin = winner === attacker;
-
-    match.joueurTour = winner.id || winner.jid;
+    match.joueurTour = defender.id || defender.jid;
 
     return {
-        ok: isAttackerWin,
-        type: "DUEL_DRAW_RANDOM",
+        ok: false,
+        type: "DRIBBLE_LOSE",
         attacker,
         defender,
         attackStat,
@@ -4603,7 +4633,7 @@ if (isDribbleAction && isTackleAction) {
         defenseScore,
         attackTotal,
         defenseTotal,
-        msg: `⚔️ Duel extrêmement serré... ${winner.nom} prend l’avantage !`
+        msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
     };
 }
 }
