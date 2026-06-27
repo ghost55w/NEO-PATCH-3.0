@@ -3484,8 +3484,8 @@ match.joueurTour = winnerId;
 // ===============================
 // 🎯 NEXT = BALLHOLDER (TOUJOURS)
 // ===============================
-const nextId = match.ballHolder;
-
+const nextId = match.ballHolderJid;
+    
     // ===============================
     // 📩 MESSAGE
     // ===============================
