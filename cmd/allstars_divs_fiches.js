@@ -22,21 +22,19 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
     try {
       const data = await getData({ jid: jid });
 
-      // Valeurs par défaut si undefined
-      data.niveu_xp = data.niveu_xp ?? 0;
-      data.close_fight = data.close_fight ?? 0;
-      data.cards = data.cards ?? "";
-
       if (!arg.length) {
-        const fiche = `░▒▒░░▒░ *👤N E O P L A Y E R 🎮*
+        const fiche = `░▒░ *👤N E O P L A Y E R | RAZORX⚡™ 🎮*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Pseudo👤*: ${data.pseudo}
+◇ *User👤*: ${data.user}
+◇ *Surnom(s)👤*: ${data.surnom}
 ◇ *Classement continental🌍:* ${data.classement}
-◇ *Niveau XP⏫*: ${data.niveu_xp} ▲
+◇ *Experience⏫:* ${data.exp} Exp
+◇ *Niveau🎖️*: ${data.niveau} ▲
 ◇ *Division🛡️*: ${data.division}
 ◇ *Rank 🎖️*: ${data.rang}
 ◇ *Classe🎖️*: ${data.classe}
-◇ *Saisons Pro🏆*: ${data.saison_pro}
+
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds} ©🧭
 ◇ *Fans👥*: ${data.fans} 👥
@@ -58,13 +56,16 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
 ░▒░▒░ STATS 📊
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 📈 Note: ${data.note}/100
-⌬ *Talent⭐ :*      ▱▱▱▱▬▬▬ ${data.talent}
+⌬ *Talent⭐:* ▱▱▱▱▬▬▬ ${data.talent}
+⌬ *Strikes👊🏻:* ▱▱▱▱▬▬▬ ${data.strikes}
+⌬ *Attaques🌀:* ▱▱▱▱▬▬▬ ${data.attaques}
 
-░▒░▒░ CARDS 🎴: ${data.cards.split("\n").length}
+░▒░▒░ CARDS 🎴: ${countCards(data.cards)}
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 🎴 ${data.cards.split("\n").join(" • ")}
+
 ╰───────────────────
-                *⌬𝗡SL PRO ESPORTS™🏆*`;
+░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
 
         await ovl.sendMessage(ms_org, {
           video: { url: 'https://files.catbox.moe/0qzigf.mp4' },
