@@ -7,6 +7,14 @@ function normalizeText(text) {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+function countCards(cardsRaw) {
+  if (!cardsRaw) return 0;
+  return cardsRaw
+    .split("\n")
+    .map(c => c.trim())
+    .filter(Boolean).length;
+}
+
 function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
   if (registeredFiches.has(nom_joueur)) return;
   registeredFiches.add(nom_joueur);
