@@ -257,7 +257,7 @@ async function addOrUpdateFiche(code_fiche, jid, image_oc, division) {
 
 // ================= INIT AUTO =================
 
-async function initFichesAuto() {
+async function initFichesAuto(ovl) {
   console.log("[INIT] Début chargement fiches...");
 
   try {
@@ -288,7 +288,7 @@ async function initFichesAuto() {
   }
 }
 
-await initFichesAuto();
+initFichesAuto(ovl);
 
 // ================= ADD FICHE =================
 
