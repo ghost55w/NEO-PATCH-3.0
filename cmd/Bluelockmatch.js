@@ -3638,9 +3638,9 @@ Il reste *1 MINUTE* pour défendre !
         const fallbackId = fallback?.id || fallback?.jid;
 
         match.joueurTour = fallbackId;
-match.ballHolderJid = fallbackId;
-match.ballHolderPlayer = fallback?.nom || attackerPlayer.nom;
-        
+        match.attacker = fallbackId;
+        match.ballHolder = fallback?.nom;
+
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -3940,10 +3940,9 @@ Il reste *1 MINUTE* pour répondre !
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
 
-match.joueurTour = fallbackId;
-match.ballHolderJid = fallbackId;
-match.ballHolderPlayer = fallback?.nom || attackerPlayer.nom;
-        
+        match.attacker = fallbackId;
+        match.defender = attackerId;
+        match.joueurTour = fallbackId;
 
         await ovl.sendMessage(chat, {
             text:
@@ -4010,21 +4009,17 @@ match.hasPlayed = true;
 if (res && res.type === "PASSIVE_BLOCK") {
 
     const allPlayers = [
-    ...(match.lineup1 || []),
-    ...(match.lineup2 || [])
-];
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
 
-const attacker = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(
-        match.phaseDuel?.attacker || match.attacker
-    )
+   const attacker = allPlayers.find(
+    p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
 ) || res.attacker;
 
 const defender = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(
-        match.phaseDuel?.defender || match.defender
-    )
-) || res.defender;
+    p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
+) || res.defender; 
 
     match.phaseDuel = {
     active: true,
@@ -4049,13 +4044,6 @@ const defender = allPlayers.find(
 const nextId = match.attacker;
 
 const nextTag = getTagFromJid(nextId);
-    // ===============================
-// ⚽ SAFE STATE (IMPORTANT)
-// ===============================
-
-// SAFE ONLY (NE PAS TOUCHER IDENTITÉ DU DUEL)
-match.joueurTour = nextId;
-match.ballHolder = attacker.nom;
 
     // ⚽ SYNC CLEAN
     match.joueurTour = nextId;
@@ -4286,26 +4274,94 @@ console.log("=================================");
         };
     }
 
-// ===============================
-// 🎯 JOUEURS DU DUEL (SOURCE UNIQUE)
-// ===============================
-const attacker = match.phaseDuel?.attacker;
-const defender = match.phaseDuel?.defender;
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
 
-console.log("DUEL ATTACKER =", attacker?.nom);
-console.log("DUEL DEFENDER =", defender?.nom);
+    // ===============================
+    // 🔍 FIND PLAYER
+    // ===============================
+    const findPlayer = (txt) => {
 
-// ===============================
-// ❌ VALIDATION
-// ===============================
-if (!attacker || !defender) {
+        const t = pureName(txt);
 
-    return {
-        ok: false,
-        type: "erreur",
-        message: "❌ Joueurs introuvables"
+        return allPlayers.find(p => {
+
+            const n = pureName(p.nom);
+
+            return t.includes(n) || n.includes(t);
+
+        }) || null;
     };
+
+    let attacker = null;
+
+    // ===============================
+// ⚽ PORTEUR PRIORITAIRE
+// ===============================
+if (match.ballHolderPlayer) {
+
+    attacker = allPlayers.find(
+        p => p.nom === match.ballHolderPlayer
+    );
+
+    if (!attacker) {
+        attacker = allPlayers[0];
+    }
 }
+
+console.log("ballHolderPlayer =", match.ballHolderPlayer);
+console.log("attacker trouvé =", attacker?.nom);
+    
+    // fallback
+    if (!attacker) {
+        attacker = findPlayer(attaqueText);
+    }
+
+    let defender = findPlayer(defenseText);
+    // Empêcher attaquant = défenseur
+if (
+    defender &&
+    attacker &&
+    normalizeJid(defender.id || defender.jid) ===
+    normalizeJid(attacker.id || attacker.jid)
+) {
+
+    defender = allPlayers.find(
+        p =>
+            normalizeJid(p.id || p.jid) !==
+            normalizeJid(attacker.id || attacker.jid)
+            &&
+            pureName(defenseText).includes(
+                pureName(p.nom)
+            )
+    );
+}
+
+    // ===============================
+    // 🧠 TARGET TACTIQUE
+    // ===============================
+    const tacticalTarget =
+        detectTargetPlayer(defenseText, allPlayers);
+
+    if (tacticalTarget) {
+        defender = tacticalTarget;
+    }
+
+    console.log("🔍 attacker trouvé =", attacker);
+console.log("🔍 defender trouvé =", defender);
+    // ===============================
+    // ❌ VALIDATION
+    // ===============================
+    if (!attacker || !defender) {
+
+        return {
+            ok: false,
+            type: "erreur",
+            message: "❌ Joueurs introuvables"
+        };
+    }
 
     const atkStats = attacker.stats || {};
     const defStats = defender.stats || {};
