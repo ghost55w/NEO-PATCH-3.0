@@ -3,352 +3,40 @@ const { getData, setfiche, getAllFiches, add_id, del_fiche } = require('../DataB
 
 const registeredFiches = new Set();
 
-// ================= UTILITAIRES =================
-
 function normalizeText(text) {
-  return text
-    ?.toString()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function countCards(cardsRaw) {
-  if (!cardsRaw) return 0;
-  return cardsRaw
-    .split("\n")
-    .map(c => c.trim())
-    .filter(Boolean).length;
-}
-
-// ================= CONSTANTES =================
-
-const MAX_LEVEL = 20;
-
-const LEVEL_REWARD_FIXED = {
-  golds: 500000,
-  fans: 50000
-};
-
-// ================= RECOMPENSES =================
-
-async function giveLevelRewards(jid, level, ovl, ms) {
-  const dataRaw = await getData({ jid });
-  const data = dataRaw?.dataValues ?? dataRaw ?? {};
-
-  for (const [col, value] of Object.entries(LEVEL_REWARD_FIXED)) {
-    const oldVal = Number(data[col]) || 0;
-    await setfiche(col, oldVal + value, jid);
-  }
-
-  await ovl.sendMessage(ms, {
-    text:
-`🎁 *Récompenses niveau ${level} !*
-
-💰 Golds +${LEVEL_REWARD_FIXED.golds}
-👥 Fans +${LEVEL_REWARD_FIXED.fans}`
-  });
-}
-
-// ================= LEVEL SYSTEM =================
-
-async function checkLevel(jid, oldExp, newExp, ovl, ms_org) {
-
-  oldExp = Number(oldExp) || 0;
-  newExp = Number(newExp) || 0;
-
-  const dataRaw = await getData({ jid });
-  const data = dataRaw?.dataValues ?? dataRaw ?? {};
-
-  let currentLevel = Number(data.niveau) || 0;
-
-  const oldLevel = Math.floor(oldExp / 100);
-  const newLevel = Math.floor(newExp / 100);
-
-  // 🔼 LEVEL UP
-  if (newLevel > oldLevel) {
-
-    const levelsGained = newLevel - oldLevel;
-
-    for (let i = 0; i < levelsGained; i++) {
-
-      if (currentLevel >= MAX_LEVEL) break;
-
-      currentLevel++;
-      await setfiche("niveau", currentLevel, jid);
-
-      await ovl.sendMessage(ms_org, {
-        text: `🏆 Promotion ! @${jid.split('@')[0]} passe niveau ${currentLevel} ▲`,
-        mentions: [jid]
-      });
-
-      await giveLevelRewards(jid, currentLevel, ovl, ms_org);
-    }
-  }
-
-  // 🔽 LEVEL DOWN
-  else if (newLevel < oldLevel) {
-
-    const levelsLost = oldLevel - newLevel;
-
-    for (let i = 0; i < levelsLost; i++) {
-
-      if (currentLevel <= 0) break;
-
-      currentLevel--;
-      await setfiche("niveau", currentLevel, jid);
-
-      await ovl.sendMessage(ms_org, {
-        text: `🔻 @${jid.split('@')[0]} redescend niveau ${currentLevel} ▼`,
-        mentions: [jid]
-      });
-    }
-  }
-}
-
-// ================= UPDATE DATA =================
-
-async function updatePlayerData(updates, jid, ovl, ms_org) {
-
-  for (const update of updates) {
-
-    await setfiche(update.colonne, update.newValue, jid);
-
-    if (update.colonne === "exp") {
-      await checkLevel(jid, update.oldValue, update.newValue, ovl, ms_org);
-    }
-  }
-}
-
-// ================= PROCESS UPDATES =================
-
-async function processUpdates(args, jid) {
-
-  if (!args || !args.length) throw new Error("Arguments manquants pour mise à jour");
-
-  const updates = [];
-
-  const dataRaw = await getData({ jid });
-  const values = dataRaw?.dataValues ?? dataRaw ?? {};
-  const columns = Object.keys(values);
-
-  let i = 0;
-
-  while (i < args.length) {
-
-    const object = args[i++];
-    const signe = args[i++];
-
-    if (!object || !signe) throw new Error("Arguments incomplets");
-
-    if (!columns.includes(object)) {
-      throw new Error(`Colonne inexistante : ${object}`);
-    }
-
-    const oldValue = values[object];
-    let newValue;
-
-    let texte = [];
-
-    if (object === "commentaire") {
-      texte = args.slice(i);
-      i = args.length;
-    } else {
-      while (
-        i < args.length &&
-        !['+', '-', '=', 'add', 'supp'].includes(args[i]) &&
-        !columns.includes(args[i])
-      ) {
-        texte.push(args[i++]);
-      }
-    }
-
-    texte = texte.join(" ");
-
-    // ===== CARDS =====
-    if (object === "cards") {
-
-      let list = (oldValue || "").split("\n").filter(Boolean);
-
-      const items = texte
-        ? texte.split(",").map(x => x.trim()).filter(Boolean)
-        : [];
-
-      if (signe === "+") {
-        for (const card of items) {
-          if (!list.some(c => normalizeText(c) === normalizeText(card))) {
-            list.push(card);
-          }
-        }
-      }
-      else if (signe === "-") {
-        list = list.filter(c =>
-          !items.map(normalizeText).includes(normalizeText(c))
-        );
-      }
-      else if (signe === "=") {
-        newValue = items.length ? items.join("\n") : list.join("\n");
-        updates.push({ colonne: "cards", oldValue, newValue });
-        continue;
-      }
-      else {
-        throw new Error("Cards accepte seulement + - =");
-      }
-
-      newValue = list.join("\n");
-      updates.push({ colonne: "cards", oldValue, newValue });
-      continue;
-    }
-
-    // ===== NUMERIQUE =====
-    if (signe === "+" || signe === "-") {
-      const n1 = Number(oldValue) || 0;
-      const n2 = Number(texte) || 0;
-      newValue = signe === "+" ? n1 + n2 : n1 - n2;
-    }
-
-    // ===== REMPLACEMENT =====
-    else if (signe === "=") {
-      newValue = texte;
-    }
-
-    // ===== AJOUT TEXTE =====
-    else if (signe === "add") {
-      newValue = (oldValue + " " + texte).trim();
-    }
-
-    // ===== SUPPRESSION TEXTE =====
-    else if (signe === "supp") {
-      newValue = (oldValue || "").replace(new RegExp(texte, "gi"), "").trim();
-    }
-
-    else {
-      throw new Error(`Signe invalide : ${signe}`);
-    }
-
-    updates.push({ colonne: object, oldValue, newValue });
-  }
-
-  return updates;
-}
-
-// ================= ADD OR UPDATE FICHE =================
-
-async function addOrUpdateFiche(code_fiche, jid, image_oc, division) {
-
-  const existing = await getData({ jid });
-
-  if (existing) {
-    await setfiche("code_fiche", code_fiche, jid);
-    await setfiche("division", division, jid);
-    await setfiche("oc_url", image_oc, jid);
-  }
-  else {
-    await add_id(jid, {
-      code_fiche,
-      division,
-      oc_url: image_oc
-    });
-  }
-
-  registeredFiches.add(code_fiche);
-}
-
-// ================= INIT AUTO =================
-
-async function initFichesAuto(ovl) {
-  console.log("[INIT] Début chargement fiches...");
-
-  try {
-    const all = await getAllFiches();
-    console.log(`[INIT] ${all?.length || 0} fiches trouvées en base`);
-
-    if (!all?.length) return;
-
-    for (const player of all) {
-
-      if (!player.code_fiche || !player.jid) continue;
-
-      registeredFiches.delete(player.code_fiche);
-
-      add_fiche(
-        player.code_fiche,
-        player.jid,
-        player.oc_url || "",
-        player.division || "Other",
-        ovl
-      );
-    }
-
-    console.log(`[INIT] ${registeredFiches.size} commandes dynamiques enregistrées`);
-    console.log("Fiches chargées ✅");
-  } catch (e) {
-    console.error("Erreur initFichesAuto:", e);
-  }
-}
-
-initFichesAuto(ovl);
-
-// ================= ADD FICHE =================
-
-function add_fiche(nom_joueur, jid_real, image_oc, joueur_div, ovl) {
-
-  if (registeredFiches.has(nom_joueur)) registeredFiches.delete(nom_joueur);
+function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
+  if (registeredFiches.has(nom_joueur)) return;
   registeredFiches.add(nom_joueur);
-
-  if (!ovl) return; // si ovl non fourni, on ne crée pas la commande
 
   ovlcmd({
     nom_cmd: nom_joueur,
     classe: joueur_div,
     react: "✅"
   },
-
-  async (ms_org, ovl_instance, cmd_options) => {
-
+  async (ms_org, ovl, cmd_options) => {
     const { repondre, ms, arg, prenium_id } = cmd_options;
 
     try {
+      const data = await getData({ jid: jid });
 
-      const dataRaw = await getData({ jid: jid_real });
-      if (!dataRaw) return await repondre("❌ Fiche introuvable pour ce joueur.");
-
-      const data = dataRaw?.dataValues ?? dataRaw ?? {};
-
-      const pseudo = data.pseudo ?? "Non défini";
-      const user = data.user ?? "Non défini";
-      const surnom = data.surnom ?? "Aucun";
-      const classement = data.classement ?? "Non classé";
-      const exp = Number(data.exp) || 0;
-      const niveau = Math.min(Number(data.niveau) || 0, 20);
-      const division = data.division ?? joueur_div ?? "Other";
-      const rang = data.rang ?? "Non défini";
-      const classe = data.classe ?? "Non défini";
-      const golds = Number(data.golds) || 0;
-      const fans = Number(data.fans) || 0;
-      const archetype = data.archetype ?? "Non défini";
-
-      const victoires = Number(data.victoires) || 0;
-      const defaites = Number(data.defaites) || 0;
-
-      const cardsRaw = data.cards ?? "";
-      const image = data.oc_url || image_oc || "https://files.catbox.moe/4quw3r.jpg";
+      // Valeurs par défaut si undefined
+      data.niveu_xp = data.niveu_xp ?? 0;
+      data.close_fight = data.close_fight ?? 0;
+      data.cards = data.cards ?? "";
 
       if (!arg.length) {
-
-        const fiche = `░▒░ *👤N E O P L A Y E R | RAZORX⚡™ 🎮*
+        const fiche = `░▒▒░░▒░ *👤N E O P L A Y E R 🎮*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Pseudo👤*: ${data.pseudo}
-◇ *User👤*: ${data.user}
-◇ *Surnom(s)👤*: ${data.surnom}
 ◇ *Classement continental🌍:* ${data.classement}
-◇ *Experience⏫:* ${data.exp} Exp
-◇ *Niveau🎖️*: ${data.niveau} ▲
+◇ *Niveau XP⏫*: ${data.niveu_xp} ▲
 ◇ *Division🛡️*: ${data.division}
 ◇ *Rank 🎖️*: ${data.rang}
 ◇ *Classe🎖️*: ${data.classe}
-
+◇ *Saisons Pro🏆*: ${data.saison_pro}
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds} ©🧭
 ◇ *Fans👥*: ${data.fans} 👥
@@ -370,83 +58,203 @@ function add_fiche(nom_joueur, jid_real, image_oc, joueur_div, ovl) {
 ░▒░▒░ STATS 📊
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 📈 Note: ${data.note}/100
-⌬ *Talent⭐:* ▱▱▱▱▬▬▬ ${data.talent}
-⌬ *Strikes👊🏻:* ▱▱▱▱▬▬▬ ${data.strikes}
-⌬ *Attaques🌀:* ▱▱▱▱▬▬▬ ${data.attaques}
+⌬ *Talent⭐ :*      ▱▱▱▱▬▬▬ ${data.talent}
 
-░▒░▒░ CARDS 🎴: ${countCards(data.cards)}
+░▒░▒░ CARDS 🎴: ${data.cards.split("\n").length}
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 🎴 ${data.cards.split("\n").join(" • ")}
-
 ╰───────────────────
-░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
+                *⌬𝗡SL PRO ESPORTS™🏆*`;
 
-        return ovl.sendMessage(
-          ms_org,
-          {
-            image: { url: data.oc_url },
-            caption: fiche
-          },
-          { quoted: ms }
-        );
+        await ovl.sendMessage(ms_org, {
+          video: { url: 'https://files.catbox.moe/0qzigf.mp4' },
+          gifPlayback: true,
+          caption: ""
+        }, { quoted: ms });
+
+        return ovl.sendMessage(ms_org, {
+          image: { url: data.oc_url },
+          caption: fiche
+        }, { quoted: ms });
       }
 
-      if (!prenium_id) {
-        return await repondre("⛔ Accès refusé ! Seuls les membres autorisés peuvent modifier.");
-      }
+      if (!prenium_id) return await repondre("⛔ Accès refusé ! Seuls les membres de la NS peuvent faire ça.");
 
-      const updates = await processUpdates(arg, jid_real);
-      await updatePlayerData(updates, jid_real, ovl, ms_org);
+      const updates = await processUpdates(arg, jid);
+      await updatePlayerData(updates, jid);
 
-      const message = updates
-        .map(u => `🛠️ *${u.colonne}* : \`${u.oldValue}\` ➤ \`${u.newValue}\``)
-        .join("\n");
+      const message = updates.map(u =>
+        `🛠️ *${u.colonne}* modifié : \`${u.oldValue}\` ➤ \`${u.newValue}\``
+      ).join('\n');
 
       await repondre("✅ Fiche mise à jour avec succès !\n\n" + message);
 
     } catch (err) {
-      console.error("Erreur fiche:", err);
+      console.error("Erreur:", err);
       await repondre("❌ Une erreur est survenue. Vérifie les paramètres.");
     }
   });
 }
 
-// ================= COMMANDES =================
+async function processUpdates(args, jid) {
+  const updates = [];
+  const data = await getData({ jid: jid });
+  const columns = Object.keys(data.dataValues);
+  let i = 0;
 
+  while (i < args.length) {
+    const object = args[i++];
+    const signe = args[i++];
+
+    // On récupère tous les mots suivants comme valeur jusqu'au prochain signe ou colonne
+    let texte = [];
+    while (i < args.length && !['+', '-', '=', 'add', 'supp'].includes(args[i]) && !columns.includes(args[i])) {
+      texte.push(args[i++]);
+    }
+
+    if (!columns.includes(object)) {
+      throw new Error(`❌ La colonne '${object}' n'existe pas.`);
+    }
+
+    const oldValue = data[object];
+    let newValue;
+
+    // --- Gestion spéciale pour les cards ---
+    if (object === "cards") {
+  const old = oldValue || "";
+  let list = old.split("\n").filter(x => x.trim() !== "");
+
+  const fullText = texte.join(" "); // tout le texte après le signe
+  // si '=' et rien après -> on veut vider
+  const items = fullText.length ? fullText.split(",").map(x => x.trim()).filter(x => x.length > 0) : [];
+
+  if (signe === "+") {
+    for (const card of items) {
+      if (!list.includes(card)) list.push(card);
+    }
+  } else if (signe === "-") {
+    for (const card of items) {
+      list = list.filter(c => c !== card);
+    }
+  } else if (signe === "=") {
+    // remplace complètement : si items est vide => vide
+    list = items;
+  } else {
+    throw new Error("❌ Le champ 'cards' accepte uniquement '+', '-' ou '='");
+  }
+
+  newValue = list.join("\n");
+
+  updates.push({
+    colonne: "cards",
+    oldValue: old,
+    newValue
+  });
+
+  continue;
+    }
+
+    // --- Gestion classique pour les autres colonnes ---
+    if (signe === "+" || signe === "-") {
+      const n1 = Number(oldValue) || 0;
+      const n2 = Number(texte.join(" ")) || 0; // fusionner texte pour les nombres
+      newValue = signe === "+" ? n1 + n2 : n1 - n2;
+    } else if (signe === "=") {
+      newValue = texte.join(" ");
+    } else if (signe === "add") {
+      newValue = (oldValue + " " + texte.join(" ")).trim();
+    } else if (signe === "supp") {
+      const regex = new RegExp(`\\b${normalizeText(texte.join(" "))}\\b`, "gi");
+      newValue = oldValue.replace(regex, "").trim();
+    } else {
+      throw new Error(`❌ Signe non reconnu : ${signe}`);
+    }
+
+    updates.push({
+      colonne: object,
+      oldValue,
+      newValue
+    });
+  }
+
+  return updates;
+}
+
+
+async function updatePlayerData(updates, jid) {
+  for (const update of updates) {
+    await setfiche(update.colonne, update.newValue, jid);
+  }
+}
+
+async function initFichesAuto() {
+  try {
+    const all = await getAllFiches();
+
+    for (const player of all) {
+      if (!player.code_fiche || player.code_fiche == "pas de fiche" || !player.division || !player.oc_url || !player.id) continue;
+
+      const nom = player.code_fiche;
+      const jid = player.jid;
+      const image = player.oc_url;
+      const division = player.division.replace(/\*/g, '');
+
+      add_fiche(nom, jid, image, division);
+    }
+  } catch (e) {
+    console.error("Erreur d'initFichesAuto:", e);
+  }
+}
+
+initFichesAuto();
+
+// Commandes add_fiche et del_fiche (inchangées)
 ovlcmd({
   nom_cmd: "add_fiche",
+  alias: [],
   classe: "Other",
-  react: "➕"
-},
-
-async (ms_org, ovl, { repondre, arg, prenium_id }) => {
-
-  if (!prenium_id) return repondre("Accès refusé.");
-  if (arg.length < 3) return repondre("Syntaxe : add_fiche <jid> <code> <division>");
+  react: "➕",
+}, async (ms_org, ovl, { repondre, arg, prenium_id }) => {
+  if (!prenium_id) return await repondre("⛔ Accès refusé !");
+  if (arg.length < 3) return await repondre("❌ Syntaxe : add_fiche <jid> <code_fiche> <division>");
 
   const jid = arg[0];
-  const code = arg[1];
+  const code_fiche = arg[1];
   const division = arg.slice(2).join(" ");
 
-  await addOrUpdateFiche(code, jid, "", division);
-  await initFichesAuto(ovl);
+  try {
+    await add_id(jid, { code_fiche, division });
+    await initFichesAuto();
 
-  await repondre("✅ Fiche créée.");
+    await repondre(
+      `✅ Nouvelle fiche enregistrée :\n` +
+      `• *JID* : \`${jid}\`\n` +
+      `• *Code Fiche* : \`${code_fiche}\`\n` +
+      `• *Division* : \`${division}\``
+    );
+  } catch (err) {
+    console.error("❌ Erreur lors de l'ajout de la fiche :", err);
+    await repondre("❌ Erreur lors de l'ajout de la fiche. Vérifie la console pour plus de détails.");
+  }
 });
 
 ovlcmd({
   nom_cmd: "del_fiche",
   classe: "Other",
-  react: "🗑️"
-},
+  react: "🗑️",
+}, async (ms_org, ovl, { repondre, arg, prenium_id }) => {
+  if (!prenium_id) return await repondre("⛔ Accès refusé !");
+  if (!arg.length) return await repondre("❌ Syntaxe : del_fiche <code_fiche>");
 
-async (ms_org, ovl, { repondre, arg, prenium_id }) => {
-
-  if (!prenium_id) return repondre("Accès refusé !");
-  if (!arg.length) return repondre("Syntaxe : del_fiche <code>");
-
-  await del_fiche(arg.join(" "));
-  await initFichesAuto(ovl);
-
-  await repondre("Fiche supprimée.");
+  const code_fiche = arg.join(' ');
+  try {
+    const deleted = await del_fiche(code_fiche);
+    if (deleted === 0) return await repondre("❌ Aucune fiche trouvée.");
+    registeredFiches.delete(code_fiche);
+    await repondre(`✅ Fiche supprimée : \`${code_fiche}\``);
+    await initFichesAuto();
+  } catch (err) {
+    console.error(err);
+    await repondre("❌ Erreur lors de la suppression de la fiche.");
+  }
 });
