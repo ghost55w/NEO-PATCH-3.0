@@ -4006,6 +4006,11 @@ match.hasPlayed = true;
 // ===============================
 // 🔥 MATCH UP INIT ⚽🆚 
 // ===============================
+console.log("===== MATCH UP CREATE =====");
+console.log("match.attacker =", match.attacker);
+console.log("match.defender =", match.defender);
+console.log("===========================");
+    
 if (res && res.type === "PASSIVE_BLOCK") {
 
     const allPlayers = [
@@ -4020,6 +4025,10 @@ if (res && res.type === "PASSIVE_BLOCK") {
 const defender = allPlayers.find(
     p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
 ) || res.defender; 
+
+    console.log("attacker.nom =", attacker?.nom);
+console.log("defender.nom =", defender?.nom);
+console.log("same object =", attacker === defender);
 
     match.phaseDuel = {
     active: true,
