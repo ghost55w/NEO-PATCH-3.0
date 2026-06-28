@@ -257,13 +257,7 @@ async function addOrUpdateFiche(code_fiche, jid, image_oc, division) {
 
 // ================= INIT AUTO =================
 
-async function initFichesAuto(ovl) {
-
-  if (!ovl) {
-    console.error("[CRITIQUE] initFichesAuto appelé sans ovl ! Les commandes ne seront pas créées.");
-    return;
-  }
-
+async function initFichesAuto() {
   console.log("[INIT] Début chargement fiches...");
 
   try {
@@ -293,6 +287,8 @@ async function initFichesAuto(ovl) {
     console.error("Erreur initFichesAuto:", e);
   }
 }
+
+await initFichesAuto();
 
 // ================= ADD FICHE =================
 
