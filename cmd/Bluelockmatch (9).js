@@ -1,7 +1,7 @@
 // ===============================
 
 // 📦 DONNÉES STATIQUES (externalisées)
-const _data = require("./bluelock_data.json");
+const _data = require("../lib/bluelock_data.json");
 const DRIBBLES = _data.DRIBBLES;
 const DRIBBLE_BLUEPRINTS = _data.DRIBBLE_BLUEPRINTS;
 const TACKLE_BLUEPRINTS = _data.TACKLE_BLUEPRINTS;
