@@ -1,0 +1,473 @@
+{
+  "DRIBBLES": [
+    "crochet extérieur",
+    "crochet intérieur",
+    "double contact",
+    "roulette",
+    "elastico",
+    "petit pont",
+    "rainbow",
+    "step over",
+    "feinte de corps",
+    "feinte de frappe"
+  ],
+  "DRIBBLE_BLUEPRINTS": {
+    "double contact": {
+      "step1": {
+        "description": "Première touche avec l'intérieur du pied ou la semelle pour ramener le ballon vers l'autre pied entre 30cm et 50cm tout en déplaçant le corps dans cette même direction.",
+        "validation": {
+          "surfaces": [
+            "intérieur du pied",
+            "semelle",
+            "pointe du pied"
+          ],
+          "ballDirection": [
+            "gauche",
+            "droite"
+          ],
+          "ballDistanceMin": 0.3,
+          "ballDistanceMax": 0.5,
+          "oppositeFoot": true
+        }
+      },
+      "step2": {
+        "description": "Deuxième touche avec l'intérieur du pied, l'extérieur du pied ou la pointe du pied pour pousser le ballon vers l'avant ou en diagonale puis accélérer jusqu'à la vitesse maximale.",
+        "validation": {
+          "surfaces": [
+            "intérieur du pied",
+            "extérieur du pied",
+            "pointe du pied"
+          ],
+          "ballDirection": [
+            "avant",
+            "diagonale"
+          ],
+          "ballDistanceMin": 0.5,
+          "acceleration": true,
+          "requireVmax": true
+        }
+      }
+    },
+    "crochet extérieur": {
+      "step1": {
+        "description": "Le ballon est poussé vers l'extérieur avec l'extérieur du pied entre 30cm et 1m50 tandis que le corps pivote de 60° à 90° dans cette même direction.",
+        "validation": {
+          "surfaces": [
+            "extérieur du pied"
+          ],
+          "ballDirection": [
+            "gauche",
+            "droite"
+          ],
+          "ballDistanceMin": 0.3,
+          "ballDistanceMax": 1.5,
+          "bodyPivotMin": 60,
+          "bodyPivotMax": 90
+        }
+      }
+    },
+    "crochet intérieur": {
+      "step1": {
+        "description": "Le ballon est ramené vers l'intérieur avec l'intérieur du pied entre 30cm et 1m50 tandis que le corps pivote de 60° à 90° dans cette même direction.",
+        "validation": {
+          "surfaces": [
+            "intérieur du pied"
+          ],
+          "ballDirection": [
+            "gauche",
+            "droite"
+          ],
+          "ballDistanceMin": 0.3,
+          "ballDistanceMax": 1.5,
+          "bodyPivotMin": 60,
+          "bodyPivotMax": 90
+        }
+      }
+    },
+    "roulette": {
+      "step1": {
+        "description": "Le ballon est tiré sous la semelle entre 30cm et 50cm tout en initiant une rotation complète du corps de 360°. Le joueur doit préciser si la rotation démarre vers la gauche ou vers la droite et accompagner le mouvement avec un déplacement du corps pouvant atteindre 50cm dans cette direction.",
+        "validation": {
+          "surfaces": [
+            "semelle"
+          ],
+          "ballDistanceMin": 0.3,
+          "ballDistanceMax": 0.5,
+          "bodyRotationMin": 360,
+          "bodyRotationMax": 360,
+          "rotationDirection": [
+            "gauche",
+            "droite"
+          ],
+          "bodyShiftMax": 0.5
+        }
+      },
+      "step2": {
+        "description": "Après la rotation, le ballon ressort dans une nouvelle direction afin de poursuivre l'action.",
+        "validation": {
+          "directionChange": true,
+          "ballDirection": [
+            "avant",
+            "diagonale",
+            "gauche",
+            "droite"
+          ]
+        }
+      }
+    },
+    "elastico": {
+      "step1": {
+        "description": "Première touche avec l'extérieur du même pied entre 50 cm et 1 m vers l'extérieur, à gauche ou à droite selon le pied utilisé.",
+        "validation": {
+          "surfaces": [
+            "extérieur du pied"
+          ],
+          "ballDirection": [
+            "gauche",
+            "droite"
+          ],
+          "ballDistanceMin": 0.5,
+          "ballDistanceMax": 1
+        }
+      },
+      "step2": {
+        "description": "Retour immédiat avec l'intérieur du même pied entre 50 cm et 1 m dans la direction opposée à la première touche.",
+        "validation": {
+          "surfaces": [
+            "intérieur du pied"
+          ],
+          "sameFoot": true,
+          "oppositeDirection": true,
+          "ballDistanceMin": 0.5,
+          "ballDistanceMax": 1
+        }
+      }
+    },
+    "petit pont": {
+      "aliases": [
+        "nutmeg"
+      ],
+      "requirements": {
+        "opponentLegGap": true
+      },
+      "step1": {
+        "description": "Le ballon est poussé entre les jambes de l'adversaire avec l'intérieur, l'extérieur ou la pointe du pied.",
+        "validation": {
+          "ballDirection": [
+            "avant"
+          ],
+          "ballDistanceMin": 0.5,
+          "ballDistanceMax": 3,
+          "surfaces": [
+            "intérieur du pied",
+            "extérieur du pied",
+            "pointe du pied"
+          ]
+        }
+      },
+      "step2": {
+        "description": "Le joueur contourne ou dépasse l'adversaire pour récupérer le ballon.",
+        "validation": {
+          "acceleration": true
+        }
+      }
+    },
+    "step over": {
+      "step1": {
+        "description": "Une jambe passe autour du ballon de l'intérieur vers l'extérieur ou de l'extérieur vers l'intérieur afin de vendre une direction.",
+        "validation": {
+          "legCircleAroundBall": true,
+          "bodyFeint": true
+        }
+      },
+      "step2": {
+        "description": "Le ballon est poussé dans la direction opposée à la feinte.",
+        "validation": {
+          "directionChange": true,
+          "surfaces": [
+            "intérieur du pied",
+            "extérieur du pied"
+          ]
+        }
+      }
+    },
+    "feinte de corps": {
+      "step1": {
+        "description": "Le joueur simule une prise de direction avec le corps sans toucher immédiatement le ballon.",
+        "validation": {
+          "bodyFeint": true
+        }
+      },
+      "step2": {
+        "description": "Le ballon est emmené dans la direction opposée à la feinte.",
+        "validation": {
+          "directionChange": true,
+          "surfaces": [
+            "intérieur du pied",
+            "extérieur du pied"
+          ]
+        }
+      }
+    },
+    "feinte de frappe": {
+      "step1": {
+        "description": "Le joueur arme une frappe crédible afin de provoquer une réaction adverse.",
+        "validation": {
+          "fakeShot": true
+        }
+      }
+    },
+    "sombrero": {
+      "step1": {
+        "description": "Le joueur lève le ballon à 2m max en arrière avec la pointe du pied ou dans un mouvement ascendant pour passer au-dessus du défenseur.",
+        "validation": {
+          "ballLift": true,
+          "ballHeightMax": 2,
+          "ballDirection": [
+            "arriere",
+            "avant"
+          ],
+          "surfaces": [
+            "pointe du pied",
+            "interieur du pied"
+          ]
+        }
+      },
+      "step2": {
+        "description": "Le ballon passe au-dessus de la tête du défenseur dans une trajectoire claire.",
+        "validation": {
+          "ballPassOver": true,
+          "target": "au-dessus du défenseur",
+          "trajectoryClear": true
+        }
+      },
+      "step3": {
+        "description": "Le joueur effectue un pivot de 60° à 180° vers la gauche ou la droite pour aller récupérer le ballon après le passage.",
+        "validation": {
+          "pivot": true,
+          "pivotAngleMin": 60,
+          "pivotAngleMax": 180,
+          "pivotDirection": [
+            "gauche",
+            "droite"
+          ],
+          "ballRecovery": true
+        }
+      }
+    },
+    "creative": {
+      "step1": {
+        "description": "Première action technique pour sortir le ballon de la ligne défensive.",
+        "validation": {
+          "ballDirection": [
+            "gauche",
+            "droite",
+            "avant",
+            "diagonale"
+          ],
+          "ballDistanceMax": 1.5,
+          "surfaces": [
+            "intérieur du pied",
+            "extérieur du pied",
+            "semelle",
+            "pointe du pied",
+            "talon"
+          ]
+        }
+      },
+      "step2": {
+        "description": "Deuxième action créant un avantage technique.",
+        "validation": {
+          "secondTouchRequired": true,
+          "directionChange": true
+        }
+      },
+      "step3": {
+        "description": "Exploitation de l'espace créé.",
+        "validation": {
+          "acceleration": true,
+          "ballDistanceMin": 0.5
+        }
+      }
+    }
+  },
+  "TACKLE_BLUEPRINTS": {
+    "tacle glissé": {
+      "description": "Le joueur effectue un tacle glissé vers l'avant, au sol, pour intercepter le ballon avec la jambe tendue avec la semelle gauche / du pied gauche où droit.",
+      "validation": {
+        "posture": [
+          "dos au sol",
+          "allongé",
+          "glissé",
+          "au sol"
+        ],
+        "bodyRotation": {
+          "allowed": false
+        },
+        "contact": [
+          "ballon",
+          "balle"
+        ],
+        "bodyPart": [
+          "pied tendu",
+          "semelle",
+          "jambe tendue",
+          "pied gauche",
+          "pied droit"
+        ],
+        "direction": [
+          "devant",
+          "en face",
+          "forward",
+          "avant"
+        ],
+        "distanceMax": 2,
+        "speed": {
+          "required": true,
+          "keywords": [
+            "vitesse max",
+            "vitesse maximale",
+            "vmax",
+            "tacle glissé"
+          ]
+        }
+      }
+    },
+    "tacle debout": {
+      "description": "Le défenseur reste debout sur ses appuis et fait un tacle frontal où vers l'avant / devant visant le ballon avec la pointe du/de pied droit où gauche pour récupérer proprement le ballon où pousser vers l'avant sans se jeter.",
+      "descriptionCas2": "Le défenseur reste debout sur ses appuis et fait un tacle en diagonale sur la droite avec l'extérieur du pied droit où sur la gauche avec l'extérieur du pied gauche visant le ballon pour pousser vers la gauche où la droite.",
+      "validation": {
+        "posture": [
+          "debout",
+          "fléchi",
+          "équilibré",
+          "appui",
+          "stable"
+        ],
+        "bodyRotation": {
+          "allowed": false
+        },
+        "contact": [
+          "ballon",
+          "balle"
+        ],
+        "bodyPart": [
+          "pied",
+          "extérieur du pied",
+          "pointe de pied"
+        ],
+        "direction": [
+          "face",
+          "devant",
+          "en face",
+          "diagonale",
+          "gauche",
+          "droite"
+        ],
+        "distanceMax": 1,
+        "speed": {
+          "required": false,
+          "keywords": [
+            "tacle debout",
+            "tacle frontal"
+          ]
+        }
+      }
+    },
+    "tacle circulaire": {
+      "description": "Le défenseur effectue un mouvement circulaire sur la gauche où la droite à 60°, 90° où 180° pied droit où pied gauche tendu pour récupérer le ballon où frapper le ballon avec l'intérieur du pied.",
+      "validation": {
+        "posture": [
+          "rotation",
+          "pivot",
+          "tourne",
+          "mouvement circulaire"
+        ],
+        "bodyRotation": {
+          "allowed": true,
+          "required": true,
+          "angles": [
+            60,
+            90,
+            180
+          ]
+        },
+        "contact": [
+          "ballon",
+          "balle"
+        ],
+        "bodyPart": [
+          "pied",
+          "jambe",
+          "extérieur du pied",
+          "semelle",
+          "intérieur du pied"
+        ],
+        "direction": [
+          "gauche",
+          "droite",
+          "rotation",
+          "60°",
+          "90°",
+          "180°"
+        ],
+        "distanceMax": 1,
+        "speed": {
+          "required": true,
+          "keywords": [
+            "rotation rapide",
+            "tourne vite",
+            "pivote",
+            "pivot",
+            "tacle circulaire",
+            "vmax",
+            "vitesse maximale"
+          ]
+        }
+      }
+    }
+  },
+  "PASSIVE_BLOCK_PATTERNS": [
+    "bloque",
+    "blocage",
+    "coupe la route",
+    "coupe la trajectoire",
+    "barre la route",
+    "barre le chemin",
+    "bloque la trajectoire",
+    "bloque le passage",
+    "ferme le passage",
+    "obstrue le passage",
+    "bouche le passage",
+    "bouche l'accès",
+    "ferme l'accès",
+    "se met devant",
+    "reste devant",
+    "vient devant",
+    "s'interpose",
+    "empêche d'avancer",
+    "empêche la progression",
+    "ralentit la progression"
+  ],
+  "DRIBBLE_PATTERNS": [
+    "conduite de balle",
+    "conduit le ballon",
+    "avance balle aux pieds",
+    "progresse balle aux pieds",
+    "dribble",
+    "feinte",
+    "crochet",
+    "roulette",
+    "double contact",
+    "flip flap",
+    "fonce",
+    "sprint",
+    "accélère",
+    "perce",
+    "transperce",
+    "élimine",
+    "dépasse",
+    "efface",
+    "prend de vitesse"
+  ]
+}
