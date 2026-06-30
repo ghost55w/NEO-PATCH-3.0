@@ -278,6 +278,9 @@ function trackerLog(match) {
                 `  ${j.nom}${balle}${lock}${stamina}`
             );
             lines.push(
+    `    🏷️ Poste     : ${snap.poste || "?"}`
+);
+            lines.push(
                 `    📍 Position  : X=${snap.position.x} Y=${snap.position.y} | Zone: ${snap.zone.x}-${snap.zone.y}`
             );
             lines.push(
