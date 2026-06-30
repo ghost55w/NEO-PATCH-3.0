@@ -3830,7 +3830,7 @@ if (isDribbleAction && isTackleAction) {
     };
 }
     
-// 🧱 DÉFENSE PASSIVE SIMPLE 
+// 🧱 DÉFENSE PASSIVE SIMPLE
 const passiveKeywords = [
     "se place",
     "devant",
@@ -3847,11 +3847,30 @@ const passiveKeywords = [
     "reste devant",
     "fait écran"
 ];
+// 🧱 DÉFENSE ACTIVE SIMPLE
+const activeDefenseKeywords = [
+    "tacle",
+    "tacle debout", 
+    "tacle circulaire", 
+    "tacle glissé",
+    "interception",
+    "contre",
+    "récupère",
+    "récupération",
+    "dégage",
+    "dévie",
+    "charge",
+    "épaule",
+    "presse",
+    "arrache"
+];
+
+const isActiveDefense =
+    activeDefenseKeywords.some(k => def.includes(k));
 
 const isPassive =
-    passiveKeywords.some(k =>
-        atk.includes(k) || def.includes(k)
-    );
+    !isActiveDefense &&
+    passiveKeywords.some(k => def.includes(k));
 
 // 🔥 PRIORITÉ ABSOLUE
 if (isPassive) {
