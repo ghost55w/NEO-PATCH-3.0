@@ -33,17 +33,20 @@ const ZONE_X_MAP = { G: 0, CG: 7, C: 15, CD: 23, D: 30 };
 // ================================================================
 // SECTION 2 : INIT TRACKER (appelé au lancement du match)
 // ================================================================
-
 function initTracker(match) {
     match.tracker = {
         // Snapshot de chaque joueur par nom
         joueurs: {},
+
         // Historique global de toutes les actions
         historique: [],
+
         // Tour courant
         tour: 0,
+
         // Position du ballon
         balle: { x: 15, y: 30, zone: "C", holder: null },
+
         // Stats du match
         stats: {
             passes: 0,
@@ -57,12 +60,34 @@ function initTracker(match) {
 
     // Initialiser chaque joueur dans le tracker
     const allPlayers = [...(match.lineup1 || []), ...(match.lineup2 || [])];
+
     for (const j of allPlayers) {
         if (!match.tracker.joueurs[j.nom]) {
             trackerInitJoueur(match, j);
         }
     }
+
+    // ============================================================
+    // 🔄 Attribution du vis-à-vis initial
+    // ============================================================
+    for (const j of allPlayers) {
+
+        const snap = match.tracker.joueurs[j.nom];
+        if (!snap) continue;
+
+        const opponentTeam =
+            (match.lineup1 || []).includes(j)
+                ? match.lineup2
+                : match.lineup1;
+
+        const vis = findVisAVis(j, opponentTeam);
+
+        if (vis) {
+            snap.visAVis = vis.nom;
+        }
+    }
 }
+
 
 // ================================================================
 // SECTION 3 : INIT JOUEUR DANS LE TRACKER
@@ -78,6 +103,7 @@ function trackerInitJoueur(match, joueur) {
     match.tracker.joueurs[joueur.nom] = {
         nom: joueur.nom,
         poste: joueur.poste,
+        visAVis: null,
         ligne: joueur.ligne,
         equipe: joueur.equipe || "?",
         equipeNom: joueur.equipeNom || joueur.equipe || "?",
@@ -286,6 +312,9 @@ function trackerLog(match) {
             lines.push(
                 `    🏁 Départ    : X=${snap.positionDepart.x} Y=${snap.positionDepart.y} | Zone: ${snap.zoneDepart.x}-${snap.zoneDepart.y}`
             );
+            lines.push(
+    `    🆚 Vis-à-vis : ${snap.visAVis || "Aucun"}`
+);
             lines.push(
                 `    🧭 Corps     : ${snap.bodyState} (${snap.bodyAngle}°)`
             );
@@ -511,6 +540,24 @@ const POSITION_POSTES = {
     DD: { zoneX: "droite", ligne: "defense", zoneY: "A2" }
 };
 
+//VIS A VIS, JOUEURS EN FACE PAR RAPPORT AU TERRAIN 
+const VIS_A_VIS_POSTE = {
+    // Attaque
+    AG: "AD",
+    AC: "DC",
+    AD: "AG",
+
+    // Milieu
+    MG: "MD",
+    MC: "MC",
+    MD: "MG",
+
+    // Défense
+    DG: "DD",
+    DC: "AC",
+    DD: "DG"
+};
+         
 // ⚽ DRIBBLES OFFICIELS
 // ===============================// ===============================
 // 🧠 NORMALISATION TEXTE
@@ -821,42 +868,58 @@ function distanceZone(z1, z2) {
     return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
 }
 
-//Trouver le Vis à VIS
-function findVisAVis(player, opponentTeam) {
-
-    const target = getVisAVisPoste(player.poste);
-
-    if (!target) return null;
-
-    return opponentTeam.find(p => 
-        POSITION_POSTES[p.poste]?.ligne === target.ligne &&
-        POSITION_POSTES[p.poste]?.zoneX === target.zoneX
-    ) || null;
-}
-
+//Postes Vis à VIS: Mapping 
 function getVisAVisPoste(poste) {
 
     const p = POSITION_POSTES[poste];
     if (!p) return null;
 
-    let targetLigne;
-    let targetZoneX = p.zoneX;
+    // Ligne miroir
+    let ligne;
 
-    // 🔁 MIRROR LIGNE
-    if (p.ligne === "attaque") targetLigne = "defense";
-    else if (p.ligne === "defense") targetLigne = "attaque";
-    else targetLigne = "milieu";
+    switch (p.ligne) {
+        case "attaque":
+            ligne = "defense";
+            break;
 
-    // 🔁 MIRROR GAUCHE / DROITE
-    let mirrorZoneX = p.zoneX;
+        case "defense":
+            ligne = "attaque";
+            break;
 
-    if (p.zoneX === "gauche") mirrorZoneX = "droite";
-    else if (p.zoneX === "droite") mirrorZoneX = "gauche";
+        default:
+            ligne = "milieu";
+    }
+
+    // Côté miroir
+    let zoneX = p.zoneX;
+
+    if (zoneX === "gauche") zoneX = "droite";
+    else if (zoneX === "droite") zoneX = "gauche";
 
     return {
-        ligne: targetLigne,
-        zoneX: mirrorZoneX
+        ligne,
+        zoneX
     };
+}
+//Trouver le Vis à Vis initiale: MAPPING
+function findVisAVis(player, opponentTeam) {
+
+    if (!player || !player.poste) return null;
+
+    const cible = getVisAVisPoste(player.poste);
+    if (!cible) return null;
+
+    return opponentTeam.find(p => {
+
+        const pos = POSITION_POSTES[p.poste];
+        if (!pos) return false;
+
+        return (
+            pos.ligne === cible.ligne &&
+            pos.zoneX === cible.zoneX
+        );
+
+    }) || null;
 }
 
 
