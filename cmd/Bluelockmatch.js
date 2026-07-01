@@ -1429,9 +1429,7 @@ function extractRealPlayers(actionText, match) {
     });
             }
 
-
-// 🧠 PARSE ACTION SEQUENCE (FIX PRINCIPAL)
-// mode = "attack" | "defense"
+// 🧠 PARSE ACTION SEQUENCE V3
 function parseActionSequence(actionText, match, mode = "attack") {
 
     const players = [
@@ -1453,83 +1451,99 @@ function parseActionSequence(actionText, match, mode = "attack") {
         { type: "bloc", words: ["bloque", "fait écran", "barre la route", "empêche", "obstrue"] },
         { type: "tacle", words: ["tacle", "glissé"] },
         { type: "interception", words: ["interception", "intercepte"] },
-        { type: "contre", words: ["contre", "contre le tir"] },
+        { type: "contre", words: ["contre"] },
         { type: "recuperation", words: ["récupère", "recupere", "récupération", "recuperation"] },
         { type: "degagement", words: ["dégage", "degage"] }
     ];
 
-    const catalogue =
-        mode === "attack"
-            ? attackActions
-            : defenseActions;
+    // Tous les mots-clés
+    const catalogue = [...attackActions, ...defenseActions];
 
-    const steps = actionText
-        .split("/")
-        .map(s => s.trim())
-        .filter(Boolean);
+    const lower = actionText.toLowerCase();
 
-    const actions = [];
+    const playerObj = players.find(p =>
+        lower.includes(pureName(p.nom))
+    );
 
-    for (const step of steps) {
+    if (!playerObj) return [];
 
-        const lower = step.toLowerCase();
+    const targetObj = players.find(p =>
+        p.nom !== playerObj.nom &&
+        lower.includes(pureName(p.nom))
+    );
 
-        // 👤 Joueur principal
-        const playerObj = players.find(p =>
-            lower.includes(pureName(p.nom))
-        );
+    const found = [];
 
-        if (!playerObj) continue;
+    for (const action of catalogue) {
 
-        // 🎯 Joueur cible
-        const targetObj = players.find(p =>
-            p.nom !== playerObj.nom &&
-            lower.includes(pureName(p.nom))
-        );
+        for (const word of action.words) {
 
-        const found = [];
+            const index = lower.indexOf(word);
 
-        // 🔍 Recherche chronologique
-        for (const action of catalogue) {
+            if (index !== -1) {
 
-            for (const word of action.words) {
+                found.push({
+                    index,
+                    type: action.type
+                });
 
-                const index = lower.indexOf(word);
-
-                if (index !== -1) {
-
-                    found.push({
-                        index,
-                        type: action.type
-                    });
-
-                    break;
-                }
+                break;
             }
         }
+    }
 
-        // 📌 Trier dans l'ordre d'apparition
-        found.sort((a, b) => a.index - b.index);
+    found.sort((a, b) => a.index - b.index);
 
-        // 🚫 Évite les doublons
-        const already = new Set();
+    // Priorité selon le mode
+    const offensive = new Set([
+        "controle",
+        "conduite",
+        "dribble",
+        "passe",
+        "centre",
+        "tir"
+    ]);
 
-        for (const f of found) {
+    const defensive = new Set([
+        "pression",
+        "bloc",
+        "tacle",
+        "interception",
+        "contre",
+        "recuperation",
+        "degagement"
+    ]);
 
-            if (already.has(f.type)) continue;
+    const already = new Set();
+    const actions = [];
 
-            already.add(f.type);
+    for (const f of found) {
 
-            actions.push({
-                player: playerObj.nom,
-                type: f.type,
-                target: targetObj?.nom || null
-            });
-        }
+        if (already.has(f.type))
+            continue;
+
+        if (
+            mode === "attack" &&
+            defensive.has(f.type)
+        ) continue;
+
+        if (
+            mode === "defense" &&
+            offensive.has(f.type)
+        ) continue;
+
+        already.add(f.type);
+
+        actions.push({
+            player: playerObj.nom,
+            type: f.type,
+            target: targetObj?.nom || null
+        });
     }
 
     return actions;
 }
+
 
 // 📊 NOTE DU PAVÉ
 function noterPave(action) {
