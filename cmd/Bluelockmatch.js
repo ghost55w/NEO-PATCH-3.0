@@ -3307,7 +3307,7 @@ if (!match.pendingAttack) {
     // 📊 LOG TEMPS RÉEL
     trackerLog(match);
 
-    const resume = genererResumeFull(action, match);
+    const resume = genererResumeFull(action, match, "attack");
     const note = noterPave(action);
 
     // 🔥 NEXT
@@ -3540,13 +3540,20 @@ Il reste *1 MINUTE* pour jouer le duel !
 }
     
 // 📉 FALLBACK : DEFENSE PASSIVE
-const resumeDefense = genererResumeFull(defense, match);
+const resumeDefense = genererResumeFull(
+    defense,
+    match,
+    "defense"
+);
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
 
 // 🔥 NEXT UNIFIED
-const baseNext = match.joueurTour || match.id1;
-
+const baseNext =
+    match.attacker ||
+    match.joueurTour ||
+    match.id1;
+    
 const fallbackPlayer =
     [ ...(match.lineup1 || []), ...(match.lineup2 || []) ]
     .find(p => normalizeJid(p.id || p.jid) === baseNext);
