@@ -2204,6 +2204,155 @@ function getNextPlayer(match) {
     return id1;
 }
 
+// ==============================
+// ⚔️ RESOLUTION DUEL DEFENSIF
+// ==============================
+function resolveDefenseDuel(match, attacker, defender, attackText) {
+
+    const atkOVR = attacker.stats.ovr;
+    const atkDRI = attacker.stats.dri;
+
+    const defDEF = defender.stats.def;
+
+    const actions = parseActionSequence(
+        attackText,
+        match,
+        "attack"
+    );
+
+    const has = type => actions.some(a => a.type === type);
+
+    const isPass = has("passe");
+    const isDribble = has("dribble");
+    const isShot = has("tir");
+
+    const diff = defDEF - atkOVR;
+
+    // ===========================
+    // DEF largement supérieure
+    // ===========================
+    if (diff >= 10) {
+
+        const success = Math.random() < 0.05;
+
+        if (!success) {
+
+            return {
+                next: defender.id,
+                ballHolder: defender.nom,
+                message:
+`🛡️ ${defender.nom} récupère facilement le ballon.
+
+➡️ @${getTagFromJid(defender.id)} NEXT`
+            };
+        }
+    }
+
+    // ===========================
+    // DEF légèrement supérieure
+    // ===========================
+    if (diff > 0 && diff < 10) {
+
+        if (isPass) {
+
+            return {
+                next: attacker.id,
+                ballHolder: attacker.nom,
+                message:
+`⚽ ${attacker.nom} évite le duel avec une passe.
+
+➡️ @${getTagFromJid(attacker.id)} NEXT`
+            };
+        }
+
+        return {
+            next: defender.id,
+            ballHolder: defender.nom,
+            message:
+`🛡️ ${defender.nom} remporte le duel et récupère le ballon.
+
+➡️ @${getTagFromJid(defender.id)} NEXT`
+        };
+    }
+
+    // ===========================
+    // Niveau équivalent
+    // ===========================
+    if (diff === 0) {
+
+        if (atkDRI > defDEF) {
+
+            return {
+                next: attacker.id,
+                ballHolder: attacker.nom,
+                message:
+`✨ ${attacker.nom} élimine ${defender.nom} grâce à son dribble.
+
+➡️ @${getTagFromJid(attacker.id)} NEXT`
+            };
+        }
+
+        const success = Math.random() < 0.5;
+
+        if (success) {
+
+            return {
+                next: attacker.id,
+                ballHolder: attacker.nom,
+                message:
+`⚽ ${attacker.nom} passe de justesse.
+
+➡️ @${getTagFromJid(attacker.id)} NEXT`
+            };
+        }
+
+        return {
+            next: defender.id,
+            ballHolder: defender.nom,
+            message:
+`🛡️ ${defender.nom} remporte le duel.
+
+➡️ @${getTagFromJid(defender.id)} NEXT`
+        };
+    }
+
+    // ===========================
+    // Attaquant supérieur
+    // ===========================
+    if (atkOVR > defDEF) {
+
+        if (atkDRI > defDEF && isDribble) {
+
+            return {
+                next: attacker.id,
+                ballHolder: attacker.nom,
+                message:
+`🔥 ${attacker.nom} élimine ${defender.nom} avec son dribble.
+
+➡️ @${getTagFromJid(attacker.id)} NEXT`
+            };
+        }
+
+        return {
+            next: attacker.id,
+            ballHolder: attacker.nom,
+            message:
+`⚽ ${attacker.nom} conserve la possession.
+
+➡️ @${getTagFromJid(attacker.id)} NEXT`
+        };
+    }
+
+    return {
+        next: defender.id,
+        ballHolder: defender.nom,
+        message:
+`🛡️ ${defender.nom} récupère le ballon.
+
+➡️ @${getTagFromJid(defender.id)} NEXT`
+    };
+}
+
 // 🎮 COMMANDE MATCH
 ovlcmd({
     nom_cmd: "match⚽",
