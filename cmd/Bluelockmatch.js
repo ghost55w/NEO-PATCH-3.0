@@ -1431,62 +1431,105 @@ function extractRealPlayers(actionText, match) {
 
 
 // 🧠 PARSE ACTION SEQUENCE (FIX PRINCIPAL)
-function parseActionSequence(actionText, match) {
+// mode = "attack" | "defense"
+function parseActionSequence(actionText, match, mode = "attack") {
 
     const players = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    const steps = actionText.split("/").map(s => s.trim());
+    const attackActions = [
+        { type: "controle", words: ["contrôle", "controle"] },
+        { type: "conduite", words: ["fonce", "avance", "progresse", "conduite", "accélère", "court"] },
+        { type: "dribble", words: ["dribble", "crochet", "roulette", "feinte", "passement"] },
+        { type: "passe", words: ["passe", "transmet", "remise"] },
+        { type: "centre", words: ["centre"] },
+        { type: "tir", words: ["tir", "frappe", "volée", "reprend"] }
+    ];
+
+    const defenseActions = [
+        { type: "pression", words: ["presse", "harcèle"] },
+        { type: "bloc", words: ["bloque", "fait écran", "barre la route", "empêche", "obstrue"] },
+        { type: "tacle", words: ["tacle", "glissé"] },
+        { type: "interception", words: ["interception", "intercepte"] },
+        { type: "contre", words: ["contre", "contre le tir"] },
+        { type: "recuperation", words: ["récupère", "recupere", "récupération", "recuperation"] },
+        { type: "degagement", words: ["dégage", "degage"] }
+    ];
+
+    const catalogue =
+        mode === "attack"
+            ? attackActions
+            : defenseActions;
+
+    const steps = actionText
+        .split("/")
+        .map(s => s.trim())
+        .filter(Boolean);
 
     const actions = [];
 
-    for (let step of steps) {
+    for (const step of steps) {
 
         const lower = step.toLowerCase();
 
-        // 🔍 joueur principal
-        const playerObj = players.find(p => {
-            const name = pureName(p.nom);
-            return lower.includes(name);
-        });
+        // 👤 Joueur principal
+        const playerObj = players.find(p =>
+            lower.includes(pureName(p.nom))
+        );
 
         if (!playerObj) continue;
 
-        const player = playerObj.nom;
+        // 🎯 Joueur cible
+        const targetObj = players.find(p =>
+            p.nom !== playerObj.nom &&
+            lower.includes(pureName(p.nom))
+        );
 
-        // 🔍 cible (autre joueur)
-        const targetObj = players.find(p => {
-            const name = pureName(p.nom);
-            return lower.includes(name) && p.nom !== player;
-        });
+        const found = [];
 
-        const target = targetObj ? targetObj.nom : null;
+        // 🔍 Recherche chronologique
+        for (const action of catalogue) {
 
-        // 🎯 TYPE D’ACTION
-        let type = "action";
+            for (const word of action.words) {
 
-        if (lower.includes("passe")) type = "passe";
-        else if (lower.includes("contrôle") || lower.includes("controle")) type = "controle";
-        else if (
-            lower.includes("fonce") ||
-            lower.includes("avance") ||
-            lower.includes("progresse") ||
-            lower.includes("conduite")
-        ) type = "conduite";
-        else if (lower.includes("tir") || lower.includes("frappe")) type = "tir";
+                const index = lower.indexOf(word);
 
-        actions.push({
-            player,
-            type,
-            target
-        });
+                if (index !== -1) {
+
+                    found.push({
+                        index,
+                        type: action.type
+                    });
+
+                    break;
+                }
+            }
+        }
+
+        // 📌 Trier dans l'ordre d'apparition
+        found.sort((a, b) => a.index - b.index);
+
+        // 🚫 Évite les doublons
+        const already = new Set();
+
+        for (const f of found) {
+
+            if (already.has(f.type)) continue;
+
+            already.add(f.type);
+
+            actions.push({
+                player: playerObj.nom,
+                type: f.type,
+                target: targetObj?.nom || null
+            });
+        }
     }
 
     return actions;
 }
-
 
 // 📊 NOTE DU PAVÉ
 function noterPave(action) {
@@ -1537,42 +1580,106 @@ function validerAction(action) {
 }
 
 // 🎙️ RESUME FULL INTELLIGENT
-function genererResumeFull(actionText, match) {
+// 🧠 GÉNÉRATION RÉSUMÉ INTELLIGENT
+function genererResumeFull(actionText, match, mode = "attack") {
 
-    const actions = parseActionSequence(actionText, match);
+    const actions = parseActionSequence(actionText, match, mode);
 
-    if (!actions.length) return "Action non identifiable.";
+    if (!actions.length)
+        return "Action non identifiable.";
 
-    let phrases = [];
+    const phrases = [];
 
     for (const act of actions) {
 
-        if (act.type === "passe" && act.target) {
-            phrases.push(`${act.player} passe à ${act.target}`);
-        }
-        else if (act.type === "controle") {
-            phrases.push(`${act.player} contrôle le ballon`);
-        }
-        else if (act.type === "conduite") {
-            phrases.push(`${act.player} progresse balle au pied`);
-        }
-        else if (act.type === "tir") {
-            phrases.push(`${act.player} frappe au but`);
-        }
-        else {
-            phrases.push(`${act.player} enchaîne une action`);
+        switch (act.type) {
+
+            // ==========================
+            // ⚽ ACTIONS OFFENSIVES
+            // ==========================
+            case "controle":
+                phrases.push(`${act.player} contrôle le ballon`);
+                break;
+
+            case "conduite":
+                phrases.push(`${act.player} progresse balle au pied`);
+                break;
+
+            case "dribble":
+                phrases.push(`${act.player} tente un dribble`);
+                break;
+
+            case "passe":
+                phrases.push(
+                    act.target
+                        ? `${act.player} passe à ${act.target}`
+                        : `${act.player} effectue une passe`
+                );
+                break;
+
+            case "centre":
+                phrases.push(`${act.player} adresse un centre`);
+                break;
+
+            case "tir":
+                phrases.push(`${act.player} frappe au but`);
+                break;
+
+            // ==========================
+            // 🛡️ ACTIONS DÉFENSIVES
+            // ==========================
+            case "pression":
+                phrases.push(`${act.player} met la pression sur son adversaire`);
+                break;
+
+            case "bloc":
+                phrases.push(`${act.player} bloque la progression`);
+                break;
+
+            case "tacle":
+                phrases.push(`${act.player} tente un tacle glissé`);
+                break;
+
+            case "interception":
+                phrases.push(`${act.player} tente une interception`);
+                break;
+
+            case "contre":
+                phrases.push(`${act.player} contre l'action`);
+                break;
+
+            case "recuperation":
+                phrases.push(`${act.player} récupère le ballon`);
+                break;
+
+            case "degagement":
+                phrases.push(`${act.player} dégage le ballon`);
+                break;
+
+            default:
+                phrases.push(`${act.player} enchaîne une action`);
+                break;
         }
     }
 
-    const connectors = ["puis", "ensuite", "et", "dans la foulée", "immédiatement", "alors"];
+    // 🔥 Suppression des doublons successifs
+    const clean = [];
 
-    let sentence = phrases[0];
-    for (let i = 1; i < phrases.length; i++) {
-        const connector = connectors[i % connectors.length];
-        sentence += `, ${connector} ${phrases[i]}`;
+    for (const p of phrases) {
+
+        if (clean[clean.length - 1] !== p)
+            clean.push(p);
     }
 
-    return sentence + ".";
+    if (clean.length === 1)
+        return clean[0] + ".";
+
+    if (clean.length === 2)
+        return `${clean[0]}, puis ${clean[1]}.`;
+
+    const last = clean.pop();
+
+    return `${clean.join(", puis ")}, puis ${last}.`;
 }
 
 // 🛡️ DETECTION TARGET DEFENDER
