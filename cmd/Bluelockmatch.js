@@ -3267,6 +3267,52 @@ match.hasPlayed = true;
 }, 1000);
     return true; 
 }    
+
+// ==============================
+// ⚔️ RÉPONSE AU TACLE
+// ==============================
+if (
+    match.phaseDuel?.active &&
+    match.phaseDuel.step === "response"
+) {
+
+    const duel = match.phaseDuel;
+
+    // Seul l'attaquant répond
+    if (normalizeJid(sender) !== normalizeJid(duel.attacker))
+        return true;
+
+    const attacker =
+        [...match.lineup1, ...match.lineup2]
+            .find(p => normalizeJid(p.id || p.jid) === duel.attacker);
+
+    const defender =
+        [...match.lineup1, ...match.lineup2]
+            .find(p => normalizeJid(p.id || p.jid) === duel.defender);
+
+    const result = resolveDefenseDuel(
+    match,
+    attacker,
+    defender,
+    action
+);
+
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+    match.ballHolderJid = result.next;
+    match.ballHolderPlayer = result.ballHolder;
+    match.joueurTour = result.next;
+
+    await ovl.sendMessage(chat,{
+        text: result.message,
+        mentions:[result.next]
+    });
+
+    return true;
+}
+
     
 // 🎯 ATTAQUE⚽
 if (!match.pendingAttack) {
@@ -3539,7 +3585,7 @@ Il reste *1 MINUTE* pour jouer le duel !
     return true;
 }
     
-// 📉 FALLBACK : DEFENSE PASSIVE
+// 📉 FALLBACK : DEFENSE ACTIVE
 const resumeDefense = genererResumeFull(
     defense,
     match,
@@ -3547,34 +3593,32 @@ const resumeDefense = genererResumeFull(
 );
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
+// ==============================
+// ⚔️ ATTENTE DE LA RÉPONSE ATTAQUANT
+// ==============================
 
-// 🔥 NEXT UNIFIED
-const baseNext =
-    match.attacker ||
-    match.joueurTour ||
-    match.id1;
-    
-const fallbackPlayer =
-    [ ...(match.lineup1 || []), ...(match.lineup2 || []) ]
-    .find(p => normalizeJid(p.id || p.jid) === baseNext);
+match.phaseDuel = {
+    active: true,
+    step: "response",
 
-const nextId = fallbackPlayer?.id || fallbackPlayer?.jid || baseNext;
+    attacker: match.attacker,
+    defender: match.defender,
 
+    attackText: match.pendingAttack,
+    defenseText: defense
+};
+
+match.joueurTour = match.attacker;
+
+const nextPlayer =
+    [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker));
+
+match.ballHolderJid = match.attacker;
+match.ballHolderPlayer = nextPlayer?.nom || "unknown";
+
+const nextId = match.attacker;
 const nextTag = getTagFromJid(nextId);
-
-
-// ⚽ SYNC SAFE STATE
-match.joueurTour = nextId;
-
-// ❌ NE PAS TOUCHER match.attacker
-// ❌ NE PAS TOUCHER match.defender
-
-match.ballHolderJid = nextId;
-match.ballHolderPlayer = fallbackPlayer?.nom || "unknown";
-
-match.pendingAttack = null;
-match.waitingDefenseFrom = null;
-
 
 // 📩 MESSAGE
 await ovl.sendMessage(chat, {
@@ -3591,8 +3635,8 @@ await ovl.sendMessage(chat, {
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
     mentions: [nextId]
-});
-
+}); 
+    
 // ⚠️ WARNING
 if (match.warningTimer) clearTimeout(match.warningTimer);
 
