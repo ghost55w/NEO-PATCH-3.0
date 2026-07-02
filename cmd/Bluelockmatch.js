@@ -2228,130 +2228,121 @@ function resolveDefenseDuel(match, attacker, defender, attackText) {
 
     const diff = defDEF - atkOVR;
 
-    // ===========================
-    // DEF largement supérieure
-    // ===========================
-    if (diff >= 10) {
+    const attackScore = noterPave(attackText);
+const defenseScore = noterPave(match.phaseDuel.defenseText);
 
-        const success = Math.random() < 0.05;
+const attackStat = atkDRI;
+const defenseStat = defDEF;
 
-        if (!success) {
+const attackTotal = attackStat + attackScore;
+const defenseTotal = defenseStat + defenseScore;
 
-            return {
-                next: defender.id,
-                ballHolder: defender.nom,
-                message:
-`🛡️ ${defender.nom} récupère facilement le ballon.
+let attackerWin = false;
 
-➡️ @${getTagFromJid(defender.id)} NEXT`
-            };
-        }
-    }
+// ==========================
+// PASSE
+// ==========================
+if (isPass) {
 
-    // ===========================
-    // DEF légèrement supérieure
-    // ===========================
+    // DEF légèrement supérieure -> la passe évite le duel
     if (diff > 0 && diff < 10) {
-
-        if (isPass) {
-
-            return {
-                next: attacker.id,
-                ballHolder: attacker.nom,
-                message:
-`⚽ ${attacker.nom} évite le duel avec une passe.
-
-➡️ @${getTagFromJid(attacker.id)} NEXT`
-            };
-        }
-
-        return {
-            next: defender.id,
-            ballHolder: defender.nom,
-            message:
-`🛡️ ${defender.nom} remporte le duel et récupère le ballon.
-
-➡️ @${getTagFromJid(defender.id)} NEXT`
-        };
+        attackerWin = true;
+    } else {
+        attackerWin = attackTotal >= defenseTotal;
     }
 
-    // ===========================
-    // Niveau équivalent
-    // ===========================
-    if (diff === 0) {
-
-        if (atkDRI > defDEF) {
-
-            return {
-                next: attacker.id,
-                ballHolder: attacker.nom,
-                message:
-`✨ ${attacker.nom} élimine ${defender.nom} grâce à son dribble.
-
-➡️ @${getTagFromJid(attacker.id)} NEXT`
-            };
-        }
-
-        const success = Math.random() < 0.5;
-
-        if (success) {
-
-            return {
-                next: attacker.id,
-                ballHolder: attacker.nom,
-                message:
-`⚽ ${attacker.nom} passe de justesse.
-
-➡️ @${getTagFromJid(attacker.id)} NEXT`
-            };
-        }
-
-        return {
-            next: defender.id,
-            ballHolder: defender.nom,
-            message:
-`🛡️ ${defender.nom} remporte le duel.
-
-➡️ @${getTagFromJid(defender.id)} NEXT`
-        };
-    }
-
-    // ===========================
-    // Attaquant supérieur
-    // ===========================
-    if (atkOVR > defDEF) {
-
-        if (atkDRI > defDEF && isDribble) {
-
-            return {
-                next: attacker.id,
-                ballHolder: attacker.nom,
-                message:
-`🔥 ${attacker.nom} élimine ${defender.nom} avec son dribble.
-
-➡️ @${getTagFromJid(attacker.id)} NEXT`
-            };
-        }
-
-        return {
-            next: attacker.id,
-            ballHolder: attacker.nom,
-            message:
-`⚽ ${attacker.nom} conserve la possession.
-
-➡️ @${getTagFromJid(attacker.id)} NEXT`
-        };
-    }
-
-    return {
-        next: defender.id,
-        ballHolder: defender.nom,
-        message:
-`🛡️ ${defender.nom} récupère le ballon.
-
-➡️ @${getTagFromJid(defender.id)} NEXT`
-    };
 }
+
+// ==========================
+// DRIBBLE
+// ==========================
+else if (isDribble) {
+
+    const dribbleAction = actions.find(a => a.type === "dribble");
+
+    const tackleAction = parseActionSequence(
+        match.phaseDuel.defenseText,
+        match,
+        "defense"
+    ).find(a => a.type === "tacle");
+
+    const dribbleCheck = dribbleAction
+        ? validateDribbleBlueprint(dribbleAction.nom, attackText)
+        : { valid: false, similarity: 0 };
+
+    const tackleCheck = tackleAction
+        ? validateTackleBlueprint(
+            tackleAction.nom,
+            match.phaseDuel.defenseText
+        )
+        : { valid: false, similarity: 0 };
+
+    // Dribble raté + tacle réussi => défense gagne
+    if (!dribbleCheck.valid && tackleCheck.valid) {
+        attackerWin = false;
+    }
+
+    // Sinon on applique les stats
+    else if (attackStat > defenseStat) {
+
+        attackerWin = true;
+
+    } else if (attackStat < defenseStat) {
+
+        attackerWin = false;
+
+    } else {
+
+        // DRI = DEF
+        if (atkOVR > defender.stats.ovr) {
+
+            attackerWin = Math.random() < 0.90;
+
+        } else if (atkOVR < defender.stats.ovr) {
+
+            attackerWin = Math.random() < 0.10;
+
+        } else {
+
+            attackerWin = Math.random() < 0.50;
+
+        }
+    }
+}
+
+// ==========================
+// AUTRES ACTIONS
+// ==========================
+else {
+
+    attackerWin = attackTotal >= defenseTotal;
+
+}
+
+const winner = attackerWin ? attacker : defender;
+
+return {
+
+    ok: attackerWin,
+
+    next: winner.id,
+    ballHolder: winner.nom,
+
+    attackStat,
+    defenseStat,
+
+    attackScore,
+    defenseScore,
+
+    attackTotal,
+    defenseTotal,
+
+    msg: attackerWin
+        ? `🔥 ${attacker.nom} élimine ${defender.nom}.`
+        : `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon.`
+
+};
+
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -3454,10 +3445,28 @@ if (
     match.ballHolderPlayer = result.ballHolder;
     match.joueurTour = result.next;
 
-    await ovl.sendMessage(chat,{
-        text: result.message,
-        mentions:[result.next]
-    });
+    await ovl.sendMessage(chat, {
+    text:
+`🛡️⚽ RÉSOLUTION DU DUEL !
+
+${result.msg}
+
+⚡ ${attacker.nom}
+├ Dribble : ${result.attackStat}
+├ Score Pavé : ${result.attackScore}
+└ Total : ${result.attackTotal} ${result.ok ? "✅" : "❌"}
+
+🛡️ ${defender.nom}
+├ Défense : ${result.defenseStat}
+├ Score Pavé : ${result.defenseScore}
+└ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
+
+➡️ @${getTagFromJid(result.next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+    mentions: [result.next]
+});
 
     return true;
 }
