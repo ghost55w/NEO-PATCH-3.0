@@ -2342,7 +2342,7 @@ return {
         : `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon.`
 
 };
-
+} 
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
