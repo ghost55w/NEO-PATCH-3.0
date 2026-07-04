@@ -3877,35 +3877,16 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
     // 🔍 FIND PLAYER
     const findPlayer = (txt) => {
 
-    const t = pureName(txt);
+        const t = pureName(txt);
 
-    console.log("\n========== FIND PLAYER ==========");
-    console.log("Texte :", t);
+        return allPlayers.find(p => {
 
-    for (const p of allPlayers) {
+            const n = pureName(p.nom);
 
-        const n = pureName(p.nom);
-        const matchFound = t.includes(n) || n.includes(t);
+            return t.includes(n) || n.includes(t);
 
-        console.log(
-            `[${matchFound ? "✅" : "❌"}]`,
-            p.nom,
-            "=>",
-            n
-        );
-
-        if (matchFound) {
-            console.log("🎯 Joueur retourné :", p.nom);
-            console.log("================================\n");
-            return p;
-        }
-    }
-
-    console.log("❌ Aucun joueur trouvé");
-    console.log("================================\n");
-
-    return null;
-};
+        }) || null;
+    };
 
     let attacker = null;
     let defender = null;
