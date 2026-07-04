@@ -3893,12 +3893,24 @@ async function handleDuelMatch(match, attaqueText, defenseText) {
         defender = match.phaseDuel.defender;
     } else {
         // Fallback si pas de phaseDuel (appel direct)
-        if (match.ballHolderPlayer) {
-            attacker = allPlayers.find(p => p.nom === match.ballHolderPlayer);
-        }
-        if (!attacker) attacker = findPlayer(attaqueText);
+        attacker = findPlayer(attaqueText);
+defender = findPlayer(defenseText);
 
-        defender = findPlayer(defenseText);
+if (!attacker) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Joueur attaquant non détecté dans le lineup."
+    };
+}
+
+if (!defender) {
+    return {
+        ok: false,
+        type: "erreur",
+        message: "❌ Joueur défenseur non détecté dans le lineup."
+    };
+}
 
         // Anti-collision attacker = defender
         if (defender && attacker &&
