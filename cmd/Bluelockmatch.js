@@ -3634,13 +3634,8 @@ if (res && res.type === "PASSIVE_BLOCK") {
         ...(match.lineup2 || [])
     ];
 
-   const attacker = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
-) || res.attacker;
-
-const defender = allPlayers.find(
-    p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-) || res.defender; 
+  const attacker = res.attacker;
+const defender = res.defender; 
     match.phaseDuel = {
     active: true,
     step: "attack_pave",
