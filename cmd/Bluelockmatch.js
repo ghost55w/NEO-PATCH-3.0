@@ -2277,35 +2277,32 @@ else if (isDribble) {
         )
         : { valid: false, similarity: 0 };
 
-    // Dribble raté + tacle réussi => défense gagne
-    if (!dribbleCheck.valid && tackleCheck.valid) {
+    // 🧠 CAS 1 : tacle réussi = défense gagne (PRIORITÉ HAUTE)
+    if (tackleCheck.valid && !dribbleCheck.valid) {
         attackerWin = false;
     }
 
-    // Sinon on applique les stats
-    else if (attackStat > defenseStat) {
-
+    // 🧠 CAS 2 : dribble réussi malgré tacle
+    else if (dribbleCheck.valid && !tackleCheck.valid) {
         attackerWin = true;
+    }
 
-    } else if (attackStat < defenseStat) {
+    // 🧠 CAS 3 : clash → stats influencent MAIS ne décident pas seules
+    else {
 
-        attackerWin = false;
+        const base = attackStat + attackScore;
+        const oppose = defenseStat + defenseScore;
 
-    } else {
+        // légère influence OVR (pas domination brute)
+        const atkPower = base + atkOVR * 0.2;
+        const defPower = oppose + defender.stats.ovr * 0.2;
 
-        // DRI = DEF
-        if (atkOVR > defender.stats.ovr) {
-
-            attackerWin = Math.random() < 0.90;
-
-        } else if (atkOVR < defender.stats.ovr) {
-
-            attackerWin = Math.random() < 0.10;
-
+        if (atkPower > defPower) {
+            attackerWin = true;
+        } else if (atkPower < defPower) {
+            attackerWin = false;
         } else {
-
-            attackerWin = Math.random() < 0.50;
-
+            attackerWin = Math.random() < 0.5;
         }
     }
 }
