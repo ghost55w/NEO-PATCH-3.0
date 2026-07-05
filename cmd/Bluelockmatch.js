@@ -3750,25 +3750,45 @@ const resumeDefense = genererResumeFull(
     "defense"
 );
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
+    
+// 🔍 FIND PLAYER
+const findPlayer = (txt, ownerJid) => {
 
+    const lineup =
+        normalizeJid(ownerJid) === normalizeJid(match.id1)
+            ? (match.lineup1 || [])
+            : (match.lineup2 || []);
+
+    const t = pureName(txt);
+
+    return lineup.find(p => {
+
+        const n = pureName(p.nom);
+
+        return t.includes(n) || n.includes(t);
+
+    }) || null;
+};    
 
 match.joueurTour = match.attacker;
 
 // ==============================
 // ⚔️ ATTENTE DE LA RÉPONSE ATTAQUANT
 // ==============================
+const attacker = findPlayer(match.pendingAttack, match.attacker);
+const defender = findPlayer(defense, match.defender);
 
-const attacker =
-    [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p =>
-            normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
-        );
+if (!attacker) {
+    return ovl.sendMessage(chat, {
+        text: "❌ Joueur attaquant non détecté dans le lineup."
+    });
+}
 
-const defender =
-    [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p =>
-            normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-        );
+if (!defender) {
+    return ovl.sendMessage(chat, {
+        text: "❌ Joueur défenseur non détecté dans le lineup."
+    });
+}
 
 match.phaseDuel = {
     active: true,
@@ -3782,7 +3802,7 @@ match.phaseDuel = {
 
     attackText: match.pendingAttack,
     defenseText: defense
-};    
+};
 const nextPlayer =
     [...(match.lineup1 || []), ...(match.lineup2 || [])]
         .find(p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker));
