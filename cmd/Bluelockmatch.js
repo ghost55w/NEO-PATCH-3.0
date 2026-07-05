@@ -3416,11 +3416,20 @@ if (
     match.phaseDuel.step === "response"
 ) {
 
+    console.log("⚔️ PHASE RESPONSE DÉTECTÉE");
+
     const duel = match.phaseDuel;
 
+    console.log("Sender :", normalizeJid(sender));
+    console.log("AttackerJid :", normalizeJid(duel.attackerJid));
+
     // Seul le propriétaire du joueur attaquant répond
-    if (normalizeJid(sender) !== normalizeJid(duel.attackerJid))
+    if (normalizeJid(sender) !== normalizeJid(duel.attackerJid)) {
+        console.log("❌ Mauvais joueur");
         return true;
+    }
+
+    console.log("✅ Bon joueur");
 
     // On récupère directement les objets joueurs
     const attacker = duel.attacker;
@@ -3742,23 +3751,38 @@ const resumeDefense = genererResumeFull(
 );
 const noteDefense = Math.max(2, Math.min(5, noterPave(defense)));
 
+
+match.joueurTour = match.attacker;
+
 // ==============================
 // ⚔️ ATTENTE DE LA RÉPONSE ATTAQUANT
 // ==============================
+
+const attacker =
+    [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p =>
+            normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
+        );
+
+const defender =
+    [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p =>
+            normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
+        );
 
 match.phaseDuel = {
     active: true,
     step: "response",
 
-    attacker: match.attacker,
-    defender: match.defender,
+    attacker,
+    defender,
+
+    attackerJid: match.attacker,
+    defenderJid: match.defender,
 
     attackText: match.pendingAttack,
     defenseText: defense
-};
-
-match.joueurTour = match.attacker;
-
+};    
 const nextPlayer =
     [...(match.lineup1 || []), ...(match.lineup2 || [])]
         .find(p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker));
