@@ -3418,24 +3418,20 @@ if (
 
     const duel = match.phaseDuel;
 
-    // Seul l'attaquant répond
-    if (normalizeJid(sender) !== normalizeJid(duel.attacker))
+    // Seul le propriétaire du joueur attaquant répond
+    if (normalizeJid(sender) !== normalizeJid(duel.attackerJid))
         return true;
 
-    const attacker =
-        [...match.lineup1, ...match.lineup2]
-            .find(p => normalizeJid(p.id || p.jid) === duel.attacker);
-
-    const defender =
-        [...match.lineup1, ...match.lineup2]
-            .find(p => normalizeJid(p.id || p.jid) === duel.defender);
+    // On récupère directement les objets joueurs
+    const attacker = duel.attacker;
+    const defender = duel.defender;
 
     const result = resolveDefenseDuel(
-    match,
-    attacker,
-    defender,
-    action
-);
+        match,
+        attacker,
+        defender,
+        action
+    );
 
     match.phaseDuel = null;
     match.pendingAttack = null;
@@ -3446,7 +3442,7 @@ if (
     match.joueurTour = result.next;
 
     await ovl.sendMessage(chat, {
-    text:
+        text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${result.msg}
@@ -3465,8 +3461,8 @@ ${result.msg}
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-    mentions: [result.next]
-});
+        mentions: [result.next]
+    });
 
     return true;
 }
