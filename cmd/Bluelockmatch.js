@@ -3442,9 +3442,18 @@ if (
         action
     );
 
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
+    const winnerPlayer = result.ok ? attacker : defender;
+const winnerId = result.next;
+
+match.ballHolder = winnerPlayer.nom;
+match.ballHolderPlayer = winnerPlayer.nom;
+match.ballHolderJid = winnerId;
+match.joueurTour = winnerId;
+
+// 🗺️ TRACKER
+trackerBalle(match, winnerPlayer.nom);
+trackerNouveauTour(match);
+trackerLog(match);
 
     match.ballHolderJid = result.next;
     match.ballHolderPlayer = result.ballHolder;
@@ -3795,10 +3804,16 @@ if (!defender) {
     });
 }
 
-// 🔄 Synchronisation du porteur du ballon
+// 🔄 SOURCE UNIQUE : l'attaquant garde le ballon
+const attackerJid = attacker.id || attacker.jid || match.attacker;
+
 match.ballHolder = attacker.nom;
 match.ballHolderPlayer = attacker.nom;
-match.ballHolderJid = attacker.id || attacker.jid;
+match.ballHolderJid = attackerJid;
+match.joueurTour = attackerJid;
+
+// 🗺️ TRACKER
+trackerBalle(match, attacker.nom);
     
 match.phaseDuel = {
     active: true,
@@ -3813,12 +3828,6 @@ match.phaseDuel = {
     attackText: match.pendingAttack,
     defenseText: defense
 };
-const nextPlayer =
-    [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker));
-
-match.ballHolderJid = match.attacker;
-match.ballHolderPlayer = nextPlayer?.nom || "unknown";
 
 const nextId = match.attacker;
 const nextTag = getTagFromJid(nextId);
@@ -3881,9 +3890,15 @@ match.defenseTimer = setTimeout(() => {
 
     match.joueurTour = finalOpponent;
 
-    match.ballHolderJid = finalOpponent;
-    match.ballHolderPlayer = fallbackOpponent?.nom || "unknown";
+    match.ballHolder = fallbackOpponent?.nom || "unknown";
+match.ballHolderPlayer = fallbackOpponent?.nom || "unknown";
+match.ballHolderJid = finalOpponent;
+match.joueurTour = finalOpponent;
 
+trackerBalle(match, fallbackOpponent?.nom || "unknown");
+trackerNouveauTour(match);
+trackerLog(match);
+    
     ovl.sendMessage(chat, {
         text:
 `⛔ LATENCE OUT ❌
