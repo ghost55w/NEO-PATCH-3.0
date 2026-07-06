@@ -3775,6 +3775,11 @@ match.joueurTour = match.attacker;
 const attacker = findPlayer(match.pendingAttack, match.attacker);
 const defender = findPlayer(defense, match.defender);
 
+console.log("=== CREATE RESPONSE ===");
+console.log("pendingAttack :", match.pendingAttack);
+console.log("attacker trouvé :", attacker.nom);
+console.log("defender trouvé :", defender.nom);
+    
 if (!attacker) {
     return ovl.sendMessage(chat, {
         text: "❌ Joueur attaquant non détecté dans le lineup."
