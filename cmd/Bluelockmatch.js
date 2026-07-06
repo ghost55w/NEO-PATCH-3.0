@@ -2277,6 +2277,9 @@ else if (isDribble) {
         )
         : { valid: false, similarity: 0 };
 
+    console.log("dribbleCheck =", dribbleCheck);
+console.log("tackleCheck =", tackleCheck);
+
     // 🧠 CAS 1 : tacle réussi = défense gagne (PRIORITÉ HAUTE)
     if (tackleCheck.valid && !dribbleCheck.valid) {
         attackerWin = false;
