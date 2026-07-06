@@ -3795,6 +3795,11 @@ if (!defender) {
     });
 }
 
+// 🔄 Synchronisation du porteur du ballon
+match.ballHolder = attacker.nom;
+match.ballHolderPlayer = attacker.nom;
+match.ballHolderJid = attacker.id || attacker.jid;
+    
 match.phaseDuel = {
     active: true,
     step: "response",
