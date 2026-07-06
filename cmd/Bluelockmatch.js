@@ -3441,8 +3441,16 @@ if (
         defender,
         action
     );
-
-    const winnerPlayer = result.ok ? attacker : defender;
+    
+// 🗺️ TRACKER : action défenseur (tacle, interception...)
+trackerAction(match, defender, "duel", {
+    texte: action.slice(0, 80),
+    note: noterPave(action),
+    adversaire: attacker.nom,
+    role: "defense"
+});
+  
+const winnerPlayer = result.ok ? attacker : defender;
 const winnerId = result.next;
 
 match.ballHolder = winnerPlayer.nom;
@@ -3509,8 +3517,10 @@ if (!match.pendingAttack) {
     match.lockedPlayers = new Set();
 
     // 🗺️ TRACKER : Enregistrer l'action attaque
-    const _trackerAttacker = [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p => normalizeJid(p.id || p.jid) === sender);
+const _trackerAttacker = findPlayer(
+    match.pendingAttack,
+    match.joueurTour
+);
     if (_trackerAttacker) {
         const _deps = trackerExtraireDeplacements(action, match.tracker?.joueurs[_trackerAttacker.nom]);
         trackerAction(match, _trackerAttacker, "attaque", {
