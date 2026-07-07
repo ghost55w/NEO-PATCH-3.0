@@ -3515,12 +3515,16 @@ if (!match.pendingAttack) {
 
     // 🔓 Reset locks au début d'un nouveau tour d'attaque
     match.lockedPlayers = new Set();
+    
+// 🗺️ TRACKER : Enregistrer l'action attaque
+const _trackerAttacker =
+    [...(match.lineup1 || []), ...(match.lineup2 || [])]
+    .find(p => {
+        const name = pureName(p.nom);
+        const text = pureName(match.pendingAttack);
 
-    // 🗺️ TRACKER : Enregistrer l'action attaque
-const _trackerAttacker = findPlayer(
-    match.pendingAttack,
-    match.joueurTour
-);
+        return text.includes(name);
+    });
     if (_trackerAttacker) {
         const _deps = trackerExtraireDeplacements(action, match.tracker?.joueurs[_trackerAttacker.nom]);
         trackerAction(match, _trackerAttacker, "attaque", {
