@@ -3441,6 +3441,52 @@ if (
         defender,
         action
     );
+
+// ==============================
+// 📊 STATS DUEL
+// ==============================
+
+attacker.stats.duels = (attacker.stats.duels || 0) + 1;
+defender.stats.duels = (defender.stats.duels || 0) + 1;
+
+if (result.ok) {
+
+    attacker.stats.duelsGagnes =
+        (attacker.stats.duelsGagnes || 0) + 1;
+
+    attacker.stats.lastAction = {
+        type: "duel",
+        texte: `Dribble réussi contre ${defender.nom}`,
+        action: null,
+        resultat: "victoire"
+    };
+
+    defender.stats.lastAction = {
+        type: "duel",
+        texte: `Tacle échoué contre ${attacker.nom}`,
+        action: action,
+        resultat: "défaite"
+    };
+
+} else {
+
+    defender.stats.duelsGagnes =
+        (defender.stats.duelsGagnes || 0) + 1;
+
+    defender.stats.lastAction = {
+        type: "duel",
+        texte: `Tacle réussi contre ${attacker.nom}`,
+        action: action,
+        resultat: "victoire"
+    };
+
+    attacker.stats.lastAction = {
+        type: "duel",
+        texte: `Dribble perdu contre ${defender.nom}`,
+        resultat: "défaite"
+    };
+}
+    
     
 // 🗺️ TRACKER : action défenseur (tacle, interception...)
 trackerAction(match, defender, "duel", {
