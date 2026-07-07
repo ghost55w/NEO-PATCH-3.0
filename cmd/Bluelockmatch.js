@@ -3864,6 +3864,17 @@ if (!defender) {
     });
 }
 
+// ==============================
+// 📊 ACTION ATTAQUANT
+// ==============================
+
+attacker.stats.actions = (attacker.stats.actions || 0) + 1;
+
+attacker.stats.lastAction = {
+    type: "attaque",
+    texte: match.pendingAttack
+};
+                           
 // 🔄 SOURCE UNIQUE : l'attaquant garde le ballon
 const attackerJid = attacker.id || attacker.jid || match.attacker;
 
