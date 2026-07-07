@@ -2266,48 +2266,135 @@ else if (isDribble) {
         "defense"
     ).find(a => a.type === "tacle");
 
+
     const dribbleCheck = dribbleAction
-        ? validateDribbleBlueprint(dribbleAction.nom, attackText)
-        : { valid: false, similarity: 0 };
+        ? validateDribbleBlueprint(
+              dribbleAction.nom,
+              attackText
+          )
+        : { valid: false };
+
 
     const tackleCheck = tackleAction
         ? validateTackleBlueprint(
-            tackleAction.nom,
-            match.phaseDuel.defenseText
-        )
-        : { valid: false, similarity: 0 };
+              tackleAction.nom,
+              match.phaseDuel.defenseText
+          )
+        : { valid: false };
+
 
     console.log("dribbleCheck =", dribbleCheck);
-console.log("tackleCheck =", tackleCheck);
+    console.log("tackleCheck =", tackleCheck);
 
-    // 🧠 CAS 1 : tacle réussi = défense gagne (PRIORITÉ HAUTE)
-    if (tackleCheck.valid && !dribbleCheck.valid) {
-        attackerWin = false;
-    }
 
-    // 🧠 CAS 2 : dribble réussi malgré tacle
-    else if (dribbleCheck.valid && !tackleCheck.valid) {
+    // ==========================
+    // CAS 1 : DRIBBLE VALIDE
+    // TACLE INVALIDE
+    // ==========================
+    if (dribbleCheck.valid && !tackleCheck.valid) {
+
         attackerWin = true;
+
     }
 
-    // 🧠 CAS 3 : clash → stats influencent MAIS ne décident pas seules
+
+    // ==========================
+    // CAS 2 : DRIBBLE INVALIDE
+    // TACLE VALIDE
+    // ==========================
+    else if (!dribbleCheck.valid && tackleCheck.valid) {
+
+        attackerWin = false;
+
+    }
+
+
+    // ==========================
+    // CAS 3 : LES DEUX VALIDES
+    // CALCUL DES STATS
+    // ==========================
+    else if (dribbleCheck.valid && tackleCheck.valid) {
+
+
+        let attackPower =
+            attackStat + attackScore;
+
+
+        let defensePower =
+            defenseStat + defenseScore;
+
+
+        console.log("⚔️ Duel stats");
+        console.log("Attaque :", attackPower);
+        console.log("Défense :", defensePower);
+
+
+        // Comparaison normale
+        if (attackPower > defensePower) {
+
+            attackerWin = true;
+
+        } 
+        
+        else if (defensePower > attackPower) {
+
+            attackerWin = false;
+
+        }
+
+
+        // ÉGALITÉ → OVR intervient
+        else {
+
+            const attackFinal =
+                attackPower + (attacker.stats.ovr * 0.5);
+
+            const defenseFinal =
+                defensePower + (defender.stats.ovr * 0.5);
+
+
+            console.log("⚖️ Égalité !");
+            console.log("Attaque avec OVR :", attackFinal);
+            console.log("Défense avec OVR :", defenseFinal);
+
+
+            if (attackFinal > defenseFinal) {
+
+                attackerWin = true;
+
+            } 
+            
+            else if (defenseFinal > attackFinal) {
+
+                attackerWin = false;
+
+            } 
+            
+            else {
+
+                attackerWin = Math.random() < 0.5;
+
+            }
+
+        }
+
+    }
+
+
+    // ==========================
+    // CAS 4 : LES DEUX INVALIDES
+    // BALLON LIBRE
+    // ==========================
     else {
 
-        const base = attackStat + attackScore;
-        const oppose = defenseStat + defenseScore;
+        attackerWin = null;
 
-        // légère influence OVR (pas domination brute)
-        const atkPower = base + atkOVR * 0.2;
-        const defPower = oppose + defender.stats.ovr * 0.2;
+        match.ballHolder = null;
+        match.ballHolderPlayer = null;
+        match.ballHolderJid = null;
 
-        if (atkPower > defPower) {
-            attackerWin = true;
-        } else if (atkPower < defPower) {
-            attackerWin = false;
-        } else {
-            attackerWin = Math.random() < 0.5;
-        }
     }
+
 }
 
 // ==========================
@@ -2337,10 +2424,11 @@ return {
     attackTotal,
     defenseTotal,
 
-    msg: attackerWin
+    msg: attackerWin === null
+    ? `⚠️ ${attacker.nom} et ${defender.nom} ratent tous les deux leur geste. Le ballon⚽ devient libre.`
+    : attackerWin
         ? `🔥 ${attacker.nom} élimine ${defender.nom}.`
         : `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon.`
-
 };
 } 
 
