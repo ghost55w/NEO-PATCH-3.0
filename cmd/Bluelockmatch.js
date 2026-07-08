@@ -2266,14 +2266,12 @@ else if (isDribble) {
         "defense"
     ).find(a => a.type === "tacle");
 
-
     const dribbleCheck = dribbleAction
         ? validateDribbleBlueprint(
               dribbleAction.nom,
               attackText
           )
         : { valid: false };
-
 
     const tackleCheck = tackleAction
         ? validateTackleBlueprint(
@@ -2282,68 +2280,103 @@ else if (isDribble) {
           )
         : { valid: false };
 
-
     console.log("dribbleCheck =", dribbleCheck);
     console.log("tackleCheck =", tackleCheck);
 
+    // ==========================
+    // DRIBBLE INVALIDE
+    // ==========================
+    if (!dribbleCheck.valid && tackleCheck.valid) {
+
+        return {
+            ok: false,
+            auto: true,
+            next: defender.id,
+            ballHolder: defender.nom,
+
+            attackStat,
+            defenseStat,
+
+            attackScore,
+            defenseScore,
+
+            attackTotal,
+            defenseTotal,
+
+            msg:
+`❌ Le dribble "${dribbleAction.nom}" est mal exécuté.
+
+🛡️ ${defender.nom} récupère automatiquement le ballon.`
+        };
+
+    }
 
     // ==========================
-    // CAS 1 : DRIBBLE VALIDE
     // TACLE INVALIDE
     // ==========================
     if (dribbleCheck.valid && !tackleCheck.valid) {
 
-        attackerWin = true;
+        return {
+            ok: true,
+            auto: true,
+            next: attacker.id,
+            ballHolder: attacker.nom,
+
+            attackStat,
+            defenseStat,
+
+            attackScore,
+            defenseScore,
+
+            attackTotal,
+            defenseTotal,
+
+            msg:
+`❌ Le tacle "${tackleAction.nom}" est mal exécuté.
+
+⚡ ${attacker.nom} conserve automatiquement le ballon.`
+        };
 
     }
 
-
     // ==========================
-    // CAS 2 : DRIBBLE INVALIDE
-    // TACLE VALIDE
+    // LES DEUX INVALIDES
     // ==========================
-    else if (!dribbleCheck.valid && tackleCheck.valid) {
+    if (!dribbleCheck.valid && !tackleCheck.valid) {
 
-        attackerWin = false;
+        attackerWin = null;
+
+        match.ballHolder = null;
+        match.ballHolderPlayer = null;
+        match.ballHolderJid = null;
 
     }
 
-
     // ==========================
-    // CAS 3 : LES DEUX VALIDES
+    // LES DEUX VALIDES
     // CALCUL DES STATS
     // ==========================
-    else if (dribbleCheck.valid && tackleCheck.valid) {
+    else {
 
-
-        let attackPower =
-            attackStat + attackScore;
-
-
-        let defensePower =
-            defenseStat + defenseScore;
-
+        const attackPower = attackStat + attackScore;
+        const defensePower = defenseStat + defenseScore;
 
         console.log("⚔️ Duel stats");
         console.log("Attaque :", attackPower);
         console.log("Défense :", defensePower);
 
-
-        // Comparaison normale
         if (attackPower > defensePower) {
 
             attackerWin = true;
 
-        } 
-        
+        }
+
         else if (defensePower > attackPower) {
 
             attackerWin = false;
 
         }
 
-
-        // ÉGALITÉ → OVR intervient
         else {
 
             const attackFinal =
@@ -2352,24 +2385,22 @@ else if (isDribble) {
             const defenseFinal =
                 defensePower + (defender.stats.ovr * 0.5);
 
-
             console.log("⚖️ Égalité !");
             console.log("Attaque avec OVR :", attackFinal);
             console.log("Défense avec OVR :", defenseFinal);
-
 
             if (attackFinal > defenseFinal) {
 
                 attackerWin = true;
 
-            } 
-            
+            }
+
             else if (defenseFinal > attackFinal) {
 
                 attackerWin = false;
 
-            } 
-            
+            }
+
             else {
 
                 attackerWin = Math.random() < 0.5;
@@ -2380,22 +2411,8 @@ else if (isDribble) {
 
     }
 
-
-    // ==========================
-    // CAS 4 : LES DEUX INVALIDES
-    // BALLON LIBRE
-    // ==========================
-    else {
-
-        attackerWin = null;
-
-        match.ballHolder = null;
-        match.ballHolderPlayer = null;
-        match.ballHolderJid = null;
-
-    }
-
 }
+
 
 // ==========================
 // AUTRES ACTIONS
