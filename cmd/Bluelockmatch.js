@@ -3542,89 +3542,148 @@ if (
 
     console.log("✅ Bon joueur");
 
-    // On récupère directement les objets joueurs
+
+    // ==============================
+    // 🎯 SOURCE UNIQUE DU DUEL
+    // ==============================
+
     const attacker = duel.attacker;
     const defender = duel.defender;
 
-    const result = resolveDefenseDuel(
+
+    // 🔥 MOTEUR UNIQUE
+    const result = await handleDuelMatch(
         match,
-        attacker,
-        defender,
+        duel.attackText,
         action
     );
 
-// ==============================
-// 📊 STATS DUEL
-// ==============================
 
-attacker.stats.duels = (attacker.stats.duels || 0) + 1;
-defender.stats.duels = (defender.stats.duels || 0) + 1;
+    if (!result) {
+        console.log("❌ Aucun résultat duel");
+        return true;
+    }
 
-if (result.ok) {
 
-    attacker.stats.duelsGagnes =
-        (attacker.stats.duelsGagnes || 0) + 1;
 
-    attacker.stats.lastAction = {
-        type: "duel",
-        texte: `Dribble réussi contre ${defender.nom}`,
-        action: null,
-        resultat: "victoire"
-    };
+    // ==============================
+    // 📊 STATS DUEL
+    // ==============================
 
-    defender.stats.lastAction = {
-        type: "duel",
-        texte: `Tacle échoué contre ${attacker.nom}`,
-        action: action,
-        resultat: "défaite"
-    };
+    attacker.stats.duels =
+        (attacker.stats.duels || 0) + 1;
 
-} else {
+    defender.stats.duels =
+        (defender.stats.duels || 0) + 1;
 
-    defender.stats.duelsGagnes =
-        (defender.stats.duelsGagnes || 0) + 1;
 
-    defender.stats.lastAction = {
-        type: "duel",
-        texte: `Tacle réussi contre ${attacker.nom}`,
-        action: action,
-        resultat: "victoire"
-    };
+    if (result.ok) {
 
-    attacker.stats.lastAction = {
-        type: "duel",
-        texte: `Dribble perdu contre ${defender.nom}`,
-        resultat: "défaite"
-    };
-}
-    
-    
-// 🗺️ TRACKER : action défenseur (tacle, interception...)
-trackerAction(match, defender, "duel", {
-    texte: action.slice(0, 80),
-    note: noterPave(action),
-    adversaire: attacker.nom,
-    role: "defense"
-});
-  
-const winnerPlayer = result.ok ? attacker : defender;
-const winnerId = result.next;
+        attacker.stats.duelsGagnes =
+            (attacker.stats.duelsGagnes || 0) + 1;
 
-match.ballHolder = winnerPlayer.nom;
-match.ballHolderPlayer = winnerPlayer.nom;
-match.ballHolderJid = winnerId;
-match.joueurTour = winnerId;
 
-// 🗺️ TRACKER
-trackerBalle(match, winnerPlayer.nom);
-trackerNouveauTour(match);
-trackerLog(match);
+        attacker.stats.lastAction = {
+            type: "duel",
+            texte: `Dribble réussi contre ${defender.nom}`,
+            resultat: "victoire"
+        };
 
-    match.ballHolderJid = result.next;
-    match.ballHolderPlayer = result.ballHolder;
-    match.joueurTour = result.next;
+
+        defender.stats.lastAction = {
+            type: "duel",
+            texte: `Tacle échoué contre ${attacker.nom}`,
+            action,
+            resultat: "défaite"
+        };
+
+    }
+
+    else {
+
+        defender.stats.duelsGagnes =
+            (defender.stats.duelsGagnes || 0) + 1;
+
+
+        defender.stats.lastAction = {
+            type: "duel",
+            texte: `Tacle réussi contre ${attacker.nom}`,
+            action,
+            resultat: "victoire"
+        };
+
+
+        attacker.stats.lastAction = {
+            type: "duel",
+            texte: `Dribble perdu contre ${defender.nom}`,
+            resultat: "défaite"
+        };
+
+    }
+
+
+
+    // ==============================
+    // 🗺️ TRACKER
+    // ==============================
+
+    trackerAction(match, defender, "duel", {
+
+        texte: action.slice(0, 80),
+
+        // uniquement historique,
+        // PAS utilisé dans le calcul duel
+        note: noterPave(action),
+
+        adversaire: attacker.nom,
+
+        role: "defense"
+    });
+
+
+
+    // ==============================
+    // ⚽ POSSESSION
+    // ==============================
+
+    const winnerPlayer =
+        result.ok
+            ? attacker
+            : defender;
+
+
+    const winnerId =
+        result.next ||
+        winnerPlayer.id ||
+        winnerPlayer.jid;
+
+
+
+    match.ballHolder = winnerPlayer.nom;
+    match.ballHolderPlayer = winnerPlayer.nom;
+    match.ballHolderJid = winnerId;
+
+    match.joueurTour = winnerId;
+
+
+
+    // 🗺️ TRACKER
+    trackerBalle(
+        match,
+        winnerPlayer.nom
+    );
+
+    trackerNouveauTour(match);
+    trackerLog(match);
+
+
+
+    // ==============================
+    // 📩 MESSAGE RESULTAT
+    // ==============================
 
     await ovl.sendMessage(chat, {
+
         text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
@@ -3640,12 +3699,26 @@ ${result.msg}
 ├ Score Pavé : ${result.defenseScore}
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
-➡️ @${getTagFromJid(result.next)} NEXT
+➡️ @${getTagFromJid(winnerId)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [result.next]
+
+        mentions: [
+            winnerId
+        ]
+
     });
+
+
+    // ==============================
+    // 🧹 CLEAN DUEL
+    // ==============================
+
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
 
     return true;
 }
