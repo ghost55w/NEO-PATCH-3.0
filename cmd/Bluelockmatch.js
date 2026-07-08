@@ -2425,6 +2425,12 @@ else {
 
 const winner = attackerWin ? attacker : defender;
 
+    console.log("===== RESULTAT DU DUEL =====");
+console.log("attackTotal =", attackTotal);
+console.log("defenseTotal =", defenseTotal);
+console.log("attackerWin =", attackerWin);
+console.log("============================");
+
 return {
 
     ok: attackerWin,
