@@ -2266,12 +2266,14 @@ else if (isDribble) {
         "defense"
     ).find(a => a.type === "tacle");
 
+
     const dribbleCheck = dribbleAction
         ? validateDribbleBlueprint(
               dribbleAction.nom,
               attackText
           )
         : { valid: false };
+
 
     const tackleCheck = tackleAction
         ? validateTackleBlueprint(
@@ -2280,103 +2282,68 @@ else if (isDribble) {
           )
         : { valid: false };
 
+
     console.log("dribbleCheck =", dribbleCheck);
     console.log("tackleCheck =", tackleCheck);
 
-    // ==========================
-    // DRIBBLE INVALIDE
-    // ==========================
-    if (!dribbleCheck.valid && tackleCheck.valid) {
-
-        return {
-            ok: false,
-            auto: true,
-            next: defender.id,
-            ballHolder: defender.nom,
-
-            attackStat,
-            defenseStat,
-
-            attackScore,
-            defenseScore,
-
-            attackTotal,
-            defenseTotal,
-
-            msg:
-`❌ Le dribble "${dribbleAction.nom}" est mal exécuté.
-
-🛡️ ${defender.nom} récupère automatiquement le ballon.`
-        };
-
-    }
 
     // ==========================
+    // CAS 1 : DRIBBLE VALIDE
     // TACLE INVALIDE
     // ==========================
     if (dribbleCheck.valid && !tackleCheck.valid) {
 
-        return {
-            ok: true,
-            auto: true,
-            next: attacker.id,
-            ballHolder: attacker.nom,
-
-            attackStat,
-            defenseStat,
-
-            attackScore,
-            defenseScore,
-
-            attackTotal,
-            defenseTotal,
-
-            msg:
-`❌ Le tacle "${tackleAction.nom}" est mal exécuté.
-
-⚡ ${attacker.nom} conserve automatiquement le ballon.`
-        };
+        attackerWin = true;
 
     }
 
-    // ==========================
-    // LES DEUX INVALIDES
-    // ==========================
-    if (!dribbleCheck.valid && !tackleCheck.valid) {
 
-        attackerWin = null;
+    // ==========================
+    // CAS 2 : DRIBBLE INVALIDE
+    // TACLE VALIDE
+    // ==========================
+    else if (!dribbleCheck.valid && tackleCheck.valid) {
 
-        match.ballHolder = null;
-        match.ballHolderPlayer = null;
-        match.ballHolderJid = null;
+        attackerWin = false;
 
     }
 
+
     // ==========================
-    // LES DEUX VALIDES
+    // CAS 3 : LES DEUX VALIDES
     // CALCUL DES STATS
     // ==========================
-    else {
+    else if (dribbleCheck.valid && tackleCheck.valid) {
 
-        const attackPower = attackStat + attackScore;
-        const defensePower = defenseStat + defenseScore;
+
+        let attackPower =
+            attackStat + attackScore;
+
+
+        let defensePower =
+            defenseStat + defenseScore;
+
 
         console.log("⚔️ Duel stats");
         console.log("Attaque :", attackPower);
         console.log("Défense :", defensePower);
 
+
+        // Comparaison normale
         if (attackPower > defensePower) {
 
             attackerWin = true;
 
-        }
-
+        } 
+        
         else if (defensePower > attackPower) {
 
             attackerWin = false;
 
         }
 
+
+        // ÉGALITÉ → OVR intervient
         else {
 
             const attackFinal =
@@ -2385,22 +2352,24 @@ else if (isDribble) {
             const defenseFinal =
                 defensePower + (defender.stats.ovr * 0.5);
 
+
             console.log("⚖️ Égalité !");
             console.log("Attaque avec OVR :", attackFinal);
             console.log("Défense avec OVR :", defenseFinal);
+
 
             if (attackFinal > defenseFinal) {
 
                 attackerWin = true;
 
-            }
-
+            } 
+            
             else if (defenseFinal > attackFinal) {
 
                 attackerWin = false;
 
-            }
-
+            } 
+            
             else {
 
                 attackerWin = Math.random() < 0.5;
@@ -2411,8 +2380,22 @@ else if (isDribble) {
 
     }
 
-}
 
+    // ==========================
+    // CAS 4 : LES DEUX INVALIDES
+    // BALLON LIBRE
+    // ==========================
+    else {
+
+        attackerWin = null;
+
+        match.ballHolder = null;
+        match.ballHolderPlayer = null;
+        match.ballHolderJid = null;
+
+    }
+
+}
 
 // ==========================
 // AUTRES ACTIONS
@@ -2424,12 +2407,6 @@ else {
 }
 
 const winner = attackerWin ? attacker : defender;
-
-    console.log("===== RESULTAT DU DUEL =====");
-console.log("attackTotal =", attackTotal);
-console.log("defenseTotal =", defenseTotal);
-console.log("attackerWin =", attackerWin);
-console.log("============================");
 
 return {
 
@@ -3542,148 +3519,89 @@ if (
 
     console.log("✅ Bon joueur");
 
-
-    // ==============================
-    // 🎯 SOURCE UNIQUE DU DUEL
-    // ==============================
-
+    // On récupère directement les objets joueurs
     const attacker = duel.attacker;
     const defender = duel.defender;
 
-
-    // 🔥 MOTEUR UNIQUE
-    const result = await handleDuelMatch(
+    const result = resolveDefenseDuel(
         match,
-        duel.attackText,
+        attacker,
+        defender,
         action
     );
 
+// ==============================
+// 📊 STATS DUEL
+// ==============================
 
-    if (!result) {
-        console.log("❌ Aucun résultat duel");
-        return true;
-    }
+attacker.stats.duels = (attacker.stats.duels || 0) + 1;
+defender.stats.duels = (defender.stats.duels || 0) + 1;
 
+if (result.ok) {
 
+    attacker.stats.duelsGagnes =
+        (attacker.stats.duelsGagnes || 0) + 1;
 
-    // ==============================
-    // 📊 STATS DUEL
-    // ==============================
+    attacker.stats.lastAction = {
+        type: "duel",
+        texte: `Dribble réussi contre ${defender.nom}`,
+        action: null,
+        resultat: "victoire"
+    };
 
-    attacker.stats.duels =
-        (attacker.stats.duels || 0) + 1;
+    defender.stats.lastAction = {
+        type: "duel",
+        texte: `Tacle échoué contre ${attacker.nom}`,
+        action: action,
+        resultat: "défaite"
+    };
 
-    defender.stats.duels =
-        (defender.stats.duels || 0) + 1;
+} else {
 
+    defender.stats.duelsGagnes =
+        (defender.stats.duelsGagnes || 0) + 1;
 
-    if (result.ok) {
+    defender.stats.lastAction = {
+        type: "duel",
+        texte: `Tacle réussi contre ${attacker.nom}`,
+        action: action,
+        resultat: "victoire"
+    };
 
-        attacker.stats.duelsGagnes =
-            (attacker.stats.duelsGagnes || 0) + 1;
+    attacker.stats.lastAction = {
+        type: "duel",
+        texte: `Dribble perdu contre ${defender.nom}`,
+        resultat: "défaite"
+    };
+}
+    
+    
+// 🗺️ TRACKER : action défenseur (tacle, interception...)
+trackerAction(match, defender, "duel", {
+    texte: action.slice(0, 80),
+    note: noterPave(action),
+    adversaire: attacker.nom,
+    role: "defense"
+});
+  
+const winnerPlayer = result.ok ? attacker : defender;
+const winnerId = result.next;
 
+match.ballHolder = winnerPlayer.nom;
+match.ballHolderPlayer = winnerPlayer.nom;
+match.ballHolderJid = winnerId;
+match.joueurTour = winnerId;
 
-        attacker.stats.lastAction = {
-            type: "duel",
-            texte: `Dribble réussi contre ${defender.nom}`,
-            resultat: "victoire"
-        };
+// 🗺️ TRACKER
+trackerBalle(match, winnerPlayer.nom);
+trackerNouveauTour(match);
+trackerLog(match);
 
-
-        defender.stats.lastAction = {
-            type: "duel",
-            texte: `Tacle échoué contre ${attacker.nom}`,
-            action,
-            resultat: "défaite"
-        };
-
-    }
-
-    else {
-
-        defender.stats.duelsGagnes =
-            (defender.stats.duelsGagnes || 0) + 1;
-
-
-        defender.stats.lastAction = {
-            type: "duel",
-            texte: `Tacle réussi contre ${attacker.nom}`,
-            action,
-            resultat: "victoire"
-        };
-
-
-        attacker.stats.lastAction = {
-            type: "duel",
-            texte: `Dribble perdu contre ${defender.nom}`,
-            resultat: "défaite"
-        };
-
-    }
-
-
-
-    // ==============================
-    // 🗺️ TRACKER
-    // ==============================
-
-    trackerAction(match, defender, "duel", {
-
-        texte: action.slice(0, 80),
-
-        // uniquement historique,
-        // PAS utilisé dans le calcul duel
-        note: noterPave(action),
-
-        adversaire: attacker.nom,
-
-        role: "defense"
-    });
-
-
-
-    // ==============================
-    // ⚽ POSSESSION
-    // ==============================
-
-    const winnerPlayer =
-        result.ok
-            ? attacker
-            : defender;
-
-
-    const winnerId =
-        result.next ||
-        winnerPlayer.id ||
-        winnerPlayer.jid;
-
-
-
-    match.ballHolder = winnerPlayer.nom;
-    match.ballHolderPlayer = winnerPlayer.nom;
-    match.ballHolderJid = winnerId;
-
-    match.joueurTour = winnerId;
-
-
-
-    // 🗺️ TRACKER
-    trackerBalle(
-        match,
-        winnerPlayer.nom
-    );
-
-    trackerNouveauTour(match);
-    trackerLog(match);
-
-
-
-    // ==============================
-    // 📩 MESSAGE RESULTAT
-    // ==============================
+    match.ballHolderJid = result.next;
+    match.ballHolderPlayer = result.ballHolder;
+    match.joueurTour = result.next;
 
     await ovl.sendMessage(chat, {
-
         text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
@@ -3699,26 +3617,12 @@ ${result.msg}
 ├ Score Pavé : ${result.defenseScore}
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
-➡️ @${getTagFromJid(winnerId)} NEXT
+➡️ @${getTagFromJid(result.next)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-
-        mentions: [
-            winnerId
-        ]
-
+        mentions: [result.next]
     });
-
-
-    // ==============================
-    // 🧹 CLEAN DUEL
-    // ==============================
-
-    match.phaseDuel = null;
-    match.pendingAttack = null;
-    match.waitingDefenseFrom = null;
-
 
     return true;
 }
