@@ -2234,11 +2234,11 @@ let attackerWin = false;
     let attackStat = attacker.stats.dri || 50;
 let defenseStat = defender.stats.def || 50;
 
-let attackScore = 0;
-let defenseScore = 0;
+let attackScore = noterPave(attackText);
+let defenseScore = noterPave(match.phaseDuel.defenseText);
 
-let attackTotal = attackStat;
-let defenseTotal = defenseStat;
+let attackTotal = attackStat + attackScore;
+let defenseTotal = defenseStat + defenseScore;
 
 // ==========================
 // PASSE
@@ -2371,8 +2371,8 @@ if (isDribbleAction && isTackleAction) {
     attackStat = attacker.stats.dri || 50;
     defenseStat = defender.stats.def || 50;
 
-    attackScore = dribbleCheck?.similarity || 0;
-    defenseScore = tackleCheck?.similarity || 0;
+    attackScore += dribbleCheck?.similarity || 0;
+defenseScore += tackleCheck?.similarity || 0;
 
     attackTotal = attackStat + attackScore;
     defenseTotal = defenseStat + defenseScore;
@@ -2427,7 +2427,10 @@ else {
     attackerWin = attackTotal >= defenseTotal;
 
 }
-     
+console.log("attackTotal =", attackTotal);
+console.log("defenseTotal =", defenseTotal);
+console.log("attackerWin FINAL =", attackerWin);
+    
 const winner = attackerWin ? attacker : defender;
 
 return {
