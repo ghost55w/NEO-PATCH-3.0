@@ -2371,69 +2371,53 @@ console.log("==============================");
         }
 
     }
-
-// ⚽ DRIBBLE VS TACLE
+                                     
+// ⚽ DRIBBLE VS TACLE BLUEPRINT
 if (isDribbleAction && isTackleAction) {
 
     attackStat = attacker.stats.dri || 50;
     defenseStat = defender.stats.def || 50;
 
-    attackScore += dribbleCheck?.similarity || 0;
-defenseScore += tackleCheck?.similarity || 0;
+    attackScore = dribbleCheck?.similarity || 0;
+    defenseScore = tackleCheck?.similarity || 0;
 
     attackTotal = attackStat + attackScore;
     defenseTotal = defenseStat + defenseScore;
 
-    if (attackTotal > defenseTotal) {
+
+    if (dribbleCheck?.valid && !tackleCheck?.valid) {
 
         attackerWin = true;
 
-    } else if (defenseTotal > attackTotal) {
+    } 
+    
+    else if (!dribbleCheck?.valid && tackleCheck?.valid) {
 
         attackerWin = false;
 
-    } else {
+    }
 
-        const attackFinal =
-            attackTotal + (attacker.stats.ovr * 0.5);
+    else if (dribbleCheck?.valid && tackleCheck?.valid) {
 
-        const defenseFinal =
-            defenseTotal + (defender.stats.ovr * 0.5);
+        attackerWin = attackTotal > defenseTotal;
 
-        if (attackFinal > defenseFinal) {
+    }
 
-            attackerWin = true;
+    else {
 
-        } else if (defenseFinal > attackFinal) {
-
-            attackerWin = false;
-
-        } else {
-
-            attackerWin = Math.random() < 0.5;
-
-        }
+        attackerWin = attackTotal >= defenseTotal;
 
     }
 
 }
 
-// ⚠️ Aucun tacle détecté
+// ⚠️ Pas de duel dribble/tacle
 else {
 
     attackerWin = attackTotal >= defenseTotal;
 
 }
-        }                                     
-
-// ==========================
-// AUTRES ACTIONS
-// ==========================
-else {
-
-    attackerWin = attackTotal >= defenseTotal;
-
-}
+        
 console.log("attackTotal =", attackTotal);
 console.log("defenseTotal =", defenseTotal);
 console.log("attackerWin FINAL =", attackerWin);
