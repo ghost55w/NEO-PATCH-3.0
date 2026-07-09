@@ -2367,45 +2367,45 @@ else if (isDribble) {
     // ⚽ DRIBBLE VS TACLE
     if (isDribbleAction && isTackleAction) {
 
-        const attackScore = dribbleCheck?.similarity || 0;
-        const defenseScore = tackleCheck?.similarity || 0;
+    attackScore = dribbleCheck?.similarity || 0;
+    defenseScore = tackleCheck?.similarity || 0;
 
-        const attackTotal = attackStat + attackScore;
-        const defenseTotal = defenseStat + defenseScore;
+    attackTotal = attackStat + attackScore;
+    defenseTotal = defenseStat + defenseScore;
 
-        if (attackTotal > defenseTotal) {
+    if (attackTotal > defenseTotal) {
+
+        attackerWin = true;
+
+    } else if (defenseTotal > attackTotal) {
+
+        attackerWin = false;
+
+    } else {
+
+        const attackFinal =
+            attackTotal + (attacker.stats.ovr * 0.5);
+
+        const defenseFinal =
+            defenseTotal + (defender.stats.ovr * 0.5);
+
+        if (attackFinal > defenseFinal) {
 
             attackerWin = true;
 
-        } else if (defenseTotal > attackTotal) {
+        } else if (defenseFinal > attackFinal) {
 
             attackerWin = false;
 
         } else {
 
-            const attackFinal =
-                attackTotal + (attacker.stats.ovr * 0.5);
-
-            const defenseFinal =
-                defenseTotal + (defender.stats.ovr * 0.5);
-
-            if (attackFinal > defenseFinal) {
-
-                attackerWin = true;
-
-            } else if (defenseFinal > attackFinal) {
-
-                attackerWin = false;
-
-            } else {
-
-                attackerWin = Math.random() < 0.5;
-
-            }
+            attackerWin = Math.random() < 0.5;
 
         }
 
     }
+
+}
 
     // ⚠️ Aucun tacle détecté
     else {
