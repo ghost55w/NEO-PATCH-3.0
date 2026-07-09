@@ -2425,7 +2425,17 @@ else {
     attackerWin = attackTotal >= defenseTotal;
 
 }
-
+    
+console.log("====== DEBUG DUEL ======");
+console.log("attackerWin =", attackerWin);
+console.log("attackTotal =", attackTotal);
+console.log("defenseTotal =", defenseTotal);
+console.log("isDribbleAction =", isDribbleAction);
+console.log("isTackleAction =", isTackleAction);
+console.log("dribbleCheck =", dribbleCheck);
+console.log("tackleCheck =", tackleCheck);
+console.log("========================");
+    
 const winner = attackerWin ? attacker : defender;
 
 return {
