@@ -2417,7 +2417,7 @@ else {
     attackerWin = attackTotal >= defenseTotal;
 
 }
-                                     
+        }                                     
 
 // ==========================
 // AUTRES ACTIONS
