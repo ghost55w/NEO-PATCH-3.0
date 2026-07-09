@@ -2410,6 +2410,7 @@ if (isDribbleAction && isTackleAction) {
     }
 
 }
+        } 
 
 // ⚠️ Pas de duel dribble/tacle
 else {
