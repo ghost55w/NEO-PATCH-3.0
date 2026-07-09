@@ -2384,7 +2384,9 @@ if (isDribbleAction && isTackleAction) {
     attackTotal = attackStat + attackScore;
     defenseTotal = defenseStat + defenseScore;
 
-
+console.log("DRIBBLE CHECK :", dribbleCheck);
+console.log("TACKLE CHECK :", tackleCheck);
+    
     if (dribbleCheck?.valid && !tackleCheck?.valid) {
 
         attackerWin = true;
@@ -2419,9 +2421,11 @@ else {
 
 }
         
+console.log("===== FINAL DUEL CHECK =====");
+console.log("attackerWin =", attackerWin);
 console.log("attackTotal =", attackTotal);
 console.log("defenseTotal =", defenseTotal);
-console.log("attackerWin FINAL =", attackerWin);
+console.log("============================");
     
 const winner = attackerWin ? attacker : defender;
 
