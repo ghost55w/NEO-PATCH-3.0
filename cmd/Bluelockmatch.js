@@ -2231,6 +2231,15 @@ function resolveDefenseDuel(match, attacker, defender, attackText) {
     
 let attackerWin = false;
 
+    let attackStat = attacker.stats.dri || 50;
+let defenseStat = defender.stats.def || 50;
+
+let attackScore = 0;
+let defenseScore = 0;
+
+let attackTotal = attackStat;
+let defenseTotal = defenseStat;
+
 // ==========================
 // PASSE
 // ==========================
@@ -2356,59 +2365,59 @@ else if (isDribble) {
 
     }
 
-    // ⚽ DRIBBLE VS TACLE
-    if (isDribbleAction && isTackleAction) {
-const attackStat = attacker.stats.dri || 50;
-const defenseStat = defender.stats.def || 50;
+// ⚽ DRIBBLE VS TACLE
+if (isDribbleAction && isTackleAction) {
 
-const attackScore = dribbleCheck?.similarity || 0;
-const defenseScore = tackleCheck?.similarity || 0;
+    attackStat = attacker.stats.dri || 50;
+    defenseStat = defender.stats.def || 50;
 
-const attackTotal = attackStat + attackScore;
-const defenseTotal = defenseStat + defenseScore;
+    attackScore = dribbleCheck?.similarity || 0;
+    defenseScore = tackleCheck?.similarity || 0;
 
-let attackerWin;
+    attackTotal = attackStat + attackScore;
+    defenseTotal = defenseStat + defenseScore;
 
-if (attackTotal > defenseTotal) {
-
-    attackerWin = true;
-
-} else if (defenseTotal > attackTotal) {
-
-    attackerWin = false;
-
-} else {
-
-    const attackFinal =
-        attackTotal + (attacker.stats.ovr * 0.5);
-
-    const defenseFinal =
-        defenseTotal + (defender.stats.ovr * 0.5);
-
-    if (attackFinal > defenseFinal) {
+    if (attackTotal > defenseTotal) {
 
         attackerWin = true;
 
-    } else if (defenseFinal > attackFinal) {
+    } else if (defenseTotal > attackTotal) {
 
         attackerWin = false;
 
     } else {
 
-        attackerWin = Math.random() < 0.5;
+        const attackFinal =
+            attackTotal + (attacker.stats.ovr * 0.5);
+
+        const defenseFinal =
+            defenseTotal + (defender.stats.ovr * 0.5);
+
+        if (attackFinal > defenseFinal) {
+
+            attackerWin = true;
+
+        } else if (defenseFinal > attackFinal) {
+
+            attackerWin = false;
+
+        } else {
+
+            attackerWin = Math.random() < 0.5;
+
+        }
 
     }
-}
-
-    // ⚠️ Aucun tacle détecté
-    else {
-
-        attackerWin = attackTotal >= defenseTotal;
-
-    }
 
 }
 
+// ⚠️ Aucun tacle détecté
+else {
+
+    attackerWin = attackTotal >= defenseTotal;
+
+}
+                                     
 
 // ==========================
 // AUTRES ACTIONS
