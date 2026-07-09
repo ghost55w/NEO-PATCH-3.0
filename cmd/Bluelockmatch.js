@@ -2328,6 +2328,13 @@ else if (isDribble) {
     }
 
     const isTackleAction = !!detectedTackle;
+    console.log("===== RESOLVE DUEL CHECK =====");
+console.log("attackText =", attackText);
+console.log("defenseText =", match.phaseDuel.defenseText);
+console.log("isDribble =", isDribble);
+console.log("isTackle =", isTackleAction);
+console.log("detectedTackle =", detectedTackle);
+console.log("==============================");
 
     let tackleCheck = null;
 
