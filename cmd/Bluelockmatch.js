@@ -4105,8 +4105,12 @@ return true;
        
 
 // ⚽ DUELS ET MATCH UP 🆚
-async function handleDuelMatch(match, attaqueText, defenseText) {
-    if (!attaqueText || !defenseText) {
+async function handleDuelMatch(
+    match,
+    attaqueText,
+    defenseText,
+    responseText = null
+) {
         return {
             ok: false,
             type: "erreur",
@@ -4256,11 +4260,13 @@ let dribbleCheck = null;
 
 if (isDribbleAction) {
 
-    dribbleCheck =
-        validateDribbleBlueprint(
-            detectedDribble,
-            attaqueText
-        );
+const dribbleText = responseText || attaqueText;
+
+dribbleCheck =
+    validateDribbleBlueprint(
+        detectedDribble,
+        dribbleText
+    );    
 
 if (!dribbleCheck.valid) {
 
