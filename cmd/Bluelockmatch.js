@@ -3548,83 +3548,84 @@ if (
     const attacker = duel.attacker;
     const defender = duel.defender;
 
-    const result = resolveDefenseDuel(
+    // Snapshot compatible avec handleDuelMatch
+    match.phaseDuel.attackPave = duel.attackText;
+    match.phaseDuel.defensePave = duel.defenseText;
+
+    // Résolution unique
+    const result = await handleDuelMatch(
         match,
-        attacker,
-        defender,
-        action
+        duel.attackText,
+        duel.defenseText
     );
 
-// ==============================
-// 📊 STATS DUEL
-// ==============================
+    // ==============================
+    // 📊 STATS DUEL
+    // ==============================
 
-attacker.stats.duels = (attacker.stats.duels || 0) + 1;
-defender.stats.duels = (defender.stats.duels || 0) + 1;
+    attacker.stats.duels = (attacker.stats.duels || 0) + 1;
+    defender.stats.duels = (defender.stats.duels || 0) + 1;
 
-if (result.ok) {
+    if (result.ok) {
 
-    attacker.stats.duelsGagnes =
-        (attacker.stats.duelsGagnes || 0) + 1;
+        attacker.stats.duelsGagnes =
+            (attacker.stats.duelsGagnes || 0) + 1;
 
-    attacker.stats.lastAction = {
-        type: "duel",
-        texte: `Dribble réussi contre ${defender.nom}`,
-        action: null,
-        resultat: "victoire"
-    };
+        attacker.stats.lastAction = {
+            type: "duel",
+            texte: `Dribble réussi contre ${defender.nom}`,
+            action: null,
+            resultat: "victoire"
+        };
 
-    defender.stats.lastAction = {
-        type: "duel",
-        texte: `Tacle échoué contre ${attacker.nom}`,
-        action: action,
-        resultat: "défaite"
-    };
+        defender.stats.lastAction = {
+            type: "duel",
+            texte: `Tacle échoué contre ${attacker.nom}`,
+            action: duel.defenseText,
+            resultat: "défaite"
+        };
 
-} else {
+    } else {
 
-    defender.stats.duelsGagnes =
-        (defender.stats.duelsGagnes || 0) + 1;
+        defender.stats.duelsGagnes =
+            (defender.stats.duelsGagnes || 0) + 1;
 
-    defender.stats.lastAction = {
-        type: "duel",
-        texte: `Tacle réussi contre ${attacker.nom}`,
-        action: action,
-        resultat: "victoire"
-    };
+        defender.stats.lastAction = {
+            type: "duel",
+            texte: `Tacle réussi contre ${attacker.nom}`,
+            action: duel.defenseText,
+            resultat: "victoire"
+        };
 
-    attacker.stats.lastAction = {
-        type: "duel",
-        texte: `Dribble perdu contre ${defender.nom}`,
-        resultat: "défaite"
-    };
-}
-    
-    
-// 🗺️ TRACKER : action défenseur (tacle, interception...)
-trackerAction(match, defender, "duel", {
-    texte: action.slice(0, 80),
-    note: noterPave(action),
-    adversaire: attacker.nom,
-    role: "defense"
-});
-  
-const winnerPlayer = result.ok ? attacker : defender;
-const winnerId = result.next;
+        attacker.stats.lastAction = {
+            type: "duel",
+            texte: `Dribble perdu contre ${defender.nom}`,
+            resultat: "défaite"
+        };
+    }
 
-match.ballHolder = winnerPlayer.nom;
-match.ballHolderPlayer = winnerPlayer.nom;
-match.ballHolderJid = winnerId;
-match.joueurTour = winnerId;
+    // 🗺️ TRACKER : action défenseur
+    trackerAction(match, defender, "duel", {
+        texte: duel.defenseText.slice(0, 80),
+        note: noterPave(duel.defenseText),
+        adversaire: attacker.nom,
+        role: "defense"
+    });
 
-// 🗺️ TRACKER
-trackerBalle(match, winnerPlayer.nom);
-trackerNouveauTour(match);
-trackerLog(match);
+    const winnerPlayer = result.ok ? attacker : defender;
+    const winnerId = result.ok
+        ? (attacker.id || attacker.jid)
+        : (defender.id || defender.jid);
 
-    match.ballHolderJid = result.next;
-    match.ballHolderPlayer = result.ballHolder;
-    match.joueurTour = result.next;
+    match.ballHolder = winnerPlayer.nom;
+    match.ballHolderPlayer = winnerPlayer.nom;
+    match.ballHolderJid = winnerId;
+    match.joueurTour = winnerId;
+
+    // 🗺️ TRACKER
+    trackerBalle(match, winnerPlayer.nom);
+    trackerNouveauTour(match);
+    trackerLog(match);
 
     await ovl.sendMessage(chat, {
         text:
@@ -3642,11 +3643,11 @@ ${result.msg}
 ├ Score Pavé : ${result.defenseScore}
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
-➡️ @${getTagFromJid(result.next)} NEXT
+➡️ @${getTagFromJid(winnerId)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [result.next]
+        mentions: [winnerId]
     });
 
     return true;
