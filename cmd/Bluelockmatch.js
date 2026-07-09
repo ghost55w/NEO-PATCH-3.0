@@ -2228,15 +2228,7 @@ function resolveDefenseDuel(match, attacker, defender, attackText) {
 
     const diff = defDEF - atkOVR;
 
-    const attackScore = noterPave(attackText);
-const defenseScore = noterPave(match.phaseDuel.defenseText);
-
-const attackStat = atkDRI;
-const defenseStat = defDEF;
-
-const attackTotal = attackStat + attackScore;
-const defenseTotal = defenseStat + defenseScore;
-
+    
 let attackerWin = false;
 
 // ==========================
@@ -2366,45 +2358,46 @@ else if (isDribble) {
 
     // ⚽ DRIBBLE VS TACLE
     if (isDribbleAction && isTackleAction) {
+const attackStat = attacker.stats.dri || 50;
+const defenseStat = defender.stats.def || 50;
 
-    attackScore = dribbleCheck?.similarity || 0;
-    defenseScore = tackleCheck?.similarity || 0;
+const attackScore = dribbleCheck?.similarity || 0;
+const defenseScore = tackleCheck?.similarity || 0;
 
-    attackTotal = attackStat + attackScore;
-    defenseTotal = defenseStat + defenseScore;
+const attackTotal = attackStat + attackScore;
+const defenseTotal = defenseStat + defenseScore;
 
-    if (attackTotal > defenseTotal) {
+let attackerWin;
+
+if (attackTotal > defenseTotal) {
+
+    attackerWin = true;
+
+} else if (defenseTotal > attackTotal) {
+
+    attackerWin = false;
+
+} else {
+
+    const attackFinal =
+        attackTotal + (attacker.stats.ovr * 0.5);
+
+    const defenseFinal =
+        defenseTotal + (defender.stats.ovr * 0.5);
+
+    if (attackFinal > defenseFinal) {
 
         attackerWin = true;
 
-    } else if (defenseTotal > attackTotal) {
+    } else if (defenseFinal > attackFinal) {
 
         attackerWin = false;
 
     } else {
 
-        const attackFinal =
-            attackTotal + (attacker.stats.ovr * 0.5);
-
-        const defenseFinal =
-            defenseTotal + (defender.stats.ovr * 0.5);
-
-        if (attackFinal > defenseFinal) {
-
-            attackerWin = true;
-
-        } else if (defenseFinal > attackFinal) {
-
-            attackerWin = false;
-
-        } else {
-
-            attackerWin = Math.random() < 0.5;
-
-        }
+        attackerWin = Math.random() < 0.5;
 
     }
-
 }
 
     // ⚠️ Aucun tacle détecté
@@ -2425,17 +2418,7 @@ else {
     attackerWin = attackTotal >= defenseTotal;
 
 }
-    
-console.log("====== DEBUG DUEL ======");
-console.log("attackerWin =", attackerWin);
-console.log("attackTotal =", attackTotal);
-console.log("defenseTotal =", defenseTotal);
-console.log("isDribbleAction =", isDribbleAction);
-console.log("isTackleAction =", isTackleAction);
-console.log("dribbleCheck =", dribbleCheck);
-console.log("tackleCheck =", tackleCheck);
-console.log("========================");
-    
+     
 const winner = attackerWin ? attacker : defender;
 
 return {
