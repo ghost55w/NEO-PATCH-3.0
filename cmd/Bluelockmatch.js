@@ -2383,9 +2383,13 @@ if (isDribbleAction && isTackleAction) {
 
     attackTotal = attackStat + attackScore;
     defenseTotal = defenseStat + defenseScore;
-
-console.log("DRIBBLE CHECK :", dribbleCheck);
-console.log("TACKLE CHECK :", tackleCheck);
+    
+console.log("===== CHECK BLUEPRINT DUEL =====");
+    console.log("DRIBBLE CHECK :", dribbleCheck);
+    console.log("TACKLE CHECK :", tackleCheck);
+    console.log("attackTotal :", attackTotal);
+    console.log("defenseTotal :", defenseTotal);
+    console.log("===============================");
     
     if (dribbleCheck?.valid && !tackleCheck?.valid) {
 
