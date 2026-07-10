@@ -4193,10 +4193,13 @@ if (!defender) {
     }
 
     const atkStats = attacker.stats || {};
-    const defStats = defender.stats || {};
+const defStats = defender.stats || {};
 
-    const atk = attaqueText.toLowerCase();
-    const def = defenseText.toLowerCase();
+// Source du dribble : réponse si elle existe, sinon attaque initiale
+const dribbleSource = responseText || attaqueText;
+
+const atk = dribbleSource.toLowerCase();
+const def = defenseText.toLowerCase();
 
     // 🎯 RESULT GLOBAL
     let result = null;
