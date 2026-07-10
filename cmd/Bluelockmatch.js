@@ -3544,19 +3544,20 @@ if (
 
     console.log("✅ Bon joueur");
 
-    // On récupère directement les objets joueurs
     const attacker = duel.attacker;
     const defender = duel.defender;
 
-    // Snapshot compatible avec handleDuelMatch
-    match.phaseDuel.attackPave = duel.attackText;
-    match.phaseDuel.defensePave = duel.defenseText;
+    // 🧠 Snapshots
+    duel.attackPave = duel.attackText;
+    duel.defensePave = duel.defenseText;
+    duel.responseText = action;
 
-    // Résolution unique
+    // ⚔️ Résolution avec les 3 pavés
     const result = await handleDuelMatch(
         match,
-        duel.attackText,
-        duel.defenseText
+        duel.attackPave,
+        duel.defensePave,
+        duel.responseText
     );
 
     // ==============================
@@ -3574,7 +3575,7 @@ if (
         attacker.stats.lastAction = {
             type: "duel",
             texte: `Dribble réussi contre ${defender.nom}`,
-            action: null,
+            action: duel.responseText,
             resultat: "victoire"
         };
 
@@ -3600,11 +3601,11 @@ if (
         attacker.stats.lastAction = {
             type: "duel",
             texte: `Dribble perdu contre ${defender.nom}`,
+            action: duel.responseText,
             resultat: "défaite"
         };
     }
 
-    // 🗺️ TRACKER : action défenseur
     trackerAction(match, defender, "duel", {
         texte: duel.defenseText.slice(0, 80),
         note: noterPave(duel.defenseText),
@@ -3622,7 +3623,6 @@ if (
     match.ballHolderJid = winnerId;
     match.joueurTour = winnerId;
 
-    // 🗺️ TRACKER
     trackerBalle(match, winnerPlayer.nom);
     trackerNouveauTour(match);
     trackerLog(match);
@@ -3649,6 +3649,12 @@ ${result.msg}
 🔷BLUELOCK⚽🥅`,
         mentions: [winnerId]
     });
+
+    // 🧹 Nettoyage
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+    match.hasPlayed = true;
 
     return true;
 }
