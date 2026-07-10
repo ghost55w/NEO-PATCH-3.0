@@ -4111,6 +4111,8 @@ async function handleDuelMatch(
     defenseText,
     responseText = null
 ) {
+
+    if (!attaqueText || !defenseText) {
         return {
             ok: false,
             type: "erreur",
