@@ -1698,31 +1698,52 @@ function genererResumeFull(actionText, match, mode = "attack") {
 
 // 🛡️ DETECTION TARGET DEFENDER
 //===============================
-function detectTargetPlayer(text, players) {
+function detectTargetPlayer(text, players, attacker) {
 
     const lower = text.toLowerCase();
 
-    // mots clés de duel défensif
     const keywords = [
-        "devant",
         "face à",
-        "sur",
-        "contre",
-        "bloquer",
-        "barrer",
-        "empêcher",
-        "stoppe",
-        "stopper"
+        "en face",
+        "devant",
+        "derrière",
+        "à gauche de",
+        "à droite de",
+        "sur la gauche de",
+        "sur la droite de",
+        "côté gauche",
+        "côté droit",
+        "profil gauche",
+        "profil droit",
+        "à côté de",
+        "près de",
+        "proche de",
+        "au niveau de",
+        "au marquage de",
+        "au contact de",
+        "à 1m de",
+        "à 2m de",
+        "à 3m de",
+        "à 4m de",
+        "à 5m de"
     ];
 
     if (!keywords.some(k => lower.includes(k))) return null;
 
-    // 🔍 cherche un joueur mentionné après ou autour
     return players.find(p => {
-        const name = pureName(p.nom);
-        return lower.includes(name);
+
+        if (
+            attacker &&
+            normalizeJid(p.id || p.jid) ===
+            normalizeJid(attacker.id || attacker.jid)
+        ) {
+            return false;
+        }
+
+        return lower.includes(pureName(p.nom));
+
     }) || null;
-      }
+}
 
 // ⚽ VIS-À-VIS AUTO (FORMATION)
 function generateVisAVis(team1, team2) {
@@ -4217,8 +4238,17 @@ if (!defender) {
             );
         }
 
+        console.log("Attacker :", attacker?.nom);
+console.log("Defender avant :", defender?.nom);
         // Cible tactique
-        const tacticalTarget = detectTargetPlayer(defenseText, allPlayers);
+        const tacticalTarget =
+    detectTargetPlayer(
+        defenseText,
+        allPlayers,
+        attacker
+    );
+        console.log("Target :", tacticalTarget?.nom);
+        
         if (tacticalTarget) defender = tacticalTarget;
     }
     // ❌ VALIDATION
