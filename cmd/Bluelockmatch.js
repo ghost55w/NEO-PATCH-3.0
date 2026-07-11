@@ -1698,7 +1698,9 @@ function genererResumeFull(actionText, match, mode = "attack") {
 
 // 🛡️ DETECTION TARGET DEFENDER
 //===============================
-function detectTargetPlayer(text, players, attacker) {
+function detectTargetPlayer(text, players) {
+
+    if (!text) return null;
 
     const lower = text.toLowerCase();
 
@@ -1728,19 +1730,17 @@ function detectTargetPlayer(text, players, attacker) {
         "à 5m de"
     ];
 
-    if (!keywords.some(k => lower.includes(k))) return null;
+    // Pas de relation spatiale → pas de cible fiable
+    if (!keywords.some(k => lower.includes(k))) {
+        return null;
+    }
 
+    // Cherche uniquement un joueur cité
     return players.find(p => {
 
-        if (
-            attacker &&
-            normalizeJid(p.id || p.jid) ===
-            normalizeJid(attacker.id || attacker.jid)
-        ) {
-            return false;
-        }
+        const name = pureName(p.nom);
 
-        return lower.includes(pureName(p.nom));
+        return lower.includes(name);
 
     }) || null;
 }
@@ -4241,16 +4241,17 @@ if (!defender) {
         console.log("Attacker :", attacker?.nom);
 console.log("Defender avant :", defender?.nom);
         // Cible tactique
-        const tacticalTarget =
-    detectTargetPlayer(
-        defenseText,
-        allPlayers,
-        attacker
-    );
-        console.log("Target :", tacticalTarget?.nom);
-        
-        if (tacticalTarget) defender = tacticalTarget;
-    }
+        const tacticalTarget = detectTargetPlayer(
+    defenseText,
+    allPlayers
+);
+
+if (
+    tacticalTarget &&
+    pureName(tacticalTarget.nom) === pureName(attacker.nom)
+) {
+    console.log("✅ La défense vise bien", attacker.nom);
+}
     // ❌ VALIDATION
     if (!attacker || !defender) {
 
