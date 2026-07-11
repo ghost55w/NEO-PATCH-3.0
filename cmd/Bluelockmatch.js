@@ -4208,60 +4208,71 @@ async function handleDuelMatch(
         attacker = match.phaseDuel.attacker;
         defender = match.phaseDuel.defender;
     } else {
-        // Fallback si pas de phaseDuel (appel direct)
-        attacker = findPlayer(attaqueText, match.attacker);
-defender = findPlayer(defenseText, match.defender);
+        
+// Fallback si pas de phaseDuel (appel direct)
+    attacker = findPlayer(attaqueText, match.attacker);
+    defender = findPlayer(defenseText, match.defender);
+
+}
+
+
+// Anti-collision attacker = defender
+if (
+    defender &&
+    attacker &&
+    normalizeJid(defender.id || defender.jid) === normalizeJid(attacker.id || attacker.jid)
+) {
+
+    defender = allPlayers.find(p =>
+        normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid) &&
+        pureName(defenseText).includes(pureName(p.nom))
+    );
+
+}
+
 
 if (!attacker) {
+
     return {
         ok: false,
         type: "erreur",
         message: "❌ Joueur attaquant non détecté dans le lineup."
     };
+
 }
 
+
 if (!defender) {
+
     return {
         ok: false,
         type: "erreur",
         message: "❌ Joueur défenseur non détecté dans le lineup."
     };
+
 }
 
-        // Anti-collision attacker = defender
-        if (defender && attacker &&
-            normalizeJid(defender.id || defender.jid) === normalizeJid(attacker.id || attacker.jid)
-        ) {
-            defender = allPlayers.find(p =>
-                normalizeJid(p.id || p.jid) !== normalizeJid(attacker.id || attacker.jid) &&
-                pureName(defenseText).includes(pureName(p.nom))
-            );
-        }
 
-        console.log("Attacker :", attacker?.nom);
-console.log("Defender avant :", defender?.nom);
-        // Cible tactique
-        const tacticalTarget = detectTargetPlayer(
+console.log("Attacker :", attacker?.nom);
+console.log("Defender :", defender?.nom);
+
+
+// Cible tactique
+const tacticalTarget = detectTargetPlayer(
     defenseText,
     allPlayers
 );
+
 
 if (
     tacticalTarget &&
     pureName(tacticalTarget.nom) === pureName(attacker.nom)
 ) {
+
     console.log("✅ La défense vise bien", attacker.nom);
+
 }
-    // ❌ VALIDATION
-    if (!attacker || !defender) {
-
-        return {
-            ok: false,
-            type: "erreur",
-            message: "❌ Joueurs introuvables"
-        };
-    }
-
+    
     const atkStats = attacker.stats || {};
 const defStats = defender.stats || {};
 
