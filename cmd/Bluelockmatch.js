@@ -4132,19 +4132,52 @@ async function handleDuelMatch(
     ];
 
     // 🔍 FIND PLAYER
-    const findPlayer = (txt) => {
+    const findPlayer = (txt, ownerJid) => {
 
-        const t = pureName(txt);
+    if (!txt) return null;
 
-        return allPlayers.find(p => {
+    const t = pureName(txt);
 
-            const n = pureName(p.nom);
+    // 🔥 On choisit d'abord le bon lineup
+    let lineup = [];
 
-            return t.includes(n) || n.includes(t);
+    if (normalizeJid(ownerJid) === normalizeJid(match.id1)) {
+        lineup = match.lineup1 || [];
+    }
+    else if (normalizeJid(ownerJid) === normalizeJid(match.id2)) {
+        lineup = match.lineup2 || [];
+    }
+    else {
+        lineup = [
+            ...(match.lineup1 || []),
+            ...(match.lineup2 || [])
+        ];
+    }
 
-        }) || null;
-    };
+    // 🎯 Recherche uniquement dans ce lineup
+    const player = lineup.find(p => {
 
+        const n = pureName(p.nom);
+
+        return t.includes(n) || n.includes(t);
+
+    });
+
+    if (player) return player;
+
+    // 🔄 Fallback : recherche globale
+    return [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ].find(p => {
+
+        const n = pureName(p.nom);
+
+        return t.includes(n) || n.includes(t);
+
+    }) || null;
+};
+    
     let attacker = null;
     let defender = null;
 
@@ -4155,8 +4188,8 @@ async function handleDuelMatch(
         defender = match.phaseDuel.defender;
     } else {
         // Fallback si pas de phaseDuel (appel direct)
-        attacker = findPlayer(attaqueText);
-defender = findPlayer(defenseText);
+        attacker = findPlayer(attaqueText, match.attacker);
+defender = findPlayer(defenseText, match.defender);
 
 if (!attacker) {
     return {
