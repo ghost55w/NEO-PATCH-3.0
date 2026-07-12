@@ -3495,6 +3495,16 @@ setTimeout(async () => {
         attackPave,
         defensePave
     );
+    // 🚶 Application réelle du déplacement
+if (
+    duelResult.distance > 0 &&
+    duelResult.attacker?.pendingMove?.active
+) {
+    avancerJoueur(
+        duelResult.attacker,
+        duelResult.distance
+    );
+}
 
     // 🎯 POSSESSION (SOURCE UNIQUE)
     // ⚠️ On utilise les snapshots (duelAttacker/duelDefender) et PAS match.phaseDuel
@@ -4161,8 +4171,9 @@ trackerLog(match);
 return true;
 }
        
-
+// ============================================================
 // ⚽ DUELS ET MATCH UP 🆚
+// ============================================================
 async function handleDuelMatch(
     match,
     attaqueText,
@@ -4454,6 +4465,8 @@ if (isTackleAction) {
         return {
             ok: true,
             type: "BAD_TACKLE",
+distance: attacker.pendingMove?.remainingDistance || 0,
+    movementReason: "tackle_failed",
             attacker,
             defender,
             msg:
@@ -4587,6 +4600,8 @@ if (isPassive) {
     return {
         ok: false,
         type: "PASSIVE_BLOCK",
+        distance: 1,
+    movementReason: "blocked",
         attacker,
         defender,
         msg: `⚔️ ${defender.nom} gêne la progression`
