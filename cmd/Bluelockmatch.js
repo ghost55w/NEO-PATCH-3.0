@@ -5177,6 +5177,65 @@ async function handleDeplacements(match, joueur, texte) {
     let targetX = startX;
     let targetY = startY;
 
+    const txt = texte.toLowerCase();
+
+const versAxe =
+    txt.includes("axe") ||
+    txt.includes("repique") ||
+    txt.includes("rentre intérieur") ||
+    txt.includes("intérieur");
+
+const versLigne =
+    txt.includes("ligne") ||
+    txt.includes("couloir") ||
+    txt.includes("extérieur") ||
+    txt.includes("déborde");
+
+const avance =
+    txt.includes("avance") ||
+    txt.includes("progresse") ||
+    txt.includes("sprinte") ||
+    txt.includes("court") ||
+    txt.includes("attaque la profondeur") ||
+    txt.includes("fonce") ||
+    txt.includes("pousse le ballon") ||
+    txt.includes("projette");
+
+const recule =
+    txt.includes("recule") ||
+    txt.includes("revient") ||
+    txt.includes("redescend");
+
+const d = distance || 5;
+
+// Mouvement avant / arrière
+if (!zoneArrivee) {
+
+    if (avance)
+        targetY -= d;
+
+    else if (recule)
+        targetY += d;
+}
+
+// Mouvement latéral intelligent
+if (!direction) {
+
+    if (versAxe) {
+
+        targetX = FIELD.width / 2;
+
+    } else if (versLigne) {
+
+        if (startX < FIELD.width / 2)
+            targetX = 1;
+
+        else
+            targetX = FIELD.width - 1;
+    }
+
+}
+
     // 📍 Déplacement vertical (zones)
     if (zoneArrivee) {
 
@@ -5230,21 +5289,33 @@ async function handleDeplacements(match, joueur, texte) {
         };
     }
 
-    // ✅ On mémorise seulement le déplacement prévu
-    joueur.pendingMove = {
-        start: {
-            x: startX,
-            y: startY
-        },
-        target: {
-            x: targetX,
-            y: targetY
-        },
-        totalDistance: dist,
-        remainingDistance: dist,
-        travelled: 0,
-        active: true
-    };
+// ✅ On mémorise le déplacement prévu + l'intention
+joueur.pendingMove = {
+    start: {
+        x: startX,
+        y: startY
+    },
+    target: {
+        x: targetX,
+        y: targetY
+    },
+
+    intention: {
+        avancer: avance,
+        reculer: recule,
+        versAxe,
+        versLigne,
+        sprint: txt.includes("sprinte"),
+        dribble:
+            txt.includes("dribble") ||
+            txt.includes("pousse le ballon")
+    },
+
+    totalDistance: dist,
+    remainingDistance: dist,
+    travelled: 0,
+    active: true
+};    
 
     moved = dist > 0;
     total = dist;
