@@ -1331,67 +1331,143 @@ function validateActionSyntax(texte) {
     return { valid: true };
 }
 
-// getDistance et computeSpeed définis plus bas (versions complètes)
-
 // 🏃 CHASE SYSTEM
 function resolveChase(match, attacker, defender, ball, actionA, actionB) {
 
     // Sécurité ball
     if (!ball || !ball.position) {
-        ball = { holder: null, state: "loose", position: { x: 15, y: 30 } };
+        ball = {
+            holder: null,
+            state: "loose",
+            position: {
+                x: 15,
+                y: 30
+            }
+        };
     }
 
     const checkA = validateActionSyntax(actionA);
     const checkB = validateActionSyntax(actionB);
 
-    const speedA = computeSpeed(attacker, checkA.speedMode || "normal");
-    const speedB = computeSpeed(defender, checkB.speedMode || "normal");
+    const speedA = computeSpeed(
+        attacker,
+        checkA.speedMode || "normal"
+    );
 
-    let distA = getDistance(attacker.position || { x: 0, y: 0 }, ball.position);
-    let distB = getDistance(defender.position || { x: 0, y: 0 }, ball.position);
+    const speedB = computeSpeed(
+        defender,
+        checkB.speedMode || "normal"
+    );
 
+
+    let distA = getDistance(
+        attacker.position || { x: 0, y: 0 },
+        ball.position
+    );
+
+    let distB = getDistance(
+        defender.position || { x: 0, y: 0 },
+        ball.position
+    );
+
+
+    // Gains de déplacement pendant la poursuite
     const gainA = speedA * 0.1;
     const gainB = speedB * 0.1;
 
-    distA = Math.max(0, distA - gainA);
-    distB = Math.max(0, distB - gainB);
 
-    // 🛡️ INTERCEPTION DEFENSEUR
-    if (distB <= 1 && distB < distA) {
+    // Distance réellement parcourue ce tour
+    const movedDistance = Math.min(
+        attacker.pendingMove?.remainingDistance || 0,
+        gainA
+    );
+
+
+    // Mise à jour des distances restantes
+    distA = Math.max(
+        0,
+        distA - gainA
+    );
+
+    distB = Math.max(
+        0,
+        distB - gainB
+    );
+
+
+    // 🛡️ INTERCEPTION DÉFENSEUR
+    if (
+        distB <= 1 &&
+        distB < distA
+    ) {
 
         ball.holder = defender.nom;
         ball.state = "controle";
-        ball.position = { ...defender.position };
+        ball.position = {
+            ...defender.position
+        };
 
         return {
             winner: defender.nom,
-            reason: "INTERCEPTION"
+            reason: "INTERCEPTION",
+
+            // déplacement effectué avant interception
+            distance: movedDistance,
+
+            movementReason: "interception"
         };
     }
 
+
     // ⚽ CONSERVATION ATTAQUANT
-    if (distA <= 1 && distA < distB) {
+    if (
+        distA <= 1 &&
+        distA < distB
+    ) {
 
         ball.holder = attacker.nom;
         ball.state = "controle";
-        ball.position = { ...attacker.position };
+        ball.position = {
+            ...attacker.position
+        };
 
         return {
             winner: attacker.nom,
-            reason: "CONSERVATION"
+            reason: "CONSERVATION",
+
+            distance: movedDistance,
+
+            movementReason: "escape"
         };
     }
 
-    // 🔄 BALLON LIBRE
+
+    // 🔄 POURSUITE CONTINUE
     ball.state = "loose";
+
     ball.position = {
-        x: (attacker.position.x + defender.position.x) / 2,
-        y: (attacker.position.y + defender.position.y) / 2
+        x:
+        (
+            attacker.position.x +
+            defender.position.x
+        ) / 2,
+
+        y:
+        (
+            attacker.position.y +
+            defender.position.y
+        ) / 2
     };
+
 
     return {
         winner: null,
-        reason: "CHASE_CONTINUES"
+
+        reason: "CHASE_CONTINUES",
+
+        distance: movedDistance,
+
+        movementReason: "chase"
     };
 }
 
