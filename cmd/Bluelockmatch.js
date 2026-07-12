@@ -4734,67 +4734,84 @@ if (!result && isPhysical) {
 }; 
     }
 
-    // 💥 RÉSOLUTION PHYSIQUE
+// 💥 RÉSOLUTION PHYSIQUE
+else {
+
+    // 💥 chute
+    if (diffPhy > 15) {
+
+        match.fallenPlayer = attacker.nom;
+
+        result = {
+            ok: false,
+            type: "chute",
+            distance: 0,
+            movementReason: "knocked_down",
+            msg:
+            `💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
+        };
+    }
+
+
+    // ⚖️ déséquilibre
+    else if (diffPhy > 0) {
+
+        match.unbalancedPlayer = attacker.nom;
+
+        result = {
+            ok: false,
+            type: "déséquilibre",
+
+            // il avance légèrement avant de perdre l'équilibre
+            distance: 2,
+
+            movementReason: "unbalanced",
+
+            msg:
+            `⚖️ ${attacker.nom} perd l'équilibre`
+        };
+    }
+
+
+    // 🤜🤛 équilibre
+    else if (diffPhy === 0) {
+
+        match.unbalancedPlayer = attacker.nom;
+
+        result = {
+            ok: false,
+            type: "déséquilibre",
+
+            distance: 1,
+
+            movementReason: "physical_clash",
+
+            msg:
+            `🤜🤛 Duel physique équilibré`
+        };
+    }
+
+
+    // 💪 résistance
     else {
 
-        // 💥 chute
-        if (diffPhy > 15) {
+        match.unbalancedPlayer = defender.nom;
 
-            match.fallenPlayer =
-                attacker.nom;
+        result = {
+            ok: true,
+            type: "win_physical",
 
-            result = {
-    ok: false,
-    type: "chute",
-    distance: 0,
-    movementReason: "knocked_down",
-    msg: `💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
-};
-        }
+            // il continue sa progression
+            distance:
+                attacker.pendingMove?.remainingDistance || 0,
 
-        // ⚖️ déséquilibre
-        else if (diffPhy > 0) {
+            movementReason: "physical_resist",
 
-            match.unbalancedPlayer =
-                attacker.nom;
-
-           result = {
-    ok: false,
-    type: "déséquilibre",
-    distance: 2,
-    movementReason: "unbalanced",
-    msg: `⚖️ ${attacker.nom} perd l'équilibre`
-}; 
-        }
-
-        // 🤜🤛 équilibre
-        else if (diffPhy === 0) {
-
-            match.unbalancedPlayer =
-                attacker.nom;
-
-            result = {
-                ok: false,
-                type: "déséquilibre",
-                msg:
-`🤜🤛 Duel physique équilibré`
-            };
-        }
-
-        // 💪 résistance
-        else {
-
-            match.unbalancedPlayer =
-                defender.nom;
-
-            result = {
-                ok: true,
-                type: "win_physical",
-                msg:
-`💪 ${attacker.nom} résiste au contact`
-            };
-        }
+            msg:
+            `💪 ${attacker.nom} résiste au contact`
+        };
     }
+}    
 }
 
 // 🏃 CHASE SYSTEM
@@ -4854,50 +4871,52 @@ if (!result && isChase) {
         defenseText
     );
 
-    // 🛑 interception
+
+    // 🛑 INTERCEPTION
     if (
-        chaseResult.reason ===
-        "INTERCEPTION"
+        chaseResult.reason === "INTERCEPTION"
     ) {
 
-        match.ball.holder =
-            defender.nom;
-
-        match.ball.state =
-            "controle";
+        match.ball.holder = defender.nom;
+        match.ball.state = "controle";
 
         result = {
             ok: false,
             type: "INTERCEPTION",
+
+            distance: chaseResult.distance || 0,
+            movementReason: chaseResult.movementReason || "interception",
+
             msg:
-`🛑 ${defender.nom} intercepte le ballon dans la course !`
+            `🛑 ${defender.nom} intercepte le ballon dans la course !`
         };
     }
 
-    // ⚡ conservation
+
+    // ⚡ CONSERVATION
     else if (
-        chaseResult.reason ===
-        "CONSERVATION"
+        chaseResult.reason === "CONSERVATION"
     ) {
 
-        match.ball.holder =
-            attacker.nom;
-
-        match.ball.state =
-            "controle";
+        match.ball.holder = attacker.nom;
+        match.ball.state = "controle";
 
         result = {
             ok: true,
             type: "CONSERVATION",
+
+            distance: chaseResult.distance || 0,
+            movementReason: chaseResult.movementReason || "escape",
+
             msg:
-`⚡ ${attacker.nom} garde le contrôle du ballon !`
+            `⚡ ${attacker.nom} garde le contrôle du ballon !`
         };
     }
 
-    // 🏃 poursuite continue
+
+    // 🏃 POURSUITE CONTINUE
     else if (
-        chaseResult.reason ===
-        "CHASE_CONTINUES"
+        chaseResult.reason === "CHASE_CONTINUES"
     ) {
 
         match.ball.state = "loose";
@@ -4905,8 +4924,12 @@ if (!result && isChase) {
         result = {
             ok: false,
             type: "CONTINUED_CHASE",
+
+            distance: chaseResult.distance || 0,
+            movementReason: chaseResult.movementReason || "chase",
+
             msg:
-`🏃 Duel de course toujours en cours...`
+            `🏃 Duel de course toujours en cours...`
         };
     }
 }
