@@ -4649,12 +4649,13 @@ if (!result && isPhysical) {
         const isPenalty =
             zone === "A1";
 
-        result = {
-            ok: false,
-            type: "faute",
-            msg:
-`❌ Faute ! (${isPenalty ? "PENALTY" : "COUP FRANC"})`
-        };
+       result = {
+    ok: false,
+    type: "faute",
+    distance: 0,
+    movementReason: "foul",
+    msg: `❌ Faute ! (${isPenalty ? "PENALTY" : "COUP FRANC"})`
+}; 
     }
 
     // 💥 RÉSOLUTION PHYSIQUE
@@ -4667,11 +4668,12 @@ if (!result && isPhysical) {
                 attacker.nom;
 
             result = {
-                ok: false,
-                type: "chute",
-                msg:
-`💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
-            };
+    ok: false,
+    type: "chute",
+    distance: 0,
+    movementReason: "knocked_down",
+    msg: `💥 ${attacker.nom} est envoyé au sol par ${defender.nom}`
+};
         }
 
         // ⚖️ déséquilibre
@@ -4680,12 +4682,13 @@ if (!result && isPhysical) {
             match.unbalancedPlayer =
                 attacker.nom;
 
-            result = {
-                ok: false,
-                type: "déséquilibre",
-                msg:
-`⚖️ ${attacker.nom} perd l'équilibre`
-            };
+           result = {
+    ok: false,
+    type: "déséquilibre",
+    distance: 2,
+    movementReason: "unbalanced",
+    msg: `⚖️ ${attacker.nom} perd l'équilibre`
+}; 
         }
 
         // 🤜🤛 équilibre
