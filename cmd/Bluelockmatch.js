@@ -4402,6 +4402,7 @@ const def = defenseText.toLowerCase();
 
     // 🎯 RESULT GLOBAL
     let result = null;
+    let isChase = false;
 
 // ⚡ VITESSE
 const atkVmax = atkStats.acc || 50;
@@ -4591,30 +4592,24 @@ if (isDribbleAction && isTackleAction) {
         else if (defenseTotal > attackTotal) winner = "defender";
         else winner = Math.random() > 0.5 ? "attacker" : "defender";
     }
+    
+//RESULTAT FINAL DU DUEL ⚽ 
+if (winner === "attacker") {
 
-    // ⚔️ RESULT FINAL
-    if (winner === "attacker") {
+    result = {
+        ok: true,
+        type: "dribble",
+        attacker,
+        defender,
+        distance: attacker.pendingMove?.remainingDistance || 0,
+        msg: `🔥⚽ ${attacker.nom} élimine son adversaire et pousse le ballon devant lui...`
+    };
 
-        match.joueurTour = attacker.id || attacker.jid;
+    match.joueurTour = attacker.id || attacker.jid;
 
-        return {
-            ok: true,
-            type: "DRIBBLE_WIN",
-            attacker,
-            defender,
-            attackStat,
-            defenseStat,
-            attackScore,
-            defenseScore,
-            attackTotal,
-            defenseTotal,
-            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-        };
-    }
+} else {
 
-    match.joueurTour = defender.id || defender.jid;
-
-    return {
+    result = {
         ok: false,
         type: "DRIBBLE_LOSE",
         attacker,
@@ -4625,8 +4620,31 @@ if (isDribbleAction && isTackleAction) {
         defenseScore,
         attackTotal,
         defenseTotal,
+        distance: 0,
         msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
     };
+
+    match.joueurTour = defender.id || defender.jid;
+}
+    
+// 🏃 Transition DRIBBLE → CHASE
+if (
+    result &&
+    result.ok &&
+    result.type === "dribble" &&
+    (result.distance || 0) >= 3
+) {
+
+    isChase = true;
+    result = null;
+
+    match.ball.state = "loose";
+
+    if (attacker.pendingMove?.targetPosition) {
+        match.ball.position = {
+            ...attacker.pendingMove.targetPosition
+        };
+    }
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
@@ -4827,7 +4845,7 @@ const chaseKeywords = [
     "revient sur"
 ];
 
-let isChase =
+isChase =
     chaseKeywords.some(
         k =>
             atk.includes(k) ||
