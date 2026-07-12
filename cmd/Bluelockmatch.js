@@ -2478,6 +2478,37 @@ return {
 };
 } 
 
+// ========================================
+// 🚶 APPLIQUE UNE PARTIE DU DÉPLACEMENT
+// ========================================
+function avancerJoueur(joueur, distance) {
+
+    if (!joueur?.pendingMove?.active) return;
+
+    const move = joueur.pendingMove;
+
+    const ratio = Math.min(1, distance / move.remainingDistance);
+
+    joueur.position.x += (move.target.x - joueur.position.x) * ratio;
+    joueur.position.y += (move.target.y - joueur.position.y) * ratio;
+
+    move.travelled += distance;
+    move.remainingDistance -= distance;
+
+    joueur.distanceParcourue =
+        (joueur.distanceParcourue || 0) + distance;
+
+    if (move.remainingDistance <= 0.05) {
+
+        joueur.position.x = move.target.x;
+        joueur.position.y = move.target.y;
+
+        move.remainingDistance = 0;
+        move.active = false;
+    }
+}
+
+
 // 🎮 COMMANDE MATCH
 ovlcmd({
     nom_cmd: "match⚽",
@@ -4988,8 +5019,9 @@ function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) 
     };
 }
 
-
-    // DÉPLACEMENTS ET POSITIONS TRACKING
+// ============================================================
+ // DÉPLACEMENTS ET POSITIONS TRACKING🏟️
+// ============================================================
 async function handleDeplacements(match, joueur, texte) {
 
     if (!joueur || !joueur.position) {
@@ -5004,78 +5036,109 @@ async function handleDeplacements(match, joueur, texte) {
     let moved = false;
     let total = 0;
 
-    // 📍 MOVE Y (ZONE)
+    const startX = joueur.position.x;
+    const startY = joueur.position.y;
+
+    let targetX = startX;
+    let targetY = startY;
+
+    // 📍 Déplacement vertical (zones)
     if (zoneArrivee) {
 
-        const currentZone = getZoneFromY(joueur.position.y);
+        const currentZone = getZoneFromY(startY);
 
         if (zoneDepart && zoneDepart !== currentZone) {
-            return { ok: false, erreur: "❌ Mauvaise zone de départ" };
+            return {
+                ok: false,
+                erreur: "❌ Mauvaise zone de départ"
+            };
         }
 
-        const targetY = ZONES_Y[zoneArrivee];
-        if (!targetY) return { ok: false, erreur: "❌ Zone invalide" };
+        targetY = ZONES_Y[zoneArrivee];
 
-        const distY = Math.abs(joueur.position.y - targetY);
-
-        if (distY > 10) {
-            return { ok: false, erreur: "❌ Déplacement trop long (>10m)" };
+        if (targetY === undefined) {
+            return {
+                ok: false,
+                erreur: "❌ Zone invalide"
+            };
         }
-
-        joueur.position.y = targetY;
-        total += distY;
-        moved = true;
     }
 
-    // ↔️ MOVE X (LATÉRAL)
+    // ↔️ Déplacement latéral
     if (direction) {
 
         const d = distance || 5;
 
         if (d > 10) {
-            return { ok: false, erreur: "❌ Trop loin (>10m)" };
+            return {
+                ok: false,
+                erreur: "❌ Trop loin (>10m)"
+            };
         }
 
-        if (direction === "gauche") joueur.position.x -= d;
-        if (direction === "droite") joueur.position.x += d;
+        if (direction === "gauche") targetX -= d;
+        if (direction === "droite") targetX += d;
 
-        joueur.position.x = Math.max(0, Math.min(FIELD.width, joueur.position.x));
-
-        total += d;
-        moved = true;
+        targetX = Math.max(0, Math.min(FIELD.width, targetX));
     }
 
-    // 🔒 LIMIT GLOBAL
-    if (total > 10) {
-        return { ok: false, erreur: "❌ Mouvement total invalide" };
+    // Distance réelle du déplacement demandé
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > 10) {
+        return {
+            ok: false,
+            erreur: "❌ Déplacement trop long (>10m)"
+        };
     }
 
-    if (!isInsideField(joueur.position)) {
-        return { ok: false, erreur: "❌ Hors terrain" };
-    }
+    // ✅ On mémorise seulement le déplacement prévu
+    joueur.pendingMove = {
+        start: {
+            x: startX,
+            y: startY
+        },
+        target: {
+            x: targetX,
+            y: targetY
+        },
+        totalDistance: dist,
+        remainingDistance: dist,
+        travelled: 0,
+        active: true
+    };
 
-    // 🧠 UPDATE GLOBAL (ONLY ONCE)
+    moved = dist > 0;
+    total = dist;
+
+    // Le joueur reste physiquement à son ancienne position.
     syncPlayer(match, joueur);
 
-    // 🧠 IA SANS AUTO-REPOSITION
-    // (juste réaction, PAS déplacement forcé)
+    // IA : uniquement lecture de la position actuelle
     const ballPos = joueur.position;
 
-    for (const p of (match.lineup1 || []).concat(match.lineup2 || [])) {
+    for (const p of [...(match.lineup1 || []), ...(match.lineup2 || [])]) {
 
         if (!p.position || p.nom === joueur.nom) continue;
 
         const dx = ballPos.x - p.position.x;
         const dy = ballPos.y - p.position.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distIA = Math.sqrt(dx * dx + dy * dy);
 
-        let factor = dist > 20 ? 2 : dist > 10 ? 1 : 0.5;
+        const factor =
+            distIA > 20 ? 2 :
+            distIA > 10 ? 1 : 0.5;
 
-        // 👉 seulement "pression mentale", pas déplacement automatique forcé
-        p.pressure = dist < 12 ? "HAUTE" : dist < 20 ? "MOYENNE" : "FAIBLE";
+        p.pressure =
+            distIA < 12 ? "HAUTE" :
+            distIA < 20 ? "MOYENNE" :
+            "FAIBLE";
 
-        // léger ajustement défensif uniquement
-        if (p.ligne === "defense" && dist < 10) {
+        // Léger ajustement défensif uniquement
+        if (p.ligne === "defense" && distIA < 10) {
             p.position.y += dy > 0 ? factor * 0.3 : -factor * 0.3;
         }
 
@@ -5094,9 +5157,12 @@ async function handleDeplacements(match, joueur, texte) {
 
     return {
         ok: true,
-        message: moved ? "✅ Déplacement enregistré" : "ℹ️ Aucun mouvement"
+        message: moved
+            ? `✅ Déplacement prévu (${dist.toFixed(1)}m)`
+            : "ℹ️ Aucun mouvement"
     };
 }
+    
 
 
     // ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
