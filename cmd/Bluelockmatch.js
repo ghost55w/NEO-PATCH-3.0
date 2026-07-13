@@ -4646,6 +4646,7 @@ if (
         };
     }
 }
+}    
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
 const passiveKeywords = [
