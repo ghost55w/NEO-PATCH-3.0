@@ -4589,9 +4589,7 @@ distance: attacker.pendingMove?.remainingDistance || 0,
     }
 }
 
-    
-
-// ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
+    // ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
@@ -4603,84 +4601,163 @@ if (isDribbleAction && isTackleAction) {
     const attackTotal = attackStat + attackScore;
     const defenseTotal = defenseStat + defenseScore;
 
-    let winner = null;
 
-    // 🧠 CAS 1 : DRIBBLE PARFAIT / TACLE RATÉ
-    if (dribbleCheck?.valid && !tackleCheck?.valid) {
-        winner = "attacker";
+    // ============================================================
+    // ⚽ BALLON DÉJÀ POUSSÉ → INTERCEPTION AU PIED
+    // ============================================================
+
+    const ballonPousse =
+        atk.includes("pousse le ballon") ||
+        atk.includes("pousser le ballon") ||
+        atk.includes("pousse devant") ||
+        atk.includes("pousse loin") ||
+        atk.includes("grand pont") ||
+        atk.includes("attaque la profondeur");
+
+
+    if (ballonPousse) {
+
+        const reactionBallon =
+            def.includes("ballon") &&
+            (
+                def.includes("tend le pied") ||
+                def.includes("tend son pied") ||
+                def.includes("pointe") ||
+                def.includes("talon") ||
+                def.includes("coupe")
+            );
+
+
+        // ❌ Il attaque le joueur alors que le ballon est parti
+        if (!reactionBallon) {
+
+            result = {
+                ok: true,
+                type: "BAD_DEFENSE",
+                attacker,
+                defender,
+                distance:
+                    attacker.pendingMove?.remainingDistance || 0,
+                movementReason: "bad_defense",
+                msg:
+`❌ ${defender.nom} intervient sur ${attacker.nom} alors que le ballon est déjà poussé.
+
+🏃 Le ballon est hors de portée du tacle.`
+            };
+
+        }
+
+        // ✅ Il vise le ballon
+        else {
+
+            // portée du pied : 50 cm
+            const distanceBallon =
+                attacker.pendingMove?.distance || 0;
+
+
+            if (
+                defenseStat > attackStat &&
+                distanceBallon <= 0.5
+            ) {
+
+                result = {
+                    ok: false,
+                    type: "BALL_CUT",
+                    attacker,
+                    defender,
+                    distance: 0,
+                    movementReason: "ball_recovery",
+                    msg:
+`🦶 ${defender.nom} tend son pied et coupe le ballon !
+
+⚽ Il récupère la possession.`
+                };
+
+            }
+
+            else {
+
+                result = {
+                    ok: true,
+                    type: "BALL_TOO_FAR",
+                    attacker,
+                    defender,
+                    distance:
+                        attacker.pendingMove?.remainingDistance || 0,
+                    movementReason: "continue_attack",
+                    msg:
+`⚡ ${attacker.nom} pousse le ballon hors de portée.
+
+${defender.nom} ne peut plus intervenir.`
+                };
+
+            }
+        }
     }
 
-    // 🧠 CAS 2 : TACLE PARFAIT / DRIBBLE RATÉ
-    else if (!dribbleCheck?.valid && tackleCheck?.valid) {
-        winner = "defender";
+
+    // ============================================================
+    // ⚔️ DUEL CLASSIQUE SI AUCUN CAS SPÉCIAL
+    // ============================================================
+
+    if (!result) {
+
+        let winner = null;
+
+        if (dribbleCheck?.valid && !tackleCheck?.valid) {
+            winner = "attacker";
+        }
+
+        else if (!dribbleCheck?.valid && tackleCheck?.valid) {
+            winner = "defender";
+        }
+
+        else if (dribbleCheck?.valid && tackleCheck?.valid) {
+            winner =
+            attackTotal > defenseTotal
+            ? "attacker"
+            : "defender";
+        }
+
+        else {
+            winner =
+            attackTotal >= defenseTotal
+            ? "attacker"
+            : "defender";
+        }
+
+
+        if (winner === "attacker") {
+
+            result = {
+                ok:true,
+                type:"dribble",
+                attacker,
+                defender,
+                distance:
+                    attacker.pendingMove?.remainingDistance || 0,
+                msg:
+`🔥 ${attacker.nom élimine ${defender.nom} et progresse vers le camp adverse .`
+            };
+
+        }
+
+        else {
+
+            result = {
+                ok:false,
+                type:"DRIBBLE_LOSE",
+                attacker,
+                defender,
+                distance:0,
+                msg:
+`⚽ ${defender.nom} récupère le ballon dans les pieds.`
+            };
+
+        }
     }
-
-    // 🧠 CAS 3 : LES DEUX VALIDES
-    else if (dribbleCheck?.valid && tackleCheck?.valid) {
-        winner = attackTotal > defenseTotal ? "attacker" : "defender";
-    }
-
-    // 🧠 CAS 4 : LES DEUX RATÉS
-    else {
-        if (attackTotal > defenseTotal) winner = "attacker";
-        else if (defenseTotal > attackTotal) winner = "defender";
-        else winner = Math.random() > 0.5 ? "attacker" : "defender";
-    }
-    
-//RESULTAT FINAL DU DUEL ⚽ 
-if (winner === "attacker") {
-
-    result = {
-        ok: true,
-        type: "dribble",
-        attacker,
-        defender,
-        distance: attacker.pendingMove?.remainingDistance || 0,
-        msg: `🔥⚽ ${attacker.nom} élimine son adversaire et pousse le ballon devant lui...`
-    };
-
-    match.joueurTour = attacker.id || attacker.jid;
-
-} else {
-
-    result = {
-        ok: false,
-        type: "DRIBBLE_LOSE",
-        attacker,
-        defender,
-        attackStat,
-        defenseStat,
-        attackScore,
-        defenseScore,
-        attackTotal,
-        defenseTotal,
-        distance: 0,
-        msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
-    };
-
-    match.joueurTour = defender.id || defender.jid;
 }
-    
-// 🏃 Transition DRIBBLE → CHASE
-if (
-    result &&
-    result.ok &&
-    result.type === "dribble" &&
-    (result.distance || 0) >= 3
-) {
 
-    isChase = true;
-    result = null;
-
-    match.ball.state = "loose";
-
-    if (attacker.pendingMove?.targetPosition) {
-        match.ball.position = {
-            ...attacker.pendingMove.targetPosition
-        };
-    }
-}
-}    
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
 const passiveKeywords = [
