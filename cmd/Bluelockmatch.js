@@ -4760,7 +4760,7 @@ ${defender.nom} ne peut plus intervenir.`
                 distance:
                     attacker.pendingMove?.remainingDistance || 0,
                 msg:
-`🔥 ${attacker.nom élimine ${defender.nom} et progresse vers le camp adverse .`
+`🔥 ${attacker.nom} élimine ${defender.nom} et progresse vers le camp adverse .`
             };
 
         }
