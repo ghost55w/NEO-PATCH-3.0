@@ -229,30 +229,64 @@ function trackerAction(match, joueur, type, details = {}) {
 // SECTION 5 : MISE À JOUR POSITION BALLE
 // ================================================================
 
-function trackerBalle(match, holderNom, zoneY = null, x = null, y = null) {
+function trackerBalle(
+    match,
+    holderNom = null,
+    zoneY = null,
+    x = null,
+    y = null,
+    state = "controlled" // "controlled" ou "loose"
+) {
+
     if (!match.tracker) return;
 
     const t = match.tracker;
 
-    // Reset hasBalle pour tous
+    // Initialisation
+    if (!t.balle) {
+        t.balle = {};
+    }
+
+    // Reset possession
     for (const nom of Object.keys(t.joueurs)) {
         t.joueurs[nom].hasBalle = false;
     }
 
-    // Nouveau porteur
-    t.balle.holder = holderNom;
-    if (holderNom && t.joueurs[holderNom]) {
-        t.joueurs[holderNom].hasBalle = true;
-        // La balle suit le porteur
-        t.balle.x = t.joueurs[holderNom].position.x;
-        t.balle.y = t.joueurs[holderNom].position.y;
-        t.balle.zone = t.joueurs[holderNom].zone.y;
+    t.balle.state = state;
+
+    // =====================================================
+    // ⚽ BALLON CONTRÔLÉ
+    // =====================================================
+    if (state === "controlled" && holderNom) {
+
+        t.balle.holder = holderNom;
+
+        if (t.joueurs[holderNom]) {
+
+            t.joueurs[holderNom].hasBalle = true;
+
+            t.balle.x = t.joueurs[holderNom].position.x;
+            t.balle.y = t.joueurs[holderNom].position.y;
+            t.balle.zone = t.joueurs[holderNom].zone.y;
+        }
+
     }
 
-    // Override manuel si fourni
+    // =====================================================
+    // ⚽ BALLON LIBRE
+    // =====================================================
+    else {
+
+        t.balle.holder = null;
+
+    }
+
+    // =====================================================
+    // Override manuel
+    // =====================================================
     if (x !== null) t.balle.x = x;
     if (y !== null) t.balle.y = y;
-    if (zoneY) t.balle.zone = zoneY;
+    if (zoneY !== null) t.balle.zone = zoneY;
 }
 
 // ================================================================
