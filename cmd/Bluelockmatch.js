@@ -2618,6 +2618,30 @@ function avancerJoueur(joueur, distance) {
     }
 }
 
+// ============================================================
+// 📏 DISTANCE ENTRE JOUEUR ET BALLON
+// ============================================================
+function getDistanceBallonDefenseur(match, defender) {
+
+    if (
+        !match.tracker ||
+        !match.tracker.balle ||
+        !match.tracker.joueurs[defender.nom]
+    ) {
+        return 999;
+    }
+
+    const ballon = match.tracker.balle;
+    const defPos = match.tracker.joueurs[defender.nom].position;
+
+    const dx = ballon.x - defPos.x;
+    const dy = ballon.y - defPos.y;
+
+    return Math.sqrt(
+        (dx * dx) + (dy * dy)
+    );
+}
+
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -4652,8 +4676,7 @@ if (isDribbleAction && isTackleAction) {
 
             // portée du pied : 50 cm
             const distanceBallon =
-                attacker.pendingMove?.distance || 0;
-
+    getDistanceBallonDefenseur(match, defender);
 
             if (
                 defenseStat > attackStat &&
