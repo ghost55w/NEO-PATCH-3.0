@@ -4794,9 +4794,267 @@ const dribbleSource = responseText || attaqueText;
 const atk = dribbleSource.toLowerCase();
 const def = defenseText.toLowerCase();
 
+const hasFootInterception =
+(
+    def.includes("tend son pied") ||
+    def.includes("tends son pied") ||
+    def.includes("tend la jambe") ||
+    def.includes("tends la jambe") ||
+    def.includes("met son pied") ||
+    def.includes("place son pied") ||
+    def.includes("allonge son pied")
+)
+&&
+(
+    def.includes("intercepte") ||
+    def.includes("interception") ||
+    def.includes("dévie") ||
+    def.includes("devie") ||
+    def.includes("coupe")
+);
+    
     // 🎯 RESULT GLOBAL
     let result = null;
     let isChase = false;
+
+    // ============================================================
+// 🦶 INTERCEPTION PIED : VALIDATION TECHNIQUE
+// ============================================================
+
+if (hasFootInterception && defNarrative.reaction) {
+
+    console.log("🦶 Tentative interception pied détectée");
+
+
+    // ============================================================
+    // DÉTECTION DU PIED UTILISÉ
+    // ============================================================
+
+    let foot = null;
+
+
+    if (
+        def.includes("pied gauche") ||
+        def.includes("pied gauchement") ||
+        def.includes("gauche")
+    ) {
+        foot = "gauche";
+    }
+
+    else if (
+        def.includes("pied droit") ||
+        def.includes("droit")
+    ) {
+        foot = "droit";
+    }
+
+
+
+    // ❌ Aucun pied précisé
+    if (!foot) {
+
+        return {
+
+            ok:true,
+
+            type:"BAD_INTERCEPTION",
+
+            winner: attacker,
+
+            msg:
+`❌ ${defender.nom} tente une interception sans préciser le pied utilisé.
+
+⚡ Mauvais placement, ${attacker.nom} poursuit son action.`
+
+        };
+
+    }
+
+
+
+    // ============================================================
+    // DÉTECTION DU PROFIL ATTAQUÉ
+    // ============================================================
+
+    let targetSide = null;
+
+
+    // Exemple : "profil gauche de Sae"
+    const profileMatch =
+        atk.match(/profil\s+(gauche|droit)\s+de/i);
+
+
+    if (profileMatch) {
+
+        targetSide =
+            profileMatch[1];
+
+    }
+
+
+
+    // ============================================================
+    // SI PAS DE PROFIL → DÉTECTION CÔTÉ BALLON
+    // ============================================================
+
+    if (!targetSide) {
+
+        if (
+            atk.includes("sur la droite") ||
+            atk.includes("à droite") ||
+            atk.includes("droite")
+        ) {
+
+            // droite du porteur = gauche du défenseur face à face
+            targetSide = "gauche";
+
+        }
+
+
+        else if (
+            atk.includes("sur la gauche") ||
+            atk.includes("à gauche") ||
+            atk.includes("gauche")
+        ) {
+
+            // gauche du porteur = droite du défenseur face à face
+            targetSide = "droit";
+
+        }
+
+    }
+
+
+
+    // ============================================================
+    // VÉRIFICATION DU PIED PAR RAPPORT À LA TRAJECTOIRE
+    // ============================================================
+
+    if (
+        targetSide &&
+        foot !== targetSide
+    ) {
+
+        return {
+
+            ok:true,
+
+            type:"BAD_INTERCEPTION_ANGLE",
+
+            winner: attacker,
+
+            msg:
+`❌ ${defender.nom} tend son pied ${foot}, mais le ballon arrive sur son profil ${targetSide}.
+
+⚡ ${attacker.nom} profite du mauvais angle et continue.`
+
+        };
+
+    }
+
+
+
+    // ============================================================
+    // DISTANCE BALLON / PIED
+    // ============================================================
+
+    let ballDistance = 1;
+
+
+    const distance =
+        def.match(/(\d+)\s?m/);
+
+
+    if (distance) {
+
+        ballDistance =
+            Number(distance[1]);
+
+    }
+
+
+
+    // portée réaliste d'un pied tendu
+    const footRange = 1.5;
+
+
+
+    if (ballDistance > footRange) {
+
+        return {
+
+            ok:true,
+
+            type:"INTERCEPTION_TOO_FAR",
+
+            winner: attacker,
+
+            msg:
+`❌ ${defender.nom} tend son pied mais le ballon est trop éloigné (${ballDistance}m).
+
+⚡ ${attacker.nom} garde l'avantage.`
+
+        };
+
+    }
+
+
+
+    // ============================================================
+    // DUEL FINAL : DEF VS DRI
+    // ============================================================
+
+    const defensePower =
+        defStats.def || 50;
+
+
+    const dribbleControl =
+        atkStats.dri || 50;
+
+
+
+    if (defensePower >= dribbleControl) {
+
+
+        result = {
+
+            ok:true,
+
+            type:"INTERCEPTION_SUCCESS",
+
+            winner:defender,
+
+            msg:
+`🦶 ${defender.nom} lit parfaitement la trajectoire et coupe le ballon avec son pied ${foot}.`
+
+        };
+
+
+    }
+
+    else {
+
+
+        result = {
+
+            ok:true,
+
+            type:"INTERCEPTION_FAILED",
+
+            winner:attacker,
+
+            msg:
+`⚡ ${attacker.nom} garde le contrôle malgré le pied tendu de ${defender.nom}.`
+
+        };
+
+    }
+
+
+
+    return result;
+
+}
 
 // ⚡ VITESSE
 const atkVmax = atkStats.acc || 50;
