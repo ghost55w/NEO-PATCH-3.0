@@ -2642,6 +2642,289 @@ function getDistanceBallonDefenseur(match, defender) {
     );
 }
 
+// ============================================================
+// 🧠 PARSE NARRATIF V1
+// Sépare : réaction → actions → intention → conséquences
+// ============================================================
+function parseNarrative(actionText, match, mode = "attack") {
+
+    if (!actionText)
+        return null;
+
+    const txt = actionText.toLowerCase();
+
+    const players = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+    const actor =
+        players.find(p =>
+            txt.includes(pureName(p.nom))
+        ) || null;
+
+    const target =
+        players.find(p =>
+            actor &&
+            p.nom !== actor.nom &&
+            txt.includes(pureName(p.nom))
+        ) || null;
+
+    const narrative = {
+
+        actor: actor?.nom || null,
+
+        target: target?.nom || null,
+
+        // Ce à quoi le joueur dit réagir
+        reaction: null,
+
+        // Actions réellement exécutées
+        actions: [],
+
+        // But recherché
+        intent: null,
+
+        // Résultat annoncé
+        consequences: []
+    };
+
+    // ============================================================
+    // 🎯 REACTION
+    // ============================================================
+
+    const reactionPatterns = [
+
+        "voyant",
+        "en voyant",
+        "lorsque",
+        "quand",
+        "dès que",
+        "au moment où",
+        "profitant que",
+        "apercevant"
+    ];
+
+    const reactionActions = [
+
+        "dribble",
+        "double contact",
+        "roulette",
+        "crochet",
+        "feinte",
+
+        "pousse le ballon",
+        "pousser le ballon",
+        "grand pont",
+
+        "contrôle",
+        "controle",
+
+        "passe",
+
+        "tir",
+        "frappe",
+
+        "centre",
+
+        "accélère",
+        "acceleration",
+        "sprinte",
+
+        "bloque",
+        "barre la route",
+        "interception",
+        "intercepte",
+        "tacle"
+    ];
+
+    for (const word of reactionPatterns) {
+
+        if (!txt.includes(word))
+            continue;
+
+        for (const action of reactionActions) {
+
+            if (txt.includes(action)) {
+
+                narrative.reaction = action;
+
+                break;
+
+            }
+
+        }
+
+        break;
+
+    }
+
+    // ============================================================
+    // ⚽ ACTIONS
+    // ============================================================
+
+    const catalogue = [
+
+        ["controle", ["contrôle","controle"]],
+
+        ["dribble",[
+            "dribble",
+            "double contact",
+            "roulette",
+            "crochet",
+            "feinte",
+            "elastico",
+            "rainbow"
+        ]],
+
+        ["push_ball",[
+            "pousse le ballon",
+            "pousser le ballon",
+            "attaque la profondeur",
+            "grand pont"
+        ]],
+
+        ["acceleration",[
+            "accélère",
+            "acceleration",
+            "sprinte",
+            "vmax"
+        ]],
+
+        ["conduite",[
+            "avance",
+            "progresse",
+            "court",
+            "fonce"
+        ]],
+
+        ["passe",[
+            "passe",
+            "transmet",
+            "remise"
+        ]],
+
+        ["centre",[
+            "centre"
+        ]],
+
+        ["tir",[
+            "tir",
+            "frappe",
+            "volée"
+        ]],
+
+        ["interception",[
+            "intercepte",
+            "interception"
+        ]],
+
+        ["tacle",[
+            "tacle",
+            "glissé",
+            "circulaire"
+        ]],
+
+        ["bloc",[
+            "bloque",
+            "barre la route",
+            "fait écran"
+        ]]
+    ];
+
+    let id = 1;
+
+    for (const [type, words] of catalogue) {
+
+        for (const w of words) {
+
+            if (txt.includes(w)) {
+
+                narrative.actions.push({
+
+                    id,
+
+                    type,
+
+                    keyword:w
+
+                });
+
+                id++;
+
+                break;
+
+            }
+
+        }
+
+    }
+
+    // ============================================================
+    // 🎯 INTENTION
+    // ============================================================
+
+    const intents = [
+
+        "pour",
+
+        "afin de",
+
+        "dans le but de"
+
+    ];
+
+    for (const i of intents) {
+
+        const index = txt.indexOf(i);
+
+        if (index !== -1) {
+
+            narrative.intent =
+                txt.substring(index);
+
+            break;
+
+        }
+
+    }
+
+    // ============================================================
+    // 🏁 CONSEQUENCES
+    // ============================================================
+
+    const consequences = [
+
+        "dépasse",
+        "depasse",
+
+        "élimine",
+        "elimine",
+
+        "marque",
+
+        "récupère",
+        "recupere",
+
+        "intercepte"
+
+    ];
+
+    for (const c of consequences) {
+
+        if (txt.includes(c)) {
+
+            narrative.consequences.push(c);
+
+        }
+
+    }
+
+    return narrative;
+
+}
+
+
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -4432,7 +4715,31 @@ if (!defender) {
 console.log("Attacker :", attacker?.nom);
 console.log("Defender :", defender?.nom);
 
+const atkNarrative = parseNarrative(attaqueText, match, "attack");
+const defNarrative = parseNarrative(defenseText, match, "defense");    
 
+// ✅ Vérifie que la défense réagit bien à une action existante
+if (defNarrative?.reaction) {
+
+    const reacted = atkNarrative.actions.some(a =>
+        a.keyword === defNarrative.reaction ||
+        a.type === defNarrative.reaction
+    );
+
+    if (!reacted) {
+        return {
+            ok: true,
+            type: "BAD_REACTION",
+            attacker,
+            defender,
+            msg:
+`❌ ${defender.nom} réagit à une action qui n'existe pas.
+
+⚡ ${attacker.nom} poursuit automatiquement son action.`
+        };
+    }
+}
+    
 // Cible tactique
 const tacticalTarget = detectTargetPlayer(
     defenseText,
