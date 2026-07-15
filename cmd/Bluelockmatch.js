@@ -2689,75 +2689,87 @@ function parseNarrative(actionText, match, mode = "attack") {
         consequences: []
     };
 
-    // ============================================================
-    // 🎯 REACTION
-    // ============================================================
+   // ============================================================
+// 🎯 REACTION
+// ============================================================
 
-    const reactionPatterns = [
+const reactionPatterns = [
+    "voyant",
+    "en voyant",
+    "lorsque",
+    "quand",
+    "dès que",
+    "au moment où",
+    "profitant que",
+    "apercevant"
+];
 
-        "voyant",
-        "en voyant",
-        "lorsque",
-        "quand",
-        "dès que",
-        "au moment où",
-        "profitant que",
-        "apercevant"
-    ];
 
-    const reactionActions = [
+const reactionActions = [
 
-        "dribble",
-        "double contact",
-        "roulette",
-        "crochet",
-        "feinte",
+    "double contact",
+    "dribble",
+    "roulette",
+    "crochet",
+    "feinte",
 
-        "pousse le ballon",
-        "pousser le ballon",
-        "grand pont",
+    "pousse le ballon",
+    "pousser le ballon",
+    "grand pont",
 
-        "contrôle",
-        "controle",
+    "contrôle",
+    "controle",
 
-        "passe",
+    "passe",
 
-        "tir",
-        "frappe",
+    "tir",
+    "frappe",
 
-        "centre",
+    "centre",
 
-        "accélère",
-        "acceleration",
-        "sprinte",
+    "accélère",
+    "acceleration",
+    "sprinte",
 
-        "bloque",
-        "barre la route",
-        "interception",
-        "intercepte",
-        "tacle"
-    ];
+    "bloque",
+    "barre la route",
+    "interception",
+    "intercepte",
+    "tacle"
+];
 
-    for (const word of reactionPatterns) {
 
-        if (!txt.includes(word))
-            continue;
+// Cherche la phrase de réaction
+for (const pattern of reactionPatterns) {
 
-        for (const action of reactionActions) {
+    const index = txt.indexOf(pattern);
 
-            if (txt.includes(action)) {
+    if (index === -1)
+        continue;
 
-                narrative.reaction = action;
 
-                break;
+    // Texte après "voyant", "quand", etc.
+    const after = txt.substring(index + pattern.length);
 
-            }
+
+    // On limite la recherche à la réaction
+    const cut = after.split(/[,.;]/)[0];
+
+
+    for (const action of reactionActions) {
+
+        if (cut.includes(action)) {
+
+            narrative.reaction = action;
+            break;
 
         }
 
-        break;
-
     }
+
+
+    break;
+} 
 
     // ============================================================
     // ⚽ ACTIONS
@@ -4719,26 +4731,43 @@ const atkNarrative = parseNarrative(attaqueText, match, "attack");
 const defNarrative = parseNarrative(defenseText, match, "defense");    
 
 // ✅ Vérifie que la défense réagit bien à une action existante
-if (defNarrative?.reaction) {
+if (defNarrative.reaction) {
 
-    const reacted = atkNarrative.actions.some(a =>
-        a.keyword === defNarrative.reaction ||
-        a.type === defNarrative.reaction
-    );
+    const reaction = defNarrative.reaction
+        .replace("pousser", "pousse")
+        .toLowerCase();
+
+
+    const reacted = atkNarrative.actions.some(a => {
+
+        const keyword = a.keyword
+            .replace("pousser", "pousse")
+            .toLowerCase();
+
+        return (
+            reaction.includes(keyword) ||
+            keyword.includes(reaction)
+        );
+
+    });
+
 
     if (!reacted) {
+
         return {
             ok: true,
             type: "BAD_REACTION",
             attacker,
             defender,
-            msg:
-`❌ ${defender.nom} réagit à une action qui n'existe pas.
 
-⚡ ${attacker.nom} poursuit automatiquement son action.`
+            msg:
+`❌ ${defender.nom} réagit à une action inexistante.
+⚡ ${attacker.nom} poursuit son action.`
         };
+
     }
 }
+
     
 // Cible tactique
 const tacticalTarget = detectTargetPlayer(
