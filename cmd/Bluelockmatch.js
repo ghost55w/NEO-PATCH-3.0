@@ -4837,15 +4837,36 @@ if (isPassive) {
     };
 }
     
-// 💪 DUELS PHYSIQUES
 const physicalKeywords = [
-    "épaule",
+
+    // Épaule
     "coup d'épaule",
-    "avant bras",
-    "paume",
-    "contact",
-    "pousser",
-    "bouscule"
+    "donne un coup d'épaule",
+    "met un coup d'épaule",
+    "utilise son épaule",
+
+    // Avant-bras
+    "pose son avant-bras",
+    "place son avant-bras",
+    "utilise son avant-bras",
+
+    // Main / paume
+    "pose sa paume",
+    "pose sa paume de main",
+    "place sa paume",
+    "appuie sa paume",
+    "pose sa main",
+
+    // Bousculade
+    "bouscule",
+    "percute",
+    "heurte",
+    "entre en contact",
+    "entre en collision",
+    "charge",
+    "met son corps",
+    "utilise son corps",
+    "fait opposition avec son corps"
 ];
 
 const isPhysical =
@@ -5104,7 +5125,6 @@ result.defender = defender;
 
 return result;
 }
-} 
 
                         
 
