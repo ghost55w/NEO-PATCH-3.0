@@ -5098,16 +5098,12 @@ if (!result) {
     };
 }
     
-// 📤 RETURN SIMPLE
-return {
-    ok: result.ok,
-    type: result.type,
+// 📤 RETURN FINAL
+result.attacker = attacker;
+result.defender = defender;
 
-    attacker,
-    defender,
-
-    msg: result.msg
-};
+return result;
+}
 } 
 
                         
