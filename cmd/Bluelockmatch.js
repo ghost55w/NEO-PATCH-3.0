@@ -2828,11 +2828,29 @@ function initKickoffPositions(match) {
     ];
 
     for (const player of allPlayers) {
-        initPlayerPosition(player);
+
+        const team1 = (match.lineup1 || []).includes(player);
+
+        const camp = team1 ? "A" : "B";
+
+        const pos = getPositionDepart(
+            player.poste,
+            camp
+        );
+
+        player.x = pos.x;
+        player.y = pos.y;
+        player.zone = pos.zone;
+        player.secteur = pos.secteur;
+        player.ligne = pos.ligne;
     }
 
-    generateVisAVis(match.lineup1, match.lineup2);
+    generateVisAVis(
+        match.lineup1,
+        match.lineup2
+    );
 }
+
 
 
 // 🎯 KICK-OFF ACTION AUTOMATIQUE 
