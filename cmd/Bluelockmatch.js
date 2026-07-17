@@ -19,131 +19,353 @@ const matchsActifs = new Map();
 // 🗺️ BLUELOCK PLAYER TRACKER — MODULE COMPLET
 // À injecter dans Bluelockmatch.js
 // ================================================================
-
 // ================================================================
 // SECTION 1 : CONSTANTES TERRAIN
 // ================================================================
-// Le terrain est une grille 30x60 (largeur x profondeur)
-// Zones Y (profondeur) : C2=30, C1=25, B2=20, B1=15, A2=10, A1=5
-// Zones X (largeur)   : G=0, CG=7, C=15, CD=23, D=30
+// Terrain : largeur 30m x profondeur 60m
+//
+// Vue du ciel :
+// Team A attaque vers Y = 0
+// Team B attaque vers Y = 60
+//
+// Les positions sont automatiquement inversées selon le camp.
+//
+const ZONES_TERRAIN = {
 
-const ZONE_Y_MAP = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
-const ZONE_X_MAP = { G: 0, CG: 7, C: 15, CD: 23, D: 30 };
+    // 🟨 ROND CENTRAL (30m)
+    rondCentral: {
+
+        côté_gauche: {
+            x: 5,
+            y: 30
+        },
+
+        centre: {
+            x: 15,
+            y: 30
+        },
+
+        côté_droit: {
+            x: 25,
+            y: 30
+        }
+
+    },
+
+
+    // 🟦 AXE DE PROGRESSION (20m → 10m)
+    axe: {
+
+        aile_gauche: {
+            x: 5,
+            y: 15
+        },
+
+        axe: {
+            x: 15,
+            y: 15
+        },
+
+        aile_droite: {
+            x: 25,
+            y: 15
+        }
+
+    },
+
+
+    // 🟥 SURFACE DE RÉPARATION (5m)
+    surface: {
+
+        couloir_gauche: {
+            x: 5,
+            y: 5
+        },
+
+        axe: {
+            x: 15,
+            y: 5
+        },
+
+        couloir_droit: {
+            x: 25,
+            y: 5
+        }
+
+    }
+
+};
+
+// ================================================================
+// DISTANCES RÉELLES PAR RAPPORT AU BUT
+// ================================================================
+
+const DISTANCES_TERRAIN = {
+
+    // 🟨 Rond central
+    rondCentral: 30,
+
+    // 🟦 Axe de progression
+    axe: {
+        max: 20,
+        min: 10
+    },
+
+    // 🟥 Surface de réparation
+    surface: 5
+
+};
+
+
+// Alias utilisé par les fonctions existantes
+const DISTANCES = DISTANCES_TERRAIN;
 
 // ================================================================
 // SECTION 2 : INIT TRACKER (appelé au lancement du match)
 // ================================================================
 function initTracker(match) {
+
     match.tracker = {
-        // Snapshot de chaque joueur par nom
+
+        // Nom réel des équipes
+        equipes: {
+            id1: match.team1Name || match.nomEquipe1 || "Équipe 1",
+            id2: match.team2Name || match.nomEquipe2 || "Équipe 2"
+        },
+
+
+        // Snapshot joueurs
         joueurs: {},
 
-        // Historique global de toutes les actions
+
+        // Historique actions
         historique: [],
+
 
         // Tour courant
         tour: 0,
 
-        // Position du ballon
-        balle: { x: 15, y: 30, zone: "C", holder: null },
 
-        // Stats du match
+        // ⚽ Ballon au rond central au coup d'envoi
+        balle: {
+            x: 15,
+            y: 30,
+            zone: "rondCentral",
+            secteur: "centre",
+            holder: null
+        },
+
+
+        // Stats match
         stats: {
             passes: 0,
             tirs: 0,
             duels: 0,
             deplacements: 0,
+
             possessionId1: 0,
             possessionId2: 0
         }
     };
 
-    // Initialiser chaque joueur dans le tracker
-    const allPlayers = [...(match.lineup1 || []), ...(match.lineup2 || [])];
+
+    const allPlayers = [
+        ...(match.lineup1 || []),
+        ...(match.lineup2 || [])
+    ];
+
+
+    // ============================================================
+    // Initialisation joueurs
+    // ============================================================
 
     for (const j of allPlayers) {
+
         if (!match.tracker.joueurs[j.nom]) {
+
             trackerInitJoueur(match, j);
+
         }
+
+
+        // Attribution vrai nom équipe
+        const equipe =
+            (match.lineup1 || []).includes(j)
+                ? match.tracker.equipes.id1
+                : match.tracker.equipes.id2;
+
+
+        match.tracker.joueurs[j.nom].equipe = equipe;
+
     }
 
+
+
     // ============================================================
-    // 🔄 Attribution du vis-à-vis initial
+    // Attribution vis-à-vis miroir
     // ============================================================
+
     for (const j of allPlayers) {
 
         const snap = match.tracker.joueurs[j.nom];
+
         if (!snap) continue;
+
 
         const opponentTeam =
             (match.lineup1 || []).includes(j)
                 ? match.lineup2
                 : match.lineup1;
 
+
         const vis = findVisAVis(j, opponentTeam);
 
-        if (vis) {
-            snap.visAVis = vis.nom;
-        }
-    }
-}
 
+        if (vis) {
+
+            snap.visAVis = vis.nom;
+
+        }
+
+    }
+
+}
 
 // ================================================================
 // SECTION 3 : INIT JOUEUR DANS LE TRACKER
 // ================================================================
 
 function trackerInitJoueur(match, joueur) {
+
     if (!match.tracker) return;
 
-    // Position initiale selon zoneX/zoneY définis dans le lineup
-    const x = ZONE_X_MAP[joueur.zoneX] ?? 15;
-    const y = ZONE_Y_MAP[joueur.zoneY] ?? 30;
+
+    // Détermination du camp réel
+    const team1 =
+        (match.lineup1 || []).some(p => p.nom === joueur.nom);
+
+
+    const camp = team1 ? "A" : "B";
+
+
+    // Position initiale selon poste + camp
+    const pos = getPositionDepart(
+        joueur.poste,
+        camp
+    );
+
 
     match.tracker.joueurs[joueur.nom] = {
+
         nom: joueur.nom,
+
         poste: joueur.poste,
-        visAVis: null,
-        ligne: joueur.ligne,
-        equipe: joueur.equipe || "?",
-        equipeNom: joueur.equipeNom || joueur.equipe || "?",
-        jid: joueur.jid || joueur.id || null,
 
-        // Position actuelle
-        position: { x, y },
-        zone: { x: joueur.zoneX || "C", y: joueur.zoneY || "C2" },
 
-        // Position de départ (ne change jamais)
-        positionDepart: { x, y },
-        zoneDepart: { x: joueur.zoneX || "C", y: joueur.zoneY || "C2" },
+        // ==========================
+        // IDENTITIFICATION TERRAIN🏟️ 
+        // ==========================
 
-        // Orientation corps
-        bodyAngle: 0,
-        bodyState: "front",
+        equipe:
+            joueur.equipe ||
+            (team1
+                ? match.team1Name
+                : match.team2Name) ||
+            "?",
 
-        // État physique
-        stamina: 100,
-        hasBalle: false,
-        estLock: false,
+        equipeNom:
+            joueur.equipeNom ||
+            joueur.equipe ||
+            "?",
 
-        // Statistiques du joueur
-        stats: {
-            actions: 0,
-            passes: 0,
-            tirs: 0,
-            duels: 0,
-            duelsGagnes: 0,
-            deplacements: 0,
-            distanceParcourue: 0,
-            noteMoyenne: 0,
-            notesTotal: 0,
-            notesCount: 0
+        camp,
+
+        jid:
+            joueur.jid ||
+            joueur.id ||
+            null,
+
+
+        // Vis-à-vis
+        visAVis:null,
+
+
+        // ==========================
+        // POSITION LOGIQUE
+        // ==========================
+
+        zone: pos.zone,
+
+        secteur: pos.secteur,
+
+
+        // ==========================
+        // POSITION TERRAIN
+        // ==========================
+
+        position:{
+            x:pos.x,
+            y:pos.y
         },
 
-        // Historique des actions de ce joueur
-        historique: []
+
+        // Position initiale fixe
+        positionDepart:{
+            x:pos.x,
+            y:pos.y
+        },
+
+
+        zoneDepart:{
+            zone:pos.zone,
+            secteur:pos.secteur
+        },
+
+
+        // ==========================
+        // ORIENTATION
+        // ==========================
+
+        bodyAngle:0,
+
+        bodyState:"front",
+
+
+        // ==========================
+        // ÉTAT
+        // ==========================
+
+        stamina:100,
+
+        hasBalle:false,
+
+        estLock:false,
+
+
+        // ==========================
+        // STATS
+        // ==========================
+
+        stats:{
+            actions:0,
+            passes:0,
+            tirs:0,
+            duels:0,
+            duelsGagnes:0,
+
+            deplacements:0,
+            distanceParcourue:0,
+
+            noteMoyenne:0,
+            notesTotal:0,
+            notesCount:0
+        },
+
+
+        historique:[]
     };
 }
+
 
 // ================================================================
 // SECTION 4 : ENREGISTRER UNE ACTION
@@ -160,17 +382,33 @@ function trackerAction(match, joueur, type, details = {}) {
     const posAvant = { ...snap.position };
     const zoneAvant = { ...snap.zone };
 
-    // --- Mettre à jour la position si déplacement ---
-    if (details.newZoneY && ZONE_Y_MAP[details.newZoneY]) {
-        snap.position.y = ZONE_Y_MAP[details.newZoneY];
-        snap.zone.y = details.newZoneY;
+// --- Mise à jour position tactique ---
+if (details.newZone && details.newSecteur) {
+
+
+    const nouvellePosition = getPositionZone(
+        details.newZone,
+        details.newSecteur,
+        snap.camp
+    );
+
+
+    if (nouvellePosition) {
+
+        snap.position.x = nouvellePosition.x;
+        snap.position.y = nouvellePosition.y;
+
+
+        snap.zone = {
+            zone: details.newZone,
+            secteur: details.newSecteur
+        };
+
+
         snap.stats.deplacements++;
         t.stats.deplacements++;
     }
-    if (details.newZoneX && ZONE_X_MAP[details.newZoneX]) {
-        snap.position.x = ZONE_X_MAP[details.newZoneX];
-        snap.zone.x = details.newZoneX;
-    }
+}
     if (details.newX !== undefined) snap.position.x = details.newX;
     if (details.newY !== undefined) snap.position.y = details.newY;
 
@@ -229,30 +467,73 @@ function trackerAction(match, joueur, type, details = {}) {
 // SECTION 5 : MISE À JOUR POSITION BALLE
 // ================================================================
 
-function trackerBalle(match, holderNom, zoneY = null, x = null, y = null) {
+function trackerBalle(
+    match,
+    holderNom,
+    zone = null,
+    secteur = null,
+    x = null,
+    y = null
+) {
+
     if (!match.tracker) return;
 
     const t = match.tracker;
 
-    // Reset hasBalle pour tous
+
+    // Reset possession
     for (const nom of Object.keys(t.joueurs)) {
+
         t.joueurs[nom].hasBalle = false;
+
     }
+
 
     // Nouveau porteur
     t.balle.holder = holderNom;
+
+
     if (holderNom && t.joueurs[holderNom]) {
-        t.joueurs[holderNom].hasBalle = true;
-        // La balle suit le porteur
-        t.balle.x = t.joueurs[holderNom].position.x;
-        t.balle.y = t.joueurs[holderNom].position.y;
-        t.balle.zone = t.joueurs[holderNom].zone.y;
+
+        const joueur = t.joueurs[holderNom];
+
+
+        joueur.hasBalle = true;
+
+
+        // La balle suit le joueur
+        t.balle.x = joueur.position.x;
+        t.balle.y = joueur.position.y;
+
+
+        // Zone actuelle du porteur
+        t.balle.zone = joueur.zone.ligne;
+        t.balle.secteur = joueur.zone.secteur;
+
     }
 
-    // Override manuel si fourni
-    if (x !== null) t.balle.x = x;
-    if (y !== null) t.balle.y = y;
-    if (zoneY) t.balle.zone = zoneY;
+
+
+    // Forçage manuel si besoin
+    if (x !== null) {
+        t.balle.x = x;
+    }
+
+
+    if (y !== null) {
+        t.balle.y = y;
+    }
+
+
+    if (zone) {
+        t.balle.zone = zone;
+    }
+
+
+    if (secteur) {
+        t.balle.secteur = secteur;
+    }
+
 }
 
 // ================================================================
@@ -278,7 +559,9 @@ function trackerLog(match) {
     const lines = [];
 
     lines.push(`\n${sep}`);
-    lines.push(`📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${t.balle.holder || "LIBRE"} (${t.balle.zone})`);
+    lines.push(
+    `📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${t.balle.holder || "LIBRE"} (${t.balle.zone} → ${t.balle.secteur || ""})`
+);
     lines.push(sep);
 
     // Grouper par équipe
@@ -307,11 +590,12 @@ function trackerLog(match) {
     `    🏷️ Poste     : ${snap.poste || "?"}`
 );
             lines.push(
-                `    📍 Position  : X=${snap.position.x} Y=${snap.position.y} | Zone: ${snap.zone.x}-${snap.zone.y}`
-            );
-            lines.push(
-                `    🏁 Départ    : X=${snap.positionDepart.x} Y=${snap.positionDepart.y} | Zone: ${snap.zoneDepart.x}-${snap.zoneDepart.y}`
-            );
+    `    📍 Position  : X=${snap.position.x} Y=${snap.position.y} | Zone: ${snap.zone.ligne} → ${snap.zone.secteur}`
+);
+
+lines.push(
+    `    🏁 Départ    : X=${snap.positionDepart.x} Y=${snap.positionDepart.y} | Zone: ${snap.zoneDepart.ligne} → ${snap.zoneDepart.secteur}`
+);
             lines.push(
     `    🆚 Vis-à-vis : ${snap.visAVis || "Aucun"}`
 );
@@ -344,9 +628,8 @@ function trackerLog(match) {
         }
     };
 
-    logEquipe(equipe1, `ÉQUIPE 1 — ${match.team1Name || "Team 1"} [${equipe1.length} joueurs]`);
-    logEquipe(equipe2, `ÉQUIPE 2 — ${match.team2Name || "Team 2"} [${equipe2.length} joueurs]`);
-
+   logEquipe(equipe1, `ÉQUIPE 1 — ${match.team1Name || "Team 1"} [${equipe1.length} joueurs]`);
+   logEquipe(equipe2, `ÉQUIPE 2 — ${match.team2Name || "Team 2"} [${equipe2.length} joueurs]`); 
     // Stats globales match
     lines.push(`\n📈 STATS MATCH`);
     lines.push("─".repeat(40));
@@ -362,37 +645,148 @@ function trackerLog(match) {
 
 // ================================================================
 // SECTION 8 : EXTRAIRE LES DÉPLACEMENTS D'UN PAVÉ
-// Analyse le texte pour détecter les nouvelles zones
+// Détecte zone + secteur + orientation du déplacement
 // ================================================================
 
 function trackerExtraireDeplacements(text, joueur) {
+
     if (!text || !joueur) return null;
 
     const t = text.toLowerCase();
+
     const result = {};
 
-    // Zones Y (profondeur)
-    const zonesY = ["c2", "c1", "b2", "b1", "a2", "a1"];
-    for (const z of zonesY) {
-        if (t.includes(z) || t.includes(`zone ${z}`)) {
-            result.newZoneY = z.toUpperCase();
-            break;
-        }
+
+    // ============================================================
+    // ZONE TERRAIN
+    // ============================================================
+
+    // Rond central
+    if (
+        t.includes("rond central") ||
+        t.includes("cercle central") ||
+        t.includes("milieu du terrain")
+    ) {
+        result.newZone = "rondCentral";
     }
 
-    // Zones X (largeur)
-    if (t.includes("côté gauche") || t.includes("aile gauche")) result.newZoneX = "G";
-    else if (t.includes("centre-gauche") || t.includes("demi-gauche")) result.newZoneX = "CG";
-    else if (t.includes("centre droit") || t.includes("demi-droit")) result.newZoneX = "CD";
-    else if (t.includes("côté droit") || t.includes("aile droite")) result.newZoneX = "D";
-    else if (t.includes("centre") && !t.includes("demi")) result.newZoneX = "C";
 
-    // Orientation corps
-    if (t.includes("pivot du torse 180")) result.bodyAngle = (joueur.bodyAngle || 0) + 180;
-    else if (t.includes("pivot gauche 90")) result.bodyAngle = (joueur.bodyAngle || 0) - 90;
-    else if (t.includes("pivot droite 90")) result.bodyAngle = (joueur.bodyAngle || 0) + 90;
+    // Axe de progression
+    else if (
+        t.includes("dans l'axe") ||
+        t.includes("axe") ||
+        t.includes("plein axe")
+    ) {
+        result.newZone = "axe";
+    }
 
-    return Object.keys(result).length ? result : null;
+
+    // Surface
+    else if (
+        t.includes("surface") ||
+        t.includes("dans la surface")
+    ) {
+        result.newZone = "surface";
+    }
+
+
+
+    // ============================================================
+    // SECTEUR LARGEUR
+    // ============================================================
+
+    if (
+        t.includes("aile gauche") ||
+        t.includes("côté gauche") ||
+        t.includes("couloir gauche")
+    ) {
+
+        result.newSecteur = "gauche";
+
+    }
+
+
+    else if (
+        t.includes("aile droite") ||
+        t.includes("côté droit") ||
+        t.includes("couloir droit")
+    ) {
+
+        result.newSecteur = "droite";
+
+    }
+
+
+    else if (
+        t.includes("centre") ||
+        t.includes("axe")
+    ) {
+
+        result.newSecteur = "axe";
+
+    }
+
+
+
+    // ============================================================
+    // DIRECTION DU DÉPLACEMENT
+    // ============================================================
+
+    if (
+        t.includes("revient") ||
+        t.includes("redescend") ||
+        t.includes("recul") ||
+        t.includes("vers l'arrière") ||
+        t.includes("vers son camp")
+    ) {
+
+        result.direction = "arriere";
+
+    }
+
+
+    else if (
+        t.includes("avance") ||
+        t.includes("monte") ||
+        t.includes("vers l'avant")
+    ) {
+
+        result.direction = "avant";
+
+    }
+
+
+
+    // ============================================================
+    // ORIENTATION CORPS
+    // ============================================================
+
+    if (t.includes("pivot du torse 180")) {
+
+        result.bodyAngle =
+            (joueur.bodyAngle || 0) + 180;
+
+    }
+
+    else if (t.includes("pivot gauche 90")) {
+
+        result.bodyAngle =
+            (joueur.bodyAngle || 0) - 90;
+
+    }
+
+    else if (t.includes("pivot droite 90")) {
+
+        result.bodyAngle =
+            (joueur.bodyAngle || 0) + 90;
+
+    }
+
+
+
+    return Object.keys(result).length
+        ? result
+        : null;
 }
 
 
@@ -516,28 +910,61 @@ async function trouverUser(nom) {
         }
 
 
-const DISTANCES_TERRAIN = { C2: 30, C1: 25, B2: 20, B1: 15, A2: 10, A1: 5 };
-// Alias nécessaire pour distanceZone()
-const DISTANCES = DISTANCES_TERRAIN;
 // ⏱️ Temps par tour (6 minutes)
 const TURN_TIME = 6 * 60 * 1000;
 // 📍 MAPPING POSTES → TERRAIN
 const POSITION_POSTES = {
 
     // 🔴 ATTAQUE
-    AG: { zoneX: "gauche", ligne: "attaque", zoneY: "B1" },
-    AC: { zoneX: "axe",    ligne: "attaque", zoneY: "B1" },
-    AD: { zoneX: "droite", ligne: "attaque", zoneY: "B1" },
+    AG: {
+        zone: "axe",
+        secteur: "aile_gauche"
+    },
+
+    AC: {
+        zone: "axe",
+        secteur: "axe"
+    },
+
+    AD: {
+        zone: "axe",
+        secteur: "aile_droite"
+    },
+
 
     // 🟡 MILIEU
-    MG: { zoneX: "gauche", ligne: "milieu", zoneY: "C1" },
-    MC: { zoneX: "axe",    ligne: "milieu", zoneY: "C1" },
-    MD: { zoneX: "droite", ligne: "milieu", zoneY: "C1" },
+    MG: {
+        zone: "rondCentral",
+        secteur: "aile_gauche"
+    },
 
-    // 🔵 DEFENSE
-    DG: { zoneX: "gauche", ligne: "defense", zoneY: "A2" },
-    DC: { zoneX: "axe",    ligne: "defense", zoneY: "A2" },
-    DD: { zoneX: "droite", ligne: "defense", zoneY: "A2" }
+    MC: {
+        zone: "rondCentral",
+        secteur: "axe"
+    },
+
+    MD: {
+        zone: "rondCentral",
+        secteur: "aile_droite"
+    },
+
+
+    // 🔵 DÉFENSE
+    DG: {
+        zone: "axe",
+        secteur: "couloir_gauche"
+    },
+
+    DC: {
+        zone: "surface",
+        secteur: "axe"
+    },
+
+    DD: {
+        zone: "axe",
+        secteur: "couloir_droit"
+    }
+    
 };
 
 //VIS A VIS, JOUEURS EN FACE PAR RAPPORT AU TERRAIN 
@@ -867,61 +1294,93 @@ function distanceZone(z1, z2) {
     if (!DISTANCES[z1] || !DISTANCES[z2]) return 0;
     return Math.abs(DISTANCES[z1] - DISTANCES[z2]);
 }
+// ================================================================
+// POSTE VIS À VIS AVEC LE NOUVEAU SYSTÈME DE ZONES
+// ================================================================
 
-//Postes Vis à VIS: Mapping 
 function getVisAVisPoste(poste) {
 
-    const p = POSITION_POSTES[poste];
-    if (!p) return null;
+    const miroir = {
 
-    // Ligne miroir
-    let ligne;
+        // 🔴 Attaquants ↔ Défenseurs adverses
+        AG: {
+            zone: "surface",
+            secteur: "couloir_droit"
+        },
 
-    switch (p.ligne) {
-        case "attaque":
-            ligne = "defense";
-            break;
+        AC: {
+            zone: "surface",
+            secteur: "axe"
+        },
 
-        case "defense":
-            ligne = "attaque";
-            break;
+        AD: {
+            zone: "surface",
+            secteur: "couloir_gauche"
+        },
 
-        default:
-            ligne = "milieu";
-    }
 
-    // Côté miroir
-    let zoneX = p.zoneX;
+        // 🟨 Milieux face à face
+        MG: {
+            zone: "rondCentral",
+            secteur: "côté_droit"
+        },
 
-    if (zoneX === "gauche") zoneX = "droite";
-    else if (zoneX === "droite") zoneX = "gauche";
+        MC: {
+            zone: "rondCentral",
+            secteur: "centre"
+        },
 
-    return {
-        ligne,
-        zoneX
+        MD: {
+            zone: "rondCentral",
+            secteur: "côté_gauche"
+        },
+
+
+        // 🔵 Défenseurs ↔ Attaquants adverses
+        DG: {
+            zone: "axe",
+            secteur: "aile_droite"
+        },
+
+        DC: {
+            zone: "axe",
+            secteur: "axe"
+        },
+
+        DD: {
+            zone: "axe",
+            secteur: "aile_gauche"
+        }
+
     };
+
+
+    return miroir[poste] || null;
 }
-//Trouver le Vis à Vis initiale: MAPPING
+// Trouver vis à vis joueurs 
 function findVisAVis(player, opponentTeam) {
 
     if (!player || !player.poste) return null;
 
     const cible = getVisAVisPoste(player.poste);
+
     if (!cible) return null;
+
 
     return opponentTeam.find(p => {
 
         const pos = POSITION_POSTES[p.poste];
+
         if (!pos) return false;
 
+
         return (
-            pos.ligne === cible.ligne &&
-            pos.zoneX === cible.zoneX
+            pos.zone === cible.zone &&
+            pos.secteur === cible.secteur
         );
 
     }) || null;
 }
-
 
 // Extractions terrain
 function extraireDistance(txt) {
@@ -953,16 +1412,6 @@ function extraireDirectionLargeur(txt) {
 const FIELD = {
     length: 60, // profondeur (Y)
     width: 30   // largeur (X)
-};
-
-// 📍 ZONES PROFONDEUR (Y)
-const ZONES_Y = {
-    C2: 30,
-    C1: 25,
-    B2: 20,
-    B1: 15,
-    A2: 10,
-    A1: 5
 };
 
 // ↔️ ZONES LARGEUR (X)
@@ -1044,23 +1493,14 @@ function moveLateral(player, direction, distance = 5) {
     return { ok: true };
 }
 
-// 🧠 POSITION → ZONE Y
-function getZoneFromY(y) {
-
-    if (y >= 28) return "C2";
-    if (y >= 23) return "C1";
-    if (y >= 18) return "B2";
-    if (y >= 13) return "B1";
-    if (y >= 8) return "A2";
-    return "A1";
-}
-
-// 🧠 POSITION → ZONE X
+// 🧠 POSITION → SECTEUR LARGEUR (X)
 function getZoneFromX(x) {
 
-    if (x <= 10) return "gauche";
-    if (x <= 20) return "axe";
-    return "droite";
+    if (x <= 10) return "côté_gauche";
+
+    if (x <= 20) return "centre";
+
+    return "côté_droit";
 }
 
 // 🔒 VALIDATION TERRAIN
@@ -2285,18 +2725,22 @@ function getVisavisPlayer(match, player) {
     return all.find(p => p.nom === player.visavis) || null;
 }
 
-// 🧭 ZONE Y PAR LIGNE (utilisée dans lancerMatch)
-function getZoneYParLigne(ligne, role) {
-    if (role === "attaque") {
-        if (ligne === "attaque") return "B1";
-        if (ligne === "milieu")  return "C1";
-        if (ligne === "defense") return "C2";
-    } else {
-        if (ligne === "defense") return "A2";
-        if (ligne === "milieu")  return "C1";
-        if (ligne === "attaque") return "B1";
+// 🧭 ZONE PAR LIGNE (nouveau système)
+function getZoneParLigne(ligne) {
+
+    if (ligne === "attaque") {
+        return "axe";
     }
-    return "C1";
+
+    if (ligne === "milieu") {
+        return "rondCentral";
+    }
+
+    if (ligne === "defense") {
+        return "surface";
+    }
+
+    return "rondCentral";
 }
 
 // 🔁 ASSIGNER VIS-À-VIS (wrapper de generateVisAVis)
@@ -2350,13 +2794,29 @@ function kickoffStart(match) {
 
     if (!starter) return "";
 
+
     match.ballHolder = starter.nom;
     match.activePlayer = starter.nom;
     match.phase = "active";
-    match.zone = "C2";
 
-    return `(C2) ${starter.nom} lance le jeu ⚽...`;
-}
+
+    // ⚽ Ballon au rond central
+    match.zone = "rondCentral";
+    match.secteur = "centre";
+
+
+    // Synchronisation tracker
+    if (match.tracker) {
+        trackerBalle(
+            match,
+            starter.nom,
+            "rondCentral",
+            "centre"
+        );
+    }
+
+return `🏟️ (Rond central) ${starter.nom} lance le jeu ⚽...`;
+}  
 
 
 // 🎯 EXTRACTION COMPLÈTE DISTANCE RANGE
@@ -3068,6 +3528,20 @@ async function appliquerConsequences(
 
 }
 
+function appliquerCamp(position, team) {
+
+    if (team === "B") {
+
+        return {
+            x: position.x,
+            y: 60 - position.y
+        };
+
+    }
+
+    return position;
+}
+
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -3334,32 +3808,58 @@ if (match.etat === "attente_lineup") {
             });
         }
 
-        // 🧩 PLAYER CARD STRUCTURE
-        joueursValides.push({
-            numero: j.numero,
-            nom: data.name,
-            id: senderJid,   // JID WhatsApp du propriétaire
-            jid: senderJid,  // alias
-            equipe: null,    // sera défini ci-dessous (team1 ou team2)
-            stats: {
-                ovr: data.ovr,
-                sho: data.sho,
-                dri: data.dri,
-                pas: data.pas,
-                acc: data.acc,
-                phy: data.phy,
-                def: data.def
-            },
-            weapons: data.weapons || [],
-            attitude: data.attitude || "calme",
-            rank: data.rank,
-            poste: j.poste,
-            ligne: posteData.ligne,
-            zoneX: posteData.zoneX,
-            zoneY: posteData.zoneY,
-            position: null,
-            visavis: null
-        });
+     // 🧩 PLAYER CARD STRUCTURE
+joueursValides.push({
+
+    numero: j.numero,
+
+    nom: data.name,
+
+    id: senderJid,
+    jid: senderJid,
+
+    // Propriétaire de la fiche
+    equipe: null,
+
+    // Nom réel de la team (Damian🇨🇬⚽ par exemple)
+    equipeNom: null,
+
+    // Camp terrain pour le miroir
+    camp: null,
+
+
+    stats: {
+        ovr: data.ovr,
+        sho: data.sho,
+        dri: data.dri,
+        pas: data.pas,
+        acc: data.acc,
+        phy: data.phy,
+        def: data.def
+    },
+
+
+    weapons: data.weapons || [],
+    attitude: data.attitude || "calme",
+    rank: data.rank,
+
+
+    // Position football
+    poste: j.poste,
+    ligne: posteData.ligne,
+
+    // Nouveau système
+    secteur: posteData.secteur,
+
+
+    // Position calculée après selon camp
+    position: null,
+
+
+    // Adversaire direct
+    visavis: null
+
+});   
     }
 
     // 🔷 TEAM 1 OWNER (id1)
