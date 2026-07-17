@@ -1429,6 +1429,68 @@ function extractRealPlayers(actionText, match) {
     });
             }
 
+function extractSpeed(txt){
+
+    if(txt.includes("vmax"))
+        return "vitesse maximale";
+
+    if(txt.includes("accélère"))
+        return "accélération";
+
+    return null;
+}
+
+
+function extractDistance(txt){
+
+    const match = txt.match(/(\d+)\s?m/);
+
+    return match ? match[1]+"m" : null;
+}
+
+
+
+function extractBodyPart(txt){
+
+    const parts = [
+        "main droite",
+        "main gauche",
+        "pied droit",
+        "pied gauche",
+        "épaule",
+        "torse"
+    ];
+
+
+    return parts.find(p=>txt.includes(p)) || null;
+}
+
+
+
+function extractDirection(txt){
+
+    const dirs=[
+        "sur la gauche",
+        "sur la droite",
+        "par sa gauche",
+        "par sa droite",
+        "profil gauche",
+        "profil droit"
+    ];
+
+
+    return dirs.find(d=>txt.includes(d)) || null;
+}
+
+
+
+function extractZone(txt){
+
+    const zone = txt.match(/\b[A-Z]\d\b/);
+
+    return zone ? zone[0] : null;
+}
+
 // 🧠 PARSE ACTION SEQUENCE V3
 function parseActionSequence(actionText, match, mode = "attack") {
 
@@ -1561,23 +1623,48 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
     // Priorité selon le mode
     const offensive = new Set([
-        "controle",
-        "conduite",
-        "dribble",
-        "passe",
-        "centre",
-        "tir"
-    ]);
+
+    "controle",
+
+    "conduite",
+
+    "dribble",
+
+    "push_ball",
+
+    "acceleration",
+
+    "passe",
+
+    "centre",
+
+    "tir"
+
+]);
 
     const defensive = new Set([
-        "pression",
-        "bloc",
-        "tacle",
-        "interception",
-        "contre",
-        "recuperation",
-        "degagement"
-    ]);
+
+"pression",
+
+"poursuite",
+
+"retournement",
+
+"contact",
+
+"bloc",
+
+"tacle",
+
+"interception",
+
+"contre",
+
+"recuperation",
+
+"degagement"
+
+]);
 
     const already = new Set();
     const actions = [];
@@ -1599,11 +1686,41 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
         already.add(f.type);
 
-        actions.push({
-            player: playerObj.nom,
-            type: f.type,
-            target: targetObj?.nom || null
-        });
+       actions.push({
+
+    player: playerObj.nom,
+
+    type:f.type,
+
+    target:targetObj?.nom || null,
+
+
+    // nouveaux éléments narratifs
+
+    speed:
+        extractSpeed(lower),
+
+    distance:
+        extractDistance(lower),
+
+    bodyPart:
+        extractBodyPart(lower),
+
+    direction:
+        extractDirection(lower),
+
+    zone:
+        extractZone(lower),
+
+
+    // intention automatique
+
+    intent:
+        f.type==="poursuite"
+        ? "rattraper son adversaire"
+        : null
+
+}); 
     }
 
     return actions;
@@ -1671,74 +1788,308 @@ function genererResumeFull(actionText, match, mode = "attack") {
 
     for (const act of actions) {
 
-        switch (act.type) {
+     switch (act.type) {
 
-            // ==========================
-            // ⚽ ACTIONS OFFENSIVES
-            // ==========================
-            case "controle":
-                phrases.push(`${act.player} contrôle le ballon`);
-                break;
 
-            case "conduite":
-                phrases.push(`${act.player} progresse balle au pied`);
-                break;
+    // ==================================================
+    // ⚽ ACTIONS OFFENSIVES
+    // ==================================================
 
-            case "dribble":
-                phrases.push(`${act.player} tente un dribble`);
-                break;
+    case "controle":
 
-            case "passe":
-                phrases.push(
-                    act.target
-                        ? `${act.player} passe à ${act.target}`
-                        : `${act.player} effectue une passe`
-                );
-                break;
+        phrases.push(
+            `${act.player} contrôle le ballon`
+        );
 
-            case "centre":
-                phrases.push(`${act.player} adresse un centre`);
-                break;
+        break;
 
-            case "tir":
-                phrases.push(`${act.player} frappe au but`);
-                break;
 
-            // ==========================
-            // 🛡️ ACTIONS DÉFENSIVES
-            // ==========================
-            case "pression":
-                phrases.push(`${act.player} met la pression sur son adversaire`);
-                break;
 
-            case "bloc":
-                phrases.push(`${act.player} bloque la progression`);
-                break;
+    case "conduite": {
 
-            case "tacle":
-                phrases.push(`${act.player} tente un tacle glissé`);
-                break;
+        let txt = `${act.player} progresse balle au pied`;
 
-            case "interception":
-                phrases.push(`${act.player} tente une interception`);
-                break;
+        if (act.speed)
+            txt += ` à ${act.speed}`;
 
-            case "contre":
-                phrases.push(`${act.player} contre l'action`);
-                break;
+        if (act.direction)
+            txt += ` vers ${act.direction}`;
 
-            case "recuperation":
-                phrases.push(`${act.player} récupère le ballon`);
-                break;
+        if (act.destination)
+            txt += ` jusqu'en ${act.destination}`;
 
-            case "degagement":
-                phrases.push(`${act.player} dégage le ballon`);
-                break;
+        phrases.push(txt);
 
-            default:
-                phrases.push(`${act.player} enchaîne une action`);
-                break;
-        }
+        break;
+    }
+
+
+
+    case "dribble": {
+
+        let txt = `${act.player}`;
+
+        if (act.technique)
+            txt += ` réalise un ${act.technique}`;
+        else
+            txt += " tente un dribble";
+
+
+        if (act.target)
+            txt += ` face à ${act.target}`;
+
+
+        if (act.intent)
+            txt += ` pour ${act.intent}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "push_ball": {
+
+        let txt =
+        `${act.player} pousse le ballon dans la profondeur`;
+
+
+        if (act.distance)
+            txt += ` sur ${act.distance}`;
+
+
+        if (act.intent)
+            txt += ` afin de ${act.intent}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "acceleration": {
+
+        let txt =
+        `${act.player} accélère`;
+
+        if (act.speed)
+            txt += ` à ${act.speed}`;
+
+
+        if (act.destination)
+            txt += ` vers ${act.destination}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "passe":
+
+        phrases.push(
+
+            act.target
+
+            ? `${act.player} transmet le ballon à ${act.target}`
+
+            : `${act.player} effectue une passe`
+
+        );
+
+        break;
+
+
+
+    case "centre":
+
+        phrases.push(
+            `${act.player} adresse un centre`
+        );
+
+        break;
+
+
+
+    case "tir":
+
+        phrases.push(
+            `${act.player} arme une frappe`
+        );
+
+        break;
+
+
+
+    // ==================================================
+    // 🛡️ ACTIONS DÉFENSIVES
+    // ==================================================
+
+
+    case "pression":
+
+        phrases.push(
+            `${act.player} met la pression sur son adversaire`
+        );
+
+        break;
+
+
+
+    case "bloc":
+
+        phrases.push(
+            `${act.player} bloque la progression`
+        );
+
+        break;
+
+
+
+    case "tacle": {
+
+        let txt =
+        `${act.player} tente un tacle`;
+
+
+        if(act.technique)
+            txt += ` ${act.technique}`;
+
+
+        if(act.bodyPart)
+            txt += ` avec ${act.bodyPart}`;
+
+
+        if(act.target)
+            txt += ` sur ${act.target}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "interception": {
+
+        let txt =
+        `${act.player} tente une interception`;
+
+
+        if(act.bodyPart)
+            txt += ` avec ${act.bodyPart}`;
+
+
+        if(act.target)
+            txt += ` sur ${act.target}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "foot_interception": {
+
+        let txt =
+        `${act.player} tend son pied pour couper la trajectoire`;
+
+
+        if(act.foot)
+            txt += ` avec son ${act.foot}`;
+
+
+        if(act.target)
+            txt += ` de ${act.target}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "chase": {
+
+        let txt =
+        `${act.player} poursuit son adversaire`;
+
+
+        if(act.speed)
+            txt += ` à ${act.speed}`;
+
+
+        if(act.destination)
+            txt += ` jusqu'en ${act.destination}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "contact": {
+
+        let txt =
+        `${act.player} entre en contact avec ${act.target}`;
+
+
+        if(act.bodyPart)
+            txt += ` avec ${act.bodyPart}`;
+
+
+        if(act.intent)
+            txt += ` pour ${act.intent}`;
+
+
+        phrases.push(txt);
+
+        break;
+    }
+
+
+
+    case "recuperation":
+
+        phrases.push(
+            `${act.player} récupère le ballon`
+        );
+
+        break;
+
+
+
+    case "degagement":
+
+        phrases.push(
+            `${act.player} dégage le ballon`
+        );
+
+        break;
+
+
+
+    default:
+
+        phrases.push(
+            `${act.player} enchaîne une action`
+        );
+
+        break;
+
+}   
     }
 
     // 🔥 Suppression des doublons successifs
