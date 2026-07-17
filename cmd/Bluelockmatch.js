@@ -1491,6 +1491,86 @@ function extractZone(txt){
     return zone ? zone[0] : null;
 }
 
+//EXTRACT MOUVEMENT 
+function extraireMouvementAction(txt, type) {
+
+    const movement = {
+        distance: null,
+        direction: null,
+        speed: null,
+        zone: null
+    };
+
+
+    // =========================
+    // 🏃 ACCÉLÉRATION / COURSE
+    // =========================
+
+    if (
+        type === "conduite" ||
+        type === "acceleration"
+    ) {
+
+        const dist =
+            txt.match(/(\d+)\s?m/);
+
+        if(dist)
+            movement.distance =
+                Number(dist[1]);
+
+
+        if(
+            txt.includes("devant lui") ||
+            txt.includes("devant")
+        )
+            movement.direction = "devant";
+
+
+        movement.speed =
+            extractSpeed(txt);
+
+    }
+
+
+    // =========================
+    // ⚽ DRIBBLE LATÉRAL
+    // =========================
+
+    if(type === "dribble") {
+
+
+        const cm =
+            txt.match(/(\d+)\s?cm/);
+
+
+        if(cm)
+            movement.distance =
+                Number(cm[1]) / 100;
+
+
+        if(
+            txt.includes("sur la droite") ||
+            txt.includes("à droite")
+        )
+            movement.direction = "droite";
+
+
+        if(
+            txt.includes("sur la gauche") ||
+            txt.includes("à gauche")
+        )
+            movement.direction = "gauche";
+
+    }
+
+
+    movement.zone =
+        extractZone(txt);
+
+
+    return movement;
+}
+
 // 🧠 PARSE ACTION SEQUENCE V3
 function parseActionSequence(actionText, match, mode = "attack") {
 
@@ -1686,7 +1766,7 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
         already.add(f.type);
 
-       const actionData = {
+ const actionData = {
 
     player: playerObj.nom,
 
@@ -1694,37 +1774,16 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
     target: targetObj?.nom || null,
 
-    movement:null
+    movement:
+        extraireMouvementAction(
+            lower,
+            f.type
+        )
 
-};
+};      
+actions.push(actionData);
 
-// ==========================
-// 🏃 EXTRACTION MOUVEMENT
-// ==========================
-
-const moveDistance =
-lower.match(/(\d+)\s?m/);
-
-
-if(
-moveDistance &&
-(
-f.type==="conduite" ||
-f.type==="acceleration" ||
-f.type==="dribble"
-)
-){
-
-    actionData.movement = {
-
-        distance:
-        Number(moveDistance[1]),
-
-        direction:"avant"
-
-    };
-
-}
+    }
         
 
     // nouveaux éléments narratifs
@@ -2926,11 +2985,24 @@ return {
 };
 } 
 
+// ============================================================
+// 🌍 APPLICATION DES CONSÉQUENCES
+// ============================================================
 async function appliquerConsequences(
-match,
-joueur,
-actions
+    match,
+    joueur,
+    actions,
+    resultat
 ){
+
+    if(!joueur || !actions || !resultat)
+        return;
+
+
+    // Si duel perdu aucune progression
+    if(!resultat.ok)
+        return;
+
 
     for(const action of actions){
 
@@ -2939,16 +3011,64 @@ actions
             continue;
 
 
+        let texteMouvement = "";
+
+
+        // Distance
+        if(action.movement.distance){
+
+            texteMouvement +=
+            ` ${action.movement.distance}m`;
+
+        }
+
+
+        // Direction
+        if(action.movement.direction){
+
+            texteMouvement +=
+            ` ${action.movement.direction}`;
+
+        }
+
+
+        // Type mouvement
+        if(action.type === "acceleration" ||
+           action.type === "conduite"){
+
+            texteMouvement =
+            "avance " + texteMouvement;
+
+        }
+
+
+        console.log(
+            "🌍 Conséquence déplacement :",
+            texteMouvement
+        );
+
+
         await handleDeplacements(
             match,
             joueur,
-            `avance de ${action.movement.distance}m`
+            texteMouvement
         );
 
+    }
+
+
+    // ⚽ Position ballon
+    if(match.ballHolder === joueur.nom){
+
+        match.ballPosition = {
+            x: joueur.position.x,
+            y: joueur.position.y
+        };
 
     }
 
 }
+
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -4947,6 +5067,23 @@ if (isDribbleAction && isTackleAction) {
     // ⚔️ RESULT FINAL
     if (winner === "attacker") {
 
+const actions =
+    parseActionSequence(
+        attaqueText,
+        match,
+        "attack"
+    );
+
+
+await appliquerConsequences(
+    match,
+    attacker,
+    actions,
+    {
+        ok:true
+    }
+);
+        
         match.joueurTour = attacker.id || attacker.jid;
 
         return {
