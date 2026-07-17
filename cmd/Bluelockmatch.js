@@ -97,6 +97,69 @@ const ZONES_TERRAIN = {
 };
 
 // ================================================================
+// POSITION DE DÉPART SELON POSTE
+// ================================================================
+
+function getPositionDepart(poste, camp) {
+
+    const p = POSITION_POSTES[poste];
+
+    if (!p) {
+        return {
+            x: 15,
+            y: 30,
+            ligne: "milieu",
+            secteur: "axe"
+        };
+    }
+
+
+    let zone = ZONES_TERRAIN[p.zone];
+
+
+    if (!zone) {
+        return {
+            x: 15,
+            y: 30,
+            ligne: p.ligne,
+            secteur: p.secteur
+        };
+    }
+
+
+    const position = zone[p.secteur];
+
+
+    if (!position) {
+        return {
+            x: 15,
+            y: 30,
+            ligne: p.ligne,
+            secteur: p.secteur
+        };
+    }
+
+
+    let y = position.y;
+
+
+    // 🔄 Inversion terrain pour équipe B
+    if (camp === "B") {
+        y = 60 - y;
+    }
+
+
+    return {
+
+        x: position.x,
+        y,
+
+        ligne: p.ligne,
+        secteur: p.secteur
+    };
+}
+
+// ================================================================
 // DISTANCES RÉELLES PAR RAPPORT AU BUT
 // ================================================================
 
@@ -915,54 +978,60 @@ const TURN_TIME = 6 * 60 * 1000;
 // 📍 MAPPING POSTES → TERRAIN
 const POSITION_POSTES = {
 
-    // 🔴 ATTAQUE
-    AG: {
-        zone: "axe",
-        secteur: "aile_gauche"
+    AG:{
+        zone:"axe",
+        secteur:"aile_gauche",
+        ligne:"attaque"
     },
 
-    AC: {
-        zone: "axe",
-        secteur: "axe"
+    AC:{
+        zone:"axe",
+        secteur:"axe",
+        ligne:"attaque"
     },
 
-    AD: {
-        zone: "axe",
-        secteur: "aile_droite"
-    },
-
-
-    // 🟡 MILIEU
-    MG: {
-        zone: "rondCentral",
-        secteur: "aile_gauche"
-    },
-
-    MC: {
-        zone: "rondCentral",
-        secteur: "axe"
-    },
-
-    MD: {
-        zone: "rondCentral",
-        secteur: "aile_droite"
+    AD:{
+        zone:"axe",
+        secteur:"aile_droite",
+        ligne:"attaque"
     },
 
 
-    // 🔵 DÉFENSE
-    DG: {
-        zone: "axe",
-        secteur: "couloir_gauche"
+    MG:{
+        zone:"rondCentral",
+        secteur:"côté_gauche",
+        ligne:"milieu"
     },
 
-    DC: {
-        zone: "surface",
-        secteur: "axe"
+    MC:{
+        zone:"rondCentral",
+        secteur:"centre",
+        ligne:"milieu"
     },
 
-    DD: {
-        zone: "axe",
-        secteur: "couloir_droit"
+    MD:{
+        zone:"rondCentral",
+        secteur:"côté_droit",
+        ligne:"milieu"
+    },
+
+
+    DG:{
+        zone:"surface",
+        secteur:"couloir_gauche",
+        ligne:"defense"
+    },
+
+    DC:{
+        zone:"surface",
+        secteur:"axe",
+        ligne:"defense"
+    },
+
+    DD:{
+        zone:"surface",
+        secteur:"couloir_droit",
+        ligne:"defense"
     }
     
 };
