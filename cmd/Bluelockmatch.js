@@ -1686,14 +1686,46 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
         already.add(f.type);
 
-       actions.push({
+       const actionData = {
 
     player: playerObj.nom,
 
-    type:f.type,
+    type: f.type,
 
-    target:targetObj?.nom || null,
+    target: targetObj?.nom || null,
 
+    movement:null
+
+};
+
+// ==========================
+// 🏃 EXTRACTION MOUVEMENT
+// ==========================
+
+const moveDistance =
+lower.match(/(\d+)\s?m/);
+
+
+if(
+moveDistance &&
+(
+f.type==="conduite" ||
+f.type==="acceleration" ||
+f.type==="dribble"
+)
+){
+
+    actionData.movement = {
+
+        distance:
+        Number(moveDistance[1]),
+
+        direction:"avant"
+
+    };
+
+}
+        
 
     // nouveaux éléments narratifs
 
@@ -2893,6 +2925,30 @@ return {
         : `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon.`
 };
 } 
+
+async function appliquerConsequences(
+match,
+joueur,
+actions
+){
+
+    for(const action of actions){
+
+
+        if(!action.movement)
+            continue;
+
+
+        await handleDeplacements(
+            match,
+            joueur,
+            `avance de ${action.movement.distance}m`
+        );
+
+
+    }
+
+}
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
