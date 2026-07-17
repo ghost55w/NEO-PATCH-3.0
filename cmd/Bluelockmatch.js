@@ -2794,29 +2794,28 @@ function kickoffStart(match) {
 
     if (!starter) return "";
 
-
     match.ballHolder = starter.nom;
     match.activePlayer = starter.nom;
     match.phase = "active";
-
 
     // ⚽ Ballon au rond central
     match.zone = "rondCentral";
     match.secteur = "centre";
 
-
     // Synchronisation tracker
     if (match.tracker) {
+
         trackerBalle(
             match,
             starter.nom,
-            "rondCentral",
-            "centre"
+            "rondCentral"
         );
+
+        match.tracker.balle.secteur = "centre";
     }
 
-return `🏟️ (Rond central) ${starter.nom} lance le jeu ⚽...`;
-}  
+    return `🏟️ (Rond central) ${starter.nom} lance le jeu ⚽...`;
+}
 
 
 // 🎯 EXTRACTION COMPLÈTE DISTANCE RANGE
