@@ -1447,14 +1447,79 @@ function parseActionSequence(actionText, match, mode = "attack") {
     ];
 
     const defenseActions = [
-        { type: "pression", words: ["presse", "harcèle"] },
-        { type: "bloc", words: ["bloque", "fait écran", "barre la route", "empêche", "obstrue"] },
-        { type: "tacle", words: ["tacle", "glissé"] },
-        { type: "interception", words: ["interception", "intercepte"] },
-        { type: "contre", words: ["contre"] },
-        { type: "recuperation", words: ["récupère", "recupere", "récupération", "recuperation"] },
-        { type: "degagement", words: ["dégage", "degage"] }
-    ];
+
+    { type: "pression", words: [
+        "presse",
+        "pressing", 
+        "harcèle"
+    ]},
+
+    { type: "poursuite", words: [
+        "poursuit",
+        "rattrape",
+        "revient sur",
+        "court derrière",
+        "sprinte derrière",
+        "chasse"
+    ]},
+
+    { type: "retournement", words: [
+        "se retourne",
+        "180°",
+        "demi-tour", 
+        "pivote" 
+    ]},
+
+    { type: "contact", words: [
+        "place sa main",
+        "pose sa main",
+        "met sa main",
+        "attrape",
+        "retient",
+        "freine",
+        "pousse l'épaule",
+        "épaule contre épaule",
+        "charge"
+    ]},
+
+    { type: "bloc", words: [
+        "bloque",
+        "fait écran",
+        "barre la route",
+        "empêche",
+        "obstrue"
+    ]},
+
+    { type: "tacle", words: [
+        "tacle",
+        "glissé",
+        "glissade"
+    ]},
+
+    { type: "interception", words: [
+        "interception",
+        "intercepte",
+        "coupe la trajectoire",
+        "dévie",
+        "devie"
+    ]},
+
+    { type: "contre", words: [
+        "contre"
+    ]},
+
+    { type: "recuperation", words: [
+        "récupère",
+        "recupere",
+        "récupération",
+        "recuperation"
+    ]},
+
+    { type: "degagement", words: [
+        "dégage",
+        "degage"
+    ]}
+];
 
     // Tous les mots-clés
     const catalogue = [...attackActions, ...defenseActions];
