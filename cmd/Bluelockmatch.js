@@ -1778,13 +1778,8 @@ function parseActionSequence(actionText, match, mode = "attack") {
         extraireMouvementAction(
             lower,
             f.type
-        )
+        ),
 
-};      
-actions.push(actionData);
-
-    }
-        
 
     // nouveaux éléments narratifs
 
@@ -1807,11 +1802,15 @@ actions.push(actionData);
     // intention automatique
 
     intent:
-        f.type==="poursuite"
-        ? "rattraper son adversaire"
-        : null
+        f.type === "poursuite"
+            ? "rattraper son adversaire"
+            : null
 
-}); 
+};
+
+
+actions.push(actionData);
+
     }
 
     return actions;
