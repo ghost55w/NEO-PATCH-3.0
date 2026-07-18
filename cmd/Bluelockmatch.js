@@ -105,12 +105,13 @@ function getPositionDepart(poste, camp) {
     const p = POSITION_POSTES[poste];
 
     if (!p) {
-        return {
-            x: 15,
-            y: 30,
-            ligne: "milieu",
-            secteur: "axe"
-        };
+    return {
+        x: 15,
+        y: 30,
+        zone: "rondCentral",
+        ligne: "milieu",
+        secteur: "axe"
+    };
     }
 
 
@@ -118,26 +119,27 @@ function getPositionDepart(poste, camp) {
 
 
     if (!zone) {
-        return {
-            x: 15,
-            y: 30,
-            ligne: p.ligne,
-            secteur: p.secteur
-        };
+    return {
+        x: 15,
+        y: 30,
+        zone: p.zone,
+        ligne: p.ligne,
+        secteur: p.secteur
+    };
     }
-
 
     const position = zone[p.secteur];
 
 
     if (!position) {
-        return {
-            x: 15,
-            y: 30,
-            ligne: p.ligne,
-            secteur: p.secteur
-        };
-    }
+    return {
+        x: 15,
+        y: 30,
+        zone: p.zone,
+        ligne: p.ligne,
+        secteur: p.secteur
+    };
+}
 
 
     let y = position.y;
@@ -150,13 +152,13 @@ function getPositionDepart(poste, camp) {
 
 
     return {
+    x: position.x,
+    y,
 
-        x: position.x,
-        y,
-
-        ligne: p.ligne,
-        secteur: p.secteur
-    };
+    zone: p.zone,
+    ligne: p.ligne,
+    secteur: p.secteur
+};
 }
 
 // ================================================================
@@ -570,11 +572,10 @@ function trackerBalle(
 
 
         // Zone actuelle du porteur
-        t.balle.zone = joueur.zone.ligne;
-        t.balle.secteur = joueur.zone.secteur;
-
-    }
-
+t.balle.zone = joueur.zone;
+t.balle.secteur = joueur.secteur;
+t.balle.ligne = joueur.ligne;
+    } 
 
 
     // Forçage manuel si besoin
