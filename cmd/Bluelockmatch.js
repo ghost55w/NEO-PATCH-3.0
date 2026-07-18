@@ -4655,10 +4655,9 @@ setTimeout(async () => {
     const attackerJidSnap = match.phaseDuel?.attackerJid || duelAttacker.id || duelAttacker.jid;
     const defenderJidSnap = match.phaseDuel?.defenderJid || duelDefender.id || duelDefender.jid;
 
+    const winnerId = duelResult.ok ? attackerJidSnap : defenderJidSnap;
     const winnerPlayer = duelResult.ok ? duelAttacker : duelDefender;
-
-match.ballHolderPlayer = winnerPlayer;   // objet complet
-match.ballHolder = winnerPlayer.nom;     // nom si tu en as besoin ailleurs
+match.ballHolderPlayer = winnerPlayer.nom;
 match.ballHolderJid = winnerId;
 match.joueurTour = winnerId;
 
