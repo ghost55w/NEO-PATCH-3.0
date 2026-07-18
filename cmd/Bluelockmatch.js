@@ -355,13 +355,13 @@ function trackerInitJoueur(match, joueur) {
         visAVis:null,
 
 
-        // ==========================
-        // POSITION LOGIQUE
-        // ==========================
+    // ==========================
+// POSITION LOGIQUE
+// ==========================
 
-        zone: pos.zone,
-
-        secteur: pos.secteur,
+zone: pos.zone,
+ligne: pos.ligne,
+secteur: pos.secteur,    
 
 
         // ==========================
