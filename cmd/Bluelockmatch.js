@@ -359,9 +359,10 @@ function trackerInitJoueur(match, joueur) {
         // POSITION LOGIQUE
         // ==========================
 
-        zone: pos.zone,
-
-        secteur: pos.secteur,
+        zone: {
+    ligne: pos.zone,
+    secteur: pos.secteur
+},
 
 
         // ==========================
@@ -381,10 +382,10 @@ function trackerInitJoueur(match, joueur) {
         },
 
 
-        zoneDepart:{
-            zone:pos.zone,
-            secteur:pos.secteur
-        },
+        zoneDepart: {
+    ligne: pos.zone,
+    secteur: pos.secteur
+},
 
 
         // ==========================
@@ -465,9 +466,9 @@ if (details.newZone && details.newSecteur) {
 
 
         snap.zone = {
-            zone: details.newZone,
-            secteur: details.newSecteur
-        };
+    ligne: details.newZone,
+    secteur: details.newSecteur
+};
 
 
         snap.stats.deplacements++;
