@@ -4123,10 +4123,14 @@ async function lancerMatch(chat, ovl) {
         }
 
     } catch (e) {
-    }
-
+    console.error("❌ Erreur SAFE TERRAIN INIT :", e);
+}
+    
+console.log("✅ Avant kickoffStart");
 // 🎯 KICKOFF (GARANTI)
 const kickoffText = kickoffStart(match);
+    
+console.log("✅ kickoffText =", kickoffText);
 
 // 🗺️ TRACKER : Balle au porteur de départ
 if (match.tracker && match.ballHolder) {
@@ -4143,7 +4147,7 @@ const imagesKickOff = [
     "https://files.catbox.moe/onotk4.jpg",
     "https://files.catbox.moe/kfw0bl.jpg"
 ];
-
+console.log("✅ Envoi du message Kick Off");
 // ⚽ MESSAGE KICK OFF
 await ovl.sendMessage(chat, {
     image: {
