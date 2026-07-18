@@ -105,13 +105,12 @@ function getPositionDepart(poste, camp) {
     const p = POSITION_POSTES[poste];
 
     if (!p) {
-    return {
-        x: 15,
-        y: 30,
-        zone: "rondCentral",
-        ligne: "milieu",
-        secteur: "axe"
-    };
+        return {
+            x: 15,
+            y: 30,
+            ligne: "milieu",
+            secteur: "axe"
+        };
     }
 
 
@@ -119,27 +118,26 @@ function getPositionDepart(poste, camp) {
 
 
     if (!zone) {
-    return {
-        x: 15,
-        y: 30,
-        zone: p.zone,
-        ligne: p.ligne,
-        secteur: p.secteur
-    };
+        return {
+            x: 15,
+            y: 30,
+            ligne: p.ligne,
+            secteur: p.secteur
+        };
     }
+
 
     const position = zone[p.secteur];
 
 
     if (!position) {
-    return {
-        x: 15,
-        y: 30,
-        zone: p.zone,
-        ligne: p.ligne,
-        secteur: p.secteur
-    };
-}
+        return {
+            x: 15,
+            y: 30,
+            ligne: p.ligne,
+            secteur: p.secteur
+        };
+    }
 
 
     let y = position.y;
@@ -152,13 +150,13 @@ function getPositionDepart(poste, camp) {
 
 
     return {
-    x: position.x,
-    y,
 
-    zone: p.zone,
-    ligne: p.ligne,
-    secteur: p.secteur
-};
+        x: position.x,
+        y,
+
+        ligne: p.ligne,
+        secteur: p.secteur
+    };
 }
 
 // ================================================================
@@ -355,13 +353,13 @@ function trackerInitJoueur(match, joueur) {
         visAVis:null,
 
 
-    // ==========================
-// POSITION LOGIQUE
-// ==========================
+        // ==========================
+        // POSITION LOGIQUE
+        // ==========================
 
-zone: pos.zone,
-ligne: pos.ligne,
-secteur: pos.secteur,    
+        zone: pos.zone,
+
+        secteur: pos.secteur,
 
 
         // ==========================
@@ -572,10 +570,11 @@ function trackerBalle(
 
 
         // Zone actuelle du porteur
-t.balle.zone = joueur.zone;
-t.balle.secteur = joueur.secteur;
-t.balle.ligne = joueur.ligne;
-    } 
+        t.balle.zone = joueur.zone.ligne;
+        t.balle.secteur = joueur.zone.secteur;
+
+    }
+
 
 
     // Forçage manuel si besoin
