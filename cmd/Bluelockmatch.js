@@ -510,7 +510,7 @@ if (details.moveDistance && details.direction) {
     snap.stats.deplacements++;
     t.stats.deplacements++;
 }
-}
+
     if (details.newX !== undefined) snap.position.x = details.newX;
     if (details.newY !== undefined) snap.position.y = details.newY;
 
