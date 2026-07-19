@@ -877,10 +877,6 @@ else if (
 ) {
     result.direction = "droite";
 }
-    
-return Object.keys(result).length
-    ? result
-    : null;
 
 
     // ============================================================
