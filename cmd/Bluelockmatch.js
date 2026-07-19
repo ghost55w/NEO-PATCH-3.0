@@ -4498,13 +4498,22 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
 
     // 🗺️ TRACKER : Pavé attaque duel
     if (attacker) {
-        const _deps = trackerExtraireDeplacements(action, match.tracker?.joueurs[attacker.nom]);
-        trackerAction(match, attacker, "duel", {
-            texte: action.slice(0, 80),
-            note: noterPave(action),
-            adversaire: defender?.nom,
-            ...(_deps || {})
-        });
+        const _deps = trackerExtraireDeplacements(
+    action,
+    match.tracker?.joueurs[attacker.nom]
+);
+if (_deps) {
+    match.pendingMove = {
+        joueur: attacker.nom,
+        details: _deps
+    };
+}
+trackerAction(match, attacker, "duel", {
+    texte: action.slice(0, 80),
+    note: noterPave(action),
+    adversaire: defender?.nom,
+    role: "attaque"
+});
         trackerBalle(match, attacker.nom);
     }
 
@@ -4713,13 +4722,27 @@ const duelDefender = match.phaseDuel.defender;
 
 // 🗺️ TRACKER : Pavé défense duel
 if (duelDefender) {
-    const _depsD = trackerExtraireDeplacements(defensePave, match.tracker?.joueurs[duelDefender.nom]);
+
+    const _depsD = trackerExtraireDeplacements(
+        defensePave,
+        match.tracker?.joueurs[duelDefender.nom]
+    );
+
+
+    // ✅ Stocker déplacement défense prévu
+    if (_depsD) {
+        match.pendingDefenseMove = {
+            joueur: duelDefender.nom,
+            details: _depsD
+        };
+    }
+
+
     trackerAction(match, duelDefender, "duel", {
         texte: (defensePave || "").slice(0, 80),
         note: noterPave(defensePave || ""),
         adversaire: duelAttacker?.nom,
-        role: "defense",
-        ...(_depsD || {})
+        role: "defense"
     });
 }
     
@@ -5759,6 +5782,22 @@ await appliquerConsequences(
         ok:true
     }
 );
+
+    // ✅ APPLIQUER LE DÉPLACEMENT SEULEMENT SI LE DUEL EST GAGNÉ
+    if (
+    match.pendingMove &&
+    match.pendingMove.joueur === attacker.nom
+) {
+
+    trackerAction(
+        match,
+        attacker,
+        "deplacement",
+        match.pendingMove.details
+    );
+
+    match.pendingMove = null;
+    }    
         
         match.joueurTour = attacker.id || attacker.jid;
 
@@ -5778,7 +5817,22 @@ await appliquerConsequences(
     }
 
     match.joueurTour = defender.id || defender.jid;
+// ✅ APPLIQUER LE DÉPLACEMENT DÉFENSE SEULEMENT SI LE DÉFENSEUR GAGNE
+if (
+    match.pendingDefenseMove &&
+    match.pendingDefenseMove.joueur === defender.nom
+) {
 
+    trackerAction(
+        match,
+        defender,
+        "deplacement",
+        match.pendingDefenseMove.details
+    );
+
+    match.pendingDefenseMove = null;
+}
+    
     return {
         ok: false,
         type: "DRIBBLE_LOSE",
