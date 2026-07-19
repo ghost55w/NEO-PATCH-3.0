@@ -162,6 +162,31 @@ function getPositionDepart(poste, camp) {
 }
 
 // ================================================================
+// POSITION SELON ZONE + SECTEUR
+// ================================================================
+
+function getPositionZone(zone, secteur, camp = "A") {
+
+    const ligne = ZONES_TERRAIN[zone];
+    if (!ligne) return null;
+
+    const position = ligne[secteur];
+    if (!position) return null;
+
+    let y = position.y;
+
+    // Inversion terrain équipe B
+    if (camp === "B") {
+        y = 60 - y;
+    }
+
+    return {
+        x: position.x,
+        y
+    };
+}
+
+// ================================================================
 // DISTANCES RÉELLES PAR RAPPORT AU BUT
 // ================================================================
 
