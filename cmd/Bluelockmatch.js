@@ -474,31 +474,42 @@ function trackerAction(match, joueur, type, details = {}) {
     const zoneAvant = { ...snap.zone };
 
 // --- Mise à jour position tactique ---
-if (details.newZone && details.newSecteur) {
+if (details.moveDistance && details.direction) {
+
+    const distance = details.moveDistance;
+
+    if (details.direction === "avant") {
+        snap.position.y -= distance;
+    }
+
+    if (details.direction === "arriere") {
+        snap.position.y += distance;
+    }
+
+    if (details.direction === "gauche") {
+        snap.position.x -= distance;
+    }
+
+    if (details.direction === "droite") {
+        snap.position.x += distance;
+    }
 
 
-    const nouvellePosition = getPositionZone(
-        details.newZone,
-        details.newSecteur,
-        snap.camp
+    // sécurité terrain
+    snap.position.x = Math.max(
+        0,
+        Math.min(FIELD.width, snap.position.x)
+    );
+
+    snap.position.y = Math.max(
+        0,
+        Math.min(FIELD.length, snap.position.y)
     );
 
 
-    if (nouvellePosition) {
-
-        snap.position.x = nouvellePosition.x;
-        snap.position.y = nouvellePosition.y;
-
-
-        snap.zone = {
-    ligne: details.newZone,
-    secteur: details.newSecteur
-};
-
-
-        snap.stats.deplacements++;
-        t.stats.deplacements++;
-    }
+    snap.stats.deplacements++;
+    t.stats.deplacements++;
+}
 }
     if (details.newX !== undefined) snap.position.x = details.newX;
     if (details.newY !== undefined) snap.position.y = details.newY;
@@ -746,6 +757,16 @@ function trackerExtraireDeplacements(text, joueur) {
 
     const result = {};
 
+    // ============================================================
+// DISTANCE RÉELLE DU DÉPLACEMENT
+// ============================================================
+
+const distanceMatch = t.match(/(\d+)\s?m/);
+
+if (distanceMatch) {
+    result.moveDistance = Number(distanceMatch[1]);
+}
+
 
     // ============================================================
     // ZONE TERRAIN
@@ -821,30 +842,45 @@ function trackerExtraireDeplacements(text, joueur) {
     // ============================================================
     // DIRECTION DU DÉPLACEMENT
     // ============================================================
-
-    if (
-        t.includes("revient") ||
-        t.includes("redescend") ||
-        t.includes("recul") ||
-        t.includes("vers l'arrière") ||
-        t.includes("vers son camp")
-    ) {
-
-        result.direction = "arriere";
-
-    }
+if (
+    t.includes("avance") ||
+    t.includes("fonce") ||
+    t.includes("monte") ||
+    t.includes("vers l'avant") ||
+    t.includes("progresse")
+) {
+    result.direction = "avant";
+}
 
 
-    else if (
-        t.includes("avance") ||
-        t.includes("monte") ||
-        t.includes("vers l'avant")
-    ) {
+else if (
+    t.includes("revient") ||
+    t.includes("redescend") ||
+    t.includes("recul") ||
+    t.includes("vers son camp")
+) {
+    result.direction = "arriere";
+}
 
-        result.direction = "avant";
 
-    }
+else if (
+    t.includes("a gauche") ||
+    t.includes("vers la gauche")
+) {
+    result.direction = "gauche";
+}
 
+
+else if (
+    t.includes("a droite") ||
+    t.includes("vers la droite")
+) {
+    result.direction = "droite";
+}
+    
+return Object.keys(result).length
+    ? result
+    : null;
 
 
     // ============================================================
