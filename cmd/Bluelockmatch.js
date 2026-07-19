@@ -1464,13 +1464,73 @@ function extractDistance(txt) {
 }
 
 function extraireZoneArrivee(txt) {
+
+    txt = txt.toLowerCase();
+
+    if (txt.includes("rond central") || txt.includes("cercle central")) {
+        return "rondCentral";
+    }
+
+    if (txt.includes("surface")) {
+        return "surface";
+    }
+
+    if (txt.includes("axe")) {
+        return "axe";
+    }
+
+    // Compatibilité ancien système
     const m = txt.match(/zone\s*([A-C][1-2])/i);
-    return m ? m[1].toUpperCase() : null;
+
+    if (m) {
+        const convert = {
+            A1: "surface",
+            A2: "surface",
+            B1: "axe",
+            B2: "axe",
+            C1: "rondCentral",
+            C2: "rondCentral"
+        };
+
+        return convert[m[1].toUpperCase()] || null;
+    }
+
+    return null;
 }
 
 function extraireZoneDepart(txt) {
+
+    txt = txt.toLowerCase();
+
+    if (txt.includes("depuis le rond central") || txt.includes("depuis le cercle central")) {
+        return "rondCentral";
+    }
+
+    if (txt.includes("depuis la surface")) {
+        return "surface";
+    }
+
+    if (txt.includes("depuis l'axe") || txt.includes("depuis l’axe") || txt.includes("depuis axe")) {
+        return "axe";
+    }
+
+    // Compatibilité ancien système
     const m = txt.match(/depuis\s*([A-C][1-2])/i);
-    return m ? m[1].toUpperCase() : null;
+
+    if (m) {
+        const convert = {
+            A1: "surface",
+            A2: "surface",
+            B1: "axe",
+            B2: "axe",
+            C1: "rondCentral",
+            C2: "rondCentral"
+        };
+
+        return convert[m[1].toUpperCase()] || null;
+    }
+
+    return null;
 }
 
 function extraireDirectionLargeur(txt) {
