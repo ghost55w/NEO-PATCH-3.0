@@ -3627,78 +3627,91 @@ return {
 async function appliquerConsequences(
     match,
     joueur,
-    actions,
     resultat
 ){
 
-    if(!joueur || !actions || !resultat)
+    if (!match?.tracker || !joueur || !resultat)
         return;
 
 
-    // Si duel perdu aucune progression
-    if(!resultat.ok)
+    const snap = match.tracker.joueurs[joueur.nom];
+
+    if (!snap)
         return;
 
 
-    for(const action of actions){
+    // Récupération du mouvement prévu
+    const move = snap.pendingMove;
 
 
-        if(!action.movement)
-            continue;
+    if (move) {
+
+        // Distance réellement parcourue
+        const distance = resultat.ok
+            ? (resultat.travelDistance ?? move.distance)
+            : (resultat.travelDistance ?? 0);
 
 
-        let texteMouvement = "";
+        // Application déplacement
+        if (move.direction === "avant") {
+            snap.position.y -= distance;
+        }
 
+        else if (move.direction === "arriere") {
+            snap.position.y += distance;
+        }
 
-        // Distance
-        if(action.movement.distance){
+        else if (move.direction === "gauche") {
+            snap.position.x -= distance;
+        }
 
-            texteMouvement +=
-            ` ${action.movement.distance}m`;
-
+        else if (move.direction === "droite") {
+            snap.position.x += distance;
         }
 
 
-        // Direction
-        if(action.movement.direction){
+        // Sécurité terrain
+        snap.position.x = Math.max(
+            0,
+            Math.min(FIELD.width, snap.position.x)
+        );
 
-            texteMouvement +=
-            ` ${action.movement.direction}`;
+        snap.position.y = Math.max(
+            0,
+            Math.min(FIELD.length, snap.position.y)
+        );
 
-        }
 
+        // Statistiques déplacement
+        if (distance > 0) {
 
-        // Type mouvement
-        if(action.type === "acceleration" ||
-           action.type === "conduite"){
+            snap.stats.distanceParcourue += distance;
+            snap.stats.deplacements++;
 
-            texteMouvement =
-            "avance " + texteMouvement;
-
+            match.tracker.stats.deplacements++;
         }
 
 
         console.log(
             "🌍 Conséquence déplacement :",
-            texteMouvement
+            joueur.nom,
+            distance + "m",
+            move.direction
         );
 
 
-        await handleDeplacements(
-            match,
-            joueur,
-            texteMouvement
-        );
+        // Nettoyage intention
+        delete snap.pendingMove;
 
     }
 
 
-    // ⚽ Position ballon
-    if(match.ballHolder === joueur.nom){
+    // ⚽ Mise à jour position ballon
+    if (match.ballHolder === joueur.nom) {
 
         match.ballPosition = {
-            x: joueur.position.x,
-            y: joueur.position.y
+            x: snap.position.x,
+            y: snap.position.y
         };
 
     }
@@ -3718,6 +3731,7 @@ function appliquerCamp(position, team) {
 
     return position;
 }
+
 
 
 // 🎮 COMMANDE MATCH
@@ -4934,54 +4948,11 @@ if (
         ? (attacker.id || attacker.jid)
         : (defender.id || defender.jid);
 
-    // ==============================
-// Appliquer le déplacement seulement
-// si l'attaquant gagne le duel
-// ==============================
-if (result.ok) {
-
-    const snap = match.tracker?.joueurs?.[attacker.nom];
-
-    if (snap?.pendingMove) {
-
-        const distance = snap.pendingMove.distance;
-
-        if (snap.pendingMove.direction === "avant") {
-            snap.position.y -= distance;
-        }
-
-        if (snap.pendingMove.direction === "arriere") {
-            snap.position.y += distance;
-        }
-
-        if (snap.pendingMove.direction === "gauche") {
-            snap.position.x -= distance;
-        }
-
-        if (snap.pendingMove.direction === "droite") {
-            snap.position.x += distance;
-        }
-
-        snap.position.x = Math.max(0, Math.min(FIELD.width, snap.position.x));
-        snap.position.y = Math.max(0, Math.min(FIELD.length, snap.position.y));
-
-        snap.stats.distanceParcourue += distance;
-        snap.stats.deplacements++;
-
-        match.tracker.stats.deplacements++;
-
-        delete snap.pendingMove;
-    }
-
-} else {
-
-    const snap = match.tracker?.joueurs?.[attacker.nom];
-
-    if (snap) {
-        delete snap.pendingMove;
-    }
-
-}
+    await appliquerConsequences(
+    match,
+    attacker,
+    result
+);
 
     match.ballHolder = winnerPlayer.nom;
     match.ballHolderPlayer = winnerPlayer.nom;
