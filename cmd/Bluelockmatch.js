@@ -4934,6 +4934,55 @@ if (
         ? (attacker.id || attacker.jid)
         : (defender.id || defender.jid);
 
+    // ==============================
+// Appliquer le déplacement seulement
+// si l'attaquant gagne le duel
+// ==============================
+if (result.ok) {
+
+    const snap = match.tracker?.joueurs?.[attacker.nom];
+
+    if (snap?.pendingMove) {
+
+        const distance = snap.pendingMove.distance;
+
+        if (snap.pendingMove.direction === "avant") {
+            snap.position.y -= distance;
+        }
+
+        if (snap.pendingMove.direction === "arriere") {
+            snap.position.y += distance;
+        }
+
+        if (snap.pendingMove.direction === "gauche") {
+            snap.position.x -= distance;
+        }
+
+        if (snap.pendingMove.direction === "droite") {
+            snap.position.x += distance;
+        }
+
+        snap.position.x = Math.max(0, Math.min(FIELD.width, snap.position.x));
+        snap.position.y = Math.max(0, Math.min(FIELD.length, snap.position.y));
+
+        snap.stats.distanceParcourue += distance;
+        snap.stats.deplacements++;
+
+        match.tracker.stats.deplacements++;
+
+        delete snap.pendingMove;
+    }
+
+} else {
+
+    const snap = match.tracker?.joueurs?.[attacker.nom];
+
+    if (snap) {
+        delete snap.pendingMove;
+    }
+
+}
+
     match.ballHolder = winnerPlayer.nom;
     match.ballHolderPlayer = winnerPlayer.nom;
     match.ballHolderJid = winnerId;
