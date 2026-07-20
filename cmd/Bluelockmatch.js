@@ -476,40 +476,12 @@ function trackerAction(match, joueur, type, details = {}) {
 // --- Mise à jour position tactique ---
 if (details.moveDistance && details.direction) {
 
-    const distance = details.moveDistance;
+    snap.pendingMove = {
+        distance: details.moveDistance,
+        direction: details.direction
+    };
 
-    if (details.direction === "avant") {
-        snap.position.y -= distance;
-    }
-
-    if (details.direction === "arriere") {
-        snap.position.y += distance;
-    }
-
-    if (details.direction === "gauche") {
-        snap.position.x -= distance;
-    }
-
-    if (details.direction === "droite") {
-        snap.position.x += distance;
-    }
-
-
-    // sécurité terrain
-    snap.position.x = Math.max(
-        0,
-        Math.min(FIELD.width, snap.position.x)
-    );
-
-    snap.position.y = Math.max(
-        0,
-        Math.min(FIELD.length, snap.position.y)
-    );
-
-
-    snap.stats.deplacements++;
-    t.stats.deplacements++;
-}
+}    
 
     if (details.newX !== undefined) snap.position.x = details.newX;
     if (details.newY !== undefined) snap.position.y = details.newY;
