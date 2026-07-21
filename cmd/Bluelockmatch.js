@@ -6303,7 +6303,6 @@ return {
                         
 
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
-
 function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) {
 
     const atk = attacker.stats || {};
@@ -6520,9 +6519,16 @@ async function handleDeplacements(match, joueur, texte) {
 
     // ↔️ MOVE X (LATÉRAL)
     if (direction) {
+        
+if (!distance) {
+    return {
+        ok: false,
+        erreur: "❌ Distance obligatoire pour un déplacement"
+    };
+}
 
-        const d = distance || 5;
-
+const d = distance;
+        
         if (d > 10) {
             return { ok: false, erreur: "❌ Trop loin (>10m)" };
         }
