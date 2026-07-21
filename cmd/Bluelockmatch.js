@@ -5313,6 +5313,8 @@ Il reste *1 MINUTE* pour jouer le duel !
             match.attacker = finalNext;
             match.ballHolder = fallback?.nom || attacker.nom;
 
+            appliquerPendingAction(match, attacker);
+
             match.phaseDuel = null;
             match.pendingAttack = null;
             match.waitingDefenseFrom = null;
@@ -5408,8 +5410,6 @@ match.ballHolderJid = attackerJid;
 match.joueurTour = attackerJid;
 
 // 🗺️ TRACKER
-trackerBalle(match, attacker.nom);
-    
 match.phaseDuel = {
     active: true,
     step: "response",
