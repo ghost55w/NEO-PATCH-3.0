@@ -296,31 +296,26 @@ if (!match.tracker.joueurs[key]) {
     // ============================================================
     // Attribution vis-à-vis miroir
     // ============================================================
+for (const j of allPlayers) {
 
-    for (const j of allPlayers) {
+    const key = `${j.equipe || j.equipeNom || j.jid}:${j.nom}`;
 
-        const snap = match.tracker.joueurs[j.nom];
+    const snap = match.tracker.joueurs[key];
 
-        if (!snap) continue;
+    if (!snap) continue;
 
+    const opponentTeam =
+        (match.lineup1 || []).includes(j)
+            ? match.lineup2
+            : match.lineup1;
 
-        const opponentTeam =
-            (match.lineup1 || []).includes(j)
-                ? match.lineup2
-                : match.lineup1;
+    const vis = findVisAVis(j, opponentTeam);
 
-
-        const vis = findVisAVis(j, opponentTeam);
-
-
-        if (vis) {
-
-            snap.visAVis = vis.nom;
-
-        }
-
+    if (vis) {
+        snap.visAVis = vis.nom;
     }
-
+}
+    
 }
 
 // ================================================================
