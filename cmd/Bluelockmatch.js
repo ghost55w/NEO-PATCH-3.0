@@ -3160,7 +3160,7 @@ function initBall(match, position = { x: 0, y: 0 }) {
         state: "neutral",
         position
     };
-                            }
+    }
 
 
 // 🧠 MATCH ENGINE UTILITIES CORE
@@ -3743,7 +3743,33 @@ function appliquerCamp(position, team) {
     return position;
 }
 
+//Appliquer Intention ⚽ 
+function appliquerPendingAction(match, joueur) {
 
+    if (!match.pendingAction) return;
+
+
+    if (
+        match.pendingAction.joueur !== joueur.nom
+    ) return;
+
+
+    if (
+        match.pendingAction.type === "deplacement"
+    ) {
+
+        trackerAction(
+            match,
+            joueur,
+            "deplacement",
+            match.pendingAction.details
+        );
+
+    }
+
+
+    match.pendingAction = null;
+}
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -4526,16 +4552,18 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const defender = match.phaseDuel.defender;
 
     // 🗺️ TRACKER : Pavé attaque duel
-    if (attacker) {
-        const _deps = trackerExtraireDeplacements(
-    action,
-    match.tracker?.joueurs[attacker.nom]
-);
+   if (attacker) {
+
+    const _deps = trackerExtraireDeplacements(
+        action,
+        match.tracker?.joueurs[attacker.nom]
+    );
 
 
-if (_deps) {
+    // 🔥 STOCKAGE DE L'INTENTION (PAS ENCORE EXÉCUTÉE)
+    if (_deps) {
 
-    match.pendingIntent = {
+    match.pendingAction = {
 
         joueur: attacker.nom,
 
@@ -4553,25 +4581,23 @@ if (_deps) {
 
     };
 
-}
-
-
-// On garde seulement l'historique du pavé
-trackerAction(match, attacker, "duel", {
-
-    texte: action.slice(0,80),
-
-    note: noterPave(action),
-
-    adversaire: defender?.nom,
-
-    role:"attaque",
-
-    noMove:true
-
-});
-        trackerBalle(match, attacker.nom);
     }
+
+    // 📜 Historique uniquement
+    trackerAction(match, attacker, "intention", {
+
+        texte: action.slice(0,80),
+
+        note:noterPave(action),
+
+        adversaire:defender?.nom,
+
+        role:"attaque",
+
+        executed:false
+
+    });
+} 
 
     const actionText = action.toLowerCase();
 
@@ -4655,6 +4681,10 @@ Il reste *1 MINUTE* pour défendre !
         match.attacker = fallbackId;
         match.ballHolder = fallback?.nom;
 
+        appliquerPendingAction(
+    match,
+    attacker
+);
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -5825,41 +5855,22 @@ if (isDribbleAction && isTackleAction) {
         else winner = Math.random() > 0.5 ? "attacker" : "defender";
     }
 
-    // ⚔️ RESULT FINAL
-    if (winner === "attacker") {
-
-const actions =
-    parseActionSequence(
-        attaqueText,
-        match,
-        "attack"
-    );
-
-
-await appliquerConsequences(
-    match,
-    attacker,
-    actions,
-    {
-        ok:true
-    }
-);
-
+    
     // ✅ APPLIQUER LE DÉPLACEMENT SEULEMENT SI LE DUEL EST GAGNÉ
     if (
-    match.pendingMove &&
-    match.pendingMove.joueur === attacker.nom
+    match.pendingAction &&
+    match.pendingAction.joueur === attacker.nom
 ) {
 
     trackerAction(
         match,
         attacker,
         "deplacement",
-        match.pendingMove.details
+        match.pendingAction.details
     );
 
-    match.pendingMove = null;
-    }    
+    match.pendingAction = null;
+}
         
         match.joueurTour = attacker.id || attacker.jid;
 
@@ -5878,22 +5889,18 @@ await appliquerConsequences(
         };
     }
 
-    match.joueurTour = defender.id || defender.jid;
-// ✅ APPLIQUER LE DÉPLACEMENT DÉFENSE SEULEMENT SI LE DÉFENSEUR GAGNE
+   match.joueurTour = defender.id || defender.jid;
+
+
+// ❌ LE DÉFENSEUR GAGNE → ANNULATION DE L'INTENTION ATTAQUANT
 if (
-    match.pendingDefenseMove &&
-    match.pendingDefenseMove.joueur === defender.nom
+    match.pendingAction &&
+    match.pendingAction.joueur === attacker.nom
 ) {
 
-    trackerAction(
-        match,
-        defender,
-        "deplacement",
-        match.pendingDefenseMove.details
-    );
+    match.pendingAction = null;
 
-    match.pendingDefenseMove = null;
-}
+} 
     
     return {
         ok: false,
