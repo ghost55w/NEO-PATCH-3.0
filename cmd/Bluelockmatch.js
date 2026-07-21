@@ -5817,8 +5817,6 @@ if (isTackleAction) {
     }
 }
 
-    
-
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
 if (isDribbleAction && isTackleAction) {
 
@@ -5855,23 +5853,26 @@ if (isDribbleAction && isTackleAction) {
         else winner = Math.random() > 0.5 ? "attacker" : "defender";
     }
 
-    
-    // ✅ APPLIQUER LE DÉPLACEMENT SEULEMENT SI LE DUEL EST GAGNÉ
-    if (
-    match.pendingAction &&
-    match.pendingAction.joueur === attacker.nom
-) {
+    // ==========================
+    // ✅ L'ATTAQUANT GAGNE
+    // ==========================
+    if (winner === "attacker") {
 
-    trackerAction(
-        match,
-        attacker,
-        "deplacement",
-        match.pendingAction.details
-    );
+        if (
+            match.pendingAction &&
+            match.pendingAction.joueur === attacker.nom
+        ) {
 
-    match.pendingAction = null;
-}
-        
+            trackerAction(
+                match,
+                attacker,
+                "deplacement",
+                match.pendingAction.details
+            );
+
+            match.pendingAction = null;
+        }
+
         match.joueurTour = attacker.id || attacker.jid;
 
         return {
@@ -5889,19 +5890,19 @@ if (isDribbleAction && isTackleAction) {
         };
     }
 
-   match.joueurTour = defender.id || defender.jid;
+    // ==========================
+    // ❌ LE DÉFENSEUR GAGNE
+    // ==========================
 
+    match.joueurTour = defender.id || defender.jid;
 
-// ❌ LE DÉFENSEUR GAGNE → ANNULATION DE L'INTENTION ATTAQUANT
-if (
-    match.pendingAction &&
-    match.pendingAction.joueur === attacker.nom
-) {
+    if (
+        match.pendingAction &&
+        match.pendingAction.joueur === attacker.nom
+    ) {
+        match.pendingAction = null;
+    }
 
-    match.pendingAction = null;
-
-} 
-    
     return {
         ok: false,
         type: "DRIBBLE_LOSE",
