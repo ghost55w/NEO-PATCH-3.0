@@ -2279,16 +2279,51 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
     const lower = actionText.toLowerCase();
 
-    const playerObj = players.find(p =>
+    // ===============================
+// 🎯 JOUEUR PRINCIPAL (PORTEUR)
+// ===============================
+
+let playerObj = null;
+
+
+// 1) Priorité au porteur actuel
+if (match.ballHolderJid) {
+
+    playerObj = players.find(p =>
+        normalizeJid(p.id || p.jid) === normalizeJid(match.ballHolderJid)
+    );
+
+}
+
+
+// 2) Sinon joueur dont c'est le tour
+if (!playerObj && match.joueurTour) {
+
+    playerObj = players.find(p =>
+        normalizeJid(p.id || p.jid) === normalizeJid(match.joueurTour)
+    );
+
+}
+
+
+// 3) Dernier recours : texte
+if (!playerObj) {
+
+    playerObj = players.find(p =>
         lower.includes(pureName(p.nom))
     );
 
-    if (!playerObj) return [];
+}
 
-    const targetObj = players.find(p =>
-        p.nom !== playerObj.nom &&
-        lower.includes(pureName(p.nom))
-    );
+
+if (!playerObj) return [];
+
+
+// 🎯 CIBLE (on garde temporairement ton système actuel)
+const targetObj = players.find(p =>
+    p.nom !== playerObj.nom &&
+    lower.includes(pureName(p.nom))
+);
 
     const found = [];
 
