@@ -2319,11 +2319,58 @@ if (!playerObj) {
 if (!playerObj) return [];
 
 
-// 🎯 CIBLE (on garde temporairement ton système actuel)
-const targetObj = players.find(p =>
-    p.nom !== playerObj.nom &&
-    lower.includes(pureName(p.nom))
-);
+// ===============================
+// 🎯 DÉTECTION CIBLE INTELLIGENTE
+// ===============================
+
+let targetObj = null;
+
+
+// Priorité aux mots de destination
+const targetWords = [
+    "à",
+    "vers",
+    "pour",
+    "visant",
+    "en direction de"
+];
+
+
+for (const word of targetWords) {
+
+    const index = lower.lastIndexOf(word);
+
+    if (index !== -1) {
+
+        const after = lower.slice(index + word.length);
+
+
+        targetObj = players.find(p => {
+
+            const name = pureName(p.nom);
+
+            return (
+                p.nom !== playerObj.nom &&
+                after.includes(name)
+            );
+
+        });
+
+
+        if (targetObj) break;
+    }
+}
+
+
+// Fallback si aucune cible trouvée
+if (!targetObj) {
+
+    targetObj = players.find(p =>
+        p.nom !== playerObj.nom &&
+        lower.includes(pureName(p.nom))
+    );
+
+}
 
     const found = [];
 
