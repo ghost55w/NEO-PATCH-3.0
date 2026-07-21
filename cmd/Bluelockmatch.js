@@ -483,9 +483,20 @@ if (details.moveDistance && details.direction) {
 
 }    
 
-    if (details.newX !== undefined) snap.position.x = details.newX;
-    if (details.newY !== undefined) snap.position.y = details.newY;
+    if (
+    details.newX !== undefined &&
+    !details.noMove
+) {
+    snap.position.x = details.newX;
+}
 
+
+if (
+    details.newY !== undefined &&
+    !details.noMove
+) {
+    snap.position.y = details.newY;
+}
     // --- Distance parcourue ---
     const dist = Math.sqrt(
         Math.pow(snap.position.x - posAvant.x, 2) +
@@ -4520,17 +4531,44 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     action,
     match.tracker?.joueurs[attacker.nom]
 );
+
+
 if (_deps) {
-    match.pendingMove = {
+
+    match.pendingIntent = {
+
         joueur: attacker.nom,
-        details: _deps
+
+        joueurId:
+            attacker.id ||
+            attacker.jid,
+
+        type: "deplacement",
+
+        details: _deps,
+
+        texte: action,
+
+        status: "waiting_defense"
+
     };
+
 }
+
+
+// On garde seulement l'historique du pavé
 trackerAction(match, attacker, "duel", {
-    texte: action.slice(0, 80),
+
+    texte: action.slice(0,80),
+
     note: noterPave(action),
+
     adversaire: defender?.nom,
-    role: "attaque"
+
+    role:"attaque",
+
+    noMove:true
+
 });
         trackerBalle(match, attacker.nom);
     }
