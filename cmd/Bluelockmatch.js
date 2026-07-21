@@ -271,7 +271,9 @@ function initTracker(match) {
 
     for (const j of allPlayers) {
 
-        if (!match.tracker.joueurs[j.nom]) {
+        const key = `${j.equipe || j.equipeNom || j.jid}:${j.nom}`;
+
+if (!match.tracker.joueurs[key]) {
 
             trackerInitJoueur(match, j);
 
@@ -345,7 +347,10 @@ function trackerInitJoueur(match, joueur) {
     );
 
 
-    match.tracker.joueurs[joueur.nom] = {
+    const playerKey = `${joueur.equipe || joueur.equipeNom || joueur.jid}:${joueur.nom}`;
+
+match.tracker.joueurs[playerKey] = {
+    idTracker: playerKey,
 
         nom: joueur.nom,
 
