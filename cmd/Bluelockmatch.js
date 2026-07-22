@@ -5086,7 +5086,7 @@ if (!match.pendingAttack) {
     }) || null;
 };
 
-const attackerId = match.joueurTour;
+attackerId = match.joueurTour;
 
 const attackerPlayer = findPlayer(action, attackerId);
 
