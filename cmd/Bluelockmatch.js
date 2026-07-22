@@ -5145,8 +5145,6 @@ Il reste *1 MINUTE* pour répondre !
 
     }, 5 * 60 * 1000);
 
-
-}
 // ⏳ LATENCE OUT
 if (match.turnTimer) clearTimeout(match.turnTimer);
 
