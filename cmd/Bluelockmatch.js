@@ -271,9 +271,7 @@ function initTracker(match) {
 
     for (const j of allPlayers) {
 
-        const key = `${j.equipe || j.equipeNom || j.jid}:${j.nom}`;
-
-if (!match.tracker.joueurs[key]) {
+        if (!match.tracker.joueurs[j.nom]) {
 
             trackerInitJoueur(match, j);
 
@@ -296,26 +294,31 @@ if (!match.tracker.joueurs[key]) {
     // ============================================================
     // Attribution vis-à-vis miroir
     // ============================================================
-for (const j of allPlayers) {
 
-    const key = `${j.equipe || j.equipeNom || j.jid}:${j.nom}`;
+    for (const j of allPlayers) {
 
-    const snap = match.tracker.joueurs[key];
+        const snap = match.tracker.joueurs[j.nom];
 
-    if (!snap) continue;
+        if (!snap) continue;
 
-    const opponentTeam =
-        (match.lineup1 || []).includes(j)
-            ? match.lineup2
-            : match.lineup1;
 
-    const vis = findVisAVis(j, opponentTeam);
+        const opponentTeam =
+            (match.lineup1 || []).includes(j)
+                ? match.lineup2
+                : match.lineup1;
 
-    if (vis) {
-        snap.visAVis = vis.nom;
+
+        const vis = findVisAVis(j, opponentTeam);
+
+
+        if (vis) {
+
+            snap.visAVis = vis.nom;
+
+        }
+
     }
-}
-    
+
 }
 
 // ================================================================
@@ -342,10 +345,7 @@ function trackerInitJoueur(match, joueur) {
     );
 
 
-    const playerKey = `${joueur.equipe || joueur.equipeNom || joueur.jid}:${joueur.nom}`;
-
-match.tracker.joueurs[playerKey] = {
-    idTracker: playerKey,
+    match.tracker.joueurs[joueur.nom] = {
 
         nom: joueur.nom,
 
