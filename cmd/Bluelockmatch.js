@@ -476,27 +476,44 @@ function trackerAction(match, joueur, type, details = {}) {
 // --- Mise à jour position tactique ---
 if (details.moveDistance && details.direction) {
 
-    snap.pendingMove = {
-        distance: details.moveDistance,
-        direction: details.direction
-    };
+    const distance = details.moveDistance;
 
-}    
+    if (details.direction === "avant") {
+        snap.position.y -= distance;
+    }
 
-    if (
-    details.newX !== undefined &&
-    !details.noMove
-) {
-    snap.position.x = details.newX;
+    if (details.direction === "arriere") {
+        snap.position.y += distance;
+    }
+
+    if (details.direction === "gauche") {
+        snap.position.x -= distance;
+    }
+
+    if (details.direction === "droite") {
+        snap.position.x += distance;
+    }
+
+
+    // sécurité terrain
+    snap.position.x = Math.max(
+        0,
+        Math.min(FIELD.width, snap.position.x)
+    );
+
+    snap.position.y = Math.max(
+        0,
+        Math.min(FIELD.length, snap.position.y)
+    );
+
+
+    snap.stats.deplacements++;
+    t.stats.deplacements++;
 }
 
+    if (details.newX !== undefined) snap.position.x = details.newX;
+    if (details.newY !== undefined) snap.position.y = details.newY;
 
-if (
-    details.newY !== undefined &&
-    !details.noMove
-) {
-    snap.position.y = details.newY;
-}
     // --- Distance parcourue ---
     const dist = Math.sqrt(
         Math.pow(snap.position.x - posAvant.x, 2) +
@@ -2279,98 +2296,16 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
     const lower = actionText.toLowerCase();
 
-    // ===============================
-// 🎯 JOUEUR PRINCIPAL (PORTEUR)
-// ===============================
-
-let playerObj = null;
-
-
-// 1) Priorité au porteur actuel
-if (match.ballHolderJid) {
-
-    playerObj = players.find(p =>
-        normalizeJid(p.id || p.jid) === normalizeJid(match.ballHolderJid)
-    );
-
-}
-
-
-// 2) Sinon joueur dont c'est le tour
-if (!playerObj && match.joueurTour) {
-
-    playerObj = players.find(p =>
-        normalizeJid(p.id || p.jid) === normalizeJid(match.joueurTour)
-    );
-
-}
-
-
-// 3) Dernier recours : texte
-if (!playerObj) {
-
-    playerObj = players.find(p =>
+    const playerObj = players.find(p =>
         lower.includes(pureName(p.nom))
     );
 
-}
+    if (!playerObj) return [];
 
-
-if (!playerObj) return [];
-
-
-// ===============================
-// 🎯 DÉTECTION CIBLE INTELLIGENTE
-// ===============================
-
-let targetObj = null;
-
-
-// Priorité aux mots de destination
-const targetWords = [
-    "à",
-    "vers",
-    "pour",
-    "visant",
-    "en direction de"
-];
-
-
-for (const word of targetWords) {
-
-    const index = lower.lastIndexOf(word);
-
-    if (index !== -1) {
-
-        const after = lower.slice(index + word.length);
-
-
-        targetObj = players.find(p => {
-
-            const name = pureName(p.nom);
-
-            return (
-                p.nom !== playerObj.nom &&
-                after.includes(name)
-            );
-
-        });
-
-
-        if (targetObj) break;
-    }
-}
-
-
-// Fallback si aucune cible trouvée
-if (!targetObj) {
-
-    targetObj = players.find(p =>
+    const targetObj = players.find(p =>
         p.nom !== playerObj.nom &&
         lower.includes(pureName(p.nom))
     );
-
-}
 
     const found = [];
 
@@ -3242,7 +3177,7 @@ function initBall(match, position = { x: 0, y: 0 }) {
         state: "neutral",
         position
     };
-    }
+                            }
 
 
 // 🧠 MATCH ENGINE UTILITIES CORE
@@ -3720,91 +3655,78 @@ return {
 async function appliquerConsequences(
     match,
     joueur,
+    actions,
     resultat
 ){
 
-    if (!match?.tracker || !joueur || !resultat)
+    if(!joueur || !actions || !resultat)
         return;
 
 
-    const snap = match.tracker.joueurs[joueur.nom];
-
-    if (!snap)
+    // Si duel perdu aucune progression
+    if(!resultat.ok)
         return;
 
 
-    // Récupération du mouvement prévu
-    const move = snap.pendingMove;
+    for(const action of actions){
 
 
-    if (move) {
-
-        // Distance réellement parcourue
-        const distance = resultat.ok
-            ? (resultat.travelDistance ?? move.distance)
-            : (resultat.travelDistance ?? 0);
+        if(!action.movement)
+            continue;
 
 
-        // Application déplacement
-        if (move.direction === "avant") {
-            snap.position.y -= distance;
-        }
+        let texteMouvement = "";
 
-        else if (move.direction === "arriere") {
-            snap.position.y += distance;
-        }
 
-        else if (move.direction === "gauche") {
-            snap.position.x -= distance;
-        }
+        // Distance
+        if(action.movement.distance){
 
-        else if (move.direction === "droite") {
-            snap.position.x += distance;
+            texteMouvement +=
+            ` ${action.movement.distance}m`;
+
         }
 
 
-        // Sécurité terrain
-        snap.position.x = Math.max(
-            0,
-            Math.min(FIELD.width, snap.position.x)
-        );
+        // Direction
+        if(action.movement.direction){
 
-        snap.position.y = Math.max(
-            0,
-            Math.min(FIELD.length, snap.position.y)
-        );
+            texteMouvement +=
+            ` ${action.movement.direction}`;
+
+        }
 
 
-        // Statistiques déplacement
-        if (distance > 0) {
+        // Type mouvement
+        if(action.type === "acceleration" ||
+           action.type === "conduite"){
 
-            snap.stats.distanceParcourue += distance;
-            snap.stats.deplacements++;
+            texteMouvement =
+            "avance " + texteMouvement;
 
-            match.tracker.stats.deplacements++;
         }
 
 
         console.log(
             "🌍 Conséquence déplacement :",
-            joueur.nom,
-            distance + "m",
-            move.direction
+            texteMouvement
         );
 
 
-        // Nettoyage intention
-        delete snap.pendingMove;
+        await handleDeplacements(
+            match,
+            joueur,
+            texteMouvement
+        );
 
     }
 
 
-    // ⚽ Mise à jour position ballon
-    if (match.ballHolder === joueur.nom) {
+    // ⚽ Position ballon
+    if(match.ballHolder === joueur.nom){
 
         match.ballPosition = {
-            x: snap.position.x,
-            y: snap.position.y
+            x: joueur.position.x,
+            y: joueur.position.y
         };
 
     }
@@ -3825,33 +3747,6 @@ function appliquerCamp(position, team) {
     return position;
 }
 
-//Appliquer Intention ⚽ 
-function appliquerPendingAction(match, joueur) {
-
-    if (!match.pendingAction) return;
-
-
-    if (
-        match.pendingAction.joueur !== joueur.nom
-    ) return;
-
-
-    if (
-        match.pendingAction.type === "deplacement"
-    ) {
-
-        trackerAction(
-            match,
-            joueur,
-            "deplacement",
-            match.pendingAction.details
-        );
-
-    }
-
-
-    match.pendingAction = null;
-}
 
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -4634,52 +4529,25 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     const defender = match.phaseDuel.defender;
 
     // 🗺️ TRACKER : Pavé attaque duel
-   if (attacker) {
-
-    const _deps = trackerExtraireDeplacements(
-        action,
-        match.tracker?.joueurs[attacker.nom]
-    );
-
-
-    // 🔥 STOCKAGE DE L'INTENTION (PAS ENCORE EXÉCUTÉE)
-    if (_deps) {
-
-    match.pendingAction = {
-
+    if (attacker) {
+        const _deps = trackerExtraireDeplacements(
+    action,
+    match.tracker?.joueurs[attacker.nom]
+);
+if (_deps) {
+    match.pendingMove = {
         joueur: attacker.nom,
-
-        joueurId:
-            attacker.id ||
-            attacker.jid,
-
-        type: "deplacement",
-
-        details: _deps,
-
-        texte: action,
-
-        status: "waiting_defense"
-
+        details: _deps
     };
-
+}
+trackerAction(match, attacker, "duel", {
+    texte: action.slice(0, 80),
+    note: noterPave(action),
+    adversaire: defender?.nom,
+    role: "attaque"
+});
+        trackerBalle(match, attacker.nom);
     }
-
-    // 📜 Historique uniquement
-    trackerAction(match, attacker, "intention", {
-
-        texte: action.slice(0,80),
-
-        note:noterPave(action),
-
-        adversaire:defender?.nom,
-
-        role:"attaque",
-
-        executed:false
-
-    });
-} 
 
     const actionText = action.toLowerCase();
 
@@ -4763,10 +4631,6 @@ Il reste *1 MINUTE* pour défendre !
         match.attacker = fallbackId;
         match.ballHolder = fallback?.nom;
 
-        appliquerPendingAction(
-    match,
-    attacker
-);
         match.phaseDuel = null;
         match.pendingAttack = null;
         match.waitingDefenseFrom = null;
@@ -5098,12 +4962,6 @@ if (
         ? (attacker.id || attacker.jid)
         : (defender.id || defender.jid);
 
-    await appliquerConsequences(
-    match,
-    attacker,
-    result
-);
-
     match.ballHolder = winnerPlayer.nom;
     match.ballHolderPlayer = winnerPlayer.nom;
     match.ballHolderJid = winnerId;
@@ -5395,8 +5253,6 @@ Il reste *1 MINUTE* pour jouer le duel !
             match.attacker = finalNext;
             match.ballHolder = fallback?.nom || attacker.nom;
 
-            appliquerPendingAction(match, attacker);
-
             match.phaseDuel = null;
             match.pendingAttack = null;
             match.waitingDefenseFrom = null;
@@ -5492,6 +5348,8 @@ match.ballHolderJid = attackerJid;
 match.joueurTour = attackerJid;
 
 // 🗺️ TRACKER
+trackerBalle(match, attacker.nom);
+    
 match.phaseDuel = {
     active: true,
     step: "response",
@@ -5899,6 +5757,8 @@ if (isTackleAction) {
     }
 }
 
+    
+
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
 if (isDribbleAction && isTackleAction) {
 
@@ -5935,26 +5795,42 @@ if (isDribbleAction && isTackleAction) {
         else winner = Math.random() > 0.5 ? "attacker" : "defender";
     }
 
-    // ==========================
-    // ✅ L'ATTAQUANT GAGNE
-    // ==========================
+    // ⚔️ RESULT FINAL
     if (winner === "attacker") {
 
-        if (
-            match.pendingAction &&
-            match.pendingAction.joueur === attacker.nom
-        ) {
+const actions =
+    parseActionSequence(
+        attaqueText,
+        match,
+        "attack"
+    );
 
-            trackerAction(
-                match,
-                attacker,
-                "deplacement",
-                match.pendingAction.details
-            );
 
-            match.pendingAction = null;
-        }
+await appliquerConsequences(
+    match,
+    attacker,
+    actions,
+    {
+        ok:true
+    }
+);
 
+    // ✅ APPLIQUER LE DÉPLACEMENT SEULEMENT SI LE DUEL EST GAGNÉ
+    if (
+    match.pendingMove &&
+    match.pendingMove.joueur === attacker.nom
+) {
+
+    trackerAction(
+        match,
+        attacker,
+        "deplacement",
+        match.pendingMove.details
+    );
+
+    match.pendingMove = null;
+    }    
+        
         match.joueurTour = attacker.id || attacker.jid;
 
         return {
@@ -5972,19 +5848,23 @@ if (isDribbleAction && isTackleAction) {
         };
     }
 
-    // ==========================
-    // ❌ LE DÉFENSEUR GAGNE
-    // ==========================
-
     match.joueurTour = defender.id || defender.jid;
+// ✅ APPLIQUER LE DÉPLACEMENT DÉFENSE SEULEMENT SI LE DÉFENSEUR GAGNE
+if (
+    match.pendingDefenseMove &&
+    match.pendingDefenseMove.joueur === defender.nom
+) {
 
-    if (
-        match.pendingAction &&
-        match.pendingAction.joueur === attacker.nom
-    ) {
-        match.pendingAction = null;
-    }
+    trackerAction(
+        match,
+        defender,
+        "deplacement",
+        match.pendingDefenseMove.details
+    );
 
+    match.pendingDefenseMove = null;
+}
+    
     return {
         ok: false,
         type: "DRIBBLE_LOSE",
@@ -6303,6 +6183,7 @@ return {
                         
 
 // ⚽ DRIBBLE VS DEFENSE ENGINE (FULL IA + PHYSIQUE + BODY SYSTEM)
+
 function resolveDribbleDuel(match, attacker, defender, attackText, defenseText) {
 
     const atk = attacker.stats || {};
@@ -6519,16 +6400,9 @@ async function handleDeplacements(match, joueur, texte) {
 
     // ↔️ MOVE X (LATÉRAL)
     if (direction) {
-        
-if (!distance) {
-    return {
-        ok: false,
-        erreur: "❌ Distance obligatoire pour un déplacement"
-    };
-}
 
-const d = distance;
-        
+        const d = distance || 5;
+
         if (d > 10) {
             return { ok: false, erreur: "❌ Trop loin (>10m)" };
         }
