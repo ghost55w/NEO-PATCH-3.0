@@ -473,44 +473,6 @@ function trackerAction(match, joueur, type, details = {}) {
     const posAvant = { ...snap.position };
     const zoneAvant = { ...snap.zone };
 
-// --- Mise à jour position tactique ---
-if (details.moveDistance && details.direction) {
-
-    const distance = details.moveDistance;
-
-    if (details.direction === "avant") {
-        snap.position.y -= distance;
-    }
-
-    if (details.direction === "arriere") {
-        snap.position.y += distance;
-    }
-
-    if (details.direction === "gauche") {
-        snap.position.x -= distance;
-    }
-
-    if (details.direction === "droite") {
-        snap.position.x += distance;
-    }
-
-
-    // sécurité terrain
-    snap.position.x = Math.max(
-        0,
-        Math.min(FIELD.width, snap.position.x)
-    );
-
-    snap.position.y = Math.max(
-        0,
-        Math.min(FIELD.length, snap.position.y)
-    );
-
-
-    snap.stats.deplacements++;
-    t.stats.deplacements++;
-}
-
     if (details.newX !== undefined) snap.position.x = details.newX;
     if (details.newY !== undefined) snap.position.y = details.newY;
 
@@ -3745,6 +3707,54 @@ function appliquerCamp(position, team) {
     }
 
     return position;
+}
+
+// ================================================================
+// APPLIQUER LE DÉPLACEMENT APRÈS VALIDATION
+// ================================================================
+
+function trackerAppliquerDeplacement(match, joueurNom, details) {
+
+    if (!match.tracker || !details) return;
+
+    const snap = match.tracker.joueurs[joueurNom];
+    if (!snap) return;
+
+    const distance = details.moveDistance || 0;
+
+    switch (details.direction) {
+
+        case "avant":
+            snap.position.y -= distance;
+            break;
+
+        case "arriere":
+            snap.position.y += distance;
+            break;
+
+        case "gauche":
+            snap.position.x -= distance;
+            break;
+
+        case "droite":
+            snap.position.x += distance;
+            break;
+    }
+
+    snap.position.x = Math.max(
+        0,
+        Math.min(FIELD.width, snap.position.x)
+    );
+
+    snap.position.y = Math.max(
+        0,
+        Math.min(FIELD.length, snap.position.y)
+    );
+
+    snap.stats.deplacements++;
+    snap.stats.distanceParcourue += distance;
+
+    match.tracker.stats.deplacements++;
 }
 
 
