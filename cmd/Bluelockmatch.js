@@ -4626,22 +4626,22 @@ Il reste *1 MINUTE* pour défendre !
 
     }, 5 * 60 * 1000);
 
- // ⏱️ LATENCE OUT (UNIFORM FIX)
+// Sauvegarde avant le timer
+const duelAttackerJid = attacker.id || attacker.jid;
+const duelDefenderJid = defender.id || defender.jid;
+
+
+// ⏱️ LATENCE OUT DUEL
 if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
-match.defenseTimer = setTimeout(() => {
+match.defenseTimer = setTimeout(async () => {
 
-    if (match.joueurTour !== duelNextId) return;
-
-    const fallback =
-        getVisavisPlayer(match, attacker) || defender;
-
-    const fallbackId = fallback?.id || fallback?.jid;
+    if (match.joueurTour !== duelDefenderJid) return;
 
 
     // ==================================================
-    // ⚽ L'ADVERSAIRE N'A PAS RÉPONDU
-    // → L'ACTION DE L'ATTAQUANT PASSE
+    // ⚽ LE DÉFENSEUR N'A PAS RÉPONDU
+    // → L'ATTAQUANT GARDE LE BALLON
     // ==================================================
 
     if (
@@ -4660,20 +4660,16 @@ match.defenseTimer = setTimeout(() => {
     }
 
 
-    // ==================================================
-    // 🔄 NOUVEL ÉTAT DU MATCH
-    // ==================================================
-
     match.ballHolder = attacker.nom;
     match.ballHolderPlayer = attacker.nom;
-    match.ballHolderJid = attacker.id || attacker.jid;
+    match.ballHolderJid = duelAttackerJid;
 
-    // L'attaquant garde la main
-    match.joueurTour = attacker.id || attacker.jid;
+    match.joueurTour = duelAttackerJid;
 
-    match.attacker = attacker.id || attacker.jid;
 
-    // Nouveau défenseur naturel
+    match.attacker = duelAttackerJid;
+
+
     const newDefender = getVisavisPlayer(match, attacker);
 
     match.defender =
@@ -4682,30 +4678,29 @@ match.defenseTimer = setTimeout(() => {
         null;
 
 
-    const attackerTag =
-        getTagFromJid(match.joueurTour);
-
-
     match.phaseDuel = null;
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
 
-    ovl.sendMessage(chat, {
+    await ovl.sendMessage(chat, {
         text:
-`⛔ LATENCE OUT ❌
+`⛔ *LATENCE OUT ❌*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+❌ @${getTagFromJid(duelDefenderJid)} n’a pas répondu !
+🔁 @${getTagFromJid(duelAttackerJid)} récupère la possession
 
 *MATCH⚽*
-❌ ${defender.nom} n'a pas répondu !
-🏟️ ${attacker.nom} continue son action.
-
-➡️ @${attackerTag} NEXT
+🏟️ ${attacker.nom} poursuit son action offensive...
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [match.joueurTour]
+        mentions: [
+            duelDefenderJid,
+            duelAttackerJid
+        ]
     });
-
 
 }, 6 * 60 * 1000);   
     return true;
