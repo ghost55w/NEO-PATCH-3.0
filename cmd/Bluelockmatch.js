@@ -5831,15 +5831,14 @@ await appliquerConsequences(
     match.pendingMove.joueur === attacker.nom
 ) {
 
-    trackerAction(
+    trackerAppliquerDeplacement(
         match,
-        attacker,
-        "deplacement",
+        attacker.nom,
         match.pendingMove.details
     );
 
     match.pendingMove = null;
-    }    
+}
         
         match.joueurTour = attacker.id || attacker.jid;
 
@@ -5865,10 +5864,9 @@ if (
     match.pendingDefenseMove.joueur === defender.nom
 ) {
 
-    trackerAction(
+    trackerAppliquerDeplacement(
         match,
-        defender,
-        "deplacement",
+        defender.nom,
         match.pendingDefenseMove.details
     );
 
