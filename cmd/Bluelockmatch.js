@@ -4554,7 +4554,8 @@ trackerAction(match, attacker, "duel", {
     texte: action.slice(0, 80),
     note: noterPave(action),
     adversaire: defender?.nom,
-    role: "attaque"
+    role: "attaque",
+    attenteResolution: true
 });
         trackerBalle(match, attacker.nom);
     }
@@ -4625,43 +4626,88 @@ Il reste *1 MINUTE* pour défendre !
 
     }, 5 * 60 * 1000);
 
-    // ⏱️ LATENCE OUT (UNIFORM FIX)
-    if (match.defenseTimer) clearTimeout(match.defenseTimer);
+ // ⏱️ LATENCE OUT (UNIFORM FIX)
+if (match.defenseTimer) clearTimeout(match.defenseTimer);
 
-    match.defenseTimer = setTimeout(() => {
+match.defenseTimer = setTimeout(() => {
 
-        if (match.joueurTour !== duelNextId) return;
+    if (match.joueurTour !== duelNextId) return;
 
-        const fallback =
-            getVisavisPlayer(match, attacker) || defender;
+    const fallback =
+        getVisavisPlayer(match, attacker) || defender;
 
-        const fallbackId = fallback?.id || fallback?.jid;
+    const fallbackId = fallback?.id || fallback?.jid;
 
-        match.joueurTour = fallbackId;
-        match.attacker = fallbackId;
-        match.ballHolder = fallback?.nom;
 
-        match.phaseDuel = null;
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
+    // ==================================================
+    // ⚽ L'ADVERSAIRE N'A PAS RÉPONDU
+    // → L'ACTION DE L'ATTAQUANT PASSE
+    // ==================================================
 
-        const fallbackTag = getTagFromJid(fallbackId);
+    if (
+        match.pendingMove &&
+        match.pendingMove.joueur === attacker.nom
+    ) {
 
-        ovl.sendMessage(chat, {
-            text:
+        trackerAction(
+            match,
+            attacker,
+            "deplacement",
+            match.pendingMove.details
+        );
+
+        match.pendingMove = null;
+    }
+
+
+    // ==================================================
+    // 🔄 NOUVEL ÉTAT DU MATCH
+    // ==================================================
+
+    match.ballHolder = attacker.nom;
+    match.ballHolderPlayer = attacker.nom;
+    match.ballHolderJid = attacker.id || attacker.jid;
+
+    // L'attaquant garde la main
+    match.joueurTour = attacker.id || attacker.jid;
+
+    match.attacker = attacker.id || attacker.jid;
+
+    // Nouveau défenseur naturel
+    const newDefender = getVisavisPlayer(match, attacker);
+
+    match.defender =
+        newDefender?.id ||
+        newDefender?.jid ||
+        null;
+
+
+    const attackerTag =
+        getTagFromJid(match.joueurTour);
+
+
+    match.phaseDuel = null;
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+
+    ovl.sendMessage(chat, {
+        text:
 `⛔ LATENCE OUT ❌
 
-🔁 ${defender.nom} récupère la possession !
+⚽ ${defender.nom} n'a pas répondu !
 
-➡️ @${fallbackTag} NEXT
+🔥 ${attacker.nom} continue son action et avance avec le ballon.
+
+➡️ @${attackerTag} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-            mentions: [fallbackId]
-        });
+        mentions: [match.joueurTour]
+    });
 
-    }, 6 * 60 * 1000);
 
+}, 6 * 60 * 1000);   
     return true;
 }
     
@@ -4779,13 +4825,13 @@ if (duelDefender) {
         };
     }
 
-
     trackerAction(match, duelDefender, "duel", {
-        texte: (defensePave || "").slice(0, 80),
-        note: noterPave(defensePave || ""),
-        adversaire: duelAttacker?.nom,
-        role: "defense"
-    });
+    texte: defensePave.slice(0,80),
+    note: noterPave(defensePave),
+    adversaire: duelAttacker.nom,
+    role:"defense",
+    attenteResolution:true
+});
 }
     
 // 🧠 RESOLUTION
