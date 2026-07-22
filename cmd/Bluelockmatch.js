@@ -4695,9 +4695,9 @@ match.defenseTimer = setTimeout(() => {
         text:
 `⛔ LATENCE OUT ❌
 
-⚽ ${defender.nom} n'a pas répondu !
-
-🔥 ${attacker.nom} continue son action et avance avec le ballon.
+*MATCH⚽*
+❌ ${defender.nom} n'a pas répondu !
+🏟️ ${attacker.nom} continue son action.
 
 ➡️ @${attackerTag} NEXT
 
@@ -5187,22 +5187,25 @@ match.turnTimer = setTimeout(async () => {
     match.defender = attackerId;
     match.joueurTour = fallbackId;
 
-
-    await ovl.sendMessage(chat, {
-        text:
+await ovl.sendMessage(chat, {
+    text:
 `⛔ *LATENCE OUT ❌*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
-⚽ @${oldTag} n’a pas répondu !
-🔁 @${newTag} récupère la possession
+❌ @${getTagFromJid(duelDefenderJid)} n’a pas répondu !
+🔁 @${getTagFromJid(duelAttackerJid)} garde la possession
+
+*MATCH⚽*
+🏟️ ${attacker.nom} poursuit son action offensive...
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [attackerId, fallbackId]
-    });
-
-}, 6 * 60 * 1000);
-
+    mentions: [
+        duelDefenderJid,
+        duelAttackerJid
+    ]
+});
+    
     // 📩 MESSAGE
     await ovl.sendMessage(chat, {
         text:
