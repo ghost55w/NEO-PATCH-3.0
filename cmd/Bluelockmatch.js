@@ -4689,7 +4689,7 @@ match.defenseTimer = setTimeout(async () => {
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
 ❌ @${getTagFromJid(duelDefenderJid)} n’a pas répondu !
-🔁 @${getTagFromJid(duelAttackerJid)} récupère la possession
+🔁 @${getTagFromJid(duelAttackerJid)} garde la possession ! 
 
 *MATCH⚽*
 🏟️ ${attacker.nom} poursuit son action offensive...
@@ -5145,12 +5145,14 @@ Il reste *1 MINUTE* pour répondre !
 
     }, 5 * 60 * 1000);
 
-    // ⏳ LATENCE OUT
+
+}
+// ⏳ LATENCE OUT
 if (match.turnTimer) clearTimeout(match.turnTimer);
 
 match.turnTimer = setTimeout(async () => {
 
-    // 🔒 Protection : le timer normal ne doit jamais gérer un duel
+    // 🔒 Protection duel
     if (match.phaseDuel?.active) {
         console.log("⚠️ LATENCE OUT NORMAL ANNULÉ : DUEL ACTIF");
         return;
@@ -5160,50 +5162,59 @@ match.turnTimer = setTimeout(async () => {
     if (match.joueurTour !== nextId) return;
 
 
-    const fallback =
-        getVisavisPlayer(match, attackerPlayer) ||
-        attackerPlayer;
-
-    const fallbackId =
-        fallback?.id ||
-        fallback?.jid ||
-        attackerId;
+    const oldTag = getTagFromJid(nextId);
+    const attackerTag = getTagFromJid(attackerId);
 
 
-    const oldTag = getTagFromJid(attackerId);
-    const newTag = getTagFromJid(fallbackId);
+    if (match.warningTimer) {
+        clearTimeout(match.warningTimer);
+        match.warningTimer = null;
+    }
 
 
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
 
-    match.attacker = fallbackId;
-    match.defender = attackerId;
-    match.joueurTour = fallbackId;
+    // ⚽ Conservation ballon
+    match.ballHolderPlayer = attackerPlayer?.nom;
+    match.ballHolderJid = attackerId;
+    match.ballHolder = attackerPlayer?.nom;
 
-await ovl.sendMessage(chat, {
-    text:
+    match.joueurTour = attackerId;
+
+    match.attacker = attackerId;
+    match.defender = nextId;
+
+    match.hasPlayed = true;
+
+
+    await ovl.sendMessage(chat, {
+        text:
 `⛔ *LATENCE OUT ❌*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
-❌ @${getTagFromJid(duelDefenderJid)} n’a pas répondu !
-🔁 @${getTagFromJid(duelAttackerJid)} garde la possession
+❌ @${oldTag} n’a pas répondu !
+🔁 @${attackerTag} garde la possession
 
 *MATCH⚽*
-🏟️ ${attacker.nom} poursuit son action offensive...
+🏟️ ${attackerPlayer?.nom || "L'attaquant"} poursuit son action offensive...
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-    mentions: [
-        duelDefenderJid,
-        duelAttackerJid
-    ]
-});
-    
-    // 📩 MESSAGE
-    await ovl.sendMessage(chat, {
-        text:
+        mentions: [
+            nextId,
+            attackerId
+        ]
+    });
+
+
+}, 6 * 60 * 1000);
+
+
+// 📩 MESSAGE IMMÉDIAT
+await ovl.sendMessage(chat, {
+    text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -5215,11 +5226,11 @@ await ovl.sendMessage(chat, {
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [nextId]
-    });
+    mentions: [nextId]
+});
 
-    return true;
-}
+return true;
+} 
 
 
 // 🛡️ DEFENSE
