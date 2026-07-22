@@ -5071,11 +5071,32 @@ if (match.phaseDuel?.active) {
 if (!match.pendingAttack) {
     const attackerId = match.joueurTour;
 
-    const attackerPlayer =
-        [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p =>
-            normalizeJid(p.id || p.jid) === attackerId
-        );
+    const findPlayer = (txt, ownerJid) => {
+
+    const lineup =
+        normalizeJid(ownerJid) === normalizeJid(match.id1)
+            ? (match.lineup1 || [])
+            : (match.lineup2 || []);
+
+    const t = pureName(txt);
+
+    return lineup.find(p => {
+        const n = pureName(p.nom);
+        return t.includes(n) || n.includes(t);
+    }) || null;
+};
+
+const attackerId = match.joueurTour;
+
+const attackerPlayer = findPlayer(action, attackerId);
+
+if (!attackerPlayer) {
+    return false;
+}
+
+match.ballHolderPlayer = attackerPlayer.nom;
+match.ballHolderJid = attackerId;
+match.ballHolder = attackerPlayer.nom;
 
     if (attackerPlayer) {
     match.ballHolderPlayer = attackerPlayer.nom;
