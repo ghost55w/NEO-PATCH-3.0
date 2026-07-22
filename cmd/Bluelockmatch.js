@@ -3684,14 +3684,19 @@ async function appliquerConsequences(
 
 
     // ⚽ Position ballon
-    if(match.ballHolder === joueur.nom){
+    if (match.ballHolder === joueur.nom) {
 
-        match.ballPosition = {
-            x: joueur.position.x,
-            y: joueur.position.y
-        };
-
+    if (!joueur.position) {
+        console.log("⚠️ Position introuvable pour", joueur.nom);
+        return;
     }
+
+    match.ballPosition = {
+        x: joueur.position.x,
+        y: joueur.position.y
+    };
+
+}
 
 }
 
