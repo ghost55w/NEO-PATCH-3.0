@@ -5060,9 +5060,15 @@ ${result.msg}
 }
 
     
-// 🎯 ATTAQUE⚽
-if (!match.pendingAttack) {
+// 🎯 ATTAQUE NORMALE ⚽
 
+if (match.phaseDuel?.active) {
+    console.log("⚠️ Bloc attaque normale bloqué : duel actif");
+    return false;
+}
+
+
+if (!match.pendingAttack) {
     const attackerId = match.joueurTour;
 
     const attackerPlayer =
@@ -5128,7 +5134,8 @@ match.defender = nextId;
     match.warningTimer = setTimeout(async () => {
 
         if (!match.pendingAttack) return;
-        if (match.joueurTour !== nextId) return;
+if (match.phaseDuel?.active) return;
+if (match.joueurTour !== nextId) return;
 
         await ovl.sendMessage(chat, {
             text:
@@ -5144,33 +5151,45 @@ Il reste *1 MINUTE* pour répondre !
     }, 5 * 60 * 1000);
 
     // ⏳ LATENCE OUT
-    if (match.turnTimer) clearTimeout(match.turnTimer);
-    match.turnTimer = setTimeout(async () => {
+if (match.turnTimer) clearTimeout(match.turnTimer);
 
-        if (!match.pendingAttack) return;
-        if (match.joueurTour !== nextId) return;
+match.turnTimer = setTimeout(async () => {
 
-        const fallback =
-            getVisavisPlayer(match, attackerPlayer) ||
-            attackerPlayer;
+    // 🔒 Protection : le timer normal ne doit jamais gérer un duel
+    if (match.phaseDuel?.active) {
+        console.log("⚠️ LATENCE OUT NORMAL ANNULÉ : DUEL ACTIF");
+        return;
+    }
 
-        const fallbackId =
-            fallback?.id ||
-            fallback?.jid ||
-            attackerId;
+    if (!match.pendingAttack) return;
+    if (match.joueurTour !== nextId) return;
 
-        const oldTag = getTagFromJid(attackerId);
-        const newTag = getTagFromJid(fallbackId);
 
-        match.pendingAttack = null;
-        match.waitingDefenseFrom = null;
+    const fallback =
+        getVisavisPlayer(match, attackerPlayer) ||
+        attackerPlayer;
 
-        match.attacker = fallbackId;
-        match.defender = attackerId;
-        match.joueurTour = fallbackId;
+    const fallbackId =
+        fallback?.id ||
+        fallback?.jid ||
+        attackerId;
 
-        await ovl.sendMessage(chat, {
-            text:
+
+    const oldTag = getTagFromJid(attackerId);
+    const newTag = getTagFromJid(fallbackId);
+
+
+    match.pendingAttack = null;
+    match.waitingDefenseFrom = null;
+
+
+    match.attacker = fallbackId;
+    match.defender = attackerId;
+    match.joueurTour = fallbackId;
+
+
+    await ovl.sendMessage(chat, {
+        text:
 `⛔ *LATENCE OUT ❌*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
@@ -5179,10 +5198,10 @@ Il reste *1 MINUTE* pour répondre !
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-            mentions: [attackerId, fallbackId]
-        });
+        mentions: [attackerId, fallbackId]
+    });
 
-    }, 6 * 60 * 1000);
+}, 6 * 60 * 1000);
 
     // 📩 MESSAGE
     await ovl.sendMessage(chat, {
