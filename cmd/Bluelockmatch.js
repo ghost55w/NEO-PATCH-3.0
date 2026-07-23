@@ -540,6 +540,7 @@ function trackerBalle(
     y = null
 ) {
 
+    console.log("✅ trackerBalle appelée :", holderNom);
     if (!match.tracker) return;
 
     const t = match.tracker;
@@ -3729,7 +3730,8 @@ if (dep) {
         joueur.nom,
         dep
     );
-
+    
+console.log("➡️ Appel trackerBalle");
     trackerBalle(match, joueur.nom);
       }
     }
