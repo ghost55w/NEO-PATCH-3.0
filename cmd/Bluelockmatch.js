@@ -5185,20 +5185,31 @@ if (!match.pendingAttack) {
                 return text.includes(name);
             });
 
-    if (_trackerAttacker) {
-        const _deps = trackerExtraireDeplacements(
-            action,
-            match.tracker?.joueurs[_trackerAttacker.nom]
-        );
+    // 🗺️ TRACKER : Enregistrer l'attaque + déplacement en attente
+if (_trackerAttacker) {
 
-        trackerAction(match, _trackerAttacker, "attaque", {
-            texte: action.slice(0, 80),
-            note: noterPave(action),
-            ...(_deps || {})
-        });
+    const _deps = trackerExtraireDeplacements(
+        action,
+        match.tracker?.joueurs[_trackerAttacker.nom]
+    );
 
-        trackerBalle(match, _trackerAttacker.nom);
+    // ⏳ Stockage du déplacement
+    // Il sera appliqué uniquement si l'action passe
+    if (_deps) {
+        match.pendingMove = {
+            joueur: _trackerAttacker.nom,
+            details: _deps
+        };
     }
+
+    trackerAction(match, _trackerAttacker, "attaque", {
+        texte: action.slice(0, 80),
+        note: noterPave(action),
+        ...(_deps || {})
+    });
+
+    trackerBalle(match, _trackerAttacker.nom);
+}
 
     trackerNouveauTour(match);
 
@@ -5281,6 +5292,13 @@ if (dep) {
         dep
     );
 
+    trackerAction(
+        match,
+        attackerPlayer,
+        "deplacement",
+        dep
+    );
+
     trackerBalle(match, attackerPlayer.nom);
 }
     match.pendingAttack = null;
@@ -5356,6 +5374,36 @@ const res = await handleDuelMatch(
     match.pendingAttack,
     defense
 );
+
+ // ✅ Validation du déplacement après résolution
+if (res.ok) {
+
+    const attackerPlayer =
+        [...(match.lineup1 || []), ...(match.lineup2 || [])]
+        .find(p => p.nom === match.pendingMove?.joueur);
+
+    if (
+        match.pendingMove &&
+        attackerPlayer
+    ) {
+
+        trackerAppliquerDeplacement(
+            match,
+            attackerPlayer.nom,
+            match.pendingMove.details
+        );
+
+        trackerAction(
+            match,
+            attackerPlayer,
+            "deplacement",
+            match.pendingMove.details
+        );
+    }
+}
+
+// 🧹 Nettoyage
+match.pendingMove = null;   
 
 match.hasPlayed = true;
 
