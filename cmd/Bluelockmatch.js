@@ -5061,72 +5061,72 @@ ${result.msg}
 
     
 // 🎯 ATTAQUE NORMALE ⚽
-
 if (match.phaseDuel?.active) {
     console.log("⚠️ Bloc attaque normale bloqué : duel actif");
     return false;
 }
 
-
 if (!match.pendingAttack) {
+
     const attackerId = match.joueurTour;
 
     const findPlayer = (txt, ownerJid) => {
 
-    const lineup =
-        normalizeJid(ownerJid) === normalizeJid(match.id1)
-            ? (match.lineup1 || [])
-            : (match.lineup2 || []);
+        const lineup =
+            normalizeJid(ownerJid) === normalizeJid(match.id1)
+                ? (match.lineup1 || [])
+                : (match.lineup2 || []);
 
-    const t = pureName(txt);
+        const t = pureName(txt);
 
-    return lineup.find(p => {
-        const n = pureName(p.nom);
-        return t.includes(n) || n.includes(t);
-    }) || null;
-};
+        return lineup.find(p => {
+            const n = pureName(p.nom);
+            return t.includes(n) || n.includes(t);
+        }) || null;
+    };
 
-attackerId = match.joueurTour;
+    const attackerPlayer = findPlayer(action, attackerId);
 
-const attackerPlayer = findPlayer(action, attackerId);
+    if (!attackerPlayer) {
+        return false;
+    }
 
-if (!attackerPlayer) {
-    return false;
-}
-
-match.ballHolderPlayer = attackerPlayer.nom;
-match.ballHolderJid = attackerId;
-match.ballHolder = attackerPlayer.nom;
-
-    if (attackerPlayer) {
+    // ⚽ Source de vérité
+    match.ballHolder = attackerPlayer.nom;
     match.ballHolderPlayer = attackerPlayer.nom;
     match.ballHolderJid = attackerId;
-}
 
     match.pendingAttack = action;
     match.hasPlayed = true;
 
     // 🔓 Reset locks au début d'un nouveau tour d'attaque
     match.lockedPlayers = new Set();
-    
-// 🗺️ TRACKER : Enregistrer l'action attaque
-const _trackerAttacker =
-    [...(match.lineup1 || []), ...(match.lineup2 || [])]
-    .find(p => {
-        const name = pureName(p.nom);
-        const text = pureName(match.pendingAttack);
 
-        return text.includes(name);
-    });
+    // 🗺️ TRACKER : Enregistrer l'action attaque
+    const _trackerAttacker =
+        [...(match.lineup1 || []), ...(match.lineup2 || [])]
+            .find(p => {
+                const name = pureName(p.nom);
+                const text = pureName(match.pendingAttack);
+
+                return text.includes(name);
+            });
+
     if (_trackerAttacker) {
-        const _deps = trackerExtraireDeplacements(action, match.tracker?.joueurs[_trackerAttacker.nom]);
+        const _deps = trackerExtraireDeplacements(
+            action,
+            match.tracker?.joueurs[_trackerAttacker.nom]
+        );
+
         trackerAction(match, _trackerAttacker, "attaque", {
             texte: action.slice(0, 80),
             note: noterPave(action),
             ...(_deps || {})
         });
+
         trackerBalle(match, _trackerAttacker.nom);
     }
+
     trackerNouveauTour(match);
 
     // 📊 LOG TEMPS RÉEL
