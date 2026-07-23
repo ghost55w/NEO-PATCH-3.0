@@ -1118,7 +1118,17 @@ function validateDribbleBlueprint(dribbleName, actionText) {
         if (condition) score += points;
     };
 
-    const steps = Object.values(blueprint);
+let steps = [];
+
+if (blueprint.phases) {
+
+    steps = blueprint.phases;
+
+} else {
+
+    steps = Object.values(blueprint);
+
+}
 
     for (const step of steps) {
 
@@ -1139,7 +1149,29 @@ function validateDribbleBlueprint(dribbleName, actionText) {
                 containsAny(text, normalizeList(v.ballDirection))
             );
         }
+// 📏 DISTANCE BALLON
+if (v.ballDistanceMin || v.ballDistanceMax) {
 
+    const distance = extractDistance(text);
+
+    if (distance !== null) {
+
+        if (v.ballDistanceMin !== undefined) {
+            addRule(
+                10,
+                distance >= v.ballDistanceMin
+            );
+        }
+
+        if (v.ballDistanceMax !== undefined) {
+            addRule(
+                10,
+                distance <= v.ballDistanceMax
+            );
+        }
+
+    }
+}
         // 🚀 ACCÉLÉRATION
         if (v.acceleration) {
             addRule(
@@ -3775,7 +3807,26 @@ function trackerAppliquerDeplacement(match, joueurNom, details) {
     match.tracker.stats.deplacements++;
 }
 
+function extractDistance(text) {
 
+    const cm = text.match(/(\d+)\s*cm/);
+
+    if (cm) {
+        return Number(cm[1]) / 100;
+    }
+
+
+    const m = text.match(/(\d+(?:\.\d+)?)\s*m/);
+
+    if (m) {
+        return Number(m[1]);
+    }
+
+
+    return null;
+}
+
+            
 // 🎮 COMMANDE MATCH
 ovlcmd({
     nom_cmd: "match⚽",
