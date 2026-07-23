@@ -622,11 +622,14 @@ function trackerLog(match) {
     const lines = [];
 
     lines.push(
-    `📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${
-        typeof t.balle.holder === "object"
-        ? t.balle.holder.nom
-        : t.balle.holder || "LIBRE"
-    } (${t.balle.zone} → ${t.balle.secteur || ""})`
+`📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${
+    typeof t.balle.holder === "object"
+    ? t.balle.holder.nom
+    : t.balle.holder || "LIBRE"
+} (${typeof t.balle.zone === "object"
+    ? t.balle.zone.ligne
+    : t.balle.zone || ""
+} → ${t.balle.secteur || ""})`
 );
     lines.push(sep);
 
@@ -3731,17 +3734,19 @@ if (dep) {
       }
     }
 
-    // ⚽ Position ballon
-    if (match.ballHolder === joueur.nom) {
+    // ⚽ Position ballon depuis le tracker
+if (match.ballHolder === holderNom) {
 
-    if (!joueur.position) {
-        console.log("⚠️ Position introuvable pour", joueur.nom);
+    const snap = match.tracker.joueurs[holderNom];
+
+    if (!snap) {
+        console.log("⚠️ Joueur absent du tracker :", holderNom);
         return;
     }
 
     match.ballPosition = {
-        x: joueur.position.x,
-        y: joueur.position.y
+        x: snap.position.x,
+        y: snap.position.y
     };
 
 }
