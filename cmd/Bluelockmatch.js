@@ -3735,12 +3735,12 @@ if (dep) {
     }
 
     // ⚽ Position ballon depuis le tracker
-if (match.ballHolder === holderNom) {
+if (match.ballHolder === joueur.nom) {
 
-    const snap = match.tracker.joueurs[holderNom];
+    const snap = match.tracker?.joueurs?.[joueur.nom];
 
     if (!snap) {
-        console.log("⚠️ Joueur absent du tracker :", holderNom);
+        console.log("⚠️ Joueur absent du tracker :", joueur.nom);
         return;
     }
 
@@ -3750,7 +3750,6 @@ if (match.ballHolder === holderNom) {
     };
 
 }
-
 }
 
 function appliquerCamp(position, team) {
