@@ -621,9 +621,12 @@ function trackerLog(match) {
     const sep = "═".repeat(50);
     const lines = [];
 
-    lines.push(`\n${sep}`);
     lines.push(
-    `📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${t.balle.holder || "LIBRE"} (${t.balle.zone} → ${t.balle.secteur || ""})`
+    `📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${
+        typeof t.balle.holder === "object"
+        ? t.balle.holder.nom
+        : t.balle.holder || "LIBRE"
+    } (${t.balle.zone} → ${t.balle.secteur || ""})`
 );
     lines.push(sep);
 
