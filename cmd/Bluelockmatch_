@@ -194,60 +194,61 @@ const DRIBBLE_BLUEPRINTS = {
 // ===============================
 "double contact": {
 
-    step1: {
+    type: "combo",
 
-        description:
-        "Première touche avec l'intérieur du pied ou la semelle pour ramener le ballon vers l'autre pied entre 30cm et 50cm tout en déplaçant le corps dans cette même direction.",
+    actionCount: 1,
 
-        validation: {
+    phases: [
 
-            surfaces: [
-                "intérieur du pied",
-                "semelle", 
-                "pointe du pied"
-            ],
+        // PHASE 1 : DÉCALAGE LATÉRAL
+        {
+            name: "decalage_lateral",
 
-            ballDirection: [
-                "gauche",
-                "droite"
-            ],
+            description:
+            "Le joueur écarte le ballon sur un côté avec la semelle ou l'intérieur du pied entre 30cm et 50cm maximum afin de créer un angle de dépassement.",
 
-            ballDistanceMin: 0.3,
-            ballDistanceMax: 0.5,
+            validation: {
 
-            oppositeFoot: true
+                surfaces: [
+                    "semelle",
+                    "intérieur du pied"
+                ],
+
+                ballDirection: [
+                    "gauche",
+                    "droite"
+                ],
+
+                ballDistanceMin: 0.3,
+                ballDistanceMax: 0.5
+            }
+        },
+
+
+        // PHASE 2 : EXPLOSION APRÈS LE DÉCALAGE
+        {
+            name: "explosion_espace",
+
+            description:
+            "Après avoir créé le décalage, le joueur accélère pour dépasser le défenseur ou attaquer l'espace créé.",
+
+            validation: {
+
+                acceleration: true,
+
+                requireVmax: true,
+
+                objective: [
+                    "depasser_defenseur",
+                    "attaquer_espace",
+                    "prendre_vitesse"
+                ]
+            }
         }
 
-    },
+    ]
 
-    step2: {
-
-        description:
-        "Deuxième touche avec l'intérieur du pied, l'extérieur du pied ou la pointe du pied pour pousser le ballon vers l'avant ou en diagonale puis accélérer jusqu'à la vitesse maximale.",
-
-        validation: {
-
-            surfaces: [
-                "intérieur du pied",
-                "extérieur du pied",
-                "pointe du pied"
-            ],
-
-            ballDirection: [
-                "avant",
-                "diagonale"
-            ],
-
-            ballDistanceMin: 0.5,
-
-            acceleration: true,
-
-            requireVmax: true
-        }
-
-    }
-
-}, 
+},
 
 // ===============================
 // CROCHET EXTERIEUR
