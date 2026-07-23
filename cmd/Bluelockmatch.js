@@ -3679,9 +3679,22 @@ async function appliquerConsequences(
             joueur,
             texteMouvement
         );
+// 📍 Mise à jour tracker après déplacement validé
+const dep = trackerExtraireDeplacements(
+    texteMouvement,
+    match.tracker?.joueurs?.[joueur.nom]
+);
 
+if (dep) {
+    trackerAppliquerDeplacement(
+        match,
+        joueur.nom,
+        dep
+    );
+
+    trackerBalle(match, joueur.nom);
+      }
     }
-
 
     // ⚽ Position ballon
     if (match.ballHolder === joueur.nom) {
@@ -4654,12 +4667,16 @@ match.defenseTimer = setTimeout(async () => {
         match.pendingMove.joueur === attacker.nom
     ) {
 
-        trackerAction(
-            match,
-            attacker,
-            "deplacement",
-            match.pendingMove.details
-        );
+  trackerAppliquerDeplacement(
+    match,
+    attacker.nom,
+    match.pendingMove.details
+);
+
+trackerBalle(
+    match,
+    attacker.nom
+);
 
         match.pendingMove = null;
     }
@@ -5196,6 +5213,20 @@ match.turnTimer = setTimeout(async () => {
     }
 
 
+    const dep = trackerExtraireDeplacements(
+    match.pendingAttack,
+    match.tracker?.joueurs?.[attackerPlayer.nom]
+);
+
+if (dep) {
+    trackerAppliquerDeplacement(
+        match,
+        attackerPlayer.nom,
+        dep
+    );
+
+    trackerBalle(match, attackerPlayer.nom);
+}
     match.pendingAttack = null;
     match.waitingDefenseFrom = null;
 
