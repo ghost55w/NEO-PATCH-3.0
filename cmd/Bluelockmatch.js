@@ -4656,35 +4656,43 @@ match.defenseTimer = setTimeout(async () => {
 
     if (match.joueurTour !== duelDefenderJid) return;
 
+// ⚽ LE DÉFENSEUR N'A PAS RÉPONDU
+// → L'ATTAQUANT GARDE LE BALLON ET SON ACTION PASSE
 
-    // ==================================================
-    // ⚽ LE DÉFENSEUR N'A PAS RÉPONDU
-    // → L'ATTAQUANT GARDE LE BALLON
-    // ==================================================
+if (
+    match.pendingMove &&
+    match.pendingMove.joueur === attacker.nom
+) {
 
-    if (
-        match.pendingMove &&
-        match.pendingMove.joueur === attacker.nom
-    ) {
+    trackerAppliquerDeplacement(
+        match,
+        attacker.nom,
+        match.pendingMove.details
+    );
 
-  trackerAppliquerDeplacement(
-    match,
-    attacker.nom,
-    match.pendingMove.details
-);
+    trackerAction(
+        match,
+        attacker,
+        "deplacement",
+        match.pendingMove.details
+    );
 
+    match.pendingMove = null;
+}
+
+
+// ⚽ Mise à jour possession
+match.ballHolder = attacker.nom;
+match.ballHolderPlayer = attacker.nom;
+match.ballHolderJid = duelAttackerJid;
+
+
+// ⚽ Maintenant le ballon suit la nouvelle position
 trackerBalle(
     match,
     attacker.nom
 );
-
-        match.pendingMove = null;
-    }
-
-
-    match.ballHolder = attacker.nom;
-    match.ballHolderPlayer = attacker.nom;
-    match.ballHolderJid = duelAttackerJid;
+    
 
     match.joueurTour = duelAttackerJid;
 
@@ -4874,6 +4882,54 @@ setTimeout(async () => {
 match.ballHolderPlayer = winnerPlayer.nom;
 match.ballHolderJid = winnerId;
 match.joueurTour = winnerId;
+
+    // ✅ Appliquer les déplacements validés
+if (duelResult.ok) {
+
+    // L'attaquant gagne
+    if (
+        match.pendingMove &&
+        match.pendingMove.joueur === duelAttacker.nom
+    ) {
+        trackerAppliquerDeplacement(
+            match,
+            duelAttacker.nom,
+            match.pendingMove.details
+        );
+
+        trackerAction(
+            match,
+            duelAttacker,
+            "deplacement",
+            match.pendingMove.details
+        );
+    }
+
+} else {
+
+    // Le défenseur gagne
+    if (
+        match.pendingDefenseMove &&
+        match.pendingDefenseMove.joueur === duelDefender.nom
+    ) {
+        trackerAppliquerDeplacement(
+            match,
+            duelDefender.nom,
+            match.pendingDefenseMove.details
+        );
+
+        trackerAction(
+            match,
+            duelDefender,
+            "deplacement",
+            match.pendingDefenseMove.details
+        );
+    }
+}
+
+// Nettoyage
+match.pendingMove = null;
+match.pendingDefenseMove = null;
 
 // 🗺️ TRACKER : Résultat duel
 if (duelAttacker) {
