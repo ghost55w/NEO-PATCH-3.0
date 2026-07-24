@@ -1,4 +1,4 @@
-// ===============================
+Pm// ===============================
 
 // 📦 DONNÉES STATIQUES (externalisées)
 const _data = require("../lib/bluelock_data.json");
@@ -573,9 +573,8 @@ function trackerBalle(
       
 // Zone actuelle du porteur
 t.balle.zone = joueur.zone;
-t.balle.ligne = joueur.zone?.ligne || null;
 t.balle.secteur = joueur.zone?.secteur || null;
-
+t.balle.ligne = joueur.zone?.ligne || null;
 
     // Forçage manuel si besoin
     if (x !== null) {
@@ -626,7 +625,9 @@ function trackerLog(match) {
     typeof t.balle.holder === "object"
         ? t.balle.holder.nom
         : t.balle.holder || "LIBRE"
-} (${t.balle.zone?.ligne || t.balle.ligne || "?"} → ${t.balle.zone?.secteur || t.balle.secteur || "?"})`
+} (${t.balle.zone?.ligne || t.balle.ligne || "?"} → ${
+    t.balle.zone?.secteur || t.balle.secteur || "?"
+})`
 );
     lines.push(sep);
 
