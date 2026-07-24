@@ -5566,6 +5566,7 @@ if (res.ok) {
 match.pendingMove = null;   
 
 match.hasPlayed = true;
+}    
 
 // 🔥 MATCH UP INIT ⚽🆚 
 if (res && res.type === "PASSIVE_BLOCK") {
