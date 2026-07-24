@@ -1,4 +1,4 @@
-Pm// ===============================
+// ===============================
 
 // 📦 DONNÉES STATIQUES (externalisées)
 const _data = require("../lib/bluelock_data.json");
@@ -570,11 +570,13 @@ function trackerBalle(
         t.balle.x = joueur.position.x;
         t.balle.y = joueur.position.y;
 
-      
-// Zone actuelle du porteur
+
+        // Zone actuelle du porteur
 t.balle.zone = joueur.zone;
-t.balle.secteur = joueur.zone?.secteur || null;
-t.balle.ligne = joueur.zone?.ligne || null;
+t.balle.secteur = joueur.secteur;
+t.balle.ligne = joueur.ligne;
+    } 
+
 
     // Forçage manuel si besoin
     if (x !== null) {
@@ -623,11 +625,12 @@ function trackerLog(match) {
     lines.push(
 `📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${
     typeof t.balle.holder === "object"
-        ? t.balle.holder.nom
-        : t.balle.holder || "LIBRE"
-} (${t.balle.zone?.ligne || t.balle.ligne || "?"} → ${
-    t.balle.zone?.secteur || t.balle.secteur || "?"
-})`
+    ? t.balle.holder.nom
+    : t.balle.holder || "LIBRE"
+} (${typeof t.balle.zone === "object"
+    ? t.balle.zone.ligne
+    : t.balle.zone || ""
+} → ${t.balle.secteur || ""})`
 );
     lines.push(sep);
 
@@ -1262,19 +1265,18 @@ if (v.ballDistanceMin || v.ballDistanceMax) {
     // ✅ RESULT
     if (similarity >= 70) {
     return {
-    valid: true,
-    dribble: dribbleName,
-    similarity,
-    score: similarity,
-    paveNote: evaluerPave(actionText)
-};
+        valid: true,
+        dribble: dribbleName,
+        similarity,
+        score: similarity // 👈 
+    };
 }
 
     return {
-    valid: false,
-    similarity,
-    reason: `Dribble ${dribbleName} mal réalisé (${similarity}%)`
-};
+        valid: false,
+        similarity,
+        reason: `Dribble ${dribbleName} mal réalisé (${similarity}%)`
+    };
 }
 
 
@@ -1402,19 +1404,17 @@ function validateTackleBlueprint(tackleName, actionText) {
     // ✅ RESULT
     if (similarity >= 70) {
         return {
-    valid:true,
-    tackle:tackleName,
-    similarity,
-    paveNote:evaluerPave(actionText)
-};
+            valid: true,
+            tackle: tackleName,
+            similarity
+        };
     }
 
     return {
-    valid:false,
-    similarity,
-    paveNote:evaluerPave(actionText),
-    reason:"Tacle mal réalisé"
-};
+        valid: false,
+        similarity,
+        reason: `Tacle ${tackleName} mal exécuté (${similarity}%)`
+    };
 }
 
 
@@ -3835,103 +3835,6 @@ function extractDistance(text) {
     return null;
 }
 
-// ================================================================
-// ⭐ ÉVALUATION QUALITÉ DU PAVÉ (/10)
-// ================================================================
-
-function evaluerPave(text, contexte = {}) {
-
-    if (!text) return 0;
-
-    const t = normalizeText(text);
-
-    let note = 10;
-
-
-    // ============================================================
-    // ❌ MALUS COHÉRENCE
-    // ============================================================
-
-
-    // Action trop vague
-    if (t.split(/\s+/).length < 8) {
-        note -= 3;
-    }
-
-
-    // Aucun détail corporel
-    if (!/(appui|jambe|pied|buste|epaule|hanche|genou|corps|centre de gravite)/i.test(t)) {
-        note -= 1;
-    }
-
-
-    // Aucun détail ballon
-    if (!/(ballon|controle|touche|pousse|conduit|frappe|passe)/i.test(t)) {
-        note -= 1;
-    }
-
-
-    // Action irréaliste
-    if (
-        /(teleporte|disparait|instantane|apparait|volant|traverse)/i.test(t)
-    ) {
-        note -= 3;
-    }
-
-
-
-    // ============================================================
-    // ✅ BONUS QUALITÉ
-    // ============================================================
-
-
-    // Description corporelle
-    if (
-        /(appui|centre de gravite|epaule|hanche|buste|genou)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-    // Gestion de l'espace
-    if (
-        /\d+\s?(cm|m)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-    // Chronologie claire
-    if (
-        /(puis|ensuite|avant|apres|pendant|au moment)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-    // Vocabulaire football
-    if (
-        /(dribble|feinte|controle|acceleration|tacle|frappe|passe|appel)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-    // Créativité technique
-    if (
-        /(enchaînement|variation|crochet|double contact|grand pont|roulette)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-
-    // Limite finale
-    note = Math.max(0, Math.min(10, note));
-
-
-    return Math.round(note);
-}    
             
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -5125,15 +5028,13 @@ await ovl.sendMessage(chat, {
 ${duelResult.msg}
 
 ⚡ ${displayAttacker.nom}
-├ 📊 Dribble stats : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
-├ ⚽ Dribble : ${duelResult.attackScore ?? 0}
-├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10 (+${duelResult.attackPavePoints ?? 0})
+├ Dribble : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
+├ Score Pavé : ${duelResult.attackScore ?? 0}
 └ Total : ${duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50)} ${atkWon ? "✅" : "❌"}
 
 🛡️ ${displayDefender.nom}
-├ 📊 Défense stats : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
-├ ⚽ Tacle : ${duelResult.defenseScore ?? 0}
-├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10 (+${duelResult.defensePavePoints ?? 0})
+├ Défense : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
+├ Score Pavé : ${duelResult.defenseScore ?? 0}
 └ Total : ${duelResult.defenseTotal ?? (displayDefender.stats?.def || 50)} ${atkWon ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(nextId)} NEXT
@@ -5266,15 +5167,13 @@ if (
 ${result.msg}
 
 ⚡ ${attacker.nom}
-├ 📊 Dribble stats : ${result.attackStat}
-├ ⚽ Dribble : ${result.attackScore}
-├ ⭐ Note pavé : ${result.attackPave ?? 0}/10 (+${result.attackPavePoints ?? 0})
+├ Dribble : ${result.attackStat}
+├ Score Pavé : ${result.attackScore}
 └ Total : ${result.attackTotal} ${result.ok ? "✅" : "❌"}
 
 🛡️ ${defender.nom}
-├ 📊 Défense stats : ${result.defenseStat}
-├ ⚽ Tacle : ${result.defenseScore}
-├ ⭐ Note pavé : ${result.defensePave ?? 0}/10 (+${result.defensePavePoints ?? 0})
+├ Défense : ${result.defenseStat}
+├ Score Pavé : ${result.defenseScore}
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(winnerId)} NEXT
@@ -5566,7 +5465,7 @@ if (res.ok) {
 // 🧹 Nettoyage
 match.pendingMove = null;   
 
-match.hasPlayed = true;    
+match.hasPlayed = true;
 
 // 🔥 MATCH UP INIT ⚽🆚 
 if (res && res.type === "PASSIVE_BLOCK") {
@@ -6167,33 +6066,14 @@ if (isTackleAction) {
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
-const defenseStat = defStats.def || 50;
+    const defenseStat = defStats.def || 50;
 
-const attackScore = dribbleCheck?.similarity || 0;
-const defenseScore = tackleCheck?.similarity || 0;
+    const attackScore = dribbleCheck?.similarity || 0;
+    const defenseScore = tackleCheck?.similarity || 0;
 
+    const attackTotal = attackStat + attackScore;
+    const defenseTotal = defenseStat + defenseScore;
 
-// ⭐ Note qualité pavé (/10)
-const attackPave = dribbleCheck?.paveNote || 0;
-const defensePave = tackleCheck?.paveNote || 0;
-
-
-// Conversion impact pavé
-const attackPavePoints = attackPave * 5;
-const defensePavePoints = defensePave * 5;
-
-
-const attackTotal =
-    attackStat +
-    attackScore +
-    attackPavePoints;
-
-
-const defenseTotal =
-    defenseStat +
-    defenseScore +
-    defensePavePoints;
-    
     let winner = null;
 
     // 🧠 CAS 1 : DRIBBLE PARFAIT / TACLE RATÉ
@@ -6256,31 +6136,18 @@ await appliquerConsequences(
         match.joueurTour = attacker.id || attacker.jid;
 
         return {
-    ok: true,
-    type: "DRIBBLE_WIN",
-
-    attacker,
-    defender,
-
-    attackStat,
-    defenseStat,
-
-    attackScore,
-    defenseScore,
-
-    // ⭐ Note qualité pavé
-    attackPave,
-    defensePave,
-
-    // ⭐ Bonus appliqué au total
-    attackPavePoints,
-    defensePavePoints,
-
-    attackTotal,
-    defenseTotal,
-
-    msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-};
+            ok: true,
+            type: "DRIBBLE_WIN",
+            attacker,
+            defender,
+            attackStat,
+            defenseStat,
+            attackScore,
+            defenseScore,
+            attackTotal,
+            defenseTotal,
+            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+        };
     }
 
     match.joueurTour = defender.id || defender.jid;
@@ -6299,29 +6166,19 @@ if (
     match.pendingDefenseMove = null;
 }
     
-    return { 
-    ok: false, 
-    type: "DRIBBLE_LOSE", 
-    attacker, 
-    defender, 
-
-    attackStat, 
-    defenseStat, 
-
-    attackScore, 
-    defenseScore, 
-
-    attackPave,
-    defensePave,
-
-    attackPavePoints,
-    defensePavePoints,
-
-    attackTotal, 
-    defenseTotal, 
-
-    msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...` 
-};
+    return {
+        ok: false,
+        type: "DRIBBLE_LOSE",
+        attacker,
+        defender,
+        attackStat,
+        defenseStat,
+        attackScore,
+        defenseScore,
+        attackTotal,
+        defenseTotal,
+        msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
+    };
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
