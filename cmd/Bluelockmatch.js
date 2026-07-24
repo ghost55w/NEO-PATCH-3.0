@@ -1265,18 +1265,20 @@ if (v.ballDistanceMin || v.ballDistanceMax) {
     // ✅ RESULT
     if (similarity >= 70) {
     return {
-        valid: true,
-        dribble: dribbleName,
-        similarity,
-        score: similarity // 👈 
-    };
+    valid: true,
+    dribble: dribbleName,
+    similarity,
+    score: similarity,
+    paveNote: evaluerPave(actionText)
+};
 }
 
     return {
-        valid: false,
-        similarity,
-        reason: `Dribble ${dribbleName} mal réalisé (${similarity}%)`
-    };
+    valid: false,
+    similarity,
+    paveNote: evaluerPave(actionText),
+    reason: `Dribble ${dribbleName} mal réalisé (${similarity}%)`
+};
 }
 
 
@@ -1404,17 +1406,19 @@ function validateTackleBlueprint(tackleName, actionText) {
     // ✅ RESULT
     if (similarity >= 70) {
         return {
-            valid: true,
-            tackle: tackleName,
-            similarity
-        };
+    valid:true,
+    tackle:tackleName,
+    similarity,
+    paveNote:evaluerPave(actionText)
+};
     }
 
     return {
-        valid: false,
-        similarity,
-        reason: `Tacle ${tackleName} mal exécuté (${similarity}%)`
-    };
+    valid:false,
+    similarity,
+    paveNote:evaluerPave(actionText),
+    reason:"Tacle mal réalisé"
+};
 }
 
 
