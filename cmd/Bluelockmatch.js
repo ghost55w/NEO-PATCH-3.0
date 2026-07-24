@@ -6062,14 +6062,18 @@ if (isTackleAction) {
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
-    const defenseStat = defStats.def || 50;
+const defenseStat = defStats.def || 50;
 
-    const attackScore = dribbleCheck?.similarity || 0;
-    const defenseScore = tackleCheck?.similarity || 0;
+const attackScore = dribbleCheck?.similarity || 0;
+const defenseScore = tackleCheck?.similarity || 0;
 
-    const attackTotal = attackStat + attackScore;
-    const defenseTotal = defenseStat + defenseScore;
+// ⭐ Note IA du pavé (/10)
+const attackPave = dribbleCheck?.paveNote || 0;
+const defensePave = tackleCheck?.paveNote || 0;
 
+const attackTotal = attackStat + attackScore + attackPave;
+const defenseTotal = defenseStat + defenseScore + defensePave;
+    
     let winner = null;
 
     // 🧠 CAS 1 : DRIBBLE PARFAIT / TACLE RATÉ
