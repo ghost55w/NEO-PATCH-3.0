@@ -5265,13 +5265,15 @@ if (
 ${result.msg}
 
 ⚡ ${attacker.nom}
-├ Dribble : ${result.attackStat}
-├ Score Pavé : ${result.attackScore}
+├ 📊 Dribble stats : ${result.attackStat}
+├ ⚽ Dribble : ${result.attackScore}
+├ ⭐ Note pavé : ${result.attackPave ?? 0}/10 (+${result.attackPavePoints ?? 0})
 └ Total : ${result.attackTotal} ${result.ok ? "✅" : "❌"}
 
 🛡️ ${defender.nom}
-├ Défense : ${result.defenseStat}
-├ Score Pavé : ${result.defenseScore}
+├ 📊 Défense stats : ${result.defenseStat}
+├ ⚽ Tacle : ${result.defenseScore}
+├ ⭐ Note pavé : ${result.defensePave ?? 0}/10 (+${result.defensePavePoints ?? 0})
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(winnerId)} NEXT
