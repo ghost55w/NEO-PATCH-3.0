@@ -5028,13 +5028,15 @@ await ovl.sendMessage(chat, {
 ${duelResult.msg}
 
 ⚡ ${displayAttacker.nom}
-├ Dribble : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
-├ Score Pavé : ${duelResult.attackScore ?? 0}
+├ 📊 Dribble stats : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
+├ ⚽ Dribble : ${duelResult.attackScore ?? 0}
+├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10 (+${duelResult.attackPavePoints ?? 0})
 └ Total : ${duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50)} ${atkWon ? "✅" : "❌"}
 
 🛡️ ${displayDefender.nom}
-├ Défense : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
-├ Score Pavé : ${duelResult.defenseScore ?? 0}
+├ 📊 Défense stats : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
+├ ⚽ Tacle : ${duelResult.defenseScore ?? 0}
+├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10 (+${duelResult.defensePavePoints ?? 0})
 └ Total : ${duelResult.defenseTotal ?? (displayDefender.stats?.def || 50)} ${atkWon ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(nextId)} NEXT
@@ -5167,13 +5169,15 @@ if (
 ${result.msg}
 
 ⚡ ${attacker.nom}
-├ Dribble : ${result.attackStat}
-├ Score Pavé : ${result.attackScore}
+├ 📊 Dribble stats : ${result.attackStat}
+├ ⚽ Dribble : ${result.attackScore}
+├ ⭐ Note pavé : ${result.attackPave ?? 0}/10 (+${result.attackPavePoints ?? 0})
 └ Total : ${result.attackTotal} ${result.ok ? "✅" : "❌"}
 
 🛡️ ${defender.nom}
-├ Défense : ${result.defenseStat}
-├ Score Pavé : ${result.defenseScore}
+├ 📊 Défense stats : ${result.defenseStat}
+├ ⚽ Tacle : ${result.defenseScore}
+├ ⭐ Note pavé : ${result.defensePave ?? 0}/10 (+${result.defensePavePoints ?? 0})
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(winnerId)} NEXT
@@ -6066,14 +6070,33 @@ if (isTackleAction) {
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
-    const defenseStat = defStats.def || 50;
+const defenseStat = defStats.def || 50;
 
-    const attackScore = dribbleCheck?.similarity || 0;
-    const defenseScore = tackleCheck?.similarity || 0;
+const attackScore = dribbleCheck?.similarity || 0;
+const defenseScore = tackleCheck?.similarity || 0;
 
-    const attackTotal = attackStat + attackScore;
-    const defenseTotal = defenseStat + defenseScore;
 
+// ⭐ Note qualité pavé (/10)
+const attackPave = dribbleCheck?.paveNote || 0;
+const defensePave = tackleCheck?.paveNote || 0;
+
+
+// Conversion impact pavé
+const attackPavePoints = attackPave * 5;
+const defensePavePoints = defensePave * 5;
+
+
+const attackTotal =
+    attackStat +
+    attackScore +
+    attackPavePoints;
+
+
+const defenseTotal =
+    defenseStat +
+    defenseScore +
+    defensePavePoints;
+    
     let winner = null;
 
     // 🧠 CAS 1 : DRIBBLE PARFAIT / TACLE RATÉ
@@ -6136,18 +6159,26 @@ await appliquerConsequences(
         match.joueurTour = attacker.id || attacker.jid;
 
         return {
-            ok: true,
-            type: "DRIBBLE_WIN",
-            attacker,
-            defender,
-            attackStat,
-            defenseStat,
-            attackScore,
-            defenseScore,
-            attackTotal,
-            defenseTotal,
-            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-        };
+    ok: true,
+    type: "DRIBBLE_WIN",
+    attacker,
+    defender,
+
+    attackStat,
+    defenseStat,
+
+    attackScore,
+    defenseScore,
+
+    attackTotal,
+    defenseTotal,
+
+    // ⭐ NOTE DES PAVÉS
+    attackPave: evaluerPave(attackPave),
+    defensePave: evaluerPave(defensePave),
+
+    msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+};
     }
 
     match.joueurTour = defender.id || defender.jid;
@@ -6166,19 +6197,27 @@ if (
     match.pendingDefenseMove = null;
 }
     
-    return {
-        ok: false,
-        type: "DRIBBLE_LOSE",
-        attacker,
-        defender,
-        attackStat,
-        defenseStat,
-        attackScore,
-        defenseScore,
-        attackTotal,
-        defenseTotal,
-        msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
-    };
+ return {
+    ok: false,
+    type: "DRIBBLE_LOSE",
+    attacker,
+    defender,
+
+    attackStat,
+    defenseStat,
+
+    attackScore,
+    defenseScore,
+
+    attackTotal,
+    defenseTotal,
+
+    // ⭐ NOTES DES PAVÉS
+    attackPave: evaluerPave(attackPave),
+    defensePave: evaluerPave(defensePave),
+
+    msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
+};   
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
