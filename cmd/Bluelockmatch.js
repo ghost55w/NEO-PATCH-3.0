@@ -6253,18 +6253,31 @@ await appliquerConsequences(
         match.joueurTour = attacker.id || attacker.jid;
 
         return {
-            ok: true,
-            type: "DRIBBLE_WIN",
-            attacker,
-            defender,
-            attackStat,
-            defenseStat,
-            attackScore,
-            defenseScore,
-            attackTotal,
-            defenseTotal,
-            msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
-        };
+    ok: true,
+    type: "DRIBBLE_WIN",
+
+    attacker,
+    defender,
+
+    attackStat,
+    defenseStat,
+
+    attackScore,
+    defenseScore,
+
+    // ⭐ Note qualité pavé
+    attackPave,
+    defensePave,
+
+    // ⭐ Bonus appliqué au total
+    attackPavePoints,
+    defensePavePoints,
+
+    attackTotal,
+    defenseTotal,
+
+    msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
+};
     }
 
     match.joueurTour = defender.id || defender.jid;
@@ -6283,19 +6296,29 @@ if (
     match.pendingDefenseMove = null;
 }
     
-    return {
-        ok: false,
-        type: "DRIBBLE_LOSE",
-        attacker,
-        defender,
-        attackStat,
-        defenseStat,
-        attackScore,
-        defenseScore,
-        attackTotal,
-        defenseTotal,
-        msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
-    };
+    return { 
+    ok: false, 
+    type: "DRIBBLE_LOSE", 
+    attacker, 
+    defender, 
+
+    attackStat, 
+    defenseStat, 
+
+    attackScore, 
+    defenseScore, 
+
+    attackPave,
+    defensePave,
+
+    attackPavePoints,
+    defensePavePoints,
+
+    attackTotal, 
+    defenseTotal, 
+
+    msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...` 
+};
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
