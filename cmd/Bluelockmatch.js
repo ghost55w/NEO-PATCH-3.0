@@ -570,12 +570,11 @@ function trackerBalle(
         t.balle.x = joueur.position.x;
         t.balle.y = joueur.position.y;
 
-
-        // Zone actuelle du porteur
+      
+// Zone actuelle du porteur
 t.balle.zone = joueur.zone;
-t.balle.secteur = joueur.secteur;
-t.balle.ligne = joueur.ligne;
-    } 
+t.balle.ligne = joueur.zone?.ligne || null;
+t.balle.secteur = joueur.zone?.secteur || null;
 
 
     // Forçage manuel si besoin
@@ -625,12 +624,9 @@ function trackerLog(match) {
     lines.push(
 `📊 TRACKER — TOUR ${t.tour} | ⚽ Ballon: ${
     typeof t.balle.holder === "object"
-    ? t.balle.holder.nom
-    : t.balle.holder || "LIBRE"
-} (${typeof t.balle.zone === "object"
-    ? t.balle.zone.ligne
-    : t.balle.zone || ""
-} → ${t.balle.secteur || ""})`
+        ? t.balle.holder.nom
+        : t.balle.holder || "LIBRE"
+} (${t.balle.zone?.ligne || t.balle.ligne || "?"} → ${t.balle.zone?.secteur || t.balle.secteur || "?"})`
 );
     lines.push(sep);
 
