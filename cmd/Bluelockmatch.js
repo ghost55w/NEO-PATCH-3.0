@@ -3835,6 +3835,104 @@ function extractDistance(text) {
     return null;
 }
 
+// ================================================================
+// ⭐ ÉVALUATION QUALITÉ DU PAVÉ (/10)
+// ================================================================
+
+function evaluerPave(text, contexte = {}) {
+
+    if (!text) return 0;
+
+    const t = normalizeText(text);
+
+    let note = 10;
+
+
+    // ============================================================
+    // ❌ MALUS COHÉRENCE
+    // ============================================================
+
+
+    // Action trop vague
+    if (t.split(/\s+/).length < 8) {
+        note -= 3;
+    }
+
+
+    // Aucun détail corporel
+    if (!/(appui|jambe|pied|buste|epaule|hanche|genou|corps|centre de gravite)/i.test(t)) {
+        note -= 1;
+    }
+
+
+    // Aucun détail ballon
+    if (!/(ballon|controle|touche|pousse|conduit|frappe|passe)/i.test(t)) {
+        note -= 1;
+    }
+
+
+    // Action irréaliste
+    if (
+        /(teleporte|disparait|instantane|apparait|volant|traverse)/i.test(t)
+    ) {
+        note -= 3;
+    }
+
+
+
+    // ============================================================
+    // ✅ BONUS QUALITÉ
+    // ============================================================
+
+
+    // Description corporelle
+    if (
+        /(appui|centre de gravite|epaule|hanche|buste|genou)/i.test(t)
+    ) {
+        note += 1;
+    }
+
+
+    // Gestion de l'espace
+    if (
+        /\d+\s?(cm|m)/i.test(t)
+    ) {
+        note += 1;
+    }
+
+
+    // Chronologie claire
+    if (
+        /(puis|ensuite|avant|apres|pendant|au moment)/i.test(t)
+    ) {
+        note += 1;
+    }
+
+
+    // Vocabulaire football
+    if (
+        /(dribble|feinte|controle|acceleration|tacle|frappe|passe|appel)/i.test(t)
+    ) {
+        note += 1;
+    }
+
+
+    // Créativité technique
+    if (
+        /(enchaînement|variation|crochet|double contact|grand pont|roulette)/i.test(t)
+    ) {
+        note += 1;
+    }
+
+
+
+    // Limite finale
+    note = Math.max(0, Math.min(10, note));
+
+
+    return Math.round(note);
+}
+
             
 // 🎮 COMMANDE MATCH
 ovlcmd({
