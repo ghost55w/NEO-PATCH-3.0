@@ -571,18 +571,19 @@ function trackerBalle(
         t.balle.y = joueur.position.y;
 
 
-        // Zone actuelle du porteur
-        console.log({
+        
+// Zone actuelle du porteur
+console.log({
     zone: joueur.zone,
     ligne: joueur.ligne,
     secteur: joueur.secteur,
     position: joueur.position
 });
-t.balle.zone = joueur.zone;
-t.balle.secteur = joueur.secteur;
-t.balle.ligne = joueur.ligne;
-    } 
 
+t.balle.zone = joueur.zone?.ligne || "";
+t.balle.secteur = joueur.zone?.secteur || "";
+t.balle.ligne = joueur.zone?.ligne || "";
+    } 
 
     // Forçage manuel si besoin
     if (x !== null) {
