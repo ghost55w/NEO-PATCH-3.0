@@ -6275,9 +6275,8 @@ await appliquerConsequences(
     attackTotal,
     defenseTotal,
 
-    // ⭐ NOTE DES PAVÉS
-    attackPave: evaluerPave(attackPave),
-    defensePave: evaluerPave(defensePave),
+    attackPave,
+    defensePave,
 
     msg: `🔥⚽ ${attacker.nom} élimine son adversaire et conserve le ballon...`
 };
@@ -6314,12 +6313,11 @@ if (
     attackTotal,
     defenseTotal,
 
-    // ⭐ NOTES DES PAVÉS
-    attackPave: evaluerPave(attackPave),
-    defensePave: evaluerPave(defensePave),
+    attackPave,
+    defensePave,
 
     msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
-};   
+};
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
