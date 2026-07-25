@@ -4291,15 +4291,7 @@ console.log("====================================");
             text: `✅ Formation validée pour *${match.team1Name}*`
         });
     }
-
-        console.log("========== JOUEURS VALIDES ==========");
-joueursValides.forEach(j => {
-    console.log(
-        `${j.nom} | poste=${j.poste} | ligne=${j.ligne} | secteur=${j.secteur}`
-    );
-});
-console.log("====================================");
-    
+        
     // 🔷 TEAM 2 OWNER (id2)
     else if (squadName === team2 && !match.equipe2) {
 
@@ -4320,17 +4312,26 @@ console.log("====================================");
         });
     }
 
-   console.log("========== MATCH LINEUPS ==========");
+   // DEBUG
+console.log("========== JOUEURS VALIDES ==========");
+joueursValides.forEach(j => {
+    console.log(
+        `${j.nom} | poste=${j.poste} | ligne=${j.ligne} | secteur=${j.secteur}`
+    );
+});
+console.log("====================================");
+
+console.log("========== MATCH LINEUPS ==========");
 
 console.log("TEAM 1");
-match.lineup1.forEach(p => {
+(match.lineup1 || []).forEach(p => {
     console.log(
         `${p.nom} | poste=${p.poste} | ligne=${p.ligne} | secteur=${p.secteur}`
     );
 });
 
 console.log("TEAM 2");
-match.lineup2.forEach(p => {
+(match.lineup2 || []).forEach(p => {
     console.log(
         `${p.nom} | poste=${p.poste} | ligne=${p.ligne} | secteur=${p.secteur}`
     );
