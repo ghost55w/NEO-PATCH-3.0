@@ -572,6 +572,12 @@ function trackerBalle(
 
 
         // Zone actuelle du porteur
+        console.log({
+    zone: joueur.zone,
+    ligne: joueur.ligne,
+    secteur: joueur.secteur,
+    position: joueur.position
+});
 t.balle.zone = joueur.zone;
 t.balle.secteur = joueur.secteur;
 t.balle.ligne = joueur.ligne;
