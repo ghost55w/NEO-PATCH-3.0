@@ -574,15 +574,22 @@ function trackerBalle(
         
 // Zone actuelle du porteur
 console.log({
-    zone: joueur.zone,
-    ligne: joueur.ligne,
-    secteur: joueur.secteur,
-    position: joueur.position
+    zone: joueur.position,
+    ligne: joueur.position?.ligne,
+    secteur: joueur.position?.secteur,
+    position: {
+        x: joueur.position?.x,
+        y: joueur.position?.y
+    }
 });
 
-t.balle.zone = joueur.zone?.ligne || "";
-t.balle.secteur = joueur.zone?.secteur || "";
-t.balle.ligne = joueur.zone?.ligne || "";
+t.balle.zone = {
+    ligne: joueur.position?.ligne,
+    secteur: joueur.position?.secteur
+};
+
+t.balle.ligne = joueur.position?.ligne || "";
+t.balle.secteur = joueur.position?.secteur || "";
     } 
 
     // Forçage manuel si besoin
@@ -1740,7 +1747,10 @@ function updateGlobalPositions(match, joueur) {
 
     if (!match.positions) match.positions = [];
 
-    const index = match.positions.findIndex(p => p.nom === joueur.nom);
+    const index = match.positions.findIndex(p =>
+        p.nom === joueur.nom &&
+        p.equipe === joueur.equipe
+    );
 
     if (index !== -1) {
         match.positions[index] = joueur;
