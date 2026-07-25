@@ -4147,6 +4147,13 @@ if (match.etat === "attente_lineup") {
     if (!safeText.includes("SQUAD⚽🥅")) return;
 
     const parsed = parseLineupFull(safeText);
+    console.log("========== PARSED LINEUP ==========");
+parsed.joueurs.forEach(j => {
+    console.log(
+        `#${j.numero} | ${j.name} | poste=${j.poste}`
+    );
+});
+console.log("==================================");
 
     if (!parsed || !parsed.joueurs || parsed.joueurs.length === 0) {
         return ovl.sendMessage(chat, {
@@ -4264,6 +4271,14 @@ joueursValides.push({
 });   
     }
 
+    console.log("========== JOUEURS VALIDES ==========");
+joueursValides.forEach(j => {
+    console.log(
+        `${j.nom} | poste=${j.poste} | ligne=${j.ligne} | secteur=${j.secteur}`
+    );
+});
+console.log("====================================");
+    
     // 🔷 TEAM 1 OWNER (id1)
     if (squadName === team1 && !match.equipe1) {
 
@@ -4277,6 +4292,14 @@ joueursValides.push({
         });
     }
 
+        console.log("========== JOUEURS VALIDES ==========");
+joueursValides.forEach(j => {
+    console.log(
+        `${j.nom} | poste=${j.poste} | ligne=${j.ligne} | secteur=${j.secteur}`
+    );
+});
+console.log("====================================");
+    
     // 🔷 TEAM 2 OWNER (id2)
     else if (squadName === team2 && !match.equipe2) {
 
@@ -4297,6 +4320,25 @@ joueursValides.push({
         });
     }
 
+   console.log("========== MATCH LINEUPS ==========");
+
+console.log("TEAM 1");
+match.lineup1.forEach(p => {
+    console.log(
+        `${p.nom} | poste=${p.poste} | ligne=${p.ligne} | secteur=${p.secteur}`
+    );
+});
+
+console.log("TEAM 2");
+match.lineup2.forEach(p => {
+    console.log(
+        `${p.nom} | poste=${p.poste} | ligne=${p.ligne} | secteur=${p.secteur}`
+    );
+});
+
+console.log("==================================");
+
+    
     // 🚀 START MATCH (ONLY WHEN READY)
     if (match.equipe1 && match.equipe2 && !match.starting) {
 
