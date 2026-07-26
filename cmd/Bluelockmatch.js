@@ -313,14 +313,19 @@ function trackerInitJoueur(match, joueur) {
 
     if (!match.tracker) return;
 
+
     // Détermination du camp réel
     const team1 =
-        (match.lineup1 || []).some(p => p.nom === joueur.nom);
+        (match.lineup1 || []).some(
+            p => p.nom === joueur.nom
+        );
+
 
     const camp = team1 ? "A" : "B";
 
-    // Clé unique du joueur
-    const key = j.jid || j.id || `${j.nom}_${team1 ? "A" : "B"}`;
+
+    // Clé unique joueur
+const key = joueur.nom;
 
     // Position initiale selon poste + camp
     const pos = getPositionDepart(
@@ -328,15 +333,13 @@ function trackerInitJoueur(match, joueur) {
         camp
     );
 
+
     match.tracker.joueurs[key] = {
 
         nom: joueur.nom,
 
         poste: joueur.poste,
 
-        // ==========================
-        // IDENTIFICATION TERRAIN🏟️
-        // ==========================
 
         equipe:
             joueur.equipe ||
@@ -345,82 +348,76 @@ function trackerInitJoueur(match, joueur) {
                 : match.team2Name) ||
             "?",
 
+
         equipeNom:
             joueur.equipeNom ||
             joueur.equipe ||
             "?",
 
+
         camp,
+
 
         jid:
             joueur.jid ||
             joueur.id ||
             null,
 
-        // Vis-à-vis
-        visAVis: null,
 
-        // ==========================
-        // POSITION LOGIQUE
-        // ==========================
+        visAVis:null,
 
-        zone: {
+
+        zone:{
             ligne: pos.zone,
             secteur: pos.secteur
         },
 
-        // ==========================
-        // POSITION TERRAIN
-        // ==========================
 
-        position: {
+        position:{
             x: pos.x,
             y: pos.y
         },
 
-        positionDepart: {
+
+        positionDepart:{
             x: pos.x,
             y: pos.y
         },
 
-        zoneDepart: {
+
+        zoneDepart:{
             ligne: pos.zone,
             secteur: pos.secteur
         },
 
-        // ==========================
-        // ORIENTATION
-        // ==========================
 
-        bodyAngle: 0,
-        bodyState: "front",
+        bodyAngle:0,
 
-        // ==========================
-        // ÉTAT
-        // ==========================
+        bodyState:"front",
 
-        stamina: 100,
-        hasBalle: false,
-        estLock: false,
 
-        // ==========================
-        // STATS
-        // ==========================
+        stamina:100,
 
-        stats: {
-            actions: 0,
-            passes: 0,
-            tirs: 0,
-            duels: 0,
-            duelsGagnes: 0,
-            deplacements: 0,
-            distanceParcourue: 0,
-            noteMoyenne: 0,
-            notesTotal: 0,
-            notesCount: 0
+        hasBalle:false,
+
+        estLock:false,
+
+
+        stats:{
+            actions:0,
+            passes:0,
+            tirs:0,
+            duels:0,
+            duelsGagnes:0,
+            deplacements:0,
+            distanceParcourue:0,
+            noteMoyenne:0,
+            notesTotal:0,
+            notesCount:0
         },
 
-        historique: []
+
+        historique:[]
     };
 }
 
