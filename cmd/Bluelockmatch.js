@@ -323,6 +323,7 @@ function initTracker(match) {
 // ================================================================
 // SECTION 3 : INIT JOUEUR DANS LE TRACKER
 // ================================================================
+console.log("INIT TRACKER :", joueur.nom, joueur.poste);
 function trackerInitJoueur(match, joueur) {
 
     if (!match.tracker) return;
