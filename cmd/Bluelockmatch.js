@@ -223,20 +223,16 @@ function initTracker(match) {
             id2: match.team2Name || match.nomEquipe2 || "Équipe 2"
         },
 
-
         // Snapshot joueurs
         joueurs: {},
-
 
         // Historique actions
         historique: [],
 
-
         // Tour courant
         tour: 0,
 
-
-        // ⚽ Ballon au rond central au coup d'envoi
+        // ⚽ Ballon
         balle: {
             x: 15,
             y: 30,
@@ -244,7 +240,6 @@ function initTracker(match) {
             secteur: "centre",
             holder: null
         },
-
 
         // Stats match
         stats: {
@@ -258,12 +253,10 @@ function initTracker(match) {
         }
     };
 
-
     const allPlayers = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
-
 
     // ============================================================
     // Initialisation joueurs
@@ -271,25 +264,20 @@ function initTracker(match) {
 
     for (const j of allPlayers) {
 
-        if (!match.tracker.joueurs[j.nom]) {
+        const team1 = (match.lineup1 || []).includes(j);
 
+        const key = `${j.nom}_${team1 ? "A" : "B"}`;
+
+        if (!match.tracker.joueurs[key]) {
             trackerInitJoueur(match, j);
-
         }
 
+        const equipe = team1
+            ? match.tracker.equipes.id1
+            : match.tracker.equipes.id2;
 
-        // Attribution vrai nom équipe
-        const equipe =
-            (match.lineup1 || []).includes(j)
-                ? match.tracker.equipes.id1
-                : match.tracker.equipes.id2;
-
-
-        match.tracker.joueurs[j.nom].equipe = equipe;
-
+        match.tracker.joueurs[key].equipe = equipe;
     }
-
-
 
     // ============================================================
     // Attribution vis-à-vis miroir
@@ -297,46 +285,42 @@ function initTracker(match) {
 
     for (const j of allPlayers) {
 
-        const snap = match.tracker.joueurs[j.nom];
+        const team1 = (match.lineup1 || []).includes(j);
+
+        const key = `${j.nom}_${team1 ? "A" : "B"}`;
+
+        const snap = match.tracker.joueurs[key];
 
         if (!snap) continue;
 
-
-        const opponentTeam =
-            (match.lineup1 || []).includes(j)
-                ? match.lineup2
-                : match.lineup1;
-
+        const opponentTeam = team1
+            ? match.lineup2
+            : match.lineup1;
 
         const vis = findVisAVis(j, opponentTeam);
 
-
         if (vis) {
-
             snap.visAVis = vis.nom;
-
         }
-
     }
-
 }
+
 
 // ================================================================
 // SECTION 3 : INIT JOUEUR DANS LE TRACKER
 // ================================================================
-
 function trackerInitJoueur(match, joueur) {
 
     if (!match.tracker) return;
-
 
     // Détermination du camp réel
     const team1 =
         (match.lineup1 || []).some(p => p.nom === joueur.nom);
 
-
     const camp = team1 ? "A" : "B";
 
+    // Clé unique du joueur
+    const key = j.jid || j.id || `${j.nom}_${team1 ? "A" : "B"}`;
 
     // Position initiale selon poste + camp
     const pos = getPositionDepart(
@@ -344,16 +328,14 @@ function trackerInitJoueur(match, joueur) {
         camp
     );
 
-
-    match.tracker.joueurs[joueur.nom] = {
+    match.tracker.joueurs[key] = {
 
         nom: joueur.nom,
 
         poste: joueur.poste,
 
-
         // ==========================
-        // IDENTITIFICATION TERRAIN🏟️ 
+        // IDENTIFICATION TERRAIN🏟️
         // ==========================
 
         equipe:
@@ -375,88 +357,72 @@ function trackerInitJoueur(match, joueur) {
             joueur.id ||
             null,
 
-
         // Vis-à-vis
-        visAVis:null,
-
+        visAVis: null,
 
         // ==========================
         // POSITION LOGIQUE
         // ==========================
 
         zone: {
-    ligne: pos.zone,
-    secteur: pos.secteur
-},
-
+            ligne: pos.zone,
+            secteur: pos.secteur
+        },
 
         // ==========================
         // POSITION TERRAIN
         // ==========================
 
-        position:{
-            x:pos.x,
-            y:pos.y
+        position: {
+            x: pos.x,
+            y: pos.y
         },
 
-
-        // Position initiale fixe
-        positionDepart:{
-            x:pos.x,
-            y:pos.y
+        positionDepart: {
+            x: pos.x,
+            y: pos.y
         },
-
 
         zoneDepart: {
-    ligne: pos.zone,
-    secteur: pos.secteur
-},
-
+            ligne: pos.zone,
+            secteur: pos.secteur
+        },
 
         // ==========================
         // ORIENTATION
         // ==========================
 
-        bodyAngle:0,
-
-        bodyState:"front",
-
+        bodyAngle: 0,
+        bodyState: "front",
 
         // ==========================
         // ÉTAT
         // ==========================
 
-        stamina:100,
-
-        hasBalle:false,
-
-        estLock:false,
-
+        stamina: 100,
+        hasBalle: false,
+        estLock: false,
 
         // ==========================
         // STATS
         // ==========================
 
-        stats:{
-            actions:0,
-            passes:0,
-            tirs:0,
-            duels:0,
-            duelsGagnes:0,
-
-            deplacements:0,
-            distanceParcourue:0,
-
-            noteMoyenne:0,
-            notesTotal:0,
-            notesCount:0
+        stats: {
+            actions: 0,
+            passes: 0,
+            tirs: 0,
+            duels: 0,
+            duelsGagnes: 0,
+            deplacements: 0,
+            distanceParcourue: 0,
+            noteMoyenne: 0,
+            notesTotal: 0,
+            notesCount: 0
         },
 
-
-        historique:[]
+        historique: []
     };
 }
-
 
 // ================================================================
 // SECTION 4 : ENREGISTRER UNE ACTION
@@ -555,42 +521,40 @@ function trackerBalle(
 
 
     // Nouveau porteur
-    t.balle.holder = holderNom;
-
-
-    if (holderNom && t.joueurs[holderNom]) {
-
-        const joueur = t.joueurs[holderNom];
-
-
-        joueur.hasBalle = true;
-
-
-        // La balle suit le joueur
-        t.balle.x = joueur.position.x;
-        t.balle.y = joueur.position.y;
-
-
-        
-// Zone actuelle du porteur
-console.log({
-    zone: joueur.position,
-    ligne: joueur.position?.ligne,
-    secteur: joueur.position?.secteur,
-    position: {
-        x: joueur.position?.x,
-        y: joueur.position?.y
-    }
+const holderKey = Object.keys(t.joueurs).find(key => {
+    const j = t.joueurs[key];
+    return (
+        key === holderNom ||
+        j.nom === holderNom ||
+        j.jid === holderNom ||
+        j.id === holderNom
+    );
 });
 
-t.balle.zone = {
-    ligne: joueur.position?.ligne,
-    secteur: joueur.position?.secteur
-};
+t.balle.holder = holderNom;
 
-t.balle.ligne = joueur.position?.ligne || "";
-t.balle.secteur = joueur.position?.secteur || "";
-    } 
+if (holderKey) {
+
+    const joueur = t.joueurs[holderKey];
+
+    joueur.hasBalle = true;
+
+    // La balle suit le joueur
+    t.balle.x = joueur.position.x;
+    t.balle.y = joueur.position.y;
+
+    console.log({
+        zone: joueur.zone,
+        ligne: joueur.zone?.ligne,
+        secteur: joueur.zone?.secteur,
+        position: joueur.position
+    });
+
+    t.balle.zone = joueur.zone;
+
+    t.balle.ligne = joueur.zone?.ligne || "";
+    t.balle.secteur = joueur.zone?.secteur || "";
+}
 
     // Forçage manuel si besoin
     if (x !== null) {
