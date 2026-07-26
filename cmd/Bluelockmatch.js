@@ -323,7 +323,6 @@ function initTracker(match) {
 // ================================================================
 // SECTION 3 : INIT JOUEUR DANS LE TRACKER
 // ================================================================
-console.log("INIT TRACKER :", joueur.nom, joueur.poste);
 function trackerInitJoueur(match, joueur) {
 
     if (!match.tracker) return;
@@ -335,13 +334,13 @@ function trackerInitJoueur(match, joueur) {
             p => p.nom === joueur.nom
         );
 
-const camp = team1 ? "A" : "B";
+
+    const camp = team1 ? "A" : "B";
 
 
     // Clé unique joueur
 const key = joueur.nom;
 
-   
     // Position initiale selon poste + camp
     const pos = getPositionDepart(
         joueur.poste,
