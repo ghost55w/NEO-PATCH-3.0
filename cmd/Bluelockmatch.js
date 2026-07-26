@@ -335,11 +335,8 @@ function trackerInitJoueur(match, joueur) {
         );
 
 
-    const camp = team1 ? "A" : "B";
-
-
-    // Clé unique joueur
-const key = joueur.nom;
+   const camp = joueur.equipe === "team1" ? "A" : "B";
+const key = `${joueur.nom}_${camp}`; 
 
     // Position initiale selon poste + camp
     const pos = getPositionDepart(
