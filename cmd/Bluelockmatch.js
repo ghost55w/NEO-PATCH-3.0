@@ -210,6 +210,7 @@ const DISTANCES_TERRAIN = {
 // Alias utilisé par les fonctions existantes
 const DISTANCES = DISTANCES_TERRAIN;
 
+
 // ================================================================
 // SECTION 2 : INIT TRACKER (appelé au lancement du match)
 // ================================================================
@@ -217,22 +218,21 @@ function initTracker(match) {
 
     match.tracker = {
 
-        // Nom réel des équipes
         equipes: {
             id1: match.team1Name || match.nomEquipe1 || "Équipe 1",
             id2: match.team2Name || match.nomEquipe2 || "Équipe 2"
         },
 
-        // Snapshot joueurs
+
         joueurs: {},
 
-        // Historique actions
+
         historique: [],
 
-        // Tour courant
+
         tour: 0,
 
-        // ⚽ Ballon
+
         balle: {
             x: 15,
             y: 30,
@@ -241,7 +241,7 @@ function initTracker(match) {
             holder: null
         },
 
-        // Stats match
+
         stats: {
             passes: 0,
             tirs: 0,
@@ -253,57 +253,71 @@ function initTracker(match) {
         }
     };
 
+
     const allPlayers = [
         ...(match.lineup1 || []),
         ...(match.lineup2 || [])
     ];
 
-    // ============================================================
-    // Initialisation joueurs
-    // ============================================================
 
+    // INIT JOUEURS
     for (const j of allPlayers) {
 
-        const team1 = (match.lineup1 || []).includes(j);
+        if (!match.tracker.joueurs[j.nom]) {
 
-        const key = `${j.nom}_${team1 ? "A" : "B"}`;
-
-        if (!match.tracker.joueurs[key]) {
             trackerInitJoueur(match, j);
+
         }
 
-        const equipe = team1
+
+        const equipe =
+            (match.lineup1 || []).some(
+                p => p.nom === j.nom
+            )
             ? match.tracker.equipes.id1
             : match.tracker.equipes.id2;
 
-        match.tracker.joueurs[key].equipe = equipe;
+
+        if (match.tracker.joueurs[j.nom]) {
+
+            match.tracker.joueurs[j.nom].equipe = equipe;
+
+        }
+
     }
 
-    // ============================================================
-    // Attribution vis-à-vis miroir
-    // ============================================================
 
+
+    // VIS-A-VIS
     for (const j of allPlayers) {
 
-        const team1 = (match.lineup1 || []).includes(j);
 
-        const key = `${j.nom}_${team1 ? "A" : "B"}`;
-
-        const snap = match.tracker.joueurs[key];
+        const snap = match.tracker.joueurs[j.nom];
 
         if (!snap) continue;
 
-        const opponentTeam = team1
+
+        const opponentTeam =
+            (match.lineup1 || []).some(
+                p => p.nom === j.nom
+            )
             ? match.lineup2
             : match.lineup1;
 
+
         const vis = findVisAVis(j, opponentTeam);
 
+
         if (vis) {
+
             snap.visAVis = vis.nom;
+
         }
+
     }
+
 }
+
 
 
 // ================================================================
