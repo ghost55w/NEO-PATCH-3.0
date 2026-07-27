@@ -6472,6 +6472,53 @@ if (isTackleAction) {
     }
 }
 
+// 📍 CONTRÔLE DIRECTION TACLE
+
+const ballonInfo =
+    trackerBalle(
+        match,
+        attacker,
+        defender
+    );
+
+
+if (
+    ballonInfo &&
+    !verifierInterventionDirection(
+        defenseText,
+        ballonInfo.position
+    )
+){
+
+    match.ballHolder =
+        attacker.nom;
+
+
+    match.joueurTour =
+        attacker.id || attacker.jid;
+
+
+    return {
+
+        ok:true,
+
+        type:
+        "BAD_TACKLE_DIRECTION",
+
+        attacker,
+        defender,
+
+
+        msg:
+`❌ ${defender.nom} tente un tacle dans une mauvaise direction.
+
+⚡ ${attacker.nom} continue son action.`
+
+    };
+
+}
+    
+
 // 🛡️ DÉTECTION : TENDRE LE PIED (UNIQUEMENT EN RÉPONSE À UN DRIBBLE)
 
 let detectedIntercept = null;
