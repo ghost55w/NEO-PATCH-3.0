@@ -6660,6 +6660,13 @@ if (isInterceptAction) {
 
     
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
+
+console.log({
+    isDribbleAction,
+    detectedDribble,
+    isTackleAction,
+    detectedTackle
+});    
 if (isDribbleAction && isTackleAction) {
 
     const attackStat = atkStats.dri || 50;
