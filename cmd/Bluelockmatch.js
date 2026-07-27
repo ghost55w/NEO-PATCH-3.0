@@ -5873,13 +5873,6 @@ const defense = action;
 // ⚠️ VALIDATION
 if (!match.pendingAttack) return false;
 
-// ⚔️ RESOLUTION DUEL
-const res = await handleDuelMatch(
-    match,
-    match.pendingAttack,
-    defense
-);
-
  // ✅ Validation du déplacement après résolution
 if (res.ok) {
 
