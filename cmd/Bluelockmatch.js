@@ -255,54 +255,62 @@ function initTracker(match) {
 
 
     const allPlayers = [
-        ...(match.lineup1 || []),
-        ...(match.lineup2 || [])
-    ];
+    ...(match.lineup1 || []).map(j => ({ ...j, camp: "A" })),
+    ...(match.lineup2 || []).map(j => ({ ...j, camp: "B" }))
+];
 
 
     // INIT JOUEURS
     for (const j of allPlayers) {
 
-        if (!match.tracker.joueurs[j.nom]) {
+    const key = `${j.nom}_${j.camp}`;
 
-            trackerInitJoueur(match, j);
+    if (!match.tracker.joueurs[key]) {
 
-        }
-
-
-        const equipe =
-            (match.lineup1 || []).some(
-                p => p.nom === j.nom
-            )
-            ? match.tracker.equipes.id1
-            : match.tracker.equipes.id2;
-
-
-        if (match.tracker.joueurs[j.nom]) {
-
-            match.tracker.joueurs[j.nom].equipe = equipe;
-
-        }
+        trackerInitJoueur(match, j);
 
     }
 
 
+        const equipe =
+    j.camp === "A"
+        ? match.tracker.equipes.id1
+        : match.tracker.equipes.id2;
+
+
+        if (match.tracker.joueurs[key]) {
+
+    match.tracker.joueurs[key].equipe = equipe;
+
+}
+
+    }
+
+for (const [key, j] of Object.entries(match.tracker.joueurs)) {
+    console.log(
+        key,
+        "nom =", j.nom,
+        "camp =", j.camp,
+        "poste =", j.poste,
+        "zone =", j.zone,
+        "position =", j.position
+    );
+}
 
     // VIS-A-VIS
     for (const j of allPlayers) {
 
 
-        const snap = match.tracker.joueurs[j.nom];
+        const key = `${j.nom}_${j.camp}`;
+const snap = match.tracker.joueurs[key];
 
         if (!snap) continue;
 
 
-        const opponentTeam =
-            (match.lineup1 || []).some(
-                p => p.nom === j.nom
-            )
-            ? match.lineup2
-            : match.lineup1;
+       const opponentTeam =
+    j.camp === "A"
+        ? match.lineup2
+        : match.lineup1; 
 
 
         const vis = findVisAVis(j, opponentTeam);
@@ -328,39 +336,30 @@ function trackerInitJoueur(match, joueur) {
     if (!match.tracker) return;
 
 
-    // Détermination du camp réel
-    const team1 =
-        (match.lineup1 || []).some(
-            p => p.nom === joueur.nom
-        );
+    // Camp transmis par le lineup
+const camp = joueur.camp;
 
+// Clé unique joueur
+const key = `${joueur.nom}_${camp}`;
 
-    const camp = team1 ? "A" : "B";
+// Position initiale selon poste + camp
+const pos = getPositionDepart(
+    joueur.poste,
+    camp
+);
 
+match.tracker.joueurs[key] = {
 
-    // Clé unique joueur
-const key = joueur.nom;
+    nom: joueur.nom,
 
-    // Position initiale selon poste + camp
-    const pos = getPositionDepart(
-        joueur.poste,
-        camp
-    );
+    poste: joueur.poste,
 
-
-    match.tracker.joueurs[key] = {
-
-        nom: joueur.nom,
-
-        poste: joueur.poste,
-
-
-        equipe:
-            joueur.equipe ||
-            (team1
-                ? match.team1Name
-                : match.team2Name) ||
-            "?",
+    equipe:
+        joueur.equipe ||
+        (camp === "A"
+            ? match.team1Name
+            : match.team2Name) ||
+        "?",
 
 
         equipeNom:
