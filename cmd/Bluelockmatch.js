@@ -614,12 +614,11 @@ else {
         t.balle.zone = zone;
     }
 
-
     if (secteur) {
         t.balle.secteur = secteur;
     }
 
-}
+
     return {
         holder: t.balle.holder,
 
@@ -631,6 +630,9 @@ else {
         zone: t.balle.zone,
         secteur: t.balle.secteur
     };
+
+} 
+    
 
 // ================================================================
 // SECTION 6 : NOUVEAU TOUR
