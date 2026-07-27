@@ -5531,6 +5531,10 @@ if (
         duel.defensePave,
         duel.responseText
     );
+    console.log("===== RESULT DUEL =====");
+console.log(result);
+console.log("ATTACKER:", attacker?.nom);
+console.log("DEFENDER:", defender?.nom);
 
     // ==============================
     // 📊 STATS DUEL
