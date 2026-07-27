@@ -7048,25 +7048,9 @@ const chaseKeywords = [
     "revient sur"
 ];
 
-let isChase =
-    chaseKeywords.some(
-        k =>
-            atk.includes(k) ||
-            def.includes(k)
-    ) ||
-    (
-        extractDistance(atk) &&
-        extractDistance(atk) > 2.5
-    );
-
-// 🔒 RESTRICTIONS CHASE
-const distance =
-    extractDistance(atk) || 1;
-
-// ❌ pas de chase proche
-if (distance <= 2) {
-    isChase = false;
-}
+const isChase = chaseKeywords.some(
+    k => atk.includes(k) || def.includes(k)
+);
 
 // ❌ pas de chase ballon contrôlé
 if (
