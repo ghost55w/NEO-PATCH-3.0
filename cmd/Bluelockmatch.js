@@ -3951,6 +3951,255 @@ function evaluerPave(text, contexte = {}) {
     return Math.round(note);
 }
 
+// 📍 VÉRIFICATION DIRECTION INTERVENTION DÉFENSIVE
+
+function verifierInterventionDirection(
+    text,
+    ballonPosition
+){
+
+    const t = text.toLowerCase();
+
+
+    // ⚽ BALLON À DROITE DU DÉFENSEUR
+
+    if (ballonPosition === "droite") {
+
+
+        // Intervention vers la gauche ❌
+        if (
+            t.includes("gauche") &&
+            !t.includes("diagonale droite")
+        ){
+
+            return false;
+
+        }
+
+
+        // Intervention devant sans viser le côté du ballon ❌
+        if (
+            (
+                t.includes("vers l'avant") ||
+                t.includes("devant lui")
+            )
+            &&
+            !t.includes("droite")
+        ){
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // ⚽ BALLON À GAUCHE DU DÉFENSEUR
+
+    if (ballonPosition === "gauche") {
+
+
+        // Intervention vers la droite ❌
+        if (
+            t.includes("droite") &&
+            !t.includes("diagonale gauche")
+        ){
+
+            return false;
+
+        }
+
+
+        // Intervention devant sans viser le côté du ballon ❌
+        if (
+            (
+                t.includes("vers l'avant") ||
+                t.includes("devant lui")
+            )
+            &&
+            !t.includes("gauche")
+        ){
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // ⚽ BALLON DEVANT
+
+    if (ballonPosition === "avant") {
+
+
+        if (
+            t.includes("derrière") ||
+            t.includes("arrière")
+        ){
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // ⚽ BALLON DERRIÈRE
+
+    if (ballonPosition === "arrière") {
+
+
+        if (
+            t.includes("vers l'avant") ||
+            t.includes("devant lui")
+        ){
+
+            return false;
+
+        }
+
+    }
+
+
+
+    return true;
+
+}
+
+// 🦶 BLUEPRINT INTERCEPTION PIED TENDU
+
+const INTERCEPT_BLUEPRINTS = {
+
+    "pied tendu": {
+
+        actions: [
+
+            "tend le pied",
+            "tend son pied",
+            "met le pied",
+            "pied tendu"
+
+        ],
+
+
+        directions: [
+
+            "vers l'avant",
+            "devant lui",
+
+            "à droite",
+            "sur le côté droit",
+
+            "à gauche",
+            "sur le côté gauche",
+
+            "diagonale droite",
+            "diagonale gauche",
+
+            "diagonale avant droite",
+            "diagonale avant gauche",
+
+            "diagonale arrière droite",
+            "diagonale arrière gauche",
+
+            "derrière lui"
+
+        ],
+
+
+        contacts: [
+
+            "intérieur du pied",
+            "extérieur du pied",
+            "pointe du pied",
+            "semelle",
+
+            "pied droit",
+            "pied gauche"
+
+        ]
+
+    }
+
+};
+
+function validateInterceptBlueprint(
+    interceptType,
+    text
+){
+
+    const t = text.toLowerCase();
+
+
+    const bp =
+        INTERCEPT_BLUEPRINTS["pied tendu"];
+
+
+    const hasAction =
+        bp.actions.some(w =>
+            t.includes(w)
+        );
+
+
+    const hasDirection =
+        bp.directions.some(w =>
+            t.includes(w)
+        );
+
+
+    const hasContact =
+        bp.contacts.some(w =>
+            t.includes(w)
+        );
+
+
+    let similarity = 0;
+
+
+    if (hasAction)
+        similarity += 40;
+
+
+    if (hasDirection)
+        similarity += 30;
+
+
+    if (hasContact)
+        similarity += 30;
+
+
+
+    return {
+
+        valid:
+            hasAction &&
+            hasDirection,
+
+
+        similarity,
+
+
+        paveNote:
+            similarity / 10,
+
+
+        reason:
+            !hasDirection
+            ? "La direction du pied n'est pas précisée."
+            :
+            !hasContact
+            ? "La surface de contact n'est pas précisée."
+            :
+            "Intervention correcte."
+
+    };
+
+}
+
+
             
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -6223,8 +6472,115 @@ if (isTackleAction) {
     }
 }
 
-    
+// 🛡️ DÉTECTION : TENDRE LE PIED (UNIQUEMENT EN RÉPONSE À UN DRIBBLE)
 
+let detectedIntercept = null;
+
+// ⚠️ Ne peut exister que si l'attaquant effectue un dribble
+if (isDribbleAction) {
+
+    const interceptKeywords = [
+    "tend le pied",
+    "tend son pied",
+    "tend le pied droit",
+    "tend le pied gauche",
+    "tend son pied droit",
+    "tend son pied gauche",
+    "met le pied",
+    "pied tendu",
+    "intérieur du pied",
+    "extérieur du pied"
+];
+
+    detectedIntercept = interceptKeywords.find(k =>
+        def.includes(k)
+    );
+}
+
+const isInterceptAction = !!detectedIntercept;
+// 📏 PORTÉE MAXIMALE : PIED TENDU (1 m)
+
+if (isInterceptAction) {
+
+    const distance =
+        extractDistance(atk) || 0;
+
+    if (distance > 1) {
+
+        match.ballHolder = attacker.nom;
+
+        const attackerId =
+            attacker.id || attacker.jid;
+
+        match.joueurTour = attackerId;
+        match.defender = attackerId;
+        match.waitingDefenseFrom = null;
+
+        return {
+            ok: true,
+            type: "BAD_INTERCEPT_RANGE",
+            attacker,
+            defender,
+            msg:
+`❌ ${defender.nom} tend le pied, mais le ballon est hors de portée.
+
+⚡ ${attacker.nom} poursuit son dribble !`
+        };
+    }
+}
+    // 📍 CONTRÔLE DIRECTION PIED TENDU
+
+if (isInterceptAction) {
+
+
+    const ballonInfo =
+        trackerBalle(
+            match,
+            attacker,
+            defender
+        );
+
+
+    if (
+        ballonInfo &&
+        !verifierInterventionDirection(
+            defenseText,
+            ballonInfo.position
+        )
+    ){
+
+
+        match.ballHolder =
+            attacker.nom;
+
+
+        match.joueurTour =
+            attacker.id || attacker.jid;
+
+
+        return {
+
+            ok:true,
+
+            type:
+            "BAD_INTERCEPT_DIRECTION",
+
+            attacker,
+            defender,
+
+
+            msg:
+`❌ ${defender.nom} tend le pied dans la mauvaise direction.
+
+⚡ ${attacker.nom} garde le ballon.`
+
+        };
+
+    }
+
+}
+
+    
 // ⚽ PRIORITÉ 1 : DRIBBLE VS TACKLE (BLUEPRINT SYSTEM)
 if (isDribbleAction && isTackleAction) {
 
@@ -6375,6 +6731,85 @@ if (
 
     msg: `⚽🥅 ${defender.nom} remporte le duel et récupère le ballon...`
 };
+}
+
+// ⚽ PRIORITÉ 2 : DRIBBLE VS PIED TENDU
+
+if (isDribbleAction && isInterceptAction) {
+
+    const attackStat = atkStats.dri || 50;
+    const defenseStat = defStats.def || 50;
+
+    const attackScore =
+        dribbleCheck?.similarity || 0;
+
+    // ⭐ Même note de pavé que le tacle
+    const attackPave =
+        dribbleCheck?.paveNote || 0;
+
+    const defensePave =
+        dribbleCheck?.paveNote || 0;
+
+    const attackPavePoints =
+        attackPave * 5;
+
+    const defensePavePoints =
+        defensePave * 5;
+
+    const attackTotal =
+        attackStat +
+        attackScore +
+        attackPavePoints;
+
+    let defenseTotal =
+        defenseStat +
+        defensePavePoints;
+
+    // 📊 Comparaison Def vs Dri
+    if (defenseStat < attackStat) {
+
+        defenseTotal = -9999;
+
+    } else if (defenseStat === attackStat) {
+
+        defenseTotal += 0.5;
+    }
+
+    const winner =
+        attackTotal > defenseTotal
+            ? "attacker"
+            : "defender";
+
+    if (winner === "attacker") {
+
+        match.joueurTour =
+            attacker.id || attacker.jid;
+
+        return {
+            ok: true,
+            type: "INTERCEPT_FAIL",
+            attacker,
+            defender,
+            attackTotal,
+            defenseTotal,
+            msg:
+`⚡ ${attacker.nom} élimine le pied tendu de ${defender.nom} et conserve le ballon.`
+        };
+    }
+
+    match.joueurTour =
+        defender.id || defender.jid;
+
+    return {
+        ok: false,
+        type: "INTERCEPT_SUCCESS",
+        attacker,
+        defender,
+        attackTotal,
+        defenseTotal,
+        msg:
+`🦶 ${defender.nom} tend parfaitement le pied et coupe le ballon !`
+    };
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
