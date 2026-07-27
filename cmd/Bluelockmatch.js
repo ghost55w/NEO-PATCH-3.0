@@ -5873,37 +5873,22 @@ const defense = action;
 // ⚠️ VALIDATION
 if (!match.pendingAttack) return false;
 
- // ✅ Validation du déplacement après résolution
-if (res.ok) {
+// ⚔️ RESOLUTION DUEL
+const res = await handleDuelMatch(
+    match,
+    match.pendingAttack,
+    defense
+);
 
-    const attackerPlayer =
-        [...(match.lineup1 || []), ...(match.lineup2 || [])]
-        .find(p => p.nom === match.pendingMove?.joueur);
-
-    if (
-        match.pendingMove &&
-        attackerPlayer
-    ) {
-
-        trackerAppliquerDeplacement(
-            match,
-            attackerPlayer.nom,
-            match.pendingMove.details
-        );
-
-        trackerAction(
-            match,
-            attackerPlayer,
-            "deplacement",
-            match.pendingMove.details
-        );
-    }
-}
+console.log("===== RESULT DUEL =====");
+console.log(res);
 
 // 🧹 Nettoyage
-match.pendingMove = null;   
+match.pendingMove = null;
 
 match.hasPlayed = true;
+
+return true;
 
 // 🔥 MATCH UP INIT ⚽🆚 
 if (res && res.type === "PASSIVE_BLOCK") {
