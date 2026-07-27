@@ -567,8 +567,24 @@ if (holderKey) {
     joueur.hasBalle = true;
 
     // La balle suit le joueur
+    if (
+    joueur.position &&
+    typeof joueur.position.x === "number" &&
+    typeof joueur.position.y === "number"
+) {
+
     t.balle.x = joueur.position.x;
     t.balle.y = joueur.position.y;
+
+}
+else {
+
+    console.log(
+        "⚠️ Position joueur absente pour trackerBalle :",
+        joueur.nom
+    );
+
+}
 
     console.log({
         zone: joueur.zone,
@@ -604,6 +620,17 @@ if (holderKey) {
     }
 
 }
+    return {
+        holder: t.balle.holder,
+
+        position: {
+            x: t.balle.x,
+            y: t.balle.y
+        },
+
+        zone: t.balle.zone,
+        secteur: t.balle.secteur
+    };
 
 // ================================================================
 // SECTION 6 : NOUVEAU TOUR
@@ -6473,12 +6500,10 @@ if (isTackleAction) {
 }
 
 // 📍 CONTRÔLE DIRECTION TACLE
-
 const ballonInfo =
     trackerBalle(
         match,
-        attacker,
-        defender
+        attacker.nom
     );
 
 
@@ -7029,9 +7054,6 @@ const chaseKeywords = [
     "rattrape",
     "rattraper",
     "course",
-    "sprinte",
-    "court",
-    "chasse",
     "revient sur"
 ];
 
