@@ -348,6 +348,24 @@ const pos = getPositionDepart(
     camp
 );
 
+// Copie de la position de départ
+let x = pos.x;
+let y = pos.y;
+
+// Décalage des DC (2 m d'écart)
+if (joueur.poste === "DC") {
+
+    const nbDC = Object.values(match.tracker.joueurs)
+        .filter(p => p.camp === camp && p.poste === "DC")
+        .length;
+
+    if (nbDC === 0) {
+        x -= 1; // DC gauche
+    } else {
+        x += 1; // DC droit
+    }
+}
+    
 match.tracker.joueurs[key] = {
 
     nom: joueur.nom,
@@ -387,15 +405,14 @@ match.tracker.joueurs[key] = {
 
 
         position:{
-            x: pos.x,
-            y: pos.y
-        },
+    x,
+    y
+},
 
-
-        positionDepart:{
-            x: pos.x,
-            y: pos.y
-        },
+positionDepart:{
+    x,
+    y
+},
 
 
         zoneDepart:{
