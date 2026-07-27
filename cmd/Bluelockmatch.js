@@ -631,7 +631,13 @@ function trackerLog(match) {
         lines.push("─".repeat(40));
 
         for (const j of lineup) {
-            const snap = t.joueurs[j.nom];
+            const camp =
+    (match.lineup1 || []).includes(j)
+        ? "A"
+        : "B";
+
+const key = `${j.nom}_${camp}`;
+const snap = t.joueurs[key];
             if (!snap) {
                 lines.push(`  ⚠️ ${j.nom} — non tracké (position inconnue)`);
                 continue;
