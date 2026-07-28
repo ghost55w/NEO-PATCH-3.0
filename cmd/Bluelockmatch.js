@@ -2352,16 +2352,35 @@ function parseActionSequence(actionText, match, mode = "attack") {
 
     const lower = actionText.toLowerCase();
 
-    const playerObj = players.find(p =>
+    let playerObj = null;
+
+if (mode === "attack") {
+    playerObj = players.find(
+        p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
+    );
+} else {
+    playerObj = players.find(
+        p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
+    );
+}
+
+// Fallback si besoin
+if (!playerObj) {
+    playerObj = players.find(p =>
         lower.includes(pureName(p.nom))
     );
-
+}
+    
     if (!playerObj) return [];
 
-    const targetObj = players.find(p =>
-        p.nom !== playerObj.nom &&
-        lower.includes(pureName(p.nom))
-    );
+   const targetObj =
+    mode === "attack"
+        ? players.find(
+              p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
+          )
+        : players.find(
+              p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
+          ); 
 
     const found = [];
 
