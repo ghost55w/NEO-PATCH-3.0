@@ -2521,28 +2521,84 @@ actions.push(actionData);
 
 
 // 📊 NOTE DU PAVÉ
-function noterPave(action) {
+// 📊 NOTE DU PAVÉ (sur 10)
+function noterPave(action, contexte = {}) {
 
-    let score = 5;
-
-    if (!action) return 0;
+    if (!action) return 1;
 
     const txt = action.toLowerCase();
 
-    // richesse
-    if (txt.length > 80) score += 1;
-    if (txt.length > 150) score += 1;
+    let score = 1; // minimum
 
-    // éléments techniques
-    if (txt.includes("passe")) score += 1;
-    if (txt.includes("contrôle") || txt.includes("controle")) score += 1;
-    if (txt.includes("zone")) score += 1;
-    if (txt.match(/\d+\s?m/)) score += 1;
+    // ==========================
+    // 🧠 Cohérence (0 → 4)
+    // ==========================
 
-    // précision vocabulaire
-    if (txt.includes("intérieur") || txt.includes("extérieur")) score += 1;
+    // Réagit à l'adversaire
+    if (
+        contexte.adversaire &&
+        txt.includes(contexte.adversaire.toLowerCase())
+    ) score += 1;
 
-    return Math.min(score, 10);
+    // Mention du ballon
+    if (
+        txt.includes("ballon") ||
+        txt.includes("balle")
+    ) score += 1;
+
+    // Mention de la distance
+    if (/\d+\s?m/.test(txt))
+        score += 1;
+
+    // Mention d'une direction ou zone
+    if (
+        txt.includes("gauche") ||
+        txt.includes("droite") ||
+        txt.includes("axe") ||
+        txt.includes("centre") ||
+        txt.includes("surface") ||
+        txt.includes("couloir")
+    ) score += 1;
+
+
+    // ==========================
+    // ⚽ Détails techniques (0 → 3)
+    // ==========================
+
+    if (
+        txt.includes("intérieur") ||
+        txt.includes("extérieur") ||
+        txt.includes("semelle") ||
+        txt.includes("pointe") ||
+        txt.includes("talon")
+    ) score += 1;
+
+    if (
+        txt.includes("pied") ||
+        txt.includes("épaule") ||
+        txt.includes("genou") ||
+        txt.includes("bras")
+    ) score += 1;
+
+    if (
+        txt.includes("vmax") ||
+        txt.includes("vitesse") ||
+        txt.includes("accélère") ||
+        txt.includes("ralentit")
+    ) score += 1;
+
+
+    // ==========================
+    // 📝 Richesse (0 → 2)
+    // ==========================
+
+    if (txt.length >= 80)
+        score += 1;
+
+    if (txt.length >= 160)
+        score += 1;
+
+    return Math.max(1, Math.min(10, score));
 }
 
 // ✅ VALIDATION DES ACTIONS
