@@ -2255,7 +2255,7 @@ function extraireMouvementAction(txt, type) {
     return movement;
 }
 
-// 🧠 PARSE ACTION SEQUENCE V3
+//i PARSE ACTION SEQUENCE V3
 function parseActionSequence(actionText, match, mode = "attack") {
 
     const players = [
@@ -2356,7 +2356,20 @@ function parseActionSequence(actionText, match, mode = "attack") {
 let playerObj = arguments[3] || null;
 let targetObj = arguments[4] || null;
 
-// 🔄 Fallback uniquement si aucun joueur n'a été fourni
+// 🔥 Priorité absolue : phaseDuel
+if (!playerObj && match.phaseDuel?.active) {
+    playerObj =
+        mode === "attack"
+            ? match.phaseDuel.attacker
+            : match.phaseDuel.defender;
+
+    targetObj =
+        mode === "attack"
+            ? match.phaseDuel.defender
+            : match.phaseDuel.attacker;
+}
+
+// 🔄 Dernier fallback : recherche dans le texte
 if (!playerObj) {
 
     playerObj = players.find(p =>
