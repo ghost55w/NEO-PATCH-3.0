@@ -2012,10 +2012,18 @@ function validateActionSyntax(texte) {
 // 🏃 CHASE SYSTEM
 function resolveChase(match, attacker, defender, ball, actionA, actionB) {
 
-    // Sécurité ball
+    // Sécurité ballon
     if (!ball || !ball.position) {
-        ball = { holder: null, state: "loose", position: { x: 15, y: 30 } };
+        ball = {
+            holder: null,
+            state: "loose",
+            position: { x: 15, y: 30 }
+        };
     }
+
+    // Sécurité positions joueurs
+    const atkPos = attacker.position || { x: 15, y: 30 };
+    const defPos = defender.position || { x: 15, y: 30 };
 
     const checkA = validateActionSyntax(actionA);
     const checkB = validateActionSyntax(actionB);
@@ -2023,8 +2031,8 @@ function resolveChase(match, attacker, defender, ball, actionA, actionB) {
     const speedA = computeSpeed(attacker, checkA.speedMode || "normal");
     const speedB = computeSpeed(defender, checkB.speedMode || "normal");
 
-    let distA = getDistance(attacker.position || { x: 0, y: 0 }, ball.position);
-    let distB = getDistance(defender.position || { x: 0, y: 0 }, ball.position);
+    let distA = getDistance(atkPos, ball.position);
+    let distB = getDistance(defPos, ball.position);
 
     const gainA = speedA * 0.1;
     const gainB = speedB * 0.1;
@@ -2032,12 +2040,12 @@ function resolveChase(match, attacker, defender, ball, actionA, actionB) {
     distA = Math.max(0, distA - gainA);
     distB = Math.max(0, distB - gainB);
 
-    // 🛡️ INTERCEPTION DEFENSEUR
+    // 🛡️ INTERCEPTION
     if (distB <= 1 && distB < distA) {
 
         ball.holder = defender.nom;
         ball.state = "controle";
-        ball.position = { ...defender.position };
+        ball.position = { ...defPos };
 
         return {
             winner: defender.nom,
@@ -2045,12 +2053,12 @@ function resolveChase(match, attacker, defender, ball, actionA, actionB) {
         };
     }
 
-    // ⚽ CONSERVATION ATTAQUANT
+    // ⚽ CONSERVATION
     if (distA <= 1 && distA < distB) {
 
         ball.holder = attacker.nom;
         ball.state = "controle";
-        ball.position = { ...attacker.position };
+        ball.position = { ...atkPos };
 
         return {
             winner: attacker.nom,
@@ -2058,11 +2066,11 @@ function resolveChase(match, attacker, defender, ball, actionA, actionB) {
         };
     }
 
-    // 🔄 BALLON LIBRE
+    // 🔄 POURSUITE
     ball.state = "loose";
     ball.position = {
-        x: (attacker.position.x + defender.position.x) / 2,
-        y: (attacker.position.y + defender.position.y) / 2
+        x: (atkPos.x + defPos.x) / 2,
+        y: (atkPos.y + defPos.y) / 2
     };
 
     return {
