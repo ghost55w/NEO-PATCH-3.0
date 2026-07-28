@@ -2350,38 +2350,32 @@ function parseActionSequence(actionText, match, mode = "attack") {
     // Tous les mots-clés
     const catalogue = [...attackActions, ...defenseActions];
 
-    const lower = actionText.toLowerCase();
+  const lower = actionText.toLowerCase();
 
-    let playerObj = null;
+// 🎯 Utiliser les joueurs déjà connus si disponibles
+let playerObj = arguments[3] || null;
+let targetObj = arguments[4] || null;
 
-if (mode === "attack") {
-    playerObj = players.find(
-        p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
-    );
-} else {
-    playerObj = players.find(
-        p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-    );
-}
-
-// Fallback si besoin
+// 🔄 Fallback uniquement si aucun joueur n'a été fourni
 if (!playerObj) {
+
     playerObj = players.find(p =>
         lower.includes(pureName(p.nom))
-    );
+    ) || null;
+
 }
+
+if (!targetObj && playerObj) {
+
+    targetObj = players.find(p =>
+        p.nom !== playerObj.nom &&
+        lower.includes(pureName(p.nom))
+    ) || null;
+
+}
+
+if (!playerObj) return [];
     
-    if (!playerObj) return [];
-
-   const targetObj =
-    mode === "attack"
-        ? players.find(
-              p => normalizeJid(p.id || p.jid) === normalizeJid(match.defender)
-          )
-        : players.find(
-              p => normalizeJid(p.id || p.jid) === normalizeJid(match.attacker)
-          ); 
-
     const found = [];
 
     for (const action of catalogue) {
