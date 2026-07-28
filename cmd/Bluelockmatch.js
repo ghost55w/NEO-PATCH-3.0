@@ -6077,6 +6077,12 @@ Il reste *1 MINUTE* pour jouer le duel !
 }
     
 // 📉 FALLBACK : DEFENSE ACTIVE
+console.log("=== DEFENSE RESUME ===");
+console.log("match.attacker :", match.attacker);
+console.log("match.defender :", match.defender);
+console.log("phase attacker :", match.phaseDuel?.attacker?.nom);
+console.log("phase defender :", match.phaseDuel?.defender?.nom);
+console.log("texte :", defense);    
 const resumeDefense = genererResumeFull(
     defense,
     match,
