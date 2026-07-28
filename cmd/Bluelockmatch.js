@@ -5544,13 +5544,13 @@ ${duelResult.msg}
 ⚡ ${displayAttacker.nom}
 ├ 📊 Dribble stats : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
 ├ ⚽ Dribble : ${duelResult.attackScore ?? 0}
-├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10 (+${duelResult.attackPavePoints ?? 0})
+├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10
 └ Total : ${duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50)} ${atkWon ? "✅" : "❌"}
 
 🛡️ ${displayDefender.nom}
 ├ 📊 Défense stats : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
 ├ ⚽ Tacle : ${duelResult.defenseScore ?? 0}
-├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10 (+${duelResult.defensePavePoints ?? 0})
+├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10
 └ Total : ${duelResult.defenseTotal ?? (displayDefender.stats?.def || 50)} ${atkWon ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(nextId)} NEXT
@@ -5558,8 +5558,8 @@ ${duelResult.msg}
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
     mentions: [nextId]
-});    
-
+});
+    
 // 🧹 CLEAN
 match.phaseDuel = null;
 match.pendingAttack = null;
@@ -5681,7 +5681,7 @@ console.log("DEFENDER:", defender?.nom);
     trackerLog(match);
 
     await ovl.sendMessage(chat, {
-        text:
+    text:
 `🛡️⚽ RÉSOLUTION DU DUEL !
 
 ${result.msg}
@@ -5689,21 +5689,21 @@ ${result.msg}
 ⚡ ${attacker.nom}
 ├ 📊 Dribble stats : ${result.attackStat}
 ├ ⚽ Dribble : ${result.attackScore}
-├ ⭐ Note pavé : ${result.attackPave ?? 0}/10 (+${result.attackPavePoints ?? 0})
+├ ⭐ Note pavé : ${result.attackPave ?? 0}/10
 └ Total : ${result.attackTotal} ${result.ok ? "✅" : "❌"}
 
 🛡️ ${defender.nom}
 ├ 📊 Défense stats : ${result.defenseStat}
 ├ ⚽ Tacle : ${result.defenseScore}
-├ ⭐ Note pavé : ${result.defensePave ?? 0}/10 (+${result.defensePavePoints ?? 0})
+├ ⭐ Note pavé : ${result.defensePave ?? 0}/10
 └ Total : ${result.defenseTotal} ${result.ok ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(winnerId)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions: [winnerId]
-    });
+    mentions: [winnerId]
+});
 
     // 🧹 Nettoyage
     match.phaseDuel = null;
@@ -6881,12 +6881,20 @@ if (isDribbleAction && isInterceptAction) {
         dribbleCheck?.similarity || 0;
 
     // ⭐ Même note de pavé que le tacle
-    const attackPave =
-        dribbleCheck?.paveNote || 0;
+    const attackPave = noterPave(
+    responseText || attaqueText,
+    attaqueText,
+    defenseText,
+    "attack"
+);
 
-    const defensePave =
-        dribbleCheck?.paveNote || 0;
-
+const defensePave = noterPave(
+    defenseText,
+    attaqueText,
+    defenseText,
+    "defense"
+);
+    
     const attackPavePoints =
         attackPave * 5;
 
