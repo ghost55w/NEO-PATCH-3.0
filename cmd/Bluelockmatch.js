@@ -486,8 +486,18 @@ function trackerAction(match, joueur, type, details = {}) {
     snap.stats.actions++;
     if (type === "passe") { snap.stats.passes++; t.stats.passes++; }
     if (type === "tir") { snap.stats.tirs++; t.stats.tirs++; }
-    if (type === "duel") { snap.stats.duels++; t.stats.duels++; }
-    if (type === "duel_gagne") snap.stats.duelsGagnes++;
+    if (
+    type === "duel" ||
+    type === "duel_gagne" ||
+    type === "duel_perdu"
+) {
+    snap.stats.duels++;
+    t.stats.duels++;
+}
+
+if (type === "duel_gagne") {
+    snap.stats.duelsGagnes++;
+}
     if (type === "deplacement") snap.stats.deplacements++;
 
     // --- Note ---
@@ -3911,6 +3921,10 @@ function appliquerCamp(position, team) {
 
 function trackerAppliquerDeplacement(match, joueurNom, details) {
 
+    console.log("===== APPLICATION DEPLACEMENT =====");
+    console.log("Joueur :", joueurNom);
+    console.log("Details :", details);
+
     if (!match.tracker || !details) return;
 
     const snap = match.tracker.joueurs[joueurNom];
@@ -5452,6 +5466,14 @@ setTimeout(async () => {
 match.ballHolderPlayer = winnerPlayer.nom;
 match.ballHolderJid = winnerId;
 match.joueurTour = winnerId;
+
+    // ✅ Appliquer les déplacements validés
+console.log("===== AVANT APPLICATION MOVE =====");
+console.log("pendingMove :", match.pendingMove);
+console.log("pendingDefenseMove :", match.pendingDefenseMove);
+console.log("duelResult :", duelResult.ok);
+console.log("attacker :", duelAttacker.nom);
+console.log("defender :", duelDefender.nom);
 
     // ✅ Appliquer les déplacements validés
 if (duelResult.ok) {
