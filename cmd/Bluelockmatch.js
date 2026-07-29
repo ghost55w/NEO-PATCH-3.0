@@ -6924,7 +6924,7 @@ const defensePave = noterPave(
     (attackScore / 10) +
     attackPavePoints;
 
-const defenseTotal =
+let defenseTotal =
     defenseStat +
     defensePavePoints;
 
