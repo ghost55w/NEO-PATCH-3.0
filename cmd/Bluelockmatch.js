@@ -6888,8 +6888,45 @@ if (
 };
 }
 
-// ⚽ PRIORITÉ 2 : DRIBBLE VS PIED TENDU
+// ⚽ PRIORITÉ 2: DRIBBLE VS DÉFENSE PASSIVE
+if (isDribbleAction && !isTackleAction && !isInterceptAction) {
 
+    const attackerId = attacker.id || attacker.jid;
+
+    const attackStat = atkStats.dri || 50;
+    const attackScore = dribbleCheck?.similarity || 0;
+    const attackPave = dribbleCheck?.paveNote || 0;
+
+    const attackTotal =
+        attackStat +
+        attackScore +
+        (attackPave * 5);
+
+
+    match.joueurTour = attackerId;
+
+    return {
+        ok: true,
+        type: "PASSIVE_DEFENSE",
+
+        attacker,
+        defender,
+
+        attackStat,
+        attackScore,
+        attackPave,
+
+        attackTotal,
+        defenseTotal: 0,
+
+        msg:
+`⚡ ${attacker.nom} élimine ${defender.nom} !
+🛡️ ${defender.nom} reste passif et ne tente aucune intervention, laissant ${attacker.nom prendre l'espace.`
+    };
+}
+
+
+// ⚽ PRIORITÉ 3 : DRIBBLE VS PIED TENDU
 if (isDribbleAction && isInterceptAction) {
 
     const attackStat = atkStats.dri || 50;
