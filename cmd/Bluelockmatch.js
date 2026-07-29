@@ -6185,8 +6185,6 @@ match.phaseDuel = {
 
 let resume = "";
 
-const actionText = defense.toLowerCase();
-
 if (actionText.includes("tacle")) {
     resume = `${defender.nom} tente un tacle pour stopper l'action.`;
 }
