@@ -6614,7 +6614,6 @@ if (
 
         msg:
 `❌ ${defender.nom} tente un tacle dans une mauvaise direction.
-
 ⚡ ${attacker.nom} continue son action.`
 
     };
@@ -6673,7 +6672,6 @@ if (isInterceptAction) {
             defender,
             msg:
 `❌ ${defender.nom} tend le pied, mais le ballon est hors de portée.
-
 ⚡ ${attacker.nom} poursuit son dribble !`
         };
     }
@@ -6922,24 +6920,21 @@ const defensePave = noterPave(
         defensePave * 5;
 
     const attackTotal =
-        attackStat +
-        attackScore +
-        attackPavePoints;
+    attackStat +
+    (attackScore / 10) +
+    attackPavePoints;
 
-    let defenseTotal =
-        defenseStat +
-        defensePavePoints;
+const defenseTotal =
+    defenseStat +
+    defensePavePoints;
 
-    // 📊 Comparaison Def vs Dri
-    if (defenseStat < attackStat) {
+// 📊 Comparaison Def vs Dri
+if (defenseStat === attackStat) {
 
-        defenseTotal = -9999;
+    defenseTotal += 0.5;
 
-    } else if (defenseStat === attackStat) {
-
-        defenseTotal += 0.5;
-    }
-
+}
+    
     const winner =
         attackTotal > defenseTotal
             ? "attacker"
@@ -6951,30 +6946,46 @@ const defensePave = noterPave(
             attacker.id || attacker.jid;
 
         return {
-            ok: true,
-            type: "INTERCEPT_FAIL",
-            attacker,
-            defender,
-            attackTotal,
-            defenseTotal,
-            msg:
-`⚡ ${attacker.nom} élimine le pied tendu de ${defender.nom} et conserve le ballon.`
-        };
+    ok: true,
+    type: "INTERCEPT_FAIL",
+    attacker,
+    defender,
+
+    attackStat,
+    defenseStat,
+
+    attackPave,
+    defensePave,
+
+    attackTotal,
+    defenseTotal,
+
+    msg:
+`🦶 ${defender.nom} rate son interception ! ⚡ ${attacker.nom} a été plus rapide et conserve le ballon.`
+};
     }
 
     match.joueurTour =
         defender.id || defender.jid;
 
-    return {
-        ok: false,
-        type: "INTERCEPT_SUCCESS",
-        attacker,
-        defender,
-        attackTotal,
-        defenseTotal,
-        msg:
-`🦶 ${defender.nom} tend parfaitement le pied et coupe le ballon !`
-    };
+  return {
+    ok: false,
+    type: "INTERCEPT_SUCCESS",
+    attacker,
+    defender,
+
+    attackStat,
+    defenseStat,
+
+    attackPave,
+    defensePave,
+
+    attackTotal,
+    defenseTotal,
+
+    msg:
+`🦶 ${defender.nom} tend son pied au bon moment et stop le dribble⚽ !`
+};  
 }
     
 // 🧱 DÉFENSE PASSIVE SIMPLE
