@@ -6941,10 +6941,10 @@ if (isDribbleAction && !isTackleAction && !isInterceptAction) {
         attackTotal,
         defenseTotal: 0,
 
-        msg:
+msg:
 `⚡ ${attacker.nom} élimine ${defender.nom} !
-🛡️ ${defender.nom} reste passif et ne tente aucune intervention, laissant ${attacker.nom prendre l'espace.`
-    };
+🛡️ ${defender.nom} reste passif et ne tente aucune intervention, laissant ${attacker.nom} prendre l'espace.`
+};
 }
 
 
