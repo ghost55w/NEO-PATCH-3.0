@@ -3982,7 +3982,7 @@ function evaluerPave(text, contexte = {}) {
 
     const t = normalizeText(text);
 
-    let note = 10;
+    let note = 5;
 
 
     // ============================================================
@@ -4021,48 +4021,31 @@ function evaluerPave(text, contexte = {}) {
     // ✅ BONUS QUALITÉ
     // ============================================================
 
+// Description corporelle
+if (/(appui|centre de gravite|epaule|hanche|buste|genou)/i.test(t)) {
+    note += 1;
+}
 
-    // Description corporelle
-    if (
-        /(appui|centre de gravite|epaule|hanche|buste|genou)/i.test(t)
-    ) {
-        note += 1;
-    }
+// Gestion de l'espace
+if (/\d+\s?(cm|m)/i.test(t)) {
+    note += 1;
+}
 
+// Chronologie claire
+if (/(puis|ensuite|avant|apres|pendant|au moment)/i.test(t)) {
+    note += 1;
+}
 
-    // Gestion de l'espace
-    if (
-        /\d+\s?(cm|m)/i.test(t)
-    ) {
-        note += 1;
-    }
+// Vocabulaire football
+if (/(dribble|feinte|controle|acceleration|tacle|frappe|passe|appel)/i.test(t)) {
+    note += 1;
+}
 
-
-    // Chronologie claire
-    if (
-        /(puis|ensuite|avant|apres|pendant|au moment)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-    // Vocabulaire football
-    if (
-        /(dribble|feinte|controle|acceleration|tacle|frappe|passe|appel)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-    // Créativité technique
-    if (
-        /(enchaînement|variation|crochet|double contact|grand pont|roulette)/i.test(t)
-    ) {
-        note += 1;
-    }
-
-
-
+// Créativité technique
+if (/(enchaînement|variation|crochet|double contact|grand pont|roulette)/i.test(t)) {
+    note += 2;
+}
+    
     // Limite finale
     note = Math.max(0, Math.min(10, note));
 
