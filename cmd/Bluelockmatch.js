@@ -6157,7 +6157,27 @@ attacker.stats.lastAction = {
     type: "attaque",
     texte: match.pendingAttack
 };
-                           
+
+ let resume = "";
+
+const actionText = defense.toLowerCase();
+
+if (actionText.includes("tacle")) {
+    resume = `${defender.nom} tente un tacle pour stopper l'action.`;
+}
+else if (actionText.includes("intercepte")) {
+    resume = `${defender.nom} tente une interception.`;
+}
+else if (actionText.includes("bloque")) {
+    resume = `${defender.nom} tente de fermer l'espace.`;
+}
+else if (actionText.includes("contre")) {
+    resume = `${defender.nom} tente un contre défensif.`;
+}
+else {
+    resume = `${defender.nom} répond à l'action offensive.`;
+}
+    
 // 🔄 SOURCE UNIQUE : l'attaquant garde le ballon
 const attackerJid = attacker.id || attacker.jid || match.attacker;
 
@@ -6192,7 +6212,7 @@ await ovl.sendMessage(chat, {
 `*🛡️⚔️⚽ DÉFENSE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
-🎙️ RESUME♻️ : ${resumeDefense}
+🎙️ RESUME♻️ : ${resume}
 
 📊 NOTE DU PAVÉ : ${noteDefense}/10
 
