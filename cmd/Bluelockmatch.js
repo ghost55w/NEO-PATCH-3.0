@@ -7667,118 +7667,462 @@ async function handleDeplacements(match, joueur, texte) {
     };
 }
 
-
-    // ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
+  // ==========================================================
+  // 👾 ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
+  // ==========================================================
 async function handlePasses(match, action, joueur) {
 
     if (!action || !joueur) {
-        return { ok: false, erreur: "❌ Données invalides (passe)" };
+        return {
+            ok: false,
+            erreur: "❌ Données invalides (passe)"
+        };
     }
 
     const txt = action.toLowerCase();
 
+    // ==========================================================
+    // 📊 RÉCUPÉRATION DES STATS RÉELLES (cardsBlueLock)
+    // ==========================================================
+    const fichePasseur = cardsBlueLock.find(c =>
+        c.nom &&
+        c.nom.toLowerCase() === joueur.nom.toLowerCase()
+    );
+
+    if (!fichePasseur) {
+        return {
+            ok: false,
+            erreur: `❌ Impossible de trouver ${joueur.nom} dans cardsBlueLock.`
+        };
+    }
+
+    const statePasse = fichePasseur.stats?.pas || 50;
+
+    // ==========================================================
     // 🎯 TYPE DE PASSE
+    // ==========================================================
     let typePasse = null;
 
-    for (const type in TYPES_PASSES) {
+    for (const type of Object.keys(BLUEPRINT_PASSES)) {
+
         if (txt.includes(type)) {
+
             typePasse = type;
             break;
+
         }
+
     }
 
     if (!typePasse) {
-        return { ok: false, erreur: "❌ Type de passe non reconnu" };
+
+        return {
+            ok: false,
+            erreur: "❌ Type de passe non reconnu."
+        };
+
     }
 
-    // 📐 VALIDATION
-    const elementsObligatoires = [
-        /passe/,
-        /(intérieur du pied|extérieur du pied|pointe de pied|talon|tête)/,
-        /(gauche|droite|devant|derrière)/,
-        /(ras du sol|cm|m)/,
-        /\d+\s?m/,
-        /(pied|tête|torse)/
-    ];
+    const blueprint = BLUEPRINT_PASSES[typePasse];
 
-    for (const reg of elementsObligatoires) {
-        if (!reg.test(txt)) {
-            return { ok: false, erreur: "❌ Passe incomplète" };
-        }
+    // ==========================================================
+    // 📐 VALIDATION DE BASE
+    // ==========================================================
+    if (!txt.includes("passe")) {
+
+        return {
+            ok: false,
+            erreur: "❌ Aucune passe détectée."
+        };
+
     }
 
-    // 🧠 PRÉCISION
-    const modele = TYPES_PASSES[typePasse];
-    const mots = modele.toLowerCase().split(" ");
+    // Technique
+    const techniqueValide =
+        blueprint.techniques?.some(t =>
+            txt.includes(t.toLowerCase())
+        );
 
-    let score = 0;
-    mots.forEach(m => { if (txt.includes(m)) score++; });
+    if (!techniqueValide) {
 
-    const precision = Math.round((score / mots.length) * 100);
+        return {
+            ok: false,
+            erreur:
+                "❌ Technique de passe incorrecte."
+        };
 
-    if (precision < 60) {
-        return { ok: false, erreur: `❌ Passe mal exécutée (${precision}%)` };
     }
 
-    // 📏 DISTANCE
-    const dist = extraireDistance(txt);
+    // Direction
+    const directionValide =
+        blueprint.directions
+            ? blueprint.directions.some(d =>
+                txt.includes(d.toLowerCase())
+            )
+            : true;
 
-    if (dist && dist > 30) {
-        return { ok: false, erreur: "❌ Passe trop longue (>30m)" };
+    if (!directionValide) {
+
+        return {
+            ok: false,
+            erreur:
+                "❌ Direction de passe absente."
+        };
+
     }
 
-    // 🎯 INTERCEPTION
-    const visavis = joueur.visavis;
+    // Distance
+    const distance = extraireDistance(txt);
 
-    if (visavis) {
+    if (!distance) {
 
-        const chance =
-            precision < 80 ? 0.5 :
-            precision < 90 ? 0.3 : 0.15;
+        return {
+            ok: false,
+            erreur:
+                "❌ Distance de passe introuvable."
+        };
 
-        if (Math.random() < chance) {
-
-            match.possession =
-                match.possession === match.team1Nom
-                    ? match.team2Nom
-                    : match.team1Nom;
-
-            return {
-                ok: false,
-                interception: true,
-                message: `🛑 Interception par ${visavis.nom} !`
-            };
-        }
     }
 
- // 🎯 CIBLE DE LA PASSE
+    if (distance > 60) {
 
-const cibleNom = txt.match(/(?:vers|à|pour)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i)?.[1];
+        return {
+            ok: false,
+            erreur:
+                "❌ Passe impossible (>60m)."
+        };
+
+    }
+
+    // ==========================================================
+    // 🧠 SIMILARITY BLUEPRINT
+    // ==========================================================
+
+    const analyse = validatePassBlueprint(
+        typePasse,
+        txt
+    );
+
+    const similarity = analyse.similarity || 0;
+
+    let precision = 0;
+
+    if (similarity >= 70) {
+
+        precision = 100;
+
+    } else if (similarity >= 50) {
+
+        precision = 50;
+
+    } else {
+
+        precision = 0;
+
+    }
+
+    // ==========================================================
+    // 📊 NOTE DU PAVÉ
+    // ==========================================================
+
+    const notePave =
+        Math.max(
+            1,
+            Math.round(similarity / 10)
+        );
+
+    // ==========================================================
+    // 📏 QUALITÉ DE PASSE
+    // ==========================================================
+
+    let qualitePasse = 0;
+
+    if (distance <= blueprint.portee.excellente.max) {
+
+        qualitePasse = 100;
+
+    } else if (
+        blueprint.portee.correcte &&
+        distance <= blueprint.portee.correcte.max
+    ) {
+
+        qualitePasse = 80;
+
+    } else {
+
+        qualitePasse = 50;
+
+    }
+
+    // ==========================================================
+    // ❌ BLUEPRINT RATÉ
+    // ==========================================================
+
+    if (precision === 0) {
+
+        return {
+
+            ok: false,
+
+            erreur:
+                "❌ Mauvaise exécution de la passe.",
+
+            similarity,
+
+            notePave
+
+        };
+
+    }
+
+// ==========================================================
+// 🎯 RECHERCHE DE LA CIBLE
+// ==========================================================
+
+const memeEquipe =
+    (match.lineup1 || []).includes(joueur)
+        ? (match.lineup1 || [])
+        : (match.lineup2 || []);
+
+const campPasseur =
+    (match.lineup1 || []).includes(joueur)
+        ? "A"
+        : "B";
+
+const cibleNom =
+    txt.match(/(?:vers|à|pour)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i)?.[1];
 
 let cible = null;
+let cibleTracker = null;
+let cibleZone = null;
+let passeVersZone = false;
+
+
+// ==========================================================
+// 🎯 PASSE VERS UN JOUEUR
+// ==========================================================
 
 if (cibleNom) {
 
-    // Déterminer l'équipe du passeur
-    const memeEquipe =
-        (match.lineup1 || []).includes(joueur)
-            ? (match.lineup1 || [])
-            : (match.lineup2 || []);
-
-    // Recherche uniquement dans son équipe
-    cible = memeEquipe.find(p =>
-        p.nom &&
-        p.nom.trim().toLowerCase() === cibleNom.trim().toLowerCase()
+    cible = memeEquipe.find(j =>
+        j.nom &&
+        j.nom.toLowerCase() === cibleNom.toLowerCase()
     );
 
-    // Sécurité si la cible n'existe pas
     if (!cible) {
+
         return {
-            ok: false,
-            erreur: `❌ ${cibleNom} ne fait pas partie de l'équipe de ${joueur.nom}.`
+            ok:false,
+            erreur:`❌ ${cibleNom} n'appartient pas à l'équipe.`
         };
+
     }
+
+    const key = `${cible.nom}_${campPasseur}`;
+
+    cibleTracker = match.tracker?.joueurs?.[key];
+
+    if (!cibleTracker) {
+
+        return {
+            ok:false,
+            erreur:`❌ Position tracker introuvable pour ${cible.nom}.`
+        };
+
+    }
+
 }
+
+
+// ==========================================================
+// 🎯 PASSE EN PROFONDEUR / PASSE VERS UNE ZONE
+// ==========================================================
+
+if (typePasse === "passe en profondeur") {
+
+    passeVersZone = true;
+
+    const posDepart = match.tracker.joueurs[
+        `${joueur.nom}_${campPasseur}`
+    ].position;
+
+    let x = posDepart.x;
+    let y = posDepart.y;
+
+    const dist = extraireDistance(txt) || 5;
+
+    // -----------------------------
+    // DEVANT
+    // -----------------------------
+
+    if (txt.includes("devant")) {
+
+        y += (campPasseur === "A")
+            ? dist
+            : -dist;
+
+    }
+
+    // -----------------------------
+    // ARRIÈRE
+    // -----------------------------
+
+    else if (txt.includes("derrière")) {
+
+        y += (campPasseur === "A")
+            ? -dist
+            : dist;
+
+    }
+
+    // -----------------------------
+    // GAUCHE
+    // -----------------------------
+
+    if (txt.includes("gauche")) {
+
+        x -= dist;
+
+    }
+
+    // -----------------------------
+    // DROITE
+    // -----------------------------
+
+    if (txt.includes("droite")) {
+
+        x += dist;
+
+    }
+
+    // -----------------------------
+    // DIAGONALE
+    // -----------------------------
+
+    if (txt.includes("diagonale")) {
+
+        const d = dist * 0.7;
+
+        if (txt.includes("gauche")) {
+
+            x -= d;
+
+        }
+
+        if (txt.includes("droite")) {
+
+            x += d;
+
+        }
+
+        y +=
+            (campPasseur === "A")
+            ? d
+            : -d;
+
+    }
+
+    cibleZone = {
+
+        x:Math.max(0,Math.min(30,x)),
+        y:Math.max(0,Math.min(60,y))
+
+    };
+
+}
+
+
+// ==========================================================
+// 📏 DISTANCE RÉELLE PASSEUR → CIBLE
+// ==========================================================
+
+const passeurTracker =
+    match.tracker.joueurs[
+        `${joueur.nom}_${campPasseur}`
+    ];
+
+const destination =
+    passeVersZone
+        ? cibleZone
+        : cibleTracker.position;
+
+const dx =
+    destination.x -
+    passeurTracker.position.x;
+
+const dy =
+    destination.y -
+    passeurTracker.position.y;
+
+const distanceReelle =
+    Math.sqrt(dx*dx + dy*dy);
+
+
+// ==========================================================
+// 📏 CONTRÔLE DE LA PORTÉE
+// ==========================================================
+
+if (distanceReelle > 60) {
+
+    return {
+
+        ok:false,
+
+        erreur:"❌ La cible est trop éloignée."
+
+    };
+
+}
+
+
+// ==========================================================
+// ⚽ BALLON EN MOUVEMENT
+// ==========================================================
+
+match.pendingPass = {
+
+    passeur:joueur.nom,
+
+    passeurCamp:campPasseur,
+
+    cible:cible?.nom || null,
+
+    passeVersZone,
+
+    cibleZone,
+
+    destination,
+
+    similarity,
+
+    precision,
+
+    qualitePasse,
+
+    statePasse,
+
+    distance:distanceReelle,
+
+    blueprint:typePasse,
+
+    action,
+
+    attenteInterception:true
+
+};
+
+
+// ==========================================================
+// ➜ PARTIE 3
+// Analyse du pavé adverse
+// Interception
+// Chase Ball
+// Attribution finale du porteur
+// ==========================================================
+ 
+
+
+
 
     
     // ⚽ CONTRÔLE
