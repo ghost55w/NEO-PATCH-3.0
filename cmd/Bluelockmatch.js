@@ -7751,18 +7751,36 @@ async function handlePasses(match, action, joueur) {
         }
     }
 
-    // 🎯 CIBLE PASSE
-    const cibleNom = txt.match(/vers\s+([a-zA-Z0-9_]+)/i)?.[1];
+ // 🎯 CIBLE DE LA PASSE
 
-    let cible = null;
+const cibleNom = txt.match(/(?:vers|à|pour)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i)?.[1];
 
-    if (cibleNom) {
-        const all = [...(match.lineup1 || []), ...(match.lineup2 || [])];
-        cible = all.find(p =>
-            p.nom?.toLowerCase().includes(cibleNom.toLowerCase())
-        );
+let cible = null;
+
+if (cibleNom) {
+
+    // Déterminer l'équipe du passeur
+    const memeEquipe =
+        (match.lineup1 || []).includes(joueur)
+            ? (match.lineup1 || [])
+            : (match.lineup2 || []);
+
+    // Recherche uniquement dans son équipe
+    cible = memeEquipe.find(p =>
+        p.nom &&
+        p.nom.trim().toLowerCase() === cibleNom.trim().toLowerCase()
+    );
+
+    // Sécurité si la cible n'existe pas
+    if (!cible) {
+        return {
+            ok: false,
+            erreur: `❌ ${cibleNom} ne fait pas partie de l'équipe de ${joueur.nom}.`
+        };
     }
+}
 
+    
     // ⚽ CONTRÔLE
     const hasControle =
         txt.includes("contrôle") ||
