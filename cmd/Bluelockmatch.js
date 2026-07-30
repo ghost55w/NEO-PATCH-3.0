@@ -5559,7 +5559,17 @@ await ovl.sendMessage(chat, {
 
 ${duelResult.msg}
 
-⚡ ${displayAttacker.nom}
+${duelResult.type === "PASSIVE_BLOCK"
+? `⚡ ${displayAttacker.nom}
+├ 📊 Dribble stats : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
+${ligneDribble}├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10
+└ Total : ${Math.round(duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50))} ✅
+
+🛡️ ${displayDefender.nom}
+├ 📊 Défense passive
+├ 🦵 Ouverture : ${duelResult.ouverture || "jambes écartées"}
+└ Total : 0 ❌`
+: `⚡ ${displayAttacker.nom}
 ├ 📊 Dribble stats : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
 ${ligneDribble}├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10
 └ Total : ${Math.round(duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50))} ${atkWon ? "✅" : "❌"}
@@ -5567,7 +5577,7 @@ ${ligneDribble}├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10
 🛡️ ${displayDefender.nom}
 ├ 📊 Défense stats : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
 ${ligneTacle}├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10
-└ Total : ${Math.round(duelResult.defenseTotal ?? (displayDefender.stats?.def || 50))} ${atkWon ? "❌" : "✅"}
+└ Total : ${Math.round(duelResult.defenseTotal ?? (displayDefender.stats?.def || 50))} ${atkWon ? "❌" : "✅"}`}
 
 ➡️ @${getTagFromJid(nextId)} NEXT
 
