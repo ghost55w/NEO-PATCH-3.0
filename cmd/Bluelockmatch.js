@@ -3410,66 +3410,108 @@ function parsePlayerIntent(text, players) {
     }
 
     // ⚙️ ACTIONS
-    const actions = [];
+const actions = [];
 
-    const actionMap = {
-        run: ["fonce", "cours", "accélère", "sprinte", "vmax"],
-        dribble: ["dribble", "crochet", "feinte", "roulette"],
-        pass: ["passe", "donne", "transmet", "centre"],
-        shoot: ["tir", "frappe", "shoot"],
-        defend: ["tacle", "bloque", "intercepte"]
-    };
+const actionMap = {
+    run: ["fonce", "cours", "accélère", "sprinte", "vmax"],
+    dribble: ["dribble", "crochet", "feinte", "roulette", "double contact", "double-contact"],
+    pass: ["passe", "donne", "transmet", "centre"],
+    shoot: ["tir", "frappe", "shoot"],
+    defend: ["tacle", "bloque", "intercepte"]
+};
 
-    for (const key in actionMap) {
-        if (actionMap[key].some(w => t.includes(w))) {
-            actions.push(key);
-        }
+for (const key in actionMap) {
+    if (actionMap[key].some(w => t.includes(w))) {
+        actions.push(key);
     }
-
-    // 🧭 DIRECTION
-    let direction = "none";
-
-    if (t.includes("gauche")) direction = "left";
-    else if (t.includes("droite")) direction = "right";
-    else if (t.includes("devant") || t.includes("face") || t.includes("tout droit")) direction = "front";
-    else if (t.includes("diagonale")) direction = "diagonal";
-
-    // 🦶 FOOT
-    let foot = null;
-
-    if (t.includes("pied gauche")) foot = "left";
-    else if (t.includes("pied droit")) foot = "right";
-
-    // 📏 DISTANCES
-    const ballDistance = extractNumber(t);
-
-    let targetDistance = null;
-    if (t.includes("1m")) targetDistance = 1;
-    if (t.includes("2m")) targetDistance = 2;
-    if (t.includes("5m")) targetDistance = 5;
-    if (t.includes("10m")) targetDistance = 10;
-
-    // 👥 PLAYERS DETECTION
-    const detectedPlayers = [];
-
-    for (const p of players) {
-        if (t.includes(p.nom.toLowerCase())) {
-            detectedPlayers.push(p);
-        }
-    }
-
-    // 📦 OUTPUT FINAL
-    return {
-        players: detectedPlayers.length ? detectedPlayers : null,
-        actions,
-        intent: {
-            direction,
-            foot,
-            ballDistance,
-            targetDistance
-        }
-    };
 }
+
+// 🧭 DIRECTION
+let direction = "none";
+
+if (t.includes("gauche")) direction = "left";
+else if (t.includes("droite")) direction = "right";
+else if (
+    t.includes("devant") ||
+    t.includes("face") ||
+    t.includes("tout droit")
+) {
+    direction = "front";
+}
+else if (t.includes("diagonale")) {
+    direction = "diagonal";
+}
+
+// 🦶 PIED
+let foot = null;
+
+if (t.includes("pied gauche")) foot = "left";
+else if (t.includes("pied droit")) foot = "right";
+
+// 📏 DISTANCES
+const ballDistance = extractNumber(t);
+
+let targetDistance = null;
+
+if (t.includes("1m")) targetDistance = 1;
+else if (t.includes("2m")) targetDistance = 2;
+else if (t.includes("5m")) targetDistance = 5;
+else if (t.includes("10m")) targetDistance = 10;
+
+// 📌 CONTEXTE DES DISTANCES
+const isDribble = actions.includes("dribble");
+const isRun = actions.includes("run");
+
+let dribbleDistance = null;
+let runDistance = null;
+
+// Un déplacement ≤ 1 m fait partie du dribble
+if (isDribble && ballDistance && ballDistance <= 1) {
+    dribbleDistance = ballDistance;
+}
+
+// Les vraies courses / accélérations
+if (isRun) {
+    runDistance = targetDistance;
+
+    // Si aucune distance explicite n'est donnée
+    // mais qu'on a une distance > 1 m, on la considère
+    // comme celle de la course.
+    if (!runDistance && ballDistance > 1) {
+        runDistance = ballDistance;
+    }
+}
+
+// 👥 PLAYERS DETECTION
+const detectedPlayers = [];
+
+for (const p of players) {
+    if (t.includes(p.nom.toLowerCase())) {
+        detectedPlayers.push(p);
+    }
+}
+
+// 📦 OUTPUT FINAL
+return {
+    players: detectedPlayers.length ? detectedPlayers : null,
+
+    actions,
+
+    intent: {
+        direction,
+        foot,
+
+        // Anciennes valeurs (compatibilité)
+        ballDistance,
+        targetDistance,
+
+        // Nouvelles valeurs
+        dribbleDistance,
+        runDistance
+    }
+};
+} 
+   
 
 // 🧪 SAFE PLAYER FINDER (STRICT + FALLBACK)
 function findPlayerStrict(text, players) {
