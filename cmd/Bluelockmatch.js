@@ -4357,196 +4357,1103 @@ function validateInterceptBlueprint(
 
 }
 
+// ============================================================
+//BLUEPRINTS PASSES 🎯⚽ 
+// ============================================================
+
 const BLUEPRINT_PASSES = {
 
-    "passe directe": {
+"passe directe": {
 
-        techniques:[
-            "intérieur du pied",
-            "extérieur du pied"
-        ],
+    modele:
+    "passe directe rapide ras du sol effectuée avec l'intérieur ou l'extérieur du pied gauche ou droit vers un coéquipier proche situé devant, derrière, à gauche, à droite ou en diagonale sur une distance maximale de 5 mètres",
 
-        directions:[
-            "gauche",
-            "droite",
-            "devant",
-            "derrière"
-        ],
+    techniques:[
+        "intérieur du pied",
+        "extérieur du pied",
+        "pointe du pied"
+    ],
 
-        hauteur:[
-            "ras du sol"
-        ],
+    directions:[
+        "devant",
+        "derrière",
+        "gauche",
+        "droite",
+        "diagonale"
+    ],
 
-        portee:{
-            excellente:{ max:10 },
-            correcte:{ max:15 }
-        },
+    hauteur:[
+        "ras du sol",
+        "mi-hauteur"
+    ],
 
-        elements:[
-            "pied"
-        ]
-
+    portee:{
+        max:5
     },
 
+    conditions:{}
 
-    "passe circulaire": {
+},
 
-        techniques:[
-            "intérieur du pied",
-            "extérieur du pied"
-        ],
 
-        directions:[
-            "gauche",
-            "droite"
-        ],
+"passe circulaire": {
 
-        hauteur:[
-            "ras du sol"
-        ],
+    modele:
+    "passe curvée enroulée circulaire ou brossée effectuée avec l'intérieur ou l'extérieur du pied gauche ou droit avec un effet donnant une trajectoire courbée pour contourner un adversaire et atteindre un coéquipier",
 
-        portee:{
-            excellente:{ max:12 },
-            correcte:{ max:20 }
-        },
+    techniques:[
+        "intérieur du pied",
+        "extérieur du pied"
+    ],
 
-        elements:[
-            "rotation",
-            "pied"
-        ]
+    directions:[
+        "gauche",
+        "droite",
+        "diagonale"
+    ],
 
+    hauteur:[
+        "ras du sol"
+    ],
+
+    portee:{
+        max:5
     },
 
+    conditions:{
 
-    "passe en profondeur": {
+        minimumPasse:85,
 
-        techniques:[
-            "extérieur du pied",
-            "intérieur du pied"
-        ],
-
-        directions:[
-            "devant",
-            "diagonale"
-        ],
-
-        hauteur:[
-            "ras du sol",
-            "légèrement levée"
-        ],
-
-        portee:{
-            excellente:{ max:25 },
-            correcte:{ max:40 }
+        courbe:{
+            min:1,
+            max:1.5
         },
 
-        elements:[
-            "derrière la défense",
-            "course",
-            "espace"
-        ]
+        pivot:{
 
-    },
+            "pied droit intérieur":{
+                angle:60,
+                direction:"droite"
+            },
 
+            "pied droit extérieur":{
+                angle:60,
+                direction:"gauche"
+            },
 
-    "passe longue": {
+            "pied gauche intérieur":{
+                angle:60,
+                direction:"gauche"
+            },
 
-        techniques:[
-            "extérieur du pied",
-            "intérieur du pied",
-            "pointe de pied"
-        ],
+            "pied gauche extérieur":{
+                angle:60,
+                direction:"droite"
+            }
 
-        directions:[
-            "devant",
-            "diagonale",
-            "gauche",
-            "droite"
-        ],
-
-        hauteur:[
-            "aérienne",
-            "tendue"
-        ],
-
-        portee:{
-            excellente:{ max:35 },
-            correcte:{ max:50 }
-        },
-
-        elements:[
-            "pied",
-            "tête"
-        ]
-
-    },
-
-
-    "passe lobée": {
-
-        techniques:[
-            "extérieur du pied",
-            "pointe de pied"
-        ],
-
-        directions:[
-            "devant",
-            "diagonale"
-        ],
-
-        hauteur:[
-            "très haute",
-            "aérienne"
-        ],
-
-        portee:{
-            excellente:{ max:30 },
-            correcte:{ max:45 }
-        },
-
-        elements:[
-            "tête",
-            "ballon au-dessus"
-        ]
-
-    },
-
-
-    "centre": {
-
-        techniques:[
-            "extérieur du pied",
-            "intérieur du pied"
-        ],
-
-        directions:[
-            "gauche",
-            "droite",
-            "diagonale"
-        ],
-
-        hauteur:[
-            "aérienne",
-            "tendue"
-        ],
-
-        portee:{
-            excellente:{ max:35 },
-            correcte:{ max:50 }
-        },
-
-        elements:[
-            "surface",
-            "tête",
-            "volée"
-        ]
+        }
 
     }
 
+},
+
+
+"passe en profondeur": {
+
+    modele:
+    "passe en profondeur jouée devant la course d'un coéquipier vers un espace libre derrière la défense avec une trajectoire ras du sol ou légèrement levée",
+
+    techniques:[
+        "intérieur du pied",
+        "extérieur du pied"
+    ],
+
+    directions:[
+        "devant",
+        "diagonale"
+    ],
+
+    hauteur:[
+        "ras du sol",
+        "légèrement levée"
+    ],
+
+    portee:{
+        max:25
+    },
+
+    conditions:{
+
+        doitViserEspace:true
+
+    }
+
+},
+
+
+"passe lobée": {
+
+    modele:
+    "passe lobée en cloche effectuée avec l'intérieur l'extérieur ou la pointe du pied afin de faire passer le ballon au-dessus des adversaires",
+
+    techniques:[
+        "intérieur du pied",
+        "extérieur du pied",
+        "pointe du pied"
+    ],
+
+    directions:[
+        "devant",
+        "diagonale"
+    ],
+
+    hauteur:[
+        "haute",
+        "aérienne",
+        "cloche"
+    ],
+
+    portee:{
+        max:30
+    },
+
+    conditions:{
+
+        minimumPasse:90,
+
+        hauteurMax:3
+
+    }
+
+},
+
+
+"passe longue": {
+
+    modele:
+    "passe longue effectuée avec l'intérieur l'extérieur ou la pointe du pied sur une distance importante avec une trajectoire tendue ou aérienne",
+
+    techniques:[
+        "intérieur du pied",
+        "extérieur du pied",
+        "pointe du pied"
+    ],
+
+    directions:[
+        "devant",
+        "diagonale",
+        "gauche",
+        "droite"
+    ],
+
+    hauteur:[
+        "tendue",
+        "aérienne"
+    ],
+
+    portee:{
+        max:20
+    },
+
+    conditions:{
+
+        hauteurMax:5
+
+    }
+
+},
+
+
+"talonnade": {
+
+    modele:
+    "talonnade effectuée avec le talon gauche ou droit pour dévier rapidement le ballon vers un coéquipier proche",
+
+    techniques:[
+        "talon"
+    ],
+
+    directions:[
+        "derrière",
+        "gauche",
+        "droite"
+    ],
+
+    portee:{
+        max:5
+    },
+
+    conditions:{}
+
+},
+
+
+"centre": {
+
+    modele:
+    "centre effectué depuis le côté du terrain vers la surface avec une trajectoire aérienne ou tendue pour trouver un coéquipier",
+
+    techniques:[
+        "intérieur du pied",
+        "extérieur du pied",
+        "pointe du pied"
+    ],
+
+    directions:[
+        "diagonale",
+        "gauche",
+        "droite"
+    ],
+
+    portee:{
+        max:10
+    },
+
+    conditions:{
+
+        depart:{
+            zone:"côté"
+        },
+
+        arrivee:{
+            zone:"surface"
+        },
+
+        hauteurMax:3
+
+    }
+
+}
+
 };
 
+// ================================================================
+// 🧠 VALIDATION BLUEPRINT PASSES
+// ================================================================
+
+function validatePassBlueprint(typePasse, txt, joueur) {
 
 
+    const blueprint = BLUEPRINT_PASSES[typePasse];
+
+
+    if (!blueprint) {
+
+        return {
+            valid:false,
+            similarity:0,
+            erreur:"❌ Blueprint introuvable."
+        };
+
+    }
+
+
+    let score = 0;
+    let total = 0;
+
+    let erreurs = [];
+
+
+
+    // ==========================================================
+    // 🧠 SIMILARITÉ AVEC LE MODÈLE
+    // ==========================================================
+
+    const motsModele =
+        blueprint.modele
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(m => m.length > 4);
+
+
+
+    total += motsModele.length;
+
+
+    for (const mot of motsModele) {
+
+        if (txt.includes(mot)) {
+
+            score++;
+
+        }
+
+    }
+
+
+
+    // ==========================================================
+    // 👟 TECHNIQUE UTILISÉE
+    // ==========================================================
+
+    if (blueprint.techniques) {
+
+        total++;
+
+        const technique =
+            blueprint.techniques.some(t =>
+                txt.includes(t.toLowerCase())
+            );
+
+
+        if (technique) {
+
+            score++;
+
+        }
+        else {
+
+            erreurs.push(
+                "Technique de pied absente"
+            );
+
+        }
+
+    }
+
+
+
+
+    // ==========================================================
+    // 🧭 DIRECTION
+    // ==========================================================
+
+    if (blueprint.directions) {
+
+        total++;
+
+
+        const direction =
+            blueprint.directions.some(d =>
+                txt.includes(d.toLowerCase())
+            );
+
+
+        if(direction){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Direction absente"
+            );
+
+        }
+
+    }
+
+
+
+
+    // ==========================================================
+    // 📏 PORTÉE
+    // ==========================================================
+
+    const distance =
+        extraireDistance(txt);
+
+
+    if(distance !== null){
+
+        total++;
+
+
+        if(distance <= blueprint.portee.max){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Distance trop élevée"
+            );
+
+        }
+
+    }
+
+
+
+
+
+    // ==========================================================
+    // 👟 PIED UTILISÉ / QUALITÉ RÉELLE
+    // ==========================================================
+
+    const piedUtilise =
+        extrairePied(txt);
+
+
+
+    const passeReelle =
+        calculStatPasseReelle(
+            joueur,
+            piedUtilise
+        );
+
+
+
+    // ==========================================================
+    // 🎯 CONDITIONS SPÉCIALES
+    // ==========================================================
+
+    const conditions =
+        blueprint.conditions || {};
+
+
+
+    // -----------------------------
+    // STAT PASSE MINIMUM
+    // -----------------------------
+
+    if(conditions.minimumPasse){
+
+
+        total++;
+
+
+        if(
+            passeReelle >= conditions.minimumPasse
+        ){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Qualité de passe insuffisante"
+            );
+
+        }
+
+    }
+
+
+
+
+    // -----------------------------
+    // 📈 HAUTEUR
+    // -----------------------------
+
+    if(conditions.hauteurMax){
+
+
+        total++;
+
+
+        const hauteur =
+            extraireHauteur(txt);
+
+
+
+        if(
+            hauteur !== null &&
+            hauteur <= conditions.hauteurMax
+        ){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Hauteur incorrecte"
+            );
+
+        }
+
+    }
+
+
+
+
+    // -----------------------------
+    // 🌀 COURBE
+    // -----------------------------
+
+    if(conditions.courbe){
+
+
+        total++;
+
+
+        const courbe =
+            extraireCourbe(txt);
+
+
+
+        if(
+            courbe !== null &&
+            courbe >= conditions.courbe.min &&
+            courbe <= conditions.courbe.max
+        ){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Courbe incorrecte"
+            );
+
+        }
+
+    }
+
+
+
+
+    // -----------------------------
+    // 🔄 PIVOT DU CORPS
+    // -----------------------------
+
+    if(conditions.pivot){
+
+
+        total++;
+
+
+        if(
+            verifierPivot(
+                txt,
+                conditions.pivot
+            )
+        ){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Pivot incorrect"
+            );
+
+        }
+
+    }
+
+
+
+
+    // -----------------------------
+    // 📍 ZONE DÉPART / ARRIVÉE
+    // -----------------------------
+
+    if(conditions.depart){
+
+
+        total++;
+
+
+        const zone =
+            extraireZone(txt);
+
+
+
+        if(
+            zone === conditions.depart.zone
+        ){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Zone de départ incorrecte"
+            );
+
+        }
+
+    }
+
+
+
+
+    if(conditions.arrivee){
+
+
+        total++;
+
+
+        const zone =
+            extraireZone(txt);
+
+
+
+        if(
+            zone === conditions.arrivee.zone
+        ){
+
+            score++;
+
+        }
+        else{
+
+            erreurs.push(
+                "Zone d'arrivée incorrecte"
+            );
+
+        }
+
+    }
+
+
+
+
+    // ==========================================================
+    // 📊 CALCUL FINAL
+    // ==========================================================
+
+    const similarity =
+        total > 0
+        ?
+        Math.round(
+            (score / total) * 100
+        )
+        :
+        0;
+
+
+
+    // Le pied faible réduit la qualité
+    const precisionFinale =
+        Math.round(
+            (similarity + passeReelle) / 2
+        );
+
+
+
+    return {
+
+        valid:
+            precisionFinale >= 50,
+
+        similarity,
+
+        precision:precisionFinale,
+
+        passeReelle,
+
+        erreurs,
+
+        blueprint:typePasse
+
+    };
+
+}
+
+// ================================================================
+// 🔎 EXTRACTION DÉTAILS DE PASSE
+// ================================================================
+
+function extractPassDetails(txt) {
+
+    return {
+
+        pied:
+            txt.includes("pied gauche") ||
+            txt.includes("gauche")
+                ? "gauche"
+                :
+            txt.includes("pied droit") ||
+            txt.includes("droit")
+                ? "droit"
+                : null,
+
+
+        distance:
+            extraireDistance(txt) || 0,
+
+
+        hauteur:
+            txt.match(
+                /(ras du sol|mi-hauteur|légèrement levée|aérienne|très haute)/
+            )?.[1] || null,
+
+
+        direction:
+            txt.match(
+                /(gauche|droite|devant|derrière|diagonale gauche|diagonale droite)/
+            )?.[1] || null,
+
+
+        courbe:
+            txt.match(
+                /(courbe|courbée|enroulée|brossée|effet|rotation)/
+            )
+            ? true
+            : false,
+
+
+        pivot:
+            Number(
+                txt.match(
+                    /(\d+)\s*°/
+                )?.[1]
+            ) || null,
+
+
+        cible:
+            txt.match(
+                /(intérieur du pied|extérieur du pied|tête|torse|poitrine)/
+            )?.[1] || null
+
+    };
+
+}
+
+
+
+// ================================================================
+// 🦶 CALCUL PIED FORT / PIED FAIBLE
+// ================================================================
+
+function calculatePassRealStats(joueur, details) {
+
+
+    const fiche =
+        cardsBlueLock.find(c =>
+            c.nom &&
+            c.nom.toLowerCase()
+            === joueur.nom.toLowerCase()
+        );
+
+
+    if(!fiche){
+
+        return {
+            passeBase:50,
+            passeFinale:50
+        };
+
+    }
+
+
+    const passeBase =
+        fiche.stats?.pas || 50;
+
+
+    const piedFort =
+        fiche.pied || "droit";
+
+
+    const ambidextre =
+        fiche.ambidextre === true;
+
+
+
+    let passeFinale = passeBase;
+
+
+
+    // pied faible
+
+    if(
+        !ambidextre &&
+        details.pied &&
+        details.pied !== piedFort
+    ){
+
+        passeFinale -= 20;
+
+    }
+
+
+
+    return {
+
+        passeBase,
+
+        passeFinale:
+            Math.max(
+                0,
+                passeFinale
+            )
+
+    };
+
+}
+
+
+
+// ================================================================
+// 🎯 CALCUL PRÉCISION FINALE
+// ================================================================
+
+function calculatePassAccuracy(
+    similarity,
+    passeFinale
+){
+
+
+    const precision =
+        Math.round(
+            (similarity + passeFinale) / 2
+        );
+
+
+    return {
+
+        precision,
+
+        reussi:
+            precision >= 50
+
+    };
+
+}
+
+
+
+// ================================================================
+// 🌀 VÉRIFICATION TRAJECTOIRE
+// ================================================================
+
+function checkPassTrajectory(
+    typePasse,
+    details
+){
+
+
+    // Passe circulaire
+
+    if(typePasse === "passe circulaire") {
+
+
+        if(!details.courbe){
+
+            return {
+
+                valide:false,
+
+                raison:
+                "Pas d'effet pour une passe circulaire."
+
+            };
+
+        }
+
+
+        if(
+            details.pivot &&
+            details.pivot < 60
+        ){
+
+            return {
+
+                valide:false,
+
+                raison:
+                "Rotation insuffisante."
+
+            };
+
+        }
+
+    }
+
+
+
+    // Passe lobée
+
+    if(typePasse === "passe lobée"){
+
+
+        if(
+            details.hauteur !== "très haute" &&
+            details.hauteur !== "aérienne"
+        ){
+
+            return {
+
+                valide:false,
+
+                raison:
+                "Hauteur insuffisante."
+
+            };
+
+        }
+
+    }
+
+
+
+    return {
+
+        valide:true
+
+    };
+
+}
+
+
+
+// ================================================================
+// 🛡️ INTERCEPTION AUTOMATIQUE
+// ================================================================
+
+function checkAutomaticInterception(
+    match,
+    pendingPass
+){
+
+
+    const type =
+        pendingPass.blueprint;
+
+
+
+    // Passe circulaire
+    // défenseur dans zone ciblée = interception
+
+    if(
+        type === "passe circulaire"
+    ){
+
+        const adversaires =
+            [
+                ...(match.lineup1 || []),
+                ...(match.lineup2 || [])
+            ];
+
+
+
+        const defenseur =
+            adversaires.find(j => {
+
+
+                if(!j.position)
+                    return false;
+
+
+
+                const dx =
+                    pendingPass.destination.x
+                    -
+                    j.position.x;
+
+
+                const dy =
+                    pendingPass.destination.y
+                    -
+                    j.position.y;
+
+
+
+                const distance =
+                    Math.sqrt(
+                        dx*dx + dy*dy
+                    );
+
+
+                return distance <= 3;
+
+
+            });
+
+
+
+        if(defenseur){
+
+            return {
+
+                interception:true,
+
+                joueur:defenseur
+
+            };
+
+        }
+
+    }
+
+
+
+    return {
+
+        interception:false
+
+    };
+
+}
+
+
+
+// ================================================================
+// ⚽ RÉSOLUTION FINALE PASSE
+// ================================================================
+
+function resolvePassResult(
+    match,
+    pendingPass
+){
+
+
+    const trajectoire =
+        checkPassTrajectory(
+            pendingPass.blueprint,
+            pendingPass.details
+        );
+
+
+
+    if(!trajectoire.valide){
+
+        return {
+
+            success:false,
+
+            raison:trajectoire.raison
+
+        };
+
+    }
+
+
+
+    const interception =
+        checkAutomaticInterception(
+            match,
+            pendingPass
+        );
+
+
+
+    if(interception.interception){
+
+        return {
+
+            success:false,
+
+            interception:true,
+
+            defenseur:
+                interception.joueur
+
+        };
+
+    }
+
+
+
+    return {
+
+        success:true,
+
+        porteur:
+            pendingPass.cible
+
+    };
+
+}
 
             
 // 🎮 COMMANDE MATCH
