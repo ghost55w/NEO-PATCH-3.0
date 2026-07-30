@@ -9154,84 +9154,83 @@ async function handlePasses(match, action, joueur) {
     }
 
 
+// =====================================================
+// 🧠 VALIDATION BLUEPRINT PASS UNIQUEMENT
+// =====================================================
 
-    // 🧠 PRÉCISION CLASSIQUE
-
-    const modele = TYPES_PASSES[typePasse];
-
-    const mots = modele
-        .toLowerCase()
-        .split(" ");
-
-
-    let score = 0;
-
-    mots.forEach(m => {
-
-        if (txt.includes(m))
-            score++;
-
-    });
+let similarity = 0;
+let precision = 0;
+let notePave = 0;
+let qualitePasse = 0;
 
 
-    let precision = Math.round(
-        (score / mots.length) * 100
+// =====================================================
+// 🧠 ANALYSE SIMILARITÉ BLUEPRINT
+// =====================================================
+
+if (typeof validatePassBlueprint === "function") {
+
+    const analyse = validatePassBlueprint(
+        typePasse,
+        txt
     );
 
 
-
-    // =====================================================
-    // 🧠 BLUEPRINT PASS
-    // =====================================================
-
-    let similarity = 0;
-    let notePave = 0;
-    let qualitePasse = 0;
+    similarity = analyse.similarity || 0;
 
 
-    if (typeof validatePassBlueprint === "function") {
+    // 📊 Conversion similarity → précision
 
-        const analyse = validatePassBlueprint(
-            typePasse,
-            txt
-        );
+    if (similarity >= 70) {
 
+        precision = 100;
 
-        similarity = analyse.similarity || 0;
+    } 
+    
+    else if (similarity >= 50) {
 
+        precision = 50;
 
-        if (similarity >= 70)
-            precision = 100;
+    } 
+    
+    else {
 
-        else if (similarity >= 50)
-            precision = 50;
-
-        else
-            precision = 0;
-
-
-
-        notePave = Math.max(
-            1,
-            Math.round(similarity / 10)
-        );
+        precision = 0;
 
     }
 
 
+    // 📊 NOTE DU PAVÉ
 
-    if (precision < 60 && similarity < 50) {
+    notePave = Math.max(
+        1,
+        Math.round(similarity / 10)
+    );
 
-        return {
-            ok:false,
-            erreur:`❌ Passe mal exécutée (${precision}%)`,
-            similarity,
-            notePave
-        };
-
-    }
+}
 
 
+// =====================================================
+// ❌ BLUEPRINT REFUSÉ
+// =====================================================
+
+if (precision === 0) {
+
+    return {
+
+        ok: false,
+
+        erreur:
+            `❌ Passe mal exécutée (${similarity}%)`,
+
+        similarity,
+
+        notePave
+
+    };
+
+}
+    
 
     // 📏 DISTANCE
 
