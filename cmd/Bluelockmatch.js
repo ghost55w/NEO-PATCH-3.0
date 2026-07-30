@@ -4357,6 +4357,196 @@ function validateInterceptBlueprint(
 
 }
 
+const BLUEPRINT_PASSES = {
+
+    "passe directe": {
+
+        techniques:[
+            "intérieur du pied",
+            "extérieur du pied"
+        ],
+
+        directions:[
+            "gauche",
+            "droite",
+            "devant",
+            "derrière"
+        ],
+
+        hauteur:[
+            "ras du sol"
+        ],
+
+        portee:{
+            excellente:{ max:10 },
+            correcte:{ max:15 }
+        },
+
+        elements:[
+            "pied"
+        ]
+
+    },
+
+
+    "passe circulaire": {
+
+        techniques:[
+            "intérieur du pied",
+            "extérieur du pied"
+        ],
+
+        directions:[
+            "gauche",
+            "droite"
+        ],
+
+        hauteur:[
+            "ras du sol"
+        ],
+
+        portee:{
+            excellente:{ max:12 },
+            correcte:{ max:20 }
+        },
+
+        elements:[
+            "rotation",
+            "pied"
+        ]
+
+    },
+
+
+    "passe en profondeur": {
+
+        techniques:[
+            "extérieur du pied",
+            "intérieur du pied"
+        ],
+
+        directions:[
+            "devant",
+            "diagonale"
+        ],
+
+        hauteur:[
+            "ras du sol",
+            "légèrement levée"
+        ],
+
+        portee:{
+            excellente:{ max:25 },
+            correcte:{ max:40 }
+        },
+
+        elements:[
+            "derrière la défense",
+            "course",
+            "espace"
+        ]
+
+    },
+
+
+    "passe longue": {
+
+        techniques:[
+            "extérieur du pied",
+            "intérieur du pied",
+            "pointe de pied"
+        ],
+
+        directions:[
+            "devant",
+            "diagonale",
+            "gauche",
+            "droite"
+        ],
+
+        hauteur:[
+            "aérienne",
+            "tendue"
+        ],
+
+        portee:{
+            excellente:{ max:35 },
+            correcte:{ max:50 }
+        },
+
+        elements:[
+            "pied",
+            "tête"
+        ]
+
+    },
+
+
+    "passe lobée": {
+
+        techniques:[
+            "extérieur du pied",
+            "pointe de pied"
+        ],
+
+        directions:[
+            "devant",
+            "diagonale"
+        ],
+
+        hauteur:[
+            "très haute",
+            "aérienne"
+        ],
+
+        portee:{
+            excellente:{ max:30 },
+            correcte:{ max:45 }
+        },
+
+        elements:[
+            "tête",
+            "ballon au-dessus"
+        ]
+
+    },
+
+
+    "centre": {
+
+        techniques:[
+            "extérieur du pied",
+            "intérieur du pied"
+        ],
+
+        directions:[
+            "gauche",
+            "droite",
+            "diagonale"
+        ],
+
+        hauteur:[
+            "aérienne",
+            "tendue"
+        ],
+
+        portee:{
+            excellente:{ max:35 },
+            correcte:{ max:50 }
+        },
+
+        elements:[
+            "surface",
+            "tête",
+            "volée"
+        ]
+
+    }
+
+};
+
+
+
 
             
 // 🎮 COMMANDE MATCH
@@ -5172,6 +5362,337 @@ if (!actionCheck || actionCheck.trim().length < 5) {
 
 const actionText = action.toLowerCase();
 
+// ================================================================
+// 🛡️ RÉACTION DÉFENSEUR : INTERCEPTION PASSE
+// ================================================================
+
+if (match.pendingPass && match.defender) {
+
+
+    let defender = match.defender;
+
+
+    // 🔎 Sécurité si defender est un JID
+    if (typeof defender !== "object") {
+
+        defender = allPlayers.find(p =>
+            normalizeJid(p.id || p.jid) === normalizeJid(defender)
+        );
+
+    }
+
+
+    if (!defender) {
+        return true;
+    }
+
+
+    const typePasse =
+        match.pendingPass.blueprint;
+
+
+    const similarity =
+        match.pendingPass.similarity || 0;
+
+
+
+    // ============================================================
+    // 📊 STATS DÉFENSEUR
+    // ============================================================
+
+    const ficheDefenseur = cardsBlueLock.find(c =>
+        c.nom &&
+        c.nom.toLowerCase() === defender.nom.toLowerCase()
+    );
+
+
+    const def =
+        ficheDefenseur?.stats?.def || 50;
+
+
+    const acc =
+        ficheDefenseur?.stats?.acc || 50;
+
+
+    const ovr =
+        ficheDefenseur?.ovr || 50;
+
+
+
+    // ============================================================
+    // ❌ PASSE DE MAUVAISE QUALITÉ
+    // ============================================================
+
+    if (similarity < 50) {
+
+
+        match.ballHolder =
+            defender.nom;
+
+
+        match.attacker =
+            defender;
+
+
+        match.pendingPass = null;
+
+
+
+        const next =
+            normalizeJid(defender.id || defender.jid) === normalizeJid(match.id1)
+                ? match.id2
+                : match.id1;
+
+
+
+        match.joueurTour = next;
+
+
+
+        await ovl.sendMessage(chat,{
+            text:
+`*❌ ⚽ PASSE RATÉE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${defender.nom} intercepte la passe de mauvaise qualité !
+
+⚽ Passe mal exécutée par ${match.pendingPass.passeur}
+
+🛡️ Défense : ${def}
+⚡ Accélération : ${acc}
+📊 OVR : ${ovr}
+
+⚽ ${defender.nom} récupère le ballon !
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions:[next]
+        });
+
+
+        return true;
+
+    }
+
+
+
+    // ============================================================
+    // 🎯 PASSE DIRECTE / CIRCULAIRE / LOBÉE
+    // 🛑 INTERCEPTION AUTOMATIQUE
+    // ============================================================
+
+    if (
+        typePasse === "passe directe" ||
+        typePasse === "passe circulaire" ||
+        typePasse === "passe lobée"
+    ) {
+
+
+        match.ballHolder =
+            defender.nom;
+
+
+        match.attacker =
+            defender;
+
+
+        match.pendingPass = null;
+
+
+
+        const next =
+            normalizeJid(defender.id || defender.jid) === normalizeJid(match.id1)
+                ? match.id2
+                : match.id1;
+
+
+
+        match.joueurTour = next;
+
+
+
+        await ovl.sendMessage(chat,{
+            text:
+`*🛑 ⚡ INTERCEPTION !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${defender.nom} lit la trajectoire et coupe la passe ${typePasse} !
+
+🛡️ Défense : ${def}
+⚡ Accélération : ${acc}
+📊 OVR : ${ovr}
+
+⚽ ${defender.nom} récupère le ballon !
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+            mentions:[next]
+        });
+
+
+        return true;
+
+    }
+
+
+
+    // ============================================================
+    // 📏 PASSE LONGUE / CENTRE RATÉ
+    // 🌍 BALLON SORT DU TERRAIN
+    // ============================================================
+
+    if (
+        typePasse === "passe longue" ||
+        typePasse === "centre"
+    ) {
+
+
+        match.pendingPass = null;
+
+
+        match.ballPosition = {
+            x:15,
+            y:30
+        };
+
+
+        // ÉQUIPE ADVERSE
+        const equipeAdverse =
+            defender.camp === "A"
+                ? match.lineup2
+                : match.lineup1;
+
+
+
+        const mc =
+            equipeAdverse.find(p =>
+                p.poste === "MC"
+            );
+
+
+        if (mc) {
+
+            match.ballHolder = mc.nom;
+
+            match.attacker = mc;
+
+
+            const next =
+                normalizeJid(mc.id || mc.jid) === normalizeJid(match.id1)
+                    ? match.id2
+                    : match.id1;
+
+
+            match.joueurTour = next;
+
+
+
+            await ovl.sendMessage(chat,{
+                text:
+`*❌ ⚽ PASSE RATÉE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : La passe est trop forte, le ballon sort à l'extérieur du terrain !
+
+🔄 Retour au rond central.
+
+⚽ ${mc.nom} récupère le ballon !
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+                mentions:[next]
+            });
+
+        }
+
+
+        return true;
+
+    }
+
+} 
+
+// ================================================================
+// 👤🎯⚽ PASSES: JOUEUR QUI EFFECTUE L'ACTION
+// ================================================================
+
+const joueurActuel = allPlayers.find(p =>
+    normalizeJid(p.id || p.jid) === sender
+);
+
+
+if (!joueurActuel) {
+
+    await ovl.sendMessage(chat,{
+        text:"❌ Joueur introuvable."
+    });
+
+    return true;
+}
+
+// ================================================================
+// ⚽ ANALYSE PASSE
+// ================================================================
+
+const resultatPasse = await handlePasses(
+    match,
+    action,
+    joueurActuel
+);
+
+// ================================================================
+// 🎯 RENDU PASSE
+// ================================================================
+
+if (resultatPasse?.ok) {
+
+    const attacker =
+        match.attacker || joueurActuel;
+
+
+    const validationPrecision =
+        resultatPasse.similarity >= 50
+            ? "✅"
+            : "❌";
+
+
+    // 🔁 NEXT DYNAMIQUE COMME DANS LES DUELS
+
+    const next =
+        normalizeJid(attacker.id || attacker.jid) === normalizeJid(match.id1)
+            ? match.id2
+            : match.id1;
+
+
+    await ovl.sendMessage(chat,{
+        text:
+`*🎯 ⚡⚽ PASSE !*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+
+🎙️ RESUME♻️ : ${attacker.nom} tente une passe ${resultatPasse.type || ""} vers ${resultatPasse.cible || "une zone"}...
+
+⚽ Passe stats : ${resultatPasse.statePasse}
+🎯 Précision : ${resultatPasse.similarity} ${validationPrecision}
+📊 NOTE DU PAVÉ : ${resultatPasse.notePave}/10
+
+➡️ @${getTagFromJid(next)} NEXT
+
+╰───────────────────
+🔷BLUELOCK⚽🥅`,
+        mentions:[next]
+    });
+
+
+    return true;
+
+}
+    
    
 // ⚽ ATTAQUE PHASE DUEL
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
@@ -8111,97 +8632,13 @@ match.pendingPass = {
 
 };
 
+return {
+    ok:true,
+    attenteInterception:true,
+    pendingPass: match.pendingPass
+}; 
+} 
 
-// ==========================================================
-// ➜ PARTIE 3
-// Analyse du pavé adverse
-// Interception
-// Chase Ball
-// Attribution finale du porteur
-// ==========================================================
- 
-
-
-
-
-    
-    // ⚽ CONTRÔLE
-    const hasControle =
-        txt.includes("contrôle") ||
-        txt.includes("controle");
-
-    if (!hasControle && cible) {
-
-        const notePasse = joueur.stats?.pas || 70;
-
-        if (notePasse < 85) {
-            return {
-                ok: false,
-                erreur: "❌ Contrôle obligatoire (passe faible)"
-            };
-        }
-
-        if (!txt.includes("déviation") && !txt.includes("deviation")) {
-            return {
-                ok: false,
-                erreur: "❌ Passe sans contrôle → déviation obligatoire"
-            };
-        }
-    }
-
-    // 📍 TRANSFERT BALLE
-    if (cible) {
-
-        match.ballHolder = cible.nom;
-
-        match.ballPosition = {
-            x: cible.position?.x,
-            y: cible.position?.y
-        };
-
-        updateGlobalPositions(match, cible);
-
-        // 🧠 MARKING (SANS DEPLACEMENT)
-        const adverses = (match.lineup1 || []).concat(match.lineup2 || []);
-
-        for (const j of adverses) {
-
-            if (!j.position) continue;
-
-            const dx = cible.position.x - j.position.x;
-            const dy = cible.position.y - j.position.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            // ❗ MARKING uniquement (PAS DE MOUVEMENT)
-            if (dist < 6) {
-                j.marking = { target: cible.nom, intensity: "FORT" };
-            } else if (dist < 12) {
-                j.marking = { target: cible.nom, intensity: "MOYEN" };
-            } else {
-                j.marking = null;
-            }
-
-            updateGlobalPositions(match, j);
-        }
-    }
-
-    // 📍 ZONE UPDATE
-    const zoneArrivee = extraireZoneArrivee(txt);
-    if (zoneArrivee) {
-        joueur.zoneY = zoneArrivee;
-    }
-
-    updateGlobalPositions(match, joueur);
-
-    return {
-        ok: true,
-        type: typePasse,
-        precision,
-        cible: cible?.nom || null
-    };
-}
-
-    
 
 
 ovlcmd({
