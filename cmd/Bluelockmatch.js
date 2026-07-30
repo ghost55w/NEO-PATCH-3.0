@@ -5561,15 +5561,13 @@ ${duelResult.msg}
 
 ⚡ ${displayAttacker.nom}
 ├ 📊 Dribble stats : ${duelResult.attackStat ?? (displayAttacker.stats?.dri || 50)}
-${duelResult.type?.includes("INTERCEPT") ? "" : `├ ⚽ Dribble : ${duelResult.attackScore ?? 0}`}
-├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10
-└ Total : ${duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50)} ${atkWon ? "✅" : "❌"}
+${ligneDribble}├ ⭐ Note pavé : ${duelResult.attackPave ?? 0}/10
+└ Total : ${Math.round(duelResult.attackTotal ?? (displayAttacker.stats?.dri || 50))} ${atkWon ? "✅" : "❌"}
 
 🛡️ ${displayDefender.nom}
 ├ 📊 Défense stats : ${duelResult.defenseStat ?? (displayDefender.stats?.def || 50)}
-${duelResult.type?.includes("INTERCEPT") ? "" : `├ ⚽ Tacle : ${duelResult.defenseScore ?? 0}`}
-├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10
-└ Total : ${duelResult.defenseTotal ?? (displayDefender.stats?.def || 50)} ${atkWon ? "❌" : "✅"}
+${ligneTacle}├ ⭐ Note pavé : ${duelResult.defensePave ?? 0}/10
+└ Total : ${Math.round(duelResult.defenseTotal ?? (displayDefender.stats?.def || 50))} ${atkWon ? "❌" : "✅"}
 
 ➡️ @${getTagFromJid(nextId)} NEXT
 
