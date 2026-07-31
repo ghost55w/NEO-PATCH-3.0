@@ -5455,6 +5455,40 @@ function resolvePassResult(
 
 }
 
+
+function extrairePied(txt) {
+
+    txt = txt.toLowerCase();
+
+    // Pied droit
+    if (
+        txt.includes("pied droit") ||
+        txt.includes("intérieur du pied droit") ||
+        txt.includes("extérieur du pied droit") ||
+        txt.includes("pointe du pied droit") ||
+        txt.includes("talon droit") ||
+        txt.includes("talon du pied droit")
+    ) {
+        return "droit";
+    }
+
+    // Pied gauche
+    if (
+        txt.includes("pied gauche") ||
+        txt.includes("intérieur du pied gauche") ||
+        txt.includes("extérieur du pied gauche") ||
+        txt.includes("pointe du pied gauche") ||
+        txt.includes("talon gauche") ||
+        txt.includes("talon du pied gauche")
+    ) {
+        return "gauche";
+    }
+
+    return null;
+
+}
+
+
             
 // 🎮 COMMANDE MATCH
 ovlcmd({
@@ -9176,10 +9210,10 @@ let qualitePasse = 0;
 if (typeof validatePassBlueprint === "function") {
 
     const analyse = validatePassBlueprint(
-        typePasse,
-        txt
-    );
-
+    typePasse,
+    txt,
+    joueur
+);
 
     similarity = analyse.similarity || 0;
 
