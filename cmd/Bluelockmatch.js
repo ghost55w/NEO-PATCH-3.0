@@ -4630,9 +4630,8 @@ const BLUEPRINT_PASSES = {
 // ================================================================
 // 🧠 VALIDATION BLUEPRINT PASSES
 // ================================================================
-
-validatePassBlueprint(match, typePasse, txt, joueur) {
-
+function validatePassBlueprint(match, typePasse, txt, joueur) {
+    
     const blueprint = BLUEPRINT_PASSES[typePasse];
 
 
