@@ -5129,24 +5129,35 @@ function extractPassDetails(txt) {
 
 function calculatePassRealStats(joueur, details) {
 
-
-    const fiche =
-        cardsBlueLock.find(c =>
-            c.nom &&
-            c.nom.toLowerCase()
-            === joueur.nom.toLowerCase()
-        );
+let fiche = null;
 
 
-    if(!fiche){
+if (Array.isArray(cardsBlueLock)) {
 
-        return {
-            passeBase:50,
-            passeFinale:50
-        };
+    fiche = cardsBlueLock.find(c =>
+        c.nom &&
+        c.nom.toLowerCase() === joueur.nom.toLowerCase()
+    );
 
-    }
+} else {
 
+    fiche = Object.values(cardsBlueLock).find(c =>
+        c.nom &&
+        c.nom.toLowerCase() === joueur.nom.toLowerCase()
+    );
+
+}
+
+
+if (!fiche) {
+
+    return {
+        passeBase:50,
+        passeFinale:50
+    };
+
+}
+    
 
     const passeBase =
         fiche.stats?.pas || 50;
@@ -5501,8 +5512,6 @@ function extrairePied(txt) {
 
 }
 
-
-
 // ==========================================================
 // 📊 STAT DE PASSE RÉELLE
 // ==========================================================
@@ -5511,21 +5520,44 @@ function calculStatPasseReelle(joueur, piedUtilise) {
 
     if (!joueur) return 50;
 
-    const fiche = cardsBlueLock.find(c =>
-        c.nom?.toLowerCase() === joueur.nom?.toLowerCase()
-    );
+
+    let fiche = null;
+
+
+    if (Array.isArray(cardsBlueLock)) {
+
+        fiche = cardsBlueLock.find(c =>
+            c.nom?.toLowerCase() === joueur.nom?.toLowerCase()
+        );
+
+    } else {
+
+        fiche = Object.values(cardsBlueLock).find(c =>
+            c.nom?.toLowerCase() === joueur.nom?.toLowerCase()
+        );
+
+    }
+
 
     if (!fiche) return 50;
 
+
     let passe = fiche.stats?.pas || 50;
 
-    const piedFort = (fiche.piedFort || "droit").toLowerCase();
 
-    if (piedUtilise && piedUtilise !== piedFort) {
+    const piedFort =
+        (fiche.piedFort || "droit").toLowerCase();
+
+
+    if (
+        piedUtilise &&
+        piedUtilise !== piedFort
+    ) {
 
         passe = Math.round(passe * 0.8);
 
     }
+
 
     return passe;
 
@@ -9289,16 +9321,61 @@ async function handleDeplacements(match, joueur, texte) {
 // ⚽ PASSES, INTERCEPTIONS, CONTRÔLES
 async function handlePasses(match, action, joueur) {
 
-    if (!action || !joueur) {
+    if (!action) {
         return {
             ok: false,
             erreur: "❌ Données invalides (passe)"
         };
     }
 
+
+    // 🔎 Trouver le passeur dans le lineup (même logique que les duels)
+    const findPlayer = (txt, ownerJid) => {
+
+        const lineup =
+            normalizeJid(ownerJid) === normalizeJid(match.id1)
+                ? (match.lineup1 || [])
+                : (match.lineup2 || []);
+
+
+        const t = pureName(txt);
+
+
+        return lineup.find(p => {
+
+            const n = pureName(p.nom);
+
+            return (
+                t.includes(n) ||
+                n.includes(t)
+            );
+
+        }) || null;
+
+    };
+
+
+    const passeur = findPlayer(
+        action,
+        match.joueurTour
+    );
+
+
+    if (!passeur) {
+        return {
+            ok:false,
+            erreur:"❌ Joueur passeur introuvable"
+        };
+    }
+
+
+    // On garde la même variable utilisée partout dans le reste du code
+    joueur = passeur;
+
+
     const txt = action.toLowerCase();
 
-let typePasse = null;
+    let typePasse = null;
 
 for (const type of Object.keys(BLUEPRINT_PASSES)) {
 
@@ -9311,18 +9388,16 @@ for (const type of Object.keys(BLUEPRINT_PASSES)) {
 
 }
 
+
 if (!typePasse) {
 
     return {
-        ok: false,
-        erreur: "❌ Type de passe non reconnu."
+        ok:false,
+        erreur:"❌ Type de passe non reconnu."
     };
 
 }
     
-
-
-
     // 📐 VALIDATION CLASSIQUE
     const elementsObligatoires = [
         /passe/,
