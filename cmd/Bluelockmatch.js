@@ -4631,8 +4631,7 @@ const BLUEPRINT_PASSES = {
 // 🧠 VALIDATION BLUEPRINT PASSES
 // ================================================================
 
-function validatePassBlueprint(typePasse, txt, joueur) {
-
+validatePassBlueprint(match, typePasse, txt, joueur) {
 
     const blueprint = BLUEPRINT_PASSES[typePasse];
 
@@ -4940,61 +4939,69 @@ function validatePassBlueprint(typePasse, txt, joueur) {
 
 
 
+// ==========================================================
+// 📍 ZONE DE DÉPART (TRACKER)
+// ==========================================================
 
-    // -----------------------------
-    // 📍 ZONE DÉPART / ARRIVÉE
-    // -----------------------------
+if (conditions.depart) {
 
-    if(conditions.depart){
+    total++;
 
+    const camp =
+        (match.lineup1 || []).includes(joueur)
+            ? "A"
+            : "B";
 
-        total++;
+    const tracker =
+        match.tracker?.joueurs?.[
+            `${joueur.nom}_${camp}`
+        ];
 
+    if (
+        tracker &&
+        tracker.zone?.ligne === conditions.depart.ligne &&
+        tracker.zone?.secteur === conditions.depart.secteur
+    ) {
 
-        const zone =
-            extraireZone(txt);
+        score++;
 
+    } else {
 
-
-        if(
-            zone === conditions.depart.zone
-        ){
-
-            score++;
-
-        }
-        else{
-
-            erreurs.push(
-                "Zone de départ incorrecte"
-            );
-
-        }
+        erreurs.push(
+            "Zone de départ incorrecte"
+        );
 
     }
 
+}
+    
+// ==========================================================
+// 📍 ZONE D'ARRIVÉE (TRACKER)
+// ==========================================================
 
+if (conditions.arrivee) {
 
+    total++;
 
-    if(conditions.arrivee){
+    const destination =
+        match.pendingPass?.destination;
 
-
-        total++;
-
+    if (destination) {
 
         const zone =
-            extraireZone(txt);
+            getZoneFromPosition(
+                destination.x,
+                destination.y
+            );
 
-
-
-        if(
-            zone === conditions.arrivee.zone
-        ){
+        if (
+            zone.ligne === conditions.arrivee.ligne &&
+            zone.secteur === conditions.arrivee.secteur
+        ) {
 
             score++;
 
-        }
-        else{
+        } else {
 
             erreurs.push(
                 "Zone d'arrivée incorrecte"
@@ -5002,9 +5009,15 @@ function validatePassBlueprint(typePasse, txt, joueur) {
 
         }
 
+    } else {
+
+        erreurs.push(
+            "Destination inconnue"
+        );
+
     }
 
-
+}
 
 
     // ==========================================================
@@ -5455,34 +5468,176 @@ function resolvePassResult(
 
 }
 
+// ==========================================================
+// 👟 PIED UTILISÉ
+// ==========================================================
 
 function extrairePied(txt) {
 
     txt = txt.toLowerCase();
 
-    // Pied droit
     if (
-        txt.includes("pied droit") ||
         txt.includes("intérieur du pied droit") ||
         txt.includes("extérieur du pied droit") ||
         txt.includes("pointe du pied droit") ||
         txt.includes("talon droit") ||
-        txt.includes("talon du pied droit")
+        txt.includes("talon du pied droit") ||
+        txt.includes("pied droit")
     ) {
         return "droit";
     }
 
-    // Pied gauche
     if (
-        txt.includes("pied gauche") ||
         txt.includes("intérieur du pied gauche") ||
         txt.includes("extérieur du pied gauche") ||
         txt.includes("pointe du pied gauche") ||
         txt.includes("talon gauche") ||
-        txt.includes("talon du pied gauche")
+        txt.includes("talon du pied gauche") ||
+        txt.includes("pied gauche")
     ) {
         return "gauche";
     }
+
+    return null;
+
+}
+
+
+
+// ==========================================================
+// 📊 STAT DE PASSE RÉELLE
+// ==========================================================
+
+function calculStatPasseReelle(joueur, piedUtilise) {
+
+    if (!joueur) return 50;
+
+    const fiche = cardsBlueLock.find(c =>
+        c.nom?.toLowerCase() === joueur.nom?.toLowerCase()
+    );
+
+    if (!fiche) return 50;
+
+    let passe = fiche.stats?.pas || 50;
+
+    const piedFort = (fiche.piedFort || "droit").toLowerCase();
+
+    if (piedUtilise && piedUtilise !== piedFort) {
+
+        passe = Math.round(passe * 0.8);
+
+    }
+
+    return passe;
+
+}
+
+
+
+// ==========================================================
+// 📈 HAUTEUR
+// ==========================================================
+
+function extraireHauteur(txt) {
+
+    txt = txt.toLowerCase();
+
+    if (txt.includes("ras du sol"))
+        return 0;
+
+    const m =
+        txt.match(/(\d+(?:\.\d+)?)\s*cm/i);
+
+    if (m)
+        return Number(m[1]);
+
+    const m2 =
+        txt.match(/(\d+(?:\.\d+)?)\s*m/i);
+
+    if (m2)
+        return Number(m2[1]) * 100;
+
+    return null;
+
+}
+
+
+
+// ==========================================================
+// 🌀 COURBE
+// ==========================================================
+
+function extraireCourbe(txt) {
+
+    txt = txt.toLowerCase();
+
+    const m =
+        txt.match(/courbe\s*(?:de)?\s*(\d+(?:\.\d+)?)\s*m/i);
+
+    if (m)
+        return Number(m[1]);
+
+    return 0;
+
+}
+
+
+
+// ==========================================================
+// 🔄 PIVOT
+// ==========================================================
+
+function verifierPivot(txt, pivot) {
+
+    txt = txt.toLowerCase();
+
+    if (Array.isArray(pivot)) {
+
+        return pivot.some(p =>
+            txt.includes(p.toLowerCase())
+        );
+
+    }
+
+    return txt.includes(
+        String(pivot).toLowerCase()
+    );
+
+}
+
+
+
+// ==========================================================
+// 📍 ZONE
+// ==========================================================
+
+function extraireZone(txt) {
+
+    txt = txt.toLowerCase();
+
+    if (txt.includes("surface"))
+        return "surface";
+
+    if (
+        txt.includes("rond central") ||
+        txt.includes("rondcentral")
+    )
+        return "rondCentral";
+
+    if (txt.includes("axe"))
+        return "axe";
+
+    if (
+        txt.includes("couloir gauche") ||
+        txt.includes("aile gauche")
+    )
+        return "couloir_gauche";
+
+    if (
+        txt.includes("couloir droit") ||
+        txt.includes("aile droite")
+    )
+        return "couloir_droit";
 
     return null;
 
@@ -9210,6 +9365,7 @@ let qualitePasse = 0;
 if (typeof validatePassBlueprint === "function") {
 
     const analyse = validatePassBlueprint(
+    match,
     typePasse,
     txt,
     joueur
