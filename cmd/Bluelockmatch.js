@@ -4941,6 +4941,7 @@ function validatePassBlueprint(match, typePasse, txt, joueur) {
 // ==========================================================
 // 📍 ZONE DE DÉPART (TRACKER)
 // ==========================================================
+
 if (conditions.depart) {
 
     total++;
@@ -4976,6 +4977,7 @@ if (conditions.depart) {
 // ==========================================================
 // 📍 ZONE D'ARRIVÉE (TRACKER)
 // ==========================================================
+
 if (conditions.arrivee) {
 
     total++;
@@ -5020,6 +5022,7 @@ if (conditions.arrivee) {
     // ==========================================================
     // 📊 CALCUL FINAL
     // ==========================================================
+
     const similarity =
         total > 0
         ?
@@ -5061,6 +5064,7 @@ if (conditions.arrivee) {
 // ================================================================
 // 🔎 EXTRACTION DÉTAILS DE PASSE
 // ================================================================
+
 function extractPassDetails(txt) {
 
     return {
@@ -5122,6 +5126,7 @@ function extractPassDetails(txt) {
 // ================================================================
 // 🦶 CALCUL PIED FORT / PIED FAIBLE
 // ================================================================
+
 function calculatePassRealStats(joueur, details) {
 
 
@@ -5133,35 +5138,26 @@ function calculatePassRealStats(joueur, details) {
         );
 
 
-// ================================================================
-// 🦶 CALCUL PIED FORT / PIED FAIBLE
-// ================================================================
-function calculatePassRealStats(joueur, details) {
-
-    if (!joueur) {
+    if(!fiche){
 
         return {
-            passeBase: 50,
-            passeFinale: 50
+            passeBase:50,
+            passeFinale:50
         };
 
     }
 
 
     const passeBase =
-        joueur.stats?.pas ||
-        joueur.pas ||
-        50;
+        fiche.stats?.pas || 50;
 
 
     const piedFort =
-        joueur.pied ||
-        joueur.piedFort ||
-        "droit";
+        fiche.pied || "droit";
 
 
     const ambidextre =
-        joueur.ambidextre === true;
+        fiche.ambidextre === true;
 
 
 
@@ -5169,13 +5165,13 @@ function calculatePassRealStats(joueur, details) {
 
 
 
-    // 🦶 Pied faible
+    // pied faible
 
-    if (
+    if(
         !ambidextre &&
         details.pied &&
         details.pied !== piedFort
-    ) {
+    ){
 
         passeFinale -= 20;
 
@@ -5202,6 +5198,7 @@ function calculatePassRealStats(joueur, details) {
 // ================================================================
 // 🎯 CALCUL PRÉCISION FINALE
 // ================================================================
+
 function calculatePassAccuracy(
     similarity,
     passeFinale
@@ -5230,6 +5227,7 @@ function calculatePassAccuracy(
 // ================================================================
 // 🌀 VÉRIFICATION TRAJECTOIRE
 // ================================================================
+
 function checkPassTrajectory(
     typePasse,
     details
@@ -5313,6 +5311,7 @@ function checkPassTrajectory(
 // ================================================================
 // 🛡️ INTERCEPTION AUTOMATIQUE
 // ================================================================
+
 function checkAutomaticInterception(
     match,
     pendingPass
@@ -5403,6 +5402,7 @@ function checkAutomaticInterception(
 // ================================================================
 // ⚽ RÉSOLUTION FINALE PASSE
 // ================================================================
+
 function resolvePassResult(
     match,
     pendingPass
@@ -5470,6 +5470,7 @@ function resolvePassResult(
 // ==========================================================
 // 👟 PIED UTILISÉ
 // ==========================================================
+
 function extrairePied(txt) {
 
     txt = txt.toLowerCase();
@@ -5505,6 +5506,7 @@ function extrairePied(txt) {
 // ==========================================================
 // 📊 STAT DE PASSE RÉELLE
 // ==========================================================
+
 function calculStatPasseReelle(joueur, piedUtilise) {
 
     if (!joueur) return 50;
@@ -5534,6 +5536,7 @@ function calculStatPasseReelle(joueur, piedUtilise) {
 // ==========================================================
 // 📈 HAUTEUR
 // ==========================================================
+
 function extraireHauteur(txt) {
 
     txt = txt.toLowerCase();
@@ -5562,6 +5565,7 @@ function extraireHauteur(txt) {
 // ==========================================================
 // 🌀 COURBE
 // ==========================================================
+
 function extraireCourbe(txt) {
 
     txt = txt.toLowerCase();
@@ -5581,6 +5585,7 @@ function extraireCourbe(txt) {
 // ==========================================================
 // 🔄 PIVOT
 // ==========================================================
+
 function verifierPivot(txt, pivot) {
 
     txt = txt.toLowerCase();
@@ -5604,6 +5609,7 @@ function verifierPivot(txt, pivot) {
 // ==========================================================
 // 📍 ZONE
 // ==========================================================
+
 function extraireZone(txt) {
 
     txt = txt.toLowerCase();
