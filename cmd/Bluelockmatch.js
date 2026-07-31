@@ -9110,23 +9110,28 @@ async function handlePasses(match, action, joueur) {
 
     const txt = action.toLowerCase();
 
+let typePasse = null;
 
-    // 🎯 TYPE DE PASSE
-    let typePasse = null;
+for (const type of Object.keys(BLUEPRINT_PASSES)) {
 
-    for (const type in TYPES_PASSES) {
-        if (txt.includes(type)) {
-            typePasse = type;
-            break;
-        }
+    if (txt.includes(type)) {
+
+        typePasse = type;
+        break;
+
     }
 
-    if (!typePasse) {
-        return {
-            ok:false,
-            erreur:"❌ Type de passe non reconnu"
-        };
-    }
+}
+
+if (!typePasse) {
+
+    return {
+        ok: false,
+        erreur: "❌ Type de passe non reconnu."
+    };
+
+}
+    
 
 
 
@@ -9304,9 +9309,10 @@ if (precision === 0) {
         : "B";
 
 
-
     const cibleNom =
-        txt.match(/(?:vers|à|pour)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i)?.[1];
+    txt.match(
+        /(?:vers|à|pour|visant(?:\s+l['’]intérieur\s+du\s+pied\s+(?:gauche|droit)\s+de)?)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i
+    )?.[1];
 
 
 
