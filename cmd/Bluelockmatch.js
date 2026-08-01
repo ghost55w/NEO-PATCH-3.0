@@ -9327,55 +9327,32 @@ async function handlePasses(match, action, joueur) {
             erreur: "❌ Données invalides (passe)"
         };
     }
+// 🔎 Trouver le passeur dans le lineup (même logique que les duels)
+const findPlayer = (txt, ownerJid) => {
 
+    const lineup =
+        normalizeJid(ownerJid) === normalizeJid(match.id1)
+            ? (match.lineup1 || [])
+            : (match.lineup2 || []);
 
-    // 🔎 Trouver le passeur dans le lineup (même logique que les duels)
-    const findPlayer = (txt, ownerJid) => {
+    const t = pureName(txt);
 
-        const lineup =
-            normalizeJid(ownerJid) === normalizeJid(match.id1)
-                ? (match.lineup1 || [])
-                : (match.lineup2 || []);
+    return lineup.find(p => {
 
+        const n = pureName(p.nom);
 
-        const t = pureName(txt);
+        return (
+            t.includes(n) ||
+            n.includes(t)
+        );
 
+    }) || null;
 
-        return lineup.find(p => {
+};
 
-            const n = pureName(p.nom);
+const txt = action.toLowerCase();
 
-            return (
-                t.includes(n) ||
-                n.includes(t)
-            );
-
-        }) || null;
-
-    };
-
-
-    const passeur = findPlayer(
-        action,
-        match.joueurTour
-    );
-
-
-    if (!passeur) {
-        return {
-            ok:false,
-            erreur:"❌ Joueur passeur introuvable"
-        };
-    }
-
-
-    // On garde la même variable utilisée partout dans le reste du code
-    joueur = passeur;
-
-
-    const txt = action.toLowerCase();
-
-    let typePasse = null;
+let typePasse = null;
 
 for (const type of Object.keys(BLUEPRINT_PASSES)) {
 
@@ -9388,16 +9365,38 @@ for (const type of Object.keys(BLUEPRINT_PASSES)) {
 
 }
 
-
 if (!typePasse) {
 
     return {
-        ok:false,
-        erreur:"❌ Type de passe non reconnu."
+        ok: false,
+        erreur: "❌ Type de passe non reconnu."
     };
 
 }
-    
+
+// 🔎 Récupération du passeur
+const passeur = findPlayer(
+    action,
+    match.joueurTour
+);
+
+if (!passeur) {
+
+    return {
+        ok: false,
+        erreur: "❌ Joueur passeur introuvable"
+    };
+
+}
+
+// Source de vérité
+joueur = passeur;
+
+const campPasseur =
+    normalizeJid(match.joueurTour) === normalizeJid(match.id1)
+        ? "A"
+        : "B"; 
+
     // 📐 VALIDATION CLASSIQUE
     const elementsObligatoires = [
         /passe/,
@@ -9420,22 +9419,17 @@ if (!typePasse) {
 
         }
     }
-
-
 // =====================================================
 // 🧠 VALIDATION BLUEPRINT PASS UNIQUEMENT
 // =====================================================
-
 let similarity = 0;
 let precision = 0;
 let notePave = 0;
 let qualitePasse = 0;
-
-
+    
 // =====================================================
 // 🧠 ANALYSE SIMILARITÉ BLUEPRINT
 // =====================================================
-
 if (typeof validatePassBlueprint === "function") {
 
     const analyse = validatePassBlueprint(
@@ -9445,44 +9439,17 @@ if (typeof validatePassBlueprint === "function") {
     joueur
 );
 
-    similarity = analyse.similarity || 0;
-
-
-    // 📊 Conversion similarity → précision
-
-    if (similarity >= 70) {
-
-        precision = 100;
-
-    } 
-    
-    else if (similarity >= 50) {
-
-        precision = 50;
-
-    } 
-    
-    else {
-
-        precision = 0;
-
-    }
-
-
-    // 📊 NOTE DU PAVÉ
-
-    notePave = Math.max(
-        1,
-        Math.round(similarity / 10)
-    );
-
-}
-
+ similarity = analyse.similarity || 0;
+precision = analyse.precision || 0;
+notePave = Math.max(
+    1,
+    Math.round(similarity / 10)
+);   
+} 
 
 // =====================================================
 // ❌ BLUEPRINT REFUSÉ
 // =====================================================
-
 if (precision === 0) {
 
     return {
@@ -9499,12 +9466,8 @@ if (precision === 0) {
     };
 
 }
-    
-
     // 📏 DISTANCE
-
     const dist = extraireDistance(txt);
-
 
     if (dist && dist > 60) {
 
@@ -9514,13 +9477,8 @@ if (precision === 0) {
         };
 
     }
-
-
-
     // 🎯 INTERCEPTION
-
     const visavis = joueur.visavis;
-
 
     if (visavis) {
 
@@ -9529,21 +9487,17 @@ if (precision === 0) {
             precision < 90 ? 0.3 :
             0.15;
 
-
         if (Math.random() < chance) {
 
             match.possession =
                 match.possession === match.team1Nom
                 ? match.team2Nom
                 : match.team1Nom;
-
-
+            
             return {
 
                 ok:false,
-
                 interception:true,
-
                 message:
                 `🛑 Interception par ${visavis.nom} !`
 
@@ -9553,90 +9507,56 @@ if (precision === 0) {
     }
 
 // =====================================================
-// 🎯 RECHERCHE PASSEUR / CIBLE
+// 🎯 RECHERCHE CIBLE
 // =====================================================
-
 const lineup =
-    normalizeJid(match.joueurTour) === normalizeJid(match.id1)
+    campPasseur === "A"
         ? (match.lineup1 || [])
         : (match.lineup2 || []);
 
-const texte = pureName(action);
-
-// 🔎 Passeur = nom avant "fait"
-const debutAction =
-    pureName(action.split("fait")[0]);
-
-const passeur =
-    lineup.find(p =>
-        debutAction.includes(
-            pureName(p.nom)
-        )
-    );
-
-if (!passeur) {
-
-    return {
-        ok:false,
-        erreur:"❌ Passeur introuvable"
-    };
-
-}
-
-// Source de vérité
-joueur = passeur;
-
-
-// 🔎 Cible = uniquement dans le même lineup
 const cibleNom =
 txt.match(
 /(?:vers|à|pour|visant(?:\s+l['’]intérieur\s+du\s+pied\s+(?:gauche|droit)\s+de)?)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i
 )?.[1];
 
-
 let cible = null;
 
 if (cibleNom) {
 
-    cible =
-        lineup.find(p =>
-            pureName(p.nom) ===
-            pureName(cibleNom)
-        );
+    cible = lineup.find(p =>
+        pureName(p.nom) === pureName(cibleNom)
+    );
 
     if (!cible) {
 
         return {
-            ok:false,
-            erreur:"❌ Cible introuvable"
+            ok: false,
+            erreur: "❌ Cible introuvable"
         };
 
     }
 
 }
 
+const cibleTracker =
+    match.tracker?.joueurs?.[
+        `${cible.nom}_${campPasseur}`
+    ];
+    
     // =====================================================
     // 🎯 PASSE EN PROFONDEUR
     // =====================================================
-
     let passeVersZone = false;
     let cibleZone = null;
 
-
-
     if (typePasse === "passe en profondeur") {
-
-
+        
         passeVersZone = true;
-
-
 
         const passeurTracker =
         match.tracker.joueurs[
             `${joueur.nom}_${campPasseur}`
         ];
-
-
 
         if (!passeurTracker) {
 
@@ -9647,23 +9567,16 @@ if (cibleNom) {
 
         }
 
-
-
         let x =
         passeurTracker.position.x;
-
 
         let y =
         passeurTracker.position.y;
 
-
-
         const d =
         extraireDistance(txt) || 5;
 
-
-
-        if (txt.includes("devant"))
+       if (txt.includes("devant"))
             y += campPasseur === "A" ? d : -d;
 
 
@@ -9677,9 +9590,7 @@ if (cibleNom) {
 
         if (txt.includes("droite"))
             x += d;
-
-
-
+        
         cibleZone = {
 
             x:Math.max(0,Math.min(30,x)),
@@ -9690,28 +9601,18 @@ if (cibleNom) {
 
     }
 
-
-
-
-
     // =====================================================
     // 📏 DISTANCE RÉELLE
     // =====================================================
-
-
     const passeurTracker =
     match.tracker?.joueurs?.[
         `${joueur.nom}_${campPasseur}`
     ];
 
-
-
     const destination =
         passeVersZone
         ? cibleZone
         : cibleTracker?.position;
-
-
 
     if (!destination || !passeurTracker) {
 
@@ -9722,23 +9623,16 @@ if (cibleNom) {
 
     }
 
-
-
     const dx =
     destination.x -
     passeurTracker.position.x;
-
 
     const dy =
     destination.y -
     passeurTracker.position.y;
 
-
-
     const distanceReelle =
     Math.sqrt(dx*dx + dy*dy);
-
-
 
     if (distanceReelle > 60) {
 
@@ -9748,12 +9642,7 @@ if (cibleNom) {
         };
 
     }
-
-
-
-
     // 📊 QUALITÉ
-
     if (dist && dist <= 15)
         qualitePasse = 100;
 
@@ -9763,14 +9652,9 @@ if (cibleNom) {
     else
         qualitePasse = 50;
 
-
-
-
     // =====================================================
     // ⚽ BALLE EN MOUVEMENT
     // =====================================================
-
-
     match.pendingPass = {
 
         passeur:joueur.nom,
@@ -9802,8 +9686,6 @@ if (cibleNom) {
         attenteInterception:true
 
     };
-
-
 
     return {
 
