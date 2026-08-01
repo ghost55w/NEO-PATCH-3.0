@@ -9552,84 +9552,68 @@ if (precision === 0) {
 
     }
 
+// =====================================================
+// 🎯 RECHERCHE PASSEUR / CIBLE
+// =====================================================
+
+const lineup =
+    normalizeJid(match.joueurTour) === normalizeJid(match.id1)
+        ? (match.lineup1 || [])
+        : (match.lineup2 || []);
+
+const texte = pureName(action);
+
+// 🔎 Passeur = nom avant "fait"
+const debutAction =
+    pureName(action.split("fait")[0]);
+
+const passeur =
+    lineup.find(p =>
+        debutAction.includes(
+            pureName(p.nom)
+        )
+    );
+
+if (!passeur) {
+
+    return {
+        ok:false,
+        erreur:"❌ Passeur introuvable"
+    };
+
+}
+
+// Source de vérité
+joueur = passeur;
 
 
-
-    // =====================================================
-    // 🎯 RECHERCHE CIBLE
-    // =====================================================
-
-
-    const memeEquipe =
-        (match.lineup1 || []).includes(joueur)
-        ? match.lineup1
-        : match.lineup2;
+// 🔎 Cible = uniquement dans le même lineup
+const cibleNom =
+txt.match(
+/(?:vers|à|pour|visant(?:\s+l['’]intérieur\s+du\s+pied\s+(?:gauche|droit)\s+de)?)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i
+)?.[1];
 
 
+let cible = null;
 
-    const campPasseur =
-        (match.lineup1 || []).includes(joueur)
-        ? "A"
-        : "B";
+if (cibleNom) {
 
-
-    const cibleNom =
-    txt.match(
-        /(?:vers|à|pour|visant(?:\s+l['’]intérieur\s+du\s+pied\s+(?:gauche|droit)\s+de)?)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i
-    )?.[1];
-
-
-
-    let cible = null;
-    let cibleTracker = null;
-
-
-
-    if (cibleNom) {
-
-
-        cible = memeEquipe.find(p =>
-            p.nom?.toLowerCase()
-            === cibleNom.toLowerCase()
+    cible =
+        lineup.find(p =>
+            pureName(p.nom) ===
+            pureName(cibleNom)
         );
 
+    if (!cible) {
 
-
-        if (!cible) {
-
-            return {
-                ok:false,
-                erreur:`❌ ${cibleNom} n'appartient pas à l'équipe`
-            };
-
-        }
-
-
-
-        const key =
-            `${cible.nom}_${campPasseur}`;
-
-
-
-        cibleTracker =
-            match.tracker?.joueurs?.[key];
-
-
-
-        if (!cibleTracker) {
-
-            return {
-                ok:false,
-                erreur:
-                `❌ Position tracker introuvable pour ${cible.nom}`
-            };
-
-        }
+        return {
+            ok:false,
+            erreur:"❌ Cible introuvable"
+        };
 
     }
 
-
-
+}
 
     // =====================================================
     // 🎯 PASSE EN PROFONDEUR
