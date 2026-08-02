@@ -85,13 +85,13 @@ function generateFicheDuel(duel) {
 
 // COMMANDE DE LANCEMENT DU MATCH🌀🆚//
 ovlcmd({
-    pattern: "match🌀",
-    desc: "Lancer un match VS",
+    nom_cmd: "match🌀",
+    classe: "ALLSTARS🌀",
     react: "🌀",
-    type: "game"
-}, async (ovl, msg) => {
+    desc: "Lancer un match VS"
+}, async (ms_org, ovl, cmd_options) => {
 
-    const chat = msg.chat;
+    const chat = ms_org.from || ms_org.key?.remoteJid || ms_org;
 
     const matchId = Date.now().toString();
 
