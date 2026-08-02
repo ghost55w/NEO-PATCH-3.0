@@ -6779,33 +6779,20 @@ const resultatPasse = await handlePasses(
 
 if (resultatPasse?.ok) {
 
-    const attacker =
-        match.attacker || joueurActuel;
-
-
-    const validationPrecision =
-        resultatPasse.similarity >= 50
-            ? "✅"
-            : "❌";
-
-
-    // 🔁 NEXT DYNAMIQUE COMME DANS LES DUELS
-
     const next =
-        normalizeJid(attacker.id || attacker.jid) === normalizeJid(match.id1)
+        normalizeJid(match.joueurTour) === normalizeJid(match.id1)
             ? match.id2
             : match.id1;
 
-
     await ovl.sendMessage(chat,{
         text:
-`*🎯 ⚡⚽ PASSE !*
+`*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
-🎙️ RESUME♻️ : ${attacker.nom} tente une passe ${resultatPasse.type || ""} vers ${resultatPasse.cible || "une zone"}...
+🎙️ RESUME♻️ : ${resultatPasse.pendingPass.passeur} fait une ${resultatPasse.type} en direction de ${resultatPasse.pendingPass.cible || "une zone"}...
 
-⚽ Passe stats : ${resultatPasse.statePasse}
-🎯 Précision : ${resultatPasse.similarity} ${validationPrecision}
+⚽ Passe : ${resultatPasse.statePasse}
+🎯 Précision : ${resultatPasse.similarity}
 📊 NOTE DU PAVÉ : ${resultatPasse.notePave}/10
 
 ➡️ @${getTagFromJid(next)} NEXT
@@ -6814,7 +6801,6 @@ if (resultatPasse?.ok) {
 🔷BLUELOCK⚽🥅`,
         mentions:[next]
     });
-
 
     return true;
 
