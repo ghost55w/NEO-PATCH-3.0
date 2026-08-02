@@ -158,25 +158,27 @@ ovlcmd({
     return ovl.sendMessage(ms_org, { text: "▶️ Décompte repris." });
   }
 
-  // Détection Go / Next
+// Détection Go / Next (uniquement si le message commence par une mention)
 let countdownTime = null;
-let isGo = false;
 let gifUrl = "";
 
+// Le premier mot doit être une mention (@...)
+if (!mots[0]?.startsWith("@")) return;
+
 if (mots[1] === "go") {
-  countdownTime = 6 * 60;
-  isGo = true;
-  gifUrl = "https://files.catbox.moe/1td1ai.mp4"; // GIF Go
+    countdownTime = 6 * 60;
+    gifUrl = "https://files.catbox.moe/1td1ai.mp4";
 } else if (mots[1] === "next") {
-  countdownTime = 6 * 60;
-  isGo = true; // Toujours true pour la logique
-  gifUrl = "https://files.catbox.moe/mdvntr.mp4"; // GIF Next
-} else return;
+    countdownTime = 6 * 60;
+    gifUrl = "https://files.catbox.moe/mdvntr.mp4";
+} else {
+    return;
+}
 
 // Envoi du GIF
 await ovl.sendMessage(ms_org, {
-  video: { url: gifUrl },
-  gifPlayback: true
+    video: { url: gifUrl },
+    gifPlayback: true
 });
 
   const interval = setInterval(async () => {
