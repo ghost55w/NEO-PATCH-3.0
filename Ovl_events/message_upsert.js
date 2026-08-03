@@ -5,6 +5,7 @@ const evt = require("../lib/ovlcmd");
 const config = require("../set");
 const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
+const { verifierJoueursMatch } = require("../cmd/AllstarsEngine");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
 const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
@@ -175,14 +176,17 @@ const clean = texte
     };
     
 // ================================
-// 🔥 SYSTEME MATCH BLUELOCK GLOBAL (VERSION CLEAN)
+// 🔥 SYSTEME MATCH GLOBAL
 // ================================
 try {
 
-  // 📄 Détection fiche match
+  // 🌀 Détection inscription AllStars
+  await verifierJoueursMatch(texte, ms_org, ovl);
+
+  // 📄 Détection fiche BlueLock
   await verifierFiche(texte, ms_org, ovl);
 
-  // ⚽ Gestion complète du match (lineup + kickoff + pavé)
+  // ⚽ Gestion complète du match BlueLock
   await messageMatch(ms, ovl);
 
 } catch (err) {
