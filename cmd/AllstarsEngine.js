@@ -6,6 +6,8 @@ const {
     getAllFiches
 } = require("../DataBase/allstars_divs_fiches");
 
+const { AllStarsDivsFiche } = require("../DataBase/allstars_divs_fiches");
+
 const { cards } = require("../DataBase/cards");
 const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
@@ -57,6 +59,20 @@ function normalizeName(n) {
         .replace(/[\u2066-\u2069\u200e\u200f\u202a-\u202e]/g, '')
         .trim();
 }
+//================= RECHERCHE FICHE PAR PSEUDO =================
+
+async function getFicheByPseudo(pseudo) {
+
+    const nom = normalizeName(pseudo);
+
+    const fiches = await getAllFiches();
+
+    return fiches.find(f => 
+        normalizeName(f.pseudo) === nom
+    );
+
+}
+
 
 //================= FICHE DUEL =================
 function generateFicheDuel(duel) {
@@ -124,7 +140,6 @@ ovlcmd({
         caption:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
 🔅 *MATCH MAKING*
 Veuillez inscrire vos pseudos de joueurs:
 
@@ -155,3 +170,162 @@ Aucun joueur valide détecté dans le temps imparti.`
 
     }, 120000);
 });
+//================= VERIFICATION JOUEURS MATCH =================
+
+async function verifierJoueursMatch(ms_org, ovl) {
+
+    const chat = ms_org.from || ms_org.key?.remoteJid;
+
+    const matchId = matchAttente[chat];
+
+    if (!matchId) return;
+
+
+    const match = duelsEnCours[matchId];
+
+    if (!match || match.etat !== "waiting_players") return;
+
+
+    const texte = clean(
+        ms_org.body ||
+        ms_org.message?.conversation ||
+        ""
+    );
+
+
+    const j1 = texte.match(/joueur\s*1\s*:\s*(.+)/i);
+    const j2 = texte.match(/joueur\s*2\s*:\s*(.+)/i);
+
+
+    if (!j1 || !j2) return;
+
+
+    const pseudo1 = j1[1].trim();
+    const pseudo2 = j2[1].trim();
+
+
+
+    const fiche1 = await getFicheByPseudo(pseudo1);
+    const fiche2 = await getFicheByPseudo(pseudo2);
+
+
+
+    if (!fiche1 || !fiche2) {
+
+
+        await ovl.sendMessage(chat,{
+            text:
+`❌ JOUEUR INTROUVABLE
+
+${!fiche1 ? `❌ ${pseudo1}` : ""}
+${!fiche2 ? `❌ ${pseudo2}` : ""}
+
+Les joueurs doivent posséder une fiche ALL STARS.`
+        });
+
+
+        return;
+    }
+
+
+
+    // Sauvegarde des joueurs
+
+    match.joueurs = [
+
+        {
+            pseudo: fiche1.pseudo,
+            jid: fiche1.jid,
+            fiche: fiche1
+        },
+
+        {
+            pseudo: fiche2.pseudo,
+            jid: fiche2.jid,
+            fiche: fiche2
+        }
+
+    ];
+
+
+    match.fiches = {
+        joueur1: fiche1,
+        joueur2: fiche2
+    };
+
+
+    match.etat = "loading_characters";
+
+
+
+    await ovl.sendMessage(chat,{
+        text:
+`🌀🔆 *ANIME JUMP VERSUS🆚*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+✅ JOUEURS CONFIRMÉS 🎉
+
+🎮 Joueur 1 : ${fiche1.pseudo}
+        🆚
+🎮 Joueur 2 : ${fiche2.pseudo}
+
+📂 Les deux fiches ont été trouvées.
+
+╰───────────────────
+                      🔆🌀`
+    });
+
+
+
+    // Effet chargement progressif
+
+    const msg = await ovl.sendMessage(chat,{
+        text:"🌀 Chargement."
+    });
+
+
+    const loading = [
+        "🌀 Chargement.",
+        "🌀 Chargement..",
+        "🌀 Chargement...",
+        "🌀 Chargement...."
+    ];
+
+
+    for(const txt of loading){
+
+        await new Promise(r=>setTimeout(r,400));
+
+
+        await ovl.sendMessage(chat,{
+            text:txt,
+            edit:msg.key
+        });
+
+    }
+
+
+
+    await ovl.sendMessage(chat,{
+        text:
+`🌀🔆 *ANIME JUMP VERSUS🆚*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+Veuillez écrire le nom complet de vos personnages !
+
+Exemple :
+
+🌀 Tanjiro
+🌀 Sasuke
+🌀 Goku
+
+🎮⌛ Temps d'attente : 2 minutes...
+
+╰───────────────────
+                      🔆🌀`
+    });
+
+ }
+
+
+
+module.exports.AllStarsDivsFiche = AllStarsDivsFiche;
