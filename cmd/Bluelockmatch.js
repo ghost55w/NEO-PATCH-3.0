@@ -6621,29 +6621,42 @@ if (match.pendingPass && match.defender) {
     }
 
 
+// ============================================================
+// 🎯 PASSE DIRECTE / CIRCULAIRE / LOBÉE
+// 🛡️ TENTATIVE INTERCEPTION
+// ============================================================
 
-    // ============================================================
-    // 🎯 PASSE DIRECTE / CIRCULAIRE / LOBÉE
-    // 🛑 INTERCEPTION AUTOMATIQUE
-    // ============================================================
-
-    if (
-        typePasse === "passe directe" ||
-        typePasse === "passe circulaire" ||
-        typePasse === "passe lobée"
-    ) {
-
-
-        match.ballHolder =
-            defender.nom;
+if (
+    typePasse === "passe directe" ||
+    typePasse === "passe circulaire" ||
+    typePasse === "passe lobée"
+) {
 
 
-        match.attacker =
-            defender;
+    const interceptionForce =
+        def + acc + ovr;
+
+
+    const passeForce =
+        similarity + (match.pendingPass.precision || 0);
+
+
+    // 🛑 INTERCEPTION RÉUSSIE
+    if (interceptionForce > passeForce) {
+
+
+        match.ballHolder = defender.nom;
+
+        match.attacker = defender;
+
+
+        trackerBalle(
+            match,
+            defender.nom
+        );
 
 
         match.pendingPass = null;
-
 
 
         const next =
@@ -6652,9 +6665,7 @@ if (match.pendingPass && match.defender) {
                 : match.id1;
 
 
-
         match.joueurTour = next;
-
 
 
         await ovl.sendMessage(chat,{
@@ -6682,6 +6693,35 @@ if (match.pendingPass && match.defender) {
 
     }
 
+
+    // ⚽ PAS D'INTERCEPTION → LA CIBLE REÇOIT
+
+    const cible = allPlayers.find(p =>
+        p.nom === match.pendingPass.cible
+    );
+
+
+    if (cible) {
+
+
+        match.ballHolder = cible.nom;
+
+
+        trackerBalle(
+            match,
+            cible.nom
+        );
+
+
+        match.pendingPass.receptionValidee = true;
+
+    }
+
+
+    return true;
+
+}
+    
 
 
     // ============================================================
