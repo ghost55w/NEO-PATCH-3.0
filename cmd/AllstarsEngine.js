@@ -172,15 +172,7 @@ Aucun joueur valide détecté dans le temps imparti.`
 // 🌀 SYSTEME INSCRIPTION JOUEURS MATCH
 //================================================
 
-ovlcmd({
-    nom_cmd: "systeme_match_allstars",
-    classe: "ALLSTARS🌀",
-}, async (ms_org, ovl, cmd_options) => {
-
-
-    const texte = cmd_options.texte || "";
-
-    const chat = ms_org;
+async function verifierJoueursMatch(message, chat, ovl) {
 
 
     const matchId = matchAttente[chat];
@@ -195,11 +187,20 @@ ovlcmd({
 
 
 
-    const j1 = texte.match(/joueur\s*1\s*:\s*(.+)/i);
-    const j2 = texte.match(/joueur\s*2\s*:\s*(.+)/i);
+    // Vérifie que c'est bien la fiche du match
+    if(
+        !message.includes("Joueur 1") ||
+        !message.includes("Joueur 2")
+    ) return;
 
 
-    if (!j1 || !j2) return;
+
+    const j1 = message.match(/joueur\s*1\s*:\s*(.+)/i);
+    const j2 = message.match(/joueur\s*2\s*:\s*(.+)/i);
+
+
+
+    if(!j1 || !j2) return;
 
 
 
@@ -213,7 +214,7 @@ ovlcmd({
 
 
 
-    if (!fiche1 || !fiche2) {
+    if(!fiche1 || !fiche2){
 
         await ovl.sendMessage(chat,{
             text:
@@ -230,7 +231,7 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
 
 
-    match.joueurs = [
+    match.joueurs=[
         {
             pseudo: fiche1.pseudo,
             jid: fiche1.jid,
@@ -244,20 +245,22 @@ Les joueurs doivent posséder une fiche ALL STARS.`
     ];
 
 
-    match.fiches = {
+
+    match.fiches={
         joueur1: fiche1,
         joueur2: fiche2
     };
 
 
-    match.etat = "loading_characters";
+
+    match.etat="loading_characters";
 
 
 
     await ovl.sendMessage(chat,{
         text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
 ✅ JOUEURS CONFIRMÉS 🎉
 
@@ -287,6 +290,7 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
         await new Promise(r=>setTimeout(r,500));
 
+
         await ovl.sendMessage(chat,{
             text:txt,
             edit:msg.key
@@ -296,14 +300,14 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
 
 
-    match.etat = "waiting_cards";
+    match.etat="waiting_cards";
 
 
 
     await ovl.sendMessage(chat,{
         text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+▔▔▔▔▔▔▔▔▔▔▔▔
 
 Veuillez écrire le nom complet de vos personnages !
 
@@ -318,11 +322,11 @@ Exemple :
 ╰───────────────────
                       🔆🌀`
     });
+ }
 
 
-}); 
-
-
-
-
-
+module.exports = {
+    verifierJoueursMatch,
+    duelsEnCours,
+    matchAttente
+};
