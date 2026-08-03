@@ -2366,6 +2366,23 @@ function parseActionSequence(actionText, match, mode = "attack") {
 let playerObj = arguments[3] || null;
 let targetObj = arguments[4] || null;
 
+    // ⚽ Priorité : passe validée par handlePasses
+if (!playerObj && mode === "attack" && match.pendingPass) {
+
+    playerObj = players.find(
+        p => pureName(p.nom) === pureName(match.pendingPass.passeur)
+    ) || null;
+
+    if (!targetObj && match.pendingPass.cible) {
+
+        targetObj = players.find(
+            p => pureName(p.nom) === pureName(match.pendingPass.cible)
+        ) || null;
+
+    }
+
+}
+
 // 🔥 Priorité absolue : phaseDuel
 if (!playerObj && match.phaseDuel?.active) {
     playerObj =
@@ -6778,6 +6795,13 @@ const resultatPasse = await handlePasses(
 // ================================================================
 
 if (resultatPasse?.ok) {
+    // 🔵 Récupération stats passeur depuis la carte Blue Lock
+    const passeurCard = findPlayerByName(
+        joueurActuel.nom,
+        cardsBlueLock
+    );
+
+    const passStat = passeurCard?.pas || 0;
 
     const next =
         normalizeJid(match.joueurTour) === normalizeJid(match.id1)
@@ -6791,7 +6815,7 @@ if (resultatPasse?.ok) {
 
 🎙️ RESUME♻️ : ${resultatPasse.pendingPass.passeur} fait une ${resultatPasse.type} en direction de ${resultatPasse.pendingPass.cible || "une zone"}...
 
-⚽ Passe : ${resultatPasse.statePasse}
+⚽ Passe : ${passStat}
 🎯 Précision : ${resultatPasse.similarity}
 📊 NOTE DU PAVÉ : ${resultatPasse.notePave}/10
 
@@ -9638,63 +9662,67 @@ const cibleTracker =
     else
         qualitePasse = 50;
 
-    // =====================================================
-    // ⚽ BALLE EN MOUVEMENT
-    // =====================================================
-    match.pendingPass = {
+ // =====================================================
+// ⚽ BALLE EN MOUVEMENT
+// =====================================================
 
-        passeur:joueur.nom,
+match.pendingPass = {
 
-        passeurCamp:campPasseur,
+    passeur: joueur.nom,
 
-        cible:cible?.nom || null,
+    passeurCamp: campPasseur,
 
-        passeVersZone,
+    cible: cible?.nom || null,
 
-        cibleZone,
+    // 📍 trajectoire
+    passeVersZone,
+    cibleZone,
+    destination,
 
-        destination,
+    // 📊 résultat passe
+    similarity,
+    precision,
+    notePave,
+    qualitePasse,
 
-        similarity,
+    distance: distanceReelle,
 
-        precision,
+    // ⚽ type de passe
+    blueprint: typePasse,
 
-        notePave,
+    // 📝 texte original
+    action,
 
-        qualitePasse,
+    // ⏳ état
+    attenteInterception: true,
 
-        distance:distanceReelle,
+    // 🔥 IMPORTANT : la balle n'est plus chez le passeur
+    ballonEnMouvement: true,
 
-        blueprint:typePasse,
+    // 🔒 Le tracker ne doit pas donner la balle à la cible maintenant
+    receptionValidee: false
+};
 
-        action,
 
-        attenteInterception:true
+return {
 
-    };
+    ok: true,
 
-    return {
+    attenteInterception: true,
 
-        ok:true,
+    pendingPass: match.pendingPass,
 
-        attenteInterception:true,
+    type: typePasse,
 
-        pendingPass:match.pendingPass,
+    precision,
 
-        type:typePasse,
+    similarity,
 
-        precision,
+    notePave,
 
-        similarity,
-
-        notePave,
-
-        cible:cible?.nom || null
-
-    };
-
-}
-        
+    cible: cible?.nom || null
+};
+}        
 
 
 ovlcmd({
