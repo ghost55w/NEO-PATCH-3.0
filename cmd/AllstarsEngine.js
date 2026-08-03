@@ -126,11 +126,8 @@ ovlcmd({
     matchAttente[chat] = matchId;
 
     const images = [
-        "https://files.catbox.moe/aoximf.jpg",
-        "https://files.catbox.moe/2qmvpa.jpg",
-        "https://files.catbox.moe/pzlkf9.jpg",
-        "https://files.catbox.moe/3vlsmw.jpg",
-        "https://files.catbox.moe/j4e1pp.jpg"
+        "https://files.catbox.moe/fc5v8n.jpg",
+        "https://files.catbox.moe/8g6zu2.jpg"
     ];
 
     const img = images[Math.floor(Math.random() * images.length)];
@@ -170,11 +167,21 @@ Aucun joueur valide détecté dans le temps imparti.`
 
     }, 120000);
 });
-//================= VERIFICATION JOUEURS MATCH =================
 
-async function verifierJoueursMatch(ms_org, ovl) {
+//================================================
+// 🌀 SYSTEME INSCRIPTION JOUEURS MATCH
+//================================================
 
-    const chat = ms_org.from || ms_org.key?.remoteJid;
+ovlcmd({
+    nom_cmd: "systeme_match_allstars",
+    classe: "ALLSTARS🌀",
+}, async (ms_org, ovl, cmd_options) => {
+
+
+    const texte = cmd_options.texte || "";
+
+    const chat = ms_org;
+
 
     const matchId = matchAttente[chat];
 
@@ -183,14 +190,9 @@ async function verifierJoueursMatch(ms_org, ovl) {
 
     const match = duelsEnCours[matchId];
 
+
     if (!match || match.etat !== "waiting_players") return;
 
-
-    const texte = clean(
-        ms_org.body ||
-        ms_org.message?.conversation ||
-        ""
-    );
 
 
     const j1 = texte.match(/joueur\s*1\s*:\s*(.+)/i);
@@ -198,6 +200,7 @@ async function verifierJoueursMatch(ms_org, ovl) {
 
 
     if (!j1 || !j2) return;
+
 
 
     const pseudo1 = j1[1].trim();
@@ -212,7 +215,6 @@ async function verifierJoueursMatch(ms_org, ovl) {
 
     if (!fiche1 || !fiche2) {
 
-
         await ovl.sendMessage(chat,{
             text:
 `❌ JOUEUR INTROUVABLE
@@ -223,28 +225,22 @@ ${!fiche2 ? `❌ ${pseudo2}` : ""}
 Les joueurs doivent posséder une fiche ALL STARS.`
         });
 
-
         return;
     }
 
 
 
-    // Sauvegarde des joueurs
-
     match.joueurs = [
-
         {
             pseudo: fiche1.pseudo,
             jid: fiche1.jid,
             fiche: fiche1
         },
-
         {
             pseudo: fiche2.pseudo,
             jid: fiche2.jid,
             fiche: fiche2
         }
-
     ];
 
 
@@ -277,25 +273,19 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
 
 
-    // Effet chargement progressif
-
     const msg = await ovl.sendMessage(chat,{
         text:"🌀 Chargement."
     });
 
 
-    const loading = [
+
+    for(const txt of [
         "🌀 Chargement.",
         "🌀 Chargement..",
-        "🌀 Chargement...",
-        "🌀 Chargement...."
-    ];
+        "🌀 Chargement..."
+    ]){
 
-
-    for(const txt of loading){
-
-        await new Promise(r=>setTimeout(r,400));
-
+        await new Promise(r=>setTimeout(r,500));
 
         await ovl.sendMessage(chat,{
             text:txt,
@@ -306,10 +296,15 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
 
 
+    match.etat = "waiting_cards";
+
+
+
     await ovl.sendMessage(chat,{
         text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
 Veuillez écrire le nom complet de vos personnages !
 
 Exemple :
@@ -324,8 +319,10 @@ Exemple :
                       🔆🌀`
     });
 
- }
+
+}); 
 
 
 
-module.exports.AllStarsDivsFiche = AllStarsDivsFiche;
+
+
