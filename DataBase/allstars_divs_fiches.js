@@ -78,10 +78,20 @@ async function getAllFiches() {
 }
 
 async function getData(where = {}) {
-  const [fiche, created] = await AllStarsDivsFiche.findOrCreate({
-    where,
-    defaults: {}
+
+  if (where.jid) {
+    where.jid = where.jid.replace("@whatsapp.net", "@s.whatsapp.net");
+  }
+
+  const fiche = await AllStarsDivsFiche.findOne({
+    where
   });
+
+  if (!fiche) {
+    console.log("❌ Fiche introuvable :", where);
+    throw new Error("Fiche inexistante");
+  }
+
   return fiche;
 }
 
