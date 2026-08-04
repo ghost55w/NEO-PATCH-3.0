@@ -19,6 +19,8 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
   if (registeredFiches.has(nom_joueur)) return;
   registeredFiches.add(nom_joueur);
 
+  console.log("Création de la commande :", nom_joueur);
+  
   ovlcmd({
     nom_cmd: nom_joueur,
     classe: joueur_div,
@@ -194,22 +196,35 @@ async function updatePlayerData(updates, jid) {
 }
 
 async function initFichesAuto() {
-  try {
-    const all = await getAllFiches();
+    try {
+        const all = await getAllFiches();
 
-    for (const player of all) {
-      if (!player.code_fiche || player.code_fiche == "pas de fiche" || !player.division || !player.oc_url || !player.id) continue;
+        console.log("Nombre de fiches :", all.length);
 
-      const nom = player.code_fiche;
-      const jid = player.jid;
-      const image = player.oc_url;
-      const division = player.division.replace(/\*/g, '');
+        for (const player of all) {
+            console.log(
+                "Chargement :",
+                player.code_fiche,
+                "| division :", player.division,
+                "| jid :", player.jid
+            );
 
-      add_fiche(nom, jid, image, division);
+            if (!player.code_fiche || player.code_fiche == "pas de fiche" || !player.division || !player.oc_url || !player.id)
+                continue;
+
+            add_fiche(
+                player.code_fiche,
+                player.jid,
+                player.oc_url,
+                player.division.replace(/\*/g, "")
+            );
+        }
+
+        console.log("Commandes enregistrées :", registeredFiches.size);
+
+    } catch (e) {
+        console.error(e);
     }
-  } catch (e) {
-    console.error("Erreur d'initFichesAuto:", e);
-  }
 }
 
 initFichesAuto();
