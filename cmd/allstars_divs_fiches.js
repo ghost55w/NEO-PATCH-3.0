@@ -34,10 +34,7 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
         const fiche = `░▒░ *👤N E O P L A Y E R | RAZORX⚡™ 🎮*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Pseudo👤*: ${data.pseudo}
-◇ *User👤*: ${data.user}
-◇ *Surnom(s)👤*: ${data.surnom}
 ◇ *Classement continental🌍:* ${data.classement}
-◇ *Experience⏫:* ${data.exp} Exp
 ◇ *Niveau🎖️*: ${data.niveau} ▲
 ◇ *Division🛡️*: ${data.division}
 ◇ *Rank 🎖️*: ${data.rang}
@@ -53,11 +50,11 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
 ✅ Victoires: ${data.victoires} - ❌ Défaites: ${data.defaites}
 *◇🏆Championnats*: ${data.championnants}
 *◇🏆NEO cup💫*: ${data.neo_cup}
-*◇🏆EVO💠*: ${data.evo}
+*◇🏆WORLDS💠*: ${data.evo}
 *◇🏆GrandSlam🅰️*: ${data.grandslam}
 *◇🌟TOS*: ${data.tos}
 *◇👑The BEST🏆*: ${data.the_best}
-*◇🗿Sigma🏆*: ${data.sigma}
+*◇🗿Laureat🏆*: ${data.sigma}
 *◇🎖️Neo Globes*: ${data.neo_globes}
 *◇🏵️Golden Rookie🏆*: ${data.golden_boy}
 
