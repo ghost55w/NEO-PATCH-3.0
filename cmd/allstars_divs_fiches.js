@@ -15,7 +15,7 @@ function countCards(cardsRaw) {
     .filter(Boolean).length;
 }
 
-function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
+function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
   if (registeredFiches.has(nom_joueur)) return;
   registeredFiches.add(nom_joueur);
 
@@ -30,46 +30,52 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
     const { repondre, ms, arg, prenium_id } = cmd_options;
 
     try {
-      const data = await getData({ jid: jid });
+      // Utilisation stricte de playerJid propre à cette instance de commande
+      const data = await getData({ jid: playerJid });
+
+      // Sécurité : Vérification et valeurs par défaut pour éviter un crash au moment du split
+      const cardsText = data.cards || "";
+      const cardsFormatted = cardsText ? cardsText.split("\n").join(" • ") : "Aucune";
+      const count = countCards(cardsText);
 
       if (!arg.length) {
         const fiche = `░▒░ *👤N E O P L A Y E R | RAZORX⚡™ 🎮*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-◇ *Pseudo👤*: ${data.pseudo}
-◇ *Classement continental🌍:* ${data.classement}
-◇ *Niveau🎖️*: ${data.niveau} ▲
-◇ *Division🛡️*: ${data.division}
-◇ *Rank 🎖️*: ${data.rang}
-◇ *Classe🎖️*: ${data.classe}
+◇ *Pseudo👤*: ${data.pseudo || 'aucun'}
+◇ *Classement continental🌍:* ${data.classement || 'aucun'}
+◇ *Niveau🎖️*: ${data.niveau || 1} ▲
+◇ *Division🛡️*: ${data.division || 'aucun'}
+◇ *Rank 🎖️*: ${data.rang || 'aucun'}
+◇ *Classe🎖️*: ${data.classe || 'aucun'}
 
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-◇ *Golds🧭*: ${data.golds} ©🧭
-◇ *Fans👥*: ${data.fans} 👥
-◇ *Archetype ⚖️*: ${data.archetype}
+◇ *Golds🧭*: ${data.golds || 0} ©🧭
+◇ *Fans👥*: ${data.fans || 0} 👥
+◇ *Archetype ⚖️*: ${data.archetype || 'aucun'}
 
 ░▒░░ PALMARÈS🏆
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-✅ Victoires: ${data.victoires} - ❌ Défaites: ${data.defaites}
-*◇🏆Championnats*: ${data.championnants}
-*◇🏆NEO cup💫*: ${data.neo_cup}
-*◇🏆WORLDS💠*: ${data.evo}
-*◇🏆GrandSlam🅰️*: ${data.grandslam}
-*◇🌟TOS*: ${data.tos}
-*◇👑The BEST🏆*: ${data.the_best}
-*◇🗿Laureat🏆*: ${data.sigma}
-*◇🎖️Neo Globes*: ${data.neo_globes}
-*◇🏵️Golden Rookie🏆*: ${data.golden_boy}
+✅ Victoires: ${data.victoires || 0} - ❌ Défaites: ${data.defaites || 0}
+*◇🏆Championnats*: ${data.championnants || 0}
+*◇🏆NEO cup💫*: ${data.neo_cup || 0}
+*◇🏆WORLDS💠*: ${data.evo || 0}
+*◇🏆GrandSlam🅰️*: ${data.grandslam || 0}
+*◇🌟TOS*: ${data.tos || 0}
+*◇👑The BEST🏆*: ${data.the_best || 0}
+*◇🗿Laureat🏆*: ${data.sigma || 0}
+*◇🎖️Neo Globes*: ${data.neo_globes || 0}
+*◇🏵️Golden Rookie🏆*: ${data.golden_boy || 0}
 
 ░▒░▒░ STATS 📊
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-📈 Note: ${data.note}/100
-⌬ *Talent⭐:* ▱▱▱▱▬▬▬ ${data.talent}
-⌬ *Strikes👊🏻:* ▱▱▱▱▬▬▬ ${data.strikes}
-⌬ *Attaques🌀:* ▱▱▱▱▬▬▬ ${data.attaques}
+📈 Note: ${data.note || 0}/100
+⌬ *Talent⭐:* ▱▱▱▱▬▬▬ ${data.talent || 0}
+⌬ *Strikes👊🏻:* ▱▱▱▱▬▬▬ ${data.strikes || 0}
+⌬ *Attaques🌀:* ▱▱▱▱▬▬▬ ${data.attaques || 0}
 
-░▒░▒░ CARDS 🎴: ${countCards(data.cards)}
+░▒░▒░ CARDS 🎴: ${count}
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-🎴 ${data.cards.split("\n").join(" • ")}
+🎴 ${cardsFormatted}
 
 ╰───────────────────
 ░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
@@ -81,15 +87,15 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
         }, { quoted: ms });
 
         return ovl.sendMessage(ms_org, {
-          image: { url: data.oc_url },
+          image: { url: data.oc_url || image_oc },
           caption: fiche
         }, { quoted: ms });
       }
 
       if (!prenium_id) return await repondre("⛔ Accès refusé ! Seuls les membres de la NS peuvent faire ça.");
 
-      const updates = await processUpdates(arg, jid);
-      await updatePlayerData(updates, jid);
+      const updates = await processUpdates(arg, playerJid);
+      await updatePlayerData(updates, playerJid);
 
       const message = updates.map(u =>
         `🛠️ *${u.colonne}* modifié : \`${u.oldValue}\` ➤ \`${u.newValue}\``
@@ -98,8 +104,8 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
       await repondre("✅ Fiche mise à jour avec succès !\n\n" + message);
 
     } catch (err) {
-      console.error("Erreur:", err);
-      await repondre("❌ Une erreur est survenue. Vérifie les paramètres.");
+      console.error(`Erreur sur la commande ${nom_joueur}:`, err);
+      await repondre("❌ Une erreur est survenue lors de la lecture de la fiche.");
     }
   });
 }
@@ -107,14 +113,14 @@ function add_fiche(nom_joueur, jid, image_oc, joueur_div) {
 async function processUpdates(args, jid) {
   const updates = [];
   const data = await getData({ jid: jid });
-  const columns = Object.keys(data.dataValues);
+  const rawValues = data.get ? data.get({ plain: true }) : data;
+  const columns = Object.keys(rawValues);
   let i = 0;
 
   while (i < args.length) {
     const object = args[i++];
     const signe = args[i++];
 
-    // On récupère tous les mots suivants comme valeur jusqu'au prochain signe ou colonne
     let texte = [];
     while (i < args.length && !['+', '-', '=', 'add', 'supp'].includes(args[i]) && !columns.includes(args[i])) {
       texte.push(args[i++]);
@@ -127,45 +133,41 @@ async function processUpdates(args, jid) {
     const oldValue = data[object];
     let newValue;
 
-    // --- Gestion spéciale pour les cards ---
     if (object === "cards") {
-  const old = oldValue || "";
-  let list = old.split("\n").filter(x => x.trim() !== "");
+      const old = oldValue || "";
+      let list = old.split("\n").filter(x => x.trim() !== "");
 
-  const fullText = texte.join(" "); // tout le texte après le signe
-  // si '=' et rien après -> on veut vider
-  const items = fullText.length ? fullText.split(",").map(x => x.trim()).filter(x => x.length > 0) : [];
+      const fullText = texte.join(" ");
+      const items = fullText.length ? fullText.split(",").map(x => x.trim()).filter(x => x.length > 0) : [];
 
-  if (signe === "+") {
-    for (const card of items) {
-      if (!list.includes(card)) list.push(card);
-    }
-  } else if (signe === "-") {
-    for (const card of items) {
-      list = list.filter(c => c !== card);
-    }
-  } else if (signe === "=") {
-    // remplace complètement : si items est vide => vide
-    list = items;
-  } else {
-    throw new Error("❌ Le champ 'cards' accepte uniquement '+', '-' ou '='");
-  }
+      if (signe === "+") {
+        for (const card of items) {
+          if (!list.includes(card)) list.push(card);
+        }
+      } else if (signe === "-") {
+        for (const card of items) {
+          list = list.filter(c => c !== card);
+        }
+      } else if (signe === "=") {
+        list = items;
+      } else {
+        throw new Error("❌ Le champ 'cards' accepte uniquement '+', '-' ou '='");
+      }
 
-  newValue = list.join("\n");
+      newValue = list.join("\n");
 
-  updates.push({
-    colonne: "cards",
-    oldValue: old,
-    newValue
-  });
+      updates.push({
+        colonne: "cards",
+        oldValue: old,
+        newValue
+      });
 
-  continue;
+      continue;
     }
 
-    // --- Gestion classique pour les autres colonnes ---
     if (signe === "+" || signe === "-") {
       const n1 = Number(oldValue) || 0;
-      const n2 = Number(texte.join(" ")) || 0; // fusionner texte pour les nombres
+      const n2 = Number(texte.join(" ")) || 0;
       newValue = signe === "+" ? n1 + n2 : n1 - n2;
     } else if (signe === "=") {
       newValue = texte.join(" ");
@@ -173,7 +175,7 @@ async function processUpdates(args, jid) {
       newValue = (oldValue + " " + texte.join(" ")).trim();
     } else if (signe === "supp") {
       const regex = new RegExp(`\\b${normalizeText(texte.join(" "))}\\b`, "gi");
-      newValue = oldValue.replace(regex, "").trim();
+      newValue = (oldValue || "").replace(regex, "").trim();
     } else {
       throw new Error(`❌ Signe non reconnu : ${signe}`);
     }
@@ -187,7 +189,6 @@ async function processUpdates(args, jid) {
 
   return updates;
 }
-
 
 async function updatePlayerData(updates, jid) {
   for (const update of updates) {
@@ -209,7 +210,7 @@ async function initFichesAuto() {
                 "| jid :", player.jid
             );
 
-            if (!player.code_fiche || player.code_fiche == "pas de fiche" || !player.division || !player.oc_url || !player.id)
+            if (!player.code_fiche || player.code_fiche === "pas de fiche" || !player.division || !player.oc_url || !player.id)
                 continue;
 
             add_fiche(
@@ -229,7 +230,6 @@ async function initFichesAuto() {
 
 initFichesAuto();
 
-// Commandes add_fiche et del_fiche (inchangées)
 ovlcmd({
   nom_cmd: "add_fiche",
   alias: [],
