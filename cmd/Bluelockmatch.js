@@ -6837,39 +6837,43 @@ const resultatPasse = await handlePasses(
 if (resultatPasse?.ok) {
     // 🔵 Récupération stats passeur depuis la carte Blue Lock
     const passeurCard = findPlayerByName(
-        joueurActuel.nom,
+        resultatPasse.pendingPass.passeur,
         cardsBlueLock
     );
 
     const passStat = passeurCard?.pas || 0;
 
+    // 🔄 Changement de tour vers l'adversaire
     const next =
         normalizeJid(match.joueurTour) === normalizeJid(match.id1)
             ? match.id2
             : match.id1;
 
-    await ovl.sendMessage(chat,{
+    // 📝 Construction du texte cible
+    const cibleAffichage = resultatPasse.pendingPass.cible
+        ? resultatPasse.pendingPass.cible
+        : "une zone";
+
+    await ovl.sendMessage(chat, {
         text:
 `*🛡️⚡⚽ ATTAQUE !*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
 
-🎙️ RESUME♻️ : ${resultatPasse.pendingPass.passeur} fait une ${resultatPasse.type} en direction de ${resultatPasse.pendingPass.cible || "une zone"}...
+🎙️ RESUME♻️ : ${resultatPasse.pendingPass.passeur} fait une ${resultatPasse.type} en direction de ${cibleAffichage}...
 
 ⚽ Passe : ${passStat}
-🎯 Précision : ${resultatPasse.similarity}
+🎯 Précision : ${resultatPasse.similarity}%
 📊 NOTE DU PAVÉ : ${resultatPasse.notePave}/10
 
 ➡️ @${getTagFromJid(next)} NEXT
 
 ╰───────────────────
 🔷BLUELOCK⚽🥅`,
-        mentions:[next]
+        mentions: [next]
     });
 
     return true;
-
 }
-    
    
 // ⚽ ATTAQUE PHASE DUEL
 if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
@@ -6878,7 +6882,7 @@ if (match.phaseDuel?.active && match.phaseDuel.step === "attack_pave") {
     match.phaseDuel.step = "defense_pave";
 
     const attacker = match.phaseDuel.attacker;
-    const defender = match.phaseDuel.defender;
+    const defender = match.phMaseDuel.defender;
 
     // 🗺️ TRACKER : Pavé attaque duel
     if (attacker) {
@@ -9557,17 +9561,16 @@ if (precision === 0) {
     }
 
 // =====================================================
-// 🎯 RECHERCHE CIBLE
+// 🎯 RECHERCHE CIBLE 
 // =====================================================
 const lineup =
     campPasseur === "A"
         ? (match.lineup1 || [])
         : (match.lineup2 || []);
 
-const cibleNom =
-txt.match(
-/(?:vers|à|pour|visant(?:\s+l['’]intérieur\s+du\s+pied\s+(?:gauche|droit)\s+de)?)\s+([a-zA-ZÀ-ÿ0-9_-]+)/i
-)?.[1];
+// Regex plus flexible : capture le dernier mot après "vers/à/pour/visant" ou après un "de"
+const matchCible = txt.match(/(?:vers|à|pour|visant)(?:.*?de)?\s+([a-zA-ZÀ-ÿ0-9_-]+)(?:\.|$|\s)/i);
+const cibleNom = matchCible ? matchCible[1] : null;
 
 let cible = null;
 
@@ -9581,10 +9584,17 @@ if (cibleNom) {
 
         return {
             ok: false,
-            erreur: "❌ Cible introuvable"
+            erreur: `❌ Cible (${cibleNom}) introuvable dans le lineup`
         };
 
     }
+
+} else {
+
+    return {
+        ok: false,
+        erreur: "❌ Joueur cible non identifié dans la passe"
+    };
 
 }
 
@@ -9592,6 +9602,7 @@ const cibleTracker =
     match.tracker?.joueurs?.[
         `${cible.nom}_${campPasseur}`
     ];
+
     
     // =====================================================
     // 🎯 PASSE EN PROFONDEUR
