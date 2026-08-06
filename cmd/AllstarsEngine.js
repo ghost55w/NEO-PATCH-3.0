@@ -52,27 +52,26 @@ function clean(txt) {
     return txt.replace(/[\u2066-\u2069\u200e\u200f\u202a-\u202e]/g, '').trim();
 }
 
-function normalizeName(n) {
-    return n
+function normalizeName(str = "") {
+    return String(str)
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, "") // retire les drapeaux
+        .replace(/[^\p{L}\p{N}]/gu, "")         // garde seulement lettres et chiffres
         .toLowerCase()
-        .replace(/@/g, '')
-        .replace(/[\u2066-\u2069\u200e\u200f\u202a-\u202e]/g, '')
         .trim();
 }
 //================= RECHERCHE FICHE PAR PSEUDO =================
 
 async function getFicheByPseudo(pseudo) {
 
-    const nom = normalizeName(pseudo);
-
     const fiches = await getAllFiches();
 
-    return fiches.find(f => 
-        normalizeName(f.pseudo) === nom
+    return fiches.find(f =>
+        normalizeName(f.pseudo) === normalizeName(pseudo)
     );
 
 }
-
 
 //================= FICHE DUEL =================
 function generateFicheDuel(duel) {
@@ -205,29 +204,31 @@ async function verifierJoueursMatch(message, chat, ovl) {
 
 
     const pseudo1 = j1[1].trim();
-    const pseudo2 = j2[1].trim();
+const pseudo2 = j2[1].trim();
 
+const fiche1 = await getFicheByPseudo(pseudo1);
+const fiche2 = await getFicheByPseudo(pseudo2);
 
+console.log("Pseudo reçu J1 :", pseudo1);
+console.log("Pseudo reçu J2 :", pseudo2);
 
-    const fiche1 = await getFicheByPseudo(pseudo1);
-    const fiche2 = await getFicheByPseudo(pseudo2);
+const toutes = await getAllFiches();
+console.log("Tous les pseudos :", toutes.map(x => x.pseudo));
 
+if (!fiche1 || !fiche2) {
 
-
-    if(!fiche1 || !fiche2){
-
-        await ovl.sendMessage(chat,{
-            text:
+    await ovl.sendMessage(chat,{
+        text:
 `❌ JOUEUR INTROUVABLE
 
 ${!fiche1 ? `❌ ${pseudo1}` : ""}
 ${!fiche2 ? `❌ ${pseudo2}` : ""}
 
 Les joueurs doivent posséder une fiche ALL STARS.`
-        });
+    });
 
-        return;
-    }
+    return;
+}
 
 
 
