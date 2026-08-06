@@ -7491,6 +7491,8 @@ if (match.phaseDuel?.active) {
     return false;
 }
 
+    console.log("⚠️ Bloc attaque normale exécuté");
+
 if (!match.pendingAttack) {
 
     const attackerId = match.joueurTour;
