@@ -9388,7 +9388,7 @@ async function handlePasses(match, action, joueur) {
             erreur: "❌ Données invalides (passe)"
         };
     }
-// 🔎 Trouver le passeur dans le lineup (même logique que les duels)
+// 🔎 Trouver le passeur dans le lineup
 const findPlayer = (txt, ownerJid) => {
 
     const lineup =
@@ -9402,10 +9402,11 @@ const findPlayer = (txt, ownerJid) => {
 
         const n = pureName(p.nom);
 
-        return (
-            t.includes(n) ||
-            n.includes(t)
-        );
+        const index = t.indexOf(n);
+
+        // Le joueur doit être au début de l'action
+        // pour éviter de prendre la cible de la passe
+        return index !== -1 && index < 15;
 
     }) || null;
 
