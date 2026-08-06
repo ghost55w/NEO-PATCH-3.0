@@ -73,6 +73,10 @@ async function getFicheByPseudo(pseudo) {
 
 }
 
+function randomImage(list) {
+    return list[Math.floor(Math.random() * list.length)];
+}
+
 //================= FICHE DUEL =================
 function generateFicheDuel(duel) {
     return `*🆚VERSUS ARENA BATTLE🏆🎮*
@@ -230,21 +234,20 @@ Les joueurs doivent posséder une fiche ALL STARS.`
     return;
 }
 
-
-
     match.joueurs=[
-        {
-            pseudo: fiche1.pseudo,
-            jid: fiche1.jid,
-            fiche: fiche1
-        },
-        {
-            pseudo: fiche2.pseudo,
-            jid: fiche2.jid,
-            fiche: fiche2
-        }
-    ];
+    {
+        pseudo: fiche1.pseudo,
+        jid: fiche1.jid,
+        fiche: fiche1
+    },
+    {
+        pseudo: fiche2.pseudo,
+        jid: fiche2.jid,
+        fiche: fiche2
+    }
+];
 
+console.log("🎮 Joueurs sauvegardés :", match.joueurs);
 
 
     match.fiches={
@@ -252,21 +255,16 @@ Les joueurs doivent posséder une fiche ALL STARS.`
         joueur2: fiche2
     };
 
-
-
     match.etat="loading_characters";
-
-
 
     await ovl.sendMessage(chat,{
         text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
 ✅ JOUEURS CONFIRMÉS 🎉
 
 🎮 Joueur 1 : ${fiche1.pseudo}
-        🆚
+              🆚
 🎮 Joueur 2 : ${fiche2.pseudo}
 
 📂 Les deux fiches ont été trouvées.
@@ -275,13 +273,10 @@ Les joueurs doivent posséder une fiche ALL STARS.`
                       🔆🌀`
     });
 
-
-
+   
     const msg = await ovl.sendMessage(chat,{
         text:"🌀 Chargement."
     });
-
-
 
     for(const txt of [
         "🌀 Chargement.",
@@ -302,32 +297,205 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
 
     match.etat="waiting_cards";
+    
+    const imagesChoixPersonnage = [
+    "https://files.catbox.moe/ygzb4n.jpg",
+    "https://files.catbox.moe/a49tvk.jpg",
+    "https://files.catbox.moe/vvspfe.jpg",
+    "https://files.catbox.moe/txd8so.jpg"
+];
 
+const imgChoix = imagesChoixPersonnage[
+    Math.floor(Math.random() * imagesChoixPersonnage.length)
+];
 
-
-    await ovl.sendMessage(chat,{
-        text:
+await ovl.sendMessage(chat,{
+    image: {
+        url: imgChoix
+    },
+    caption:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
 ▔▔▔▔▔▔▔▔▔▔▔▔
+*🎮\`CHOIX DU PERSONNAGE\`*
 
-Veuillez écrire le nom complet de vos personnages !
+♨️Veuillez écrire le nom complet de vos personnages !
 
 Exemple :
-
 🌀 Tanjiro
-🌀 Sasuke
-🌀 Goku
+🌀 Sasuke Hebi
+🌀 Goku SSJ
 
 🎮⌛ Temps d'attente : 2 minutes...
 
 ╰───────────────────
                       🔆🌀`
-    });
+});   
  }
+
+//================================================
+// 🎴 SYSTEME CHOIX DES PERSONNAGES / CARDS
+//================================================
+
+async function verifierCardsMatch(message, chat, ovl) {
+
+    const matchId = matchAttente[chat];
+
+    if (!matchId) return;
+
+
+    const match = duelsEnCours[matchId];
+
+
+    if (!match || match.etat !== "waiting_cards") return;
+
+
+    const texte = clean(message);
+
+
+    // On ignore les pavés système
+    if (
+        texte.includes("ANIME JUMP VERSUS") ||
+        texte.includes("Veuillez écrire")
+    ) return;
+
+
+    // Séparation des deux personnages
+    const lignes = texte
+        .split("\n")
+        .map(x => x.trim())
+        .filter(Boolean);
+
+
+    if (lignes.length < 2) return;
+
+
+    const perso1 = lignes[0]
+        .replace(/^🌀/,"")
+        .trim();
+
+
+    const perso2 = lignes[1]
+        .replace(/^🌀/,"")
+        .trim();
+
+
+
+    console.log("🎴 Personnage J1 :", perso1);
+    console.log("🎴 Personnage J2 :", perso2);
+
+
+
+    // Recherche cards dans la base
+    const findCard = (nom) => {
+
+        const search = normalize(nom);
+
+
+        return cards.find(card =>
+            normalize(card.nom) === search ||
+            normalize(card.name) === search
+        );
+
+    };
+
+
+    const card1 = findCard(perso1);
+    const card2 = findCard(perso2);
+
+
+
+    if (!card1 || !card2) {
+
+        await ovl.sendMessage(chat,{
+            text:
+`❌ CARTE INTROUVABLE
+
+${!card1 ? "❌ " + perso1 : ""}
+${!card2 ? "❌ " + perso2 : ""}
+
+Vérifiez le nom complet de vos personnages.`
+        });
+
+        return;
+    }
+
+match.etat = "cards_loaded";
+
+console.log("🎴 Cards chargées :", match.personnages);
+
+
+// 1) Envoyer le pavé de confirmation
+await ovl.sendMessage(chat,{
+    text:
+`🌀🔆 *ANIME JUMP VERSUS🆚*
+▔▔▔▔▔▔▔▔▔▔▔▔
+🎴 PERSONNAGES CONFIRMÉS 🎉
+
+🎮 ${match.joueurs[0].pseudo}
+🎴 ${card1.nom}
+
+        🆚
+
+🎮 ${match.joueurs[1].pseudo}
+🎴 ${card2.nom}
+
+╰───────────────────
+                      🔆🌀`
+});
+
+
+// 2) Envoyer image card joueur 1
+
+await ovl.sendMessage(chat,{
+    image:{
+        url: card1.image
+    },
+    caption:
+`🎴 ${card1.nom}
+
+👤 ${match.joueurs[0].pseudo}`
+});
+
+
+// 3) Envoyer image card joueur 2
+
+await ovl.sendMessage(chat,{
+    image:{
+        url: card2.image
+    },
+    caption:
+`🎴 ${card2.nom}
+
+👤 ${match.joueurs[1].pseudo}`
+});
+
+    // Sauvegarde dans le match
+
+    match.joueurs[0].personnage = card1;
+    match.joueurs[1].personnage = card2;
+
+
+    match.personnages = {
+        joueur1: card1,
+        joueur2: card2
+    };
+
+    await ovl.sendMessage(chat,{
+        image:{
+            url: card2.image
+        },
+        caption:
+`🎴 ${card2.nom}
+
+👤 ${match.joueurs[1].pseudo}`
+    });
+
+}
 
 
 module.exports = {
     verifierJoueursMatch,
+    verifierCardsMatch,
     duelsEnCours,
     matchAttente
 };
