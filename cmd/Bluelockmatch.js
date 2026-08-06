@@ -6824,11 +6824,16 @@ if (!joueurActuel) {
 // ⚽ ANALYSE PASSE
 // ================================================================
 
+
+console.log("➡️ Avant handlePasses");
+
 const resultatPasse = await handlePasses(
     match,
     action,
     joueurActuel
 );
+
+console.log("⬅️ Résultat handlePasses :", resultatPasse);
 
 // ================================================================
 // 🎯 RENDU PASSE
