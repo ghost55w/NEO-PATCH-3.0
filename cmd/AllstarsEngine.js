@@ -355,22 +355,28 @@ Exemple :
 //================================================
 // 🎴 SYSTEME CHOIX DES PERSONNAGES / CARDS
 //================================================
-async function verifierCardsMatch(message, chat, ovl, ms_org) {
-
+async function verifierCardsMatch(message, chat, ovl, sender) { 
+    
     const matchId = matchAttente[chat];
 
     if (!matchId) return;
 
-
     const match = duelsEnCours[matchId];
-
 
     if (!match || match.etat !== "waiting_cards") return;
 
 
+    // 🔎 Trouver le joueur correspondant
+const joueur = match.joueurs.find(j => j.jid === sender);
 
-    // 👤 Récupération du jid de celui qui écrit
-    const sender = ms_org.sender || ms_org.key?.participant;
+if (!joueur) {
+    console.log("❌ Joueur non trouvé :", sender);
+    console.log(
+        "🎮 JID enregistrés :",
+        match.joueurs.map(j => j.jid)
+    );
+    return;
+}
 
 
     // 🔎 Trouver le joueur correspondant
