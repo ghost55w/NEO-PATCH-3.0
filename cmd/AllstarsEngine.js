@@ -505,25 +505,26 @@ console.log(
 //================================================
 // 🔎 RECHERCHE EXACTE DE LA CARTE
 //================================================
+// 🔎 Récupérer toutes les cartes exactement comme dans la boutique
+const allCards = [];
 
-const card = allCards.find(c => {
+for (const [placementKey, placementCards] of Object.entries(cards)) {
+    if (!Array.isArray(placementCards)) continue;
 
-    const nom =
-        c.name ||
-        c.nom ||
-        "";
+    for (const c of placementCards) {
+        allCards.push({
+            ...c,
+            placement: placementKey
+        });
+    }
+}
 
-    return normalize(nom) === normalize(nomCarte);
-});
-
+// 🔎 Trouver la carte exacte
+const card = allCards.find(c =>
+    normalize(c.name || "") === normalize(nomCarte)
+);
 
 if (!card) {
-
-    console.log(
-        "❌ Carte absente de la base :",
-        nomCarte
-    );
-
     await ovl.sendMessage(chat, {
         text:
 `❌ Carte introuvable dans la base :
@@ -533,85 +534,78 @@ if (!card) {
     return;
 }
 
+console.log("🎴 CARTE TROUVÉE :", card);
 
-console.log(
-    "✅ Carte trouvée dans la base :",
-    card.name || card.nom,
-    "| Placement :",
-    card.placement
-);
 
     // ============================================
     // 💾 SAUVEGARDE DU PERSONNAGE
     // ============================================
+joueur.personnage = card;
 
-    joueur.personnage = card;
-
-
-    console.log(
-        "✅ Carte validée :",
-        joueur.pseudo,
-        "=>",
-        card.nom
-    );
-
+console.log(
+    "✅ Carte validée :",
+    joueur.pseudo,
+    "=>",
+    card.name
+);
 
     // ============================================
     // 🖼️ CONFIRMATION
     // ============================================
+// 🖼️ Confirmation avec les caractéristiques de la carte
+await ovl.sendMessage(chat, {
+    image: {
+        url: card.image
+    },
+    caption:
+`🎴🌀 *Carte :* ${card.name}
 
-    await ovl.sendMessage(chat, {
-        image: {
-            url: card.image
-        },
-        caption:
-`🎴 Carte confirmée pour ${joueur.pseudo}✅
+Nom : ${card.name}
+Grade : ${card.grade}
+Catégorie : ${card.category}
 
-⭐ ${card.nom}`
-    });
-
+▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
+                                 🔆🌀`
+});
+    
 
     // ============================================
     // 🔥 LES DEUX JOUEURS ONT CHOISI
     // ============================================
+if (
+    match.joueurs[0].personnage &&
+    match.joueurs[1].personnage
+) {
 
-    if (
-        match.joueurs[0].personnage &&
-        match.joueurs[1].personnage
-    ) {
+    match.personnages = {
+        joueur1: match.joueurs[0].personnage,
+        joueur2: match.joueurs[1].personnage
+    };
 
-        match.personnages = {
-            joueur1: match.joueurs[0].personnage,
-            joueur2: match.joueurs[1].personnage
-        };
+    match.etat = "cards_loaded";
 
-
-        match.etat = "cards_loaded";
-
-
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
 ▔▔▔▔▔▔▔▔▔▔
 🎴 PERSONNAGES FINALISÉS ✅
 
 🎮 ${match.joueurs[0].pseudo}
-➡️ ${match.joueurs[0].personnage.nom}
+➡️ ${match.joueurs[0].personnage.name}
 
                 🆚
 
 🎮 ${match.joueurs[1].pseudo}
-➡️ ${match.joueurs[1].personnage.nom}
+➡️ ${match.joueurs[1].personnage.name}
 
 ╰───────────────────
                       🔆🌀`
-        });
+    });
 
-
-        // lancerMatchAllStars(match, chat, ovl);
-    }
+    // Prochaine étape :
+    // lancerMatchAllStars(match, chat, ovl);
 }
-        
+    
 
 module.exports = {
     verifierJoueursMatch,
