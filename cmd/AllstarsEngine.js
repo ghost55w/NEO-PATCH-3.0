@@ -355,8 +355,8 @@ Exemple :
 //================================================
 // 🎴 SYSTEME CHOIX DES PERSONNAGES / CARDS
 //================================================
-async function verifierCardsMatch(message, chat, ovl, sender) { 
-    
+async function verifierCardsMatch(message, chat, ovl, sender) {
+
     const matchId = matchAttente[chat];
 
     if (!matchId) return;
@@ -366,34 +366,35 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
     if (!match || match.etat !== "waiting_cards") return;
 
 
-    // 🔎 Trouver le joueur correspondant
-const joueur = match.joueurs.find(j => j.jid === sender);
+    // ============================================
+    // 👤 UTILISER UNIQUEMENT LE JID DÉJÀ SAUVEGARDÉ
+    // ============================================
 
-if (!joueur) {
-    console.log("❌ Joueur non trouvé :", sender);
+    console.log("🆔 JID reçu pour choix carte :", sender);
+
     console.log(
-        "🎮 JID enregistrés :",
+        "🆔 JID des joueurs sauvegardés :",
         match.joueurs.map(j => j.jid)
     );
-    return;
-}
 
-
-    // 🔎 Trouver le joueur correspondant
     const joueur = match.joueurs.find(j =>
         j.jid === sender
     );
-
 
     if (!joueur) {
         console.log("❌ Joueur non trouvé :", sender);
         return;
     }
 
+    console.log(
+        "✅ Joueur identifié :",
+        joueur.pseudo,
+        "| JID :",
+        joueur.jid
+    );
 
 
     const texte = clean(message);
-
 
 
     // 🚫 Ignorer les messages système
@@ -404,15 +405,12 @@ if (!joueur) {
     ) return;
 
 
-
     const nomCarte = texte
         .replace(/^🌀/, "")
         .trim();
 
 
-
     if (!nomCarte) return;
-
 
 
     console.log(
@@ -423,20 +421,23 @@ if (!joueur) {
     );
 
 
+    // ============================================
+    // 📂 FICHE DU JOUEUR DÉJÀ SAUVEGARDÉE
+    // ============================================
 
-    // 📂 Récupération sécurisée de la fiche
     const ficheData = joueur.fiche.dataValues || joueur.fiche;
 
 
+    // ============================================
+    // 🎴 CARTES POSSÉDÉES
+    // ============================================
 
-    // 🎴 Liste des cartes du joueur
     const cartesJoueur = ficheData.cards
         ? ficheData.cards
             .split("\n")
             .map(c => c.trim())
             .filter(Boolean)
         : [];
-
 
 
     console.log(
@@ -447,17 +448,18 @@ if (!joueur) {
     );
 
 
+    // ============================================
+    // ✅ VÉRIFICATION DE POSSESSION
+    // ============================================
 
-    // ✅ Vérification possession
     const cartePossedee = cartesJoueur.find(c =>
         normalize(c) === normalize(nomCarte)
     );
 
 
-
     if (!cartePossedee) {
 
-        await ovl.sendMessage(chat,{
+        await ovl.sendMessage(chat, {
             text:
 `❌ CARTE NON POSSÉDÉE
 
@@ -472,18 +474,19 @@ Choisis une carte présente dans ta fiche.`
     }
 
 
+    // ============================================
+    // 🔎 RECHERCHE DANS LA BASE DES CARTES
+    // ============================================
 
-    // 🔎 Trouver l'image et les infos dans la base cards
     const card = cards.find(c =>
         normalize(c.nom) === normalize(nomCarte) ||
         normalize(c.name) === normalize(nomCarte)
     );
 
 
-
     if (!card) {
 
-        await ovl.sendMessage(chat,{
+        await ovl.sendMessage(chat, {
             text:
 `❌ Carte introuvable dans la base :
 🎴 ${nomCarte}`
@@ -493,10 +496,11 @@ Choisis une carte présente dans ta fiche.`
     }
 
 
+    // ============================================
+    // 💾 SAUVEGARDE DU PERSONNAGE
+    // ============================================
 
-    // 💾 Sauvegarde du personnage choisi
     joueur.personnage = card;
-
 
 
     console.log(
@@ -507,10 +511,12 @@ Choisis une carte présente dans ta fiche.`
     );
 
 
+    // ============================================
+    // 🖼️ CONFIRMATION
+    // ============================================
 
-    // 🖼️ Confirmation immédiate
-    await ovl.sendMessage(chat,{
-        image:{
+    await ovl.sendMessage(chat, {
+        image: {
             url: card.image
         },
         caption:
@@ -520,13 +526,14 @@ Choisis une carte présente dans ta fiche.`
     });
 
 
+    // ============================================
+    // 🔥 LES DEUX JOUEURS ONT CHOISI
+    // ============================================
 
-    // 🔥 Vérifie si les deux joueurs ont choisi
-    if(
+    if (
         match.joueurs[0].personnage &&
         match.joueurs[1].personnage
-    ){
-
+    ) {
 
         match.personnages = {
             joueur1: match.joueurs[0].personnage,
@@ -537,11 +544,10 @@ Choisis une carte présente dans ta fiche.`
         match.etat = "cards_loaded";
 
 
-
-        await ovl.sendMessage(chat,{
+        await ovl.sendMessage(chat, {
             text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
-▔▔▔▔▔▔▔▔▔▔▔▔
+▔▔▔▔▔▔▔▔▔▔
 🎴 PERSONNAGES FINALISÉS ✅
 
 🎮 ${match.joueurs[0].pseudo}
@@ -557,15 +563,10 @@ Choisis une carte présente dans ta fiche.`
         });
 
 
-
-        // Prochaine étape :
         // lancerMatchAllStars(match, chat, ovl);
-
     }
-
 }
-
-
+        
 
 module.exports = {
     verifierJoueursMatch,
