@@ -196,6 +196,8 @@ try {
   await messageMatch(ms, ovl);
 
 } catch (err) {
+  console.log("❌ Erreur système match :", err);
+}
     
     async function isBanned(type, id) {
       const ban = await Bans.findOne({ where: { id, type } });
