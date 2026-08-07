@@ -587,11 +587,9 @@ if (
 ╰───────────────────
                       🔆🌀`
     });
-
-    // Prochaine étape :
-    // lancerMatchAllStars(match, chat, ovl);
-}
-    
+        
+  } 
+}   
 
 module.exports = {
     verifierJoueursMatch,
