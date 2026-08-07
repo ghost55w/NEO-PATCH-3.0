@@ -233,22 +233,27 @@ Les joueurs doivent posséder une fiche ALL STARS.`
 
     return;
 }
+    
+const data1 = fiche1.dataValues || fiche1;
+const data2 = fiche2.dataValues || fiche2;
 
-    match.joueurs=[
-    {
-        pseudo: fiche1.pseudo,
-        jid: fiche1.jid,
-        fiche: fiche1
-    },
-    {
-        pseudo: fiche2.pseudo,
-        jid: fiche2.jid,
-        fiche: fiche2
-    }
+match.joueurs=[
+{
+    pseudo: data1.pseudo,
+    jid: data1.jid,
+    fiche: data1
+},
+{
+    pseudo: data2.pseudo,
+    jid: data2.jid,
+    fiche: data2
+}
 ];
 
-console.log("🎮 Joueurs sauvegardés :", match.joueurs);
+console.log("🆔 JID J1 :", data1.jid);
+console.log("🆔 JID J2 :", data2.jid);
 
+console.log("🎮 Joueurs sauvegardés :", match.joueurs);
 
     match.fiches={
         joueur1: fiche1,
@@ -335,8 +340,7 @@ Exemple :
 //================================================
 // 🎴 SYSTEME CHOIX DES PERSONNAGES / CARDS
 //================================================
-
-async function verifierCardsMatch(message, chat, ovl) {
+async function verifierCardsMatch(message, chat, ovl, ms_org) {
 
     const matchId = matchAttente[chat];
 
@@ -349,148 +353,197 @@ async function verifierCardsMatch(message, chat, ovl) {
     if (!match || match.etat !== "waiting_cards") return;
 
 
+
+    // 👤 Récupération du jid de celui qui écrit
+    const sender = ms_org.sender || ms_org.key?.participant;
+
+
+    // 🔎 Trouver le joueur correspondant
+    const joueur = match.joueurs.find(j =>
+        j.jid === sender
+    );
+
+
+    if (!joueur) {
+        console.log("❌ Joueur non trouvé :", sender);
+        return;
+    }
+
+
+
     const texte = clean(message);
 
 
-    // On ignore les pavés système
+
+    // 🚫 Ignorer les messages système
     if (
         texte.includes("ANIME JUMP VERSUS") ||
+        texte.includes("CHOIX DU PERSONNAGE") ||
         texte.includes("Veuillez écrire")
     ) return;
 
 
-    // Séparation des deux personnages
-    const lignes = texte
-        .split("\n")
-        .map(x => x.trim())
-        .filter(Boolean);
 
-
-    if (lignes.length < 2) return;
-
-
-    const perso1 = lignes[0]
-        .replace(/^🌀/,"")
-        .trim();
-
-
-    const perso2 = lignes[1]
-        .replace(/^🌀/,"")
+    const nomCarte = texte
+        .replace(/^🌀/, "")
         .trim();
 
 
 
-    console.log("🎴 Personnage J1 :", perso1);
-    console.log("🎴 Personnage J2 :", perso2);
+    if (!nomCarte) return;
 
 
 
-    // Recherche cards dans la base
-    const findCard = (nom) => {
-
-        const search = normalize(nom);
-
-
-        return cards.find(card =>
-            normalize(card.nom) === search ||
-            normalize(card.name) === search
-        );
-
-    };
-
-
-    const card1 = findCard(perso1);
-    const card2 = findCard(perso2);
+    console.log(
+        "🎴 Carte demandée :",
+        nomCarte,
+        "par",
+        joueur.pseudo
+    );
 
 
 
-    if (!card1 || !card2) {
+    // 📂 Récupération sécurisée de la fiche
+    const ficheData = joueur.fiche.dataValues || joueur.fiche;
+
+
+
+    // 🎴 Liste des cartes du joueur
+    const cartesJoueur = ficheData.cards
+        ? ficheData.cards
+            .split("\n")
+            .map(c => c.trim())
+            .filter(Boolean)
+        : [];
+
+
+
+    console.log(
+        "🎴 Cartes de",
+        joueur.pseudo,
+        ":",
+        cartesJoueur
+    );
+
+
+
+    // ✅ Vérification possession
+    const cartePossedee = cartesJoueur.find(c =>
+        normalize(c) === normalize(nomCarte)
+    );
+
+
+
+    if (!cartePossedee) {
 
         await ovl.sendMessage(chat,{
             text:
-`❌ CARTE INTROUVABLE
+`❌ CARTE NON POSSÉDÉE
 
-${!card1 ? "❌ " + perso1 : ""}
-${!card2 ? "❌ " + perso2 : ""}
+🎮 ${joueur.pseudo}
+n'a pas la carte :
+🎴 ${nomCarte}
 
-Vérifiez le nom complet de vos personnages.`
+Choisis une carte présente dans ta fiche.`
         });
 
         return;
     }
 
-match.etat = "cards_loaded";
-
-console.log("🎴 Cards chargées :", match.personnages);
 
 
-// 1) Envoyer le pavé de confirmation
-await ovl.sendMessage(chat,{
-    text:
+    // 🔎 Trouver l'image et les infos dans la base cards
+    const card = cards.find(c =>
+        normalize(c.nom) === normalize(nomCarte) ||
+        normalize(c.name) === normalize(nomCarte)
+    );
+
+
+
+    if (!card) {
+
+        await ovl.sendMessage(chat,{
+            text:
+`❌ Carte introuvable dans la base :
+🎴 ${nomCarte}`
+        });
+
+        return;
+    }
+
+
+
+    // 💾 Sauvegarde du personnage choisi
+    joueur.personnage = card;
+
+
+
+    console.log(
+        "✅ Carte validée :",
+        joueur.pseudo,
+        "=>",
+        card.nom
+    );
+
+
+
+    // 🖼️ Confirmation immédiate
+    await ovl.sendMessage(chat,{
+        image:{
+            url: card.image
+        },
+        caption:
+`🎴 Carte confirmée pour ${joueur.pseudo}✅
+
+⭐ ${card.nom}`
+    });
+
+
+
+    // 🔥 Vérifie si les deux joueurs ont choisi
+    if(
+        match.joueurs[0].personnage &&
+        match.joueurs[1].personnage
+    ){
+
+
+        match.personnages = {
+            joueur1: match.joueurs[0].personnage,
+            joueur2: match.joueurs[1].personnage
+        };
+
+
+        match.etat = "cards_loaded";
+
+
+
+        await ovl.sendMessage(chat,{
+            text:
 `🌀🔆 *ANIME JUMP VERSUS🆚*
 ▔▔▔▔▔▔▔▔▔▔▔▔
-🎴 PERSONNAGES CONFIRMÉS 🎉
+🎴 PERSONNAGES FINALISÉS ✅
 
 🎮 ${match.joueurs[0].pseudo}
-🎴 ${card1.nom}
+➡️ ${match.joueurs[0].personnage.nom}
 
-        🆚
+                🆚
 
 🎮 ${match.joueurs[1].pseudo}
-🎴 ${card2.nom}
+➡️ ${match.joueurs[1].personnage.nom}
 
 ╰───────────────────
                       🔆🌀`
-});
+        });
 
 
-// 2) Envoyer image card joueur 1
 
-await ovl.sendMessage(chat,{
-    image:{
-        url: card1.image
-    },
-    caption:
-`🎴 ${card1.nom}
+        // Prochaine étape :
+        // lancerMatchAllStars(match, chat, ovl);
 
-👤 ${match.joueurs[0].pseudo}`
-});
-
-
-// 3) Envoyer image card joueur 2
-
-await ovl.sendMessage(chat,{
-    image:{
-        url: card2.image
-    },
-    caption:
-`🎴 ${card2.nom}
-
-👤 ${match.joueurs[1].pseudo}`
-});
-
-    // Sauvegarde dans le match
-
-    match.joueurs[0].personnage = card1;
-    match.joueurs[1].personnage = card2;
-
-
-    match.personnages = {
-        joueur1: card1,
-        joueur2: card2
-    };
-
-    await ovl.sendMessage(chat,{
-        image:{
-            url: card2.image
-        },
-        caption:
-`🎴 ${card2.nom}
-
-👤 ${match.joueurs[1].pseudo}`
-    });
+    }
 
 }
+
 
 
 module.exports = {
