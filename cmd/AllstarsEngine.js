@@ -474,27 +474,72 @@ Choisis une carte présente dans ta fiche.`
     }
 
 
-    // ============================================
-    // 🔎 RECHERCHE DANS LA BASE DES CARTES
-    // ============================================
+    //================================================
+// 🎴 RÉCUPÉRATION EXACTE DES CARTES DE LA BOUTIQUE
+//================================================
 
-    const card = cards.find(c =>
-        normalize(c.nom) === normalize(nomCarte) ||
-        normalize(c.name) === normalize(nomCarte)
+const allCards = [];
+
+for (const [placementKey, placementCards] of Object.entries(cards)) {
+
+    if (!Array.isArray(placementCards)) continue;
+
+    for (const c of placementCards) {
+
+        if (!c) continue;
+
+        allCards.push({
+            ...c,
+            placement: placementKey
+        });
+    }
+}
+
+
+console.log(
+    "🎴 Nombre total de cartes dans la base :",
+    allCards.length
+);
+
+
+//================================================
+// 🔎 RECHERCHE EXACTE DE LA CARTE
+//================================================
+
+const card = allCards.find(c => {
+
+    const nom =
+        c.name ||
+        c.nom ||
+        "";
+
+    return normalize(nom) === normalize(nomCarte);
+});
+
+
+if (!card) {
+
+    console.log(
+        "❌ Carte absente de la base :",
+        nomCarte
     );
 
-
-    if (!card) {
-
-        await ovl.sendMessage(chat, {
-            text:
+    await ovl.sendMessage(chat, {
+        text:
 `❌ Carte introuvable dans la base :
 🎴 ${nomCarte}`
-        });
+    });
 
-        return;
-    }
+    return;
+}
 
+
+console.log(
+    "✅ Carte trouvée dans la base :",
+    card.name || card.nom,
+    "| Placement :",
+    card.placement
+);
 
     // ============================================
     // 💾 SAUVEGARDE DU PERSONNAGE
