@@ -5,7 +5,10 @@ const evt = require("../lib/ovlcmd");
 const config = require("../set");
 const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
-const { verifierJoueursMatch } = require("../cmd/AllstarsEngine");
+const {
+    verifierJoueursMatch,
+    verifierCardsMatch
+} = require("../cmd/AllstarsEngine");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
 const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
@@ -180,8 +183,11 @@ const clean = texte
 // ================================
 try {
 
-  // 🌀 Détection inscription AllStars
+  // 🌀 Inscription des joueurs
   await verifierJoueursMatch(texte, ms_org, ovl);
+
+  // 🎴 Choix des personnages
+  await verifierCardsMatch(texte, ms_org, ovl, ms);
 
   // 📄 Détection fiche BlueLock
   await verifierFiche(texte, ms_org, ovl);
@@ -190,8 +196,6 @@ try {
   await messageMatch(ms, ovl);
 
 } catch (err) {
-  console.log("❌ Erreur système match:", err);
-}
     
     async function isBanned(type, id) {
       const ban = await Bans.findOne({ where: { id, type } });
