@@ -505,21 +505,7 @@ console.log(
 //================================================
 // 🔎 RECHERCHE EXACTE DE LA CARTE
 //================================================
-// 🔎 Récupérer toutes les cartes exactement comme dans la boutique
-const allCards = [];
-
-for (const [placementKey, placementCards] of Object.entries(cards)) {
-    if (!Array.isArray(placementCards)) continue;
-
-    for (const c of placementCards) {
-        allCards.push({
-            ...c,
-            placement: placementKey
-        });
-    }
-}
-
-// 🔎 Trouver la carte exacte
+// 🔎 Recherche exacte de la carte
 const card = allCards.find(c =>
     normalize(c.name || "") === normalize(nomCarte)
 );
