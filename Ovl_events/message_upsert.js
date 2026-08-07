@@ -187,7 +187,12 @@ try {
   await verifierJoueursMatch(texte, ms_org, ovl);
 
   // 🎴 Choix des personnages
-  await verifierCardsMatch(texte, ms_org, ovl, ms);
+await verifierCardsMatch(
+    texte,
+    ms_org,
+    ovl,
+    auteur_Message
+);
 
   // 📄 Détection fiche BlueLock
   await verifierFiche(texte, ms_org, ovl);
