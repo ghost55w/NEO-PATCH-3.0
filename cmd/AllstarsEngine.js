@@ -355,8 +355,162 @@ function creerDuel(match) {
     return duel;
 }
 
+//================================================
+// 🆚 FICHE DUEL
+//================================================
+function generateFicheDuel(duel) {
+
+    const perso1 = duel.perso1;
+    const perso2 = duel.perso2;
+
+    return `*🆚VERSUS ARENA BATTLE🏆🎮*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒░░▒░
+
+🔆🎴 *${perso1.nom}* :
+🫀 Sta : ${perso1.stats.sta}%
+🌀 En : ${perso1.stats.energie}%
+❤️ Pv : ${perso1.stats.pv}%
+
+                         ~  *🆚*  ~
+
+🔆🎴 *${perso2.nom}* :
+🫀 Sta : ${perso2.stats.sta}%
+🌀 En : ${perso2.stats.energie}%
+❤️ Pv : ${perso2.stats.pv}%
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+*🌍 𝐀𝐫𝐞̀𝐧𝐞* : ${duel.arene.nom}
+*🚫 𝐇𝐚𝐧𝐝𝐢𝐜𝐚𝐩𝐞* : Boost 1 fois chaque 2 tours!
+*⚖️ 𝐒𝐭𝐚𝐭𝐬* : ${duel.statsCustom || "Aucune"}
+*🏞️ 𝐀𝐢𝐫 𝐝𝐞 𝐜𝐨𝐦𝐛𝐚𝐭* : illimitée
+*🦶🏼 𝐃𝐢𝐬𝐭𝐚𝐧𝐜𝐞 𝐢𝐧𝐢𝐭𝐢𝐚𝐥𝐞 📌* : 5m
+*⌚ 𝐋𝐚𝐭𝐞𝐧𝐜𝐞* : 6mins ⚠️
+*⭕ 𝐏𝐨𝐫𝐭𝐞́* : 10m
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+*⚠️ Vous avez 🔟 tours max pour finir votre Adversaire !*
+*Sinon la victoire sera donnée par décision selon l'offensive !*
+
+╰───────────────────
+                            🌀🔆`;
+}
 
 
+//================================================
+// 🚀 LANCEMENT DU MATCH ALL STARS
+//================================================
+async function lancerMatchAllStars(match, chat, ovl) {
+
+    try {
+
+        console.log("🚀 LANCEMENT DU MATCH :", match.id);
+
+        //========================================
+        // 🔄 ETAT
+        //========================================
+        match.etat = "loading_match";
+
+        //========================================
+        // 🌀 CHARGEMENT
+        //========================================
+        const loading = await ovl.sendMessage(chat, {
+            text: "🌀 Préparation de l'arène."
+        });
+
+        for (const txt of [
+            "🌀 Préparation de l'arène..",
+            "🌀 Préparation de l'arène...",
+            "🏟️ Sélection de l'arène..."
+        ]) {
+
+            await new Promise(resolve =>
+                setTimeout(resolve, 700)
+            );
+
+            await ovl.sendMessage(chat, {
+                text: txt,
+                edit: loading.key
+            });
+        }
+
+        //========================================
+        // 🆚 CREATION DU DUEL
+        //========================================
+        const duel = creerDuel(match);
+
+        // Sauvegarde du duel
+        match.duel = duel;
+
+        // Sauvegarde de l'arène
+        match.arene = duel.arene;
+
+        //========================================
+        // 🎮 MATCH PRET
+        //========================================
+        match.etat = "in_match";
+
+        //========================================
+        // 🏟️ ENVOI DE LA FICHE DU COMBAT
+        //========================================
+        await ovl.sendMessage(chat, {
+
+            image: {
+                url: duel.arene.image
+            },
+
+            caption: generateFicheDuel(duel)
+
+        });
+
+        //========================================
+        // 📊 LOGS
+        //========================================
+        console.log(
+            "🏟️ Arène sélectionnée :",
+            duel.arene.nom
+        );
+
+        console.log(
+            "🎴 Personnage 1 :",
+            duel.perso1.nom,
+            "| Catégorie :",
+            duel.perso1.category
+        );
+
+        console.log(
+            "🎴 Personnage 2 :",
+            duel.perso2.nom,
+            "| Catégorie :",
+            duel.perso2.category
+        );
+
+        console.log(
+            "⚖️ Comparaison catégories :",
+            comparerCategories(
+                duel.perso1.category,
+                duel.perso2.category
+            )
+        );
+
+    } catch (error) {
+
+        console.error(
+            "❌ ERREUR LANCEMENT MATCH ALL STARS :",
+            error
+        );
+
+        match.etat = "error";
+
+        await ovl.sendMessage(chat, {
+            text:
+`❌ Une erreur est survenue lors du lancement du match.
+
+Veuillez réessayer.`
+        });
+    }
+}
 
 
 // COMMANDE DE LANCEMENT DU MATCH🌀🆚//
