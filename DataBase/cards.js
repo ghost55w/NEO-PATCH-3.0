@@ -6,7 +6,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/7c3pgw.jpg",
   Price: "800K",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -112,7 +112,7 @@ const cards = [
 {
   name: "Android16",
   grade: "Bronze",
-  category: "S+",
+  category: "SS+ ultimate",
   images: "",
   card: "https://files.catbox.moe/tt79m2.jpg",
   Price: "100nc",
@@ -123,7 +123,7 @@ const cards = [
 {
   name: "Android17(Dbz)",
   grade: "Argent",
-  category: "SS",
+  category: "SS Mega",
   images: "",
   card: "https://files.catbox.moe/hohfci.jpg",
   Price: "200nc",
@@ -145,7 +145,7 @@ const cards = [
 {
   name: "Android18",
   grade: "Argent",
-  category: "SS",
+  category: "SS super",
   images: "",
   card: "https://files.catbox.moe/b7neim.jpg",
   Price: "190nc",
@@ -255,7 +255,7 @@ const cards = [
 {
   name: "BabyVegeta",
   grade: "Or",
-  category: "SS",
+  category: "SS- ultimate",
   images: "",
   card: "https://files.catbox.moe/ahxz48.jpg",
   Price: "310nc",
@@ -277,7 +277,7 @@ const cards = [
 {
   name: "Bardock",
   grade: "Bronze",
-  category: "SS",
+  category: "SS- super",
   images: "",
   card: "https://files.catbox.moe/pidi5o.jpg",
   Price: "110nc",
@@ -299,7 +299,7 @@ const cards = [
 {
   name: "Beerus",
   grade: "Or",
-  category: "SS+",
+  category: "SS+ ultimate",
   images: "",
   card: "https://files.catbox.moe/y9cgpo.jpg",
   Price: "530nc",
@@ -321,7 +321,7 @@ const cards = [
 {
   name: "BlackGoku",
   grade: "Or",
-  category: "SS+",
+  category: "SS+ super",
   images: "",
   card: "https://files.catbox.moe/un7c3l.jpg",
   Price: "460nc",
@@ -343,7 +343,7 @@ const cards = [
 {
   name: "Bojack",
   grade: "Argent",
-  category: "S",
+  category: "SS-",
   images: "",
   card: "https://files.catbox.moe/ck3vpk.jpg",
   Price: "120nc",
@@ -365,7 +365,7 @@ const cards = [
 {
   name: "Boros",
   grade: "Or",
-  category: "SS+",
+  category: "S+ ultimate",
   images: "",
   card: "https://files.catbox.moe/ofoqc5.jpg",
   Price: "2M",
@@ -398,7 +398,7 @@ const cards = [
 {
   name: "Broly",
   grade: "Argent",
-  category: "SS+",
+  category: "SS+ Extreme",
   images: "",
   card: "https://files.catbox.moe/au0pd6.jpg",
   Price: "300nc",
@@ -409,7 +409,7 @@ const cards = [
 {
   name: "Broly(Dbs)",
   grade: "Or",
-  category: "SS+",
+  category: "SS+ Super",
   images: "",
   card: "https://files.catbox.moe/2qvkfx.jpg",
   Price: "480nc",
@@ -451,9 +451,9 @@ const cards = [
   Patterns: ""
 },
 {
-  name: "Buu(super)",
+  name: "Super Buu",
   grade: "Or",
-  category: "SS",
+  category: "SS- Super",
   images: "",
   card: "https://files.catbox.moe/5lfqpz.jpg",
   Price: "310nc",
@@ -462,9 +462,9 @@ const cards = [
   Patterns: ""
 },
 {
-  name: "Buu(Fat)",
+  name: " Fat Buu",
   grade: "Or",
-  category: "SS",
+  category: "SS-",
   images: "",
   card: "https://files.catbox.moe/xnl4el.jpg",
   Price: "300nc",
@@ -473,9 +473,9 @@ const cards = [
   Patterns: ""
 },
 {
-  name: "Buu(Kid)",
+  name: "Kid Buu",
   grade: "Or",
-  category: "SS",
+  category: "SS- Super",
   images: "",
   card: "https://files.catbox.moe/bb2e50.jpg",
   Price: "360nc",
@@ -486,7 +486,7 @@ const cards = [
 {
   name: "Buutenks",
   grade: "Or",
-  category: "SS",
+  category: "SS- ultimate",
   images: "",
   card: "https://files.catbox.moe/1gcugi.jpg",
   Price: "320nc",
