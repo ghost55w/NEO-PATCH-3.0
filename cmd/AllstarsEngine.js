@@ -651,7 +651,7 @@ async function demarrerCombat(match, chat, ovl) {
     //================================================
     await ovl.sendMessage(chat, {
         image: {
-            url: "LIEN_DE_TON_IMAGE_ICI"
+            url: "https://files.catbox.moe/1td1ai.mp4"
         },
         caption:
 `*♨️🎮 DEBUT DU COMBAT🌀*
