@@ -463,7 +463,15 @@ async function lancerMatchAllStars(match, chat, ovl) {
             caption: generateFicheDuel(duel)
 
         });
+//========================================
+// ♨️ DEMARRAGE DU COMBAT
+//========================================
 
+await demarrerCombat(
+    match,
+    chat,
+    ovl
+);
         //========================================
         // 📊 LOGS
         //========================================
@@ -512,6 +520,156 @@ Veuillez réessayer.`
     }
 }
 
+//================================================
+// 🏆 HIERARCHIE DES GRADES
+//================================================
+const HIERARCHIE_GRADES = [
+    "Bronze",
+    "Argent",
+    "Or"
+];
+
+
+//================================================
+// ⚖️ COMPARAISON GRADE
+//================================================
+function getNiveauGrade(grade = "") {
+
+    const index = HIERARCHIE_GRADES.findIndex(
+        g => g.toLowerCase() === String(grade).toLowerCase()
+    );
+
+    return index;
+}
+
+
+//================================================
+// 🥊 DETERMINER QUI COMMENCE
+//================================================
+function determinerPremierJoueur(match) {
+
+    const j1 = match.joueurs[0];
+    const j2 = match.joueurs[1];
+
+    const p1 = j1.personnage;
+    const p2 = j2.personnage;
+
+    //============================================
+    // 1️⃣ COMPARAISON DES CATEGORIES
+    //============================================
+    const cat1 = getNiveauCategorie(p1.category);
+    const cat2 = getNiveauCategorie(p2.category);
+
+    console.log("⚖️ Catégorie J1 :", p1.category, cat1);
+    console.log("⚖️ Catégorie J2 :", p2.category, cat2);
+
+    // Plus faible = commence
+    if (cat1 < cat2) {
+        return {
+            joueur: j1,
+            raison: "catégorie inférieure",
+            type: "category"
+        };
+    }
+
+    if (cat2 < cat1) {
+        return {
+            joueur: j2,
+            raison: "catégorie inférieure",
+            type: "category"
+        };
+    }
+
+    //============================================
+    // 2️⃣ CATEGORIES EGALES → GRADE
+    //============================================
+    const grade1 = getNiveauGrade(p1.grade);
+    const grade2 = getNiveauGrade(p2.grade);
+
+    console.log("🏅 Grade J1 :", p1.grade, grade1);
+    console.log("🏅 Grade J2 :", p2.grade, grade2);
+
+    if (grade1 < grade2) {
+        return {
+            joueur: j1,
+            raison: "grade inférieur",
+            type: "grade"
+        };
+    }
+
+    if (grade2 < grade1) {
+        return {
+            joueur: j2,
+            raison: "grade inférieur",
+            type: "grade"
+        };
+    }
+
+    //============================================
+    // 3️⃣ TOTALEMENT EGAUX → 0.5
+    //============================================
+    const joueurAleatoire =
+        Math.random() < 0.5 ? j1 : j2;
+
+    return {
+        joueur: joueurAleatoire,
+        raison: "égalité parfaite → tirage 0.5",
+        type: "random"
+    };
+}
+
+//================================================
+// ♨️ DEBUT DU COMBAT
+//================================================
+async function demarrerCombat(match, chat, ovl) {
+
+    const premier = determinerPremierJoueur(match);
+
+    const joueur = premier.joueur;
+
+    const jid = joueur.jid;
+    const pseudo = joueur.pseudo;
+
+    // Sauvegarde du joueur actif
+    match.joueurActif = joueur;
+    match.joueurActifJid = jid;
+
+    match.tour = 1;
+    match.phase = "attaque";
+
+    console.log(
+        "♨️ PREMIER JOUEUR :",
+        pseudo,
+        "| JID :",
+        jid,
+        "| Raison :",
+        premier.raison
+    );
+
+    //================================================
+    // 🎬 MEDIA DE DEBUT DU COMBAT
+    //================================================
+    await ovl.sendMessage(chat, {
+        image: {
+            url: "LIEN_DE_TON_IMAGE_ICI"
+        },
+        caption:
+`*♨️🎮 DEBUT DU COMBAT🌀*
+▔▔▔▔▔▔▔▔▔▔▔
+➡️ @${pseudo} GO !!!! 🔥
+
+╰───────────────────
+                            🌀🔆`,
+        mentions: [jid]
+    });
+
+    //================================================
+    // ⏱️ TIMER UNIQUEMENT POUR LE PREMIER JOUEUR
+    //================================================
+    lancerTimerTour(match, chat, ovl);
+}
+
+
 
 // COMMANDE DE LANCEMENT DU MATCH🌀🆚//
 ovlcmd({
@@ -526,16 +684,22 @@ ovlcmd({
     const matchId = Date.now().toString();
 
     // 🧠 création du match
-    duelsEnCours[matchId] = {
-        id: matchId,
-        etat: "waiting_players",
-        joueurs: [],
-        fiches: {},
-        personnages: {},
-        arene: null,
-        tour: 0,
-        createdAt: Date.now()
-    };
+duelsEnCours[matchId] = {
+    id: matchId,
+    etat: "waiting_players",
+    joueurs: [],
+    fiches: {},
+    personnages: {},
+    arene: null,
+    tour: 0,
+    createdAt: Date.now(),
+
+    timers: {
+        waitingPlayers: null,
+        turn: null,
+        warning: null
+    }
+};
 
     matchAttente[chat] = matchId;
 
@@ -564,28 +728,29 @@ Veuillez inscrire vos pseudos de joueurs:
     });
 
     // ⏱️ TIMER 2 MINUTES
-    setTimeout(async () => {
+match.timers.waitingPlayers = setTimeout(async () => {
 
-        const match = duelsEnCours[matchId];
+    const matchActuel = duelsEnCours[matchId];
 
-        if (!match || match.etat !== "waiting_players") return;
+    if (!matchActuel) return;
 
-        await ovl.sendMessage(chat, {
-            text:
+    if (matchActuel.etat !== "waiting_players") return;
+
+    await ovl.sendMessage(chat, {
+        text:
 `⛔ MATCH ANNULÉ
 Aucun joueur valide détecté dans le temps imparti.`
-        });
+    });
 
-        delete duelsEnCours[matchId];
-        delete matchAttente[chat];
+    delete duelsEnCours[matchId];
+    delete matchAttente[chat];
 
-    }, 120000);
+}, 120000);
 });
 
 //================================================
 // 🌀 SYSTEME INSCRIPTION JOUEURS MATCH
 //================================================
-
 async function verifierJoueursMatch(message, chat, ovl) {
 
 
@@ -671,6 +836,10 @@ console.log("🎮 Joueurs sauvegardés :", match.joueurs);
         joueur2: fiche2
     };
 
+    if (match.timers?.waitingPlayers) {
+    clearTimeout(match.timers.waitingPlayers);
+    match.timers.waitingPlayers = null;
+    }
     match.etat="loading_characters";
 
     await ovl.sendMessage(chat,{
@@ -847,7 +1016,6 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
     // ============================================
     // ✅ VÉRIFICATION DE POSSESSION
     // ============================================
-
     const cartePossedee = cartesJoueur.find(c =>
         normalize(c) === normalize(nomCarte)
     );
@@ -873,7 +1041,6 @@ Choisis une carte présente dans ta fiche.`
     //================================================
 // 🎴 RÉCUPÉRATION EXACTE DES CARTES DE LA BOUTIQUE
 //================================================
-
 const allCards = [];
 
 for (const [placementKey, placementCards] of Object.entries(cards)) {
