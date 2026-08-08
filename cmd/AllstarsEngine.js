@@ -321,11 +321,6 @@ function creerDuel(match) {
 // 🆚 CREATION DU DUEL
 //================================================
 // ⚖️ Calcul de la supériorité
-const superieur = calculerSuperieur(
-    perso1,
-    perso2
-);
-
 const duel = {
 
     id: match.id,
