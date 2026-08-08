@@ -14,7 +14,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 5,
             animal: 5,
-            creature: 2
+            creature: 2,
+            vehicule: 1.25
         },
 
         effet: "coupure",
@@ -34,7 +35,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 10,
             animal: 10,
-            creature: 5
+            creature: 5,
+            vehicule: 2.5
         },
 
         effet: "coupure",
@@ -59,7 +61,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 25,
             animal: 20,
-            creature: 10
+            creature: 10,
+            vehicule: 6.25
         },
 
         effet: "coupure",
@@ -84,7 +87,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 30,
             animal: 30,
-            creature: 20
+            creature: 20,
+            vehicule: 7.5
         },
 
         effet: "coupure",
@@ -111,7 +115,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 12,
             animal: 12,
-            creature: 8
+            creature: 8,
+            vehicule: 3
         },
 
         effet: "tir",
@@ -135,7 +140,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 20,
             animal: 20,
-            creature: 14
+            creature: 14,
+            vehicule: 5
         },
 
         effet: "tir",
@@ -159,7 +165,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 30,
             animal: 30,
-            creature: 22
+            creature: 22,
+            vehicule: 7.5
         },
 
         effet: "tir",
@@ -188,7 +195,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 18,
             animal: 18,
-            creature: 12
+            creature: 12,
+            vehicule: 4.5
         },
 
         effet: "tir",
@@ -212,7 +220,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 28,
             animal: 28,
-            creature: 20
+            creature: 20,
+            vehicule: 7
         },
 
         effet: "tir",
@@ -236,7 +245,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 40,
             animal: 40,
-            creature: 30
+            creature: 30,
+            vehicule: 10
         },
 
         effet: "tir",
@@ -265,7 +275,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 30,
             animal: 30,
-            creature: 22
+            creature: 22,
+            vehicule: 7.5
         },
 
         effet: "tir",
@@ -289,7 +300,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 42,
             animal: 42,
-            creature: 30
+            creature: 30,
+            vehicule: 10.5
         },
 
         effet: "tir",
@@ -313,7 +325,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 55,
             animal: 55,
-            creature: 40
+            creature: 40,
+            vehicule: 13.75
         },
 
         effet: "tir",
@@ -342,7 +355,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 40,
             animal: 40,
-            creature: 30
+            creature: 30,
+            vehicule: 10
         },
 
         effet: "tir",
@@ -366,7 +380,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 55,
             animal: 55,
-            creature: 40
+            creature: 40,
+            vehicule: 13.75
         },
 
         effet: "tir",
@@ -390,7 +405,8 @@ const ElysiumWeapons = {
         degats: {
             humain: 75,
             animal: 75,
-            creature: 55
+            creature: 55,
+            vehicule: 18.75
         },
 
         effet: "tir",
@@ -404,9 +420,11 @@ const ElysiumWeapons = {
 
 };
 
+
 //================================================
 // 🔎 RÉCUPÉRATION DES ARMES
 //================================================
+
 function getWeapon(id) {
 
     return Object.values(ElysiumWeapons).find(
@@ -419,6 +437,7 @@ function getWeapon(id) {
 //================================================
 // 📦 RÉCUPÉRATION DE TOUTES LES ARMES
 //================================================
+
 function getAllWeapons() {
 
     return Object.values(ElysiumWeapons);
@@ -429,6 +448,7 @@ function getAllWeapons() {
 //================================================
 // 🔎 RECHERCHE PAR NOM
 //================================================
+
 function getWeaponByName(nom) {
 
     return Object.values(ElysiumWeapons).find(
@@ -442,6 +462,7 @@ function getWeaponByName(nom) {
 //================================================
 // 🎖️ RÉCUPÉRATION PAR RARETÉ
 //================================================
+
 function getWeaponsByRarity(rarete) {
 
     return Object.values(ElysiumWeapons).filter(
@@ -454,6 +475,7 @@ function getWeaponsByRarity(rarete) {
 //================================================
 // 🔫 RÉCUPÉRATION PAR TYPE
 //================================================
+
 function getWeaponsByType(type) {
 
     return Object.values(ElysiumWeapons).filter(
@@ -462,9 +484,11 @@ function getWeaponsByType(type) {
 
 }
 
+
 //================================================
 // 📤 EXPORT
 //================================================
+
 module.exports = {
     ElysiumWeapons,
     getWeapon,
