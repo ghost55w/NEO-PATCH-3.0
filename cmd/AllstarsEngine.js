@@ -317,41 +317,48 @@ function creerDuel(match) {
         personnage2
     );
 
-    //============================================
-    // 🆚 CREATION DU DUEL
-    //============================================
-    const duel = {
+//================================================
+// 🆚 CREATION DU DUEL
+//================================================
+// ⚖️ Calcul de la supériorité
+const superieur = calculerSuperieur(
+    perso1,
+    perso2
+);
 
-        id: match.id,
+const duel = {
 
-        joueur1: joueur1,
-        joueur2: joueur2,
+    id: match.id,
 
-        perso1: perso1,
-        perso2: perso2,
+    joueur1: joueur1,
+    joueur2: joueur2,
 
-        equipe1: [
-            perso1
-        ],
+    perso1: perso1,
+    perso2: perso2,
 
-        equipe2: [
-            perso2
-        ],
+    equipe1: [
+        perso1
+    ],
 
-        arene: arene,
+    equipe2: [
+        perso2
+    ],
 
-        tour: 0,
+    arene: arene,
 
-        statsCustom: "Toutes les stats sont égales",
+    tour: 0,
 
-        avantageCategorie: avantageCategorie,
+    // ⚖️ Supériorité
+    superieur: superieur,
 
-        etat: "ready",
+    avantageCategorie: avantageCategorie,
 
-        createdAt: Date.now()
-    };
+    etat: "ready",
 
-    return duel;
+    createdAt: Date.now()
+};
+
+return duel;
 }
 
 //================================================
@@ -562,12 +569,14 @@ function determinerPremierJoueur(match) {
     console.log("⚖️ Catégorie J1 :", p1.category, cat1);
     console.log("⚖️ Catégorie J2 :", p2.category, cat2);
 
-    // Plus faible = commence
+    // Catégories différentes
     if (cat1 < cat2) {
         return {
             joueur: j1,
             raison: "catégorie inférieure",
-            type: "category"
+            type: "category",
+            ecart: cat2 - cat1,
+            statsEqual: false
         };
     }
 
@@ -575,12 +584,15 @@ function determinerPremierJoueur(match) {
         return {
             joueur: j2,
             raison: "catégorie inférieure",
-            type: "category"
+            type: "category",
+            ecart: cat1 - cat2,
+            statsEqual: false
         };
     }
 
+
     //============================================
-    // 2️⃣ CATEGORIES EGALES → GRADE
+    // 2️⃣ CATÉGORIES ÉGALES → COMPARAISON GRADE
     //============================================
     const grade1 = getNiveauGrade(p1.grade);
     const grade2 = getNiveauGrade(p2.grade);
@@ -588,11 +600,14 @@ function determinerPremierJoueur(match) {
     console.log("🏅 Grade J1 :", p1.grade, grade1);
     console.log("🏅 Grade J2 :", p2.grade, grade2);
 
+    // Grades différents
     if (grade1 < grade2) {
         return {
             joueur: j1,
             raison: "grade inférieur",
-            type: "grade"
+            type: "grade",
+            ecart: grade2 - grade1,
+            statsEqual: false
         };
     }
 
@@ -600,21 +615,25 @@ function determinerPremierJoueur(match) {
         return {
             joueur: j2,
             raison: "grade inférieur",
-            type: "grade"
+            type: "grade",
+            ecart: grade1 - grade2,
+            statsEqual: false
         };
     }
 
-    //============================================
-    // 3️⃣ TOTALEMENT EGAUX → 0.5
-    //============================================
-    const joueurAleatoire =
-        Math.random() < 0.5 ? j1 : j2;
+//============================================
+// 3️⃣ CATÉGORIE + GRADE IDENTIQUES
+//============================================
+const joueurAleatoire =
+    Math.random() < 0.5 ? j1 : j2;
 
-    return {
-        joueur: joueurAleatoire,
-        raison: "égalité parfaite → tirage 0.5",
-        type: "random"
-    };
+return {
+    joueur: joueurAleatoire,
+    raison: "catégorie et grade identiques → tirage 0.5",
+    type: "random",
+    ecart: 0.5,
+    statsEqual: true
+};
 }
 
 //================================================
