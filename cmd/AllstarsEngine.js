@@ -52,7 +52,6 @@ function normalizeName(str = "") {
         .trim();
 }
 //================= RECHERCHE FICHE PAR PSEUDO =================
-
 async function getFicheByPseudo(pseudo) {
 
     const fiches = await getAllFiches();
@@ -616,6 +615,97 @@ function determinerPremierJoueur(match) {
         raison: "égalité parfaite → tirage 0.5",
         type: "random"
     };
+}
+
+//================================================
+// ⏱️ TIMER DU JOUEUR ACTIF
+//================================================
+function lancerTimerTour(match, chat, ovl) {
+
+    // Sécurité : annuler les anciens timers
+    if (match.timerTour) {
+        clearTimeout(match.timerTour);
+    }
+
+    if (match.timerWarning) {
+        clearTimeout(match.timerWarning);
+    }
+
+    const joueur = match.joueurActif;
+
+    if (!joueur || !joueur.jid) {
+        console.log("❌ Impossible de lancer le timer : joueur actif introuvable");
+        return;
+    }
+
+    const jid = joueur.jid;
+    const pseudo = joueur.pseudo;
+
+    console.log(
+        "⏱️ TIMER LANCÉ POUR :",
+        pseudo,
+        "| JID :",
+        jid
+    );
+
+    //============================================
+    // ⚠️ AVERTISSEMENT À 6 MINUTES
+    //============================================
+    match.timerWarning = setTimeout(async () => {
+
+        const actuel = duelsEnCours[match.id];
+
+        if (!actuel) return;
+
+        if (actuel.etat !== "in_match") return;
+
+        // Le joueur doit toujours être celui qui joue
+        if (actuel.joueurActif?.jid !== jid) return;
+
+        await ovl.sendMessage(chat, {
+            text:
+`⚠️ *PLUS QU'1 MINUTE !*
+
+➡️ @${pseudo}
+
+Il te reste seulement 1 minute pour envoyer ton pavé !`,
+            mentions: [jid]
+        });
+
+    }, 6 * 60 * 1000);
+
+
+    //============================================
+    // ⏰ FIN DES 7 MINUTES
+    //============================================
+    match.timerTour = setTimeout(async () => {
+
+        const actuel = duelsEnCours[match.id];
+
+        if (!actuel) return;
+
+        if (actuel.etat !== "in_match") return;
+
+        // Vérifie que le joueur est toujours actif
+        if (actuel.joueurActif?.jid !== jid) return;
+
+        console.log(
+            "⏰ TEMPS ÉCOULÉ POUR :",
+            pseudo
+        );
+
+        await ovl.sendMessage(chat, {
+            text:
+`⏰ *TEMPS ÉCOULÉ !*
+
+➡️ @${pseudo}
+
+Tu n'as pas envoyé ton pavé dans les 7 minutes.
+
+❌ Ton tour est perdu.`
+        });
+
+    }, 7 * 60 * 1000);
 }
 
 //================================================
