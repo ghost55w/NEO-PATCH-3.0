@@ -650,18 +650,18 @@ async function demarrerCombat(match, chat, ovl) {
     // 🎬 MEDIA DE DEBUT DU COMBAT
     //================================================
     await ovl.sendMessage(chat, {
-        image: {
-            url: "https://files.catbox.moe/1td1ai.mp4"
-        },
-        caption:
+    video: {
+        url: "https://files.catbox.moe/1td1ai.mp4"
+    },
+    caption:
 `*♨️🎮 DEBUT DU COMBAT🌀*
 ▔▔▔▔▔▔▔▔▔▔▔
 ➡️ @${pseudo} GO !!!! 🔥
 
 ╰───────────────────
                             🌀🔆`,
-        mentions: [jid]
-    });
+    mentions: [jid]
+});
 
     //================================================
     // ⏱️ TIMER UNIQUEMENT POUR LE PREMIER JOUEUR
