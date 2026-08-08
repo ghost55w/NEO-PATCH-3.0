@@ -29,20 +29,10 @@ const normalize = str =>
         .replace(/[^a-z0-9]/g, "");
 
 //================= DUELS PAR GROUPE =================
-const duelsEnCours = {};
-const matchAttente = {};
-
-let lastArenaIndex = -1;
 
 
 //================= UTILS =================
-function tirerAr() {
-    let i;
-    do { i = Math.floor(Math.random() * arenes.length); }
-    while (i === lastArenaIndex);
-    lastArenaIndex = i;
-    return arenes[i];
-}
+
 
 function limiterStats(stats, stat, val) {
     stats[stat] = Math.max(0, Math.min(100, stats[stat] + val));
@@ -92,29 +82,281 @@ function randomImage(list) {
     return list[Math.floor(Math.random() * list.length)];
 }
 
-//================= FICHE DUEL =================
-function generateFicheDuel(duel) {
-    return `*🆚VERSUS ARENA BATTLE🏆🎮*
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒░░▒░
-🔅 *${duel.equipe1[0].nom}*: 🫀:${duel.equipe1[0].stats.sta}% 🌀:${duel.equipe1[0].stats.energie}% ❤️:${duel.equipe1[0].stats.pv}%
-                                   ~  *🆚*  ~
-🔅 *${duel.equipe2[0].nom}*: 🫀:${duel.equipe2[0].stats.sta}% 🌀:${duel.equipe2[0].stats.energie}% ❤️:${duel.equipe2[0].stats.pv}%
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-*🌍 𝐀𝐫𝐞̀𝐧𝐞*: ${duel.arene.nom}
-*🚫 𝐇𝐚𝐧𝐝𝐢𝐜𝐚𝐩𝐞*: Boost 1 fois chaque 2 tours!
-*⚖️ 𝐒𝐭𝐚𝐭𝐬*: ${duel.statsCustom || "Aucune"}
-*🏞️ 𝐀𝐢𝐫 𝐝𝐞 𝐜𝐨𝐦𝐛𝐚𝐭*: illimitée
-*🦶🏼 𝐃𝐢𝐬𝐭𝐚𝐧𝐜𝐞 𝐢𝐧𝐢𝐭𝐢𝐚𝐥𝐞 📌*: 5m
-*⌚ 𝐋𝐚𝐭𝐞𝐧𝐜𝐞*: 6mins ⚠️
-*⭕ 𝐏𝐨𝐫𝐭𝐞́*: 10m
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-*⚠️ Vous avez 🔟 tours max pour finir votre Adversaire !*
-*Sinon la victoire sera donnée par décision selon l'offensive !*
+//================================================
+// 🏟️ ARENES
+//================================================
+const arenes = [
+    {
+        nom: "Desert Montagneux⛰️",
+        image: "https://files.catbox.moe/aoximf.jpg"
+    },
+    {
+        nom: "Ville en Ruines🏚️",
+        image: "https://files.catbox.moe/2qmvpa.jpg"
+    },
+    {
+        nom: "Centre-ville🏙️",
+        image: "https://files.catbox.moe/pzlkf9.jpg"
+    },
+    {
+        nom: "Arise🌇",
+        image: "https://files.catbox.moe/3vlsmw.jpg"
+    },
+    {
+        nom: "Salle du temps ⌛",
+        image: "https://files.catbox.moe/j4e1pp.jpg"
+    },
+    {
+        nom: "Valley de la fin🗿",
+        image: "https://files.catbox.moe/m0k1jp.jpg"
+    },
+    {
+        nom: "École d'exorcisme de Tokyo📿",
+        image: "https://files.catbox.moe/rgznzb.jpg"
+    },
+    {
+        nom: "Marinford🏰",
+        image: "https://files.catbox.moe/4bygut.jpg"
+    },
+    {
+        nom: "Cathédrale⛩️",
+        image: "https://files.catbox.moe/ie6jvx.jpg"
+    }
+];
 
-╰───────────────────
-🏆NSL PRO ESPORT ARENA® | RAZORX⚡™ `;
+
+//================================================
+// 🌀 DUELS PAR GROUPE
+//================================================
+const duelsEnCours = {};
+const matchAttente = {};
+
+let lastArenaIndex = -1;
+
+
+//================================================
+// 🏟️ TIRAGE ALEATOIRE DE L'ARENE
+//================================================
+function tirerAr() {
+
+    let i;
+
+    do {
+        i = Math.floor(Math.random() * arenes.length);
+    } while (
+        arenes.length > 1 &&
+        i === lastArenaIndex
+    );
+
+    lastArenaIndex = i;
+
+    return arenes[i];
 }
+
+//================================================
+// ⭐ HIERARCHIE DES CATEGORIES
+//================================================
+const HIERARCHIE_CATEGORIES = [
+    "S-",
+    "S",
+    "S+",
+    "S+ super",
+    "S+ ultra",
+    "S+ extreme",
+    "S+ mega",
+    "S+ ultimate",
+
+    "SS-",
+    "SS",
+    "SS+",
+    "SS+ super",
+    "SS+ ultra",
+    "SS+ extreme",
+    "SS+ mega",
+    "SS+ ultimate"
+];
+
+
+//================================================
+// 🔎 NORMALISATION DE CATEGORIE
+//================================================
+function normalizeCategorie(categorie = "") {
+
+    return String(categorie)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+
+//================================================
+// 📊 OBTENIR LE NIVEAU D'UNE CATEGORIE
+//================================================
+function getNiveauCategorie(categorie) {
+
+    const normalisee = normalizeCategorie(categorie);
+
+    const index = HIERARCHIE_CATEGORIES.findIndex(
+        c => normalizeCategorie(c) === normalisee
+    );
+
+    return index;
+}
+
+
+//================================================
+// ⚖️ COMPARER DEUX CATEGORIES
+//================================================
+function comparerCategories(categorie1, categorie2) {
+
+    const niveau1 = getNiveauCategorie(categorie1);
+    const niveau2 = getNiveauCategorie(categorie2);
+
+    if (niveau1 === -1 || niveau2 === -1) {
+        console.log(
+            "⚠️ Catégorie inconnue :",
+            categorie1,
+            categorie2
+        );
+
+        return 0;
+    }
+
+    if (niveau1 > niveau2) return 1;
+
+    if (niveau1 < niveau2) return -1;
+
+    return 0;
+}
+
+//================================================
+// 🎴 PREPARATION DES PERSONNAGES POUR LE MATCH
+//================================================
+function preparerPersonnageMatch(joueur, personnage) {
+
+    return {
+
+        // Joueur propriétaire
+        pseudo: joueur.pseudo,
+        jid: joueur.jid,
+
+        // Personnage / carte
+        nom: personnage.name,
+
+        image: personnage.image,
+
+        grade: personnage.grade,
+
+        category: personnage.category,
+
+        //========================================
+        // ❤️ STATS DE COMBAT
+        //========================================
+        stats: {
+
+            // Endurance
+            sta: 100,
+
+            // Energie
+            energie: 100,
+
+            // Points de vie
+            pv: 100
+        }
+    };
+}
+
+//================================================
+// 🆚 CREATION DU DUEL
+//================================================
+function creerDuel(match) {
+
+    const joueur1 = match.joueurs[0];
+    const joueur2 = match.joueurs[1];
+
+    const personnage1 = joueur1.personnage;
+    const personnage2 = joueur2.personnage;
+
+    //============================================
+    // 🏟️ ARENE ALEATOIRE
+    //============================================
+    const arene = tirerAr();
+
+    //============================================
+    // 📊 COMPARAISON DES CATEGORIES
+    //============================================
+    const comparaison = comparerCategories(
+        personnage1.category,
+        personnage2.category
+    );
+
+    let avantageCategorie = "Égalité";
+
+    if (comparaison > 0) {
+        avantageCategorie =
+            `${personnage1.name} possède la catégorie supérieure`;
+    }
+
+    else if (comparaison < 0) {
+        avantageCategorie =
+            `${personnage2.name} possède la catégorie supérieure`;
+    }
+
+    //============================================
+    // 🎴 CREATION DES PERSONNAGES
+    //============================================
+    const perso1 = preparerPersonnageMatch(
+        joueur1,
+        personnage1
+    );
+
+    const perso2 = preparerPersonnageMatch(
+        joueur2,
+        personnage2
+    );
+
+    //============================================
+    // 🆚 CREATION DU DUEL
+    //============================================
+    const duel = {
+
+        id: match.id,
+
+        joueur1: joueur1,
+        joueur2: joueur2,
+
+        perso1: perso1,
+        perso2: perso2,
+
+        equipe1: [
+            perso1
+        ],
+
+        equipe2: [
+            perso2
+        ],
+
+        arene: arene,
+
+        tour: 0,
+
+        statsCustom: "Toutes les stats sont égales",
+
+        avantageCategorie: avantageCategorie,
+
+        etat: "ready",
+
+        createdAt: Date.now()
+    };
+
+    return duel;
+}
+
+
+
 
 
 // COMMANDE DE LANCEMENT DU MATCH🌀🆚//
@@ -587,13 +829,148 @@ if (
 ╰───────────────────
                       🔆🌀`
     });
-        
-  } 
-}   
+
+
+    //============================================
+    // ⏳ MATCH DANS 1 MINUTE
+    //============================================
+    match.etat = "waiting_match_start";
+
+    await ovl.sendMessage(chat, {
+        text:
+`⏳ *MATCH PRÊT !*
+
+🎴 Les deux personnages sont sélectionnés.
+
+🆚 ${match.joueurs[0].personnage.name}
+      VS
+🆚 ${match.joueurs[1].personnage.name}
+
+🏟️ L'arène sera sélectionnée au lancement.
+
+⌚ *Début du match dans 1 minute...*`
+    });
+
+
+    //============================================
+    // ⏱️ LANCEMENT APRÈS 1 MINUTE
+    //============================================
+    setTimeout(async () => {
+
+        const matchActuel = duelsEnCours[match.id];
+
+        if (!matchActuel) return;
+
+        if (matchActuel.etat !== "waiting_match_start") return;
+
+        await lancerMatchAllStars(
+            matchActuel,
+            chat,
+            ovl
+        );
+
+    }, 60000);
+}       
+}
+
+//================================================
+// 🛑 COMMANDE ARRÊT DU MATCH
+//================================================
+ovlcmd({
+    nom_cmd: "stopmatch🌀",
+    classe: "ALLSTARS🌀",
+    react: "🛑",
+    desc: "Arrêter le match ALL STARS en cours"
+}, async (ms_org, ovl, cmd_options) => {
+
+    const chat =
+        ms_org.from ||
+        ms_org.key?.remoteJid ||
+        ms_org;
+
+    //============================================
+    // 🔎 RECHERCHE DU MATCH DU GROUPE
+    //============================================
+    const matchId = matchAttente[chat];
+
+    if (!matchId) {
+
+        await ovl.sendMessage(chat, {
+            text:
+`❌ *AUCUN MATCH EN COURS*
+
+Il n'y a actuellement aucun match ALL STARS actif dans ce groupe.`
+        });
+
+        return;
+    }
+
+    //============================================
+    // 🔎 RECUPERATION DU MATCH
+    //============================================
+    const match = duelsEnCours[matchId];
+
+    if (!match) {
+
+        // Nettoyage au cas où matchAttente
+        // contient un ancien ID
+        delete matchAttente[chat];
+
+        await ovl.sendMessage(chat, {
+            text:
+`❌ *AUCUN MATCH EN COURS*
+
+Le match associé à ce groupe n'existe plus.`
+        });
+
+        return;
+    }
+
+    //============================================
+    // 🛑 ARRET DU MATCH
+    //============================================
+    const joueurs = match.joueurs || [];
+
+    const nomsJoueurs = joueurs.length
+        ? joueurs.map(j => j.pseudo).join(" 🆚 ")
+        : "Aucun joueur enregistré";
+
+    console.log(
+        "🛑 MATCH ARRÊTÉ :",
+        matchId,
+        "| Groupe :",
+        chat,
+        "| Joueurs :",
+        nomsJoueurs
+    );
+
+    //============================================
+    // 🗑️ SUPPRESSION DU MATCH
+    //============================================
+    delete duelsEnCours[matchId];
+    delete matchAttente[chat];
+
+    //============================================
+    // 📢 MESSAGE
+    //============================================
+    await ovl.sendMessage(chat, {
+        text:
+`🛑 *MATCH ALL STARS ARRÊTÉ*
+
+${nomsJoueurs}
+
+❌ Le match a été annulé avec succès.
+
+╰───────────────────
+                 🌀🔆`
+    });
+});
+               
 
 module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
+    lancerMatchAllStars,
     duelsEnCours,
     matchAttente
 };
