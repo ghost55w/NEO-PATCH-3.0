@@ -28,12 +28,10 @@ const normalize = str =>
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]/g, "");
 
-//================= DUELS PAR GROUPE =================
+
 
 
 //================= UTILS =================
-
-
 function limiterStats(stats, stat, val) {
     stats[stat] = Math.max(0, Math.min(100, stats[stat] + val));
 }
@@ -316,38 +314,47 @@ function creerDuel(match) {
         joueur2,
         personnage2
     );
-
+//============================================
+// ⚖️ CALCUL DE L'AVANTAGE
+//============================================
+const avantage = calculerAvantage(
+    personnage1,
+    personnage2
+);
+    
     //============================================
     // 🆚 DUEL
     //============================================
     const duel = {
 
-        id: match.id,
+    id: match.id,
 
-        joueur1: joueur1,
-        joueur2: joueur2,
+    joueur1: joueur1,
+    joueur2: joueur2,
 
-        perso1: perso1,
-        perso2: perso2,
+    perso1: perso1,
+    perso2: perso2,
 
-        equipe1: [
-            perso1
-        ],
+    equipe1: [
+        perso1
+    ],
 
-        equipe2: [
-            perso2
-        ],
+    equipe2: [
+        perso2
+    ],
 
-        arene: arene,
+    arene: arene,
 
-        tour: 0,
+    tour: 0,
 
-        avantageCategorie: avantageCategorie,
+    avantage: avantage,
 
-        etat: "ready",
+    avantageCategorie: avantageCategorie,
 
-        createdAt: Date.now()
-    };
+    etat: "ready",
+
+    createdAt: Date.now()
+};
 
     return duel;
 }
@@ -379,10 +386,10 @@ function generateFicheDuel(duel) {
 
 *🌍 𝐀𝐫𝐞̀𝐧𝐞* : ${duel.arene.nom}
 *🚫 𝐇𝐚𝐧𝐝𝐢𝐜𝐚𝐩𝐞* : Boost 1 fois chaque 2 tours!
-*⚖️ 𝐒𝐭𝐚𝐭𝐬* : ${duel.statsCustom || "Aucune"}
+*⚖️ 𝐒𝐭𝐚𝐭𝐬* : ${duel.avantage.texte}
 *🏞️ 𝐀𝐢𝐫 𝐝𝐞 𝐜𝐨𝐦𝐛𝐚𝐭* : illimitée
 *🦶🏼 𝐃𝐢𝐬𝐭𝐚𝐧𝐜𝐞 𝐢𝐧𝐢𝐭𝐢𝐚𝐥𝐞 📌* : 5m
-*⌚ 𝐋𝐚𝐭𝐞𝐧𝐜𝐞* : 6mins ⚠️
+*⌚ 𝐋𝐚𝐭𝐞𝐧𝐜𝐞* : 7mins ⚠️
 *⭕ 𝐏𝐨𝐫𝐭𝐞́* : 10m
 
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
@@ -409,7 +416,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // 🌀 MESSAGE DE CHARGEMENT
         //========================================
-
         const loading = await ovl.sendMessage(chat, {
             text: "🏟️ Sélection de l'arène."
         });
@@ -418,7 +424,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // 🏟️ ÉTAPE 1 — 15 SECONDES
         //========================================
-
         for (const txt of [
             "🏟️ Sélection de l'arène..",
             "🏟️ Sélection de l'arène...",
@@ -440,7 +445,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // 🌀 ÉTAPE 2 — 15 SECONDES
         //========================================
-
         for (const txt of [
             "🌀 Préparation du match.",
             "🌀 Préparation du match..",
@@ -462,7 +466,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // 🔥 ÉTAPE 3 — 15 SECONDES
         //========================================
-
         for (const txt of [
             "🔥 Initialisation du combat.",
             "🔥 Initialisation du combat..",
@@ -484,7 +487,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // ♨️ ÉTAPE 4 — 15 SECONDES
         //========================================
-
         for (const txt of [
             "♨️ Le combat va commencer.",
             "♨️ Le combat va commencer..",
@@ -506,7 +508,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // 🆚 CRÉATION DU DUEL
         //========================================
-
         const duel = creerDuel(match);
 
         match.duel = duel;
@@ -519,7 +520,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // 🏟️ AFFICHAGE DE L'ARÈNE
         //========================================
-
         await ovl.sendMessage(chat, {
 
             image: {
@@ -534,7 +534,6 @@ async function lancerMatchAllStars(match, chat, ovl) {
         //========================================
         // ♨️ DÉMARRAGE DU COMBAT
         //========================================
-
         await demarrerCombat(
             match,
             chat,
@@ -606,6 +605,71 @@ function getNiveauGrade(grade = "") {
     return index;
 }
 
+//================================================
+// ⚖️ CALCUL DE L'AVANTAGE TOTAL
+//================================================
+function calculerAvantage(personnage1, personnage2) {
+
+    const cat1 = getNiveauCategorie(personnage1.category);
+    const cat2 = getNiveauCategorie(personnage2.category);
+
+    //============================================
+    // 1️⃣ CATÉGORIE DIFFÉRENTE
+    //============================================
+    if (cat1 !== cat2) {
+
+        const ecart = Math.abs(cat1 - cat2);
+
+        if (cat1 > cat2) {
+            return {
+                joueur: 1,
+                valeur: ecart,
+                texte: `${personnage1.name} +${ecart}`
+            };
+        }
+
+        return {
+            joueur: 2,
+            valeur: ecart,
+            texte: `${personnage2.name} +${ecart}`
+        };
+    }
+
+    //============================================
+    // 2️⃣ CATÉGORIE ÉGALE → GRADE
+    //============================================
+    const grade1 = getNiveauGrade(personnage1.grade);
+    const grade2 = getNiveauGrade(personnage2.grade);
+
+    if (grade1 !== grade2) {
+
+        const ecart = Math.abs(grade1 - grade2);
+
+        if (grade1 > grade2) {
+            return {
+                joueur: 1,
+                valeur: ecart,
+                texte: `${personnage1.name} +${ecart}`
+            };
+        }
+
+        return {
+            joueur: 2,
+            valeur: ecart,
+            texte: `${personnage2.name} +${ecart}`
+        };
+    }
+
+    //============================================
+    // 3️⃣ CATÉGORIE + GRADE IDENTIQUES
+    //============================================
+    return {
+        joueur: 0,
+        valeur: 0.5,
+        texte: `${personnage1.name} +0.5 / ${personnage2.name} +0.5`,
+        statsEqual: true
+    };
+}
 
 //================================================
 // 🥊 DETERMINER QUI COMMENCE
@@ -820,9 +884,10 @@ async function demarrerCombat(match, chat, ovl) {
     video: {
         url: "https://files.catbox.moe/1td1ai.mp4"
     },
+    gifPlayback: true,
     caption:
 `*♨️🎮 DEBUT DU COMBAT🌀*
-▔▔▔▔▔▔▔▔▔▔▔
+▔▔▔▔▔▔▔▔▔
 ➡️ @${pseudo} GO !!!! 🔥
 
 ╰───────────────────
@@ -1155,14 +1220,12 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
     // ============================================
     // 📂 FICHE DU JOUEUR DÉJÀ SAUVEGARDÉE
     // ============================================
-
     const ficheData = joueur.fiche.dataValues || joueur.fiche;
 
 
     // ============================================
     // 🎴 CARTES POSSÉDÉES
     // ============================================
-
     const cartesJoueur = ficheData.cards
         ? ficheData.cards
             .split("\n")
