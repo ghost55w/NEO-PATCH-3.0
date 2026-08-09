@@ -317,43 +317,39 @@ function creerDuel(match) {
         personnage2
     );
 
-//================================================
-// 🆚 CREATION DU DUEL
-//================================================
-// ⚖️ Calcul de la supériorité
-const duel = {
+    //============================================
+    // 🆚 DUEL
+    //============================================
+    const duel = {
 
-    id: match.id,
+        id: match.id,
 
-    joueur1: joueur1,
-    joueur2: joueur2,
+        joueur1: joueur1,
+        joueur2: joueur2,
 
-    perso1: perso1,
-    perso2: perso2,
+        perso1: perso1,
+        perso2: perso2,
 
-    equipe1: [
-        perso1
-    ],
+        equipe1: [
+            perso1
+        ],
 
-    equipe2: [
-        perso2
-    ],
+        equipe2: [
+            perso2
+        ],
 
-    arene: arene,
+        arene: arene,
 
-    tour: 0,
+        tour: 0,
 
-    // ⚖️ Supériorité
-    superieur: superieur,
+        avantageCategorie: avantageCategorie,
 
-    avantageCategorie: avantageCategorie,
+        etat: "ready",
 
-    etat: "ready",
+        createdAt: Date.now()
+    };
 
-    createdAt: Date.now()
-};
-
-return duel;
+    return duel;
 }
 
 //================================================
@@ -406,28 +402,32 @@ async function lancerMatchAllStars(match, chat, ovl) {
 
     try {
 
-        console.log("🚀 LANCEMENT DU MATCH :", match.id);
+        console.log("🚀 PRÉPARATION DU MATCH :", match.id);
 
-        //========================================
-        // 🔄 ETAT
-        //========================================
         match.etat = "loading_match";
 
         //========================================
-        // 🌀 CHARGEMENT
+        // 🌀 MESSAGE DE CHARGEMENT
         //========================================
+
         const loading = await ovl.sendMessage(chat, {
-            text: "🌀 Préparation de l'arène."
+            text: "🏟️ Sélection de l'arène."
         });
 
+
+        //========================================
+        // 🏟️ ÉTAPE 1 — 15 SECONDES
+        //========================================
+
         for (const txt of [
-            "🌀 Préparation de l'arène..",
-            "🌀 Préparation de l'arène...",
+            "🏟️ Sélection de l'arène..",
+            "🏟️ Sélection de l'arène...",
+            "🏟️ Sélection de l'arène..",
             "🏟️ Sélection de l'arène..."
         ]) {
 
             await new Promise(resolve =>
-                setTimeout(resolve, 700)
+                setTimeout(resolve, 3500)
             );
 
             await ovl.sendMessage(chat, {
@@ -436,25 +436,90 @@ async function lancerMatchAllStars(match, chat, ovl) {
             });
         }
 
+
         //========================================
-        // 🆚 CREATION DU DUEL
+        // 🌀 ÉTAPE 2 — 15 SECONDES
         //========================================
+
+        for (const txt of [
+            "🌀 Préparation du match.",
+            "🌀 Préparation du match..",
+            "🌀 Préparation du match...",
+            "🌀 Préparation du match.."
+        ]) {
+
+            await new Promise(resolve =>
+                setTimeout(resolve, 3500)
+            );
+
+            await ovl.sendMessage(chat, {
+                text: txt,
+                edit: loading.key
+            });
+        }
+
+
+        //========================================
+        // 🔥 ÉTAPE 3 — 15 SECONDES
+        //========================================
+
+        for (const txt of [
+            "🔥 Initialisation du combat.",
+            "🔥 Initialisation du combat..",
+            "🔥 Initialisation du combat...",
+            "🔥 Initialisation du combat.."
+        ]) {
+
+            await new Promise(resolve =>
+                setTimeout(resolve, 3500)
+            );
+
+            await ovl.sendMessage(chat, {
+                text: txt,
+                edit: loading.key
+            });
+        }
+
+
+        //========================================
+        // ♨️ ÉTAPE 4 — 15 SECONDES
+        //========================================
+
+        for (const txt of [
+            "♨️ Le combat va commencer.",
+            "♨️ Le combat va commencer..",
+            "♨️ Le combat va commencer...",
+            "♨️ Le combat va commencer.."
+        ]) {
+
+            await new Promise(resolve =>
+                setTimeout(resolve, 3500)
+            );
+
+            await ovl.sendMessage(chat, {
+                text: txt,
+                edit: loading.key
+            });
+        }
+
+
+        //========================================
+        // 🆚 CRÉATION DU DUEL
+        //========================================
+
         const duel = creerDuel(match);
 
-        // Sauvegarde du duel
         match.duel = duel;
 
-        // Sauvegarde de l'arène
         match.arene = duel.arene;
 
-        //========================================
-        // 🎮 MATCH PRET
-        //========================================
         match.etat = "in_match";
 
+
         //========================================
-        // 🏟️ ENVOI DE LA FICHE DU COMBAT
+        // 🏟️ AFFICHAGE DE L'ARÈNE
         //========================================
+
         await ovl.sendMessage(chat, {
 
             image: {
@@ -464,18 +529,23 @@ async function lancerMatchAllStars(match, chat, ovl) {
             caption: generateFicheDuel(duel)
 
         });
-//========================================
-// ♨️ DEMARRAGE DU COMBAT
-//========================================
 
-await demarrerCombat(
-    match,
-    chat,
-    ovl
-);
+
+        //========================================
+        // ♨️ DÉMARRAGE DU COMBAT
+        //========================================
+
+        await demarrerCombat(
+            match,
+            chat,
+            ovl
+        );
+
+
         //========================================
         // 📊 LOGS
         //========================================
+
         console.log(
             "🏟️ Arène sélectionnée :",
             duel.arene.nom
@@ -495,13 +565,6 @@ await demarrerCombat(
             duel.perso2.category
         );
 
-        console.log(
-            "⚖️ Comparaison catégories :",
-            comparerCategories(
-                duel.perso1.category,
-                duel.perso2.category
-            )
-        );
 
     } catch (error) {
 
@@ -1038,7 +1101,6 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
     // ============================================
     // 👤 UTILISER UNIQUEMENT LE JID DÉJÀ SAUVEGARDÉ
     // ============================================
-
     console.log("🆔 JID reçu pour choix carte :", sender);
 
     console.log(
@@ -1256,45 +1318,69 @@ if (
     });
 
 
-    //============================================
-    // ⏳ MATCH DANS 1 MINUTE
-    //============================================
-    match.etat = "waiting_match_start";
+//============================================
+// ⏳ MATCH PRÊT → CHARGEMENT PENDANT 1 MINUTE
+//============================================
+match.etat = "waiting_match_start";
 
-    await ovl.sendMessage(chat, {
-        text:
-`⏳ *MATCH PRÊT !*
+//============================================
+// 🖼️ IMAGE DE CREATION DU MATCH
+//============================================
+const imagesMatch = [
+    "https://files.catbox.moe/fc5v8n.jpg",
+    "https://files.catbox.moe/8g6zu2.jpg"
+];
 
-🎴 Les deux personnages sont sélectionnés.
+const imageMatch = imagesMatch[
+    Math.floor(Math.random() * imagesMatch.length)
+];
 
-🆚 ${match.joueurs[0].personnage.name}
-      VS
-🆚 ${match.joueurs[1].personnage.name}
+//============================================
+// 🎴 MESSAGE DES JOUEURS PRÊTS
+//============================================
+await ovl.sendMessage(chat, {
 
-🏟️ L'arène sera sélectionnée au lancement.
+    image: {
+        url: imageMatch
+    },
 
-⌚ *Début du match dans 1 minute...*`
-    });
+    caption:
+`🌀🔆 *ANIME JUMP VERSUS*
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+🎴✅ *LES JOUEURS SONT PRÊTS !*
+*LE MATCH DÉBUTERA DANS 1 MIN⌚ ...*
+
+🎮 ${match.joueurs[0].pseudo}
+➡️ ${match.joueurs[0].personnage.name}
+
+🆚
+
+🎮 ${match.joueurs[1].pseudo}
+➡️ ${match.joueurs[1].personnage.name}
+
+╰───────────────────
+                             🔆🌀`
+});
+
+//============================================
+// ⏱️ ATTENTE AVANT LE CHARGEMENT
+//============================================
+// Petite pause avant de commencer les animations
+await new Promise(resolve =>
+    setTimeout(resolve, 1000)
+);
 
 
-    //============================================
-    // ⏱️ LANCEMENT APRÈS 1 MINUTE
-    //============================================
-    setTimeout(async () => {
-
-        const matchActuel = duelsEnCours[match.id];
-
-        if (!matchActuel) return;
-
-        if (matchActuel.etat !== "waiting_match_start") return;
-
-        await lancerMatchAllStars(
-            matchActuel,
-            chat,
-            ovl
-        );
-
-    }, 60000);
+//============================================
+// 🚀 LANCEMENT DU CHARGEMENT
+//============================================
+await lancerMatchAllStars(
+    match,
+    chat,
+    ovl
+); 
 }       
 }
 
