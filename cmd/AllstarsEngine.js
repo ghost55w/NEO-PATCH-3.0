@@ -501,6 +501,7 @@ function obtenirToutesLesActions() {
     return actions;
 }
 
+
 //================================================
 // 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
 //================================================
@@ -521,6 +522,7 @@ function detecterActionsPave(texte = "") {
         "📚 Nombre d'actions disponibles :",
         toutesLesActions.length
     );
+
     const actionsDetectees = [];
 
     for (const action of toutesLesActions) {
@@ -562,30 +564,12 @@ function detecterActionsPave(texte = "") {
     }
 
     console.log(
-    "✅ ACTIONS TROUVÉES :",
-    actionsDetectees
-);
+        "✅ ACTIONS TROUVÉES :",
+        actionsDetectees
+    );
+
     return actionsDetectees;
 }
-
-console.log("========================================");
-console.log("🥊 ANALYSE PAVÉ ALL STARS");
-console.log("========================================");
-
-console.log("👤 Joueur :", joueur?.pseudo);
-console.log("📝 Pavé :", pave);
-
-console.log(
-    "🎮 Actions détectées :",
-    actions
-);
-
-console.log(
-    "🔢 Nombre d'actions :",
-    actions.length
-);
-
-console.log("========================================");
 
 
 //================================================
@@ -608,6 +592,7 @@ function extrairePaveAction(message = "") {
     return match[1].trim();
 }
 
+
 //================================================
 // 🧠 ANALYSE DU PAVÉ DE MATCH
 //================================================
@@ -616,11 +601,43 @@ function AnalysePaveMatch(message, joueur) {
 
     const pave = extrairePaveAction(message);
 
+
+    //============================================
+    // 🥊 DEBUG ANALYSE PAVÉ ALL STARS
+    //============================================
+
+    console.log("========================================");
+    console.log("🥊 ANALYSE PAVÉ ALL STARS");
+    console.log("========================================");
+
+    console.log(
+        "👤 Joueur :",
+        joueur?.pseudo || "Inconnu"
+    );
+
+    console.log(
+        "📝 Pavé :",
+        pave || "(vide)"
+    );
+
+
     //============================================
     // ❌ PAVÉ VIDE
     //============================================
 
     if (!pave) {
+
+        console.log(
+            "🎮 Actions détectées :",
+            []
+        );
+
+        console.log(
+            "🔢 Nombre d'actions :",
+            0
+        );
+
+        console.log("========================================");
 
         return {
             valide: false,
@@ -645,6 +662,23 @@ function AnalysePaveMatch(message, joueur) {
     //============================================
 
     const actions = detecterActionsPave(pave);
+
+
+    //============================================
+    // 🥊 DEBUG ACTIONS
+    //============================================
+
+    console.log(
+        "🎮 Actions détectées :",
+        actions
+    );
+
+    console.log(
+        "🔢 Nombre d'actions :",
+        actions.length
+    );
+
+    console.log("========================================");
 
 
     //============================================
@@ -724,9 +758,10 @@ function AnalysePaveMatch(message, joueur) {
     const paveNormalise = normaliserAction(pave);
 
     const precisionTrouvee = precision.some(
-        mot => paveNormalise.includes(
-            normaliserAction(mot)
-        )
+        mot =>
+            paveNormalise.includes(
+                normaliserAction(mot)
+            )
     );
 
     if (precisionTrouvee) {
@@ -744,7 +779,6 @@ function AnalysePaveMatch(message, joueur) {
     // -------------------------------------------
     // 4️⃣ COHÉRENCE / DESCRIPTION
     // -------------------------------------------
-
     const verbesAction = [
         "frappe",
         "frapper",
@@ -825,7 +859,8 @@ function AnalysePaveMatch(message, joueur) {
             : null
     };
 }
-
+    
+    
 //================================================
 // 📊 MESSAGE D'ANALYSE DU PAVÉ
 //================================================
