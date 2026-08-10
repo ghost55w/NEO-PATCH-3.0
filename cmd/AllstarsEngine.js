@@ -12520,6 +12520,12652 @@ console.log(
     "⚔️ Résolveur physique ALL STARS chargé."
 );
 
+//==============================================================
+// ⚔️ ALL STARS — GESTION DES ÉTATS / EFFETS
+//==============================================================
+// Gère les conséquences persistantes du combat.
+//
+// États principaux :
+// - normal
+// - sonné
+// - immobilisé
+// - KO
+// - mort
+//
+// Effets temporaires :
+// - durée
+// - puissance
+// - source
+// - expiration
+//
+// Ce système ne raconte pas le combat.
+// Il maintient l'état réel des combattants.
+//==============================================================
+
+
+//==============================================================
+// 🧠 TYPES D'EFFETS
+//==============================================================
+
+const EFFETS_COMBAT_ALLSTARS = {
+
+    SONNE: "sonne",
+
+    IMMOBILISE: "immobilise",
+
+    AFFAIBLI: "affaibli",
+
+    DESORIENTE: "desoriente",
+
+    SAIGNEMENT: "saignement",
+
+    RALENTI: "ralenti",
+
+    REGENERATION: "regeneration"
+};
+
+
+//==============================================================
+// ⏱️ AJOUTER UN EFFET
+//==============================================================
+
+function ajouterEffetCombat({
+
+    joueur,
+
+    type,
+
+    duree = 1,
+
+    puissance = 1,
+
+    source = null,
+
+    metadata = {}
+
+} = {}) {
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    if (!type) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Type d'effet manquant."
+        };
+    }
+
+
+    if (!Array.isArray(joueur.effets)) {
+
+        joueur.effets = [];
+    }
+
+
+    duree =
+        Math.max(
+            1,
+            Number(duree) || 1
+        );
+
+
+    puissance =
+        Math.max(
+            0,
+            Number(puissance) || 0
+        );
+
+
+    //----------------------------------------------------------
+    // 🔎 EFFET EXISTANT
+    //----------------------------------------------------------
+
+    const existant =
+        joueur.effets.find(
+            effet =>
+                effet.type === type
+        );
+
+
+    if (existant) {
+
+        // On conserve la durée la plus élevée
+        existant.duree =
+            Math.max(
+                Number(existant.duree) || 0,
+                duree
+            );
+
+
+        // On conserve la puissance la plus forte
+        existant.puissance =
+            Math.max(
+                Number(existant.puissance) || 0,
+                puissance
+            );
+
+
+        existant.source =
+            source ??
+            existant.source;
+
+
+        existant.metadata = {
+
+            ...existant.metadata,
+
+            ...metadata
+        };
+
+
+        return {
+
+            succes: true,
+
+            effet:
+                existant,
+
+            nouveau: false
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ➕ NOUVEL EFFET
+    //----------------------------------------------------------
+
+    const effet = {
+
+        id:
+            `${type}_${Date.now()}_${Math.random()
+                .toString(36)
+                .slice(2, 8)}`,
+
+        type,
+
+        duree,
+
+        puissance,
+
+        source,
+
+        metadata: {
+
+            ...metadata
+        },
+
+        cree:
+            Date.now()
+    };
+
+
+    joueur.effets.push(
+        effet
+    );
+
+
+    //----------------------------------------------------------
+    // 🔄 APPLICATION IMMÉDIATE
+    //----------------------------------------------------------
+
+    appliquerEffetEtatCombat(
+        joueur,
+        effet
+    );
+
+
+    return {
+
+        succes: true,
+
+        effet,
+
+        nouveau: true
+    };
+}
+
+
+//==============================================================
+// ❌ SUPPRIMER UN EFFET
+//==============================================================
+
+function supprimerEffetCombat(
+    joueur,
+    type
+) {
+
+    if (!joueur) {
+
+        return false;
+    }
+
+
+    if (!Array.isArray(joueur.effets)) {
+
+        return false;
+    }
+
+
+    const avant =
+        joueur.effets.length;
+
+
+    joueur.effets =
+        joueur.effets.filter(
+            effet =>
+                effet.type !== type
+        );
+
+
+    const supprime =
+        avant !==
+        joueur.effets.length;
+
+
+    if (supprime) {
+
+        actualiserEtatDepuisEffetsCombat(
+            joueur
+        );
+    }
+
+
+    return supprime;
+}
+
+
+//==============================================================
+// 🔎 POSSÈDE UN EFFET
+//==============================================================
+
+function joueurPossedeEffetCombat(
+    joueur,
+    type
+) {
+
+    return !!(
+        joueur &&
+        Array.isArray(
+            joueur.effets
+        ) &&
+        joueur.effets.some(
+            effet =>
+                effet.type === type &&
+                Number(effet.duree) > 0
+        )
+    );
+}
+
+
+//==============================================================
+// 🔎 RÉCUPÉRER UN EFFET
+//==============================================================
+
+function obtenirEffetCombat(
+    joueur,
+    type
+) {
+
+    if (
+        !joueur ||
+        !Array.isArray(
+            joueur.effets
+        )
+    ) {
+
+        return null;
+    }
+
+
+    return (
+        joueur.effets.find(
+            effet =>
+                effet.type === type
+        ) ??
+        null
+    );
+}
+
+
+//==============================================================
+// 🧠 APPLICATION D'UN EFFET
+//==============================================================
+
+function appliquerEffetEtatCombat(
+    joueur,
+    effet
+) {
+
+    if (!joueur || !effet) {
+        return;
+    }
+
+
+    switch (
+        effet.type
+    ) {
+
+        //------------------------------------------------------
+        // 😵 SONNÉ
+        //------------------------------------------------------
+
+        case EFFETS_COMBAT_ALLSTARS.SONNE:
+
+            joueur.etat =
+                ETATS_COMBAT_ALLSTARS.SONNE;
+
+            break;
+
+
+        //------------------------------------------------------
+        // 🧊 IMMOBILISÉ
+        //------------------------------------------------------
+
+        case EFFETS_COMBAT_ALLSTARS.IMMOBILISE:
+
+            joueur.etat =
+                ETATS_COMBAT_ALLSTARS.IMMOBILISE;
+
+            break;
+
+
+        //------------------------------------------------------
+        // 🩸 SAIGNEMENT
+        //------------------------------------------------------
+
+        case EFFETS_COMBAT_ALLSTARS.SAIGNEMENT:
+
+            break;
+
+
+        //------------------------------------------------------
+        // 🐌 RALENTI
+        //------------------------------------------------------
+
+        case EFFETS_COMBAT_ALLSTARS.RALENTI:
+
+            break;
+
+
+        //------------------------------------------------------
+        // 💢 AFFAIBLI
+        //------------------------------------------------------
+
+        case EFFETS_COMBAT_ALLSTARS.AFFAIBLI:
+
+            break;
+
+
+        //------------------------------------------------------
+        // 🌀 DÉSORIENTÉ
+        //------------------------------------------------------
+
+        case EFFETS_COMBAT_ALLSTARS.DESORIENTE:
+
+            break;
+    }
+}
+
+
+//==============================================================
+// 🔄 ACTUALISER L'ÉTAT SELON LES EFFETS
+//==============================================================
+
+function actualiserEtatDepuisEffetsCombat(
+    joueur
+) {
+
+    if (!joueur) {
+        return;
+    }
+
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.MORT
+    ) {
+
+        return;
+    }
+
+
+    //----------------------------------------------------------
+    // ☠️ PV
+    //----------------------------------------------------------
+
+    if (
+        Number(joueur.pv) <= 0
+    ) {
+
+        joueur.etat =
+            ETATS_COMBAT_ALLSTARS.MORT;
+
+        return;
+    }
+
+
+    //----------------------------------------------------------
+    // 😵 SONNÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurPossedeEffetCombat(
+            joueur,
+            EFFETS_COMBAT_ALLSTARS.SONNE
+        )
+    ) {
+
+        joueur.etat =
+            ETATS_COMBAT_ALLSTARS.SONNE;
+
+        return;
+    }
+
+
+    //----------------------------------------------------------
+    // 🧊 IMMOBILISÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurPossedeEffetCombat(
+            joueur,
+            EFFETS_COMBAT_ALLSTARS.IMMOBILISE
+        )
+    ) {
+
+        joueur.etat =
+            ETATS_COMBAT_ALLSTARS.IMMOBILISE;
+
+        return;
+    }
+
+
+    //----------------------------------------------------------
+    // ✅ NORMAL
+    //----------------------------------------------------------
+
+    joueur.etat =
+        ETATS_COMBAT_ALLSTARS.NORMAL;
+}
+
+
+//==============================================================
+// ⏱️ FAIRE AVANCER LES EFFETS
+//==============================================================
+
+function avancerEffetsCombat(
+    joueur
+) {
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            effetsExpires: []
+        };
+    }
+
+
+    if (!Array.isArray(joueur.effets)) {
+
+        joueur.effets = [];
+    }
+
+
+    const effetsExpires = [];
+
+
+    //----------------------------------------------------------
+    // 🔄 TICK
+    //----------------------------------------------------------
+
+    for (
+        const effet of joueur.effets
+    ) {
+
+        //------------------------------------------------------
+        // 🩸 SAIGNEMENT
+        //------------------------------------------------------
+
+        if (
+            effet.type ===
+            EFFETS_COMBAT_ALLSTARS.SAIGNEMENT
+        ) {
+
+            const degats =
+                Math.max(
+                    0,
+                    Number(
+                        effet.puissance
+                    ) || 0
+                );
+
+
+            if (degats > 0) {
+
+                appliquerDegatsCombat(
+
+                    joueur,
+
+                    degats,
+
+                    effet.source
+                );
+            }
+        }
+
+
+        //------------------------------------------------------
+        // 💚 RÉGÉNÉRATION
+        //------------------------------------------------------
+
+        if (
+            effet.type ===
+            EFFETS_COMBAT_ALLSTARS.REGENERATION
+        ) {
+
+            const soin =
+                Math.max(
+                    0,
+                    Number(
+                        effet.puissance
+                    ) || 0
+                );
+
+
+            joueur.pv =
+                Math.min(
+
+                    Number(
+                        joueur.pvMax
+                    ) || 100,
+
+                    Number(
+                        joueur.pv
+                    ) + soin
+                );
+        }
+
+
+        //------------------------------------------------------
+        // ⏳ DURÉE
+        //------------------------------------------------------
+
+        effet.duree =
+            Math.max(
+                0,
+                (
+                    Number(
+                        effet.duree
+                    ) || 0
+                ) - 1
+            );
+
+
+        //------------------------------------------------------
+        // ❌ EXPIRATION
+        //------------------------------------------------------
+
+        if (
+            effet.duree <= 0
+        ) {
+
+            effetsExpires.push(
+                effet
+            );
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧹 SUPPRESSION
+    //----------------------------------------------------------
+
+    joueur.effets =
+        joueur.effets.filter(
+            effet =>
+                Number(
+                    effet.duree
+                ) > 0
+        );
+
+
+    //----------------------------------------------------------
+    // 🔄 ÉTAT
+    //----------------------------------------------------------
+
+    actualiserEtatDepuisEffetsCombat(
+        joueur
+    );
+
+
+    return {
+
+        succes: true,
+
+        effetsExpires
+    };
+}
+
+
+//==============================================================
+// 🧠 VÉRIFIER SI LE JOUEUR PEUT AGIR
+//==============================================================
+
+function joueurPeutAgirCombat(
+    joueur
+) {
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ☠️ MORT
+    //----------------------------------------------------------
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.MORT
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est mort."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 😵 KO
+    //----------------------------------------------------------
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.KO
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est KO."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 😵 SONNÉ
+    //----------------------------------------------------------
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.SONNE
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est sonné."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧊 IMMOBILISÉ
+    //----------------------------------------------------------
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.IMMOBILISE
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est immobilisé."
+        };
+    }
+
+
+    return {
+
+        succes: true
+    };
+}
+
+
+//==============================================================
+// 👤 RÉCUPÉRER UN JOUEUR
+//==============================================================
+
+function obtenirJoueurCombat(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !jid
+    ) {
+
+        return null;
+    }
+
+
+    return (
+        combat.joueurs?.[jid] ??
+        null
+    );
+}
+
+
+//==============================================================
+// 🎯 ACTION ACTIVE D'UN JOUEUR
+//==============================================================
+
+function obtenirActionActiveCombat(
+    combat,
+    jid
+) {
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+        return null;
+    }
+
+
+    return joueur.actionEnCours ??
+        null;
+}
+
+
+//==============================================================
+// 📊 CAPACITÉS DU COMBATTANT
+//==============================================================
+
+function calculerCapacitesCombat(
+    joueur
+) {
+
+    if (!joueur) {
+
+        return {
+
+            force: 0,
+
+            vitesse: 0,
+
+            defense: 0,
+
+            reflexes: 0,
+
+            intelligenceCombat: 0
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔎 SOURCES POSSIBLES
+    //----------------------------------------------------------
+
+    const stats =
+        joueur.stats ??
+        joueur.statistiquesCombat ??
+        joueur.attributs ??
+        {};
+
+
+    return {
+
+        force:
+            Number(
+                joueur.force ??
+                stats.force ??
+                50
+            ),
+
+        vitesse:
+            Number(
+                joueur.vitesse ??
+                stats.vitesse ??
+                joueur.combatSpeed ??
+                50
+            ),
+
+        defense:
+            Number(
+                joueur.defense ??
+                stats.defense ??
+                50
+            ),
+
+        reflexes:
+            Number(
+                joueur.reflexes ??
+                stats.reflexes ??
+                50
+            ),
+
+        intelligenceCombat:
+            Number(
+                joueur.intelligenceCombat ??
+                stats.intelligenceCombat ??
+                50
+            )
+    };
+}
+
+
+//==============================================================
+// 💪 PUISSANCE D'ATTAQUE
+//==============================================================
+
+function calculerPuissanceAttaqueCombat(
+    joueur
+) {
+
+    const capacites =
+        calculerCapacitesCombat(
+            joueur
+        );
+
+
+    let puissance =
+        capacites.force;
+
+
+    //----------------------------------------------------------
+    // 💢 AFFAIBLI
+    //----------------------------------------------------------
+
+    if (
+        joueurPossedeEffetCombat(
+            joueur,
+            EFFETS_COMBAT_ALLSTARS.AFFAIBLI
+        )
+    ) {
+
+        const effet =
+            obtenirEffetCombat(
+                joueur,
+                EFFETS_COMBAT_ALLSTARS.AFFAIBLI
+            );
+
+
+        puissance *=
+            Math.max(
+                0,
+                1 -
+                (
+                    Number(
+                        effet.puissance
+                    ) || 0
+                ) / 100
+            );
+    }
+
+
+    return Math.max(
+        0,
+        puissance
+    );
+}
+
+
+//==============================================================
+// 🛡️ DÉFENSE EFFECTIVE
+//==============================================================
+
+function calculerDefenseEffectiveCombat(
+    joueur
+) {
+
+    const capacites =
+        calculerCapacitesCombat(
+            joueur
+        );
+
+
+    let defense =
+        capacites.defense;
+
+
+    //----------------------------------------------------------
+    // 😵 DÉSORIENTÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurPossedeEffetCombat(
+            joueur,
+            EFFETS_COMBAT_ALLSTARS.DESORIENTE
+        )
+    ) {
+
+        const effet =
+            obtenirEffetCombat(
+                joueur,
+                EFFETS_COMBAT_ALLSTARS.DESORIENTE
+            );
+
+
+        defense *=
+            Math.max(
+                0,
+                1 -
+                (
+                    Number(
+                        effet.puissance
+                    ) || 0
+                ) / 100
+            );
+    }
+
+
+    return Math.max(
+        0,
+        defense
+    );
+}
+
+
+//==============================================================
+// 💨 ESQUIVE EFFECTIVE
+//==============================================================
+
+function calculerEsquiveEffectiveCombat(
+    joueur
+) {
+
+    const capacites =
+        calculerCapacitesCombat(
+            joueur
+        );
+
+
+    let esquive =
+        capacites.vitesse;
+
+
+    if (
+        joueurPossedeEffetCombat(
+            joueur,
+            EFFETS_COMBAT_ALLSTARS.RALENTI
+        )
+    ) {
+
+        const effet =
+            obtenirEffetCombat(
+                joueur,
+                EFFETS_COMBAT_ALLSTARS.RALENTI
+            );
+
+
+        esquive *=
+            Math.max(
+                0,
+                1 -
+                (
+                    Number(
+                        effet.puissance
+                    ) || 0
+                ) / 100
+            );
+    }
+
+
+    return Math.max(
+        0,
+        esquive
+    );
+}
+
+
+//==============================================================
+// 📊 PROFIL COMPLET DU COMBATTANT
+//==============================================================
+
+function creerProfilCombat(
+    joueur
+) {
+
+    if (!joueur) {
+
+        return {
+
+            vitesseEffective: 0,
+
+            puissanceAttaque: 0,
+
+            defenseEffective: 0,
+
+            capacites:
+                calculerCapacitesCombat(
+                    null
+                )
+        };
+    }
+
+
+    const capacites =
+        calculerCapacitesCombat(
+            joueur
+        );
+
+
+    return {
+
+        vitesseEffective:
+            Math.max(
+                0,
+                capacites.vitesse
+            ),
+
+        puissanceAttaque:
+            calculerPuissanceAttaqueCombat(
+                joueur
+            ),
+
+        defenseEffective:
+            calculerDefenseEffectiveCombat(
+                joueur
+            ),
+
+        esquiveEffective:
+            calculerEsquiveEffectiveCombat(
+                joueur
+            ),
+
+        capacites
+    };
+}
+
+
+//==============================================================
+// 📏 PORTÉE D'UNE ACTION
+//==============================================================
+
+function obtenirPorteeActionCombat(
+    type,
+    valeurDefaut = 1
+) {
+
+    const portees = {
+
+        attaque: 2,
+
+        defense: 0,
+
+        esquive: 2,
+
+        saisie: 1.5,
+
+        contre: 2,
+
+        technique: 5,
+
+        deplacement: 0,
+
+        recuperation: 0,
+
+        attente: 0
+    };
+
+
+    return (
+        portees[type] ??
+        valeurDefaut
+    );
+}
+
+
+//==============================================================
+// 💥 DÉGÂTS DE BASE
+//==============================================================
+
+function obtenirDegatsBaseActionCombat(
+    type,
+    valeurDefaut = 10
+) {
+
+    const degats = {
+
+        attaque: 10,
+
+        saisie: 5,
+
+        contre: 12,
+
+        technique: 20
+    };
+
+
+    return (
+        degats[type] ??
+        valeurDefaut
+    );
+}
+
+
+//==============================================================
+// 🧠 CONDITIONS D'UNE ACTION
+//==============================================================
+
+function verifierConditionsActionCombat({
+
+    joueur,
+
+    cible,
+
+    profil
+
+} = {}) {
+
+
+    const raisons = [];
+
+
+    if (!joueur) {
+
+        raisons.push(
+            "Joueur introuvable."
+        );
+
+
+        return {
+
+            valide: false,
+
+            raisons
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 ÉTAT
+    //----------------------------------------------------------
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            joueur
+        );
+
+
+    if (!peutAgir.succes) {
+
+        raisons.push(
+            peutAgir.raison
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 CIBLE
+    //----------------------------------------------------------
+
+    if (
+        cible &&
+        cible.etat ===
+        ETATS_COMBAT_ALLSTARS.MORT
+    ) {
+
+        raisons.push(
+            "La cible est morte."
+        );
+    }
+
+
+    return {
+
+        valide:
+            raisons.length === 0,
+
+        raisons
+    };
+}
+
+
+//==============================================================
+// 🔄 ACTUALISER L'ÉTAT GLOBAL DU COMBAT
+//==============================================================
+
+function actualiserEtatCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        actualiserEtatDepuisEffetsCombat(
+            joueur
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 FIN DU COMBAT
+    //----------------------------------------------------------
+
+    const joueursVivants =
+        (combat.ordre || [])
+            .filter(
+                jid => {
+
+                    const joueur =
+                        obtenirJoueurCombat(
+                            combat,
+                            jid
+                        );
+
+
+                    return (
+                        joueur &&
+                        joueur.etat !==
+                        ETATS_COMBAT_ALLSTARS.MORT
+                    );
+                }
+            );
+
+
+    if (
+        joueursVivants.length <= 1
+    ) {
+
+        combat.phase =
+            "termine";
+    }
+
+
+    return combat;
+}
+
+
+//==============================================================
+// 🏃 DÉPLACEMENT
+//==============================================================
+
+function executerDeplacementCombat({
+
+    combat,
+
+    jid,
+
+    destination,
+
+    coutStamina = 0
+
+} = {}) {
+
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            joueur
+        );
+
+
+    if (!peutAgir.succes) {
+
+        return peutAgir;
+    }
+
+
+    if (!destination) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Destination manquante."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    const stamina =
+        consommerStaminaCombat(
+
+            joueur,
+
+            coutStamina
+        );
+
+
+    if (!stamina.succes) {
+
+        return stamina;
+    }
+
+
+    //----------------------------------------------------------
+    // 📍 POSITION
+    //----------------------------------------------------------
+
+    const anciennePosition = {
+
+        ...joueur.position
+    };
+
+
+    joueur.position = {
+
+        x:
+            Number(
+                destination.x ?? 0
+            ),
+
+        y:
+            Number(
+                destination.y ?? 0
+            ),
+
+        z:
+            Number(
+                destination.z ?? 0
+            )
+    };
+
+
+    //----------------------------------------------------------
+    // 📊 ENREGISTREMENT
+    //----------------------------------------------------------
+
+    combat.deplacements.push({
+
+        jid,
+
+        anciennePosition,
+
+        nouvellePosition:
+            {
+                ...joueur.position
+            },
+
+        temps:
+            combat.temps,
+
+        sequence:
+            ++combat.sequence
+    });
+
+
+    return {
+
+        succes: true,
+
+        anciennePosition,
+
+        nouvellePosition:
+            {
+                ...joueur.position
+            },
+
+        stamina
+    };
+}
+
+
+//==============================================================
+// 🛡️ DÉFENSE
+//==============================================================
+
+function executerDefenseCombat({
+
+    combat,
+
+    jid,
+
+    type = "blocage"
+
+} = {}) {
+
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            joueur
+        );
+
+
+    if (!peutAgir.succes) {
+
+        return peutAgir;
+    }
+
+
+    joueur.actionEnCours = {
+
+        type:
+            ACTIONS_COMBAT_ALLSTARS.DEFENSE,
+
+        sousType:
+            type,
+
+        actif: true
+    };
+
+
+    return {
+
+        succes: true,
+
+        action:
+            joueur.actionEnCours
+    };
+}
+
+
+//==============================================================
+// ⚔️ PRÉPARER UNE ATTAQUE
+//==============================================================
+
+function preparerAttaqueCombat({
+
+    combat,
+
+    jid,
+
+    cibleJid,
+
+    type = "attaque",
+
+    coutStamina = 0,
+
+    coutEnergie = 0,
+
+    technique = null
+
+} = {}) {
+
+
+    const attaquant =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!attaquant) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Attaquant introuvable."
+        };
+    }
+
+
+    const cible =
+        obtenirJoueurCombat(
+            combat,
+            cibleJid
+        );
+
+
+    if (!cible) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Cible introuvable."
+        };
+    }
+
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            attaquant
+        );
+
+
+    if (!peutAgir.succes) {
+
+        return peutAgir;
+    }
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    const stamina =
+        consommerStaminaCombat(
+
+            attaquant,
+
+            coutStamina
+        );
+
+
+    if (!stamina.succes) {
+
+        return stamina;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚡ ÉNERGIE
+    //----------------------------------------------------------
+
+    const energie =
+        consommerEnergieCombat(
+
+            attaquant,
+
+            coutEnergie
+        );
+
+
+    if (!energie.succes) {
+
+        // remboursement stamina
+        attaquant.stamina +=
+            Number(
+                coutStamina
+            ) || 0;
+
+
+        return energie;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ ACTION
+    //----------------------------------------------------------
+
+    const action = {
+
+        jid,
+
+        type:
+            ACTIONS_COMBAT_ALLSTARS.ATTAQUE,
+
+        sousType:
+            type,
+
+        cibleJid,
+
+        technique,
+
+        coutStamina,
+
+        coutEnergie,
+
+        actif: true
+    };
+
+
+    attaquant.actionEnCours =
+        action;
+
+
+    combat.actionsEnCours.push(
+        action
+    );
+
+
+    return {
+
+        succes: true,
+
+        action,
+
+        stamina,
+
+        energie
+    };
+}
+
+
+//==============================================================
+// ⏳ ATTENTE
+//==============================================================
+
+function executerAttenteCombat({
+
+    combat,
+
+    jid
+
+} = {}) {
+
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    joueur.actionEnCours = {
+
+        type:
+            ACTIONS_COMBAT_ALLSTARS.ATTENTE,
+
+        actif: true
+    };
+
+
+    return {
+
+        succes: true,
+
+        action:
+            joueur.actionEnCours
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Gestion des états ALL STARS chargée."
+);
+
+//==============================================================
+// ⚔️ ALL STARS — SYSTÈME DE TOURS
+//==============================================================
+// Un TOUR représente un échange COMPLET.
+//
+// TOUR 1
+//
+// Joueur 1 joue
+//      ↓
+// Joueur 2 joue
+//      ↓
+// Résolution
+//      ↓
+// Mise à jour du combat
+//      ↓
+// Calcul de domination
+//      ↓
+// FIN DU TOUR
+//
+// Puis :
+// tour 2
+// tour 3
+// ...
+// tour 10
+//
+// À la fin du 10e tour :
+// décision finale.
+//==============================================================
+
+
+//==============================================================
+// ⚙️ CONFIGURATION DES TOURS
+//==============================================================
+
+const CONFIG_TOURS_ALLSTARS = {
+
+    MAX_TOURS: 10,
+
+    JOUEURS_PAR_TOUR: 2,
+
+    DECISION_APRES_MAX_TOURS: true
+};
+
+
+//==============================================================
+// 📊 INITIALISER LE TRACKER DE TOUR
+//==============================================================
+
+function initialiserToursCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    combat.tour = 0;
+
+    combat.sequence = 0;
+
+
+    //----------------------------------------------------------
+    // ACTIONS DU TOUR
+    //----------------------------------------------------------
+
+    combat.tourActuel = {
+
+        numero: 1,
+
+        joueursAyantJoue: [],
+
+        actions: [],
+
+        resolutionEffectuee: false,
+
+        termine: false
+    };
+
+
+    //----------------------------------------------------------
+    // DOMINATION
+    //----------------------------------------------------------
+
+    combat.domination = {};
+
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        combat.domination[jid] = {
+
+            score: 0,
+
+            attaquesReussies: 0,
+
+            attaquesRatees: 0,
+
+            coupsPortes: 0,
+
+            coupsRecus: 0,
+
+            degatsInfliges: 0,
+
+            degatsRecus: 0,
+
+            esquives: 0,
+
+            blocages: 0,
+
+            contres: 0,
+
+            saisies: 0,
+
+            actionsReussies: 0,
+
+            actionsRatees: 0,
+
+            tempsDominant: 0
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ÉTAT
+    //----------------------------------------------------------
+
+    combat.phase =
+        "combat";
+
+
+    return combat;
+}
+
+
+//==============================================================
+// 👤 VÉRIFIER SI LE JOUEUR A DÉJÀ JOUÉ
+//==============================================================
+
+function joueurADejaJoueTourCombat(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !combat.tourActuel
+    ) {
+
+        return false;
+    }
+
+
+    return combat.tourActuel
+        .joueursAyantJoue
+        .includes(jid);
+}
+
+
+//==============================================================
+// 👤 ENREGISTRER L'ACTION DU JOUEUR
+//==============================================================
+
+function enregistrerActionTourCombat({
+
+    combat,
+
+    jid,
+
+    action
+
+} = {}) {
+
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    if (!combat.tourActuel) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 JOUEUR INCONNU
+    //----------------------------------------------------------
+
+    if (
+        !combat.ordre.includes(jid)
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur ne participe pas à ce combat."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 A DÉJÀ JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurADejaJoueTourCombat(
+            combat,
+            jid
+        )
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Ce joueur a déjà joué pendant ce tour."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📝 ENREGISTREMENT
+    //----------------------------------------------------------
+
+    combat.tourActuel
+        .joueursAyantJoue
+        .push(jid);
+
+
+    combat.tourActuel
+        .actions
+        .push(action);
+
+
+    return {
+
+        succes: true,
+
+        joueursAyantJoue:
+            [
+                ...combat.tourActuel
+                    .joueursAyantJoue
+            ]
+    };
+}
+
+
+//==============================================================
+// 🔎 VÉRIFIER SI LES DEUX JOUEURS ONT JOUÉ
+//==============================================================
+
+function tousLesJoueursOntJoueTourCombat(
+    combat
+) {
+
+    if (!combat) {
+        return false;
+    }
+
+
+    const joueurs =
+        combat.ordre || [];
+
+
+    if (
+        joueurs.length === 0
+    ) {
+
+        return false;
+    }
+
+
+    return joueurs.every(
+        jid =>
+            combat.tourActuel
+                ?.joueursAyantJoue
+                ?.includes(jid)
+    );
+}
+
+
+//==============================================================
+// ⚔️ PRÉPARER LES ACTIONS DU TOUR
+//==============================================================
+
+function preparerActionsTourCombat(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            actions: []
+        };
+    }
+
+
+    if (
+        !combat.tourActuel
+    ) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    const actions =
+        combat.tourActuel.actions || [];
+
+
+    //----------------------------------------------------------
+    // 📦 COPIE
+    //----------------------------------------------------------
+
+    const actionsResolution = [];
+
+
+    for (
+        const action of actions
+    ) {
+
+        if (!action) {
+            continue;
+        }
+
+
+        actionsResolution.push({
+
+            ...action,
+
+            tour:
+                combat.tourActuel.numero
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 📥 AJOUT AUX ACTIONS DU COMBAT
+    //----------------------------------------------------------
+
+    combat.actionsEnCours.push(
+        ...actionsResolution
+    );
+
+
+    return {
+
+        succes: true,
+
+        actions:
+            actionsResolution
+    };
+}
+
+
+//==============================================================
+// 📊 ENREGISTRER LES STATISTIQUES D'UNE RÉSOLUTION
+//==============================================================
+
+function enregistrerResultatTourCombat({
+
+    combat,
+
+    action,
+
+    resultat
+
+} = {}) {
+
+
+    if (
+        !combat ||
+        !action
+    ) {
+
+        return;
+    }
+
+
+    const jid =
+        action.jid;
+
+
+    const stats =
+        combat.domination?.[jid];
+
+
+    if (!stats) {
+        return;
+    }
+
+
+    const resultatReel =
+        resultat?.resultat ??
+        resultat?.resultat?.resultat ??
+        null;
+
+
+    //----------------------------------------------------------
+    // 📊 ACTION RÉUSSIE
+    //----------------------------------------------------------
+
+    if (
+        resultat?.succes
+    ) {
+
+        stats.actionsReussies++;
+    }
+
+
+    //----------------------------------------------------------
+    // 📊 ACTION RATÉE
+    //----------------------------------------------------------
+
+    else {
+
+        stats.actionsRatees++;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ ATTAQUE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.ATTAQUE
+    ) {
+
+        if (
+            resultatReel ===
+            RESULTATS_COMBAT_ALLSTARS.IMPACT
+        ) {
+
+            stats.attaquesReussies++;
+
+        } else {
+
+            stats.attaquesRatees++;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        resultatReel ===
+        RESULTATS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        stats.esquives++;
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ BLOCAGE
+    //----------------------------------------------------------
+
+    if (
+        resultatReel ===
+        RESULTATS_COMBAT_ALLSTARS.BLOQUE
+    ) {
+
+        stats.blocages++;
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        resultatReel ===
+        RESULTATS_COMBAT_ALLSTARS.CONTRE
+    ) {
+
+        stats.contres++;
+    }
+
+
+    //----------------------------------------------------------
+    // 💥 DÉGÂTS
+    //----------------------------------------------------------
+
+    const degats =
+        resultat?.degats?.degats ??
+        resultat?.resultat?.degats?.degats ??
+        0;
+
+
+    stats.degatsInfliges +=
+        Number(degats) || 0;
+}
+
+
+//==============================================================
+// 📊 CALCULER LES DÉGÂTS REÇUS
+//==============================================================
+
+function actualiserDegatsRecusTourCombat(
+    combat
+) {
+
+    if (!combat) {
+        return;
+    }
+
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        const stats =
+            combat.domination?.[jid];
+
+
+        if (
+            !joueur ||
+            !stats
+        ) {
+
+            continue;
+        }
+
+
+        //------------------------------------------------------
+        // PV PERDUS
+        //------------------------------------------------------
+
+        const pvMax =
+            Number(
+                joueur.pvMax
+            ) || 100;
+
+
+        const pv =
+            Number(
+                joueur.pv
+            ) || 0;
+
+
+        const totalDegatsSubis =
+            pvMax - pv;
+
+
+        stats.degatsRecus =
+            Math.max(
+                0,
+                totalDegatsSubis
+            );
+    }
+}
+
+
+//==============================================================
+// 👑 CALCUL DE DOMINATION DU TOUR
+//==============================================================
+// La domination mesure qui a réellement pris le dessus.
+//
+// Elle ne correspond PAS simplement aux dégâts.
+//==============================================================
+
+function calculerDominationTourCombat(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    actualiserDegatsRecusTourCombat(
+        combat
+    );
+
+
+    const joueurs =
+        combat.ordre || [];
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return null;
+    }
+
+
+    const j1 =
+        joueurs[0];
+
+
+    const j2 =
+        joueurs[1];
+
+
+    const s1 =
+        combat.domination[j1];
+
+
+    const s2 =
+        combat.domination[j2];
+
+
+    //----------------------------------------------------------
+    // 📊 SCORE BRUT
+    //----------------------------------------------------------
+
+    const score1 =
+
+        s1.degatsInfliges * 0.40 +
+
+        s1.attaquesReussies * 5 +
+
+        s1.esquives * 4 +
+
+        s1.blocages * 3 +
+
+        s1.contres * 7 +
+
+        s1.actionsReussies * 2;
+
+
+    const score2 =
+
+        s2.degatsInfliges * 0.40 +
+
+        s2.attaquesReussies * 5 +
+
+        s2.esquives * 4 +
+
+        s2.blocages * 3 +
+
+        s2.contres * 7 +
+
+        s2.actionsReussies * 2;
+
+
+    //----------------------------------------------------------
+    // 📈 AVANTAGE DU TOUR
+    //----------------------------------------------------------
+
+    const difference =
+        score1 - score2;
+
+
+    let gagnantTour = null;
+
+
+    if (
+        difference > 0
+    ) {
+
+        gagnantTour =
+            j1;
+
+    } else if (
+        difference < 0
+    ) {
+
+        gagnantTour =
+            j2;
+    }
+
+
+    //----------------------------------------------------------
+    // 👑 DOMINATION
+    //----------------------------------------------------------
+
+    if (gagnantTour) {
+
+        combat.domination[
+            gagnantTour
+        ].tempsDominant++;
+    }
+
+
+    return {
+
+        j1: {
+
+            jid:
+                j1,
+
+            score:
+                score1
+        },
+
+        j2: {
+
+            jid:
+                j2,
+
+            score:
+                score2
+        },
+
+        difference,
+
+        gagnantTour
+    };
+}
+
+
+//==============================================================
+// ❤️ SCORE PV
+//==============================================================
+
+function calculerScorePvDecisionCombat(
+    joueur
+) {
+
+    if (!joueur) {
+        return 0;
+    }
+
+
+    const pv =
+        Number(
+            joueur.pv
+        ) || 0;
+
+
+    const pvMax =
+        Number(
+            joueur.pvMax
+        ) || 100;
+
+
+    if (
+        pvMax <= 0
+    ) {
+
+        return 0;
+    }
+
+
+    return (
+        pv /
+        pvMax
+    ) * 100;
+}
+
+
+//==============================================================
+// 🔋 SCORE STAMINA
+//==============================================================
+
+function calculerScoreStaminaDecisionCombat(
+    joueur
+) {
+
+    if (!joueur) {
+        return 0;
+    }
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Number(
+                joueur.stamina
+            ) || 0
+        )
+    );
+}
+
+
+//==============================================================
+// ⚔️ SCORE DOMINATION FINAL
+//==============================================================
+
+function calculerScoreDominationFinalCombat(
+    combat,
+    jid
+) {
+
+    const stats =
+        combat.domination?.[jid];
+
+
+    if (!stats) {
+        return 0;
+    }
+
+
+    //----------------------------------------------------------
+    // SCORE DE BASE
+    //----------------------------------------------------------
+
+    let score = 0;
+
+
+    score +=
+        stats.degatsInfliges *
+        0.40;
+
+
+    score +=
+        stats.attaquesReussies *
+        5;
+
+
+    score +=
+        stats.esquives *
+        4;
+
+
+    score +=
+        stats.blocages *
+        3;
+
+
+    score +=
+        stats.contres *
+        7;
+
+
+    score +=
+        stats.saisies *
+        5;
+
+
+    score +=
+        stats.actionsReussies *
+        2;
+
+
+    //----------------------------------------------------------
+    // DOMINATION DES TOURS
+    //----------------------------------------------------------
+
+    score +=
+        stats.tempsDominant *
+        10;
+
+
+    return score;
+}
+
+
+//==============================================================
+// 🏆 DÉCISION FINALE APRÈS 10 TOURS
+//==============================================================
+// Pondération :
+//
+// PV          = 25 %
+// STAMINA     = 15 %
+// DÉGÂTS      = 20 %
+// DOMINATION  = 25 %
+// EFFICACITÉ  = 15 %
+//==============================================================
+
+function calculerDecisionFinaleCombat(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    const joueurs =
+        combat.ordre || [];
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Deux joueurs sont nécessaires."
+        };
+    }
+
+
+    const resultats = [];
+
+
+    //----------------------------------------------------------
+    // 📊 SCORES
+    //----------------------------------------------------------
+
+    for (
+        const jid of joueurs
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        const stats =
+            combat.domination[jid];
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        //------------------------------------------------------
+        // ❤️ PV
+        //------------------------------------------------------
+
+        const scorePv =
+            calculerScorePvDecisionCombat(
+                joueur
+            );
+
+
+        //------------------------------------------------------
+        // 🔋 STAMINA
+        //------------------------------------------------------
+
+        const scoreStamina =
+            calculerScoreStaminaDecisionCombat(
+                joueur
+            );
+
+
+        //------------------------------------------------------
+        // ⚔️ DÉGÂTS
+        //------------------------------------------------------
+
+        const totalDegats =
+            Math.max(
+                1,
+
+                Number(
+                    stats.degatsInfliges
+                ) +
+                Number(
+                    stats.degatsRecus
+                )
+            );
+
+
+        const scoreDegats =
+            (
+                Number(
+                    stats.degatsInfliges
+                ) /
+                totalDegats
+            ) * 100;
+
+
+        //------------------------------------------------------
+        // 👑 DOMINATION
+        //------------------------------------------------------
+
+        const scoreDomination =
+            calculerScoreDominationFinalCombat(
+                combat,
+                jid
+            );
+
+
+        //------------------------------------------------------
+        // 📈 EFFICACITÉ
+        //------------------------------------------------------
+
+        const totalActions =
+            Math.max(
+                1,
+
+                Number(
+                    stats.actionsReussies
+                ) +
+                Number(
+                    stats.actionsRatees
+                )
+            );
+
+
+        const scoreEfficacite =
+            (
+                Number(
+                    stats.actionsReussies
+                ) /
+                totalActions
+            ) * 100;
+
+
+        //------------------------------------------------------
+        // 🏆 SCORE FINAL
+        //------------------------------------------------------
+
+        const scoreFinal =
+
+            scorePv * 0.25 +
+
+            scoreStamina * 0.15 +
+
+            scoreDegats * 0.20 +
+
+            Math.min(
+                100,
+                scoreDomination
+            ) * 0.25 +
+
+            scoreEfficacite * 0.15;
+
+
+        resultats.push({
+
+            jid,
+
+            pseudo:
+                joueur.pseudo,
+
+            scorePv,
+
+            scoreStamina,
+
+            scoreDegats,
+
+            scoreDomination,
+
+            scoreEfficacite,
+
+            scoreFinal
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 🥇 CLASSEMENT
+    //----------------------------------------------------------
+
+    resultats.sort(
+        (
+            a,
+            b
+        ) =>
+            b.scoreFinal -
+            a.scoreFinal
+    );
+
+
+    const premier =
+        resultats[0];
+
+
+    const second =
+        resultats[1];
+
+
+    //----------------------------------------------------------
+    // 🤝 ÉGALITÉ
+    //----------------------------------------------------------
+
+    const difference =
+        Math.abs(
+            premier.scoreFinal -
+            second.scoreFinal
+        );
+
+
+    let vainqueur =
+        premier.jid;
+
+
+    let decision =
+        "victoire";
+
+
+    if (
+        difference < 2
+    ) {
+
+        vainqueur = null;
+
+        decision =
+            "egalite";
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 FIN
+    //----------------------------------------------------------
+
+    combat.phase =
+        "termine";
+
+
+    combat.decisionFinale = {
+
+        decision,
+
+        vainqueur,
+
+        scores:
+            resultats,
+
+        difference,
+
+        tourFinal:
+            combat.tour
+    };
+
+
+    return {
+
+        succes: true,
+
+        ...combat.decisionFinale
+    };
+}
+
+
+//==============================================================
+// 🔄 TERMINER UN TOUR
+//==============================================================
+
+function terminerTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 DÉJÀ TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le combat est déjà terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📊 DOMINATION
+    //----------------------------------------------------------
+
+    const domination =
+        calculerDominationTourCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 🔄 ÉTATS
+    //----------------------------------------------------------
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        avancerEffetsCombat(
+            joueur
+        );
+
+
+        joueur.actionEnCours =
+            null;
+    }
+
+
+    actualiserEtatCombatAllStars(
+        combat
+    );
+
+
+    //----------------------------------------------------------
+    // ☠️ FIN PRÉMATURÉE
+    //----------------------------------------------------------
+
+    const morts =
+        (combat.ordre || [])
+            .filter(
+                jid => {
+
+                    const joueur =
+                        obtenirJoueurCombat(
+                            combat,
+                            jid
+                        );
+
+
+                    return (
+                        joueur &&
+                        joueur.etat ===
+                        ETATS_COMBAT_ALLSTARS.MORT
+                    );
+                }
+            );
+
+
+    if (
+        morts.length > 0
+    ) {
+
+        combat.phase =
+            "termine";
+
+
+        const vivants =
+            combat.ordre.filter(
+                jid =>
+                    !morts.includes(jid)
+            );
+
+
+        combat.decisionFinale = {
+
+            decision:
+                "victoire_par_ko",
+
+            vainqueur:
+                vivants.length === 1
+                    ? vivants[0]
+                    : null,
+
+            tourFinal:
+                combat.tour,
+
+            domination
+        };
+
+
+        return {
+
+            succes: true,
+
+            termine: true,
+
+            raison:
+                "Combat terminé avant la limite.",
+
+            domination,
+
+            decisionFinale:
+                combat.decisionFinale
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔢 FIN DU TOUR
+    //----------------------------------------------------------
+
+    combat.tour++;
+
+
+    //----------------------------------------------------------
+    // 🏁 10 TOURS
+    //----------------------------------------------------------
+
+    if (
+        combat.tour >=
+        CONFIG_TOURS_ALLSTARS.MAX_TOURS
+    ) {
+
+        const decision =
+            calculerDecisionFinaleCombat(
+                combat
+            );
+
+
+        return {
+
+            succes: true,
+
+            termine: true,
+
+            tour:
+                combat.tour,
+
+            domination,
+
+            decisionFinale:
+                decision
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 NOUVEAU TOUR
+    //----------------------------------------------------------
+
+    combat.tourActuel = {
+
+        numero:
+            combat.tour + 1,
+
+        joueursAyantJoue: [],
+
+        actions: [],
+
+        resolutionEffectuee: false,
+
+        termine: false
+    };
+
+
+    return {
+
+        succes: true,
+
+        termine: false,
+
+        tour:
+            combat.tour,
+
+        prochainTour:
+            combat.tour + 1,
+
+        domination
+    };
+}
+
+
+//==============================================================
+// ⚔️ TRAITER LA FIN D'UN ÉCHANGE COMPLET
+//==============================================================
+
+function resoudreTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔎 VÉRIFICATION
+    //----------------------------------------------------------
+
+    if (
+        !tousLesJoueursOntJoueTourCombat(
+            combat
+        )
+    ) {
+
+        return {
+
+            succes: false,
+
+            termine: false,
+
+            raison:
+                "Tous les joueurs n'ont pas encore joué."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ PRÉPARER
+    //----------------------------------------------------------
+
+    const preparation =
+        preparerActionsTourCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 💥 RÉSOLUTION
+    //----------------------------------------------------------
+
+    const resolution =
+        resoudreActionsPhysiquesCombat(
+            combat
+        );
+
+
+    combat.tourActuel
+        .resolutionEffectuee = true;
+
+
+    //----------------------------------------------------------
+    // 📊 ENREGISTRER
+    //----------------------------------------------------------
+
+    for (
+        let i = 0;
+
+        i < resolution.resultats.length;
+
+        i++
+    ) {
+
+        const element =
+            resolution.resultats[i];
+
+
+        enregistrerResultatTourCombat({
+
+            combat,
+
+            action:
+                element.action,
+
+            resultat:
+                element.resultat
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 TERMINER
+    //----------------------------------------------------------
+
+    const fin =
+        terminerTourCombatAllStars(
+            combat
+        );
+
+
+    return {
+
+        succes: true,
+
+        tour:
+            combat.tour,
+
+        preparation,
+
+        resolution,
+
+        fin
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Système de tours ALL STARS chargé."
+);
+
+//==============================================================
+// ⚔️ ALL STARS — SYSTÈME DE TOURS
+//==============================================================
+// Un TOUR représente un échange COMPLET.
+//
+// TOUR 1
+//
+// Joueur 1 joue
+//      ↓
+// Joueur 2 joue
+//      ↓
+// Résolution
+//      ↓
+// Mise à jour du combat
+//      ↓
+// Calcul de domination
+//      ↓
+// FIN DU TOUR
+//
+// Puis :
+// tour 2
+// tour 3
+// ...
+// tour 10
+//
+// À la fin du 10e tour :
+// décision finale.
+//==============================================================
+
+
+//==============================================================
+// ⚙️ CONFIGURATION DES TOURS
+//==============================================================
+
+const CONFIG_TOURS_ALLSTARS = {
+
+    MAX_TOURS: 10,
+
+    JOUEURS_PAR_TOUR: 2,
+
+    DECISION_APRES_MAX_TOURS: true
+};
+
+
+//==============================================================
+// 📊 INITIALISER LE TRACKER DE TOUR
+//==============================================================
+
+function initialiserToursCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    combat.tour = 0;
+
+    combat.sequence = 0;
+
+
+    //----------------------------------------------------------
+    // ACTIONS DU TOUR
+    //----------------------------------------------------------
+
+    combat.tourActuel = {
+
+        numero: 1,
+
+        joueursAyantJoue: [],
+
+        actions: [],
+
+        resolutionEffectuee: false,
+
+        termine: false
+    };
+
+
+    //----------------------------------------------------------
+    // DOMINATION
+    //----------------------------------------------------------
+
+    combat.domination = {};
+
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        combat.domination[jid] = {
+
+            score: 0,
+
+            attaquesReussies: 0,
+
+            attaquesRatees: 0,
+
+            coupsPortes: 0,
+
+            coupsRecus: 0,
+
+            degatsInfliges: 0,
+
+            degatsRecus: 0,
+
+            esquives: 0,
+
+            blocages: 0,
+
+            contres: 0,
+
+            saisies: 0,
+
+            actionsReussies: 0,
+
+            actionsRatees: 0,
+
+            tempsDominant: 0
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ÉTAT
+    //----------------------------------------------------------
+
+    combat.phase =
+        "combat";
+
+
+    return combat;
+}
+
+
+//==============================================================
+// 👤 VÉRIFIER SI LE JOUEUR A DÉJÀ JOUÉ
+//==============================================================
+
+function joueurADejaJoueTourCombat(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !combat.tourActuel
+    ) {
+
+        return false;
+    }
+
+
+    return combat.tourActuel
+        .joueursAyantJoue
+        .includes(jid);
+}
+
+
+//==============================================================
+// 👤 ENREGISTRER L'ACTION DU JOUEUR
+//==============================================================
+
+function enregistrerActionTourCombat({
+
+    combat,
+
+    jid,
+
+    action
+
+} = {}) {
+
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    if (!combat.tourActuel) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 JOUEUR INCONNU
+    //----------------------------------------------------------
+
+    if (
+        !combat.ordre.includes(jid)
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur ne participe pas à ce combat."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 A DÉJÀ JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurADejaJoueTourCombat(
+            combat,
+            jid
+        )
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Ce joueur a déjà joué pendant ce tour."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📝 ENREGISTREMENT
+    //----------------------------------------------------------
+
+    combat.tourActuel
+        .joueursAyantJoue
+        .push(jid);
+
+
+    combat.tourActuel
+        .actions
+        .push(action);
+
+
+    return {
+
+        succes: true,
+
+        joueursAyantJoue:
+            [
+                ...combat.tourActuel
+                    .joueursAyantJoue
+            ]
+    };
+}
+
+
+//==============================================================
+// 🔎 VÉRIFIER SI LES DEUX JOUEURS ONT JOUÉ
+//==============================================================
+
+function tousLesJoueursOntJoueTourCombat(
+    combat
+) {
+
+    if (!combat) {
+        return false;
+    }
+
+
+    const joueurs =
+        combat.ordre || [];
+
+
+    if (
+        joueurs.length === 0
+    ) {
+
+        return false;
+    }
+
+
+    return joueurs.every(
+        jid =>
+            combat.tourActuel
+                ?.joueursAyantJoue
+                ?.includes(jid)
+    );
+}
+
+
+//==============================================================
+// ⚔️ PRÉPARER LES ACTIONS DU TOUR
+//==============================================================
+
+function preparerActionsTourCombat(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            actions: []
+        };
+    }
+
+
+    if (
+        !combat.tourActuel
+    ) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    const actions =
+        combat.tourActuel.actions || [];
+
+
+    //----------------------------------------------------------
+    // 📦 COPIE
+    //----------------------------------------------------------
+
+    const actionsResolution = [];
+
+
+    for (
+        const action of actions
+    ) {
+
+        if (!action) {
+            continue;
+        }
+
+
+        actionsResolution.push({
+
+            ...action,
+
+            tour:
+                combat.tourActuel.numero
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 📥 AJOUT AUX ACTIONS DU COMBAT
+    //----------------------------------------------------------
+
+    combat.actionsEnCours.push(
+        ...actionsResolution
+    );
+
+
+    return {
+
+        succes: true,
+
+        actions:
+            actionsResolution
+    };
+}
+
+
+//==============================================================
+// 📊 ENREGISTRER LES STATISTIQUES D'UNE RÉSOLUTION
+//==============================================================
+
+function enregistrerResultatTourCombat({
+
+    combat,
+
+    action,
+
+    resultat
+
+} = {}) {
+
+
+    if (
+        !combat ||
+        !action
+    ) {
+
+        return;
+    }
+
+
+    const jid =
+        action.jid;
+
+
+    const stats =
+        combat.domination?.[jid];
+
+
+    if (!stats) {
+        return;
+    }
+
+
+    const resultatReel =
+        resultat?.resultat ??
+        resultat?.resultat?.resultat ??
+        null;
+
+
+    //----------------------------------------------------------
+    // 📊 ACTION RÉUSSIE
+    //----------------------------------------------------------
+
+    if (
+        resultat?.succes
+    ) {
+
+        stats.actionsReussies++;
+    }
+
+
+    //----------------------------------------------------------
+    // 📊 ACTION RATÉE
+    //----------------------------------------------------------
+
+    else {
+
+        stats.actionsRatees++;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ ATTAQUE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.ATTAQUE
+    ) {
+
+        if (
+            resultatReel ===
+            RESULTATS_COMBAT_ALLSTARS.IMPACT
+        ) {
+
+            stats.attaquesReussies++;
+
+        } else {
+
+            stats.attaquesRatees++;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        resultatReel ===
+        RESULTATS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        stats.esquives++;
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ BLOCAGE
+    //----------------------------------------------------------
+
+    if (
+        resultatReel ===
+        RESULTATS_COMBAT_ALLSTARS.BLOQUE
+    ) {
+
+        stats.blocages++;
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        resultatReel ===
+        RESULTATS_COMBAT_ALLSTARS.CONTRE
+    ) {
+
+        stats.contres++;
+    }
+
+
+    //----------------------------------------------------------
+    // 💥 DÉGÂTS
+    //----------------------------------------------------------
+
+    const degats =
+        resultat?.degats?.degats ??
+        resultat?.resultat?.degats?.degats ??
+        0;
+
+
+    stats.degatsInfliges +=
+        Number(degats) || 0;
+}
+
+
+//==============================================================
+// 📊 CALCULER LES DÉGÂTS REÇUS
+//==============================================================
+
+function actualiserDegatsRecusTourCombat(
+    combat
+) {
+
+    if (!combat) {
+        return;
+    }
+
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        const stats =
+            combat.domination?.[jid];
+
+
+        if (
+            !joueur ||
+            !stats
+        ) {
+
+            continue;
+        }
+
+
+        //------------------------------------------------------
+        // PV PERDUS
+        //------------------------------------------------------
+
+        const pvMax =
+            Number(
+                joueur.pvMax
+            ) || 100;
+
+
+        const pv =
+            Number(
+                joueur.pv
+            ) || 0;
+
+
+        const totalDegatsSubis =
+            pvMax - pv;
+
+
+        stats.degatsRecus =
+            Math.max(
+                0,
+                totalDegatsSubis
+            );
+    }
+}
+
+
+//==============================================================
+// 👑 CALCUL DE DOMINATION DU TOUR
+//==============================================================
+// La domination mesure qui a réellement pris le dessus.
+//
+// Elle ne correspond PAS simplement aux dégâts.
+//==============================================================
+
+function calculerDominationTourCombat(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    actualiserDegatsRecusTourCombat(
+        combat
+    );
+
+
+    const joueurs =
+        combat.ordre || [];
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return null;
+    }
+
+
+    const j1 =
+        joueurs[0];
+
+
+    const j2 =
+        joueurs[1];
+
+
+    const s1 =
+        combat.domination[j1];
+
+
+    const s2 =
+        combat.domination[j2];
+
+
+    //----------------------------------------------------------
+    // 📊 SCORE BRUT
+    //----------------------------------------------------------
+
+    const score1 =
+
+        s1.degatsInfliges * 0.40 +
+
+        s1.attaquesReussies * 5 +
+
+        s1.esquives * 4 +
+
+        s1.blocages * 3 +
+
+        s1.contres * 7 +
+
+        s1.actionsReussies * 2;
+
+
+    const score2 =
+
+        s2.degatsInfliges * 0.40 +
+
+        s2.attaquesReussies * 5 +
+
+        s2.esquives * 4 +
+
+        s2.blocages * 3 +
+
+        s2.contres * 7 +
+
+        s2.actionsReussies * 2;
+
+
+    //----------------------------------------------------------
+    // 📈 AVANTAGE DU TOUR
+    //----------------------------------------------------------
+
+    const difference =
+        score1 - score2;
+
+
+    let gagnantTour = null;
+
+
+    if (
+        difference > 0
+    ) {
+
+        gagnantTour =
+            j1;
+
+    } else if (
+        difference < 0
+    ) {
+
+        gagnantTour =
+            j2;
+    }
+
+
+    //----------------------------------------------------------
+    // 👑 DOMINATION
+    //----------------------------------------------------------
+
+    if (gagnantTour) {
+
+        combat.domination[
+            gagnantTour
+        ].tempsDominant++;
+    }
+
+
+    return {
+
+        j1: {
+
+            jid:
+                j1,
+
+            score:
+                score1
+        },
+
+        j2: {
+
+            jid:
+                j2,
+
+            score:
+                score2
+        },
+
+        difference,
+
+        gagnantTour
+    };
+}
+
+
+//==============================================================
+// ❤️ SCORE PV
+//==============================================================
+
+function calculerScorePvDecisionCombat(
+    joueur
+) {
+
+    if (!joueur) {
+        return 0;
+    }
+
+
+    const pv =
+        Number(
+            joueur.pv
+        ) || 0;
+
+
+    const pvMax =
+        Number(
+            joueur.pvMax
+        ) || 100;
+
+
+    if (
+        pvMax <= 0
+    ) {
+
+        return 0;
+    }
+
+
+    return (
+        pv /
+        pvMax
+    ) * 100;
+}
+
+
+//==============================================================
+// 🔋 SCORE STAMINA
+//==============================================================
+
+function calculerScoreStaminaDecisionCombat(
+    joueur
+) {
+
+    if (!joueur) {
+        return 0;
+    }
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Number(
+                joueur.stamina
+            ) || 0
+        )
+    );
+}
+
+
+//==============================================================
+// ⚔️ SCORE DOMINATION FINAL
+//==============================================================
+
+function calculerScoreDominationFinalCombat(
+    combat,
+    jid
+) {
+
+    const stats =
+        combat.domination?.[jid];
+
+
+    if (!stats) {
+        return 0;
+    }
+
+
+    //----------------------------------------------------------
+    // SCORE DE BASE
+    //----------------------------------------------------------
+
+    let score = 0;
+
+
+    score +=
+        stats.degatsInfliges *
+        0.40;
+
+
+    score +=
+        stats.attaquesReussies *
+        5;
+
+
+    score +=
+        stats.esquives *
+        4;
+
+
+    score +=
+        stats.blocages *
+        3;
+
+
+    score +=
+        stats.contres *
+        7;
+
+
+    score +=
+        stats.saisies *
+        5;
+
+
+    score +=
+        stats.actionsReussies *
+        2;
+
+
+    //----------------------------------------------------------
+    // DOMINATION DES TOURS
+    //----------------------------------------------------------
+
+    score +=
+        stats.tempsDominant *
+        10;
+
+
+    return score;
+}
+
+
+//==============================================================
+// 🏆 DÉCISION FINALE APRÈS 10 TOURS
+//==============================================================
+// Pondération :
+//
+// PV          = 25 %
+// STAMINA     = 15 %
+// DÉGÂTS      = 20 %
+// DOMINATION  = 25 %
+// EFFICACITÉ  = 15 %
+//==============================================================
+
+function calculerDecisionFinaleCombat(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    const joueurs =
+        combat.ordre || [];
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Deux joueurs sont nécessaires."
+        };
+    }
+
+
+    const resultats = [];
+
+
+    //----------------------------------------------------------
+    // 📊 SCORES
+    //----------------------------------------------------------
+
+    for (
+        const jid of joueurs
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        const stats =
+            combat.domination[jid];
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        //------------------------------------------------------
+        // ❤️ PV
+        //------------------------------------------------------
+
+        const scorePv =
+            calculerScorePvDecisionCombat(
+                joueur
+            );
+
+
+        //------------------------------------------------------
+        // 🔋 STAMINA
+        //------------------------------------------------------
+
+        const scoreStamina =
+            calculerScoreStaminaDecisionCombat(
+                joueur
+            );
+
+
+        //------------------------------------------------------
+        // ⚔️ DÉGÂTS
+        //------------------------------------------------------
+
+        const totalDegats =
+            Math.max(
+                1,
+
+                Number(
+                    stats.degatsInfliges
+                ) +
+                Number(
+                    stats.degatsRecus
+                )
+            );
+
+
+        const scoreDegats =
+            (
+                Number(
+                    stats.degatsInfliges
+                ) /
+                totalDegats
+            ) * 100;
+
+
+        //------------------------------------------------------
+        // 👑 DOMINATION
+        //------------------------------------------------------
+
+        const scoreDomination =
+            calculerScoreDominationFinalCombat(
+                combat,
+                jid
+            );
+
+
+        //------------------------------------------------------
+        // 📈 EFFICACITÉ
+        //------------------------------------------------------
+
+        const totalActions =
+            Math.max(
+                1,
+
+                Number(
+                    stats.actionsReussies
+                ) +
+                Number(
+                    stats.actionsRatees
+                )
+            );
+
+
+        const scoreEfficacite =
+            (
+                Number(
+                    stats.actionsReussies
+                ) /
+                totalActions
+            ) * 100;
+
+
+        //------------------------------------------------------
+        // 🏆 SCORE FINAL
+        //------------------------------------------------------
+
+        const scoreFinal =
+
+            scorePv * 0.25 +
+
+            scoreStamina * 0.15 +
+
+            scoreDegats * 0.20 +
+
+            Math.min(
+                100,
+                scoreDomination
+            ) * 0.25 +
+
+            scoreEfficacite * 0.15;
+
+
+        resultats.push({
+
+            jid,
+
+            pseudo:
+                joueur.pseudo,
+
+            scorePv,
+
+            scoreStamina,
+
+            scoreDegats,
+
+            scoreDomination,
+
+            scoreEfficacite,
+
+            scoreFinal
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 🥇 CLASSEMENT
+    //----------------------------------------------------------
+
+    resultats.sort(
+        (
+            a,
+            b
+        ) =>
+            b.scoreFinal -
+            a.scoreFinal
+    );
+
+
+    const premier =
+        resultats[0];
+
+
+    const second =
+        resultats[1];
+
+
+    //----------------------------------------------------------
+    // 🤝 ÉGALITÉ
+    //----------------------------------------------------------
+
+    const difference =
+        Math.abs(
+            premier.scoreFinal -
+            second.scoreFinal
+        );
+
+
+    let vainqueur =
+        premier.jid;
+
+
+    let decision =
+        "victoire";
+
+
+    if (
+        difference < 2
+    ) {
+
+        vainqueur = null;
+
+        decision =
+            "egalite";
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 FIN
+    //----------------------------------------------------------
+
+    combat.phase =
+        "termine";
+
+
+    combat.decisionFinale = {
+
+        decision,
+
+        vainqueur,
+
+        scores:
+            resultats,
+
+        difference,
+
+        tourFinal:
+            combat.tour
+    };
+
+
+    return {
+
+        succes: true,
+
+        ...combat.decisionFinale
+    };
+}
+
+
+//==============================================================
+// 🔄 TERMINER UN TOUR
+//==============================================================
+
+function terminerTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 DÉJÀ TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le combat est déjà terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📊 DOMINATION
+    //----------------------------------------------------------
+
+    const domination =
+        calculerDominationTourCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 🔄 ÉTATS
+    //----------------------------------------------------------
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        avancerEffetsCombat(
+            joueur
+        );
+
+
+        joueur.actionEnCours =
+            null;
+    }
+
+
+    actualiserEtatCombatAllStars(
+        combat
+    );
+
+
+    //----------------------------------------------------------
+    // ☠️ FIN PRÉMATURÉE
+    //----------------------------------------------------------
+
+    const morts =
+        (combat.ordre || [])
+            .filter(
+                jid => {
+
+                    const joueur =
+                        obtenirJoueurCombat(
+                            combat,
+                            jid
+                        );
+
+
+                    return (
+                        joueur &&
+                        joueur.etat ===
+                        ETATS_COMBAT_ALLSTARS.MORT
+                    );
+                }
+            );
+
+
+    if (
+        morts.length > 0
+    ) {
+
+        combat.phase =
+            "termine";
+
+
+        const vivants =
+            combat.ordre.filter(
+                jid =>
+                    !morts.includes(jid)
+            );
+
+
+        combat.decisionFinale = {
+
+            decision:
+                "victoire_par_ko",
+
+            vainqueur:
+                vivants.length === 1
+                    ? vivants[0]
+                    : null,
+
+            tourFinal:
+                combat.tour,
+
+            domination
+        };
+
+
+        return {
+
+            succes: true,
+
+            termine: true,
+
+            raison:
+                "Combat terminé avant la limite.",
+
+            domination,
+
+            decisionFinale:
+                combat.decisionFinale
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔢 FIN DU TOUR
+    //----------------------------------------------------------
+
+    combat.tour++;
+
+
+    //----------------------------------------------------------
+    // 🏁 10 TOURS
+    //----------------------------------------------------------
+
+    if (
+        combat.tour >=
+        CONFIG_TOURS_ALLSTARS.MAX_TOURS
+    ) {
+
+        const decision =
+            calculerDecisionFinaleCombat(
+                combat
+            );
+
+
+        return {
+
+            succes: true,
+
+            termine: true,
+
+            tour:
+                combat.tour,
+
+            domination,
+
+            decisionFinale:
+                decision
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 NOUVEAU TOUR
+    //----------------------------------------------------------
+
+    combat.tourActuel = {
+
+        numero:
+            combat.tour + 1,
+
+        joueursAyantJoue: [],
+
+        actions: [],
+
+        resolutionEffectuee: false,
+
+        termine: false
+    };
+
+
+    return {
+
+        succes: true,
+
+        termine: false,
+
+        tour:
+            combat.tour,
+
+        prochainTour:
+            combat.tour + 1,
+
+        domination
+    };
+}
+
+
+//==============================================================
+// ⚔️ TRAITER LA FIN D'UN ÉCHANGE COMPLET
+//==============================================================
+
+function resoudreTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔎 VÉRIFICATION
+    //----------------------------------------------------------
+
+    if (
+        !tousLesJoueursOntJoueTourCombat(
+            combat
+        )
+    ) {
+
+        return {
+
+            succes: false,
+
+            termine: false,
+
+            raison:
+                "Tous les joueurs n'ont pas encore joué."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ PRÉPARER
+    //----------------------------------------------------------
+
+    const preparation =
+        preparerActionsTourCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 💥 RÉSOLUTION
+    //----------------------------------------------------------
+
+    const resolution =
+        resoudreActionsPhysiquesCombat(
+            combat
+        );
+
+
+    combat.tourActuel
+        .resolutionEffectuee = true;
+
+
+    //----------------------------------------------------------
+    // 📊 ENREGISTRER
+    //----------------------------------------------------------
+
+    for (
+        let i = 0;
+
+        i < resolution.resultats.length;
+
+        i++
+    ) {
+
+        const element =
+            resolution.resultats[i];
+
+
+        enregistrerResultatTourCombat({
+
+            combat,
+
+            action:
+                element.action,
+
+            resultat:
+                element.resultat
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 TERMINER
+    //----------------------------------------------------------
+
+    const fin =
+        terminerTourCombatAllStars(
+            combat
+        );
+
+
+    return {
+
+        succes: true,
+
+        tour:
+            combat.tour,
+
+        preparation,
+
+        resolution,
+
+        fin
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Système de tours ALL STARS chargé."
+);
+
+//==============================================================
+// 🧠 ALL STARS — INTERPRÉTEUR DU PAVÉ JOUEUR
+//==============================================================
+// Transforme le texte libre du joueur en INTENTION structurée.
+//
+// IMPORTANT :
+// Ce système ne décide PAS si l'action réussit.
+//
+// Il répond uniquement à :
+// "Qu'est-ce que le joueur essaie de faire ?"
+//
+// Exemple :
+//
+// "Je fonce vers lui et lui donne un coup de poing au visage."
+//
+// devient :
+//
+// déplacement
+// attaque
+// cible = visage
+// arme = poing
+//
+// L'ARBITRE décidera ensuite si cela est possible.
+//==============================================================
+
+
+//==============================================================
+// 🎮 TYPES D'ACTIONS
+//==============================================================
+
+const ACTIONS_COMBAT_ALLSTARS = {
+
+    ATTAQUE: "attaque",
+
+    DEFENSE: "defense",
+
+    ESQUIVE: "esquive",
+
+    DEPLACEMENT: "deplacement",
+
+    SAISIE: "saisie",
+
+    CONTRE: "contre",
+
+    TECHNIQUE: "technique",
+
+    RECUPERATION: "recuperation",
+
+    ATTENTE: "attente"
+};
+
+
+//==============================================================
+// 🎯 TYPES DE CIBLES
+//==============================================================
+
+const CIBLES_COMBAT_ALLSTARS = {
+
+    TETE: "tete",
+
+    VISAGE: "visage",
+
+    COU: "cou",
+
+    TORSE: "torse",
+
+    ABDOMEN: "abdomen",
+
+    DOS: "dos",
+
+    BRAS_GAUCHE: "brasGauche",
+
+    BRAS_DROIT: "brasDroit",
+
+    JAMBE_GAUCHE: "jambeGauche",
+
+    JAMBE_DROITE: "jambeDroite",
+
+    CORPS: "corps",
+
+    ADVERSAIRE: "adversaire",
+
+    INCONNUE: null
+};
+
+
+//==============================================================
+// 🧭 DIRECTIONS
+//==============================================================
+
+const DIRECTIONS_COMBAT_ALLSTARS = {
+
+    AVANT: "avant",
+
+    ARRIERE: "arriere",
+
+    GAUCHE: "gauche",
+
+    DROITE: "droite",
+
+    HAUT: "haut",
+
+    BAS: "bas",
+
+    CIBLE: "vers_cible",
+
+    INCONNUE: null
+};
+
+
+//==============================================================
+// 🧹 NORMALISATION DU TEXTE
+//==============================================================
+
+function normaliserTexteCombat(
+    texte
+) {
+
+    return String(
+        texte ?? ""
+    )
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .replace(
+            /[’']/g,
+            "'"
+        )
+        .replace(
+            /\s+/g,
+            " "
+        )
+        .trim();
+}
+
+
+//==============================================================
+// 🔎 DÉTECTION D'UN MOT
+//==============================================================
+
+function texteContientMotCombat(
+    texte,
+    mots = []
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    return mots.some(
+        mot =>
+            texteNormalise.includes(
+                normaliserTexteCombat(
+                    mot
+                )
+            )
+    );
+}
+
+
+//==============================================================
+// ⚔️ DÉTECTION ATTAQUE
+//==============================================================
+
+function detecterAttaqueCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "attaque",
+
+            "frappe",
+
+            "frapper",
+
+            "coup",
+
+            "poing",
+
+            "coup de poing",
+
+            "pied",
+
+            "coup de pied",
+
+            "genou",
+
+            "coude",
+
+            "assene",
+
+            "assener",
+
+            "tape",
+
+            "taper",
+
+            "percute",
+
+            "percuter",
+
+            "ecrase",
+
+            "ecraser",
+
+            "matraque"
+        ]
+    );
+}
+
+
+//==============================================================
+// 🛡️ DÉTECTION DÉFENSE
+//==============================================================
+
+function detecterDefenseCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "defend",
+
+            "defendre",
+
+            "bloque",
+
+            "bloquer",
+
+            "blocage",
+
+            "pare",
+
+            "parer",
+
+            "garde",
+
+            "proteger",
+
+            "protege",
+
+            "encaisse"
+        ]
+    );
+}
+
+
+//==============================================================
+// 💨 DÉTECTION ESQUIVE
+//==============================================================
+
+function detecterEsquiveCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "esquive",
+
+            "esquiver",
+
+            "evite",
+
+            "eviter",
+
+            "se decale",
+
+            "decaler",
+
+            "roule",
+
+            "roulade",
+
+            "saute",
+
+            "bondit",
+
+            "bondir",
+
+            "se baisse",
+
+            "baisse"
+        ]
+    );
+}
+
+
+//==============================================================
+// 🏃 DÉTECTION DÉPLACEMENT
+//==============================================================
+
+function detecterDeplacementCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "avance",
+
+            "avancer",
+
+            "recule",
+
+            "reculer",
+
+            "approche",
+
+            "approcher",
+
+            "eloigne",
+
+            "eloigner",
+
+            "fonce",
+
+            "foncer",
+
+            "cours",
+
+            "courir",
+
+            "se deplace",
+
+            "deplace",
+
+            "bouge",
+
+            "bondit",
+
+            "sprint"
+        ]
+    );
+}
+
+
+//==============================================================
+// 🤼 DÉTECTION SAISIE
+//==============================================================
+
+function detecterSaisieCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "saisit",
+
+            "saisir",
+
+            "attrape",
+
+            "attraper",
+
+            "agrippe",
+
+            "agripper",
+
+            "empoigne",
+
+            "empoigner",
+
+            "serre",
+
+            "serrer",
+
+            "maintient",
+
+            "maintenir",
+
+            "immobilise",
+
+            "immobiliser",
+
+            "prise",
+
+            "grapple"
+        ]
+    );
+}
+
+
+//==============================================================
+// 🔄 DÉTECTION CONTRE
+//==============================================================
+
+function detecterContreCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "contre",
+
+            "contre-attaque",
+
+            "contre attaque",
+
+            "riposte",
+
+            "riposter",
+
+            "renvoie",
+
+            "renvoyer"
+        ]
+    );
+}
+
+
+//==============================================================
+// ⚡ DÉTECTION TECHNIQUE
+//==============================================================
+
+function detecterTechniqueCombat(
+    texte
+) {
+
+    return texteContientMotCombat(
+        texte,
+        [
+
+            "technique",
+
+            "pouvoir",
+
+            "capacite",
+
+            "competence",
+
+            "special",
+
+            "ultime",
+
+            "attaque speciale",
+
+            "technique speciale"
+        ]
+    );
+}
+
+
+//==============================================================
+// 🎯 DÉTECTION DE LA CIBLE
+//==============================================================
+
+function detecterCibleCombat(
+    texte
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    //----------------------------------------------------------
+    // 👤 VISAGE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "visage"
+        ) ||
+        texteNormalise.includes(
+            "face"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.VISAGE;
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 TÊTE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "tete"
+        ) ||
+        texteNormalise.includes(
+            "crane"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.TETE;
+    }
+
+
+    //----------------------------------------------------------
+    // 🦴 COU
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "cou"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.COU;
+    }
+
+
+    //----------------------------------------------------------
+    // 💪 BRAS DROIT
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "bras droit"
+        ) ||
+        texteNormalise.includes(
+            "droit"
+        ) &&
+        texteNormalise.includes(
+            "bras"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.BRAS_DROIT;
+    }
+
+
+    //----------------------------------------------------------
+    // 💪 BRAS GAUCHE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "bras gauche"
+        ) ||
+        texteNormalise.includes(
+            "gauche"
+        ) &&
+        texteNormalise.includes(
+            "bras"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.BRAS_GAUCHE;
+    }
+
+
+    //----------------------------------------------------------
+    // 🦵 JAMBE DROITE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "jambe droite"
+        ) ||
+        texteNormalise.includes(
+            "droit"
+        ) &&
+        texteNormalise.includes(
+            "jambe"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.JAMBE_DROITE;
+    }
+
+
+    //----------------------------------------------------------
+    // 🦵 JAMBE GAUCHE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "jambe gauche"
+        ) ||
+        texteNormalise.includes(
+            "gauche"
+        ) &&
+        texteNormalise.includes(
+            "jambe"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.JAMBE_GAUCHE;
+    }
+
+
+    //----------------------------------------------------------
+    // 🫀 TORSE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "torse"
+        ) ||
+        texteNormalise.includes(
+            "poitrine"
+        ) ||
+        texteNormalise.includes(
+            "ventre"
+        ) ||
+        texteNormalise.includes(
+            "abdomen"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.TORSE;
+    }
+
+
+    //----------------------------------------------------------
+    // 🧍 CORPS
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "corps"
+        )
+    ) {
+
+        return CIBLES_COMBAT_ALLSTARS.CORPS;
+    }
+
+
+    //----------------------------------------------------------
+    // ❔ INCONNUE
+    //----------------------------------------------------------
+
+    return CIBLES_COMBAT_ALLSTARS.INCONNUE;
+}
+
+
+//==============================================================
+// 🧭 DÉTECTION DIRECTION
+//==============================================================
+
+function detecterDirectionCombat(
+    texte
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    if (
+        texteNormalise.includes(
+            "avance"
+        ) ||
+        texteNormalise.includes(
+            "vers lui"
+        ) ||
+        texteNormalise.includes(
+            "vers elle"
+        ) ||
+        texteNormalise.includes(
+            "approche"
+        ) ||
+        texteNormalise.includes(
+            "fonce vers"
+        )
+    ) {
+
+        return DIRECTIONS_COMBAT_ALLSTARS.AVANT;
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "recule"
+        ) ||
+        texteNormalise.includes(
+            "en arriere"
+        )
+    ) {
+
+        return DIRECTIONS_COMBAT_ALLSTARS.ARRIERE;
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "a gauche"
+        ) ||
+        texteNormalise.includes(
+            "sur la gauche"
+        )
+    ) {
+
+        return DIRECTIONS_COMBAT_ALLSTARS.GAUCHE;
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "a droite"
+        ) ||
+        texteNormalise.includes(
+            "sur la droite"
+        )
+    ) {
+
+        return DIRECTIONS_COMBAT_ALLSTARS.DROITE;
+    }
+
+
+    return DIRECTIONS_COMBAT_ALLSTARS.INCONNUE;
+}
+
+
+//==============================================================
+// 🥊 TYPE D'ATTAQUE
+//==============================================================
+
+function detecterTypeAttaqueCombat(
+    texte
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    if (
+        texteNormalise.includes(
+            "poing"
+        ) ||
+        texteNormalise.includes(
+            "coup de poing"
+        )
+    ) {
+
+        return "poing";
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "pied"
+        ) ||
+        texteNormalise.includes(
+            "coup de pied"
+        ) ||
+        texteNormalise.includes(
+            "coup de pied circulaire"
+        )
+    ) {
+
+        return "pied";
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "genou"
+        )
+    ) {
+
+        return "genou";
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "coude"
+        )
+    ) {
+
+        return "coude";
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "coup"
+        ) ||
+        texteNormalise.includes(
+            "frappe"
+        )
+    ) {
+
+        return "frappe";
+    }
+
+
+    return null;
+}
+
+
+//==============================================================
+// 🏃 INTENSITÉ DU DÉPLACEMENT
+//==============================================================
+
+function detecterIntensiteDeplacementCombat(
+    texte
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    if (
+        texteNormalise.includes(
+            "sprint"
+        ) ||
+        texteNormalise.includes(
+            "fonce"
+        ) ||
+        texteNormalise.includes(
+            "a toute vitesse"
+        ) ||
+        texteNormalise.includes(
+            "rapidement"
+        )
+    ) {
+
+        return "rapide";
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "lentement"
+        ) ||
+        texteNormalise.includes(
+            "doucement"
+        )
+    ) {
+
+        return "lent";
+    }
+
+
+    return "normal";
+}
+
+
+//==============================================================
+// 📏 DÉTECTION DISTANCE
+//==============================================================
+
+function detecterDistanceCombatTexte(
+    texte
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    //----------------------------------------------------------
+    // 📏 DISTANCE NUMÉRIQUE
+    //----------------------------------------------------------
+
+    const match =
+        texteNormalise.match(
+            /(\d+(?:[.,]\d+)?)\s*(m|metres|metre)/
+        );
+
+
+    if (match) {
+
+        return Number(
+            match[1]
+                .replace(",", ".")
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🔵 PROCHE
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "tres pres"
+        ) ||
+        texteNormalise.includes(
+            "au contact"
+        ) ||
+        texteNormalise.includes(
+            "a bout portant"
+        )
+    ) {
+
+        return 1;
+    }
+
+
+    if (
+        texteNormalise.includes(
+            "pres"
+        ) ||
+        texteNormalise.includes(
+            "proche"
+        )
+    ) {
+
+        return 2;
+    }
+
+
+    //----------------------------------------------------------
+    // 🔴 LOIN
+    //----------------------------------------------------------
+
+    if (
+        texteNormalise.includes(
+            "loin"
+        ) ||
+        texteNormalise.includes(
+            "a distance"
+        )
+    ) {
+
+        return 10;
+    }
+
+
+    return null;
+}
+
+
+//==============================================================
+// 🔗 EXTRAIRE LES ÉTAPES D'UNE ACTION
+//==============================================================
+// Exemple :
+//
+// "Je cours vers lui puis je frappe son visage"
+//
+// → ["je cours vers lui", "je frappe son visage"]
+//==============================================================
+
+function decouperSequenceCombat(
+    texte
+) {
+
+    const texteNormalise =
+        normaliserTexteCombat(
+            texte
+        );
+
+
+    return texteNormalise
+        .split(
+            /\s+(?:puis|ensuite|et ensuite|avant de|apres avoir|tout en)\s+/
+        )
+        .map(
+            morceau =>
+                morceau.trim()
+        )
+        .filter(
+            Boolean
+        );
+}
+
+
+//==============================================================
+// 🧠 CLASSIFIER UNE ACTION
+//==============================================================
+
+function classifierActionCombat(
+    morceau
+) {
+
+    const attaque =
+        detecterAttaqueCombat(
+            morceau
+        );
+
+
+    const defense =
+        detecterDefenseCombat(
+            morceau
+        );
+
+
+    const esquive =
+        detecterEsquiveCombat(
+            morceau
+        );
+
+
+    const deplacement =
+        detecterDeplacementCombat(
+            morceau
+        );
+
+
+    const saisie =
+        detecterSaisieCombat(
+            morceau
+        );
+
+
+    const contre =
+        detecterContreCombat(
+            morceau
+        );
+
+
+    const technique =
+        detecterTechniqueCombat(
+            morceau
+        );
+
+
+    //----------------------------------------------------------
+    // PRIORITÉ
+    //----------------------------------------------------------
+
+    if (contre) {
+
+        return ACTIONS_COMBAT_ALLSTARS.CONTRE;
+    }
+
+
+    if (technique) {
+
+        return ACTIONS_COMBAT_ALLSTARS.TECHNIQUE;
+    }
+
+
+    if (saisie) {
+
+        return ACTIONS_COMBAT_ALLSTARS.SAISIE;
+    }
+
+
+    if (attaque) {
+
+        return ACTIONS_COMBAT_ALLSTARS.ATTAQUE;
+    }
+
+
+    if (esquive) {
+
+        return ACTIONS_COMBAT_ALLSTARS.ESQUIVE;
+    }
+
+
+    if (defense) {
+
+        return ACTIONS_COMBAT_ALLSTARS.DEFENSE;
+    }
+
+
+    if (deplacement) {
+
+        return ACTIONS_COMBAT_ALLSTARS.DEPLACEMENT;
+    }
+
+
+    return ACTIONS_COMBAT_ALLSTARS.ATTENTE;
+}
+
+
+//==============================================================
+// 🧩 CONSTRUIRE UNE ACTION STRUCTURÉE
+//==============================================================
+
+function construireActionInterpreteeCombat({
+
+    morceau,
+
+    index = 0
+
+} = {}) {
+
+
+    const type =
+        classifierActionCombat(
+            morceau
+        );
+
+
+    const cible =
+        detecterCibleCombat(
+            morceau
+        );
+
+
+    const direction =
+        detecterDirectionCombat(
+            morceau
+        );
+
+
+    const distance =
+        detecterDistanceCombatTexte(
+            morceau
+        );
+
+
+    const action = {
+
+        index,
+
+        texteOriginal:
+            morceau,
+
+        type,
+
+        cible,
+
+        direction,
+
+        distance,
+
+        intention: {
+
+            type,
+
+            cible,
+
+            direction,
+
+            distance
+        },
+
+        details: {}
+    };
+
+
+    //----------------------------------------------------------
+    // ⚔️ ATTAQUE
+    //----------------------------------------------------------
+
+    if (
+        type ===
+        ACTIONS_COMBAT_ALLSTARS.ATTAQUE
+    ) {
+
+        action.details = {
+
+            typeAttaque:
+                detecterTypeAttaqueCombat(
+                    morceau
+                ),
+
+            puissanceDeclaree:
+                texteContientMotCombat(
+                    morceau,
+                    [
+                        "puissant",
+                        "fort",
+                        "de toutes mes forces",
+                        "maximum"
+                    ]
+                )
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        type ===
+        ACTIONS_COMBAT_ALLSTARS.DEPLACEMENT
+    ) {
+
+        action.details = {
+
+            intensite:
+                detecterIntensiteDeplacementCombat(
+                    morceau
+                )
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        type ===
+        ACTIONS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        action.details = {
+
+            direction,
+
+            intensite:
+                detecterIntensiteDeplacementCombat(
+                    morceau
+                )
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🤼 SAISIE
+    //----------------------------------------------------------
+
+    if (
+        type ===
+        ACTIONS_COMBAT_ALLSTARS.SAISIE
+    ) {
+
+        action.details = {
+
+            zoneSaisie:
+                cible
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        type ===
+        ACTIONS_COMBAT_ALLSTARS.CONTRE
+    ) {
+
+        action.details = {
+
+            reaction:
+                "contre_action_adverse"
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ DÉFENSE
+    //----------------------------------------------------------
+
+    if (
+        type ===
+        ACTIONS_COMBAT_ALLSTARS.DEFENSE
+    ) {
+
+        action.details = {
+
+            mode:
+                "blocage"
+        };
+    }
+
+
+    return action;
+}
+
+
+//==============================================================
+// 🧠 INTERPRÉTER LE PAVÉ COMPLET
+//==============================================================
+
+function interpreterPaveCombat({
+
+    texte,
+
+    joueur = null,
+
+    combat = null
+
+} = {}) {
+
+
+    //----------------------------------------------------------
+    // ❌ TEXTE VIDE
+    //----------------------------------------------------------
+
+    if (
+        !texte ||
+        !String(texte).trim()
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Pavé vide.",
+
+            actions: []
+        };
+    }
+
+
+    const texteOriginal =
+        String(texte).trim();
+
+
+    //----------------------------------------------------------
+    // ✂️ DÉCOUPAGE
+    //----------------------------------------------------------
+
+    const morceaux =
+        decouperSequenceCombat(
+            texteOriginal
+        );
+
+
+    //----------------------------------------------------------
+    // 🧩 CONSTRUCTION
+    //----------------------------------------------------------
+
+    const actions =
+        morceaux.map(
+
+            (
+                morceau,
+                index
+            ) =>
+
+                construireActionInterpreteeCombat({
+
+                    morceau,
+
+                    index
+                })
+        );
+
+
+    //----------------------------------------------------------
+    // 🧹 SUPPRESSION DES ATTENTES
+    //----------------------------------------------------------
+
+    const actionsUtiles =
+        actions.filter(
+            action =>
+                action.type !==
+                ACTIONS_COMBAT_ALLSTARS.ATTENTE
+        );
+
+
+    //----------------------------------------------------------
+    // 🆔 ID
+    //----------------------------------------------------------
+
+    const intentionId =
+        `INT_${Date.now()}_${Math.random()
+            .toString(36)
+            .slice(2, 8)}`;
+
+
+    //----------------------------------------------------------
+    // 📦 RÉSULTAT
+    //----------------------------------------------------------
+
+    const interpretation = {
+
+        id:
+            intentionId,
+
+        joueurJid:
+            joueur?.jid ??
+            null,
+
+        texteOriginal,
+
+        actions:
+            actionsUtiles,
+
+        nombreActions:
+            actionsUtiles.length,
+
+        ciblePrincipale:
+            actionsUtiles.find(
+                action =>
+                    action.cible
+            )?.cible ??
+            null,
+
+        intentionPrincipale:
+            actionsUtiles[0]?.type ??
+            ACTIONS_COMBAT_ALLSTARS.ATTENTE
+    };
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE
+    //----------------------------------------------------------
+
+    if (
+        combat &&
+        Array.isArray(
+            combat.historique
+        )
+    ) {
+
+        combat.historique.push({
+
+            type:
+                "interpretation",
+
+            intentionId,
+
+            jid:
+                joueur?.jid ??
+                null,
+
+            texte:
+                texteOriginal,
+
+            actions:
+                actionsUtiles,
+
+            temps:
+                combat.temps,
+
+            tour:
+                combat.tour
+        });
+    }
+
+
+    return {
+
+        succes: true,
+
+        interpretation
+    };
+}
+
+
+//==============================================================
+// 🎯 TRANSFORMER L'INTERPRÉTATION EN ACTION DE COMBAT
+//==============================================================
+// Cette fonction ne valide toujours PAS l'action.
+// Elle la prépare seulement pour l'arbitre.
+//==============================================================
+
+function preparerIntentionPourArbitreCombat({
+
+    interpretation,
+
+    joueur,
+
+    cible = null
+
+} = {}) {
+
+
+    if (
+        !interpretation
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Interprétation absente."
+        };
+    }
+
+
+    const actions =
+        interpretation.actions || [];
+
+
+    return {
+
+        succes: true,
+
+        intention: {
+
+            id:
+                interpretation.id,
+
+            joueurJid:
+                joueur?.jid ??
+                interpretation.joueurJid ??
+                null,
+
+            cibleJid:
+                cible?.jid ??
+                null,
+
+            actions,
+
+            texteOriginal:
+                interpretation.texteOriginal,
+
+            statut:
+                "a_arbitrer"
+        }
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "🧠 Interpréteur de pavé ALL STARS chargé."
+);
+
+//==============================================================
+// ⚖️ ALL STARS — ARBITRE DE COMBAT
+//==============================================================
+// L'arbitre transforme les intentions des joueurs en résultats
+// cohérents avec l'état réel du combat.
+//
+// ORDRE :
+//
+// PAVÉ JOUEUR
+//      ↓
+// INTERPRÉTEUR
+//      ↓
+// ARBITRE
+//      ↓
+// RÉSOLUTION
+//
+// L'arbitre vérifie notamment :
+//
+// - distance
+// - position
+// - état physique
+// - stamina
+// - énergie
+// - vitesse
+// - disponibilité des membres
+// - cible
+// - action adverse
+// - règles de combat
+//
+// IMPORTANT :
+// L'arbitre ne doit PAS favoriser un joueur.
+// Il applique les mêmes règles aux deux.
+//==============================================================
+
+
+//==============================================================
+// ⚖️ TYPES DE DÉCISIONS
+//==============================================================
+
+const DECISIONS_ARBITRE_ALLSTARS = {
+
+    ACCEPTEE: "acceptee",
+
+    PARTIELLE: "partielle",
+
+    REFUSEE: "refusee",
+
+    INTERCEPTEE: "interceptee",
+
+    ESQUIVEE: "esquivee",
+
+    BLOQUEE: "bloquee",
+
+    CONTREE: "contree",
+
+    IMPOSSIBLE: "impossible"
+};
+
+
+//==============================================================
+// 📊 RÉSULTATS DE COMBAT
+//==============================================================
+
+const RESULTATS_COMBAT_ALLSTARS = {
+
+    IMPACT: "impact",
+
+    ESQUIVE: "esquive",
+
+    BLOQUE: "bloque",
+
+    CONTRE: "contre",
+
+    SAISIE: "saisie",
+
+    DEPLACEMENT: "deplacement",
+
+    ECHEC: "echec",
+
+    IMPOSSIBLE: "impossible",
+
+    ATTENTE: "attente"
+};
+
+
+//==============================================================
+// 🎯 RÉCUPÉRER L'ACTION PRINCIPALE
+//==============================================================
+
+function obtenirActionPrincipaleArbitre(
+    intention
+) {
+
+    if (
+        !intention ||
+        !Array.isArray(
+            intention.actions
+        )
+    ) {
+
+        return null;
+    }
+
+
+    return (
+        intention.actions.find(
+            action =>
+                action.type !==
+                ACTIONS_COMBAT_ALLSTARS.ATTENTE
+        ) ??
+        null
+    );
+}
+
+
+//==============================================================
+// 🎯 RÉCUPÉRER LA CIBLE
+//==============================================================
+
+function obtenirCibleArbitre(
+    combat,
+    intention
+) {
+
+    if (
+        !combat ||
+        !intention
+    ) {
+
+        return null;
+    }
+
+
+    //----------------------------------------------------------
+    // 🆔 CIBLE DIRECTE
+    //----------------------------------------------------------
+
+    if (
+        intention.cibleJid
+    ) {
+
+        return obtenirJoueurCombat(
+            combat,
+            intention.cibleJid
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 👤 ADVERSAIRE AUTOMATIQUE
+    //----------------------------------------------------------
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            intention.joueurJid
+        );
+
+
+    if (!joueur) {
+        return null;
+    }
+
+
+    return (
+        combat.ordre
+            .filter(
+                jid =>
+                    jid !==
+                    joueur.jid
+            )
+            .map(
+                jid =>
+                    obtenirJoueurCombat(
+                        combat,
+                        jid
+                    )
+            )
+            .find(
+                Boolean
+            ) ??
+        null
+    );
+}
+
+
+//==============================================================
+// 📏 VÉRIFICATION DE PORTÉE
+//==============================================================
+
+function verifierPorteeArbitre({
+
+    joueur,
+
+    cible,
+
+    action
+
+} = {}) {
+
+
+    if (
+        !joueur ||
+        !cible ||
+        !action
+    ) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "Données insuffisantes."
+        };
+    }
+
+
+    const distance =
+        calculerDistanceCombat(
+            joueur,
+            cible
+        );
+
+
+    const portee =
+        obtenirPorteeActionCombat(
+            action.type
+        );
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.DEPLACEMENT
+    ) {
+
+        return {
+
+            valide: true,
+
+            distance,
+
+            portee
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        return {
+
+            valide: true,
+
+            distance,
+
+            portee
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ ATTAQUE
+    //----------------------------------------------------------
+
+    if (
+        distance > portee
+    ) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "La cible est hors de portée.",
+
+            distance,
+
+            portee
+        };
+    }
+
+
+    return {
+
+        valide: true,
+
+        distance,
+
+        portee
+    };
+}
+
+
+//==============================================================
+// 🧍 VÉRIFIER LA CIBLE
+//==============================================================
+
+function verifierCibleArbitre({
+
+    joueur,
+
+    cible,
+
+    action
+
+} = {}) {
+
+
+    if (!cible) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "Aucune cible valide."
+        };
+    }
+
+
+    if (
+        cible.etat ===
+        ETATS_COMBAT_ALLSTARS.MORT
+    ) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "La cible est morte."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🦴 MEMBRE CIBLÉ
+    //----------------------------------------------------------
+
+    const membre =
+        action?.cible;
+
+
+    if (
+        membre ===
+        CIBLES_COMBAT_ALLSTARS.BRAS_DROIT
+    ) {
+
+        if (
+            cible.membres?.brasDroit
+                ?.disponible === false
+        ) {
+
+            return {
+
+                valide: false,
+
+                raison:
+                    "Le bras droit de la cible est indisponible."
+            };
+        }
+    }
+
+
+    if (
+        membre ===
+        CIBLES_COMBAT_ALLSTARS.BRAS_GAUCHE
+    ) {
+
+        if (
+            cible.membres?.brasGauche
+                ?.disponible === false
+        ) {
+
+            return {
+
+                valide: false,
+
+                raison:
+                    "Le bras gauche de la cible est indisponible."
+            };
+        }
+    }
+
+
+    if (
+        membre ===
+        CIBLES_COMBAT_ALLSTARS.JAMBE_DROITE
+    ) {
+
+        if (
+            cible.membres?.jambeDroite
+                ?.disponible === false
+        ) {
+
+            return {
+
+                valide: false,
+
+                raison:
+                    "La jambe droite de la cible est indisponible."
+            };
+        }
+    }
+
+
+    if (
+        membre ===
+        CIBLES_COMBAT_ALLSTARS.JAMBE_GAUCHE
+    ) {
+
+        if (
+            cible.membres?.jambeGauche
+                ?.disponible === false
+        ) {
+
+            return {
+
+                valide: false,
+
+                raison:
+                    "La jambe gauche de la cible est indisponible."
+            };
+        }
+    }
+
+
+    return {
+
+        valide: true
+    };
+}
+
+
+//==============================================================
+// 🧠 VÉRIFIER L'ÉTAT DU JOUEUR
+//==============================================================
+
+function verifierEtatArbitre(
+    joueur
+) {
+
+    if (!joueur) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            joueur
+        );
+
+
+    if (
+        !peutAgir.succes
+    ) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                peutAgir.raison
+        };
+    }
+
+
+    return {
+
+        valide: true
+    };
+}
+
+
+//==============================================================
+// 🔋 VÉRIFIER LES RESSOURCES
+//==============================================================
+
+function verifierRessourcesArbitre({
+
+    joueur,
+
+    action
+
+} = {}) {
+
+
+    if (!joueur) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    const coutStamina =
+        Number(
+            action?.coutStamina ??
+            0
+        );
+
+
+    const coutEnergie =
+        Number(
+            action?.coutEnergie ??
+            0
+        );
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    if (
+        joueur.stamina <
+        coutStamina
+    ) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "Stamina insuffisante."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚡ ÉNERGIE
+    //----------------------------------------------------------
+
+    if (
+        joueur.energie <
+        coutEnergie
+    ) {
+
+        return {
+
+            valide: false,
+
+            raison:
+                "Énergie insuffisante."
+        };
+    }
+
+
+    return {
+
+        valide: true
+    };
+}
+
+
+//==============================================================
+// 💨 CALCUL DE VITESSE RELATIVE
+//==============================================================
+
+function calculerAvantageVitesseArbitre({
+
+    attaquant,
+
+    defenseur
+
+} = {}) {
+
+
+    const profilAttaquant =
+        creerProfilCombat(
+            attaquant
+        );
+
+
+    const profilDefenseur =
+        creerProfilCombat(
+            defenseur
+        );
+
+
+    const vitesseA =
+        profilAttaquant
+            .vitesseEffective;
+
+
+    const vitesseD =
+        profilDefenseur
+            .vitesseEffective;
+
+
+    if (
+        vitesseA <= 0 &&
+        vitesseD <= 0
+    ) {
+
+        return {
+
+            attaquant: 0,
+
+            defenseur: 0,
+
+            difference: 0
+        };
+    }
+
+
+    const total =
+        Math.max(
+            1,
+            vitesseA +
+            vitesseD
+        );
+
+
+    return {
+
+        attaquant:
+            vitesseA /
+            total,
+
+        defenseur:
+            vitesseD /
+            total,
+
+        difference:
+            vitesseA -
+            vitesseD
+    };
+}
+
+
+//==============================================================
+// 🧠 CALCULER LA PROBABILITÉ D'ESQUIVE
+//==============================================================
+
+function calculerChanceEsquiveArbitre({
+
+    attaquant,
+
+    defenseur,
+
+    action
+
+} = {}) {
+
+
+    if (
+        !attaquant ||
+        !defenseur
+    ) {
+
+        return 0;
+    }
+
+
+    const vitesse =
+        calculerAvantageVitesseArbitre({
+
+            attaquant:
+                defenseur,
+
+            defenseur:
+                attaquant
+        });
+
+
+    //----------------------------------------------------------
+    // 🎯 BASE
+    //----------------------------------------------------------
+
+    let chance =
+        0.20;
+
+
+    //----------------------------------------------------------
+    // 💨 VITESSE
+    //----------------------------------------------------------
+
+    chance +=
+        vitesse.attaquant *
+        0.35;
+
+
+    //----------------------------------------------------------
+    // 🧠 RÉFLEXES
+    //----------------------------------------------------------
+
+    const profil =
+        calculerCapacitesCombat(
+            defenseur
+        );
+
+
+    chance +=
+        (
+            profil.reflexes /
+            100
+        ) * 0.25;
+
+
+    //----------------------------------------------------------
+    // 🐌 RALENTI
+    //----------------------------------------------------------
+
+    if (
+        joueurPossedeEffetCombat(
+            defenseur,
+            EFFETS_COMBAT_ALLSTARS.RALENTI
+        )
+    ) {
+
+        chance -= 0.15;
+    }
+
+
+    //----------------------------------------------------------
+    // 😵 DÉSORIENTÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurPossedeEffetCombat(
+            defenseur,
+            EFFETS_COMBAT_ALLSTARS.DESORIENTE
+        )
+    ) {
+
+        chance -= 0.20;
+    }
+
+
+    //----------------------------------------------------------
+    // 📏 DISTANCE
+    //----------------------------------------------------------
+
+    const distance =
+        calculerDistanceCombat(
+            attaquant,
+            defenseur
+        );
+
+
+    if (
+        distance <= 1
+    ) {
+
+        chance -= 0.05;
+    }
+
+
+    return Math.max(
+        0.05,
+        Math.min(
+            0.80,
+            chance
+        )
+    );
+}
+
+
+//==============================================================
+// 🎲 TIRAGE DÉTERMINISTE / PROBABILISTE
+//==============================================================
+// Utilise Math.random uniquement pour le résultat final.
+// L'arbitre conserve toutes les raisons de sa décision.
+//==============================================================
+
+function tirageArbitre(
+    chance
+) {
+
+    return Math.random() <
+        Math.max(
+            0,
+            Math.min(
+                1,
+                chance
+            )
+        );
+}
+
+
+//==============================================================
+// ⚔️ RÉSOLUTION D'UNE ATTAQUE
+//==============================================================
+
+function arbitrerAttaqueCombat({
+
+    combat,
+
+    attaquant,
+
+    defenseur,
+
+    action
+
+} = {}) {
+
+
+    //----------------------------------------------------------
+    // 📏 PORTÉE
+    //----------------------------------------------------------
+
+    const portee =
+        verifierPorteeArbitre({
+
+            joueur:
+                attaquant,
+
+            cible:
+                defenseur,
+
+            action
+        });
+
+
+    if (
+        !portee.valide
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.IMPOSSIBLE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.IMPOSSIBLE,
+
+            succes: false,
+
+            raison:
+                portee.raison,
+
+            distance:
+                portee.distance
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 CIBLE
+    //----------------------------------------------------------
+
+    const cible =
+        verifierCibleArbitre({
+
+            joueur:
+                attaquant,
+
+            cible:
+                defenseur,
+
+            action
+        });
+
+
+    if (
+        !cible.valide
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                cible.raison
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 ÉTAT
+    //----------------------------------------------------------
+
+    const etat =
+        verifierEtatArbitre(
+            attaquant
+        );
+
+
+    if (
+        !etat.valide
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                etat.raison
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ ACTION DÉFENSIVE ADVERSE
+    //----------------------------------------------------------
+
+    const actionDefense =
+        defenseur.actionEnCours;
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        actionDefense?.type ===
+        ACTIONS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        const chance =
+            calculerChanceEsquiveArbitre({
+
+                attaquant,
+
+                defenseur,
+
+                action
+            });
+
+
+        const esquive =
+            tirageArbitre(
+                chance
+            );
+
+
+        if (
+            esquive
+        ) {
+
+            defenseur.statistiques
+                .esquives++;
+
+
+            return {
+
+                decision:
+                    DECISIONS_ARBITRE_ALLSTARS.ESQUIVEE,
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS.ESQUIVE,
+
+                succes: false,
+
+                raison:
+                    "La cible a réussi son esquive.",
+
+                chanceEsquive:
+                    chance
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ BLOCAGE
+    //----------------------------------------------------------
+
+    if (
+        actionDefense?.type ===
+        ACTIONS_COMBAT_ALLSTARS.DEFENSE
+    ) {
+
+        const defense =
+            calculerDefenseEffectiveCombat(
+                defenseur
+            );
+
+
+        const attaque =
+            calculerPuissanceAttaqueCombat(
+                attaquant
+            );
+
+
+        const ratio =
+            attaque /
+            Math.max(
+                1,
+                attaque +
+                defense
+            );
+
+
+        if (
+            tirageArbitre(
+                0.35 +
+                ratio * 0.30
+            ) === false
+        ) {
+
+            defenseur.statistiques
+                .blocages++;
+
+
+            return {
+
+                decision:
+                    DECISIONS_ARBITRE_ALLSTARS.BLOQUEE,
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS.BLOQUE,
+
+                succes: false,
+
+                raison:
+                    "L'attaque a été bloquée.",
+
+                attaque,
+
+                defense
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        actionDefense?.type ===
+        ACTIONS_COMBAT_ALLSTARS.CONTRE
+    ) {
+
+        const vitesse =
+            calculerAvantageVitesseArbitre({
+
+                attaquant:
+                    defenseur,
+
+                defenseur:
+                    attaquant
+            });
+
+
+        if (
+            tirageArbitre(
+                0.35 +
+                vitesse.attaquant *
+                0.35
+            )
+        ) {
+
+            defenseur.statistiques
+                .contres++;
+
+
+            return {
+
+                decision:
+                    DECISIONS_ARBITRE_ALLSTARS.CONTREE,
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS.CONTRE,
+
+                succes: false,
+
+                raison:
+                    "L'attaque a été contrée."
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 💥 IMPACT
+    //----------------------------------------------------------
+
+    const puissance =
+        calculerPuissanceAttaqueCombat(
+            attaquant
+        );
+
+
+    const defense =
+        calculerDefenseEffectiveCombat(
+            defenseur
+        );
+
+
+    //----------------------------------------------------------
+    // 📊 DÉGÂTS
+    //----------------------------------------------------------
+
+    let degats =
+
+        obtenirDegatsBaseActionCombat(
+            action.details
+                ?.typeAttaque ??
+            action.type
+        );
+
+
+    degats +=
+        puissance * 0.20;
+
+
+    degats -=
+        defense * 0.10;
+
+
+    //----------------------------------------------------------
+    // 💪 PUISSANCE DÉCLARÉE
+    //----------------------------------------------------------
+
+    if (
+        action.details
+            ?.puissanceDeclaree
+    ) {
+
+        degats *= 1.15;
+    }
+
+
+    degats =
+        Math.max(
+            1,
+            Math.round(
+                degats
+            )
+        );
+
+
+    //----------------------------------------------------------
+    // ❤️ APPLICATION
+    //----------------------------------------------------------
+
+    const resultatDegats =
+        appliquerDegatsCombat(
+
+            defenseur,
+
+            degats,
+
+            attaquant.jid
+        );
+
+
+    attaquant.statistiques
+        .coupsPortes++;
+
+
+    //----------------------------------------------------------
+    // 🩸 RÉDUCTION / KO
+    //----------------------------------------------------------
+
+    return {
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.IMPACT,
+
+        succes: true,
+
+        raison:
+            "L'attaque a atteint sa cible.",
+
+        degats:
+            resultatDegats,
+
+        puissance,
+
+        defense,
+
+        distance:
+            portee.distance
+    };
+}
+
+
+//==============================================================
+// 🏃 ARBITRER UN DÉPLACEMENT
+//==============================================================
+
+function arbitrerDeplacementCombat({
+
+    combat,
+
+    joueur,
+
+    cible,
+
+    action
+
+} = {}) {
+
+
+    const intensite =
+        action.details
+            ?.intensite ??
+        "normal";
+
+
+    //----------------------------------------------------------
+    // 📏 DISTANCE DEMANDÉE
+    //----------------------------------------------------------
+
+    const distanceActuelle =
+        cible
+            ? calculerDistanceCombat(
+                joueur,
+                cible
+            )
+            : 0;
+
+
+    //----------------------------------------------------------
+    // 💨 VITESSE
+    //----------------------------------------------------------
+
+    const profil =
+        creerProfilCombat(
+            joueur
+        );
+
+
+    let distanceDeplacement =
+        Math.max(
+            1,
+            profil.vitesseEffective /
+            10
+        );
+
+
+    if (
+        intensite ===
+        "rapide"
+    ) {
+
+        distanceDeplacement *=
+            1.5;
+    }
+
+
+    if (
+        intensite ===
+        "lent"
+    ) {
+
+        distanceDeplacement *=
+            0.5;
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 VERS LA CIBLE
+    //----------------------------------------------------------
+
+    if (
+        cible &&
+        action.direction ===
+        DIRECTIONS_COMBAT_ALLSTARS.AVANT
+    ) {
+
+        const dx =
+            cible.position.x -
+            joueur.position.x;
+
+
+        const dy =
+            cible.position.y -
+            joueur.position.y;
+
+
+        const dz =
+            cible.position.z -
+            joueur.position.z;
+
+
+        const longueur =
+            Math.sqrt(
+                dx * dx +
+                dy * dy +
+                dz * dz
+            );
+
+
+        if (
+            longueur > 0
+        ) {
+
+            const ratio =
+                Math.min(
+                    1,
+                    distanceDeplacement /
+                    longueur
+                );
+
+
+            joueur.position.x +=
+                dx * ratio;
+
+
+            joueur.position.y +=
+                dy * ratio;
+
+
+            joueur.position.z +=
+                dz * ratio;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    const cout =
+        Math.max(
+            1,
+            Math.round(
+                distanceDeplacement *
+                (
+                    intensite ===
+                    "rapide"
+                        ? 2
+                        : 1
+                )
+            )
+        );
+
+
+    const stamina =
+        consommerStaminaCombat(
+            joueur,
+            cout
+        );
+
+
+    if (
+        !stamina.succes
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                "Stamina insuffisante pour le déplacement."
+        };
+    }
+
+
+    return {
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.DEPLACEMENT,
+
+        succes: true,
+
+        distanceParcourue:
+            distanceDeplacement,
+
+        distanceAvant:
+            distanceActuelle,
+
+        distanceApres:
+            cible
+                ? calculerDistanceCombat(
+                    joueur,
+                    cible
+                )
+                : null,
+
+        stamina
+    };
+}
+
+
+//==============================================================
+// 💨 ARBITRER UNE ESQUIVE
+//==============================================================
+
+function arbitrerEsquiveCombat({
+
+    joueur,
+
+    cible,
+
+    action
+
+} = {}) {
+
+
+    const profil =
+        creerProfilCombat(
+            joueur
+        );
+
+
+    const intensite =
+        action.details
+            ?.intensite ??
+        "normal";
+
+
+    let cout =
+        4;
+
+
+    if (
+        intensite ===
+        "rapide"
+    ) {
+
+        cout = 7;
+    }
+
+
+    if (
+        intensite ===
+        "lent"
+    ) {
+
+        cout = 2;
+    }
+
+
+    const stamina =
+        consommerStaminaCombat(
+            joueur,
+            cout
+        );
+
+
+    if (
+        !stamina.succes
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                "Stamina insuffisante pour esquiver."
+        };
+    }
+
+
+    joueur.actionEnCours = {
+
+        type:
+            ACTIONS_COMBAT_ALLSTARS.ESQUIVE,
+
+        direction:
+            action.direction,
+
+        intensite,
+
+        vitesse:
+            profil.vitesseEffective
+    };
+
+
+    return {
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.ESQUIVE,
+
+        succes: true,
+
+        stamina
+    };
+}
+
+
+//==============================================================
+// 🛡️ ARBITRER UNE DÉFENSE
+//==============================================================
+
+function arbitrerDefenseCombat({
+
+    joueur,
+
+    action
+
+} = {}) {
+
+
+    const cout =
+        3;
+
+
+    const stamina =
+        consommerStaminaCombat(
+            joueur,
+            cout
+        );
+
+
+    if (
+        !stamina.succes
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                "Stamina insuffisante."
+        };
+    }
+
+
+    joueur.actionEnCours = {
+
+        type:
+            ACTIONS_COMBAT_ALLSTARS.DEFENSE,
+
+        sousType:
+            action.details?.mode ??
+            "blocage",
+
+        actif: true
+    };
+
+
+    return {
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.BLOQUE,
+
+        succes: true,
+
+        stamina
+    };
+}
+
+
+//==============================================================
+// 🤼 ARBITRER UNE SAISIE
+//==============================================================
+
+function arbitrerSaisieCombat({
+
+    attaquant,
+
+    defenseur,
+
+    action
+
+} = {}) {
+
+
+    const distance =
+        calculerDistanceCombat(
+            attaquant,
+            defenseur
+        );
+
+
+    //----------------------------------------------------------
+    // 📏 DISTANCE
+    //----------------------------------------------------------
+
+    if (
+        distance >
+        obtenirPorteeActionCombat(
+            ACTIONS_COMBAT_ALLSTARS.SAISIE
+        )
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.IMPOSSIBLE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.IMPOSSIBLE,
+
+            succes: false,
+
+            raison:
+                "La cible est trop éloignée pour une saisie."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    const stamina =
+        consommerStaminaCombat(
+            attaquant,
+            5
+        );
+
+
+    if (
+        !stamina.succes
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                "Stamina insuffisante."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💪 FORCE
+    //----------------------------------------------------------
+
+    const forceA =
+        calculerCapacitesCombat(
+            attaquant
+        ).force;
+
+
+    const forceD =
+        calculerCapacitesCombat(
+            defenseur
+        ).force;
+
+
+    const chance =
+        0.35 +
+        (
+            forceA /
+            Math.max(
+                1,
+                forceA +
+                forceD
+            )
+        ) * 0.40;
+
+
+    if (
+        !tirageArbitre(
+            chance
+        )
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                "La cible résiste à la saisie.",
+
+            chance
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧊 IMMOBILISATION
+    //----------------------------------------------------------
+
+    ajouterEffetCombat({
+
+        joueur:
+            defenseur,
+
+        type:
+            EFFETS_COMBAT_ALLSTARS.IMMOBILISE,
+
+        duree:
+            1,
+
+        puissance:
+            1,
+
+        source:
+            attaquant.jid
+    });
+
+
+    attaquant.statistiques
+        .saisies++;
+
+
+    return {
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.SAISIE,
+
+        succes: true,
+
+        raison:
+            "La saisie a réussi.",
+
+        chance
+    };
+}
+
+
+//==============================================================
+// ⚡ ARBITRER UNE TECHNIQUE
+//==============================================================
+
+function arbitrerTechniqueCombat({
+
+    attaquant,
+
+    defenseur,
+
+    action
+
+} = {}) {
+
+
+    const coutEnergie =
+        Number(
+            action.coutEnergie ??
+            20
+        );
+
+
+    const energie =
+        consommerEnergieCombat(
+            attaquant,
+            coutEnergie
+        );
+
+
+    if (
+        !energie.succes
+    ) {
+
+        return {
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            succes: false,
+
+            raison:
+                "Énergie insuffisante."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💥 TECHNIQUE
+    //----------------------------------------------------------
+
+    const puissance =
+        calculerPuissanceAttaqueCombat(
+            attaquant
+        );
+
+
+    const degats =
+        Math.max(
+            1,
+            Math.round(
+                puissance *
+                0.50
+            )
+        );
+
+
+    const impact =
+        appliquerDegatsCombat(
+
+            defenseur,
+
+            degats,
+
+            attaquant.jid
+        );
+
+
+    attaquant.statistiques
+        .coupsPortes++;
+
+
+    return {
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.IMPACT,
+
+        succes: true,
+
+        degats:
+            impact,
+
+        energie
+    };
+}
+
+
+//==============================================================
+// ⚖️ ARBITRER UNE ACTION
+//==============================================================
+
+function arbitrerActionCombat({
+
+    combat,
+
+    intention,
+
+    joueur,
+
+    cible
+
+} = {}) {
+
+
+    if (
+        !intention ||
+        !joueur
+    ) {
+
+        return {
+
+            succes: false,
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.IMPOSSIBLE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.IMPOSSIBLE,
+
+            raison:
+                "Intention ou joueur manquant."
+        };
+    }
+
+
+    const action =
+        obtenirActionPrincipaleArbitre(
+            intention
+        );
+
+
+    //----------------------------------------------------------
+    // ⏳ AUCUNE ACTION
+    //----------------------------------------------------------
+
+    if (!action) {
+
+        return {
+
+            succes: true,
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ATTENTE,
+
+            action: null
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 ÉTAT
+    //----------------------------------------------------------
+
+    const etat =
+        verifierEtatArbitre(
+            joueur
+        );
+
+
+    if (
+        !etat.valide
+    ) {
+
+        return {
+
+            succes: false,
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.REFUSEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            action,
+
+            raison:
+                etat.raison
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 CIBLE AUTOMATIQUE
+    //----------------------------------------------------------
+
+    cible =
+        cible ??
+        obtenirCibleArbitre(
+            combat,
+            intention
+        );
+
+
+    //----------------------------------------------------------
+    // ⚔️ ATTAQUE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.ATTAQUE
+    ) {
+
+        return {
+
+            ...arbitrerAttaqueCombat({
+
+                combat,
+
+                attaquant:
+                    joueur,
+
+                defenseur:
+                    cible,
+
+                action
+            }),
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.DEPLACEMENT
+    ) {
+
+        return {
+
+            ...arbitrerDeplacementCombat({
+
+                combat,
+
+                joueur,
+
+                cible,
+
+                action
+            }),
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        return {
+
+            ...arbitrerEsquiveCombat({
+
+                joueur,
+
+                cible,
+
+                action
+            }),
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ DÉFENSE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.DEFENSE
+    ) {
+
+        return {
+
+            ...arbitrerDefenseCombat({
+
+                joueur,
+
+                action
+            }),
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🤼 SAISIE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.SAISIE
+    ) {
+
+        return {
+
+            ...arbitrerSaisieCombat({
+
+                attaquant:
+                    joueur,
+
+                defenseur:
+                    cible,
+
+                action
+            }),
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚡ TECHNIQUE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.TECHNIQUE
+    ) {
+
+        return {
+
+            ...arbitrerTechniqueCombat({
+
+                attaquant:
+                    joueur,
+
+                defenseur:
+                    cible,
+
+                action
+            }),
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        action.type ===
+        ACTIONS_COMBAT_ALLSTARS.CONTRE
+    ) {
+
+        joueur.actionEnCours = {
+
+            type:
+                ACTIONS_COMBAT_ALLSTARS.CONTRE,
+
+            actif: true
+        };
+
+
+        return {
+
+            succes: true,
+
+            decision:
+                DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.CONTRE,
+
+            action
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⏳ ATTENTE
+    //----------------------------------------------------------
+
+    return {
+
+        succes: true,
+
+        decision:
+            DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.ATTENTE,
+
+        action
+    };
+}
+
+
+//==============================================================
+// ⚖️ ARBITRER LES DEUX JOUEURS
+//==============================================================
+// Les deux intentions sont analysées AVANT la résolution.
+// Cela permet de prendre en compte les interactions :
+//
+// attaque VS esquive
+// attaque VS blocage
+// attaque VS contre
+// saisie VS déplacement
+// etc.
+//==============================================================
+
+function arbitrerTourCombatAllStars({
+
+    combat,
+
+    intentions = {}
+
+} = {}) {
+
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    const resultats = [];
+
+
+    //----------------------------------------------------------
+    // 👥 ORDRE DES JOUEURS
+    //----------------------------------------------------------
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        const intention =
+            intentions[jid];
+
+
+        //------------------------------------------------------
+        // ⏳ PAS D'INTENTION
+        //------------------------------------------------------
+
+        if (!intention) {
+
+            resultats.push({
+
+                jid,
+
+                succes: true,
+
+                decision:
+                    DECISIONS_ARBITRE_ALLSTARS.ACCEPTEE,
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS.ATTENTE,
+
+                action: null
+            });
+
+            continue;
+        }
+
+
+        //------------------------------------------------------
+        // 🎯 CIBLE
+        //------------------------------------------------------
+
+        const cible =
+            obtenirCibleArbitre(
+                combat,
+                intention
+            );
+
+
+        //------------------------------------------------------
+        // ⚖️ ARBITRAGE
+        //------------------------------------------------------
+
+        const resultat =
+            arbitrerActionCombat({
+
+                combat,
+
+                intention,
+
+                joueur,
+
+                cible
+            });
+
+
+        resultats.push({
+
+            jid,
+
+            ...resultat
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE
+    //----------------------------------------------------------
+
+    combat.derniereDecisionArbitre = {
+
+        tour:
+            combat.tour,
+
+        resultats,
+
+        temps:
+            combat.temps
+    };
+
+
+    combat.historique.push({
+
+        type:
+            "arbitrage",
+
+        tour:
+            combat.tour,
+
+        resultats,
+
+        temps:
+            combat.temps
+    });
+
+
+    return {
+
+        succes: true,
+
+        tour:
+            combat.tour,
+
+        resultats
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚖️ Arbitre ALL STARS chargé."
+);
+
+//==============================================================
+// ⚔️ ALL STARS — MOTEUR DE TOUR
+//==============================================================
+// Un tour représente UNE SÉQUENCE COMPLÈTE :
+//
+// 1. Joueur 1 envoie son pavé
+// 2. Joueur 2 envoie son pavé
+// 3. Les deux intentions sont interprétées
+// 4. Les deux intentions sont arbitrées
+// 5. Les actions sont résolues
+// 6. Les statistiques sont mises à jour
+// 7. Le tour est terminé
+//
+// IMPORTANT :
+// Le compteur "tour" n'augmente QU'APRÈS la résolution des
+// deux joueurs.
+//
+// À 10 tours terminés → décision finale.
+//==============================================================
+
+
+//==============================================================
+// 🔢 CONFIGURATION DES TOURS
+//==============================================================
+
+const CONFIG_TOURS_ALLSTARS = {
+
+    toursMaximum: 10,
+
+    tourInitial: 0
+};
+
+
+//==============================================================
+// 🏆 CRÉATION DES DONNÉES DE DOMINATION
+//==============================================================
+
+function initialiserDominationCombat(
+    joueur
+) {
+
+    if (!joueur) {
+        return;
+    }
+
+
+    joueur.domination = {
+
+        score: 0,
+
+        attaquesReussies: 0,
+
+        attaquesRatees: 0,
+
+        esquivesReussies: 0,
+
+        blocagesReussis: 0,
+
+        contresReussis: 0,
+
+        saisiesReussies: 0,
+
+        deplacementsReussis: 0,
+
+        coupsRecus: 0,
+
+        pression: 0,
+
+        toursDomines: 0
+    };
+}
+
+
+//==============================================================
+// 🏆 INITIALISER LA DOMINATION DU COMBAT
+//==============================================================
+
+function initialiserDominationCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return;
+    }
+
+
+    for (
+        const jid of combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        if (
+            !joueur.domination
+        ) {
+
+            initialiserDominationCombat(
+                joueur
+            );
+        }
+    }
+}
+
+
+//==============================================================
+// 📊 AJOUTER DES POINTS DE DOMINATION
+//==============================================================
+
+function ajouterDominationCombat(
+    joueur,
+    points,
+    raison = null
+) {
+
+    if (!joueur) {
+        return;
+    }
+
+
+    if (
+        !joueur.domination
+    ) {
+
+        initialiserDominationCombat(
+            joueur
+        );
+    }
+
+
+    points =
+        Number(points) || 0;
+
+
+    joueur.domination.score +=
+        points;
+
+
+    //----------------------------------------------------------
+    // HISTORIQUE DE PRESSION
+    //----------------------------------------------------------
+
+    if (points > 0) {
+
+        joueur.domination.pression +=
+            points;
+    }
+
+
+    //----------------------------------------------------------
+    // ÉVÉNEMENT
+    //----------------------------------------------------------
+
+    if (
+        raison
+    ) {
+
+        joueur.domination.derniereAction =
+            raison;
+    }
+}
+
+
+//==============================================================
+// 📈 ANALYSER LA DOMINATION D'UN RÉSULTAT
+//==============================================================
+
+function analyserDominationResultatCombat({
+
+    joueur,
+
+    resultat
+
+} = {}) {
+
+
+    if (
+        !joueur ||
+        !resultat
+    ) {
+
+        return;
+    }
+
+
+    if (
+        !joueur.domination
+    ) {
+
+        initialiserDominationCombat(
+            joueur
+        );
+    }
+
+
+    const domination =
+        joueur.domination;
+
+
+    //----------------------------------------------------------
+    // 💥 COUP RÉUSSI
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.IMPACT
+    ) {
+
+        domination.attaquesReussies++;
+
+        ajouterDominationCombat(
+            joueur,
+            3,
+            "attaque réussie"
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // ❌ ATTAQUE RATÉE
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.ECHEC
+    ) {
+
+        domination.attaquesRatees++;
+
+        ajouterDominationCombat(
+            joueur,
+            -1,
+            "action échouée"
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.ESQUIVE
+    ) {
+
+        domination.esquivesReussies++;
+
+        ajouterDominationCombat(
+            joueur,
+            2,
+            "esquive réussie"
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ BLOCAGE
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.BLOQUE
+    ) {
+
+        domination.blocagesReussis++;
+
+        ajouterDominationCombat(
+            joueur,
+            2,
+            "blocage réussi"
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.CONTRE
+    ) {
+
+        domination.contresReussis++;
+
+        ajouterDominationCombat(
+            joueur,
+            4,
+            "contre réussi"
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🤼 SAISIE
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.SAISIE
+    ) {
+
+        domination.saisiesReussies++;
+
+        ajouterDominationCombat(
+            joueur,
+            3,
+            "saisie réussie"
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        resultat.resultat ===
+        RESULTATS_COMBAT_ALLSTARS.DEPLACEMENT
+    ) {
+
+        domination.deplacementsReussis++;
+
+        ajouterDominationCombat(
+            joueur,
+            1,
+            "déplacement réussi"
+        );
+    }
+}
+
+
+//==============================================================
+// ❤️ CALCULER L'AVANTAGE PV
+//==============================================================
+
+function calculerAvantagePVCombat(
+    joueurA,
+    joueurB
+) {
+
+    if (
+        !joueurA ||
+        !joueurB
+    ) {
+
+        return 0;
+    }
+
+
+    const pvA =
+        Math.max(
+            0,
+            Number(
+                joueurA.pv ?? 0
+            )
+        );
+
+
+    const pvB =
+        Math.max(
+            0,
+            Number(
+                joueurB.pv ?? 0
+            )
+        );
+
+
+    const maxA =
+        Math.max(
+            1,
+            Number(
+                joueurA.pvMax ?? 100
+            )
+        );
+
+
+    const maxB =
+        Math.max(
+            1,
+            Number(
+                joueurB.pvMax ?? 100
+            )
+        );
+
+
+    const ratioA =
+        pvA / maxA;
+
+
+    const ratioB =
+        pvB / maxB;
+
+
+    return (
+        ratioA -
+        ratioB
+    );
+}
+
+
+//==============================================================
+// 🔋 CALCULER L'AVANTAGE STAMINA
+//==============================================================
+
+function calculerAvantageStaminaCombat(
+    joueurA,
+    joueurB
+) {
+
+    if (
+        !joueurA ||
+        !joueurB
+    ) {
+
+        return 0;
+    }
+
+
+    const staminaA =
+        Math.max(
+            0,
+            Number(
+                joueurA.stamina ?? 0
+            )
+        );
+
+
+    const staminaB =
+        Math.max(
+            0,
+            Number(
+                joueurB.stamina ?? 0
+            )
+        );
+
+
+    return (
+        staminaA -
+        staminaB
+    );
+}
+
+
+//==============================================================
+// 👑 COMPARER LA DOMINATION
+//==============================================================
+
+function calculerAvantageDominationCombat(
+    joueurA,
+    joueurB
+) {
+
+    const dominationA =
+        Number(
+            joueurA?.domination?.score ??
+            0
+        );
+
+
+    const dominationB =
+        Number(
+            joueurB?.domination?.score ??
+            0
+        );
+
+
+    return (
+        dominationA -
+        dominationB
+    );
+}
+
+
+//==============================================================
+// 🧠 ÉVALUATION DU COMBAT
+//==============================================================
+// Cette fonction donne une photographie du combat.
+// Elle ne décide PAS encore définitivement du vainqueur.
+//==============================================================
+
+function evaluerCombatAllStars(
+    combat
+) {
+
+    if (
+        !combat ||
+        !combat.ordre
+    ) {
+
+        return null;
+    }
+
+
+    const joueurs =
+        combat.ordre
+            .map(
+                jid =>
+                    obtenirJoueurCombat(
+                        combat,
+                        jid
+                    )
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return null;
+    }
+
+
+    const joueurA =
+        joueurs[0];
+
+
+    const joueurB =
+        joueurs[1];
+
+
+    const avantagePV =
+        calculerAvantagePVCombat(
+            joueurA,
+            joueurB
+        );
+
+
+    const avantageStamina =
+        calculerAvantageStaminaCombat(
+            joueurA,
+            joueurB
+        );
+
+
+    const avantageDomination =
+        calculerAvantageDominationCombat(
+            joueurA,
+            joueurB
+        );
+
+
+    return {
+
+        joueurA:
+            joueurA.jid,
+
+        joueurB:
+            joueurB.jid,
+
+        avantagePV,
+
+        avantageStamina,
+
+        avantageDomination,
+
+        pv: {
+
+            [joueurA.jid]:
+                joueurA.pv,
+
+            [joueurB.jid]:
+                joueurB.pv
+        },
+
+        stamina: {
+
+            [joueurA.jid]:
+                joueurA.stamina,
+
+            [joueurB.jid]:
+                joueurB.stamina
+        },
+
+        domination: {
+
+            [joueurA.jid]:
+                joueurA.domination?.score ?? 0,
+
+            [joueurB.jid]:
+                joueurB.domination?.score ?? 0
+        }
+    };
+}
+
+
+//==============================================================
+// 👑 DÉTERMINER LE DOMINANT DU TOUR
+//==============================================================
+
+function determinerDominantTourCombat(
+    combat
+) {
+
+    const joueurs =
+        combat.ordre
+            .map(
+                jid =>
+                    obtenirJoueurCombat(
+                        combat,
+                        jid
+                    )
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return null;
+    }
+
+
+    const A =
+        joueurs[0];
+
+
+    const B =
+        joueurs[1];
+
+
+    const scoreA =
+        Number(
+            A.domination?.score ??
+            0
+        );
+
+
+    const scoreB =
+        Number(
+            B.domination?.score ??
+            0
+        );
+
+
+    if (
+        scoreA === scoreB
+    ) {
+
+        return null;
+    }
+
+
+    return scoreA > scoreB
+        ? A.jid
+        : B.jid;
+}
+
+
+//==============================================================
+// 📊 ENREGISTRER LE TOUR DOMINÉ
+//==============================================================
+
+function enregistrerDominationTourCombat(
+    combat
+) {
+
+    const dominant =
+        determinerDominantTourCombat(
+            combat
+        );
+
+
+    if (!dominant) {
+        return null;
+    }
+
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            dominant
+        );
+
+
+    if (!joueur) {
+        return null;
+    }
+
+
+    if (
+        !joueur.domination
+    ) {
+
+        initialiserDominationCombat(
+            joueur
+        );
+    }
+
+
+    joueur.domination
+        .toursDomines++;
+
+
+    return dominant;
+}
+
+
+//==============================================================
+// ⚔️ RÉSOUDRE UN TOUR COMPLET
+//==============================================================
+
+async function resoudreTourCombatAllStars({
+
+    combat,
+
+    intentions = {}
+
+} = {}) {
+
+
+    //----------------------------------------------------------
+    // 🛑 COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        !combat
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le combat est déjà terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 INITIALISATION DOMINATION
+    //----------------------------------------------------------
+
+    initialiserDominationCombatAllStars(
+        combat
+    );
+
+
+    //----------------------------------------------------------
+    // ⚖️ ARBITRAGE SIMULTANÉ
+    //----------------------------------------------------------
+
+    const arbitrage =
+        arbitrerTourCombatAllStars({
+
+            combat,
+
+            intentions
+        });
+
+
+    if (
+        !arbitrage.succes
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Impossible d'arbitrer le tour."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📊 ANALYSE DES RÉSULTATS
+    //----------------------------------------------------------
+
+    for (
+        const resultat of
+        arbitrage.resultats
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                resultat.jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        analyserDominationResultatCombat({
+
+            joueur,
+
+            resultat
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 👑 DOMINATION DU TOUR
+    //----------------------------------------------------------
+
+    const dominantTour =
+        enregistrerDominationTourCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 🔢 LE TOUR EST MAINTENANT TERMINÉ
+    //----------------------------------------------------------
+    // C'est ici et seulement ici que le compteur augmente.
+    //----------------------------------------------------------
+
+    combat.tour++;
+
+    combat.sequence++;
+
+
+    //----------------------------------------------------------
+    // 📸 ÉVALUATION
+    //----------------------------------------------------------
+
+    const evaluation =
+        evaluerCombatAllStars(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE
+    //----------------------------------------------------------
+
+    combat.historique.push({
+
+        type:
+            "fin_tour",
+
+        tour:
+            combat.tour,
+
+        dominant:
+            dominantTour,
+
+        evaluation,
+
+        resultats:
+            arbitrage.resultats,
+
+        temps:
+            combat.temps
+    });
+
+
+    //----------------------------------------------------------
+    // ☠️ VÉRIFICATION KO / MORT
+    //----------------------------------------------------------
+
+    const finImmediate =
+        verifierFinCombatAllStars(
+            combat
+        );
+
+
+    if (
+        finImmediate.termine
+    ) {
+
+        return terminerCombatAllStars({
+
+            combat,
+
+            raison:
+                finImmediate.raison,
+
+            type:
+                "ko"
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // ⏱️ LIMITE DES 10 TOURS
+    //----------------------------------------------------------
+
+    if (
+        combat.tour >=
+        CONFIG_TOURS_ALLSTARS.toursMaximum
+    ) {
+
+        return terminerCombatAllStars({
+
+            combat,
+
+            raison:
+                "Les 10 tours sont terminés.",
+
+            type:
+                "decision"
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 TOUR SUIVANT
+    //----------------------------------------------------------
+
+    for (
+        const jid of
+        combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        joueur.actionEnCours =
+            null;
+
+        joueur.cibleActuelle =
+            joueur.cibleActuelle ??
+            combat.ordre.find(
+                id =>
+                    id !== jid
+            );
+    }
+
+
+    return {
+
+        succes: true,
+
+        termine: false,
+
+        tourTermine:
+            combat.tour,
+
+        prochainTour:
+            combat.tour + 1,
+
+        arbitrage,
+
+        dominantTour,
+
+        evaluation
+    };
+}
+
+
+//==============================================================
+// ☠️ VÉRIFIER SI LE COMBAT DOIT S'ARRÊTER
+//==============================================================
+
+function verifierFinCombatAllStars(
+    combat
+) {
+
+    for (
+        const jid of
+        combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        if (
+            joueur.etat ===
+            ETATS_COMBAT_ALLSTARS.MORT
+        ) {
+
+            return {
+
+                termine: true,
+
+                raison:
+                    "Un joueur est mort."
+            };
+        }
+
+
+        if (
+            joueur.pv <= 0
+        ) {
+
+            joueur.pv = 0;
+
+            joueur.etat =
+                ETATS_COMBAT_ALLSTARS.KO;
+
+
+            return {
+
+                termine: true,
+
+                raison:
+                    "Un joueur est KO."
+            };
+        }
+    }
+
+
+    return {
+
+        termine: false
+    };
+}
+
+
+//==============================================================
+// 🏆 SCORE FINAL
+//==============================================================
+// IMPORTANT :
+// On compare séparément les 3 critères.
+//
+// 1️⃣ PV
+// 2️⃣ STAMINA
+// 3️⃣ DOMINATION
+//
+// Le critère suivant ne sert que si le précédent est égal.
+//==============================================================
+
+function calculerDecisionFinaleAllStars(
+    combat
+) {
+
+    const joueurs =
+        combat.ordre
+            .map(
+                jid =>
+                    obtenirJoueurCombat(
+                        combat,
+                        jid
+                    )
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return {
+
+            vainqueur: null,
+
+            egalite: true,
+
+            raison:
+                "Impossible de déterminer un vainqueur."
+        };
+    }
+
+
+    const A =
+        joueurs[0];
+
+
+    const B =
+        joueurs[1];
+
+
+    //----------------------------------------------------------
+    // ❤️ PV
+    //----------------------------------------------------------
+
+    const pvA =
+        A.pv /
+        Math.max(
+            1,
+            A.pvMax
+        );
+
+
+    const pvB =
+        B.pv /
+        Math.max(
+            1,
+            B.pvMax
+        );
+
+
+    if (
+        pvA !== pvB
+    ) {
+
+        return {
+
+            vainqueur:
+                pvA > pvB
+                    ? A.jid
+                    : B.jid,
+
+            egalite: false,
+
+            critere:
+                "pv",
+
+            raison:
+                "Le joueur possède le meilleur pourcentage de PV restants."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    const staminaA =
+        Number(
+            A.stamina ?? 0
+        );
+
+
+    const staminaB =
+        Number(
+            B.stamina ?? 0
+        );
+
+
+    if (
+        staminaA !== staminaB
+    ) {
+
+        return {
+
+            vainqueur:
+                staminaA > staminaB
+                    ? A.jid
+                    : B.jid,
+
+            egalite: false,
+
+            critere:
+                "stamina",
+
+            raison:
+                "Les PV sont égaux ; le joueur possède davantage de stamina."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 👑 DOMINATION
+    //----------------------------------------------------------
+
+    const dominationA =
+        Number(
+            A.domination?.score ??
+            0
+        );
+
+
+    const dominationB =
+        Number(
+            B.domination?.score ??
+            0
+        );
+
+
+    if (
+        dominationA !== dominationB
+    ) {
+
+        return {
+
+            vainqueur:
+                dominationA >
+                dominationB
+                    ? A.jid
+                    : B.jid,
+
+            egalite: false,
+
+            critere:
+                "domination",
+
+            raison:
+                "Les PV et la stamina sont égaux ; le joueur ayant le plus dominé le combat l'emporte."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🤝 ÉGALITÉ
+    //----------------------------------------------------------
+
+    return {
+
+        vainqueur: null,
+
+        egalite: true,
+
+        critere:
+            "egalite",
+
+        raison:
+            "Les deux combattants sont parfaitement à égalité."
+    };
+}
+
+
+//==============================================================
+// 🏁 TERMINER LE COMBAT
+//==============================================================
+
+function terminerCombatAllStars({
+
+    combat,
+
+    raison = "Combat terminé.",
+
+    type = "decision"
+
+} = {}) {
+
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛑 ÉVITER DOUBLE TERMINAISON
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: true,
+
+            dejaTermine: true,
+
+            decision:
+                combat.decisionFinale
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 PHASE
+    //----------------------------------------------------------
+
+    combat.phase =
+        "termine";
+
+
+    //----------------------------------------------------------
+    // 🏆 DÉCISION
+    //----------------------------------------------------------
+
+    const decision =
+        calculerDecisionFinaleAllStars(
+            combat
+        );
+
+
+    combat.decisionFinale = {
+
+        type,
+
+        raison,
+
+        tour:
+            combat.tour,
+
+        vainqueur:
+            decision.vainqueur,
+
+        egalite:
+            decision.egalite,
+
+        critere:
+            decision.critere,
+
+        explication:
+            decision.raison,
+
+        evaluation:
+            evaluerCombatAllStars(
+                combat
+            )
+    };
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE
+    //----------------------------------------------------------
+
+    combat.historique.push({
+
+        type:
+            "fin_combat",
+
+        tour:
+            combat.tour,
+
+        decision:
+            combat.decisionFinale,
+
+        temps:
+            combat.temps
+    });
+
+
+    return {
+
+        succes: true,
+
+        termine: true,
+
+        decision:
+            combat.decisionFinale
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Moteur de tours ALL STARS chargé."
+);
+
+//==============================================================
+// ⚔️ ALL STARS — RÉSOLUTION DES ACTIONS
+//==============================================================
+// Ce module transforme les intentions arbitrées en conséquences
+// réelles dans l'état du combat.
+//
+// Exemple :
+//
+// Joueur 1 → attaque
+// Joueur 2 → esquive
+//
+//              ↓
+//
+// Résolution
+//
+//              ↓
+//
+// Joueur 2 esquive
+// Joueur 1 consomme sa stamina
+// statistiques mises à jour
+// domination mise à jour
+// historique enregistré
+//
+//==============================================================
+
+
+//==============================================================
+// 🎯 TYPES DE RÉSULTATS
+//==============================================================
+
+const RESULTATS_COMBAT_ALLSTARS = {
+
+    IMPACT: "impact",
+
+    ECHEC: "echec",
+
+    ESQUIVE: "esquive",
+
+    BLOQUE: "bloque",
+
+    CONTRE: "contre",
+
+    SAISIE: "saisie",
+
+    DEPLACEMENT: "deplacement",
+
+    INTERROMPU: "interrompu",
+
+    INVALIDE: "invalide"
+};
+
+
+//==============================================================
+// 🧍 OBTENIR UN JOUEUR
+//==============================================================
+
+function obtenirJoueurCombat(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !jid
+    ) {
+        return null;
+    }
+
+
+    return combat.joueurs?.[jid] ??
+        null;
+}
+
+
+//==============================================================
+// 🎯 OBTENIR L'ADVERSAIRE
+//==============================================================
+
+function obtenirAdversaireCombat(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !jid
+    ) {
+        return null;
+    }
+
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+        return null;
+    }
+
+
+    const adversaireJid =
+        combat.ordre.find(
+            id =>
+                id !== jid
+        );
+
+
+    return obtenirJoueurCombat(
+        combat,
+        adversaireJid
+    );
+}
+
+
+//==============================================================
+// 🧠 NORMALISATION D'UNE ACTION
+//==============================================================
+
+function normaliserActionCombat(
+    action
+) {
+
+    if (!action) {
+
+        return {
+
+            type: "attendre",
+
+            cible: null,
+
+            puissance: 0,
+
+            coutStamina: 0,
+
+            coutEnergie: 0,
+
+            donnees: {}
+        };
+    }
+
+
+    if (
+        typeof action ===
+        "string"
+    ) {
+
+        return {
+
+            type:
+                action
+                .toLowerCase()
+                .trim(),
+
+            cible: null,
+
+            puissance: 0,
+
+            coutStamina: 0,
+
+            coutEnergie: 0,
+
+            donnees: {}
+        };
+    }
+
+
+    return {
+
+        type:
+            String(
+                action.type ??
+                action.action ??
+                "attendre"
+            )
+            .toLowerCase()
+            .trim(),
+
+        cible:
+            action.cible ??
+            null,
+
+        puissance:
+            Number(
+                action.puissance ??
+                action.power ??
+                0
+            ),
+
+        coutStamina:
+            Number(
+                action.coutStamina ??
+                action.stamina ??
+                0
+            ),
+
+        coutEnergie:
+            Number(
+                action.coutEnergie ??
+                action.energie ??
+                0
+            ),
+
+        donnees:
+            action.donnees ??
+            action
+    };
+}
+
+
+//==============================================================
+// 🏃 ACTIONS QUI NÉCESSITENT DE LA STAMINA
+//==============================================================
+
+function actionNecessiteStamina(
+    action
+) {
+
+    const types = [
+
+        "attaque",
+
+        "frappe",
+
+        "coup",
+
+        "esquive",
+
+        "blocage",
+
+        "defense",
+
+        "contre",
+
+        "saisie",
+
+        "projection",
+
+        "course",
+
+        "sprint",
+
+        "deplacement",
+
+        "dash",
+
+        "charge"
+    ];
+
+
+    return types.includes(
+        action.type
+    );
+}
+
+
+//==============================================================
+// ⚡ ACTIONS QUI NÉCESSITENT DE L'ÉNERGIE
+//==============================================================
+
+function actionNecessiteEnergie(
+    action
+) {
+
+    const types = [
+
+        "technique",
+
+        "special",
+
+        "attaque_speciale",
+
+        "pouvoir",
+
+        "ultime"
+    ];
+
+
+    return types.includes(
+        action.type
+    );
+}
+
+
+//==============================================================
+// 💰 CONSOMMATION DES RESSOURCES
+//==============================================================
+
+function appliquerCoutsActionCombat(
+    joueur,
+    action
+) {
+
+    if (
+        !joueur ||
+        !action
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur ou action introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔋 STAMINA
+    //----------------------------------------------------------
+
+    if (
+        action.coutStamina > 0
+    ) {
+
+        const resultat =
+            consommerStaminaCombat(
+                joueur,
+                action.coutStamina
+            );
+
+
+        if (
+            !resultat.succes
+        ) {
+
+            return {
+
+                succes: false,
+
+                raison:
+                    resultat.raison,
+
+                type:
+                    "stamina"
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // ⚡ ÉNERGIE
+    //----------------------------------------------------------
+
+    if (
+        action.coutEnergie > 0
+    ) {
+
+        const resultat =
+            consommerEnergieCombat(
+                joueur,
+                action.coutEnergie
+            );
+
+
+        if (
+            !resultat.succes
+        ) {
+
+            return {
+
+                succes: false,
+
+                raison:
+                    resultat.raison,
+
+                type:
+                    "energie"
+            };
+        }
+    }
+
+
+    return {
+
+        succes: true
+    };
+}
+
+
+//==============================================================
+// 📏 VÉRIFIER LA PORTÉE
+//==============================================================
+
+function verifierPorteeActionCombat({
+
+    attaquant,
+
+    cible,
+
+    action
+
+} = {}) {
+
+
+    if (
+        !attaquant ||
+        !cible ||
+        !action
+    ) {
+
+        return false;
+    }
+
+
+    const distance =
+        calculerDistanceCombat(
+            attaquant,
+            cible
+        );
+
+
+    //----------------------------------------------------------
+    // 👊 CORPS À CORPS
+    //----------------------------------------------------------
+
+    if (
+        [
+            "attaque",
+            "frappe",
+            "coup",
+            "saisie",
+            "projection",
+            "contre",
+            "blocage"
+        ].includes(
+            action.type
+        )
+    ) {
+
+        const portee =
+            Number(
+                action.donnees?.portee ??
+                REGLES_COMBAT_ALLSTARS
+                    .corpsACorps
+                    .zoneEffetAttaqueFrontale
+            );
+
+
+        return distance <= portee;
+    }
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        [
+            "deplacement",
+            "course",
+            "sprint",
+            "dash",
+            "charge"
+        ].includes(
+            action.type
+        )
+    ) {
+
+        return true;
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 DISTANCE
+    //----------------------------------------------------------
+
+    return true;
+}
+
+
+//==============================================================
+// 💥 CALCUL DES DÉGÂTS
+//==============================================================
+
+function calculerDegatsCombat({
+
+    attaquant,
+
+    cible,
+
+    action
+
+} = {}) {
+
+
+    if (
+        !attaquant ||
+        !cible ||
+        !action
+    ) {
+
+        return 0;
+    }
+
+
+    let degats =
+        Number(
+            action.donnees?.degats ??
+            action.donnees?.damage ??
+            action.puissance ??
+            0
+        );
+
+
+    //----------------------------------------------------------
+    // ⚔️ BONUS DE PUISSANCE
+    //----------------------------------------------------------
+
+    if (
+        action.donnees?.multiplicateur
+    ) {
+
+        degats *=
+            Number(
+                action.donnees.multiplicateur
+            );
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 BONUS DE DOMINATION
+    //----------------------------------------------------------
+
+    const domination =
+        Number(
+            attaquant.domination?.score ??
+            0
+        );
+
+
+    if (
+        domination > 0
+    ) {
+
+        const bonus =
+            Math.min(
+                0.25,
+                domination / 1000
+            );
+
+
+        degats *=
+            1 + bonus;
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ MINIMUM
+    //----------------------------------------------------------
+
+    return Math.max(
+        0,
+        Math.round(
+            degats
+        )
+    );
+}
+
+
+//==============================================================
+// 💥 RÉSOLUTION D'UNE ATTAQUE
+//==============================================================
+
+function resoudreAttaqueCombat({
+
+    attaquant,
+
+    defenseur,
+
+    actionAttaquant,
+
+    actionDefenseur
+
+} = {}) {
+
+
+    //----------------------------------------------------------
+    // 📏 PORTÉE
+    //----------------------------------------------------------
+
+    if (
+        !verifierPorteeActionCombat({
+
+            attaquant,
+
+            cible:
+                defenseur,
+
+            action:
+                actionAttaquant
+
+        })
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            raison:
+                "La cible est hors de portée.",
+
+            degats: 0
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        [
+            "esquive",
+            "dash",
+            "deplacement"
+        ].includes(
+            actionDefenseur.type
+        )
+    ) {
+
+        defenseur.statistiques.esquives++;
+
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ESQUIVE,
+
+            attaquant:
+                attaquant.jid,
+
+            defenseur:
+                defenseur.jid,
+
+            degats: 0,
+
+            raison:
+                "L'attaque a été évitée."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛡️ BLOCAGE
+    //----------------------------------------------------------
+
+    if (
+        [
+            "blocage",
+            "defense",
+            "garde"
+        ].includes(
+            actionDefenseur.type
+        )
+    ) {
+
+        defenseur.statistiques.blocages++;
+
+
+        const degats =
+            Math.floor(
+                calculerDegatsCombat({
+
+                    attaquant,
+
+                    cible:
+                        defenseur,
+
+                    action:
+                        actionAttaquant
+
+                }) * 0.25
+            );
+
+
+        if (
+            degats > 0
+        ) {
+
+            appliquerDegatsCombat(
+                defenseur,
+                degats,
+                attaquant.jid
+            );
+        }
+
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.BLOQUE,
+
+            attaquant:
+                attaquant.jid,
+
+            defenseur:
+                defenseur.jid,
+
+            degats,
+
+            raison:
+                "L'attaque a été bloquée."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 CONTRE
+    //----------------------------------------------------------
+
+    if (
+        actionDefenseur.type ===
+        "contre"
+    ) {
+
+        defenseur.statistiques.contres++;
+
+
+        const degats =
+            calculerDegatsCombat({
+
+                attaquant:
+                    defenseur,
+
+                cible:
+                    attaquant,
+
+                action:
+                    actionDefenseur
+
+            });
+
+
+        if (
+            degats > 0
+        ) {
+
+            appliquerDegatsCombat(
+                attaquant,
+                degats,
+                defenseur.jid
+            );
+        }
+
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.CONTRE,
+
+            attaquant:
+                defenseur.jid,
+
+            defenseur:
+                attaquant.jid,
+
+            degats,
+
+            raison:
+                "Le défenseur a retourné l'attaque."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 💥 IMPACT
+    //----------------------------------------------------------
+
+    const degats =
+        calculerDegatsCombat({
+
+            attaquant,
+
+            cible:
+                defenseur,
+
+            action:
+                actionAttaquant
+
+        });
+
+
+    if (
+        degats > 0
+    ) {
+
+        appliquerDegatsCombat(
+            defenseur,
+            degats,
+            attaquant.jid
+        );
+    }
+
+
+    attaquant.statistiques.coupsPortes++;
+
+
+    return {
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.IMPACT,
+
+        attaquant:
+            attaquant.jid,
+
+        defenseur:
+            defenseur.jid,
+
+        degats,
+
+        raison:
+            "L'attaque touche la cible."
+    };
+}
+
+
+//==============================================================
+// 🤼 RÉSOLUTION D'UNE SAISIE
+//==============================================================
+
+function resoudreSaisieCombat({
+
+    attaquant,
+
+    defenseur,
+
+    actionAttaquant,
+
+    actionDefenseur
+
+} = {}) {
+
+
+    if (
+        !verifierPorteeActionCombat({
+
+            attaquant,
+
+            cible:
+                defenseur,
+
+            action:
+                actionAttaquant
+
+        })
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            raison:
+                "La saisie est hors de portée."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        [
+            "esquive",
+            "dash",
+            "deplacement",
+            "course",
+            "sprint"
+        ].includes(
+            actionDefenseur.type
+        )
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            raison:
+                "La cible s'est éloignée."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🤼 SAISIE RÉUSSIE
+    //----------------------------------------------------------
+
+    attaquant.statistiques.saisies++;
+
+
+    return {
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.SAISIE,
+
+        attaquant:
+            attaquant.jid,
+
+        defenseur:
+            defenseur.jid,
+
+        degats:
+            Number(
+                actionAttaquant.donnees?.degats ??
+                0
+            ),
+
+        raison:
+            "La saisie est réussie."
+    };
+}
+
+
+//==============================================================
+// 🏃 RÉSOLUTION D'UN DÉPLACEMENT
+//==============================================================
+
+function resoudreDeplacementCombat({
+
+    joueur,
+
+    adversaire,
+
+    action
+
+} = {}) {
+
+
+    if (
+        !joueur ||
+        !action
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.INVALIDE
+        };
+    }
+
+
+    const distanceAvant =
+        calculerDistanceCombat(
+            joueur,
+            adversaire
+        );
+
+
+    //----------------------------------------------------------
+    // 📐 DISTANCE DEMANDÉE
+    //----------------------------------------------------------
+
+    let distance =
+        Number(
+            action.donnees?.distance ??
+            action.puissance ??
+            0
+        );
+
+
+    distance =
+        Math.max(
+            0,
+            distance
+        );
+
+
+    //----------------------------------------------------------
+    // 🧭 DIRECTION
+    //----------------------------------------------------------
+
+    const direction =
+        action.donnees?.direction ??
+        "vers_adversaire";
+
+
+    let dx = 0;
+    let dy = 0;
+    let dz = 0;
+
+
+    if (
+        direction ===
+        "vers_adversaire"
+    ) {
+
+        const vx =
+            adversaire.position.x -
+            joueur.position.x;
+
+
+        const vy =
+            adversaire.position.y -
+            joueur.position.y;
+
+
+        const vz =
+            adversaire.position.z -
+            joueur.position.z;
+
+
+        const longueur =
+            Math.sqrt(
+                vx * vx +
+                vy * vy +
+                vz * vz
+            );
+
+
+        if (
+            longueur > 0
+        ) {
+
+            dx =
+                (vx / longueur) *
+                distance;
+
+            dy =
+                (vy / longueur) *
+                distance;
+
+            dz =
+                (vz / longueur) *
+                distance;
+        }
+    }
+
+
+    if (
+        direction ===
+        "eloignement"
+    ) {
+
+        const vx =
+            joueur.position.x -
+            adversaire.position.x;
+
+
+        const vy =
+            joueur.position.y -
+            adversaire.position.y;
+
+
+        const vz =
+            joueur.position.z -
+            adversaire.position.z;
+
+
+        const longueur =
+            Math.sqrt(
+                vx * vx +
+                vy * vy +
+                vz * vz
+            );
+
+
+        if (
+            longueur > 0
+        ) {
+
+            dx =
+                (vx / longueur) *
+                distance;
+
+            dy =
+                (vy / longueur) *
+                distance;
+
+            dz =
+                (vz / longueur) *
+                distance;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 📍 APPLICATION
+    //----------------------------------------------------------
+
+    joueur.position.x +=
+        dx;
+
+    joueur.position.y +=
+        dy;
+
+    joueur.position.z +=
+        dz;
+
+
+    const distanceApres =
+        calculerDistanceCombat(
+            joueur,
+            adversaire
+        );
+
+
+    joueur.statistiques.deplacements =
+        (joueur.statistiques.deplacements ?? 0) + 1;
+
+
+    return {
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS.DEPLACEMENT,
+
+        joueur:
+            joueur.jid,
+
+        distanceAvant,
+
+        distanceApres,
+
+        distanceParcourue:
+            distance,
+
+        raison:
+            "Déplacement effectué."
+    };
+}
+
+
+//==============================================================
+// ⚔️ RÉSOUDRE DEUX ACTIONS
+//==============================================================
+
+function resoudreDeuxActionsCombat({
+
+    joueurA,
+
+    joueurB,
+
+    actionA,
+
+    actionB
+
+} = {}) {
+
+
+    if (
+        !joueurA ||
+        !joueurB
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combattants introuvables."
+        };
+    }
+
+
+    actionA =
+        normaliserActionCombat(
+            actionA
+        );
+
+
+    actionB =
+        normaliserActionCombat(
+            actionB
+        );
+
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENTS SIMULTANÉS
+    //----------------------------------------------------------
+
+    const deplacementA =
+        [
+            "deplacement",
+            "course",
+            "sprint",
+            "dash"
+        ].includes(
+            actionA.type
+        );
+
+
+    const deplacementB =
+        [
+            "deplacement",
+            "course",
+            "sprint",
+            "dash"
+        ].includes(
+            actionB.type
+        );
+
+
+    if (
+        deplacementA
+    ) {
+
+        resoudreDeplacementCombat({
+
+            joueur:
+                joueurA,
+
+            adversaire:
+                joueurB,
+
+            action:
+                actionA
+        });
+    }
+
+
+    if (
+        deplacementB
+    ) {
+
+        resoudreDeplacementCombat({
+
+            joueur:
+                joueurB,
+
+            adversaire:
+                joueurA,
+
+            action:
+                actionB
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 👊 ACTION A → B
+    //----------------------------------------------------------
+
+    let resultatA = null;
+
+
+    if (
+        [
+            "attaque",
+            "frappe",
+            "coup"
+        ].includes(
+            actionA.type
+        )
+    ) {
+
+        resultatA =
+            resoudreAttaqueCombat({
+
+                attaquant:
+                    joueurA,
+
+                defenseur:
+                    joueurB,
+
+                actionAttaquant:
+                    actionA,
+
+                actionDefenseur:
+                    actionB
+            });
+    }
+
+
+    //----------------------------------------------------------
+    // 🤼 SAISIE A → B
+    //----------------------------------------------------------
+
+    else if (
+        [
+            "saisie",
+            "projection"
+        ].includes(
+            actionA.type
+        )
+    ) {
+
+        resultatA =
+            resoudreSaisieCombat({
+
+                attaquant:
+                    joueurA,
+
+                defenseur:
+                    joueurB,
+
+                actionAttaquant:
+                    actionA,
+
+                actionDefenseur:
+                    actionB
+            });
+    }
+
+
+    //----------------------------------------------------------
+    // 👊 ACTION B → A
+    //----------------------------------------------------------
+
+    let resultatB = null;
+
+
+    if (
+        [
+            "attaque",
+            "frappe",
+            "coup"
+        ].includes(
+            actionB.type
+        )
+    ) {
+
+        resultatB =
+            resoudreAttaqueCombat({
+
+                attaquant:
+                    joueurB,
+
+                defenseur:
+                    joueurA,
+
+                actionAttaquant:
+                    actionB,
+
+                actionDefenseur:
+                    actionA
+            });
+    }
+
+
+    //----------------------------------------------------------
+    // 🤼 SAISIE B → A
+    //----------------------------------------------------------
+
+    else if (
+        [
+            "saisie",
+            "projection"
+        ].includes(
+            actionB.type
+        )
+    ) {
+
+        resultatB =
+            resoudreSaisieCombat({
+
+                attaquant:
+                    joueurB,
+
+                defenseur:
+                    joueurA,
+
+                actionAttaquant:
+                    actionB,
+
+                actionDefenseur:
+                    actionA
+            });
+    }
+
+
+    //----------------------------------------------------------
+    // 🛑 ACTIONS NON OFFENSIVES
+    //----------------------------------------------------------
+
+    if (
+        !resultatA
+    ) {
+
+        resultatA = {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            attaquant:
+                joueurA.jid,
+
+            raison:
+                "Aucune action offensive résolue."
+        };
+    }
+
+
+    if (
+        !resultatB
+    ) {
+
+        resultatB = {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS.ECHEC,
+
+            attaquant:
+                joueurB.jid,
+
+            raison:
+                "Aucune action offensive résolue."
+        };
+    }
+
+
+    return {
+
+        succes: true,
+
+        resultats: [
+
+            {
+                jid:
+                    joueurA.jid,
+
+                action:
+                    actionA,
+
+                resultat:
+                    resultatA
+            },
+
+            {
+                jid:
+                    joueurB.jid,
+
+                action:
+                    actionB,
+
+                resultat:
+                    resultatB
+            }
+        ]
+    };
+}
+
+
+//==============================================================
+// ⚖️ ARBITRER UN TOUR
+//==============================================================
+// Cette fonction est le pont entre l'arbitre IA et le moteur.
+//
+// L'IA décide :
+// "Joueur A attaque avec 20 de puissance."
+//
+// Le moteur applique réellement :
+// - coût
+// - portée
+// - esquive
+// - blocage
+// - dégâts
+// - PV
+// - statistiques
+// - position
+//==============================================================
+
+function arbitrerTourCombatAllStars({
+
+    combat,
+
+    intentions = {}
+
+} = {}) {
+
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    const joueurA =
+        obtenirJoueurCombat(
+            combat,
+            combat.ordre[0]
+        );
+
+
+    const joueurB =
+        obtenirJoueurCombat(
+            combat,
+            combat.ordre[1]
+        );
+
+
+    if (
+        !joueurA ||
+        !joueurB
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Les deux combattants ne sont pas disponibles."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 RÉCUPÉRATION DES INTENTIONS
+    //----------------------------------------------------------
+
+    const actionA =
+        normaliserActionCombat(
+            intentions[joueurA.jid] ??
+            intentions.joueur1 ??
+            intentions[joueurA.pseudo]
+        );
+
+
+    const actionB =
+        normaliserActionCombat(
+            intentions[joueurB.jid] ??
+            intentions.joueur2 ??
+            intentions[joueurB.pseudo]
+        );
+
+
+    //----------------------------------------------------------
+    // 💰 COÛTS
+    //----------------------------------------------------------
+
+    const coutA =
+        appliquerCoutsActionCombat(
+            joueurA,
+            actionA
+        );
+
+
+    const coutB =
+        appliquerCoutsActionCombat(
+            joueurB,
+            actionB
+        );
+
+
+    //----------------------------------------------------------
+    // ❌ RESSOURCES INSUFFISANTES
+    //----------------------------------------------------------
+
+    if (
+        !coutA.succes
+    ) {
+
+        actionA.type =
+            "attendre";
+
+
+        actionA.coutStamina =
+            0;
+
+
+        actionA.coutEnergie =
+            0;
+    }
+
+
+    if (
+        !coutB.succes
+    ) {
+
+        actionB.type =
+            "attendre";
+
+
+        actionB.coutStamina =
+            0;
+
+
+        actionB.coutEnergie =
+            0;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ RÉSOLUTION
+    //----------------------------------------------------------
+
+    const resolution =
+        resoudreDeuxActionsCombat({
+
+            joueurA,
+
+            joueurB,
+
+            actionA,
+
+            actionB
+        });
+
+
+    if (
+        !resolution.succes
+    ) {
+
+        return resolution;
+    }
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE
+    //----------------------------------------------------------
+
+    combat.derniereAction = {
+
+        tour:
+            combat.tour + 1,
+
+        actions: [
+
+            {
+                jid:
+                    joueurA.jid,
+
+                action:
+                    actionA,
+
+                resultat:
+                    resolution.resultats[0]
+            },
+
+            {
+                jid:
+                    joueurB.jid,
+
+                action:
+                    actionB,
+
+                resultat:
+                    resolution.resultats[1]
+            }
+        ]
+    };
+
+
+    //----------------------------------------------------------
+    // 📊 STATISTIQUES DOMINATION
+    //----------------------------------------------------------
+
+    for (
+        const element of
+        resolution.resultats
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                element.jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        const resultat =
+            element.resultat;
+
+
+        analyserDominationResultatCombat({
+
+            joueur,
+
+            resultat
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE GLOBAL
+    //----------------------------------------------------------
+
+    combat.historique.push({
+
+        type:
+            "resolution_actions",
+
+        tour:
+            combat.tour + 1,
+
+        resultats:
+            resolution.resultats,
+
+        positions: {
+
+            [joueurA.jid]:
+                {
+                    ...joueurA.position
+                },
+
+            [joueurB.jid]:
+                {
+                    ...joueurB.position
+                }
+        },
+
+        ressources: {
+
+            [joueurA.jid]: {
+
+                pv:
+                    joueurA.pv,
+
+                stamina:
+                    joueurA.stamina,
+
+                energie:
+                    joueurA.energie
+            },
+
+            [joueurB.jid]: {
+
+                pv:
+                    joueurB.pv,
+
+                stamina:
+                    joueurB.stamina,
+
+                energie:
+                    joueurB.energie
+            }
+        }
+    });
+
+
+    return {
+
+        succes: true,
+
+        resultats:
+            resolution.resultats,
+
+        actions: {
+
+            [joueurA.jid]:
+                actionA,
+
+            [joueurB.jid]:
+                actionB
+        }
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Résolution des actions ALL STARS chargée."
+);
+
+//==============================================================
+// ⚔️ ALL STARS — GESTIONNAIRE DES TOURS ET DES PAVÉS
+//==============================================================
+// Ce module gère le déroulement réel d'un combat.
+//
+// 1. Le tour commence
+// 2. Joueur 1 envoie son pavé
+// 3. Joueur 2 envoie son pavé
+// 4. Les deux pavés sont conservés
+// 5. La résolution est lancée UNE SEULE FOIS
+// 6. Le tour est terminé
+// 7. On passe au tour suivant
+//
+// IMPORTANT :
+//
+// joueur 1 seul  → aucun tour terminé
+// joueur 2 seul  → aucun tour terminé
+// les deux      → résolution
+// résolution    → tour +1
+//
+//==============================================================
+
+
+//==============================================================
+// ⚙️ CONFIGURATION DU GESTIONNAIRE
+//==============================================================
+
+const CONFIG_GESTION_TOURS_ALLSTARS = {
+
+    tempsMaximumTour: 360000,
+
+    toursMaximum: 10
+};
+
+
+//==============================================================
+// 🧠 INITIALISER LE GESTIONNAIRE
+//==============================================================
+
+function initialiserGestionToursCombat(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    if (
+        !combat.gestionTours
+    ) {
+
+        combat.gestionTours = {
+
+            tourActuel:
+                combat.tour ?? 0,
+
+            pavésRecus: {},
+
+            resolutionEnCours:
+                false,
+
+            tourEnCours:
+                false,
+
+            dernierTourResolu:
+                0,
+
+            toursHistorique: []
+        };
+    }
+
+
+    return combat.gestionTours;
+}
+
+
+//==============================================================
+// 🔄 DÉMARRER UN NOUVEAU TOUR
+//==============================================================
+
+function demarrerTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le combat est terminé."
+        };
+    }
+
+
+    const gestion =
+        initialiserGestionToursCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 🛑 NE PAS DÉMARRER DEUX FOIS
+    //----------------------------------------------------------
+
+    if (
+        gestion.tourEnCours
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Un tour est déjà en cours."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 LIMITE
+    //----------------------------------------------------------
+
+    if (
+        combat.tour >=
+        CONFIG_GESTION_TOURS_ALLSTARS
+            .toursMaximum
+    ) {
+
+        return terminerCombatAllStars({
+
+            combat,
+
+            raison:
+                "Les 10 tours sont terminés.",
+
+            type:
+                "decision"
+        });
+    }
+
+
+    //----------------------------------------------------------
+    // 🧹 NETTOYAGE
+    //----------------------------------------------------------
+
+    gestion.pavésRecus = {};
+
+    gestion.resolutionEnCours =
+        false;
+
+    gestion.tourEnCours =
+        true;
+
+
+    gestion.tourActuel =
+        combat.tour + 1;
+
+
+    //----------------------------------------------------------
+    // ACTIONS EN COURS
+    //----------------------------------------------------------
+
+    for (
+        const jid of
+        combat.ordre || []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        joueur.actionEnCours =
+            null;
+    }
+
+
+    return {
+
+        succes: true,
+
+        tour:
+            gestion.tourActuel,
+
+        joueursAyantJoue:
+            []
+    };
+}
+
+
+//==============================================================
+// 📝 ENREGISTRER LE PAVÉ D'UN JOUEUR
+//==============================================================
+// "pave" peut être :
+//
+// - le texte brut envoyé par WhatsApp
+// - une intention déjà interprétée
+// - un objet d'action
+//
+// L'interprétation peut donc être branchée plus tard
+// sans modifier le gestionnaire.
+//
+//==============================================================
+
+async function enregistrerPaveCombatAllStars({
+
+    combat,
+
+    jid,
+
+    pave,
+
+    intention = null
+
+} = {}) {
+
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛑 COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le combat est terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧍 JOUEUR
+    //----------------------------------------------------------
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚙️ GESTION
+    //----------------------------------------------------------
+
+    const gestion =
+        initialiserGestionToursCombat(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // 🔄 DÉMARRAGE AUTOMATIQUE
+    //----------------------------------------------------------
+
+    if (
+        !gestion.tourEnCours
+    ) {
+
+        const debut =
+            demarrerTourCombatAllStars(
+                combat
+            );
+
+
+        if (
+            !debut.succes
+        ) {
+
+            return debut;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 JOUEUR DÉJÀ JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        gestion.pavésRecus[jid]
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Tu as déjà envoyé ton action pour ce tour.",
+
+            tour:
+                gestion.tourActuel
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 ACTION / INTENTION
+    //----------------------------------------------------------
+
+    let action =
+        intention ??
+        pave;
+
+
+    action =
+        normaliserActionCombat(
+            action
+        );
+
+
+    //----------------------------------------------------------
+    // 📦 STOCKAGE
+    //----------------------------------------------------------
+
+    gestion.pavésRecus[jid] = {
+
+        jid,
+
+        pave,
+
+        action,
+
+        timestamp:
+            Date.now()
+    };
+
+
+    joueur.actionEnCours =
+        action;
+
+
+    //----------------------------------------------------------
+    // 📊 NOMBRE DE JOUEURS AYANT JOUÉ
+    //----------------------------------------------------------
+
+    const nombrePaves =
+        Object.keys(
+            gestion.pavésRecus
+        ).length;
+
+
+    const nombreJoueurs =
+        combat.ordre.length;
+
+
+    //----------------------------------------------------------
+    // ⏳ UN SEUL JOUEUR A JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        nombrePaves <
+        nombreJoueurs
+    ) {
+
+        return {
+
+            succes: true,
+
+            tour:
+                gestion.tourActuel,
+
+            actionEnregistree:
+                true,
+
+            pretPourResolution:
+                false,
+
+            joueursAyantJoue:
+                Object.keys(
+                    gestion.pavésRecus
+                ),
+
+            joueursRestants:
+                combat.ordre.filter(
+                    id =>
+                        !gestion.pavésRecus[id]
+                )
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ LES DEUX ONT JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        gestion.resolutionEnCours
+    ) {
+
+        return {
+
+            succes: true,
+
+            resolutionDejaLancee:
+                true
+        };
+    }
+
+
+    gestion.resolutionEnCours =
+        true;
+
+
+    //----------------------------------------------------------
+    // 🧠 CONSTRUIRE LES INTENTIONS
+    //----------------------------------------------------------
+
+    const intentions = {};
+
+
+    for (
+        const joueurJid of
+        combat.ordre
+    ) {
+
+        const entree =
+            gestion.pavésRecus[
+                joueurJid
+            ];
+
+
+        if (!entree) {
+            continue;
+        }
+
+
+        intentions[joueurJid] =
+            entree.action;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚖️ RÉSOLUTION DU TOUR
+    //----------------------------------------------------------
+
+    let resolution;
+
+
+    try {
+
+        resolution =
+            await resoudreTourCombatAllStars({
+
+                combat,
+
+                intentions
+            });
+
+    } catch (error) {
+
+        console.error(
+            "❌ Erreur résolution tour ALL STARS :",
+            error
+        );
+
+
+        gestion.resolutionEnCours =
+            false;
+
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Erreur pendant la résolution du tour.",
+
+            erreur:
+                error.message
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 TOUR TERMINÉ
+    //----------------------------------------------------------
+
+    gestion.dernierTourResolu =
+        combat.tour;
+
+
+    gestion.toursHistorique.push({
+
+        tour:
+            combat.tour,
+
+        pavés:
+            gestion.pavésRecus,
+
+        resolution
+    });
+
+
+    gestion.tourEnCours =
+        false;
+
+    gestion.resolutionEnCours =
+        false;
+
+
+    //----------------------------------------------------------
+    // 🛑 COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        resolution.termine
+    ) {
+
+        return {
+
+            succes: true,
+
+            tour:
+                combat.tour,
+
+            tourTermine:
+                true,
+
+            combatTermine:
+                true,
+
+            resolution
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 PRÉPARER LE TOUR SUIVANT
+    //----------------------------------------------------------
+
+    const prochainTour =
+        demarrerTourCombatAllStars(
+            combat
+        );
+
+
+    return {
+
+        succes: true,
+
+        tour:
+            combat.tour,
+
+        tourTermine:
+            true,
+
+        combatTermine:
+            false,
+
+        prochainTour:
+            prochainTour.tour,
+
+        resolution
+    };
+}
+
+
+//==============================================================
+// 🔎 SAVOIR SI LES DEUX JOUEURS ONT JOUÉ
+//==============================================================
+
+function combatAllStarsPretPourResolution(
+    combat
+) {
+
+    if (!combat) {
+        return false;
+    }
+
+
+    const gestion =
+        initialiserGestionToursCombat(
+            combat
+        );
+
+
+    return combat.ordre.every(
+        jid =>
+            Boolean(
+                gestion.pavésRecus[jid]
+            )
+    );
+}
+
+
+//==============================================================
+// 👤 SAVOIR SI UN JOUEUR A DÉJÀ JOUÉ
+//==============================================================
+
+function joueurADejaJoueTourAllStars(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !jid
+    ) {
+        return false;
+    }
+
+
+    const gestion =
+        initialiserGestionToursCombat(
+            combat
+        );
+
+
+    return Boolean(
+        gestion.pavésRecus[jid]
+    );
+}
+
+
+//==============================================================
+// 📊 ÉTAT DU TOUR
+//==============================================================
+
+function obtenirEtatTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    const gestion =
+        initialiserGestionToursCombat(
+            combat
+        );
+
+
+    const joueurs =
+        combat.ordre.map(
+            jid => {
+
+                const joueur =
+                    obtenirJoueurCombat(
+                        combat,
+                        jid
+                    );
+
+
+                return {
+
+                    jid,
+
+                    pseudo:
+                        joueur?.pseudo ??
+                        "Inconnu",
+
+                    aJoue:
+                        Boolean(
+                            gestion.pavésRecus[jid]
+                        )
+                };
+            }
+        );
+
+
+    return {
+
+        tour:
+            gestion.tourActuel,
+
+        tourCombat:
+            combat.tour,
+
+        tourEnCours:
+            gestion.tourEnCours,
+
+        resolutionEnCours:
+            gestion.resolutionEnCours,
+
+        pretPourResolution:
+            combatAllStarsPretPourResolution(
+                combat
+            ),
+
+        joueurs
+    };
+}
+
+
+//==============================================================
+// ⏱️ ANNULER / ABANDONNER LE TOUR
+//==============================================================
+
+function annulerTourCombatAllStars(
+    combat,
+    raison =
+        "Tour annulé."
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    const gestion =
+        initialiserGestionToursCombat(
+            combat
+        );
+
+
+    if (
+        gestion.resolutionEnCours
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "La résolution est déjà en cours."
+        };
+    }
+
+
+    gestion.pavésRecus = {};
+
+    gestion.tourEnCours =
+        false;
+
+    gestion.resolutionEnCours =
+        false;
+
+
+    for (
+        const jid of
+        combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        joueur.actionEnCours =
+            null;
+    }
+
+
+    combat.historique.push({
+
+        type:
+            "tour_annule",
+
+        tour:
+            combat.tour + 1,
+
+        raison,
+
+        temps:
+            combat.temps
+    });
+
+
+    return {
+
+        succes: true,
+
+        raison
+    };
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Gestionnaire des tours ALL STARS chargé."
+);
+
 //================================================
 // 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
 //================================================
