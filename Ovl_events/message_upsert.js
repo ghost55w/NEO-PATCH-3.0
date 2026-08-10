@@ -7,7 +7,10 @@ const prefixe = config.PREFIXE || "+";
 const getJid = require("./cache_jid");
 const {
     verifierJoueursMatch,
-    verifierCardsMatch
+    verifierCardsMatch,
+    AnalysePavematch,
+    duelsEnCours,
+    matchAttente
 } = require("../cmd/AllstarsEngine");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
@@ -183,25 +186,114 @@ const clean = texte
 // ================================
 try {
 
-  // 🌀 Inscription des joueurs
-  await verifierJoueursMatch(texte, ms_org, ovl);
+    // 🌀 Inscription des joueurs
+    await verifierJoueursMatch(
+        texte,
+        ms_org,
+        ovl
+    );
 
-  // 🎴 Choix des personnages
-await verifierCardsMatch(
-    texte,
-    ms_org,
-    ovl,
-    auteur_Message
-);
 
-  // 📄 Détection fiche BlueLock
-  await verifierFiche(texte, ms_org, ovl);
+    // 🎴 Choix des personnages
+    await verifierCardsMatch(
+        texte,
+        ms_org,
+        ovl,
+        auteur_Message
+    );
 
-  // ⚽ Gestion complète du match BlueLock
-  await messageMatch(ms, ovl);
+
+    //================================================
+    // 🥊 ANALYSE DU PAVÉ ALL STARS
+    //================================================
+
+    const matchId = matchAttente[ms_org];
+
+    if (matchId) {
+
+        const match = duelsEnCours[matchId];
+
+        if (
+            match &&
+            match.etat === "in_match"
+        ) {
+
+            const joueur = match.joueurs?.find(
+                j => j.jid === auteur_Message
+            );
+
+            if (joueur) {
+
+                const analyse = await AnalysePavematch(
+                    texte,
+                    match,
+                    joueur
+                );
+
+                //============================================
+                // 🛡️ MESSAGE NON-PAVÉ → IGNORÉ
+                //============================================
+
+                if (!analyse) {
+                    // Rien du tout.
+                    // Ce message n'est pas un pavé de combat.
+                }
+
+                //============================================
+                // 🥊 PAVÉ DÉTECTÉ
+                //============================================
+
+                else {
+
+                    console.log(
+                        "🥊 PAVÉ DE COMBAT DÉTECTÉ"
+                    );
+
+                    console.log(
+                        "👤 Joueur :",
+                        joueur.pseudo
+                    );
+
+                    console.log(
+                        "🌀 Actions :",
+                        analyse.texte
+                    );
+
+                    console.log(
+                        "📊 Note :",
+                        analyse.note + "/10"
+                    );
+
+                    console.log(
+                        "✅ Valide :",
+                        analyse.valide
+                    );
+                }
+            }
+        }
+    }
+
+
+    // 📄 Détection fiche BlueLock
+    await verifierFiche(
+        texte,
+        ms_org,
+        ovl
+    );
+
+
+    // ⚽ Gestion match BlueLock
+    await messageMatch(
+        ms,
+        ovl
+    );
 
 } catch (err) {
-  console.log("❌ Erreur système match :", err);
+
+    console.log(
+        "❌ Erreur système match :",
+        err
+    );
 }
     
     async function isBanned(type, id) {
