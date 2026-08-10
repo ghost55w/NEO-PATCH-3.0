@@ -49,6 +49,806 @@ function normalizeName(str = "") {
         .toLowerCase()
         .trim();
 }
+
+//================================================
+// 🎮 ACTIONS MAP — BASE DU GAMEPLAY
+//================================================
+
+const ACTIONS_MAP = {
+
+    //============================================
+    // 🥊 FRAPPES — MAINS
+    //============================================
+    frappes: {
+
+        mains: {
+
+            coup_direct: {
+                nom: "Coup direct",
+                aliases: [
+                    "coup direct",
+                    "direct",
+                    "poing direct",
+                    "jab",
+                    "straight"
+                ],
+                description:
+                    "Poing avant ou arrière propulsé en ligne droite vers le visage ou le torse."
+            },
+
+            crochet_gauche: {
+                nom: "Crochet gauche",
+                aliases: [
+                    "crochet gauche",
+                    "left hook",
+                    "hook gauche"
+                ],
+                description:
+                    "Poing gauche lancé en arc horizontal vers la tête ou le flanc droit."
+            },
+
+            crochet_droit: {
+                nom: "Crochet droit",
+                aliases: [
+                    "crochet droit",
+                    "right hook",
+                    "hook droit"
+                ],
+                description:
+                    "Poing droit lancé en arc horizontal vers la tête ou le flanc gauche."
+            },
+
+            uppercut: {
+                nom: "Uppercut",
+                aliases: [
+                    "uppercut",
+                    "coup uppercut"
+                ],
+                description:
+                    "Poing propulsé de bas en haut sous le menton ou le torse."
+            },
+
+            uppercut_saute: {
+                nom: "Uppercut sauté",
+                aliases: [
+                    "uppercut sauté",
+                    "uppercut saute",
+                    "rising uppercut"
+                ],
+                description:
+                    "Uppercut effectué en sautant vers le menton ou la poitrine."
+            },
+
+            revers: {
+                nom: "Coup en revers",
+                aliases: [
+                    "revers",
+                    "coup en revers",
+                    "backfist"
+                ],
+                description:
+                    "Poing lancé horizontalement ou diagonalement avec le dos du poing."
+            },
+
+            revers_circulaire: {
+                nom: "Revers circulaire",
+                aliases: [
+                    "revers circulaire",
+                    "spinning backfist",
+                    "spinning back fist"
+                ],
+                description:
+                    "Rotation du corps à 180° ou 360° avec frappe circulaire du dos du poing."
+            },
+
+            marteau_descendant: {
+                nom: "Coup marteau descendant",
+                aliases: [
+                    "coup marteau",
+                    "marteau descendant",
+                    "hammer",
+                    "hammer fist"
+                ],
+                description:
+                    "Poing descendant verticalement comme un marteau."
+            },
+
+            marteau_lateral: {
+                nom: "Coup marteau latéral",
+                aliases: [
+                    "marteau latéral",
+                    "marteau lateral",
+                    "hammer fist side",
+                    "hammer side"
+                ],
+                description:
+                    "Frappe latérale effectuée avec le poing comme un marteau."
+            },
+
+            marteau_revers: {
+                nom: "Coup marteau en revers",
+                aliases: [
+                    "marteau en revers",
+                    "reverse hammer",
+                    "reverse hammer fist"
+                ],
+                description:
+                    "Frappe horizontale ou diagonale effectuée avec le dos du poing."
+            }
+        },
+
+        //========================================
+        // 🦵 FRAPPES — PIEDS
+        //========================================
+
+        pieds: {
+
+            front_kick: {
+                nom: "Coup de pied frontal",
+                aliases: [
+                    "coup de pied frontal",
+                    "front kick",
+                    "frontkick",
+                    "coup frontal"
+                ],
+                description:
+                    "Pied propulsé vers l'avant ou l'arrière contre le torse ou le menton."
+            },
+
+            roundhouse_kick: {
+                nom: "Coup circulaire",
+                aliases: [
+                    "coup circulaire",
+                    "roundhouse kick",
+                    "roundhouse",
+                    "kick circulaire"
+                ],
+                description:
+                    "Coup de pied circulaire frappant latéralement la tête, le torse ou les côtes."
+            },
+
+            side_kick: {
+                nom: "Coup de pied latéral",
+                aliases: [
+                    "coup de pied latéral",
+                    "coup de pied lateral",
+                    "side kick",
+                    "sidekick"
+                ],
+                description:
+                    "Coup de pied propulsé sur le côté avec la jambe tendue."
+            },
+
+            back_kick: {
+                nom: "Coup de pied arrière",
+                aliases: [
+                    "coup de pied arrière",
+                    "coup de pied arriere",
+                    "back kick",
+                    "backkick"
+                ],
+                description:
+                    "Rotation du corps et frappe arrière avec le talon."
+            },
+
+            hook_kick: {
+                nom: "Coup de pied en crochet",
+                aliases: [
+                    "coup de pied en crochet",
+                    "hook kick",
+                    "hookkick",
+                    "kick crochet"
+                ],
+                description:
+                    "Coup de pied en crochet frappant de côté ou par l'arrière."
+            },
+
+            axe_kick: {
+                nom: "Coup de pied descendant",
+                aliases: [
+                    "coup de pied descendant",
+                    "axe kick",
+                    "axekick",
+                    "coup descendant"
+                ],
+                description:
+                    "Jambe levée verticalement puis redescendue pour frapper avec le talon."
+            },
+
+            spinning_back_kick: {
+                nom: "Coup de pied arrière circulaire",
+                aliases: [
+                    "coup de pied arrière circulaire",
+                    "coup de pied arriere circulaire",
+                    "spinning back kick",
+                    "spinning backkick"
+                ],
+                description:
+                    "Rotation complète de 360° suivie d'une frappe arrière puissante."
+            },
+
+            low_kick: {
+                nom: "Coup bas",
+                aliases: [
+                    "coup bas",
+                    "low kick",
+                    "lowkick"
+                ],
+                description:
+                    "Coup de pied visant principalement la cuisse ou le mollet."
+            },
+
+            knee_strike: {
+                nom: "Coup de genou",
+                aliases: [
+                    "coup de genou",
+                    "genou",
+                    "knee strike"
+                ],
+                description:
+                    "Genou levé et propulsé vers le corps ou la tête à courte distance."
+            },
+
+            flying_kick: {
+                nom: "Coup sauté",
+                aliases: [
+                    "coup sauté",
+                    "coup saute",
+                    "flying kick",
+                    "flyingkick",
+                    "kick sauté"
+                ],
+                description:
+                    "Saut vers l'avant ou latéral avec frappe du pied."
+            }
+        }
+    },
+
+    //============================================
+    // 🏃 DÉPLACEMENTS
+    //============================================
+
+    déplacements: {
+
+        avancer: {
+            nom: "Avancer",
+            aliases: [
+                "avance",
+                "avancer",
+                "s'avance",
+                "s'avancer"
+            ]
+        },
+
+        reculer: {
+            nom: "Reculer",
+            aliases: [
+                "recule",
+                "reculer",
+                "s'éloigne",
+                "s'eloigne"
+            ]
+        },
+
+        gauche: {
+            nom: "Déplacement gauche",
+            aliases: [
+                "va à gauche",
+                "va a gauche",
+                "se déplace à gauche",
+                "se deplace a gauche",
+                "gauche"
+            ]
+        },
+
+        droite: {
+            nom: "Déplacement droite",
+            aliases: [
+                "va à droite",
+                "va a droite",
+                "se déplace à droite",
+                "se deplace a droite",
+                "droite"
+            ]
+        },
+
+        saut: {
+            nom: "Saut",
+            aliases: [
+                "saute",
+                "saut",
+                "bondit",
+                "bond"
+            ]
+        }
+    },
+
+    //============================================
+    // 🛡️ DÉFENSE
+    //============================================
+
+    defenses: {
+
+        garde: {
+            nom: "Garde",
+            aliases: [
+                "garde",
+                "se met en garde",
+                "bloque"
+            ]
+        },
+
+        esquive_gauche: {
+            nom: "Esquive gauche",
+            aliases: [
+                "esquive gauche",
+                "esquive sur la gauche",
+                "part à gauche",
+                "part a gauche"
+            ]
+        },
+
+        esquive_droite: {
+            nom: "Esquive droite",
+            aliases: [
+                "esquive droite",
+                "esquive sur la droite",
+                "part à droite",
+                "part a droite"
+            ]
+        },
+
+        esquive_arriere: {
+            nom: "Esquive arrière",
+            aliases: [
+                "esquive arrière",
+                "esquive arriere",
+                "recule pour esquiver",
+                "se baisse"
+            ]
+        },
+
+        blocage: {
+            nom: "Blocage",
+            aliases: [
+                "blocage",
+                "bloque le coup",
+                "pare",
+                "parer",
+                "pare le coup"
+            ]
+        }
+    },
+
+    //============================================
+    // 🤼 CONTACT / TECHNIQUES
+    //============================================
+
+    contact: {
+
+        saisie: {
+            nom: "Saisie",
+            aliases: [
+                "saisie",
+                "attrape",
+                "agrippe",
+                "empoigne"
+            ]
+        },
+
+        projection: {
+            nom: "Projection",
+            aliases: [
+                "projection",
+                "projette",
+                "jette au sol"
+            ]
+        },
+
+        repousser: {
+            nom: "Repousser",
+            aliases: [
+                "repousse",
+                "repousser",
+                "pousse"
+            ]
+        }
+    }
+};
+
+//================================================
+// 🔎 NORMALISATION D'UNE ACTION
+//================================================
+
+function normaliserAction(texte = "") {
+
+    return String(texte)
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[’']/g, " ")
+        .replace(/[^a-z0-9\s-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+//================================================
+// 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
+//================================================
+
+function obtenirToutesLesActions() {
+
+    const actions = [];
+
+    for (const [categorie, groupes] of Object.entries(ACTIONS_MAP)) {
+
+        for (const [groupe, listeActions] of Object.entries(groupes)) {
+
+            for (const [id, action] of Object.entries(listeActions)) {
+
+                actions.push({
+                    id,
+                    categorie,
+                    groupe,
+                    nom: action.nom,
+                    aliases: action.aliases || [],
+                    description: action.description || ""
+                });
+            }
+        }
+    }
+
+    return actions;
+}
+
+//================================================
+// 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
+//================================================
+
+function detecterActionsPave(texte = "") {
+
+    const texteNormalise = normaliserAction(texte);
+
+    const toutesLesActions = obtenirToutesLesActions();
+
+    const actionsDetectees = [];
+
+    for (const action of toutesLesActions) {
+
+        const termes = [
+            action.nom,
+            ...(action.aliases || [])
+        ];
+
+        let trouve = false;
+        let termeUtilise = null;
+
+        for (const terme of termes) {
+
+            const termeNormalise = normaliserAction(terme);
+
+            if (!termeNormalise) continue;
+
+            if (texteNormalise.includes(termeNormalise)) {
+
+                trouve = true;
+                termeUtilise = terme;
+
+                break;
+            }
+        }
+
+        if (trouve) {
+
+            actionsDetectees.push({
+                id: action.id,
+                nom: action.nom,
+                categorie: action.categorie,
+                groupe: action.groupe,
+                termeDetecte: termeUtilise,
+                description: action.description
+            });
+        }
+    }
+
+    return actionsDetectees;
+}
+
+//================================================
+// 🎮 EXTRACTION DU PAVÉ D'ACTION
+//================================================
+
+function extrairePaveAction(message = "") {
+
+    const texte = clean(String(message));
+
+    // Recherche du marqueur d'action
+    const match = texte.match(
+        /🌀🎮\s*:\s*([\s\S]*?)(?:\n\s*\n|\n╰|$)/i
+    );
+
+    if (!match) {
+        return "";
+    }
+
+    return match[1].trim();
+}
+
+//================================================
+// 🧠 ANALYSE DU PAVÉ DE MATCH
+//================================================
+
+function AnalysePaveMatch(message, joueur) {
+
+    const pave = extrairePaveAction(message);
+
+    //============================================
+    // ❌ PAVÉ VIDE
+    //============================================
+
+    if (!pave) {
+
+        return {
+            valide: false,
+            note: 0,
+
+            pave: "",
+
+            actions: [],
+
+            erreurs: [
+                "Aucune action détectée dans la section 🌀🎮."
+            ],
+
+            raison:
+                "Le joueur doit écrire son action dans la section 🌀🎮."
+        };
+    }
+
+
+    //============================================
+    // 🔎 DÉTECTION DES ACTIONS
+    //============================================
+
+    const actions = detecterActionsPave(pave);
+
+
+    //============================================
+    // 📊 CALCUL DE LA QUALITÉ DU PAVÉ
+    //============================================
+
+    let note = 0;
+
+    const erreurs = [];
+
+
+    // -------------------------------------------
+    // 1️⃣ PRÉSENCE D'UNE ACTION
+    // -------------------------------------------
+
+    if (actions.length > 0) {
+
+        note += 4;
+
+    } else {
+
+        erreurs.push(
+            "Aucune action reconnue."
+        );
+    }
+
+
+    // -------------------------------------------
+    // 2️⃣ LONGUEUR / DÉTAIL
+    // -------------------------------------------
+
+    const nombreMots = pave
+        .split(/\s+/)
+        .filter(Boolean)
+        .length;
+
+    if (nombreMots >= 8) {
+
+        note += 2;
+
+    } else if (nombreMots >= 4) {
+
+        note += 1;
+
+    } else {
+
+        erreurs.push(
+            "Action trop peu détaillée."
+        );
+    }
+
+
+    // -------------------------------------------
+    // 3️⃣ PRÉCISION
+    // -------------------------------------------
+
+    const precision = [
+        "visage",
+        "tête",
+        "tete",
+        "torse",
+        "ventre",
+        "abdomen",
+        "flanc",
+        "côtes",
+        "cotes",
+        "jambe",
+        "cuisse",
+        "mollet",
+        "menton",
+        "épaule",
+        "epaule",
+        "dos",
+        "bras"
+    ];
+
+    const paveNormalise = normaliserAction(pave);
+
+    const precisionTrouvee = precision.some(
+        mot => paveNormalise.includes(
+            normaliserAction(mot)
+        )
+    );
+
+    if (precisionTrouvee) {
+
+        note += 2;
+
+    } else {
+
+        erreurs.push(
+            "Cible insuffisamment précise."
+        );
+    }
+
+
+    // -------------------------------------------
+    // 4️⃣ COHÉRENCE / DESCRIPTION
+    // -------------------------------------------
+
+    const verbesAction = [
+        "frappe",
+        "frapper",
+        "lance",
+        "lancer",
+        "avance",
+        "recule",
+        "esquive",
+        "bloque",
+        "pare",
+        "saute",
+        "tourne",
+        "attrape",
+        "agrippe",
+        "repousse",
+        "projette"
+    ];
+
+    const verbeTrouve = verbesAction.some(
+        verbe =>
+            paveNormalise.includes(
+                normaliserAction(verbe)
+            )
+    );
+
+    if (verbeTrouve) {
+
+        note += 2;
+
+    } else {
+
+        erreurs.push(
+            "Action insuffisamment décrite."
+        );
+    }
+
+
+    //============================================
+    // 🔟 LIMITE
+    //============================================
+
+    note = Math.max(
+        0,
+        Math.min(10, note)
+    );
+
+
+    //============================================
+    // ✅ VALIDATION
+    //============================================
+
+    const valide =
+        actions.length > 0 &&
+        note >= 4;
+
+
+    //============================================
+    // 📦 RESULTAT
+    //============================================
+
+    return {
+
+        valide,
+
+        note,
+
+        pave,
+
+        actions,
+
+        erreurs,
+
+        joueur: joueur
+            ? {
+                pseudo: joueur.pseudo,
+                jid: joueur.jid
+            }
+            : null
+    };
+}
+
+//================================================
+// 📊 MESSAGE D'ANALYSE DU PAVÉ
+//================================================
+
+function genererResultatAnalysePave(
+    analyse,
+    prochainJoueur
+) {
+
+    //============================================
+    // ❌ PAVÉ NON VALIDÉ
+    //============================================
+
+    if (!analyse.valide) {
+
+        const raison =
+            analyse.erreurs.length > 0
+                ? analyse.erreurs.join(" ")
+                : "Action invalide.";
+
+        return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+❌: ${raison}
+
+📊Note du pavé : ${analyse.note}/10 ❌
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆joueur suivant:
+➡️ @${prochainJoueur.pseudo} NEXT!! 🔥
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+    }
+
+
+    //============================================
+    // ✅ PAVÉ VALIDÉ
+    //============================================
+
+    return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+✅ : Actions en cours....
+
+📊Note du pavé : ${analyse.note}/10 ⭐
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆joueur suivant:
+➡️ @${prochainJoueur.pseudo} NEXT!! 🔥
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+}
+
+
+
 //================= RECHERCHE FICHE PAR PSEUDO =================
 async function getFicheByPseudo(pseudo) {
 
