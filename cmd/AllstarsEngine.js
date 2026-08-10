@@ -2345,6 +2345,7 @@ module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
     lancerMatchAllStars,
+    AnalysePavematch,
     duelsEnCours,
     matchAttente
 };
