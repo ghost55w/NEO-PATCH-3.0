@@ -8,7 +8,7 @@ const getJid = require("./cache_jid");
 const {
     verifierJoueursMatch,
     verifierCardsMatch,
-    AnalysePavematch,
+    AnalysePaveMatch,
     duelsEnCours,
     matchAttente
 } = require("../cmd/AllstarsEngine");
@@ -224,7 +224,7 @@ try {
 
             if (joueur) {
 
-                const analyse = await AnalysePavematch(
+                const analyse = await AnalysePaveMatch(
                     texte,
                     match,
                     joueur
