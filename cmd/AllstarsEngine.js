@@ -511,6 +511,16 @@ function detecterActionsPave(texte = "") {
 
     const toutesLesActions = obtenirToutesLesActions();
 
+    // 🔎 DEBUG
+    console.log(
+        "🔎 Recherche des actions dans :",
+        texte
+    );
+
+    console.log(
+        "📚 Nombre d'actions disponibles :",
+        toutesLesActions.length
+    );
     const actionsDetectees = [];
 
     for (const action of toutesLesActions) {
@@ -551,8 +561,32 @@ function detecterActionsPave(texte = "") {
         }
     }
 
+    console.log(
+    "✅ ACTIONS TROUVÉES :",
+    actionsDetectees
+);
     return actionsDetectees;
 }
+
+console.log("========================================");
+console.log("🥊 ANALYSE PAVÉ ALL STARS");
+console.log("========================================");
+
+console.log("👤 Joueur :", joueur?.pseudo);
+console.log("📝 Pavé :", pave);
+
+console.log(
+    "🎮 Actions détectées :",
+    actions
+);
+
+console.log(
+    "🔢 Nombre d'actions :",
+    actions.length
+);
+
+console.log("========================================");
+
 
 //================================================
 // 🎮 EXTRACTION DU PAVÉ D'ACTION
