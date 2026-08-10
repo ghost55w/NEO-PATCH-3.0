@@ -25166,6 +25166,4046 @@ console.log(
     "⚔️ Gestionnaire des tours ALL STARS chargé."
 );
 
+//==============================================================
+// ⚔️ ALL STARS — PONT WHATSAPP / MOTEUR DE COMBAT
+//==============================================================
+// Ce module fait le lien entre WhatsApp et le moteur ALL STARS.
+//
+// WhatsApp
+//    ↓
+// Identification du joueur
+//    ↓
+// Récupération du pavé
+//    ↓
+// Découpage des actions
+//    ↓
+// Interprétation
+//    ↓
+// enregistrementPaveCombatAllStars()
+//    ↓
+// Si les 2 joueurs ont joué
+//    ↓
+// Résolution
+//    ↓
+// Message de résultat
+//
+//==============================================================
+
+
+//==============================================================
+// ⚙️ CONFIGURATION DES PAVÉS
+//==============================================================
+
+const CONFIG_PAVES_ALLSTARS = {
+
+    nombreActionsMaximum: 4,
+
+    separateurRegex: /\s*(?:\/|\|)\s*/,
+
+    longueurMinimumAction: 1
+};
+
+
+//==============================================================
+// 🧹 NETTOYER UN PAVÉ
+//==============================================================
+
+function nettoyerPaveAllStars(
+    texte
+) {
+
+    if (
+        typeof texte !==
+        "string"
+    ) {
+
+        return "";
+    }
+
+
+    return texte
+        .replace(/\r/g, "")
+        .replace(/\n+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+
+//==============================================================
+// ✂️ DÉCOUPER LE PAVÉ EN ACTIONS
+//==============================================================
+
+function decouperPaveAllStars(
+    texte
+) {
+
+    texte =
+        nettoyerPaveAllStars(
+            texte
+        );
+
+
+    if (!texte) {
+
+        return [];
+    }
+
+
+    let actions =
+        texte.split(
+            CONFIG_PAVES_ALLSTARS
+                .separateurRegex
+        );
+
+
+    actions =
+        actions
+            .map(
+                action =>
+                    action.trim()
+            )
+            .filter(
+                action =>
+                    action.length >=
+                    CONFIG_PAVES_ALLSTARS
+                        .longueurMinimumAction
+            );
+
+
+    //----------------------------------------------------------
+    // 🛑 MAXIMUM 4 ACTIONS
+    //----------------------------------------------------------
+
+    if (
+        actions.length >
+        CONFIG_PAVES_ALLSTARS
+            .nombreActionsMaximum
+    ) {
+
+        actions =
+            actions.slice(
+                0,
+                CONFIG_PAVES_ALLSTARS
+                    .nombreActionsMaximum
+            );
+    }
+
+
+    return actions;
+}
+
+
+//==============================================================
+// 🧠 STRUCTURE D'UN PAVÉ
+//==============================================================
+
+function creerStructurePaveAllStars(
+    texte
+) {
+
+    const actions =
+        decouperPaveAllStars(
+            texte
+        );
+
+
+    return {
+
+        texteOriginal:
+            texte,
+
+        nombreActions:
+            actions.length,
+
+        actions,
+
+        valide:
+            actions.length > 0
+    };
+}
+
+
+//==============================================================
+// 🎯 EXTRAIRE LE JOUEUR À PARTIR DU MESSAGE
+//==============================================================
+// On accepte :
+//
+// - jid direct
+// - participant
+// - sender
+// - key.participant
+// - key.remoteJid
+//
+// Cela permet de fonctionner avec plusieurs formats Baileys.
+//==============================================================
+
+function extraireJidMessageAllStars(
+    msg
+) {
+
+    if (!msg) {
+        return null;
+    }
+
+
+    return (
+
+        msg.sender ??
+
+        msg.participant ??
+
+        msg.key?.participant ??
+
+        msg.key?.remoteJid ??
+
+        msg.chat ??
+
+        null
+    );
+}
+
+
+//==============================================================
+// 🔎 TROUVER LE COMBAT D'UN JOUEUR
+//==============================================================
+
+function trouverCombatJoueurAllStars(
+    combats,
+    jid
+) {
+
+    if (
+        !combats ||
+        !jid
+    ) {
+        return null;
+    }
+
+
+    //----------------------------------------------------------
+    // MAP
+    //----------------------------------------------------------
+
+    if (
+        combats instanceof Map
+    ) {
+
+        for (
+            const [id, combat]
+            of combats.entries()
+        ) {
+
+            if (
+                combat?.phase ===
+                "termine"
+            ) {
+                continue;
+            }
+
+
+            if (
+                combat?.joueurs?.[jid]
+            ) {
+
+                return {
+
+                    id,
+
+                    combat
+                };
+            }
+        }
+
+
+        return null;
+    }
+
+
+    //----------------------------------------------------------
+    // OBJET
+    //----------------------------------------------------------
+
+    for (
+        const id of
+        Object.keys(
+            combats
+        )
+    ) {
+
+        const combat =
+            combats[id];
+
+
+        if (
+            !combat ||
+            combat.phase ===
+            "termine"
+        ) {
+            continue;
+        }
+
+
+        if (
+            combat.joueurs?.[jid]
+        ) {
+
+            return {
+
+                id,
+
+                combat
+            };
+        }
+    }
+
+
+    return null;
+}
+
+
+//==============================================================
+// 🧠 NORMALISER LE JID
+//==============================================================
+
+function normaliserJidAllStars(
+    jid
+) {
+
+    if (!jid) {
+        return null;
+    }
+
+
+    return String(
+        jid
+    )
+    .replace(
+        "@whatsapp.net",
+        "@s.whatsapp.net"
+    );
+}
+
+
+//==============================================================
+// 👤 TROUVER LE JOUEUR DANS LE COMBAT
+//==============================================================
+
+function trouverJoueurDansCombatAllStars(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !jid
+    ) {
+        return null;
+    }
+
+
+    jid =
+        normaliserJidAllStars(
+            jid
+        );
+
+
+    //----------------------------------------------------------
+    // RECHERCHE DIRECTE
+    //----------------------------------------------------------
+
+    if (
+        combat.joueurs?.[jid]
+    ) {
+
+        return combat.joueurs[jid];
+    }
+
+
+    //----------------------------------------------------------
+    // RECHERCHE PAR JID INTERNE
+    //----------------------------------------------------------
+
+    for (
+        const joueur
+        of Object.values(
+            combat.joueurs ?? {}
+        )
+    ) {
+
+        if (
+            normaliserJidAllStars(
+                joueur?.jid
+            ) === jid
+        ) {
+
+            return joueur;
+        }
+    }
+
+
+    return null;
+}
+
+
+//==============================================================
+// 🧠 PRÉPARER L'INTERPRÉTATION DU PAVÉ
+//==============================================================
+// Cette fonction ne décide PAS si l'action réussit.
+// Elle transforme simplement le texte en intentions.
+//
+// L'arbitre reste responsable de la décision.
+//==============================================================
+
+async function interpreterPaveAllStars({
+
+    combat,
+
+    joueur,
+
+    pave,
+
+    interpreter = null
+
+} = {}) {
+
+
+    const structure =
+        creerStructurePaveAllStars(
+            pave
+        );
+
+
+    if (
+        !structure.valide
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le pavé est vide.",
+
+            structure
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🤖 INTERPRÉTEUR EXTERNE
+    //----------------------------------------------------------
+
+    if (
+        typeof interpreter ===
+        "function"
+    ) {
+
+        const resultat =
+            await interpreter({
+
+                combat,
+
+                joueur,
+
+                pave:
+
+                    structure.texteOriginal,
+
+                actions:
+                    structure.actions
+            });
+
+
+        return {
+
+            succes: true,
+
+            structure,
+
+            intention:
+                resultat
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧱 FALLBACK
+    //----------------------------------------------------------
+    // En attendant l'interpréteur IA définitif,
+    // on conserve le pavé brut.
+    //----------------------------------------------------------
+
+    return {
+
+        succes: true,
+
+        structure,
+
+        intention: {
+
+            type:
+                "pave",
+
+            actions:
+                structure.actions,
+
+            texte:
+                structure.texteOriginal
+        }
+    };
+}
+
+
+//==============================================================
+// 📨 TRAITER UN PAVÉ WHATSAPP
+//==============================================================
+// C'est la fonction principale à appeler depuis ton système
+// de réception des messages.
+//==============================================================
+
+async function traiterPaveWhatsAppAllStars({
+
+    msg,
+
+    pave = null,
+
+    combats,
+
+    interpreter = null,
+
+    envoyerMessage = null
+
+} = {}) {
+
+
+    //----------------------------------------------------------
+    // 👤 IDENTIFICATION
+    //----------------------------------------------------------
+
+    let jid =
+        extraireJidMessageAllStars(
+            msg
+        );
+
+
+    jid =
+        normaliserJidAllStars(
+            jid
+        );
+
+
+    if (!jid) {
+
+        return {
+
+            succes: false,
+
+            ignore: true,
+
+            raison:
+                "JID introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📝 TEXTE
+    //----------------------------------------------------------
+
+    if (
+        pave === null
+    ) {
+
+        pave =
+            msg?.text ??
+            msg?.body ??
+            msg?.message?.conversation ??
+            msg?.message?.extendedTextMessage?.text ??
+            "";
+    }
+
+
+    pave =
+        nettoyerPaveAllStars(
+            pave
+        );
+
+
+    if (!pave) {
+
+        return {
+
+            succes: false,
+
+            ignore: true,
+
+            raison:
+                "Aucun texte de combat."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔎 COMBAT
+    //----------------------------------------------------------
+
+    const recherche =
+        trouverCombatJoueurAllStars(
+            combats,
+            jid
+        );
+
+
+    if (!recherche) {
+
+        return {
+
+            succes: false,
+
+            ignore: true,
+
+            raison:
+                "Aucun combat ALL STARS actif pour ce joueur."
+        };
+    }
+
+
+    const combat =
+        recherche.combat;
+
+
+    //----------------------------------------------------------
+    // 👤 JOUEUR
+    //----------------------------------------------------------
+
+    const joueur =
+        trouverJoueurDansCombatAllStars(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable dans le combat."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🏁 VÉRIFIER LE COMBAT
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            ignore: true,
+
+            raison:
+                "Combat déjà terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🚫 DÉJÀ JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        joueurADejaJoueTourAllStars(
+            combat,
+            joueur.jid
+        )
+    ) {
+
+        const etat =
+            obtenirEtatTourCombatAllStars(
+                combat
+            );
+
+
+        if (
+            typeof envoyerMessage ===
+            "function"
+        ) {
+
+            await envoyerMessage(
+                "⚠️ Tu as déjà envoyé ton pavé pour le tour " +
+                etat.tour +
+                ". Attends la résolution."
+            );
+        }
+
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Pavé déjà envoyé pour ce tour."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🧠 INTERPRÉTATION
+    //----------------------------------------------------------
+
+    const interpretation =
+        await interpreterPaveAllStars({
+
+            combat,
+
+            joueur,
+
+            pave,
+
+            interpreter
+        });
+
+
+    if (
+        !interpretation.succes
+    ) {
+
+        if (
+            typeof envoyerMessage ===
+            "function"
+        ) {
+
+            await envoyerMessage(
+                "❌ Pavé invalide : " +
+                interpretation.raison
+            );
+        }
+
+
+        return interpretation;
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ ENREGISTREMENT
+    //----------------------------------------------------------
+
+    const resultat =
+        await enregistrerPaveCombatAllStars({
+
+            combat,
+
+            jid:
+                joueur.jid,
+
+            pave,
+
+            intention:
+                interpretation.intention
+        });
+
+
+    //----------------------------------------------------------
+    // ❌ ERREUR
+    //----------------------------------------------------------
+
+    if (
+        !resultat.succes
+    ) {
+
+        if (
+            typeof envoyerMessage ===
+            "function"
+        ) {
+
+            await envoyerMessage(
+                "❌ " +
+                resultat.raison
+            );
+        }
+
+
+        return resultat;
+    }
+
+
+    //----------------------------------------------------------
+    // ⏳ UN JOUEUR ATTEND
+    //----------------------------------------------------------
+
+    if (
+        !resultat.tourTermine
+    ) {
+
+        const etat =
+            obtenirEtatTourCombatAllStars(
+                combat
+            );
+
+
+        if (
+            typeof envoyerMessage ===
+            "function"
+        ) {
+
+            await envoyerMessage(
+
+                "✅ Pavé reçu pour le tour " +
+                etat.tour +
+                ".\n\n" +
+
+                "⚔️ Ton action est enregistrée.\n" +
+
+                "⏳ En attente de l'adversaire..."
+            );
+        }
+
+
+        return {
+
+            succes: true,
+
+            enAttente:
+                true,
+
+            resultat,
+
+            etat
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ⚔️ TOUR RÉSOLU
+    //----------------------------------------------------------
+
+    const messageResultat =
+        formaterResultatTourAllStars(
+            combat,
+            resultat
+        );
+
+
+    if (
+        typeof envoyerMessage ===
+        "function"
+    ) {
+
+        await envoyerMessage(
+            messageResultat
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🏆 COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        resultat.combatTermine
+    ) {
+
+        const messageFinal =
+            formaterDecisionFinaleAllStars(
+                combat
+            );
+
+
+        if (
+            typeof envoyerMessage ===
+            "function"
+        ) {
+
+            await envoyerMessage(
+                messageFinal
+            );
+        }
+    }
+
+
+    return {
+
+        succes: true,
+
+        tourTermine:
+            true,
+
+        combatTermine:
+            Boolean(
+                resultat.combatTermine
+            ),
+
+        resultat
+    };
+}
+
+
+//==============================================================
+// 📊 FORMATAGE DU RÉSULTAT D'UN TOUR
+//==============================================================
+
+function formaterResultatTourAllStars(
+    combat,
+    resultat
+) {
+
+    if (
+        !combat ||
+        !resultat
+    ) {
+
+        return "⚔️ Résolution terminée.";
+    }
+
+
+    const tour =
+        combat.tour;
+
+
+    const lignes = [];
+
+
+    lignes.push(
+        "━━━━━━━━━━━━━━━━━━"
+    );
+
+
+    lignes.push(
+        `⚔️ TOUR ${tour} — RÉSOLUTION`
+    );
+
+
+    lignes.push(
+        "━━━━━━━━━━━━━━━━━━"
+    );
+
+
+    //----------------------------------------------------------
+    // RÉSULTATS
+    //----------------------------------------------------------
+
+    for (
+        const element
+        of resultat.resolution
+            ?.resultats ??
+            resultat.resultats ??
+            []
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                element.jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        const resultatAction =
+            element.resultat ??
+            {};
+
+
+        let symbole =
+            "⚔️";
+
+
+        switch (
+            resultatAction.resultat
+        ) {
+
+            case RESULTATS_COMBAT_ALLSTARS.IMPACT:
+
+                symbole = "💥";
+
+                break;
+
+
+            case RESULTATS_COMBAT_ALLSTARS.ESQUIVE:
+
+                symbole = "💨";
+
+                break;
+
+
+            case RESULTATS_COMBAT_ALLSTARS.BLOQUE:
+
+                symbole = "🛡️";
+
+                break;
+
+
+            case RESULTATS_COMBAT_ALLSTARS.CONTRE:
+
+                symbole = "🔄";
+
+                break;
+
+
+            case RESULTATS_COMBAT_ALLSTARS.SAISIE:
+
+                symbole = "🤼";
+
+                break;
+
+
+            case RESULTATS_COMBAT_ALLSTARS.DEPLACEMENT:
+
+                symbole = "🏃";
+
+                break;
+
+
+            default:
+
+                symbole = "⚔️";
+        }
+
+
+        lignes.push(
+
+            `${symbole} ${joueur.pseudo} : ` +
+            `${resultatAction.raison ?? "Action résolue."}`
+        );
+
+
+        if (
+            Number(
+                resultatAction.degats ?? 0
+            ) > 0
+        ) {
+
+            lignes.push(
+                `   💥 Dégâts : ${resultatAction.degats}`
+            );
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // ÉTAT DES JOUEURS
+    //----------------------------------------------------------
+
+    lignes.push(
+        ""
+    );
+
+
+    for (
+        const jid
+        of combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        lignes.push(
+
+            `👤 ${joueur.pseudo}` +
+
+            ` | ❤️ ${joueur.pv}/${joueur.pvMax}` +
+
+            ` | 🔋 ${joueur.stamina}` +
+
+            ` | ⚡ ${joueur.energie}`
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // PROCHAIN TOUR
+    //----------------------------------------------------------
+
+    if (
+        !resultat.combatTermine
+    ) {
+
+        lignes.push(
+            ""
+        );
+
+
+        lignes.push(
+            `⏭️ Prochain tour : ${combat.tour + 1}/10`
+        );
+    }
+
+
+    lignes.push(
+        "━━━━━━━━━━━━━━━━━━"
+    );
+
+
+    return lignes.join(
+        "\n"
+    );
+}
+
+
+//==============================================================
+// 🏆 FORMATAGE DE LA DÉCISION FINALE
+//==============================================================
+
+function formaterDecisionFinaleAllStars(
+    combat
+) {
+
+    const decision =
+        combat?.decisionFinale;
+
+
+    if (!decision) {
+
+        return (
+            "🏁 Combat terminé."
+        );
+    }
+
+
+    const lignes = [];
+
+
+    lignes.push(
+        ""
+    );
+
+
+    lignes.push(
+        "━━━━━━━━━━━━━━━━━━"
+    );
+
+
+    lignes.push(
+        "🏆 DÉCISION FINALE"
+    );
+
+
+    lignes.push(
+        "━━━━━━━━━━━━━━━━━━"
+    );
+
+
+    if (
+        decision.egalite
+    ) {
+
+        lignes.push(
+            "🤝 ÉGALITÉ"
+        );
+
+    } else {
+
+        const vainqueur =
+            obtenirJoueurCombat(
+                combat,
+                decision.vainqueur
+            );
+
+
+        if (
+            vainqueur
+        ) {
+
+            lignes.push(
+                `👑 VAINQUEUR : ${vainqueur.pseudo}`
+            );
+        }
+    }
+
+
+    lignes.push(
+        ""
+    );
+
+
+    lignes.push(
+        `📊 Critère : ${decision.critere ?? "—"}`
+    );
+
+
+    lignes.push(
+        `📝 ${decision.explication ?? decision.raison ?? ""}`
+    );
+
+
+    //----------------------------------------------------------
+    // STATISTIQUES FINALES
+    //----------------------------------------------------------
+
+    for (
+        const jid
+        of combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        lignes.push(
+            ""
+        );
+
+
+        lignes.push(
+            `👤 ${joueur.pseudo}`
+        );
+
+
+        lignes.push(
+            `❤️ PV : ${joueur.pv}/${joueur.pvMax}`
+        );
+
+
+        lignes.push(
+            `🔋 Stamina : ${joueur.stamina}`
+        );
+
+
+        lignes.push(
+            `👑 Domination : ${
+                joueur.domination?.score ?? 0
+            }`
+        );
+
+
+        lignes.push(
+            `💥 Coups portés : ${
+                joueur.statistiques?.coupsPortes ?? 0
+            }`
+        );
+
+
+        lignes.push(
+            `🛡️ Blocages : ${
+                joueur.statistiques?.blocages ?? 0
+            }`
+        );
+
+
+        lignes.push(
+            `💨 Esquives : ${
+                joueur.statistiques?.esquives ?? 0
+            }`
+        );
+
+
+        lignes.push(
+            `🔄 Contres : ${
+                joueur.statistiques?.contres ?? 0
+            }`
+        );
+    }
+
+
+    lignes.push(
+        ""
+    );
+
+
+    lignes.push(
+        "━━━━━━━━━━━━━━━━━━"
+    );
+
+
+    return lignes.join(
+        "\n"
+    );
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "⚔️ Pont WhatsApp → ALL STARS chargé."
+);
+
+//==============================================================
+// ⚖️ ALL STARS — RÉSOLUTION D'UN TOUR
+//==============================================================
+// Reçoit les intentions des deux joueurs.
+//
+// Le moteur compare :
+//
+// - action
+// - position
+// - distance
+// - vitesse
+// - stamina
+// - état
+// - membres disponibles
+// - action adverse
+//
+// Puis applique les conséquences réelles.
+//
+// IMPORTANT :
+// Le moteur ne considère JAMAIS une intention comme une réussite
+// automatique.
+//
+// "Je frappe son visage"
+// ≠
+// "Je touche son visage"
+//
+// L'arbitre doit déterminer le résultat.
+//==============================================================
+
+
+//==============================================================
+// 📌 RÉSULTATS POSSIBLES
+//==============================================================
+
+const RESULTATS_COMBAT_ALLSTARS = {
+
+    IMPACT: "impact",
+
+    ESQUIVE: "esquive",
+
+    BLOQUE: "bloque",
+
+    CONTRE: "contre",
+
+    SAISIE: "saisie",
+
+    PROJECTION: "projection",
+
+    DEPLACEMENT: "deplacement",
+
+    RATE: "rate",
+
+    IMPOSSIBLE: "impossible",
+
+    AUCUNE_ACTION: "aucune_action"
+};
+
+
+//==============================================================
+// 🔎 RÉCUPÉRER UN JOUEUR
+//==============================================================
+
+function obtenirJoueurCombat(
+    combat,
+    jid
+) {
+
+    if (
+        !combat ||
+        !jid
+    ) {
+        return null;
+    }
+
+
+    if (
+        combat.joueurs?.[jid]
+    ) {
+
+        return combat.joueurs[jid];
+    }
+
+
+    for (
+        const joueur
+        of Object.values(
+            combat.joueurs ?? {}
+        )
+    ) {
+
+        if (
+            joueur?.jid === jid
+        ) {
+
+            return joueur;
+        }
+    }
+
+
+    return null;
+}
+
+
+//==============================================================
+// 👤 RÉCUPÉRER L'ADVERSAIRE
+//==============================================================
+
+function obtenirAdversaireCombat(
+    combat,
+    jid
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    const autreJid =
+        combat.ordre.find(
+            id =>
+                id !== jid
+        );
+
+
+    if (!autreJid) {
+        return null;
+    }
+
+
+    return obtenirJoueurCombat(
+        combat,
+        autreJid
+    );
+}
+
+
+//==============================================================
+// 🛑 VÉRIFIER SI LE JOUEUR PEUT AGIR
+//==============================================================
+
+function joueurPeutAgirCombat(
+    joueur
+) {
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.MORT
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est mort."
+        };
+    }
+
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.KO
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est KO."
+        };
+    }
+
+
+    if (
+        joueur.etat ===
+        ETATS_COMBAT_ALLSTARS.IMMOBILISE
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le joueur est immobilisé."
+        };
+    }
+
+
+    return {
+
+        succes: true
+    };
+}
+
+
+//==============================================================
+// 📏 DISTANCE D'UNE ACTION
+//==============================================================
+
+function verifierPorteeActionCombat(
+    joueur,
+    adversaire,
+    action
+) {
+
+    const distance =
+        calculerDistanceCombat(
+            joueur,
+            adversaire
+        );
+
+
+    //----------------------------------------------------------
+    // DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        action?.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .DEPLACEMENT
+    ) {
+
+        return {
+
+            succes: true,
+
+            distance
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ACTIONS CORPS À CORPS
+    //----------------------------------------------------------
+
+    const zoneContact =
+        REGLES_COMBAT_ALLSTARS
+            ?.corpsACorps
+            ?.zoneEffetAttaqueFrontale ??
+        1;
+
+
+    if (
+        [
+            TYPES_ACTION_COMBAT_ALLSTARS.ATTAQUE,
+            TYPES_ACTION_COMBAT_ALLSTARS.CONTRE,
+            TYPES_ACTION_COMBAT_ALLSTARS.SAISIE,
+            TYPES_ACTION_COMBAT_ALLSTARS.PROJECTION
+        ].includes(
+            action?.type
+        )
+    ) {
+
+        if (
+            distance >
+            zoneContact
+        ) {
+
+            return {
+
+                succes: false,
+
+                raison:
+                    "L'adversaire est hors de portée.",
+
+                distance
+            };
+        }
+    }
+
+
+    return {
+
+        succes: true,
+
+        distance
+    };
+}
+
+
+//==============================================================
+// 🔋 COÛT D'UNE ACTION
+//==============================================================
+
+function obtenirCoutActionCombat(
+    action
+) {
+
+    if (!action) {
+        return {
+            stamina: 0,
+            energie: 0
+        };
+    }
+
+
+    switch (
+        action.type
+    ) {
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .DEPLACEMENT:
+
+            return {
+
+                stamina: 5,
+
+                energie: 0
+            };
+
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .ESQUIVE:
+
+            return {
+
+                stamina: 8,
+
+                energie: 0
+            };
+
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .BLOCAGE:
+
+            return {
+
+                stamina: 4,
+
+                energie: 0
+            };
+
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .ATTAQUE:
+
+            return {
+
+                stamina: 6,
+
+                energie: 2
+            };
+
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .CONTRE:
+
+            return {
+
+                stamina: 8,
+
+                energie: 2
+            };
+
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .SAISIE:
+
+            return {
+
+                stamina: 7,
+
+                energie: 0
+            };
+
+
+        case TYPES_ACTION_COMBAT_ALLSTARS
+            .PROJECTION:
+
+            return {
+
+                stamina: 10,
+
+                energie: 2
+            };
+
+
+        default:
+
+            return {
+
+                stamina: 2,
+
+                energie: 0
+            };
+    }
+}
+
+
+//==============================================================
+// 🧮 CALCULER UNE VALEUR D'ACTION
+//==============================================================
+
+function calculerPuissanceActionCombat(
+    joueur,
+    action
+) {
+
+    const combatSpeed =
+        Number(
+            joueur.combatSpeed ?? 0
+        );
+
+
+    const stamina =
+        Number(
+            joueur.stamina ?? 0
+        );
+
+
+    const staminaFactor =
+        Math.max(
+            0.25,
+            Math.min(
+                1,
+                stamina / 100
+            )
+        );
+
+
+    const base =
+        combatSpeed > 0
+            ? combatSpeed
+            : 50;
+
+
+    return (
+        base *
+        staminaFactor
+    );
+}
+
+
+//==============================================================
+// 💥 CALCUL DES DÉGÂTS
+//==============================================================
+
+function calculerDegatsCombatAllStars(
+    attaquant,
+    action,
+    defenseur
+) {
+
+    const puissance =
+        calculerPuissanceActionCombat(
+            attaquant,
+            action
+        );
+
+
+    //----------------------------------------------------------
+    // BASE
+    //----------------------------------------------------------
+
+    let degats =
+        Math.max(
+            1,
+            Math.round(
+                puissance * 0.10
+            )
+        );
+
+
+    //----------------------------------------------------------
+    // ZONE
+    //----------------------------------------------------------
+
+    if (
+        action?.zone ===
+        "tete"
+    ) {
+
+        degats *= 1.35;
+    }
+
+
+    else if (
+        action?.zone ===
+        "cou"
+    ) {
+
+        degats *= 1.40;
+    }
+
+
+    else if (
+        action?.zone ===
+        "torse"
+    ) {
+
+        degats *= 1.00;
+    }
+
+
+    else if (
+        action?.zone ===
+        "jambe"
+    ) {
+
+        degats *= 0.80;
+    }
+
+
+    //----------------------------------------------------------
+    // ÉTAT DE L'ATTAQUANT
+    //----------------------------------------------------------
+
+    if (
+        attaquant.etat ===
+        ETATS_COMBAT_ALLSTARS.SONNE
+    ) {
+
+        degats *= 0.60;
+    }
+
+
+    //----------------------------------------------------------
+    // ARRONDI
+    //----------------------------------------------------------
+
+    return Math.max(
+        1,
+        Math.round(
+            degats
+        )
+    );
+}
+
+
+//==============================================================
+// 🏃 RÉSOLUTION D'UN DÉPLACEMENT
+//==============================================================
+
+function resoudreDeplacementCombat(
+    joueur,
+    adversaire,
+    action
+) {
+
+    const deplacement =
+        action?.deplacement ??
+        {};
+
+
+    const vitesse =
+        Number(
+            joueur.travelSpeed ??
+            joueur.combatSpeed ??
+            1
+        );
+
+
+    const distance =
+        calculerDistanceCombat(
+            joueur,
+            adversaire
+        );
+
+
+    //----------------------------------------------------------
+    // DISTANCE PAR DÉFAUT
+    //----------------------------------------------------------
+
+    const distanceParcourue =
+        Math.min(
+            distance,
+            Math.max(
+                0.5,
+                vitesse * 0.5
+            )
+        );
+
+
+    //----------------------------------------------------------
+    // DIRECTION
+    //----------------------------------------------------------
+
+    const dx =
+        adversaire.position.x -
+        joueur.position.x;
+
+    const dy =
+        adversaire.position.y -
+        joueur.position.y;
+
+    const longueur =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        ) || 1;
+
+
+    let directionX =
+        dx / longueur;
+
+    let directionY =
+        dy / longueur;
+
+
+    if (
+        deplacement.direction ===
+        "arriere"
+    ) {
+
+        directionX *= -1;
+        directionY *= -1;
+    }
+
+
+    if (
+        deplacement.direction ===
+        "gauche"
+    ) {
+
+        const ancienX =
+            directionX;
+
+        directionX =
+            -directionY;
+
+        directionY =
+            ancienX;
+    }
+
+
+    if (
+        deplacement.direction ===
+        "droite"
+    ) {
+
+        const ancienX =
+            directionX;
+
+        directionX =
+            directionY;
+
+        directionY =
+            -ancienX;
+    }
+
+
+    //----------------------------------------------------------
+    // NOUVELLE POSITION
+    //----------------------------------------------------------
+
+    joueur.position.x +=
+        directionX *
+        distanceParcourue;
+
+
+    joueur.position.y +=
+        directionY *
+        distanceParcourue;
+
+
+    return {
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS
+                .DEPLACEMENT,
+
+        distanceParcourue,
+
+        nouvellePosition: {
+
+            x:
+                joueur.position.x,
+
+            y:
+                joueur.position.y,
+
+            z:
+                joueur.position.z
+        }
+    };
+}
+
+
+//==============================================================
+// 🛡️ RÉSOLUTION D'UNE DÉFENSE
+//==============================================================
+
+function resoudreDefenseCombat(
+    defenseur,
+    attaquant,
+    actionDefense
+) {
+
+    if (
+        actionDefense?.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .ESQUIVE
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS
+                    .ESQUIVE,
+
+            raison:
+                `${defenseur.pseudo} tente d'esquiver.`
+        };
+    }
+
+
+    if (
+        actionDefense?.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .BLOCAGE
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS
+                    .BLOQUE,
+
+            raison:
+                `${defenseur.pseudo} se met en garde.`
+        };
+    }
+
+
+    return {
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS
+                .AUCUNE_ACTION,
+
+        raison:
+            `${defenseur.pseudo} ne prépare pas de défense.`
+    };
+}
+
+
+//==============================================================
+// ⚔️ RÉSOLUTION ATTAQUE CONTRE DÉFENSE
+//==============================================================
+
+function resoudreAffrontementCombatAllStars(
+    attaquant,
+    actionAttaque,
+    defenseur,
+    actionDefense
+) {
+
+    //----------------------------------------------------------
+    // VÉRIFICATION JOUEUR
+    //----------------------------------------------------------
+
+    const peutAttaquer =
+        joueurPeutAgirCombat(
+            attaquant
+        );
+
+
+    if (
+        !peutAttaquer.succes
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS
+                    .IMPOSSIBLE,
+
+            raison:
+                peutAttaquer.raison
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // PORTÉE
+    //----------------------------------------------------------
+
+    const portee =
+        verifierPorteeActionCombat(
+            attaquant,
+            defenseur,
+            actionAttaque
+        );
+
+
+    if (
+        !portee.succes
+    ) {
+
+        return {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS
+                    .IMPOSSIBLE,
+
+            raison:
+                portee.raison,
+
+            distance:
+                portee.distance
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ESQUIVE
+    //----------------------------------------------------------
+
+    if (
+        actionDefense?.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .ESQUIVE
+    ) {
+
+        const puissanceAttaque =
+            calculerPuissanceActionCombat(
+                attaquant,
+                actionAttaque
+            );
+
+
+        const puissanceDefense =
+            calculerPuissanceActionCombat(
+                defenseur,
+                actionDefense
+            );
+
+
+        if (
+            puissanceDefense >=
+            puissanceAttaque
+        ) {
+
+            defenseur.statistiques
+                .esquives++;
+
+
+            return {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .ESQUIVE,
+
+                raison:
+                    `${defenseur.pseudo} esquive l'attaque.`
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // BLOCAGE
+    //----------------------------------------------------------
+
+    if (
+        actionDefense?.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .BLOCAGE
+    ) {
+
+        const puissanceAttaque =
+            calculerPuissanceActionCombat(
+                attaquant,
+                actionAttaque
+            );
+
+
+        const puissanceDefense =
+            calculerPuissanceActionCombat(
+                defenseur,
+                actionDefense
+            );
+
+
+        if (
+            puissanceDefense >=
+            puissanceAttaque
+        ) {
+
+            defenseur.statistiques
+                .blocages++;
+
+
+            return {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .BLOQUE,
+
+                raison:
+                    `${defenseur.pseudo} bloque l'attaque.`
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // CONTRE
+    //----------------------------------------------------------
+
+    if (
+        actionDefense?.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .CONTRE
+    ) {
+
+        const puissanceDefense =
+            calculerPuissanceActionCombat(
+                defenseur,
+                actionDefense
+            );
+
+
+        const puissanceAttaque =
+            calculerPuissanceActionCombat(
+                attaquant,
+                actionAttaque
+            );
+
+
+        if (
+            puissanceDefense >
+            puissanceAttaque
+        ) {
+
+            defenseur.statistiques
+                .contres++;
+
+
+            const degats =
+                calculerDegatsCombatAllStars(
+                    defenseur,
+                    actionDefense,
+                    attaquant
+                );
+
+
+            const impact =
+                appliquerDegatsCombat(
+                    attaquant,
+                    degats,
+                    defenseur.jid
+                );
+
+
+            defenseur.statistiques
+                .coupsPortes++;
+
+
+            return {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .CONTRE,
+
+                raison:
+                    `${defenseur.pseudo} contre l'attaque.`,
+
+                degats,
+
+                impact
+            };
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // IMPACT
+    //----------------------------------------------------------
+
+    const degats =
+        calculerDegatsCombatAllStars(
+            attaquant,
+            actionAttaque,
+            defenseur
+        );
+
+
+    const impact =
+        appliquerDegatsCombat(
+            defenseur,
+            degats,
+            attaquant.jid
+        );
+
+
+    attaquant.statistiques
+        .coupsPortes++;
+
+
+    return {
+
+        resultat:
+            RESULTATS_COMBAT_ALLSTARS
+                .IMPACT,
+
+        raison:
+            `${attaquant.pseudo} touche ${defenseur.pseudo}.`,
+
+        degats,
+
+        impact
+    };
+}
+
+
+//==============================================================
+// ⚔️ RÉSOUDRE UNE ACTION
+//==============================================================
+
+function resoudreActionCombatAllStars(
+    joueur,
+    adversaire,
+    actionJoueur,
+    actionAdversaire
+) {
+
+    if (!actionJoueur) {
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat: {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .AUCUNE_ACTION,
+
+                raison:
+                    "Aucune action."
+            }
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // JOUEUR INCAPABLE
+    //----------------------------------------------------------
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            joueur
+        );
+
+
+    if (
+        !peutAgir.succes
+    ) {
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat: {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .IMPOSSIBLE,
+
+                raison:
+                    peutAgir.raison
+            }
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // CONSOMMATION DES RESSOURCES
+    //----------------------------------------------------------
+
+    const cout =
+        obtenirCoutActionCombat(
+            actionJoueur
+        );
+
+
+    const stamina =
+        consommerStaminaCombat(
+            joueur,
+            cout.stamina
+        );
+
+
+    if (
+        !stamina.succes
+    ) {
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat: {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .IMPOSSIBLE,
+
+                raison:
+                    "Stamina insuffisante."
+            }
+        };
+    }
+
+
+    const energie =
+        consommerEnergieCombat(
+            joueur,
+            cout.energie
+        );
+
+
+    if (
+        !energie.succes
+    ) {
+
+        // Remboursement de stamina si
+        // l'énergie est insuffisante.
+
+        joueur.stamina +=
+            cout.stamina;
+
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat: {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .IMPOSSIBLE,
+
+                raison:
+                    "Énergie insuffisante."
+            }
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // DÉPLACEMENT
+    //----------------------------------------------------------
+
+    if (
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .DEPLACEMENT
+    ) {
+
+        const mouvement =
+            resoudreDeplacementCombat(
+                joueur,
+                adversaire,
+                actionJoueur
+            );
+
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat:
+                mouvement
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // DÉFENSE
+    //----------------------------------------------------------
+
+    if (
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .ESQUIVE ||
+
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .BLOCAGE
+    ) {
+
+        const defense =
+            resoudreDefenseCombat(
+                joueur,
+                adversaire,
+                actionJoueur
+            );
+
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat:
+                defense
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // ATTAQUE / CONTRE
+    //----------------------------------------------------------
+
+    if (
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .ATTAQUE ||
+
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .CONTRE
+    ) {
+
+        const affrontement =
+            resoudreAffrontementCombatAllStars(
+                joueur,
+                actionJoueur,
+                adversaire,
+                actionAdversaire
+            );
+
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat:
+                affrontement
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // SAISIE
+    //----------------------------------------------------------
+
+    if (
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .SAISIE
+    ) {
+
+        const distance =
+            calculerDistanceCombat(
+                joueur,
+                adversaire
+            );
+
+
+        const portee =
+            REGLES_COMBAT_ALLSTARS
+                ?.corpsACorps
+                ?.zoneEffetAttaqueFrontale ??
+            1;
+
+
+        if (
+            distance > portee
+        ) {
+
+            return {
+
+                jid:
+                    joueur.jid,
+
+                resultat: {
+
+                    resultat:
+                        RESULTATS_COMBAT_ALLSTARS
+                            .IMPOSSIBLE,
+
+                    raison:
+                        "Trop loin pour saisir."
+                }
+            };
+        }
+
+
+        joueur.statistiques
+            .saisies++;
+
+
+        adversaire.etat =
+            ETATS_COMBAT_ALLSTARS
+                .IMMOBILISE;
+
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat: {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .SAISIE,
+
+                raison:
+                    `${joueur.pseudo} saisit ${adversaire.pseudo}.`
+            }
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // PROJECTION
+    //----------------------------------------------------------
+
+    if (
+        actionJoueur.type ===
+        TYPES_ACTION_COMBAT_ALLSTARS
+            .PROJECTION
+    ) {
+
+        const distance =
+            calculerDistanceCombat(
+                joueur,
+                adversaire
+            );
+
+
+        const portee =
+            REGLES_COMBAT_ALLSTARS
+                ?.corpsACorps
+                ?.zoneEffetAttaqueFrontale ??
+            1;
+
+
+        if (
+            distance > portee
+        ) {
+
+            return {
+
+                jid:
+                    joueur.jid,
+
+                resultat: {
+
+                    resultat:
+                        RESULTATS_COMBAT_ALLSTARS
+                            .IMPOSSIBLE,
+
+                    raison:
+                        "Trop loin pour projeter."
+                };
+        }
+
+
+        const degats =
+            calculerDegatsCombatAllStars(
+                joueur,
+                actionJoueur,
+                adversaire
+            );
+
+
+        const impact =
+            appliquerDegatsCombat(
+                adversaire,
+                degats,
+                joueur.jid
+            );
+
+
+        joueur.statistiques
+            .coupsPortes++;
+
+
+        return {
+
+            jid:
+                joueur.jid,
+
+            resultat: {
+
+                resultat:
+                    RESULTATS_COMBAT_ALLSTARS
+                        .PROJECTION,
+
+                raison:
+                    `${joueur.pseudo} projette ${adversaire.pseudo}.`,
+
+                degats,
+
+                impact
+            }
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // AUTRE
+    //----------------------------------------------------------
+
+    return {
+
+        jid:
+            joueur.jid,
+
+        resultat: {
+
+            resultat:
+                RESULTATS_COMBAT_ALLSTARS
+                    .AUCUNE_ACTION,
+
+            raison:
+                "Action non reconnue par le moteur."
+        }
+    };
+}
+
+
+//==============================================================
+// 🏆 CALCUL DE LA DOMINATION
+//==============================================================
+
+function calculerDominationCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return;
+    }
+
+
+    for (
+        const jid
+        of combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        if (!joueur.domination) {
+
+            joueur.domination = {
+
+                score: 0,
+
+                actionsReussies: 0,
+
+                actionsRatees: 0,
+
+                pression: 0
+            };
+        }
+
+
+        //------------------------------------------------------
+        // ACTIONS RÉUSSIES
+        //------------------------------------------------------
+
+        const coups =
+            joueur.statistiques
+                ?.coupsPortes ?? 0;
+
+
+        const esquives =
+            joueur.statistiques
+                ?.esquives ?? 0;
+
+
+        const blocages =
+            joueur.statistiques
+                ?.blocages ?? 0;
+
+
+        const contres =
+            joueur.statistiques
+                ?.contres ?? 0;
+
+
+        //------------------------------------------------------
+        // SCORE
+        //------------------------------------------------------
+
+        joueur.domination.score =
+            (
+                coups * 3
+            ) +
+            (
+                esquives * 2
+            ) +
+            (
+                blocages * 1
+            ) +
+            (
+                contres * 4
+            );
+    }
+}
+
+
+//==============================================================
+// ☠️ VÉRIFIER LA FIN DU COMBAT
+//==============================================================
+
+function verifierFinCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return false;
+    }
+
+
+    for (
+        const jid
+        of combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            continue;
+        }
+
+
+        if (
+            joueur.pv <= 0
+        ) {
+
+            joueur.pv = 0;
+
+            joueur.etat =
+                ETATS_COMBAT_ALLSTARS
+                    .MORT;
+
+
+            return true;
+        }
+    }
+
+
+    return false;
+}
+
+
+//==============================================================
+// 🧮 DÉCISION APRÈS 10 TOURS
+//==============================================================
+
+function calculerDecisionFinaleAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    const joueurs =
+        combat.ordre.map(
+            jid =>
+                obtenirJoueurCombat(
+                    combat,
+                    jid
+                )
+        ).filter(
+            Boolean
+        );
+
+
+    if (
+        joueurs.length < 2
+    ) {
+
+        return null;
+    }
+
+
+    //----------------------------------------------------------
+    // SCORE FINAL
+    //----------------------------------------------------------
+
+    const scores =
+        joueurs.map(
+            joueur => {
+
+                const pv =
+                    Number(
+                        joueur.pv ?? 0
+                    );
+
+
+                const pvMax =
+                    Number(
+                        joueur.pvMax ?? 100
+                    );
+
+
+                const stamina =
+                    Number(
+                        joueur.stamina ?? 0
+                    );
+
+
+                const domination =
+                    Number(
+                        joueur.domination
+                            ?.score ?? 0
+                    );
+
+
+                //------------------------------------------------
+                // PV = 40%
+                // STAMINA = 25%
+                // DOMINATION = 35%
+                //------------------------------------------------
+
+                const scorePV =
+                    (
+                        pv /
+                        Math.max(
+                            1,
+                            pvMax
+                        )
+                    ) * 40;
+
+
+                const scoreStamina =
+                    (
+                        stamina /
+                        100
+                    ) * 25;
+
+
+                const scoreDomination =
+                    Math.min(
+                        35,
+                        domination
+                    );
+
+
+                return {
+
+                    jid:
+                        joueur.jid,
+
+                    pseudo:
+                        joueur.pseudo,
+
+                    scorePV,
+
+                    scoreStamina,
+
+                    scoreDomination,
+
+                    score:
+                        scorePV +
+                        scoreStamina +
+                        scoreDomination
+                };
+            }
+        );
+
+
+    scores.sort(
+        (
+            a,
+            b
+        ) =>
+            b.score -
+            a.score
+    );
+
+
+    const premier =
+        scores[0];
+
+    const second =
+        scores[1];
+
+
+    //----------------------------------------------------------
+    // ÉGALITÉ
+    //----------------------------------------------------------
+
+    const egalite =
+        Math.abs(
+            premier.score -
+            second.score
+        ) < 0.01;
+
+
+    if (egalite) {
+
+        return {
+
+            type:
+                "decision",
+
+            egalite:
+                true,
+
+            vainqueur:
+                null,
+
+            scores,
+
+            critere:
+                "égalité",
+
+            explication:
+                "Les deux combattants terminent avec un score pratiquement identique."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // VAINQUEUR
+    //----------------------------------------------------------
+
+    return {
+
+        type:
+            "decision",
+
+        egalite:
+            false,
+
+        vainqueur:
+            premier.jid,
+
+        scores,
+
+        critere:
+            "PV + stamina + domination",
+
+        explication:
+            `${premier.pseudo} termine avec le meilleur bilan global après 10 tours.`
+    };
+}
+
+
+//==============================================================
+// ⚔️ RÉSOLUTION COMPLÈTE DU TOUR
+//==============================================================
+
+async function resoudreTourCombatAllStars({
+
+    combat,
+
+    intentions
+
+} = {}) {
+
+
+    if (!combat) {
+
+        throw new Error(
+            "Combat introuvable."
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🛑 COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            termine:
+                true,
+
+            raison:
+                "Combat déjà terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔒 VÉRIFICATION DES DEUX JOUEURS
+    //----------------------------------------------------------
+
+    if (
+        combat.ordre.length < 2
+    ) {
+
+        throw new Error(
+            "Deux joueurs sont nécessaires."
+        );
+    }
+
+
+    const jid1 =
+        combat.ordre[0];
+
+    const jid2 =
+        combat.ordre[1];
+
+
+    const joueur1 =
+        obtenirJoueurCombat(
+            combat,
+            jid1
+        );
+
+
+    const joueur2 =
+        obtenirJoueurCombat(
+            combat,
+            jid2
+        );
+
+
+    if (
+        !joueur1 ||
+        !joueur2
+    ) {
+
+        throw new Error(
+            "Impossible de récupérer les deux combattants."
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // ACTIONS
+    //----------------------------------------------------------
+
+    const action1 =
+        intentions?.[jid1] ??
+        null;
+
+
+    const action2 =
+        intentions?.[jid2] ??
+        null;
+
+
+    //----------------------------------------------------------
+    // ⚔️ RÉSOLUTION
+    //----------------------------------------------------------
+
+    const resultat1 =
+        resoudreActionCombatAllStars(
+            joueur1,
+            joueur2,
+            action1,
+            action2
+        );
+
+
+    const resultat2 =
+        resoudreActionCombatAllStars(
+            joueur2,
+            joueur1,
+            action2,
+            action1
+        );
+
+
+    //----------------------------------------------------------
+    // 📊 DOMINATION
+    //----------------------------------------------------------
+
+    calculerDominationCombatAllStars(
+        combat
+    );
+
+
+    //----------------------------------------------------------
+    // 🏁 FIN PAR KO / MORT
+    //----------------------------------------------------------
+
+    let termine =
+        verifierFinCombatAllStars(
+            combat
+        );
+
+
+    //----------------------------------------------------------
+    // ⏱️ LE TOUR EST TERMINÉ
+    //----------------------------------------------------------
+
+    combat.tour =
+        Number(
+            combat.tour ?? 0
+        ) + 1;
+
+
+    combat.sequence =
+        Number(
+            combat.sequence ?? 0
+        ) + 1;
+
+
+    //----------------------------------------------------------
+    // 📜 HISTORIQUE
+    //----------------------------------------------------------
+
+    combat.historique.push({
+
+        type:
+            "tour_resolu",
+
+        tour:
+            combat.tour,
+
+        joueur1:
+            resultat1,
+
+        joueur2:
+            resultat2,
+
+        temps:
+            combat.temps
+    });
+
+
+    //----------------------------------------------------------
+    // 🏆 FIN APRÈS 10 TOURS
+    //----------------------------------------------------------
+
+    if (
+        !termine &&
+        combat.tour >= 10
+    ) {
+
+        const decision =
+            calculerDecisionFinaleAllStars(
+                combat
+            );
+
+
+        combat.decisionFinale =
+            decision;
+
+
+        combat.phase =
+            "termine";
+
+
+        termine =
+            true;
+    }
+
+
+    //----------------------------------------------------------
+    // FIN PAR KO
+    //----------------------------------------------------------
+
+    if (
+        termine &&
+        combat.phase !==
+        "termine"
+    ) {
+
+        combat.phase =
+            "termine";
+
+
+        combat.decisionFinale = {
+
+            type:
+                "ko",
+
+            egalite:
+                false,
+
+            vainqueur:
+                combat.ordre.find(
+                    jid => {
+
+                        const joueur =
+                            obtenirJoueurCombat(
+                                combat,
+                                jid
+                            );
+
+
+                        return (
+                            joueur &&
+                            joueur.pv > 0
+                        );
+                    }
+                ) ?? null,
+
+            critere:
+                "KO",
+
+            explication:
+                "Le combat s'est terminé avant les 10 tours."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // RETOUR
+    //----------------------------------------------------------
+
+    return {
+
+        termine,
+
+        tour:
+            combat.tour,
+
+        resultats: [
+
+            resultat1,
+
+            resultat2
+        ],
+
+        resolution: {
+
+            resultats: [
+
+                resultat1,
+
+                resultat2
+            ]
+        },
+
+        decision:
+            combat.decisionFinale ??
+            null
+    };
+}
+
+//==============================================================
+// 🔄 ALL STARS — GESTIONNAIRE DES TOURS
+//==============================================================
+// Un tour =
+//
+// 1. Joueur 1 envoie son intention
+// 2. Joueur 2 envoie son intention
+// 3. Les deux intentions sont conservées
+// 4. Lorsque les deux sont présentes → résolution
+// 5. La résolution terminée → +1 tour
+// 6. Les intentions sont supprimées
+// 7. Nouveau tour
+//
+// IMPORTANT :
+// Une seule intention par joueur et par tour.
+//==============================================================
+
+
+//==============================================================
+// 🧠 INITIALISER LE SYSTÈME DES TOURS
+//==============================================================
+
+function initialiserToursCombatAllStars(combat) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    //----------------------------------------------------------
+    // INTENTIONS DU TOUR ACTUEL
+    //----------------------------------------------------------
+
+    combat.intentionsTour = {};
+
+
+    //----------------------------------------------------------
+    // ÉTAT DU TOUR
+    //----------------------------------------------------------
+
+    combat.tourEnCours = {
+
+        numero:
+            Number(
+                combat.tour ?? 0
+            ) + 1,
+
+        joueursAyantJoue: [],
+
+        joueursEnAttente:
+            [...combat.ordre],
+
+        pretPourResolution: false,
+
+        resolu: false
+    };
+
+
+    return combat.tourEnCours;
+}
+
+
+//==============================================================
+// 🎯 ENREGISTRER UNE INTENTION
+//==============================================================
+
+function enregistrerIntentionCombatAllStars(
+    combat,
+    jid,
+    intention
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Le combat est déjà terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // VÉRIFIER LE JOUEUR
+    //----------------------------------------------------------
+
+    const joueur =
+        obtenirJoueurCombat(
+            combat,
+            jid
+        );
+
+
+    if (!joueur) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Joueur introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // INITIALISER LE TOUR SI NÉCESSAIRE
+    //----------------------------------------------------------
+
+    if (!combat.intentionsTour) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    if (!combat.tourEnCours) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // 🛑 JOUEUR DÉJÀ MORT / KO
+    //----------------------------------------------------------
+
+    const peutAgir =
+        joueurPeutAgirCombat(
+            joueur
+        );
+
+
+    if (!peutAgir.succes) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                peutAgir.raison
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🛑 UNE SEULE ACTION PAR TOUR
+    //----------------------------------------------------------
+
+    if (
+        Object.prototype.hasOwnProperty.call(
+            combat.intentionsTour,
+            jid
+        )
+    ) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Ce joueur a déjà envoyé son action pour ce tour."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 📌 ENREGISTREMENT
+    //----------------------------------------------------------
+
+    combat.intentionsTour[jid] =
+        intention;
+
+
+    //----------------------------------------------------------
+    // LISTE DES JOUEURS AYANT JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        !combat.tourEnCours.joueursAyantJoue
+            .includes(jid)
+    ) {
+
+        combat.tourEnCours
+            .joueursAyantJoue
+            .push(jid);
+    }
+
+
+    //----------------------------------------------------------
+    // MISE À JOUR DES JOUEURS EN ATTENTE
+    //----------------------------------------------------------
+
+    combat.tourEnCours
+        .joueursEnAttente =
+        combat.ordre.filter(
+            id =>
+                !combat.tourEnCours
+                    .joueursAyantJoue
+                    .includes(id)
+        );
+
+
+    //----------------------------------------------------------
+    // LES DEUX ONT JOUÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.tourEnCours
+            .joueursAyantJoue
+            .length >= 2
+    ) {
+
+        combat.tourEnCours
+            .pretPourResolution =
+            true;
+    }
+
+
+    return {
+
+        succes: true,
+
+        jid,
+
+        tour:
+            combat.tourEnCours.numero,
+
+        joueursAyantJoue:
+            [
+                ...combat.tourEnCours
+                    .joueursAyantJoue
+            ],
+
+        joueursEnAttente:
+            [
+                ...combat.tourEnCours
+                    .joueursEnAttente
+            ],
+
+        pretPourResolution:
+            combat.tourEnCours
+                .pretPourResolution
+    };
+}
+
+
+//==============================================================
+// ⚔️ RÉSOUDRE LE TOUR SI LES DEUX ONT JOUÉ
+//==============================================================
+
+async function tenterResolutionTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+
+        return {
+
+            succes: false,
+
+            raison:
+                "Combat introuvable."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // COMBAT TERMINÉ
+    //----------------------------------------------------------
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return {
+
+            succes: false,
+
+            termine: true,
+
+            raison:
+                "Le combat est terminé."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // INITIALISATION
+    //----------------------------------------------------------
+
+    if (!combat.intentionsTour) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    if (!combat.tourEnCours) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    //----------------------------------------------------------
+    // VÉRIFIER LES DEUX INTENTIONS
+    //----------------------------------------------------------
+
+    const intentions =
+        combat.intentionsTour;
+
+
+    const jid1 =
+        combat.ordre[0];
+
+    const jid2 =
+        combat.ordre[1];
+
+
+    const action1 =
+        intentions?.[jid1] ??
+        null;
+
+    const action2 =
+        intentions?.[jid2] ??
+        null;
+
+
+    //----------------------------------------------------------
+    // IL MANQUE UNE ACTION
+    //----------------------------------------------------------
+
+    if (
+        !action1 ||
+        !action2
+    ) {
+
+        return {
+
+            succes: false,
+
+            pretPourResolution:
+                false,
+
+            termine: false,
+
+            tour:
+                combat.tourEnCours.numero,
+
+            joueursAyantJoue:
+                [
+                    ...combat.tourEnCours
+                        .joueursAyantJoue
+                ],
+
+            joueursEnAttente:
+                [
+                    ...combat.tourEnCours
+                        .joueursEnAttente
+                ],
+
+            raison:
+                "En attente de l'action de l'autre joueur."
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔒 VERROUILLAGE
+    //----------------------------------------------------------
+
+    combat.tourEnCours
+        .resolving = true;
+
+
+    //----------------------------------------------------------
+    // ⚔️ RÉSOLUTION
+    //----------------------------------------------------------
+
+    let resolution;
+
+
+    try {
+
+        resolution =
+            await resoudreTourCombatAllStars({
+
+                combat,
+
+                intentions
+            });
+
+    }
+
+    catch (erreur) {
+
+        combat.tourEnCours
+            .resolving = false;
+
+
+        console.error(
+            "❌ Erreur résolution tour ALL STARS :",
+            erreur
+        );
+
+
+        return {
+
+            succes: false,
+
+            raison:
+                erreur.message
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // TOUR RÉSOLU
+    //----------------------------------------------------------
+
+    combat.tourEnCours
+        .resolu = true;
+
+
+    combat.tourEnCours
+        .resolving = false;
+
+
+    //----------------------------------------------------------
+    // 📜 SAUVEGARDE DES INTENTIONS
+    //----------------------------------------------------------
+
+    const intentionsResolues = {
+
+        tour:
+            combat.tour,
+
+        joueur1: {
+
+            jid:
+                jid1,
+
+            intention:
+                action1
+        },
+
+        joueur2: {
+
+            jid:
+                jid2,
+
+            intention:
+                action2
+        }
+    };
+
+
+    if (!combat.historiqueIntentions) {
+
+        combat.historiqueIntentions =
+            [];
+    }
+
+
+    combat.historiqueIntentions
+        .push(
+            intentionsResolues
+        );
+
+
+    //----------------------------------------------------------
+    // 🧹 NETTOYAGE DU TOUR
+    //----------------------------------------------------------
+
+    combat.intentionsTour = {};
+
+
+    //----------------------------------------------------------
+    // 🏆 FIN DU COMBAT
+    //----------------------------------------------------------
+
+    if (
+        resolution.termine
+    ) {
+
+        return {
+
+            succes: true,
+
+            termine: true,
+
+            tour:
+                combat.tour,
+
+            resolution
+        };
+    }
+
+
+    //----------------------------------------------------------
+    // 🔄 PRÉPARER LE TOUR SUIVANT
+    //----------------------------------------------------------
+
+    initialiserToursCombatAllStars(
+        combat
+    );
+
+
+    return {
+
+        succes: true,
+
+        termine: false,
+
+        tour:
+            combat.tour,
+
+        resolution,
+
+        prochainTour:
+            combat.tourEnCours.numero,
+
+        joueursEnAttente:
+            [
+                ...combat.tourEnCours
+                    .joueursEnAttente
+            ]
+    };
+}
+
+
+//==============================================================
+// 📊 ÉTAT ACTUEL DU TOUR
+//==============================================================
+
+function obtenirEtatTourCombatAllStars(
+    combat
+) {
+
+    if (!combat) {
+        return null;
+    }
+
+
+    if (!combat.tourEnCours) {
+
+        initialiserToursCombatAllStars(
+            combat
+        );
+    }
+
+
+    return {
+
+        tourActuel:
+            combat.tourEnCours.numero,
+
+        tourResolu:
+            combat.tourEnCours.resolu,
+
+        pretPourResolution:
+            combat.tourEnCours
+                .pretPourResolution,
+
+        joueursAyantJoue:
+            [
+                ...combat.tourEnCours
+                    .joueursAyantJoue
+            ],
+
+        joueursEnAttente:
+            [
+                ...combat.tourEnCours
+                    .joueursEnAttente
+            ],
+
+        nombreJoueurs:
+            combat.ordre.length,
+
+        actionsEnregistrees:
+            Object.keys(
+                combat.intentionsTour ?? {}
+            ).length,
+
+        maxTours:
+            10
+    };
+}
+
+
+//==============================================================
+// 🛑 VÉRIFIER SI LE COMBAT PEUT CONTINUER
+//==============================================================
+
+function combatAllStarsPeutContinuer(
+    combat
+) {
+
+    if (!combat) {
+        return false;
+    }
+
+
+    if (
+        combat.phase ===
+        "termine"
+    ) {
+
+        return false;
+    }
+
+
+    if (
+        Number(
+            combat.tour ?? 0
+        ) >= 10
+    ) {
+
+        return false;
+    }
+
+
+    for (
+        const jid
+        of combat.ordre
+    ) {
+
+        const joueur =
+            obtenirJoueurCombat(
+                combat,
+                jid
+            );
+
+
+        if (!joueur) {
+            return false;
+        }
+
+
+        if (
+            joueur.pv <= 0 ||
+            joueur.etat ===
+            ETATS_COMBAT_ALLSTARS.MORT
+        ) {
+
+            return false;
+        }
+    }
+
+
+    return true;
+}
+
+
+//==============================================================
+// 🧪 DEBUG
+//==============================================================
+
+console.log(
+    "🔄 Gestionnaire des tours ALL STARS chargé."
+);
+
+
+
+
 //================================================
 // 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
 //================================================
