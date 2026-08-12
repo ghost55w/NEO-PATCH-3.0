@@ -3023,7 +3023,6 @@ module.exports = {
     verifierCardsMatch,
     lancerMatchAllStars,
     AnalysePaveMatch,
-    reagirReceptionPave,
     duelsEnCours,
     matchAttente
 };
