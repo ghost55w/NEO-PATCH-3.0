@@ -593,7 +593,6 @@ function extraireActionsChronologiques(texte = "") {
 //================================================
 // 👤 EXTRACTION DES PERSONNAGES DU PAVÉ
 //================================================
-
 function extrairePersonnagesPave(
     pave = "",
     match = null
@@ -1017,6 +1016,43 @@ function extrairePaveAction(message = "") {
 
     return match[1].trim();
 }
+
+//================================================
+// 🌀🔆 RÉACTION RÉCEPTION DU PAVÉ
+//================================================
+async function reagirReceptionPave(ms, ovl) {
+
+    const reaction =
+        Math.random() < 0.5
+            ? "🌀"
+            : "🔆";
+
+    try {
+
+        await ovl.sendMessage(
+            ms.key.remoteJid,
+            {
+                react: {
+                    text: reaction,
+                    key: ms.key
+                }
+            }
+        );
+
+        console.log(
+            "🌀🔆 Réaction pavé :",
+            reaction
+        );
+
+    } catch (error) {
+
+        console.error(
+            "❌ Erreur réaction pavé :",
+            error
+        );
+    }
+}
+
 
 
 //================================================
