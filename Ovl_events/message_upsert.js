@@ -272,11 +272,10 @@ if (estPave) {
         console.log(
             "✅ Valide :",
             analyse.valide
-        );
-    }
-}
-            
-    }
+           );
+         }
+      }
+   }
 }
     
 
