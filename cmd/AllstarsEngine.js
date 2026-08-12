@@ -1018,44 +1018,6 @@ function extrairePaveAction(message = "") {
 }
 
 //================================================
-// 🌀🔆 RÉACTION RÉCEPTION DU PAVÉ
-//================================================
-async function reagirReceptionPave(ms, ovl) {
-
-    const reaction =
-        Math.random() < 0.5
-            ? "🌀"
-            : "🔆";
-
-    try {
-
-        await ovl.sendMessage(
-            ms.key.remoteJid,
-            {
-                react: {
-                    text: reaction,
-                    key: ms.key
-                }
-            }
-        );
-
-        console.log(
-            "🌀🔆 Réaction pavé :",
-            reaction
-        );
-
-    } catch (error) {
-
-        console.error(
-            "❌ Erreur réaction pavé :",
-            error
-        );
-    }
-}
-
-
-
-//================================================
 // 🧠 ANALYSE DU PAVÉ DE MATCH
 //================================================
 function AnalysePaveMatch(
