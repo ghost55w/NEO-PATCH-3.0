@@ -9,7 +9,6 @@ const {
     verifierJoueursMatch,
     verifierCardsMatch,
     AnalysePaveMatch,
-    reagirReceptionPave,
     duelsEnCours,
     matchAttente
 } = require("../cmd/AllstarsEngine");
@@ -187,108 +186,93 @@ const clean = texte
 // ================================
 try {
 
-    // ==================================================
-    // 🥊 DÉTECTION STRICTE D'UN PAVÉ
-    // ==================================================
-    const estPave = (
-        texte &&
-        texte.includes("💬") &&
-        texte.includes("⚽") &&
-        texte.includes("🔁")
+    // 🌀 Inscription des joueurs
+    await verifierJoueursMatch(
+        texte,
+        ms_org,
+        ovl
     );
 
-    // ==================================================
-    // 🚫 MESSAGE NORMAL → RIEN POUR LE MOTEUR DE COMBAT
-    // ==================================================
-    if (estPave) {
 
-        console.log("🥊 PAVÉ DÉTECTÉ");
-
-        // ==================================================
-        // 🌀 INSCRIPTION DES JOUEURS
-        // ==================================================
-        await verifierJoueursMatch(
-            texte,
-            ms_org,
-            ovl
-        );
+    // 🎴 Choix des personnages
+    await verifierCardsMatch(
+        texte,
+        ms_org,
+        ovl,
+        auteur_Message
+    );
 
 
-        // ==================================================
-        // 🎴 CHOIX DES PERSONNAGES
-        // ==================================================
-        await verifierCardsMatch(
-            texte,
-            ms_org,
-            ovl,
-            auteur_Message
-        );
+    //================================================
+    // 🥊 ANALYSE DU PAVÉ ALL STARS
+    //================================================
 
+    const matchId = matchAttente[ms_org];
 
-        // ==================================================
-        // 🥊 ANALYSE DU PAVÉ ALL STARS
-        // ==================================================
-        const matchId = matchAttente[ms_org];
+    if (matchId) {
 
-        if (matchId) {
+        const match = duelsEnCours[matchId];
 
-            const match = duelsEnCours[matchId];
+        if (
+            match &&
+            match.etat === "in_match"
+        ) {
 
-            if (
-                match &&
-                match.etat === "in_match"
-            ) {
+            const joueur = match.joueurs?.find(
+                j => j.jid === auteur_Message
+            );
 
-                const joueur = match.joueurs?.find(
-                    j => j.jid === auteur_Message
+            if (joueur) {
+
+                const analyse = await AnalysePaveMatch(
+                    texte,
+                    match,
+                    joueur
                 );
 
-                if (joueur) {
+                //============================================
+                // 🛡️ MESSAGE NON-PAVÉ → IGNORÉ
+                //============================================
 
-                    const analyse = await AnalysePaveMatch(
-                        texte,
-                        match,
-                        joueur
+                if (!analyse) {
+                    // Rien du tout.
+                    // Ce message n'est pas un pavé de combat.
+                }
+
+                //============================================
+                // 🥊 PAVÉ DÉTECTÉ
+                //============================================
+
+                else {
+
+                    console.log(
+                        "🥊 PAVÉ DE COMBAT DÉTECTÉ"
                     );
 
-                    // ==================================================
-                    // 🛡️ SEUL UN PAVÉ VALIDE EST ANALYSÉ
-                    // ==================================================
-                    if (analyse) {
+                    console.log(
+                        "👤 Joueur :",
+                        joueur.pseudo
+                    );
 
-                        console.log(
-                            "🥊 PAVÉ DE COMBAT DÉTECTÉ"
-                        );
+                    console.log(
+                        "🌀 Actions :",
+                        analyse.texte
+                    );
 
-                        console.log(
-                            "👤 Joueur :",
-                            joueur.pseudo
-                        );
+                    console.log(
+                        "📊 Note :",
+                        analyse.note + "/10"
+                    );
 
-                        console.log(
-                            "🌀 Actions :",
-                            analyse.texte
-                        );
-
-                        console.log(
-                            "📊 Note :",
-                            analyse.note + "/10"
-                        );
-
-                        console.log(
-                            "✅ Valide :",
-                            analyse.valide
-                        );
-                    }
+                    console.log(
+                        "✅ Valide :",
+                        analyse.valide
+                    );
                 }
             }
         }
     }
 
-    // ==================================================
-    // ⚠️ IMPORTANT
-    // Blue Lock reste indépendant
-    // ==================================================
 
     // 📄 Détection fiche BlueLock
     await verifierFiche(
@@ -296,6 +280,7 @@ try {
         ms_org,
         ovl
     );
+
 
     // ⚽ Gestion match BlueLock
     await messageMatch(
@@ -310,7 +295,6 @@ try {
         err
     );
 }
-
     
     async function isBanned(type, id) {
       const ban = await Bans.findOne({ where: { id, type } });
