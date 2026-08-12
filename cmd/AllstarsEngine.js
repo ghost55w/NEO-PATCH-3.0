@@ -3018,12 +3018,12 @@ ${nomsJoueurs}
     });
 });
                
-
 module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
     lancerMatchAllStars,
     AnalysePaveMatch,
+    reagirReceptionPave,
     duelsEnCours,
     matchAttente
 };
