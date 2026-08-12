@@ -459,7 +459,6 @@ const ACTIONS_MAP = {
 //================================================
 // 🔎 NORMALISATION D'UNE ACTION
 //================================================
-
 function normaliserAction(texte = "") {
 
     return String(texte)
@@ -473,9 +472,438 @@ function normaliserAction(texte = "") {
 }
 
 //================================================
-// 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
+// 🎮 CONFIGURATION PAVÉ ALL STARS
 //================================================
 
+const MAX_ACTIONS_PAVE = 4;
+
+const DUREE_ACTION_NORMALE = 1;   // 1 seconde
+const DUREE_ACTION_COMBO = 0.5;   // 0.5 seconde
+
+
+//================================================
+// 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
+//================================================
+
+function extraireActionsChronologiques(texte = "") {
+
+    const texteOriginal = String(texte);
+
+    const texteNormalise = normaliserAction(texteOriginal);
+
+    const toutesLesActions = obtenirToutesLesActions();
+
+    const occurrences = [];
+
+    //============================================
+    // 🔎 RECHERCHE DE CHAQUE ACTION
+    //============================================
+
+    for (const action of toutesLesActions) {
+
+        const termes = [
+            action.nom,
+            ...(action.aliases || [])
+        ];
+
+        for (const terme of termes) {
+
+            const termeNormalise = normaliserAction(terme);
+
+            if (!termeNormalise) continue;
+
+            let position = 0;
+
+            while (true) {
+
+                const index = texteNormalise.indexOf(
+                    termeNormalise,
+                    position
+                );
+
+                if (index === -1) break;
+
+                occurrences.push({
+                    index,
+
+                    id: action.id,
+
+                    nom: action.nom,
+
+                    categorie: action.categorie,
+
+                    groupe: action.groupe,
+
+                    termeDetecte: terme,
+
+                    description: action.description || ""
+                });
+
+                position =
+                    index + termeNormalise.length;
+            }
+        }
+    }
+
+
+    //============================================
+    // 📊 TRI CHRONOLOGIQUE
+    //============================================
+
+    occurrences.sort(
+        (a, b) => a.index - b.index
+    );
+
+
+    //============================================
+    // 🚫 SUPPRESSION DES DOUBLONS
+    //============================================
+
+    const actionsFinales = [];
+
+    for (const action of occurrences) {
+
+        const precedente =
+            actionsFinales[actionsFinales.length - 1];
+
+        if (
+            precedente &&
+            precedente.index === action.index
+        ) {
+            continue;
+        }
+
+        actionsFinales.push(action);
+    }
+
+
+    //============================================
+    // 🔢 AJOUT DU NUMÉRO D'ACTION
+    //============================================
+
+    return actionsFinales.map(
+        (action, index) => ({
+            ...action,
+
+            numero: index + 1
+        })
+    );
+}
+
+//================================================
+// 👤 EXTRACTION DES PERSONNAGES DU PAVÉ
+//================================================
+
+function extrairePersonnagesPave(
+    pave = "",
+    match = null
+) {
+
+    const texte = String(pave);
+
+    const personnages = [];
+
+    //============================================
+    // 🎴 RÉCUPÉRATION DES PERSONNAGES DU DUEL
+    //============================================
+
+    if (match?.duel) {
+
+        const duel = match.duel;
+
+        if (duel.perso1?.nom) {
+            personnages.push(duel.perso1.nom);
+        }
+
+        if (duel.perso2?.nom) {
+            personnages.push(duel.perso2.nom);
+        }
+    }
+
+    //============================================
+    // 🔎 FALLBACK
+    //============================================
+
+    if (
+        !personnages.length &&
+        match?.joueurs
+    ) {
+
+        for (const joueur of match.joueurs) {
+
+            if (joueur.personnage?.name) {
+
+                personnages.push(
+                    joueur.personnage.name
+                );
+            }
+        }
+    }
+
+
+    //============================================
+    // 🔎 RECHERCHE DANS LE TEXTE
+    //============================================
+
+    const trouves = [];
+
+    for (const nom of personnages) {
+
+        if (!nom) continue;
+
+        const nomNormalise =
+            normaliserAction(nom);
+
+        const texteNormalise =
+            normaliserAction(texte);
+
+        if (
+            nomNormalise &&
+            texteNormalise.includes(nomNormalise)
+        ) {
+
+            trouves.push({
+                nom,
+                position:
+                    texteNormalise.indexOf(
+                        nomNormalise
+                    )
+            });
+        }
+    }
+
+
+    //============================================
+    // 📊 ORDRE D'APPARITION
+    //============================================
+
+    trouves.sort(
+        (a, b) => a.position - b.position
+    );
+
+    return trouves;
+}
+
+//================================================
+// 🆚 DÉTERMINER ACTEUR / CIBLE
+//================================================
+
+function determinerActeurEtCible(
+    pave,
+    actions,
+    match
+) {
+
+    const personnages =
+        extrairePersonnagesPave(
+            pave,
+            match
+        );
+
+    if (personnages.length < 2) {
+
+        return {
+            acteur: null,
+            cible: null,
+            valide: false,
+            erreur:
+                "Le pavé doit mentionner le personnage qui agit et le personnage ciblé."
+        };
+    }
+
+
+    //============================================
+    // 🎮 PREMIER PERSONNAGE
+    //============================================
+
+    const acteur = personnages[0];
+
+
+    //============================================
+    // 🎯 SECOND PERSONNAGE
+    //============================================
+
+    const cible = personnages[1];
+
+
+    return {
+        acteur,
+        cible,
+        valide: true
+    };
+}
+
+//================================================
+// 🌀 DÉTECTION DU COMBO
+//================================================
+
+function detecterCombo(pave = "") {
+
+    const texte = normaliserAction(pave);
+
+    return (
+        texte.includes("combo") ||
+        texte.includes("en combo")
+    );
+}
+
+//================================================
+// 🎮 CONSTRUIRE LA SÉQUENCE DU PAVÉ
+//================================================
+
+function construireSequencePave(
+    pave,
+    match
+) {
+
+    const actions =
+        extraireActionsChronologiques(pave);
+
+
+    //============================================
+    // ❌ AUCUNE ACTION
+    //============================================
+
+    if (!actions.length) {
+
+        return {
+            valide: false,
+
+            erreur:
+                "Aucune action reconnue dans le pavé.",
+
+            actions: []
+        };
+    }
+
+
+    //============================================
+    // 🚫 MAXIMUM 4 ACTIONS
+    //============================================
+
+    if (actions.length > MAX_ACTIONS_PAVE) {
+
+        return {
+            valide: false,
+
+            erreur:
+                `Le pavé contient ${actions.length} actions. Maximum autorisé : ${MAX_ACTIONS_PAVE}.`,
+
+            actions
+        };
+    }
+
+
+    //============================================
+    // 👤 ACTEUR / CIBLE
+    //============================================
+
+    const relation =
+        determinerActeurEtCible(
+            pave,
+            actions,
+            match
+        );
+
+
+    if (!relation.valide) {
+
+        return {
+            valide: false,
+
+            erreur: relation.erreur,
+
+            actions
+        };
+    }
+
+
+    //============================================
+    // 🌀 COMBO
+    //============================================
+
+    const combo =
+        detecterCombo(pave);
+
+
+    //============================================
+    // ⏱️ DURÉE
+    //============================================
+
+    const dureeParAction =
+        combo
+            ? DUREE_ACTION_COMBO
+            : DUREE_ACTION_NORMALE;
+
+
+    const dureeTotale =
+        actions.length *
+        dureeParAction;
+
+
+    //============================================
+    // 📦 SÉQUENCE FINALE
+    //============================================
+
+    const sequence = actions.map(
+        (action, index) => ({
+
+            ordre: index + 1,
+
+            id: action.id,
+
+            nom: action.nom,
+
+            categorie: action.categorie,
+
+            groupe: action.groupe,
+
+            termeDetecte:
+                action.termeDetecte,
+
+            acteur:
+                relation.acteur.nom,
+
+            cible:
+                relation.cible.nom,
+
+            combo,
+
+            duree:
+                dureeParAction
+        })
+    );
+
+
+    return {
+
+        valide: true,
+
+        acteur:
+            relation.acteur.nom,
+
+        cible:
+            relation.cible.nom,
+
+        combo,
+
+        nombreActions:
+            sequence.length,
+
+        dureeParAction,
+
+        dureeTotale,
+
+        actions: sequence
+    };
+}
+
+
+
+
+//================================================
+// 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
+//================================================
 function obtenirToutesLesActions() {
 
     const actions = [];
@@ -505,7 +933,6 @@ function obtenirToutesLesActions() {
 //================================================
 // 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
 //================================================
-
 function detecterActionsPave(texte = "") {
 
     const texteNormalise = normaliserAction(texte);
@@ -575,7 +1002,6 @@ function detecterActionsPave(texte = "") {
 //================================================
 // 🎮 EXTRACTION DU PAVÉ D'ACTION
 //================================================
-
 function extrairePaveAction(message = "") {
 
     const texte = clean(String(message));
@@ -596,19 +1022,23 @@ function extrairePaveAction(message = "") {
 //================================================
 // 🧠 ANALYSE DU PAVÉ DE MATCH
 //================================================
+function AnalysePaveMatch(
+    message,
+    joueur,
+    match = null
+) {
 
-function AnalysePaveMatch(message, joueur) {
+    const pave =
+        extrairePaveAction(message);
 
-    const pave = extrairePaveAction(message);
 
+    console.log(
+        "========================================"
+    );
 
-    //============================================
-    // 🥊 DEBUG ANALYSE PAVÉ ALL STARS
-    //============================================
-
-    console.log("========================================");
-    console.log("🥊 ANALYSE PAVÉ ALL STARS");
-    console.log("========================================");
+    console.log(
+        "🥊 ANALYSE PAVÉ ALL STARS"
+    );
 
     console.log(
         "👤 Joueur :",
@@ -627,23 +1057,15 @@ function AnalysePaveMatch(message, joueur) {
 
     if (!pave) {
 
-        console.log(
-            "🎮 Actions détectées :",
-            []
-        );
-
-        console.log(
-            "🔢 Nombre d'actions :",
-            0
-        );
-
-        console.log("========================================");
-
         return {
+
             valide: false,
+
             note: 0,
 
             pave: "",
+
+            sequence: null,
 
             actions: [],
 
@@ -658,31 +1080,65 @@ function AnalysePaveMatch(message, joueur) {
 
 
     //============================================
-    // 🔎 DÉTECTION DES ACTIONS
+    // 🎮 CONSTRUCTION DE LA SÉQUENCE
     //============================================
 
-    const actions = detecterActionsPave(pave);
+    const sequence =
+        construireSequencePave(
+            pave,
+            match
+        );
 
-
-    //============================================
-    // 🥊 DEBUG ACTIONS
-    //============================================
 
     console.log(
-        "🎮 Actions détectées :",
-        actions
+        "🎮 SÉQUENCE :",
+        sequence
     );
-
-    console.log(
-        "🔢 Nombre d'actions :",
-        actions.length
-    );
-
-    console.log("========================================");
 
 
     //============================================
-    // 📊 CALCUL DE LA QUALITÉ DU PAVÉ
+    // ❌ SÉQUENCE INVALIDE
+    //============================================
+
+    if (!sequence.valide) {
+
+        console.log(
+            "❌ PAVÉ REFUSÉ :",
+            sequence.erreur
+        );
+
+        return {
+
+            valide: false,
+
+            note: 0,
+
+            pave,
+
+            sequence,
+
+            actions:
+                sequence.actions || [],
+
+            erreurs: [
+                sequence.erreur
+            ],
+
+            raison:
+                sequence.erreur,
+
+            joueur: joueur
+                ? {
+                    pseudo: joueur.pseudo,
+                    jid: joueur.jid
+                }
+                : null
+        };
+    }
+
+
+    //============================================
+    // 📊 CALCUL DE LA NOTE DE BASE
     //============================================
 
     let note = 0;
@@ -690,40 +1146,43 @@ function AnalysePaveMatch(message, joueur) {
     const erreurs = [];
 
 
-    // -------------------------------------------
-    // 1️⃣ PRÉSENCE D'UNE ACTION
-    // -------------------------------------------
+    //============================================
+    // 1️⃣ ACTIONS
+    //============================================
 
-    if (actions.length > 0) {
+    if (
+        sequence.nombreActions >= 1
+    ) {
 
         note += 4;
 
-    } else {
-
-        erreurs.push(
-            "Aucune action reconnue."
-        );
     }
 
 
-    // -------------------------------------------
-    // 2️⃣ LONGUEUR / DÉTAIL
-    // -------------------------------------------
+    //============================================
+    // 2️⃣ DÉTAIL
+    //============================================
 
-    const nombreMots = pave
-        .split(/\s+/)
-        .filter(Boolean)
-        .length;
+    const nombreMots =
+        pave
+            .split(/\s+/)
+            .filter(Boolean)
+            .length;
+
 
     if (nombreMots >= 8) {
 
         note += 2;
 
-    } else if (nombreMots >= 4) {
+    }
+
+    else if (nombreMots >= 4) {
 
         note += 1;
 
-    } else {
+    }
+
+    else {
 
         erreurs.push(
             "Action trop peu détaillée."
@@ -731,11 +1190,12 @@ function AnalysePaveMatch(message, joueur) {
     }
 
 
-    // -------------------------------------------
-    // 3️⃣ PRÉCISION
-    // -------------------------------------------
+    //============================================
+    // 3️⃣ CIBLE
+    //============================================
 
     const precision = [
+
         "visage",
         "tête",
         "tete",
@@ -755,20 +1215,27 @@ function AnalysePaveMatch(message, joueur) {
         "bras"
     ];
 
-    const paveNormalise = normaliserAction(pave);
 
-    const precisionTrouvee = precision.some(
-        mot =>
-            paveNormalise.includes(
-                normaliserAction(mot)
-            )
-    );
+    const paveNormalise =
+        normaliserAction(pave);
+
+
+    const precisionTrouvee =
+        precision.some(
+            mot =>
+                paveNormalise.includes(
+                    normaliserAction(mot)
+                )
+        );
+
 
     if (precisionTrouvee) {
 
         note += 2;
 
-    } else {
+    }
+
+    else {
 
         erreurs.push(
             "Cible insuffisamment précise."
@@ -776,39 +1243,63 @@ function AnalysePaveMatch(message, joueur) {
     }
 
 
-    // -------------------------------------------
-    // 4️⃣ COHÉRENCE / DESCRIPTION
-    // -------------------------------------------
+    //============================================
+    // 4️⃣ COHÉRENCE
+    //============================================
+
     const verbesAction = [
+
         "frappe",
         "frapper",
+
         "lance",
         "lancer",
+
         "avance",
+        "avancer",
+
+        "fonce",
+        "foncer",
+
         "recule",
+        "reculer",
+
         "esquive",
+
         "bloque",
+
         "pare",
+
         "saute",
+
         "tourne",
+
         "attrape",
+
         "agrippe",
+
         "repousse",
+
         "projette"
     ];
 
-    const verbeTrouve = verbesAction.some(
-        verbe =>
-            paveNormalise.includes(
-                normaliserAction(verbe)
-            )
-    );
+
+    const verbeTrouve =
+        verbesAction.some(
+            verbe =>
+                paveNormalise.includes(
+                    normaliserAction(verbe)
+                )
+        );
+
 
     if (verbeTrouve) {
 
         note += 2;
 
-    } else {
+    }
+
+    else {
 
         erreurs.push(
             "Action insuffisamment décrite."
@@ -820,10 +1311,11 @@ function AnalysePaveMatch(message, joueur) {
     // 🔟 LIMITE
     //============================================
 
-    note = Math.max(
-        0,
-        Math.min(10, note)
-    );
+    note =
+        Math.max(
+            0,
+            Math.min(10, note)
+        );
 
 
     //============================================
@@ -831,13 +1323,48 @@ function AnalysePaveMatch(message, joueur) {
     //============================================
 
     const valide =
-        actions.length > 0 &&
+        sequence.valide &&
+        sequence.nombreActions >= 1 &&
         note >= 4;
 
 
-    //============================================
-    // 📦 RESULTAT
-    //============================================
+    console.log(
+        "📊 NOTE :",
+        note,
+        "/10"
+    );
+
+    console.log(
+        "🔢 ACTIONS :",
+        sequence.nombreActions
+    );
+
+    console.log(
+        "👤 ACTEUR :",
+        sequence.acteur
+    );
+
+    console.log(
+        "🎯 CIBLE :",
+        sequence.cible
+    );
+
+    console.log(
+        "🌀 COMBO :",
+        sequence.combo
+    );
+
+    console.log(
+        "⏱️ DURÉE TOTALE :",
+        sequence.dureeTotale,
+        "s"
+    );
+
+
+    console.log(
+        "========================================"
+    );
+
 
     return {
 
@@ -847,7 +1374,25 @@ function AnalysePaveMatch(message, joueur) {
 
         pave,
 
-        actions,
+        acteur:
+            sequence.acteur,
+
+        cible:
+            sequence.cible,
+
+        sequence,
+
+        actions:
+            sequence.actions,
+
+        nombreActions:
+            sequence.nombreActions,
+
+        combo:
+            sequence.combo,
+
+        dureeTotale:
+            sequence.dureeTotale,
 
         erreurs,
 
@@ -859,10 +1404,9 @@ function AnalysePaveMatch(message, joueur) {
             : null
     };
 }
-    
-    
+
 //================================================
-// 📊 MESSAGE D'ANALYSE DU PAVÉ
+// 📊 RÉSULTAT ANALYSE PAVÉ
 //================================================
 
 function genererResultatAnalysePave(
@@ -871,15 +1415,16 @@ function genererResultatAnalysePave(
 ) {
 
     //============================================
-    // ❌ PAVÉ NON VALIDÉ
+    // ❌ REFUS
     //============================================
 
     if (!analyse.valide) {
 
         const raison =
-            analyse.erreurs.length > 0
+            analyse.erreurs?.length
                 ? analyse.erreurs.join(" ")
-                : "Action invalide.";
+                : analyse.raison ||
+                  "Action invalide.";
 
         return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
@@ -898,13 +1443,43 @@ function genererResultatAnalysePave(
 
 
     //============================================
-    // ✅ PAVÉ VALIDÉ
+    // 🌀 DESCRIPTION GLOBALE
+    //============================================
+
+    let description =
+        `${analyse.acteur} attaque ${analyse.cible}`;
+
+    if (analyse.nombreActions > 1) {
+
+        description +=
+            ` avec un enchaînement de ${analyse.nombreActions} actions`;
+
+    } else {
+
+        description +=
+            ` avec une action`;
+    }
+
+
+    if (analyse.combo) {
+
+        description +=
+            " en combo";
+    }
+
+
+    description += ".";
+
+
+    //============================================
+    // ✅ VALIDATION
     //============================================
 
     return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-✅ : Actions en cours....
+✅ ACTIONS VALIDÉES :
+- ${description}
 
 📊Note du pavé : ${analyse.note}/10 ⭐
 
@@ -914,7 +1489,7 @@ function genererResultatAnalysePave(
 
 ╰───────────────────
                *JUMP BATTLE ARENA 🌀🔆*`;
-}
+}    
 
 
 
@@ -1979,8 +2554,6 @@ console.log("🎮 Joueurs sauvegardés :", match.joueurs);
         });
 
     }
-
-
 
     match.etat="waiting_cards";
     
