@@ -9,9 +9,10 @@ const {
     verifierJoueursMatch,
     verifierCardsMatch,
     AnalysePaveMatch,
-    genererResultatAnalysePave, 
+    genererResultatAnalysePave,
     duelsEnCours,
-    matchAttente
+    matchAttente,
+    lancerTimerTour
 } = require("../cmd/AllstarsEngine");
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
@@ -287,13 +288,38 @@ if (matchId) {
 
 
             //============================================
-            // 🔄 DÉTERMINER LE JOUEUR SUIVANT
-            //============================================
+// 🔄 DÉTERMINER LE JOUEUR SUIVANT
+//============================================
 
-            const prochainJoueur =
-                match.joueurs?.find(
-                    j => j.jid !== joueur.jid
-                );
+const prochainJoueur =
+    match.joueurs?.find(
+        j => j.jid !== joueur.jid
+    );
+
+if (!prochainJoueur) {
+    console.log("❌ Impossible de trouver le joueur suivant");
+    return;
+}
+
+//============================================
+// 🔥 CHANGEMENT RÉEL DU TOUR
+//============================================
+
+match.joueurActif = prochainJoueur;
+match.joueurActifJid = prochainJoueur.jid;
+
+console.log(
+    "🔄 TOUR CHANGÉ :",
+    prochainJoueur.pseudo,
+    "| JID :",
+    prochainJoueur.jid
+);
+
+//============================================
+// ⏱️ RELANCER LE TIMER DU NOUVEAU JOUEUR
+//============================================
+
+lancerTimerTour(match, ms_org, ovl);
 
 
             if (!prochainJoueur) {
