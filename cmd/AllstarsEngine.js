@@ -1650,6 +1650,491 @@ function extraireParametresAction(texte = "", action = {}) {
     return params;
 }
 
+//================================================
+// 🧭 EXTRACTION DIRECTION
+//================================================
+
+function extraireDirection(texte = "") {
+
+    const t =
+        normaliserAction(texte);
+
+    const directions = [
+
+        {
+            valeur: "diagonale_avant_gauche",
+            termes: [
+                "diagonale avant gauche",
+                "diagonal avant gauche",
+                "avant gauche",
+                "avant-gauche"
+            ]
+        },
+
+        {
+            valeur: "diagonale_avant_droite",
+            termes: [
+                "diagonale avant droite",
+                "diagonal avant droite",
+                "avant droite",
+                "avant-droit"
+            ]
+        },
+
+        {
+            valeur: "diagonale_arriere_gauche",
+            termes: [
+                "diagonale arriere gauche",
+                "diagonal arriere gauche",
+                "arriere gauche",
+                "arriere-gauche"
+            ]
+        },
+
+        {
+            valeur: "diagonale_arriere_droite",
+            termes: [
+                "diagonale arriere droite",
+                "diagonal arriere droite",
+                "arriere droite",
+                "arriere-droit"
+            ]
+        },
+
+        {
+            valeur: "devant",
+            termes: [
+                "devant",
+                "vers l avant",
+                "en avant",
+                "vers avant"
+            ]
+        },
+
+        {
+            valeur: "derriere",
+            termes: [
+                "derriere",
+                "vers l arriere",
+                "en arriere",
+                "vers arriere"
+            ]
+        },
+
+        {
+            valeur: "gauche",
+            termes: [
+                "a gauche",
+                "vers la gauche",
+                "sur la gauche"
+            ]
+        },
+
+        {
+            valeur: "droite",
+            termes: [
+                "a droite",
+                "vers la droite",
+                "sur la droite"
+            ]
+        }
+    ];
+
+    // Les diagonales passent avant.
+    for (
+        const direction of directions
+    ) {
+
+        for (
+            const terme of direction.termes
+        ) {
+
+            if (
+                t.includes(
+                    normaliserAction(terme)
+                )
+            ) {
+                return direction.valeur;
+            }
+        }
+    }
+
+    return null;
+}
+
+//================================================
+// 📏⚡ DISTANCE + VITESSE
+//================================================
+
+function extraireVitesseDistance(
+    texte = ""
+) {
+
+    const t =
+        normaliserAction(texte);
+
+    let vitesse = null;
+    let distance = null;
+
+    //============================================
+    // ⚡ VMAX
+    //============================================
+
+    if (
+        /\bvmax\b/.test(t) ||
+        /\bvitesse max\b/.test(t) ||
+        /\bvitesse maximale\b/.test(t)
+    ) {
+
+        vitesse = "vmax";
+    }
+
+    //============================================
+    // ⚡ VITESSE NUMÉRIQUE
+    //============================================
+
+    const vitesseMatch =
+        t.match(
+            /(?:vitesse|speed)\s*(?:de)?\s*(\d+(?:\.\d+)?)\s*m\s*\/?\s*s/
+        );
+
+    if (vitesseMatch) {
+
+        vitesse =
+            Number(vitesseMatch[1]);
+    }
+
+    //============================================
+    // 📏 DISTANCE
+    //============================================
+
+    const distanceMatch =
+        t.match(
+            /(\d+(?:\.\d+)?)\s*(?:m|metre|metres)\b/
+        );
+
+    if (distanceMatch) {
+
+        distance =
+            Number(distanceMatch[1]);
+    }
+
+    return {
+        vitesse,
+        distance
+    };
+}
+
+//================================================
+// 🦘 EXTRACTION HAUTEUR
+//================================================
+
+function extraireHauteur(texte = "") {
+
+    const t =
+        normaliserAction(texte);
+
+    //==============================
+    // RAS DU SOL
+    //==============================
+
+    if (
+        t.includes("ras du sol")
+    ) {
+        return 0;
+    }
+
+    //==============================
+    // HAUTEUR EN CM
+    //==============================
+
+    const cm =
+        t.match(
+            /(\d+(?:\.\d+)?)\s*(?:cm|centimetres?|centimetres?)/
+        );
+
+    if (cm) {
+
+        const hauteur =
+            Number(cm[1]) / 100;
+
+        if (
+            hauteur <= 20
+        ) {
+            return hauteur;
+        }
+    }
+
+    //==============================
+    // HAUTEUR EN M
+    //==============================
+
+    const metres =
+        t.match(
+            /(\d+(?:\.\d+)?)\s*(?:m|metres?|metre)/
+        );
+
+    if (metres) {
+
+        const hauteur =
+            Number(metres[1]);
+
+        if (
+            hauteur <= 20
+        ) {
+            return hauteur;
+        }
+    }
+
+    return null;
+}
+
+//================================================
+// 🔄 EXTRACTION ANGLE
+//================================================
+
+function extraireAngle(texte = "") {
+
+    const t =
+        normaliserAction(texte);
+
+    const match =
+        t.match(
+            /(\d+)\s*(?:°|degres?|deg)/
+        );
+
+    if (!match) {
+        return null;
+    }
+
+    const angle =
+        Number(match[1]);
+
+    const autorises = [
+        60,
+        90,
+        180,
+        360,
+        540,
+        720
+    ];
+
+    if (
+        !autorises.includes(angle)
+    ) {
+        return null;
+    }
+
+    return angle;
+}
+
+//================================================
+// ↔️ CÔTÉ D'ENGAGEMENT
+//================================================
+
+function extraireCoteEngagement(
+    texte = ""
+) {
+
+    const t =
+        normaliserAction(texte);
+
+    if (
+        /\bpar sa gauche\b/.test(t) ||
+        /\bpar la gauche\b/.test(t) ||
+        /\bdu cote gauche\b/.test(t) ||
+        /\ba gauche\b/.test(t)
+    ) {
+
+        return "gauche";
+    }
+
+    if (
+        /\bpar sa droite\b/.test(t) ||
+        /\bpar la droite\b/.test(t) ||
+        /\bdu cote droit\b/.test(t) ||
+        /\ba droite\b/.test(t)
+    ) {
+
+        return "droite";
+    }
+
+    return null;
+}
+
+
+//================================================
+// ✊ EXTRACTION MAIN
+//================================================
+
+function extraireMain(texte = "") {
+
+    const t =
+        normaliserAction(texte);
+
+    if (
+        /\bdu droit\b/.test(t) ||
+        /\bmain droite\b/.test(t) ||
+        /\bpoing droit\b/.test(t)
+    ) {
+
+        return "droite";
+    }
+
+    if (
+        /\bdu gauche\b/.test(t) ||
+        /\bmain gauche\b/.test(t) ||
+        /\bpoing gauche\b/.test(t)
+    ) {
+
+        return "gauche";
+    }
+
+    return null;
+}
+
+//================================================
+// 🦶 EXTRACTION PIED
+//================================================
+
+function extrairePied(texte = "") {
+
+    const t =
+        normaliserAction(texte);
+
+    if (
+        /\bpied droit\b/.test(t) ||
+        /\bjambe droite\b/.test(t) ||
+        /\bdu pied droit\b/.test(t)
+    ) {
+
+        return "droit";
+    }
+
+    if (
+        /\bpied gauche\b/.test(t) ||
+        /\bjambe gauche\b/.test(t) ||
+        /\bdu pied gauche\b/.test(t)
+    ) {
+
+        return "gauche";
+    }
+
+    return null;
+}
+
+//================================================
+// 🎯 ZONE VISÉE
+//================================================
+
+function extraireZoneVisee(
+    texte = ""
+) {
+
+    const t =
+        normaliserAction(texte);
+
+    const zones = [
+
+        "pied gauche",
+        "pied droit",
+
+        "flanc gauche",
+        "flanc droit",
+
+        "avant bras",
+
+        "visage",
+        "tete",
+        "menton",
+        "machoire",
+
+        "cou",
+
+        "torse",
+        "poitrine",
+
+        "abdomen",
+        "ventre",
+
+        "cotes",
+        "flanc",
+
+        "epaule",
+
+        "bras",
+        "coude",
+        "poignet",
+        "main",
+
+        "cuisse",
+        "genou",
+        "tibia",
+        "mollet",
+        "cheville",
+        "pied"
+    ];
+
+    zones.sort(
+        (a, b) =>
+            b.length - a.length
+    );
+
+    for (
+        const zone of zones
+    ) {
+
+        if (
+            t.includes(zone)
+        ) {
+
+            return zone;
+        }
+    }
+
+    return null;
+}
+
+//================================================
+// ✅ VALIDATION PARAMÈTRES
+//================================================
+
+function validerParametresAction(
+    action,
+    parametres
+) {
+
+    const obligatoires =
+        action.parametres || [];
+
+    const manquants = [];
+
+    for (
+        const parametre of obligatoires
+    ) {
+
+        const valeur =
+            parametres[parametre];
+
+        if (
+            valeur === null ||
+            valeur === undefined ||
+            valeur === ""
+        ) {
+
+            manquants.push(
+                parametre
+            );
+        }
+    }
+
+    return {
+        valide:
+            manquants.length === 0,
+
+        manquants
+    };
+}
 
 //================================================
 // 👤 EXTRACTION DES PERSONNAGES DU PAVÉ
