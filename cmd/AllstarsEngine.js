@@ -304,65 +304,209 @@ const ACTIONS_MAP = {
         }
     },
 
-    //============================================
-    // 🏃 DÉPLACEMENTS
-    //============================================
+//============================================
+// 🏃 DÉPLACEMENTS
+//============================================
 
-    déplacements: {
+déplacements: {
 
-        avancer: {
-            nom: "Avancer",
-            aliases: [
-                "avance",
-                "avancer",
-                "s'avance",
-                "s'avancer"
-            ]
-        },
+    //========================================
+    // 🚶 DÉPLACEMENT NORMAL
+    //========================================
 
-        reculer: {
-            nom: "Reculer",
-            aliases: [
-                "recule",
-                "reculer",
-                "s'éloigne",
-                "s'eloigne"
-            ]
-        },
-
-        gauche: {
-            nom: "Déplacement gauche",
-            aliases: [
-                "va à gauche",
-                "va a gauche",
-                "se déplace à gauche",
-                "se deplace a gauche",
-                "gauche"
-            ]
-        },
-
-        droite: {
-            nom: "Déplacement droite",
-            aliases: [
-                "va à droite",
-                "va a droite",
-                "se déplace à droite",
-                "se deplace a droite",
-                "droite"
-            ]
-        },
-
-        saut: {
-            nom: "Saut",
-            aliases: [
-                "saute",
-                "saut",
-                "bondit",
-                "bond"
-            ]
-        }
+    avancer: {
+        nom: "Avancer",
+        aliases: [
+            "avance",
+            "avancer",
+            "s'avance",
+            "s'avancer",
+            "marche vers",
+            "se dirige vers",
+            "va vers"
+        ],
+        description:
+            "Déplacement normal vers l'avant ou vers une cible."
     },
 
+    reculer: {
+        nom: "Reculer",
+        aliases: [
+            "recule",
+            "reculer",
+            "s'éloigne",
+            "s'eloigne",
+            "marche en arrière",
+            "marche en arriere"
+        ],
+        description:
+            "Déplacement vers l'arrière pour augmenter la distance."
+    },
+
+    gauche: {
+        nom: "Déplacement gauche",
+        aliases: [
+            "va à gauche",
+            "va a gauche",
+            "se déplace à gauche",
+            "se deplace a gauche",
+            "déplace à gauche",
+            "deplace a gauche"
+        ],
+        description:
+            "Déplacement latéral vers la gauche."
+    },
+
+    droite: {
+        nom: "Déplacement droite",
+        aliases: [
+            "va à droite",
+            "va a droite",
+            "se déplace à droite",
+            "se deplace a droite",
+            "déplace à droite",
+            "deplace a droite"
+        ],
+        description:
+            "Déplacement latéral vers la droite."
+    },
+
+    //========================================
+    // 🏃 COURSE
+    //========================================
+
+    course: {
+        nom: "Course",
+        aliases: [
+            "course",
+            "court",
+            "courir",
+            "en course",
+            "part en course",
+            "se met à courir",
+            "se met a courir",
+            "court vers",
+            "fonce",
+            "fonce vers"
+        ],
+        description:
+            "Déplacement rapide en courant vers une direction ou une cible."
+    },
+
+    sprint: {
+        nom: "Sprint",
+        aliases: [
+            "sprint",
+            "sprinte",
+            "sprinter",
+            "en sprint",
+            "part en sprint",
+            "démarre un sprint",
+            "demarre un sprint",
+            "accélère en sprint",
+            "accelere en sprint"
+        ],
+        description:
+            "Accélération rapide permettant de parcourir une distance importante en peu de temps."
+    },
+
+    acceleration: {
+        nom: "Accélération",
+        aliases: [
+            "accélère",
+            "accelere",
+            "accélérer",
+            "accelerer",
+            "accélération",
+            "acceleration",
+            "accélère sa course",
+            "accelere sa course",
+            "accélère brusquement",
+            "accelere brusquement"
+        ],
+        description:
+            "Augmentation progressive ou brutale de la vitesse de déplacement."
+    },
+
+    course_vitesse_max: {
+        nom: "Course à vitesse maximale",
+        aliases: [
+            "vitesse maximale",
+            "vitesse max",
+            "vmax",
+            "à vitesse maximale",
+            "a vitesse maximale",
+            "à vitesse max",
+            "a vitesse max",
+            "en vmax",
+            "course vmax",
+            "court à vmax",
+            "court a vmax",
+            "fonce à pleine vitesse",
+            "fonce a pleine vitesse",
+            "à pleine vitesse",
+            "a pleine vitesse",
+            "à toute vitesse",
+            "a toute vitesse",
+            "à fond",
+            "a fond"
+        ],
+        description:
+            "Course effectuée à la vitesse maximale disponible pour le personnage."
+    },
+
+    //========================================
+    // 🦘 SAUT
+    //========================================
+
+    saut: {
+        nom: "Saut",
+        aliases: [
+            "saute",
+            "saut",
+            "bondit",
+            "bond",
+            "fait un saut",
+            "effectue un saut"
+        ],
+        description:
+            "Saut vertical ou déplacement aérien sans attaque."
+    },
+
+    //========================================
+    // 🏃 COURSE + DIRECTION
+    //========================================
+
+    course_avant: {
+        nom: "Course avant",
+        aliases: [
+            "court en avant",
+            "court vers l'avant",
+            "court vers l'avant",
+            "fonce en avant",
+            "fonce vers l'avant",
+            "fonce vers l'avant"
+        ],
+        description:
+            "Course rapide dirigée vers l'avant."
+    },
+
+    course_arriere: {
+        nom: "Course arrière",
+        aliases: [
+            "court en arrière",
+            "court en arriere",
+            "recule en courant",
+            "recul en courant",
+            "fuit en courant",
+            "s'éloigne en courant",
+            "s'eloigne en courant"
+        ],
+        description:
+            "Course effectuée vers l'arrière."
+    }
+},
+    
     //============================================
     // 🛡️ DÉFENSE
     //============================================
