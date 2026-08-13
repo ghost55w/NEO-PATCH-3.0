@@ -1023,27 +1023,63 @@ function extrairePaveAction(message = "") {
 function AnalysePaveMatch(
     message,
     joueur,
-    match = null
+    match = null,
+    auteurJid = null
 ) {
 
     //================================================
-    // 🔐 VÉRIFICATION DU JOUEUR
+    // 🔐 VÉRIFICATIONS DE SÉCURITÉ
     //================================================
 
-    if (!match || !joueur?.jid) {
+    if (!match || !auteurJid) {
         return null;
     }
 
+    //================================================
+    // 👥 JIDS AUTORISÉS DANS CE MATCH
+    //================================================
+
     const joueursAutorises = [
         match.joueur1?.jid,
-        match.joueur2?.jid
+        match.joueur2?.jid,
+        ...(match.joueurs || []).map(j => j?.jid)
     ].filter(Boolean);
 
-    // Le joueur doit obligatoirement appartenir au match
-    if (!joueursAutorises.includes(joueur.jid)) {
+    //================================================
+    // 🚫 L'AUTEUR DOIT ÊTRE UN JOUEUR DU MATCH
+    //================================================
+
+    if (!joueursAutorises.includes(auteurJid)) {
+
         console.log(
             "🚫 PAVÉ IGNORÉ — JID NON CONCERNÉ PAR LE MATCH :",
-            joueur.jid
+            auteurJid
+        );
+
+        return null;
+    }
+
+    //================================================
+    // 👤 IDENTIFIER LE JOUEUR CORRESPONDANT AU JID
+    //================================================
+
+    const joueurReel =
+        (match.joueurs || []).find(
+            j => j?.jid === auteurJid
+        )
+        ||
+        (
+            match.joueur1?.jid === auteurJid
+                ? match.joueur1
+                : match.joueur2?.jid === auteurJid
+                    ? match.joueur2
+                    : joueur
+        );
+
+    if (!joueurReel) {
+        console.log(
+            "🚫 PAVÉ IGNORÉ — JOUEUR INTROUVABLE POUR LE JID :",
+            auteurJid
         );
 
         return null;
@@ -1060,6 +1096,7 @@ function AnalysePaveMatch(
         texte.includes("🎮🌀");
 
     if (!estPaveJeu) {
+
         console.log(
             "🚫 MESSAGE IGNORÉ — PAS UN PAVÉ DE JEU"
         );
@@ -1074,7 +1111,6 @@ function AnalysePaveMatch(
     const pave =
         extrairePaveAction(message);
 
-
     console.log(
         "========================================"
     );
@@ -1084,8 +1120,13 @@ function AnalysePaveMatch(
     );
 
     console.log(
+        "🆔 JID auteur :",
+        auteurJid
+    );
+
+    console.log(
         "👤 Joueur :",
-        joueur?.pseudo || "Inconnu"
+        joueurReel?.pseudo || "Inconnu"
     );
 
     console.log(
@@ -1093,15 +1134,13 @@ function AnalysePaveMatch(
         pave || "(vide)"
     );
 
-
-    //============================================
-    // ❌ PAVÉ VIDE
-    //============================================
+    //================================================
+    // ❌ AUCUN PAVÉ D'ACTION
+    //================================================
 
     if (!pave) {
 
         return {
-
             valide: false,
 
             note: 0,
@@ -1120,6 +1159,18 @@ function AnalysePaveMatch(
                 "Le joueur doit écrire son action dans la section 🌀🎮."
         };
     }
+
+    //================================================
+    // ✅ PAVÉ VALIDE À ANALYSER
+    //================================================
+
+    return {
+        joueur: joueurReel,
+        jid: auteurJid,
+        pave
+    };
+}
+
 
     //============================================
     // 🎮 CONSTRUCTION DE LA SÉQUENCE
