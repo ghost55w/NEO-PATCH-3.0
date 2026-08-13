@@ -928,17 +928,17 @@ function obtenirToutesLesActions() {
     return actions;
 }
 
-
 //================================================
 // 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
 //================================================
 function detecterActionsPave(texte = "") {
 
-    const texteNormalise = normaliserAction(texte);
+    const texteNormalise =
+        normaliserAction(texte);
 
-    const toutesLesActions = obtenirToutesLesActions();
+    const toutesLesActions =
+        obtenirToutesLesActions();
 
-    // 🔎 DEBUG
     console.log(
         "🔎 Recherche des actions dans :",
         texte
@@ -949,7 +949,11 @@ function detecterActionsPave(texte = "") {
         toutesLesActions.length
     );
 
-    const actionsDetectees = [];
+    const candidats = [];
+
+    //================================================
+    // 🔎 RECHERCHE DE TOUS LES TERMES
+    //================================================
 
     for (const action of toutesLesActions) {
 
@@ -958,44 +962,226 @@ function detecterActionsPave(texte = "") {
             ...(action.aliases || [])
         ];
 
-        let trouve = false;
-        let termeUtilise = null;
-
         for (const terme of termes) {
 
-            const termeNormalise = normaliserAction(terme);
+            const termeNormalise =
+                normaliserAction(terme);
 
             if (!termeNormalise) continue;
 
-            if (texteNormalise.includes(termeNormalise)) {
+            const position =
+                texteNormalise.indexOf(
+                    termeNormalise
+                );
 
-                trouve = true;
-                termeUtilise = terme;
+            if (position === -1) continue;
 
-                break;
-            }
-        }
+            candidats.push({
 
-        if (trouve) {
+                action,
 
-            actionsDetectees.push({
-                id: action.id,
-                nom: action.nom,
-                categorie: action.categorie,
-                groupe: action.groupe,
-                termeDetecte: termeUtilise,
-                description: action.description
+                termeOriginal:
+                    terme,
+
+                termeNormalise,
+
+                position,
+
+                longueur:
+                    termeNormalise.length
             });
         }
     }
 
-    console.log(
-        "✅ ACTIONS TROUVÉES :",
-        actionsDetectees
+
+    //================================================
+    // 📍 ORDRE CHRONOLOGIQUE
+    //    + TERMES LES PLUS LONGS EN PRIORITÉ
+    //================================================
+
+    candidats.sort((a, b) => {
+
+        if (a.position !== b.position) {
+
+            return a.position -
+                   b.position;
+        }
+
+        return b.longueur -
+               a.longueur;
+    });
+
+
+    const actionsDetectees = [];
+    const zonesOccupees = [];
+
+
+    //================================================
+    // 🧹 ÉVITER LES DOUBLONS / SOUS-TERMES
+    //================================================
+
+    for (const candidat of candidats) {
+
+        const debut =
+            candidat.position;
+
+        const fin =
+            debut +
+            candidat.longueur;
+
+
+        //================================================
+        // 🚫 LE TERME EST DÉJÀ COUVERT
+        //================================================
+
+        const dejaCouvert =
+            zonesOccupees.some(
+                zone =>
+                    debut >= zone.debut &&
+                    fin <= zone.fin
+            );
+
+        if (dejaCouvert) {
+
+            console.log(
+                "♻️ DÉTECTION IGNORÉE — SOUS-TERME :",
+                candidat.termeOriginal
+            );
+
+            continue;
+        }
+
+
+        //================================================
+        // 🔄 SUPPRIMER LES TERMES PLUS COURTS
+        //    SI LE TERME ACTUEL EST PLUS PRÉCIS
+        //================================================
+
+        for (
+            let i = zonesOccupees.length - 1;
+            i >= 0;
+            i--
+        ) {
+
+            const zone =
+                zonesOccupees[i];
+
+            const contientZone =
+                debut <= zone.debut &&
+                fin >= zone.fin;
+
+            if (!contientZone) continue;
+
+
+            const index =
+                actionsDetectees.findIndex(
+                    action =>
+                        action._debut === zone.debut &&
+                        action._fin === zone.fin
+                );
+
+
+            if (index !== -1) {
+
+                console.log(
+                    "🔄 TERME PLUS PRÉCIS :",
+                    actionsDetectees[index]
+                        .termeDetecte,
+                    "→",
+                    candidat.termeOriginal
+                );
+
+                actionsDetectees.splice(
+                    index,
+                    1
+                );
+            }
+
+            zonesOccupees.splice(
+                i,
+                1
+            );
+        }
+
+
+        //================================================
+        // ✅ AJOUT DE L'ACTION
+        //================================================
+
+        actionsDetectees.push({
+
+            id:
+                candidat.action.id,
+
+            nom:
+                candidat.action.nom,
+
+            categorie:
+                candidat.action.categorie,
+
+            groupe:
+                candidat.action.groupe,
+
+            termeDetecte:
+                candidat.termeOriginal,
+
+            description:
+                candidat.action.description,
+
+            // Données internes
+            _debut:
+                debut,
+
+            _fin:
+                fin
+        });
+
+
+        zonesOccupees.push({
+
+            debut,
+
+            fin
+        });
+    }
+
+
+    //================================================
+    // 🔢 TRI FINAL CHRONOLOGIQUE
+    //================================================
+
+    actionsDetectees.sort(
+        (a, b) =>
+            a._debut -
+            b._debut
     );
 
-    return actionsDetectees;
+
+    //================================================
+    // 🧹 RETIRER LES DONNÉES INTERNES
+    //================================================
+
+    const resultat =
+        actionsDetectees.map(action => {
+
+            const {
+                _debut,
+                _fin,
+                ...actionPropre
+            } = action;
+
+            return actionPropre;
+        });
+
+
+    console.log(
+        "✅ ACTIONS TROUVÉES :",
+        resultat
+    );
+
+    return resultat;
 }
+
 
 
 //================================================
