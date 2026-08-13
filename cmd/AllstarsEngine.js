@@ -480,20 +480,23 @@ const MAX_ACTIONS_PAVE = 4;
 const DUREE_ACTION_NORMALE = 1;   // 1 seconde
 const DUREE_ACTION_COMBO = 0.5;   // 0.5 seconde
 
-
 //================================================
 // 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
 //================================================
 
 function extraireActionsChronologiques(texte = "") {
 
-    const texteOriginal = String(texte);
+    const texteOriginal =
+        String(texte);
 
-    const texteNormalise = normaliserAction(texteOriginal);
+    const texteNormalise =
+        normaliserAction(texteOriginal);
 
-    const toutesLesActions = obtenirToutesLesActions();
+    const toutesLesActions =
+        obtenirToutesLesActions();
 
     const occurrences = [];
+
 
     //============================================
     // 🔎 RECHERCHE DE CHAQUE ACTION
@@ -508,7 +511,8 @@ function extraireActionsChronologiques(texte = "") {
 
         for (const terme of termes) {
 
-            const termeNormalise = normaliserAction(terme);
+            const termeNormalise =
+                normaliserAction(terme);
 
             if (!termeNormalise) continue;
 
@@ -516,77 +520,195 @@ function extraireActionsChronologiques(texte = "") {
 
             while (true) {
 
-                const index = texteNormalise.indexOf(
-                    termeNormalise,
-                    position
-                );
+                const index =
+                    texteNormalise.indexOf(
+                        termeNormalise,
+                        position
+                    );
 
                 if (index === -1) break;
 
+
                 occurrences.push({
+
                     index,
 
-                    id: action.id,
+                    fin:
+                        index +
+                        termeNormalise.length,
 
-                    nom: action.nom,
+                    longueur:
+                        termeNormalise.length,
 
-                    categorie: action.categorie,
+                    id:
+                        action.id,
 
-                    groupe: action.groupe,
+                    nom:
+                        action.nom,
 
-                    termeDetecte: terme,
+                    categorie:
+                        action.categorie,
 
-                    description: action.description || ""
+                    groupe:
+                        action.groupe,
+
+                    termeDetecte:
+                        terme,
+
+                    description:
+                        action.description || ""
                 });
 
+
                 position =
-                    index + termeNormalise.length;
+                    index +
+                    termeNormalise.length;
             }
         }
     }
 
 
     //============================================
-    // 📊 TRI CHRONOLOGIQUE
+    // 📊 TRI
+    // Plus long en premier si même position
     //============================================
 
     occurrences.sort(
-        (a, b) => a.index - b.index
+        (a, b) => {
+
+            if (a.index !== b.index) {
+
+                return a.index -
+                       b.index;
+            }
+
+            return b.longueur -
+                   a.longueur;
+        }
     );
 
 
     //============================================
-    // 🚫 SUPPRESSION DES DOUBLONS
+    // 🛡️ SUPPRESSION DES TERMES CHEVAUCHÉS
     //============================================
 
     const actionsFinales = [];
 
     for (const action of occurrences) {
 
-        const precedente =
-            actionsFinales[actionsFinales.length - 1];
+        // Vérifie si cette occurrence est
+        // entièrement contenue dans une action
+        // déjà retenue.
 
-        if (
-            precedente &&
-            precedente.index === action.index
-        ) {
+        const dejaCouverte =
+            actionsFinales.some(
+                precedente => {
+
+                    return (
+                        action.index >=
+                            precedente.index
+                        &&
+                        action.fin <=
+                            precedente.fin
+                    );
+                }
+            );
+
+
+        if (dejaCouverte) {
+
+            console.log(
+                "♻️ ACTION IGNORÉE — TERME DÉJÀ COUVERT :",
+                action.termeDetecte
+            );
+
             continue;
         }
+
+
+        //========================================
+        // ⚠️ CAS OÙ L'ACTION ACTUELLE EST PLUS
+        // LONGUE ET REMPLACE UNE PLUS COURTE
+        //========================================
+
+        for (
+            let i =
+                actionsFinales.length - 1;
+
+            i >= 0;
+
+            i--
+        ) {
+
+            const precedente =
+                actionsFinales[i];
+
+
+            const precedenteContenue =
+                precedente.index >=
+                    action.index
+                &&
+                precedente.fin <=
+                    action.fin;
+
+
+            if (precedenteContenue) {
+
+                console.log(
+                    "🔄 ACTION REMPLACÉE :",
+                    precedente.termeDetecte,
+                    "→",
+                    action.termeDetecte
+                );
+
+                actionsFinales.splice(
+                    i,
+                    1
+                );
+            }
+        }
+
+
+        //========================================
+        // ✅ AJOUT
+        //========================================
 
         actionsFinales.push(action);
     }
 
 
     //============================================
-    // 🔢 AJOUT DU NUMÉRO D'ACTION
+    // 📊 TRI CHRONOLOGIQUE FINAL
+    //============================================
+
+    actionsFinales.sort(
+        (a, b) =>
+            a.index -
+            b.index
+    );
+
+
+    //============================================
+    // 🔢 NUMÉROTATION
     //============================================
 
     return actionsFinales.map(
-        (action, index) => ({
-            ...action,
+        (action, index) => {
 
-            numero: index + 1
-        })
+            const {
+                fin,
+                longueur,
+                ...actionPropre
+            } = action;
+
+            return {
+
+                ...actionPropre,
+
+                numero:
+                    index + 1
+            };
+        }
     );
 }
 
