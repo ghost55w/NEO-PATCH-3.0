@@ -2986,5 +2986,6 @@ module.exports = {
     lancerMatchAllStars,
     AnalysePaveMatch,
     duelsEnCours,
+    genererResultatAnalysePave, 
     matchAttente
 };
