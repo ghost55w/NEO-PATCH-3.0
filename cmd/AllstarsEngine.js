@@ -1089,11 +1089,9 @@ const DUREE_ACTION_COMBO = 0.5;   // 0.5 seconde
 //================================================
 // 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
 //================================================
-
 function extraireActionsChronologiques(texte = "") {
 
-    const texteOriginal =
-        String(texte);
+    const texteOriginal = String(texte);
 
     const texteNormalise =
         normaliserAction(texteOriginal);
@@ -1104,9 +1102,20 @@ function extraireActionsChronologiques(texte = "") {
     const occurrences = [];
 
 
-    //============================================
-    // 🔎 RECHERCHE DE CHAQUE ACTION
-    //============================================
+    console.log(
+        "🔎 TEXTE NORMALISÉ :",
+        texteNormalise
+    );
+
+    console.log(
+        "🎮 NOMBRE ACTIONS DISPONIBLES :",
+        toutesLesActions.length
+    );
+
+
+    //================================================
+    // 🔎 RECHERCHE
+    //================================================
 
     for (const action of toutesLesActions) {
 
@@ -1115,24 +1124,37 @@ function extraireActionsChronologiques(texte = "") {
             ...(action.aliases || [])
         ];
 
+
         for (const terme of termes) {
 
             const termeNormalise =
                 normaliserAction(terme);
 
-            if (!termeNormalise) continue;
+            if (!termeNormalise) {
+                continue;
+            }
 
-            let position = 0;
 
-            while (true) {
+            //========================================
+            // REGEX AVEC FRONTIÈRES DE MOT
+            //========================================
+
+            const regex = new RegExp(
+                `(^|\\s)${echapperRegex(termeNormalise)}(?=\\s|$)`,
+                "g"
+            );
+
+
+            let match;
+
+
+            while (
+                (match = regex.exec(texteNormalise)) !== null
+            ) {
 
                 const index =
-                    texteNormalise.indexOf(
-                        termeNormalise,
-                        position
-                    );
-
-                if (index === -1) break;
+                    match.index +
+                    match[1].length;
 
 
                 occurrences.push({
@@ -1166,18 +1188,36 @@ function extraireActionsChronologiques(texte = "") {
                 });
 
 
-                position =
-                    index +
-                    termeNormalise.length;
+                // sécurité regex
+                if (
+                    regex.lastIndex ===
+                    match.index
+                ) {
+                    regex.lastIndex++;
+                }
             }
         }
     }
 
 
-    //============================================
+    //================================================
+    // 📋 DEBUG BRUT
+    //================================================
+
+    console.log(
+        "🔍 OCCURRENCES BRUTES :",
+        occurrences.map(a => ({
+            index: a.index,
+            terme: a.termeDetecte,
+            id: a.id,
+            categorie: a.categorie
+        }))
+    );
+
+
+    //================================================
     // 📊 TRI
-    // Plus long en premier si même position
-    //============================================
+    //================================================
 
     occurrences.sort(
         (a, b) => {
@@ -1188,34 +1228,36 @@ function extraireActionsChronologiques(texte = "") {
                        b.index;
             }
 
-            return b.longueur -
-                   a.longueur;
+            return (
+                b.longueur -
+                a.longueur
+            );
         }
     );
 
 
-    //============================================
-    // 🛡️ SUPPRESSION DES TERMES CHEVAUCHÉS
-    //============================================
+    //================================================
+    // 🛡️ SUPPRESSION CHEVAUCHEMENTS
+    //================================================
 
     const actionsFinales = [];
 
-    for (const action of occurrences) {
 
-        // Vérifie si cette occurrence est
-        // entièrement contenue dans une action
-        // déjà retenue.
+    for (const action of occurrences) {
 
         const dejaCouverte =
             actionsFinales.some(
                 precedente => {
 
                     return (
+
                         action.index >=
-                            precedente.index
+                        precedente.index
+
                         &&
+
                         action.fin <=
-                            precedente.fin
+                        precedente.fin
                     );
                 }
             );
@@ -1232,10 +1274,10 @@ function extraireActionsChronologiques(texte = "") {
         }
 
 
-        //========================================
-        // ⚠️ CAS OÙ L'ACTION ACTUELLE EST PLUS
-        // LONGUE ET REMPLACE UNE PLUS COURTE
-        //========================================
+        //============================================
+        // SI L'ACTION ACTUELLE CONTIENT UNE
+        // ACTION PRÉCÉDENTE
+        //============================================
 
         for (
             let i =
@@ -1251,11 +1293,14 @@ function extraireActionsChronologiques(texte = "") {
 
 
             const precedenteContenue =
+
                 precedente.index >=
-                    action.index
+                action.index
+
                 &&
+
                 precedente.fin <=
-                    action.fin;
+                action.fin;
 
 
             if (precedenteContenue) {
@@ -1275,17 +1320,13 @@ function extraireActionsChronologiques(texte = "") {
         }
 
 
-        //========================================
-        // ✅ AJOUT
-        //========================================
-
         actionsFinales.push(action);
     }
 
 
-    //============================================
-    // 📊 TRI CHRONOLOGIQUE FINAL
-    //============================================
+    //================================================
+    // 📊 TRI FINAL
+    //================================================
 
     actionsFinales.sort(
         (a, b) =>
@@ -1294,30 +1335,67 @@ function extraireActionsChronologiques(texte = "") {
     );
 
 
-    //============================================
+    //================================================
     // 🔢 NUMÉROTATION
-    //============================================
+    //================================================
 
-    return actionsFinales.map(
-        (action, index) => {
+    const resultat =
+        actionsFinales.map(
+            (action, index) => {
 
-            const {
-                fin,
-                longueur,
-                ...actionPropre
-            } = action;
+                const {
+                    fin,
+                    longueur,
+                    index: position,
+                    ...actionPropre
+                } = action;
 
-            return {
+                return {
 
-                ...actionPropre,
+                    ...actionPropre,
 
-                numero:
-                    index + 1
-            };
-        }
+                    ordre:
+                        index + 1,
+
+                    numero:
+                        index + 1,
+
+                    position
+                };
+            }
+        );
+
+
+    //================================================
+    // 📋 DEBUG FINAL
+    //================================================
+
+    console.log(
+        "✅ ACTIONS FINALES :",
+        resultat.map(a => ({
+            ordre: a.ordre,
+            id: a.id,
+            nom: a.nom,
+            terme: a.termeDetecte,
+            categorie: a.categorie,
+            groupe: a.groupe
+        }))
     );
+
+
+    return resultat;
 }
 
+
+//================================================
+// 🛡️ ÉCHAPPER REGEX
+//================================================
+function echapperRegex(texte = "") {
+
+    return String(texte)
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+    
 //================================================
 // 🧩 EXTRACTION DES PARAMÈTRES D'ACTION
 //================================================
@@ -2443,9 +2521,6 @@ function construireSequencePave(
     };
 }
 
-
-
-
 //================================================
 // 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
 //================================================
@@ -2455,17 +2530,44 @@ function obtenirToutesLesActions() {
 
     for (const [categorie, groupes] of Object.entries(ACTIONS_MAP)) {
 
+        if (!gruposValide(groupes)) {
+            console.log(
+                "⚠️ Groupe invalide dans ACTIONS_MAP :",
+                categorie
+            );
+            continue;
+        }
+
         for (const [groupe, listeActions] of Object.entries(groupes)) {
+
+            if (!listeActions || typeof listeActions !== "object") {
+                continue;
+            }
 
             for (const [id, action] of Object.entries(listeActions)) {
 
+                if (!action || typeof action !== "object") {
+                    continue;
+                }
+
                 actions.push({
+
                     id,
+
                     categorie,
+
                     groupe,
-                    nom: action.nom,
-                    aliases: action.aliases || [],
-                    description: action.description || ""
+
+                    nom:
+                        action.nom || id,
+
+                    aliases:
+                        Array.isArray(action.aliases)
+                            ? action.aliases
+                            : [],
+
+                    description:
+                        action.description || ""
                 });
             }
         }
@@ -2473,6 +2575,20 @@ function obtenirToutesLesActions() {
 
     return actions;
 }
+
+
+//================================================
+// 🛡️ VÉRIFICATION GROUPE
+//================================================
+function gruposValide(obj) {
+
+    return (
+        obj &&
+        typeof obj === "object" &&
+        !Array.isArray(obj)
+    );
+}
+
 
 //================================================
 // 🧠 DÉTECTION DES ACTIONS DANS UN PAVÉ
