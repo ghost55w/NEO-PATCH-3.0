@@ -51,7 +51,7 @@ function normalizeName(str = "") {
 }
 
 //================================================
-// 🎮 ACTIONS MAP — BASE DU GAMEPLAY
+// 🎮 ACTIONS MAP — BASE COMPLÈTE DU GAMEPLAY
 //================================================
 
 const ACTIONS_MAP = {
@@ -59,6 +59,7 @@ const ACTIONS_MAP = {
     //============================================
     // 🥊 FRAPPES — MAINS
     //============================================
+
     frappes: {
 
         mains: {
@@ -73,7 +74,7 @@ const ACTIONS_MAP = {
                     "straight"
                 ],
                 description:
-                    "Poing avant ou arrière propulsé en ligne droite vers le visage ou le torse."
+                    "Main gauche ou droite obligatoire + zone visée obligatoire."
             },
 
             crochet_gauche: {
@@ -84,7 +85,7 @@ const ACTIONS_MAP = {
                     "hook gauche"
                 ],
                 description:
-                    "Poing gauche lancé en arc horizontal vers la tête ou le flanc droit."
+                    "Main gauche obligatoire + zone visée obligatoire."
             },
 
             crochet_droit: {
@@ -95,7 +96,7 @@ const ACTIONS_MAP = {
                     "hook droit"
                 ],
                 description:
-                    "Poing droit lancé en arc horizontal vers la tête ou le flanc gauche."
+                    "Main droite obligatoire + zone visée obligatoire."
             },
 
             uppercut: {
@@ -105,7 +106,7 @@ const ACTIONS_MAP = {
                     "coup uppercut"
                 ],
                 description:
-                    "Poing propulsé de bas en haut sous le menton ou le torse."
+                    "Main gauche ou droite obligatoire + zone visée obligatoire."
             },
 
             uppercut_saute: {
@@ -116,7 +117,7 @@ const ACTIONS_MAP = {
                     "rising uppercut"
                 ],
                 description:
-                    "Uppercut effectué en sautant vers le menton ou la poitrine."
+                    "Main utilisée + hauteur + direction + zone visée obligatoires."
             },
 
             revers: {
@@ -127,7 +128,7 @@ const ACTIONS_MAP = {
                     "backfist"
                 ],
                 description:
-                    "Poing lancé horizontalement ou diagonalement avec le dos du poing."
+                    "Main gauche ou droite obligatoire + zone visée obligatoire."
             },
 
             revers_circulaire: {
@@ -138,7 +139,7 @@ const ACTIONS_MAP = {
                     "spinning back fist"
                 ],
                 description:
-                    "Rotation du corps à 180° ou 360° avec frappe circulaire du dos du poing."
+                    "Angle de rotation + côté d'engagement + main utilisée + zone visée obligatoires."
             },
 
             marteau_descendant: {
@@ -150,7 +151,7 @@ const ACTIONS_MAP = {
                     "hammer fist"
                 ],
                 description:
-                    "Poing descendant verticalement comme un marteau."
+                    "Main gauche ou droite obligatoire + zone visée obligatoire."
             },
 
             marteau_lateral: {
@@ -162,7 +163,7 @@ const ACTIONS_MAP = {
                     "hammer side"
                 ],
                 description:
-                    "Frappe latérale effectuée avec le poing comme un marteau."
+                    "Main gauche ou droite obligatoire + direction + zone visée."
             },
 
             marteau_revers: {
@@ -173,9 +174,10 @@ const ACTIONS_MAP = {
                     "reverse hammer fist"
                 ],
                 description:
-                    "Frappe horizontale ou diagonale effectuée avec le dos du poing."
+                    "Main utilisée + direction + zone visée obligatoires."
             }
         },
+
 
         //========================================
         // 🦵 FRAPPES — PIEDS
@@ -192,7 +194,7 @@ const ACTIONS_MAP = {
                     "coup frontal"
                 ],
                 description:
-                    "Pied propulsé vers l'avant ou l'arrière contre le torse ou le menton."
+                    "Pied gauche ou droit obligatoire + direction + zone visée."
             },
 
             roundhouse_kick: {
@@ -204,7 +206,7 @@ const ACTIONS_MAP = {
                     "kick circulaire"
                 ],
                 description:
-                    "Coup de pied circulaire frappant latéralement la tête, le torse ou les côtes."
+                    "Pied gauche ou droit obligatoire + côté d'engagement + zone visée."
             },
 
             side_kick: {
@@ -216,7 +218,7 @@ const ACTIONS_MAP = {
                     "sidekick"
                 ],
                 description:
-                    "Coup de pied propulsé sur le côté avec la jambe tendue."
+                    "Pied gauche ou droit obligatoire + direction + zone visée."
             },
 
             back_kick: {
@@ -228,7 +230,7 @@ const ACTIONS_MAP = {
                     "backkick"
                 ],
                 description:
-                    "Rotation du corps et frappe arrière avec le talon."
+                    "Pied gauche ou droit + rotation + côté d'engagement + zone visée."
             },
 
             hook_kick: {
@@ -240,7 +242,7 @@ const ACTIONS_MAP = {
                     "kick crochet"
                 ],
                 description:
-                    "Coup de pied en crochet frappant de côté ou par l'arrière."
+                    "Pied gauche ou droit obligatoire + direction + zone visée."
             },
 
             axe_kick: {
@@ -252,7 +254,7 @@ const ACTIONS_MAP = {
                     "coup descendant"
                 ],
                 description:
-                    "Jambe levée verticalement puis redescendue pour frapper avec le talon."
+                    "Pied gauche ou droit obligatoire + hauteur + zone visée."
             },
 
             spinning_back_kick: {
@@ -264,7 +266,7 @@ const ACTIONS_MAP = {
                     "spinning backkick"
                 ],
                 description:
-                    "Rotation complète de 360° suivie d'une frappe arrière puissante."
+                    "Angle + côté d'engagement + pied utilisé + direction + zone visée obligatoires."
             },
 
             low_kick: {
@@ -275,7 +277,7 @@ const ACTIONS_MAP = {
                     "lowkick"
                 ],
                 description:
-                    "Coup de pied visant principalement la cuisse ou le mollet."
+                    "Pied gauche ou droit obligatoire + zone basse obligatoire : cuisse, tibia, mollet, genou ou pied."
             },
 
             knee_strike: {
@@ -286,7 +288,7 @@ const ACTIONS_MAP = {
                     "knee strike"
                 ],
                 description:
-                    "Genou levé et propulsé vers le corps ou la tête à courte distance."
+                    "Genou gauche ou droit obligatoire + direction + zone visée."
             },
 
             flying_kick: {
@@ -299,214 +301,522 @@ const ACTIONS_MAP = {
                     "kick sauté"
                 ],
                 description:
-                    "Saut vers l'avant ou latéral avec frappe du pied."
+                    "Hauteur + direction + pied utilisé + zone visée obligatoires."
             }
         }
     },
 
-//============================================
-// 🏃 DÉPLACEMENTS
-//============================================
 
-déplacements: {
+    //============================================
+    // 🏃 DÉPLACEMENTS
+    //============================================
 
-    //========================================
-    // 🚶 DÉPLACEMENT NORMAL
-    //========================================
+    déplacements: {
 
-    avancer: {
-        nom: "Avancer",
-        aliases: [
-            "avance",
-            "avancer",
-            "s'avance",
-            "s'avancer",
-            "marche vers",
-            "se dirige vers",
-            "va vers"
-        ],
-        description:
-            "Déplacement normal vers l'avant ou vers une cible."
+        avancer: {
+            nom: "Avancer",
+            aliases: [
+                "avance",
+                "avancer",
+                "s'avance",
+                "s'avancer",
+                "va devant",
+                "va vers l'avant",
+                "avance devant",
+                "avance vers l'avant",
+                "fonce",
+                "foncer",
+                "fonce vers",
+                "foncer vers",
+                "course",
+                "en course",
+                "court",
+                "courir",
+                "sprint",
+                "sprinte",
+                "sprinter",
+                "accélère",
+                "accélère vers",
+                "accélération"
+            ],
+            description:
+                "Direction obligatoire : devant, derrière, gauche, droite ou diagonale. Distance et vitesse peuvent être précisées."
+        },
+
+        reculer: {
+            nom: "Reculer",
+            aliases: [
+                "recule",
+                "reculer",
+                "s'éloigne",
+                "s'eloigne",
+                "va derrière",
+                "va derriere",
+                "va vers l'arrière",
+                "va vers l'arriere",
+                "recule vers"
+            ],
+            description:
+                "Direction arrière obligatoire + distance/vitesse si utilisées."
+        },
+
+        gauche: {
+            nom: "Déplacement gauche",
+            aliases: [
+                "va à gauche",
+                "va a gauche",
+                "se déplace à gauche",
+                "se deplace a gauche",
+                "déplacement gauche",
+                "deplacement gauche",
+                "part à gauche",
+                "part a gauche"
+            ],
+            description:
+                "Direction gauche obligatoire + distance/vitesse si utilisées."
+        },
+
+        droite: {
+            nom: "Déplacement droite",
+            aliases: [
+                "va à droite",
+                "va a droite",
+                "se déplace à droite",
+                "se deplace a droite",
+                "déplacement droite",
+                "deplacement droite",
+                "part à droite",
+                "part a droite"
+            ],
+            description:
+                "Direction droite obligatoire + distance/vitesse si utilisées."
+        },
+
+        diagonal_avant_gauche: {
+            nom: "Déplacement diagonal avant gauche",
+            aliases: [
+                "diagonale avant gauche",
+                "diagonal avant gauche",
+                "avance en diagonale gauche",
+                "court en diagonale gauche",
+                "fonce en diagonale gauche",
+                "vers l'avant gauche",
+                "vers l'avant-gauche"
+            ],
+            description:
+                "Direction diagonale avant gauche obligatoire + distance/vitesse."
+        },
+
+        diagonal_avant_droite: {
+            nom: "Déplacement diagonal avant droit",
+            aliases: [
+                "diagonale avant droite",
+                "diagonal avant droite",
+                "avance en diagonale droite",
+                "court en diagonale droite",
+                "fonce en diagonale droite",
+                "vers l'avant droite",
+                "vers l'avant-droit"
+            ],
+            description:
+                "Direction diagonale avant droite obligatoire + distance/vitesse."
+        },
+
+        diagonal_arriere_gauche: {
+            nom: "Déplacement diagonal arrière gauche",
+            aliases: [
+                "diagonale arrière gauche",
+                "diagonale arriere gauche",
+                "diagonal arrière gauche",
+                "diagonal arriere gauche",
+                "recule en diagonale gauche",
+                "part en diagonale arrière gauche",
+                "part en diagonale arriere gauche"
+            ],
+            description:
+                "Direction diagonale arrière gauche obligatoire + distance/vitesse."
+        },
+
+        diagonal_arriere_droite: {
+            nom: "Déplacement diagonal arrière droit",
+            aliases: [
+                "diagonale arrière droite",
+                "diagonale arriere droite",
+                "diagonal arrière droite",
+                "diagonal arriere droite",
+                "recule en diagonale droite",
+                "part en diagonale arrière droite",
+                "part en diagonale arriere droite"
+            ],
+            description:
+                "Direction diagonale arrière droite obligatoire + distance/vitesse."
+        },
+
+
+        //========================================
+        // 🦘 SAUT / BOND / VOL
+        //========================================
+
+        saut: {
+            nom: "Saut",
+            aliases: [
+                "saute",
+                "saut",
+                "sauter"
+            ],
+            description:
+                "Hauteur obligatoire de 0 à 20 m + direction obligatoire."
+        },
+
+        bond: {
+            nom: "Bond",
+            aliases: [
+                "bond",
+                "bondit",
+                "bondir",
+                "fait un bond",
+                "grand bond",
+                "bond en avant",
+                "bond en arrière",
+                "bond en arriere",
+                "bond a gauche",
+                "bond a droite"
+            ],
+            description:
+                "Hauteur obligatoire de 0 à 20 m + direction obligatoire."
+        },
+
+        vol: {
+            nom: "Vol",
+            aliases: [
+                "vole",
+                "vol",
+                "voler",
+                "s'envole",
+                "senvole",
+                "vole devant",
+                "vole derrière",
+                "vole derriere",
+                "vole à gauche",
+                "vole a gauche",
+                "vole à droite",
+                "vole a droite",
+                "vol stationnaire"
+            ],
+            description:
+                "Hauteur obligatoire de 0 à 20 m + direction obligatoire."
+        }
     },
 
-    reculer: {
-        nom: "Reculer",
-        aliases: [
-            "recule",
-            "reculer",
-            "s'éloigne",
-            "s'eloigne",
-            "marche en arrière",
-            "marche en arriere"
-        ],
-        description:
-            "Déplacement vers l'arrière pour augmenter la distance."
+
+    //============================================
+    // 🔄 ROTATIONS / PIVOTS
+    //============================================
+
+    rotations: {
+
+        pivot_60: {
+            nom: "Pivot 60°",
+            aliases: [
+                "pivot 60",
+                "pivot à 60",
+                "pivot a 60",
+                "rotation 60",
+                "rotation à 60",
+                "rotation a 60",
+                "tourne à 60",
+                "tourne a 60"
+            ],
+            description:
+                "Angle 60° obligatoire + côté d'engagement gauche ou droite."
+        },
+
+        pivot_90: {
+            nom: "Pivot 90°",
+            aliases: [
+                "pivot 90",
+                "pivot à 90",
+                "pivot a 90",
+                "rotation 90",
+                "rotation à 90",
+                "rotation a 90",
+                "tourne à 90",
+                "tourne a 90"
+            ],
+            description:
+                "Angle 90° obligatoire + côté d'engagement gauche ou droite."
+        },
+
+        pivot_180: {
+            nom: "Pivot 180°",
+            aliases: [
+                "pivot 180",
+                "pivot à 180",
+                "pivot a 180",
+                "rotation 180",
+                "rotation à 180",
+                "rotation a 180",
+                "tourne à 180",
+                "tourne a 180",
+                "demi-tour",
+                "demi tour"
+            ],
+            description:
+                "Angle 180° obligatoire + côté d'engagement gauche ou droite."
+        },
+
+        pivot_360: {
+            nom: "Rotation 360°",
+            aliases: [
+                "pivot 360",
+                "pivot à 360",
+                "pivot a 360",
+                "rotation 360",
+                "rotation à 360",
+                "rotation a 360",
+                "tourne à 360",
+                "tourne a 360",
+                "tour complet"
+            ],
+            description:
+                "Angle 360° obligatoire + côté d'engagement gauche ou droite."
+        }
     },
 
-    gauche: {
-        nom: "Déplacement gauche",
-        aliases: [
-            "va à gauche",
-            "va a gauche",
-            "se déplace à gauche",
-            "se deplace a gauche",
-            "déplace à gauche",
-            "deplace a gauche"
-        ],
-        description:
-            "Déplacement latéral vers la gauche."
+
+    //============================================
+    // 🤸 ACROBATIES
+    //============================================
+
+    acrobaties: {
+
+        salto_avant: {
+            nom: "Salto avant",
+            aliases: [
+                "salto avant",
+                "salto en avant",
+                "front flip",
+                "frontflip",
+                "flip avant"
+            ],
+            description:
+                "Hauteur + direction obligatoires."
+        },
+
+        salto_arriere: {
+            nom: "Salto arrière",
+            aliases: [
+                "salto arrière",
+                "salto arriere",
+                "salto en arrière",
+                "salto en arriere",
+                "backflip",
+                "back flip",
+                "flip arrière",
+                "flip arriere"
+            ],
+            description:
+                "Hauteur + direction obligatoires."
+        },
+
+        salto_lateral_gauche: {
+            nom: "Salto latéral gauche",
+            aliases: [
+                "salto latéral gauche",
+                "salto lateral gauche",
+                "salto gauche",
+                "side flip gauche",
+                "sideflip gauche"
+            ],
+            description:
+                "Hauteur + direction gauche obligatoires."
+        },
+
+        salto_lateral_droit: {
+            nom: "Salto latéral droit",
+            aliases: [
+                "salto latéral droit",
+                "salto lateral droit",
+                "salto droite",
+                "side flip droite",
+                "sideflip droite"
+            ],
+            description:
+                "Hauteur + direction droite obligatoires."
+        },
+
+        salto_360: {
+            nom: "Salto 360°",
+            aliases: [
+                "salto 360",
+                "salto à 360",
+                "salto a 360",
+                "flip 360",
+                "flip à 360",
+                "flip a 360"
+            ],
+            description:
+                "Angle 360° + hauteur + direction + côté d'engagement obligatoires."
+        },
+
+        salto_540: {
+            nom: "Salto 540°",
+            aliases: [
+                "salto 540",
+                "salto à 540",
+                "salto a 540",
+                "flip 540",
+                "flip à 540",
+                "flip a 540"
+            ],
+            description:
+                "Angle 540° + hauteur + direction + côté d'engagement obligatoires."
+        },
+
+        salto_720: {
+            nom: "Salto 720°",
+            aliases: [
+                "salto 720",
+                "salto à 720",
+                "salto a 720",
+                "flip 720",
+                "flip à 720",
+                "flip a 720"
+            ],
+            description:
+                "Angle 720° + hauteur + direction + côté d'engagement obligatoires."
+        },
+
+        pirouette: {
+            nom: "Pirouette",
+            aliases: [
+                "pirouette",
+                "pirouette aérienne",
+                "pirouette aerienne",
+                "tour aérien",
+                "tour aerien"
+            ],
+            description:
+                "Angle + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        rotation_aerienne_180: {
+            nom: "Rotation aérienne 180°",
+            aliases: [
+                "rotation aérienne 180",
+                "rotation aerienne 180",
+                "rotation aérienne à 180",
+                "rotation aerienne a 180",
+                "tour aérien 180",
+                "tour aerien 180"
+            ],
+            description:
+                "180° + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        rotation_aerienne_360: {
+            nom: "Rotation aérienne 360°",
+            aliases: [
+                "rotation aérienne 360",
+                "rotation aerienne 360",
+                "rotation aérienne à 360",
+                "rotation aerienne a 360",
+                "tour aérien 360",
+                "tour aerien 360"
+            ],
+            description:
+                "360° + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        rotation_aerienne_540: {
+            nom: "Rotation aérienne 540°",
+            aliases: [
+                "rotation aérienne 540",
+                "rotation aerienne 540",
+                "rotation aérienne à 540",
+                "rotation aerienne a 540",
+                "tour aérien 540",
+                "tour aerien 540"
+            ],
+            description:
+                "540° + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        rotation_aerienne_720: {
+            nom: "Rotation aérienne 720°",
+            aliases: [
+                "rotation aérienne 720",
+                "rotation aerienne 720",
+                "rotation aérienne à 720",
+                "rotation aerienne a 720",
+                "tour aérien 720",
+                "tour aerien 720"
+            ],
+            description:
+                "720° + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        roue_gauche: {
+            nom: "Roue gauche",
+            aliases: [
+                "roue gauche",
+                "roulade latérale gauche",
+                "roulade laterale gauche",
+                "cartwheel gauche"
+            ],
+            description:
+                "Hauteur + direction gauche obligatoires."
+        },
+
+        roue_droite: {
+            nom: "Roue droite",
+            aliases: [
+                "roue droite",
+                "roulade latérale droite",
+                "roulade laterale droite",
+                "cartwheel droite"
+            ],
+            description:
+                "Hauteur + direction droite obligatoires."
+        },
+
+        vrille: {
+            nom: "Vrille",
+            aliases: [
+                "vrille",
+                "vrille aérienne",
+                "vrille aerienne",
+                "spin aérien",
+                "spin aerien"
+            ],
+            description:
+                "Angle + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        vrille_180: {
+            nom: "Vrille 180°",
+            aliases: [
+                "vrille 180",
+                "vrille à 180",
+                "vrille a 180"
+            ],
+            description:
+                "180° + côté d'engagement + hauteur + direction obligatoires."
+        },
+
+        vrille_360: {
+            nom: "Vrille 360°",
+            aliases: [
+                "vrille 360",
+                "vrille à 360",
+                "vrille a 360"
+            ],
+            description:
+                "360° + côté d'engagement + hauteur + direction obligatoires."
+        }
     },
 
-    droite: {
-        nom: "Déplacement droite",
-        aliases: [
-            "va à droite",
-            "va a droite",
-            "se déplace à droite",
-            "se deplace a droite",
-            "déplace à droite",
-            "deplace a droite"
-        ],
-        description:
-            "Déplacement latéral vers la droite."
-    },
 
-    //========================================
-    // 🏃 COURSE
-    //========================================
-
-    course: {
-        nom: "Course",
-        aliases: [
-            "course",
-            "court",
-            "courir",
-            "en course",
-            "part en course",
-            "se met à courir",
-            "se met a courir",
-            "court vers",
-            "fonce",
-            "fonce vers"
-        ],
-        description:
-            "Déplacement rapide en courant vers une direction ou une cible."
-    },
-
-    sprint: {
-        nom: "Sprint",
-        aliases: [
-            "sprint",
-            "sprinte",
-            "sprinter",
-            "en sprint",
-            "part en sprint",
-            "démarre un sprint",
-            "demarre un sprint",
-            "accélère en sprint",
-            "accelere en sprint"
-        ],
-        description:
-            "Accélération rapide permettant de parcourir une distance importante en peu de temps."
-    },
-
-    acceleration: {
-        nom: "Accélération",
-        aliases: [
-            "accélère",
-            "accelere",
-            "accélérer",
-            "accelerer",
-            "accélération",
-            "acceleration",
-            "accélère sa course",
-            "accelere sa course",
-            "accélère brusquement",
-            "accelere brusquement"
-        ],
-        description:
-            "Augmentation progressive ou brutale de la vitesse de déplacement."
-    },
-
-    course_vitesse_max: {
-        nom: "Course à vitesse maximale",
-        aliases: [
-            "vitesse maximale",
-            "vitesse max",
-            "vmax",
-            "à vitesse maximale",
-            "a vitesse maximale",
-            "à vitesse max",
-            "a vitesse max",
-            "en vmax",
-            "course vmax",
-            "court à vmax",
-            "court a vmax",
-            "fonce à pleine vitesse",
-            "fonce a pleine vitesse",
-            "à pleine vitesse",
-            "a pleine vitesse",
-            "à toute vitesse",
-            "a toute vitesse",
-            "à fond",
-            "a fond"
-        ],
-        description:
-            "Course effectuée à la vitesse maximale disponible pour le personnage."
-    },
-
-    //========================================
-    // 🦘 SAUT
-    //========================================
-
-    saut: {
-        nom: "Saut",
-        aliases: [
-            "saute",
-            "saut",
-            "bondit",
-            "bond",
-            "fait un saut",
-            "effectue un saut"
-        ],
-        description:
-            "Saut vertical ou déplacement aérien sans attaque."
-    },
-
-    //========================================
-    // 🏃 COURSE + DIRECTION
-    //========================================
-
-    course_avant: {
-        nom: "Course avant",
-        aliases: [
-            "court en avant",
-            "court vers l'avant",
-            "court vers l'avant",
-            "fonce en avant",
-            "fonce vers l'avant",
-            "fonce vers l'avant"
-        ],
-        description:
-            "Course rapide dirigée vers l'avant."
-    },
-
-    course_arriere: {
-        nom: "Course arrière",
-        aliases: [
-            "court en arrière",
-            "court en arriere",
-            "recule en courant",
-            "recul en courant",
-            "fuit en courant",
-            "s'éloigne en courant",
-            "s'eloigne en courant"
-        ],
-        description:
-            "Course effectuée vers l'arrière."
-    }
-},
-    
     //============================================
     // 🛡️ DÉFENSE
     //============================================
@@ -519,7 +829,9 @@ déplacements: {
                 "garde",
                 "se met en garde",
                 "bloque"
-            ]
+            ],
+            description:
+                "Position défensive."
         },
 
         esquive_gauche: {
@@ -529,7 +841,9 @@ déplacements: {
                 "esquive sur la gauche",
                 "part à gauche",
                 "part a gauche"
-            ]
+            ],
+            description:
+                "Direction gauche obligatoire."
         },
 
         esquive_droite: {
@@ -539,7 +853,9 @@ déplacements: {
                 "esquive sur la droite",
                 "part à droite",
                 "part a droite"
-            ]
+            ],
+            description:
+                "Direction droite obligatoire."
         },
 
         esquive_arriere: {
@@ -549,7 +865,9 @@ déplacements: {
                 "esquive arriere",
                 "recule pour esquiver",
                 "se baisse"
-            ]
+            ],
+            description:
+                "Direction arrière obligatoire."
         },
 
         blocage: {
@@ -560,9 +878,12 @@ déplacements: {
                 "pare",
                 "parer",
                 "pare le coup"
-            ]
+            ],
+            description:
+                "Blocage d'une attaque."
         }
     },
+
 
     //============================================
     // 🤼 CONTACT / TECHNIQUES
@@ -577,7 +898,9 @@ déplacements: {
                 "attrape",
                 "agrippe",
                 "empoigne"
-            ]
+            ],
+            description:
+                "Saisie d'une cible précise."
         },
 
         projection: {
@@ -586,7 +909,9 @@ déplacements: {
                 "projection",
                 "projette",
                 "jette au sol"
-            ]
+            ],
+            description:
+                "Projection vers une direction et une destination précises."
         },
 
         repousser: {
@@ -595,11 +920,14 @@ déplacements: {
                 "repousse",
                 "repousser",
                 "pousse"
-            ]
+            ],
+            description:
+                "Repoussement avec direction et distance si précisées."
         }
     }
 };
 
+    
 //================================================
 // 🔎 NORMALISATION D'UNE ACTION
 //================================================
