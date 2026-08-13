@@ -222,54 +222,69 @@ try {
                 j => j.jid === auteur_Message
             );
 
-            if (joueur) {
+          if (joueur) {
 
-                const analyse = await AnalysePaveMatch(
-                    texte,
-                    match,
-                    joueur
-                );
+    const analyse = await AnalysePaveMatch(
+        texte,
+        joueur,
+        match
+    );
 
-                //============================================
-                // 🛡️ MESSAGE NON-PAVÉ → IGNORÉ
-                //============================================
+    //============================================
+    // 🛡️ MESSAGE NON-PAVÉ → IGNORÉ
+    //============================================
 
-                if (!analyse) {
-                    // Rien du tout.
-                    // Ce message n'est pas un pavé de combat.
-                }
+    if (!analyse) {
+        // Rien du tout.
+        // Ce message n'est pas un pavé de combat.
+    }
 
-                //============================================
-                // 🥊 PAVÉ DÉTECTÉ
-                //============================================
+    //============================================
+    // 🥊 PAVÉ DÉTECTÉ
+    //============================================
 
-                else {
+    else {
 
-                    console.log(
-                        "🥊 PAVÉ DE COMBAT DÉTECTÉ"
-                    );
+        console.log(
+            "🥊 PAVÉ DE COMBAT DÉTECTÉ"
+        );
 
-                    console.log(
-                        "👤 Joueur :",
-                        joueur.pseudo
-                    );
+        console.log(
+            "👤 Joueur :",
+            joueur.pseudo
+        );
 
-                    console.log(
-                        "🌀 Actions :",
-                        analyse.texte
-                    );
+        console.log(
+            "📝 Pavé :",
+            analyse.pave
+        );
 
-                    console.log(
-                        "📊 Note :",
-                        analyse.note + "/10"
-                    );
+        console.log(
+            "👤 Acteur :",
+            analyse.acteur
+        );
 
-                    console.log(
-                        "✅ Valide :",
-                        analyse.valide
-                    );
-                }
-            }
+        console.log(
+            "🎯 Cible :",
+            analyse.cible
+        );
+
+        console.log(
+            "🌀 Actions :",
+            analyse.actions
+        );
+
+        console.log(
+            "📊 Note :",
+            analyse.note + "/10"
+        );
+
+        console.log(
+            "✅ Valide :",
+            analyse.valide
+        );
+    }
+}  
         }
     }
 
