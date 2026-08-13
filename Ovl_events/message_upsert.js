@@ -202,92 +202,145 @@ try {
         auteur_Message
     );
 
+//================================================
+// 🥊 ANALYSE DU PAVÉ ALL STARS
+//================================================
 
-    //================================================
-    // 🥊 ANALYSE DU PAVÉ ALL STARS
-    //================================================
+const matchId = matchAttente[ms_org];
 
-    const matchId = matchAttente[ms_org];
+if (matchId) {
 
-    if (matchId) {
+    const match = duelsEnCours[matchId];
 
-        const match = duelsEnCours[matchId];
+    if (
+        match &&
+        match.etat === "in_match"
+    ) {
 
-        if (
-            match &&
-            match.etat === "in_match"
-        ) {
+        const joueur = match.joueurs?.find(
+            j => j.jid === auteur_Message
+        );
 
-            const joueur = match.joueurs?.find(
-                j => j.jid === auteur_Message
+        if (joueur) {
+
+            //============================================
+            // 🧠 ANALYSE DU PAVÉ
+            //============================================
+
+            const analyse = await AnalysePaveMatch(
+                texte,
+                joueur,
+                match
             );
 
-          if (joueur) {
+            //============================================
+            // 🛡️ MESSAGE NON-PAVÉ
+            //============================================
 
-    const analyse = await AnalysePaveMatch(
-        texte,
-        joueur,
-        match
-    );
+            if (!analyse) {
+                return;
+            }
 
-    //============================================
-    // 🛡️ MESSAGE NON-PAVÉ → IGNORÉ
-    //============================================
+            //============================================
+            // 🥊 PAVÉ DÉTECTÉ
+            //============================================
 
-    if (!analyse) {
-        // Rien du tout.
-        // Ce message n'est pas un pavé de combat.
-    }
+            console.log(
+                "🥊 PAVÉ DE COMBAT DÉTECTÉ"
+            );
 
-    //============================================
-    // 🥊 PAVÉ DÉTECTÉ
-    //============================================
+            console.log(
+                "👤 Joueur :",
+                joueur.pseudo
+            );
 
-    else {
+            console.log(
+                "📝 Pavé :",
+                analyse.pave
+            );
 
-        console.log(
-            "🥊 PAVÉ DE COMBAT DÉTECTÉ"
-        );
+            console.log(
+                "👤 Acteur :",
+                analyse.acteur
+            );
 
-        console.log(
-            "👤 Joueur :",
-            joueur.pseudo
-        );
+            console.log(
+                "🎯 Cible :",
+                analyse.cible
+            );
 
-        console.log(
-            "📝 Pavé :",
-            analyse.pave
-        );
+            console.log(
+                "🌀 Actions :",
+                analyse.actions
+            );
 
-        console.log(
-            "👤 Acteur :",
-            analyse.acteur
-        );
+            console.log(
+                "📊 Note :",
+                analyse.note + "/10"
+            );
 
-        console.log(
-            "🎯 Cible :",
-            analyse.cible
-        );
+            console.log(
+                "✅ Valide :",
+                analyse.valide
+            );
 
-        console.log(
-            "🌀 Actions :",
-            analyse.actions
-        );
 
-        console.log(
-            "📊 Note :",
-            analyse.note + "/10"
-        );
+            //============================================
+            // 🔄 DÉTERMINER LE JOUEUR SUIVANT
+            //============================================
 
-        console.log(
-            "✅ Valide :",
-            analyse.valide
-        );
-    }
-}  
+            const prochainJoueur =
+                match.joueurs?.find(
+                    j => j.jid !== joueur.jid
+                );
+
+
+            if (!prochainJoueur) {
+
+                console.log(
+                    "❌ Impossible de trouver le joueur suivant"
+                );
+
+                return;
+            }
+
+
+            //============================================
+            // 📝 GÉNÉRER LE MESSAGE DE RÉSULTAT
+            //============================================
+
+            const resultat =
+                genererResultatAnalysePave(
+                    analyse,
+                    prochainJoueur
+                );
+
+
+            console.log(
+                "📨 ENVOI RÉSULTAT PAVÉ"
+            );
+
+
+            //============================================
+            // 📤 ENVOYER DANS LE GROUPE
+            //============================================
+
+            await ovl.sendMessage(
+                ms_org,
+                {
+                    text: resultat,
+                    mentions: [
+                        prochainJoueur.jid
+                    ]
+                },
+                {
+                    quoted: ms
+                }
+            );
         }
     }
-
+}
+   
 
     // 📄 Détection fiche BlueLock
     await verifierFiche(
