@@ -241,11 +241,12 @@ if (!estPaveJeu) {
             // 🧠 ANALYSE DU PAVÉ
             //============================================
 
-            const analyse = await AnalysePaveMatch(
-                texte,
-                joueur,
-                match
-            );
+            const analyse = AnalysePaveMatch(
+    texte,
+    joueur,
+    match,
+    auteur_Message
+);
 
             //============================================
             // 🛡️ MESSAGE NON-PAVÉ
