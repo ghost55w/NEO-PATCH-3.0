@@ -225,6 +225,18 @@ if (matchId) {
 
         if (joueur) {
 
+//============================================
+// 🎮 VÉRIFIER QUE C'EST UN PAVÉ DE JEU
+//============================================
+
+const estPaveJeu =
+    texte.includes("🌀🎮") ||
+    texte.includes("🎮🌀");
+
+if (!estPaveJeu) {
+    return;
+}
+
             //============================================
             // 🧠 ANALYSE DU PAVÉ
             //============================================
