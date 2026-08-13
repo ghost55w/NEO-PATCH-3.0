@@ -1026,6 +1026,51 @@ function AnalysePaveMatch(
     match = null
 ) {
 
+    //================================================
+    // 🔐 VÉRIFICATION DU JOUEUR
+    //================================================
+
+    if (!match || !joueur?.jid) {
+        return null;
+    }
+
+    const joueursAutorises = [
+        match.joueur1?.jid,
+        match.joueur2?.jid
+    ].filter(Boolean);
+
+    // Le joueur doit obligatoirement appartenir au match
+    if (!joueursAutorises.includes(joueur.jid)) {
+        console.log(
+            "🚫 PAVÉ IGNORÉ — JID NON CONCERNÉ PAR LE MATCH :",
+            joueur.jid
+        );
+
+        return null;
+    }
+
+    //================================================
+    // 🎮 VÉRIFIER QUE C'EST BIEN UN PAVÉ DE JEU
+    //================================================
+
+    const texte = String(message || "");
+
+    const estPaveJeu =
+        texte.includes("🌀🎮") ||
+        texte.includes("🎮🌀");
+
+    if (!estPaveJeu) {
+        console.log(
+            "🚫 MESSAGE IGNORÉ — PAS UN PAVÉ DE JEU"
+        );
+
+        return null;
+    }
+
+    //================================================
+    // 🧠 EXTRACTION DU PAVÉ
+    //================================================
+
     const pave =
         extrairePaveAction(message);
 
@@ -1075,7 +1120,6 @@ function AnalysePaveMatch(
                 "Le joueur doit écrire son action dans la section 🌀🎮."
         };
     }
-
 
     //============================================
     // 🎮 CONSTRUCTION DE LA SÉQUENCE
