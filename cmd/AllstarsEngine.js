@@ -50,15 +50,16 @@ function normalizeName(str = "") {
         .trim();
 }
 
+
 //================================================
-// 🎮 ACTIONS MAP — BASE COMPLÈTE DU GAMEPLAY
+// 🎮 ACTIONS MAP — GAMEPLAY COMPLET
 //================================================
 
 const ACTIONS_MAP = {
 
-    //============================================
-    // 🥊 FRAPPES — MAINS
-    //============================================
+    //================================================
+    // 🥊 FRAPPES
+    //================================================
 
     frappes: {
 
@@ -67,14 +68,17 @@ const ACTIONS_MAP = {
             coup_direct: {
                 nom: "Coup direct",
                 aliases: [
+                    "coup de poing direct",
                     "coup direct",
-                    "direct",
                     "poing direct",
+                    "direct",
                     "jab",
                     "straight"
                 ],
-                description:
-                    "Main gauche ou droite obligatoire + zone visée obligatoire."
+                parametres: [
+                    "main",
+                    "zoneVisee"
+                ]
             },
 
             crochet_gauche: {
@@ -84,8 +88,9 @@ const ACTIONS_MAP = {
                     "left hook",
                     "hook gauche"
                 ],
-                description:
-                    "Main gauche obligatoire + zone visée obligatoire."
+                parametres: [
+                    "zoneVisee"
+                ]
             },
 
             crochet_droit: {
@@ -95,8 +100,9 @@ const ACTIONS_MAP = {
                     "right hook",
                     "hook droit"
                 ],
-                description:
-                    "Main droite obligatoire + zone visée obligatoire."
+                parametres: [
+                    "zoneVisee"
+                ]
             },
 
             uppercut: {
@@ -105,8 +111,10 @@ const ACTIONS_MAP = {
                     "uppercut",
                     "coup uppercut"
                 ],
-                description:
-                    "Main gauche ou droite obligatoire + zone visée obligatoire."
+                parametres: [
+                    "main",
+                    "zoneVisee"
+                ]
             },
 
             uppercut_saute: {
@@ -116,19 +124,25 @@ const ACTIONS_MAP = {
                     "uppercut saute",
                     "rising uppercut"
                 ],
-                description:
-                    "Main utilisée + hauteur + direction + zone visée obligatoires."
+                parametres: [
+                    "main",
+                    "hauteur",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             revers: {
                 nom: "Coup en revers",
                 aliases: [
-                    "revers",
                     "coup en revers",
+                    "revers",
                     "backfist"
                 ],
-                description:
-                    "Main gauche ou droite obligatoire + zone visée obligatoire."
+                parametres: [
+                    "main",
+                    "zoneVisee"
+                ]
             },
 
             revers_circulaire: {
@@ -138,20 +152,27 @@ const ACTIONS_MAP = {
                     "spinning backfist",
                     "spinning back fist"
                 ],
-                description:
-                    "Angle de rotation + côté d'engagement + main utilisée + zone visée obligatoires."
+                parametres: [
+                    "angle",
+                    "coteEngagement",
+                    "main",
+                    "zoneVisee"
+                ]
             },
 
             marteau_descendant: {
                 nom: "Coup marteau descendant",
                 aliases: [
-                    "coup marteau",
+                    "coup marteau descendant",
                     "marteau descendant",
-                    "hammer",
-                    "hammer fist"
+                    "coup marteau",
+                    "hammer fist",
+                    "hammer"
                 ],
-                description:
-                    "Main gauche ou droite obligatoire + zone visée obligatoire."
+                parametres: [
+                    "main",
+                    "zoneVisee"
+                ]
             },
 
             marteau_lateral: {
@@ -162,8 +183,11 @@ const ACTIONS_MAP = {
                     "hammer fist side",
                     "hammer side"
                 ],
-                description:
-                    "Main gauche ou droite obligatoire + direction + zone visée."
+                parametres: [
+                    "main",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             marteau_revers: {
@@ -173,15 +197,18 @@ const ACTIONS_MAP = {
                     "reverse hammer",
                     "reverse hammer fist"
                 ],
-                description:
-                    "Main utilisée + direction + zone visée obligatoires."
+                parametres: [
+                    "main",
+                    "direction",
+                    "zoneVisee"
+                ]
             }
         },
 
 
-        //========================================
-        // 🦵 FRAPPES — PIEDS
-        //========================================
+        //================================================
+        // 🦵 PIEDS
+        //================================================
 
         pieds: {
 
@@ -193,20 +220,27 @@ const ACTIONS_MAP = {
                     "frontkick",
                     "coup frontal"
                 ],
-                description:
-                    "Pied gauche ou droit obligatoire + direction + zone visée."
+                parametres: [
+                    "pied",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             roundhouse_kick: {
                 nom: "Coup circulaire",
                 aliases: [
+                    "coup de pied circulaire",
                     "coup circulaire",
                     "roundhouse kick",
                     "roundhouse",
                     "kick circulaire"
                 ],
-                description:
-                    "Pied gauche ou droit obligatoire + côté d'engagement + zone visée."
+                parametres: [
+                    "pied",
+                    "coteEngagement",
+                    "zoneVisee"
+                ]
             },
 
             side_kick: {
@@ -217,8 +251,11 @@ const ACTIONS_MAP = {
                     "side kick",
                     "sidekick"
                 ],
-                description:
-                    "Pied gauche ou droit obligatoire + direction + zone visée."
+                parametres: [
+                    "pied",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             back_kick: {
@@ -229,8 +266,12 @@ const ACTIONS_MAP = {
                     "back kick",
                     "backkick"
                 ],
-                description:
-                    "Pied gauche ou droit + rotation + côté d'engagement + zone visée."
+                parametres: [
+                    "pied",
+                    "angle",
+                    "coteEngagement",
+                    "zoneVisee"
+                ]
             },
 
             hook_kick: {
@@ -241,8 +282,11 @@ const ACTIONS_MAP = {
                     "hookkick",
                     "kick crochet"
                 ],
-                description:
-                    "Pied gauche ou droit obligatoire + direction + zone visée."
+                parametres: [
+                    "pied",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             axe_kick: {
@@ -253,8 +297,11 @@ const ACTIONS_MAP = {
                     "axekick",
                     "coup descendant"
                 ],
-                description:
-                    "Pied gauche ou droit obligatoire + hauteur + zone visée."
+                parametres: [
+                    "pied",
+                    "hauteur",
+                    "zoneVisee"
+                ]
             },
 
             spinning_back_kick: {
@@ -265,19 +312,27 @@ const ACTIONS_MAP = {
                     "spinning back kick",
                     "spinning backkick"
                 ],
-                description:
-                    "Angle + côté d'engagement + pied utilisé + direction + zone visée obligatoires."
+                parametres: [
+                    "angle",
+                    "coteEngagement",
+                    "pied",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             low_kick: {
                 nom: "Coup bas",
                 aliases: [
+                    "coup de pied bas",
                     "coup bas",
                     "low kick",
                     "lowkick"
                 ],
-                description:
-                    "Pied gauche ou droit obligatoire + zone basse obligatoire : cuisse, tibia, mollet, genou ou pied."
+                parametres: [
+                    "pied",
+                    "zoneVisee"
+                ]
             },
 
             knee_strike: {
@@ -287,29 +342,37 @@ const ACTIONS_MAP = {
                     "genou",
                     "knee strike"
                 ],
-                description:
-                    "Genou gauche ou droit obligatoire + direction + zone visée."
+                parametres: [
+                    "pied",
+                    "direction",
+                    "zoneVisee"
+                ]
             },
 
             flying_kick: {
                 nom: "Coup sauté",
                 aliases: [
+                    "coup de pied sauté",
                     "coup sauté",
                     "coup saute",
                     "flying kick",
                     "flyingkick",
                     "kick sauté"
                 ],
-                description:
-                    "Hauteur + direction + pied utilisé + zone visée obligatoires."
+                parametres: [
+                    "hauteur",
+                    "direction",
+                    "pied",
+                    "zoneVisee"
+                ]
             }
         }
     },
 
 
-    //============================================
+    //================================================
     // 🏃 DÉPLACEMENTS
-    //============================================
+    //================================================
 
     déplacements: {
 
@@ -318,12 +381,12 @@ const ACTIONS_MAP = {
             aliases: [
                 "avance",
                 "avancer",
-                "s'avance",
-                "s'avancer",
+                "s avance",
+                "s avancer",
                 "va devant",
-                "va vers l'avant",
+                "va vers l avant",
                 "avance devant",
-                "avance vers l'avant",
+                "avance vers l avant",
                 "fonce",
                 "foncer",
                 "fonce vers",
@@ -335,12 +398,14 @@ const ACTIONS_MAP = {
                 "sprint",
                 "sprinte",
                 "sprinter",
-                "accélère",
-                "accélère vers",
-                "accélération"
+                "accelere",
+                "acceleration"
             ],
-            description:
-                "Direction obligatoire : devant, derrière, gauche, droite ou diagonale. Distance et vitesse peuvent être précisées."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         reculer: {
@@ -348,16 +413,16 @@ const ACTIONS_MAP = {
             aliases: [
                 "recule",
                 "reculer",
-                "s'éloigne",
-                "s'eloigne",
-                "va derrière",
+                "s eloigne",
                 "va derriere",
-                "va vers l'arrière",
-                "va vers l'arriere",
+                "va vers l arriere",
                 "recule vers"
             ],
-            description:
-                "Direction arrière obligatoire + distance/vitesse si utilisées."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         gauche: {
@@ -372,8 +437,11 @@ const ACTIONS_MAP = {
                 "part à gauche",
                 "part a gauche"
             ],
-            description:
-                "Direction gauche obligatoire + distance/vitesse si utilisées."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         droite: {
@@ -388,8 +456,11 @@ const ACTIONS_MAP = {
                 "part à droite",
                 "part a droite"
             ],
-            description:
-                "Direction droite obligatoire + distance/vitesse si utilisées."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         diagonal_avant_gauche: {
@@ -400,11 +471,14 @@ const ACTIONS_MAP = {
                 "avance en diagonale gauche",
                 "court en diagonale gauche",
                 "fonce en diagonale gauche",
-                "vers l'avant gauche",
-                "vers l'avant-gauche"
+                "vers l avant gauche",
+                "vers l avant gauche"
             ],
-            description:
-                "Direction diagonale avant gauche obligatoire + distance/vitesse."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         diagonal_avant_droite: {
@@ -415,11 +489,14 @@ const ACTIONS_MAP = {
                 "avance en diagonale droite",
                 "court en diagonale droite",
                 "fonce en diagonale droite",
-                "vers l'avant droite",
-                "vers l'avant-droit"
+                "vers l avant droite",
+                "vers l avant droit"
             ],
-            description:
-                "Direction diagonale avant droite obligatoire + distance/vitesse."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         diagonal_arriere_gauche: {
@@ -433,8 +510,11 @@ const ACTIONS_MAP = {
                 "part en diagonale arrière gauche",
                 "part en diagonale arriere gauche"
             ],
-            description:
-                "Direction diagonale arrière gauche obligatoire + distance/vitesse."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
         diagonal_arriere_droite: {
@@ -448,14 +528,17 @@ const ACTIONS_MAP = {
                 "part en diagonale arrière droite",
                 "part en diagonale arriere droite"
             ],
-            description:
-                "Direction diagonale arrière droite obligatoire + distance/vitesse."
+            parametres: [
+                "direction",
+                "distance",
+                "vitesse"
+            ]
         },
 
 
-        //========================================
+        //================================================
         // 🦘 SAUT / BOND / VOL
-        //========================================
+        //================================================
 
         saut: {
             nom: "Saut",
@@ -464,8 +547,10 @@ const ACTIONS_MAP = {
                 "saut",
                 "sauter"
             ],
-            description:
-                "Hauteur obligatoire de 0 à 20 m + direction obligatoire."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         bond: {
@@ -475,15 +560,12 @@ const ACTIONS_MAP = {
                 "bondit",
                 "bondir",
                 "fait un bond",
-                "grand bond",
-                "bond en avant",
-                "bond en arrière",
-                "bond en arriere",
-                "bond a gauche",
-                "bond a droite"
+                "grand bond"
             ],
-            description:
-                "Hauteur obligatoire de 0 à 20 m + direction obligatoire."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         vol: {
@@ -492,26 +574,21 @@ const ACTIONS_MAP = {
                 "vole",
                 "vol",
                 "voler",
-                "s'envole",
+                "s envole",
                 "senvole",
-                "vole devant",
-                "vole derrière",
-                "vole derriere",
-                "vole à gauche",
-                "vole a gauche",
-                "vole à droite",
-                "vole a droite",
                 "vol stationnaire"
             ],
-            description:
-                "Hauteur obligatoire de 0 à 20 m + direction obligatoire."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         }
     },
 
 
-    //============================================
+    //================================================
     // 🔄 ROTATIONS / PIVOTS
-    //============================================
+    //================================================
 
     rotations: {
 
@@ -527,8 +604,10 @@ const ACTIONS_MAP = {
                 "tourne à 60",
                 "tourne a 60"
             ],
-            description:
-                "Angle 60° obligatoire + côté d'engagement gauche ou droite."
+            parametres: [
+                "angle",
+                "coteEngagement"
+            ]
         },
 
         pivot_90: {
@@ -543,8 +622,10 @@ const ACTIONS_MAP = {
                 "tourne à 90",
                 "tourne a 90"
             ],
-            description:
-                "Angle 90° obligatoire + côté d'engagement gauche ou droite."
+            parametres: [
+                "angle",
+                "coteEngagement"
+            ]
         },
 
         pivot_180: {
@@ -558,11 +639,13 @@ const ACTIONS_MAP = {
                 "rotation a 180",
                 "tourne à 180",
                 "tourne a 180",
-                "demi-tour",
-                "demi tour"
+                "demi tour",
+                "demi-tour"
             ],
-            description:
-                "Angle 180° obligatoire + côté d'engagement gauche ou droite."
+            parametres: [
+                "angle",
+                "coteEngagement"
+            ]
         },
 
         pivot_360: {
@@ -578,15 +661,17 @@ const ACTIONS_MAP = {
                 "tourne a 360",
                 "tour complet"
             ],
-            description:
-                "Angle 360° obligatoire + côté d'engagement gauche ou droite."
+            parametres: [
+                "angle",
+                "coteEngagement"
+            ]
         }
     },
 
 
-    //============================================
+    //================================================
     // 🤸 ACROBATIES
-    //============================================
+    //================================================
 
     acrobaties: {
 
@@ -599,8 +684,10 @@ const ACTIONS_MAP = {
                 "frontflip",
                 "flip avant"
             ],
-            description:
-                "Hauteur + direction obligatoires."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         salto_arriere: {
@@ -615,8 +702,10 @@ const ACTIONS_MAP = {
                 "flip arrière",
                 "flip arriere"
             ],
-            description:
-                "Hauteur + direction obligatoires."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         salto_lateral_gauche: {
@@ -628,8 +717,10 @@ const ACTIONS_MAP = {
                 "side flip gauche",
                 "sideflip gauche"
             ],
-            description:
-                "Hauteur + direction gauche obligatoires."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         salto_lateral_droit: {
@@ -641,8 +732,10 @@ const ACTIONS_MAP = {
                 "side flip droite",
                 "sideflip droite"
             ],
-            description:
-                "Hauteur + direction droite obligatoires."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         salto_360: {
@@ -655,8 +748,12 @@ const ACTIONS_MAP = {
                 "flip à 360",
                 "flip a 360"
             ],
-            description:
-                "Angle 360° + hauteur + direction + côté d'engagement obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         salto_540: {
@@ -669,8 +766,12 @@ const ACTIONS_MAP = {
                 "flip à 540",
                 "flip a 540"
             ],
-            description:
-                "Angle 540° + hauteur + direction + côté d'engagement obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         salto_720: {
@@ -683,8 +784,12 @@ const ACTIONS_MAP = {
                 "flip à 720",
                 "flip a 720"
             ],
-            description:
-                "Angle 720° + hauteur + direction + côté d'engagement obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         pirouette: {
@@ -696,8 +801,12 @@ const ACTIONS_MAP = {
                 "tour aérien",
                 "tour aerien"
             ],
-            description:
-                "Angle + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         rotation_aerienne_180: {
@@ -705,13 +814,15 @@ const ACTIONS_MAP = {
             aliases: [
                 "rotation aérienne 180",
                 "rotation aerienne 180",
-                "rotation aérienne à 180",
-                "rotation aerienne a 180",
                 "tour aérien 180",
                 "tour aerien 180"
             ],
-            description:
-                "180° + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         rotation_aerienne_360: {
@@ -719,13 +830,15 @@ const ACTIONS_MAP = {
             aliases: [
                 "rotation aérienne 360",
                 "rotation aerienne 360",
-                "rotation aérienne à 360",
-                "rotation aerienne a 360",
                 "tour aérien 360",
                 "tour aerien 360"
             ],
-            description:
-                "360° + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         rotation_aerienne_540: {
@@ -733,13 +846,15 @@ const ACTIONS_MAP = {
             aliases: [
                 "rotation aérienne 540",
                 "rotation aerienne 540",
-                "rotation aérienne à 540",
-                "rotation aerienne a 540",
                 "tour aérien 540",
                 "tour aerien 540"
             ],
-            description:
-                "540° + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         rotation_aerienne_720: {
@@ -747,37 +862,41 @@ const ACTIONS_MAP = {
             aliases: [
                 "rotation aérienne 720",
                 "rotation aerienne 720",
-                "rotation aérienne à 720",
-                "rotation aerienne a 720",
                 "tour aérien 720",
                 "tour aerien 720"
             ],
-            description:
-                "720° + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         roue_gauche: {
             nom: "Roue gauche",
             aliases: [
                 "roue gauche",
-                "roulade latérale gauche",
-                "roulade laterale gauche",
-                "cartwheel gauche"
+                "cartwheel gauche",
+                "roulade laterale gauche"
             ],
-            description:
-                "Hauteur + direction gauche obligatoires."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         roue_droite: {
             nom: "Roue droite",
             aliases: [
                 "roue droite",
-                "roulade latérale droite",
-                "roulade laterale droite",
-                "cartwheel droite"
+                "cartwheel droite",
+                "roulade laterale droite"
             ],
-            description:
-                "Hauteur + direction droite obligatoires."
+            parametres: [
+                "hauteur",
+                "direction"
+            ]
         },
 
         vrille: {
@@ -789,8 +908,12 @@ const ACTIONS_MAP = {
                 "spin aérien",
                 "spin aerien"
             ],
-            description:
-                "Angle + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         vrille_180: {
@@ -800,8 +923,12 @@ const ACTIONS_MAP = {
                 "vrille à 180",
                 "vrille a 180"
             ],
-            description:
-                "180° + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         },
 
         vrille_360: {
@@ -811,15 +938,19 @@ const ACTIONS_MAP = {
                 "vrille à 360",
                 "vrille a 360"
             ],
-            description:
-                "360° + côté d'engagement + hauteur + direction obligatoires."
+            parametres: [
+                "angle",
+                "hauteur",
+                "direction",
+                "coteEngagement"
+            ]
         }
     },
 
 
-    //============================================
+    //================================================
     // 🛡️ DÉFENSE
-    //============================================
+    //================================================
 
     defenses: {
 
@@ -827,35 +958,31 @@ const ACTIONS_MAP = {
             nom: "Garde",
             aliases: [
                 "garde",
-                "se met en garde",
-                "bloque"
+                "se met en garde"
             ],
-            description:
-                "Position défensive."
+            parametres: []
         },
 
         esquive_gauche: {
             nom: "Esquive gauche",
             aliases: [
                 "esquive gauche",
-                "esquive sur la gauche",
-                "part à gauche",
-                "part a gauche"
+                "esquive sur la gauche"
             ],
-            description:
-                "Direction gauche obligatoire."
+            parametres: [
+                "direction"
+            ]
         },
 
         esquive_droite: {
             nom: "Esquive droite",
             aliases: [
                 "esquive droite",
-                "esquive sur la droite",
-                "part à droite",
-                "part a droite"
+                "esquive sur la droite"
             ],
-            description:
-                "Direction droite obligatoire."
+            parametres: [
+                "direction"
+            ]
         },
 
         esquive_arriere: {
@@ -866,8 +993,9 @@ const ACTIONS_MAP = {
                 "recule pour esquiver",
                 "se baisse"
             ],
-            description:
-                "Direction arrière obligatoire."
+            parametres: [
+                "direction"
+            ]
         },
 
         blocage: {
@@ -875,19 +1003,17 @@ const ACTIONS_MAP = {
             aliases: [
                 "blocage",
                 "bloque le coup",
-                "pare",
-                "parer",
-                "pare le coup"
+                "pare le coup",
+                "pare"
             ],
-            description:
-                "Blocage d'une attaque."
+            parametres: []
         }
     },
 
 
-    //============================================
-    // 🤼 CONTACT / TECHNIQUES
-    //============================================
+    //================================================
+    // 🤼 CONTACT
+    //================================================
 
     contact: {
 
@@ -899,8 +1025,9 @@ const ACTIONS_MAP = {
                 "agrippe",
                 "empoigne"
             ],
-            description:
-                "Saisie d'une cible précise."
+            parametres: [
+                "zoneVisee"
+            ]
         },
 
         projection: {
@@ -910,8 +1037,10 @@ const ACTIONS_MAP = {
                 "projette",
                 "jette au sol"
             ],
-            description:
-                "Projection vers une direction et une destination précises."
+            parametres: [
+                "direction",
+                "distance"
+            ]
         },
 
         repousser: {
@@ -921,16 +1050,19 @@ const ACTIONS_MAP = {
                 "repousser",
                 "pousse"
             ],
-            description:
-                "Repoussement avec direction et distance si précisées."
+            parametres: [
+                "direction",
+                "distance"
+            ]
         }
     }
 };
+        
+                    
+//================================================
+// 🔎 NORMALISATION
+//================================================
 
-    
-//================================================
-// 🔎 NORMALISATION D'UNE ACTION
-//================================================
 function normaliserAction(texte = "") {
 
     return String(texte)
@@ -938,10 +1070,12 @@ function normaliserAction(texte = "") {
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .replace(/[’']/g, " ")
-        .replace(/[^a-z0-9\s-]/g, " ")
+        .replace(/[^a-z0-9°\s-]/g, " ")
         .replace(/\s+/g, " ")
         .trim();
 }
+    
+
 
 //================================================
 // 🎮 CONFIGURATION PAVÉ ALL STARS
@@ -1183,6 +1317,339 @@ function extraireActionsChronologiques(texte = "") {
         }
     );
 }
+
+//================================================
+// 🧩 EXTRACTION DES PARAMÈTRES D'ACTION
+//================================================
+
+function extraireParametresAction(texte = "", action = {}) {
+
+    const t = normaliserAction(texte);
+
+    const params = {
+        direction: null,
+        distance: null,
+        vitesse: null,
+        vmax: null,
+        hauteur: null,
+        angle: null,
+        coteEngagement: null,
+        main: null,
+        pied: null,
+        genou: null,
+        zoneVisee: null
+    };
+
+
+    //================================================
+    // 🧭 DIRECTION
+    //================================================
+
+    if (
+        /\b(avant|devant|vers l avant|vers avant|en avant)\b/.test(t)
+    ) {
+        params.direction = "avant";
+    }
+
+    else if (
+        /\b(arriere|derriere|vers l arriere|en arriere)\b/.test(t)
+    ) {
+        params.direction = "arriere";
+    }
+
+    else if (
+        /\b(gauche|vers la gauche|a gauche)\b/.test(t)
+    ) {
+        params.direction = "gauche";
+    }
+
+    else if (
+        /\b(droite|vers la droite|a droite)\b/.test(t)
+    ) {
+        params.direction = "droite";
+    }
+
+
+    //================================================
+    // ↗️ DIAGONALES
+    //================================================
+
+    if (
+        /diagonal(e)?\s+(avant|vers l avant)\s+(gauche)/.test(t)
+        ||
+        /avant\s+gauche/.test(t)
+    ) {
+        params.direction = "avant-gauche";
+    }
+
+    else if (
+        /diagonal(e)?\s+(avant|vers l avant)\s+(droite)/.test(t)
+        ||
+        /avant\s+droite/.test(t)
+    ) {
+        params.direction = "avant-droite";
+    }
+
+    else if (
+        /diagonal(e)?\s+(arriere|vers l arriere)\s+(gauche)/.test(t)
+        ||
+        /arriere\s+gauche/.test(t)
+    ) {
+        params.direction = "arriere-gauche";
+    }
+
+    else if (
+        /diagonal(e)?\s+(arriere|vers l arriere)\s+(droite)/.test(t)
+        ||
+        /arriere\s+droite/.test(t)
+    ) {
+        params.direction = "arriere-droite";
+    }
+
+
+    //================================================
+    // 📏 DISTANCE
+    //================================================
+
+    const distanceMatch =
+        t.match(
+            /\b(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\b/
+        );
+
+    if (distanceMatch) {
+
+        params.distance =
+            Number(
+                distanceMatch[1]
+                    .replace(",", ".")
+            );
+    }
+
+
+    //================================================
+    // ⚡ VITESSE / VMAX
+    //================================================
+
+    const vmaxMatch =
+        t.match(
+            /\bvmax\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\s*\/?\s*s\b/
+        );
+
+    if (vmaxMatch) {
+
+        params.vmax =
+            Number(
+                vmaxMatch[1]
+                    .replace(",", ".")
+            );
+    }
+
+    const vitesseMatch =
+        t.match(
+            /\bvitesse\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\s*\/?\s*s\b/
+        );
+
+    if (vitesseMatch) {
+
+        params.vitesse =
+            Number(
+                vitesseMatch[1]
+                    .replace(",", ".")
+            );
+    }
+
+
+    //================================================
+    // 🦘 HAUTEUR
+    //================================================
+
+    const hauteurMatch =
+        t.match(
+            /\b(?:hauteur|a)\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\b/
+        );
+
+    if (hauteurMatch) {
+
+        params.hauteur =
+            Number(
+                hauteurMatch[1]
+                    .replace(",", ".")
+            );
+    }
+
+    else if (/\bras du sol\b/.test(t)) {
+
+        params.hauteur = 0;
+    }
+
+    else {
+
+        const cmMatch =
+            t.match(
+                /\b(\d+(?:[.,]\d+)?)\s*cm\b/
+            );
+
+        if (cmMatch) {
+
+            params.hauteur =
+                Number(
+                    cmMatch[1]
+                        .replace(",", ".")
+                ) / 100;
+        }
+    }
+
+
+    //================================================
+    // 🔄 ANGLE
+    //================================================
+
+    const angleMatch =
+        t.match(
+            /\b(60|90|180|360|540|720)\s*(?:degres|degres|°)?\b/
+        );
+
+    if (angleMatch) {
+
+        params.angle =
+            Number(angleMatch[1]);
+    }
+
+
+    //================================================
+    // ↩️ CÔTÉ D'ENGAGEMENT
+    //================================================
+
+    if (
+        /\b(par|depuis|de|cote|côté)\s+(sa\s+)?gauche\b/.test(t)
+        ||
+        /\bengage\s+(par|du)\s+gauche\b/.test(t)
+    ) {
+        params.coteEngagement = "gauche";
+    }
+
+    else if (
+        /\b(par|depuis|de|cote|côté)\s+(sa\s+)?droite\b/.test(t)
+        ||
+        /\bengage\s+(par|du)\s+droite\b/.test(t)
+    ) {
+        params.coteEngagement = "droite";
+    }
+
+
+    //================================================
+    // 🥊 MAIN
+    //================================================
+
+    if (
+        /\b(main|poing)\s+gauche\b/.test(t)
+        ||
+        /\bdu\s+gauche\b/.test(t)
+        ||
+        /\bde\s+la\s+gauche\b/.test(t)
+    ) {
+        params.main = "gauche";
+    }
+
+    else if (
+        /\b(main|poing)\s+droit\b/.test(t)
+        ||
+        /\bdu\s+droit\b/.test(t)
+        ||
+        /\bde\s+la\s+droite\b/.test(t)
+    ) {
+        params.main = "droite";
+    }
+
+
+    //================================================
+    // 🦵 PIED
+    //================================================
+
+    if (
+        /\bpied\s+gauche\b/.test(t)
+        ||
+        /\bjambe\s+gauche\b/.test(t)
+    ) {
+        params.pied = "gauche";
+    }
+
+    else if (
+        /\bpied\s+droit\b/.test(t)
+        ||
+        /\bjambe\s+droite\b/.test(t)
+    ) {
+        params.pied = "droite";
+    }
+
+
+    //================================================
+    // 🦵 GENOU
+    //================================================
+
+    if (
+        /\bgenou\s+gauche\b/.test(t)
+    ) {
+        params.genou = "gauche";
+    }
+
+    else if (
+        /\bgenou\s+droit\b/.test(t)
+    ) {
+        params.genou = "droite";
+    }
+
+
+    //================================================
+    // 🎯 ZONE VISÉE
+    //================================================
+
+    const zones = [
+        "visage",
+        "tete",
+        "front",
+        "menton",
+        "nez",
+        "machoire",
+        "cou",
+        "gorge",
+        "torse",
+        "poitrine",
+        "abdomen",
+        "ventre",
+        "cotes",
+        "flanc",
+        "dos",
+        "epaule",
+        "bras",
+        "coude",
+        "poignet",
+        "main",
+        "cuisse",
+        "genou",
+        "tibia",
+        "mollet",
+        "cheville",
+        "pied"
+    ];
+
+    for (const zone of zones) {
+
+        if (
+            t.includes(zone)
+        ) {
+
+            params.zoneVisee =
+                zone;
+
+            break;
+        }
+    }
+
+
+    return params;
+}
+
 
 //================================================
 // 👤 EXTRACTION DES PERSONNAGES DU PAVÉ
