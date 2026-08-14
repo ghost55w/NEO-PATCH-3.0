@@ -377,36 +377,29 @@ const ACTIONS_MAP = {
     déplacements: {
 
         avancer: {
-            nom: "Avancer",
-            aliases: [
-                "avance",
-                "avancer",
-                "s avance",
-                "s avancer",
-                "va devant",
-                "va vers l avant",
-                "avance devant",
-                "avance vers l avant",
-                "fonce",
-                "foncer",
-                "fonce vers",
-                "foncer vers",
-                "course",
-                "en course",
-                "court",
-                "courir",
-                "sprint",
-                "sprinte",
-                "sprinter",
-                "accelere",
-                "acceleration"
-            ],
-            parametres: [
-                "direction",
-                "distance",
-                "vitesse"
-            ]
-        },
+    nom: "Avancer",
+
+    aliases: [
+        "avance",
+        "avancer",
+        "s avance",
+        "s avancer",
+        "va devant",
+        "va vers l avant",
+        "avance devant",
+        "avance vers l avant",
+        "fonce",
+        "foncer",
+        "fonce vers",
+        "foncer vers"
+    ],
+
+    parametres: [
+        "direction",
+        "distance",
+        "vitesse"
+    ]
+},
 
         reculer: {
             nom: "Reculer",
@@ -416,6 +409,7 @@ const ACTIONS_MAP = {
                 "s eloigne",
                 "va derriere",
                 "va vers l arriere",
+                "s'écarte", 
                 "recule vers"
             ],
             parametres: [
@@ -535,6 +529,44 @@ const ACTIONS_MAP = {
             ]
         },
 
+        //================================================
+// 🏃 MODES DE DÉPLACEMENT
+//================================================
+
+modes_deplacement: {
+
+    course: {
+        nom: "Course",
+
+        aliases: [
+            "course",
+            "en course",
+            "court",
+            "courir"
+        ]
+    },
+
+    sprint: {
+        nom: "Sprint",
+
+        aliases: [
+            "sprint",
+            "sprinte",
+            "sprinter"
+        ]
+    },
+
+    acceleration: {
+        nom: "Accélération",
+
+        aliases: [
+            "accelere",
+            "accélère",
+            "acceleration",
+            "accélération"
+        ]
+    }
+}
 
         //================================================
         // 🦘 SAUT / BOND / VOL
@@ -1087,6 +1119,7 @@ const DUREE_ACTION_COMBO = 0.5;   // 0.5 seconde
 //================================================
 // 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
 //================================================
+
 function extraireActionsChronologiques(texte = "") {
 
     const texteOriginal = String(texte);
@@ -1096,348 +1129,166 @@ function extraireActionsChronologiques(texte = "") {
 
     const toutesLesActions =
         obtenirToutesLesActions();
-console.log(
-    "🧪 ===== INSPECTION ACTIONS CHARGÉES ====="
-);
 
-console.log(
-    "🧪 TOTAL :",
-    toutesLesActions.length
-);
+    //================================================
+    // MODIFICATEURS
+    //================================================
 
-console.log(
-    "🧪 PREMIÈRES ACTIONS :",
-    toutesLesActions.slice(0, 20).map(a => ({
-        id: a.id,
-        categorie: a.categorie,
-        groupe: a.groupe,
-        nom: a.nom
-    }))
-);
-
-console.log(
-    "🧪 ACTIONS DÉPLACEMENT :",
-    toutesLesActions
-        .filter(a =>
-            a.categorie === "déplacements"
-        )
-        .map(a => ({
-            id: a.id,
-            categorie: a.categorie,
-            groupe: a.groupe,
-            nom: a.nom,
-            aliases: a.aliases
-        }))
-);
-
-console.log(
-    "🧪 RECHERCHE ID avancer :",
-    toutesLesActions.filter(
-        a => a.id === "avancer"
-    )
-);
-
-console.log(
-    "🧪 RECHERCHE NOM Avancer :",
-    toutesLesActions.filter(
-        a => a.nom === "Avancer"
-    )
-);
-
-console.log(
-    "🧪 RECHERCHE ALIAS fonce :",
-    toutesLesActions.filter(
-        a =>
-            Array.isArray(a.aliases) &&
-            a.aliases.includes("fonce")
-    )
-);
-
-console.log(
-    "🧪 RECHERCHE ALIAS course :",
-    toutesLesActions.filter(
-        a =>
-            Array.isArray(a.aliases) &&
-            a.aliases.includes("course")
-    )
-);
-
-console.log(
-    "🧪 ======================================="
-);
-    
+    const modificateurs =
+        detecterModificateursDeplacement(
+            texteOriginal
+        );
 
     const occurrences = [];
 
+    //================================================
+    // MOTS À NE JAMAIS COMPTER COMME ACTIONS
+    //================================================
 
-    console.log(
-        "🔎 TEXTE NORMALISÉ :",
-        texteNormalise
+    const motsModificateurs = new Set(
+        Object.values(MODIFICATEURS_DEPLACEMENT)
+            .flat()
+            .map(x => normaliserAction(x))
     );
-
-    console.log(
-        "🎮 NOMBRE ACTIONS DISPONIBLES :",
-        toutesLesActions.length
-    );
-
 
     //================================================
-// 🔎 RECHERCHE DE TOUTES LES OCCURRENCES
-//================================================
+    // RECHERCHE DES ACTIONS
+    //================================================
 
-for (const action of toutesLesActions) {
+    for (const action of toutesLesActions) {
 
-    const termes = [
-        action.nom,
-        ...(action.aliases || [])
-    ];
+        const termes = [
+            action.nom,
+            ...(action.aliases || [])
+        ];
 
-    for (const terme of termes) {
+        for (const terme of termes) {
 
-        const termeNormalise =
-            normaliserAction(terme);
+            const termeNormalise =
+                normaliserAction(terme);
 
-        if (!termeNormalise) {
-            continue;
-        }
-//============================================
-            // REGEX
-            //============================================
-        
-        const regex =
-            new RegExp(
+            if (!termeNormalise) {
+                continue;
+            }
+
+            // -----------------------------------------
+            // IMPORTANT :
+            // "course", "en course", sprint, etc.
+            // ne sont PAS des actions.
+            // -----------------------------------------
+
+            if (
+                action.categorie === "déplacements" &&
+                motsModificateurs.has(termeNormalise)
+            ) {
+                continue;
+            }
+
+            const regex = new RegExp(
                 `(^|\\s)${echapperRegex(termeNormalise)}(?=\\s|$)`,
                 "g"
             );
 
-        let match;
+            let match;
 
-        while (
-            (match = regex.exec(texteNormalise))
-            !== null
-        ) {
-
-            const index =
-                match.index +
-                match[1].length;
-
-            occurrences.push({
-
-                index,
-
-                fin:
-                    index +
-                    termeNormalise.length,
-
-                longueur:
-                    termeNormalise.length,
-
-                id:
-                    action.id,
-
-                nom:
-                    action.nom,
-
-                categorie:
-                    action.categorie,
-
-                groupe:
-                    action.groupe,
-
-                termeDetecte:
-                    terme,
-
-                termeNormalise,
-
-                description:
-                    action.description || ""
-            });
-
-            if (
-                regex.lastIndex ===
-                match.index
+            while (
+                (match = regex.exec(texteNormalise))
+                !== null
             ) {
-                regex.lastIndex++;
+
+                const index =
+                    match.index +
+                    match[1].length;
+
+                occurrences.push({
+
+                    index,
+
+                    fin:
+                        index +
+                        termeNormalise.length,
+
+                    longueur:
+                        termeNormalise.length,
+
+                    id:
+                        action.id,
+
+                    nom:
+                        action.nom,
+
+                    categorie:
+                        action.categorie,
+
+                    groupe:
+                        action.groupe,
+
+                    termeDetecte:
+                        terme,
+
+                    termeNormalise,
+
+                    description:
+                        action.description || "",
+
+                    modificateurs:
+                        action.categorie === "déplacements"
+                            ? modificateurs
+                            : {}
+                });
+
+                if (
+                    regex.lastIndex ===
+                    match.index
+                ) {
+                    regex.lastIndex++;
+                }
             }
         }
     }
-}
-
-
-//================================================
-// 🧠 REGROUPEMENT DES ALIAS D'UNE MÊME ACTION
-//================================================
-const occurrencesFiltrees = [];
-
-for (const occurrence of occurrences) {
-
-    const dejaPresente =
-        occurrencesFiltrees.find(existing => {
-
-            // Même action
-            if (
-                existing.id !==
-                occurrence.id
-            ) {
-                return false;
-            }
-
-            // Même zone d'expression
-            //
-            // On considère qu'un deuxième alias
-            // proche du premier décrit le même mouvement.
-            //
-            const distance =
-                occurrence.index -
-                existing.fin;
-
-            return (
-                distance >= 0 &&
-                distance <= 20
-            );
-        });
-
-    if (dejaPresente) {
-
-        console.log(
-            "♻️ ALIAS IGNORÉ — MÊME ACTION :",
-            occurrence.termeDetecte,
-            "→ action",
-            occurrence.id
-        );
-
-        continue;
-    }
-
-    occurrencesFiltrees.push(
-        occurrence
-    );
-}
-
-
-//================================================
-// 🔄 REMPLACER PAR LES OCCURRENCES FILTRÉES
-//================================================
-
-occurrences.length = 0;
-
-occurrences.push(
-    ...occurrencesFiltrees
-);
-
-
-//================================================
-// 📋 DEBUG OCCURRENCES BRUTES
-//================================================
-
-console.log(
-    "🔍 OCCURRENCES BRUTES :",
-    occurrences.map(a => ({
-        index: a.index,
-        fin: a.fin,
-        terme: a.termeDetecte,
-        id: a.id,
-        nom: a.nom,
-        categorie: a.categorie,
-        groupe: a.groupe
-    }))
-);
-
 
     //================================================
-    // 📊 TRI PAR POSITION
-    //================================================
-    //
-    // Si deux termes commencent au même endroit,
-    // le terme le plus long est prioritaire.
-    //
-    // Exemple :
-    //
-    // "tir"
-    // "tir puissant"
-    //
-    // => "tir puissant" gagne.
-    //
+    // TRI
     //================================================
 
-    occurrences.sort(
-        (a, b) => {
+    occurrences.sort((a, b) => {
 
-            if (a.index !== b.index) {
-
-                return a.index -
-                       b.index;
-            }
-
-            return (
-                b.longueur -
-                a.longueur
-            );
+        if (a.index !== b.index) {
+            return a.index - b.index;
         }
-    );
 
+        return b.longueur - a.longueur;
+    });
 
     //================================================
-    // 🛡️ SUPPRESSION DES CHEVAUCHEMENTS
+    // SUPPRESSION DES CHEVAUCHEMENTS
     //================================================
 
     const actionsFinales = [];
-
 
     for (const action of occurrences) {
 
         let conflit = null;
 
-
-        //============================================
-        // Chercher une action déjà retenue
-        // qui chevauche celle-ci
-        //============================================
-
-        for (
-            const precedente of actionsFinales
-        ) {
+        for (const precedente of actionsFinales) {
 
             const chevauchement =
-
-                action.index <
-                precedente.fin
-
-                &&
-
-                action.fin >
-                precedente.index;
-
+                action.index < precedente.fin &&
+                action.fin > precedente.index;
 
             if (chevauchement) {
 
                 conflit = precedente;
-
                 break;
             }
         }
 
-
-        //============================================
-        // Aucun conflit
-        //============================================
-
         if (!conflit) {
 
-            actionsFinales.push(
-                action
-            );
+            actionsFinales.push(action);
 
             continue;
         }
-
-
-        //============================================
-        // Deux termes commencent au même endroit
-        // ou se chevauchent :
-        //
-        // le plus long gagne.
-        //============================================
 
         if (
             action.longueur >
@@ -1445,32 +1296,16 @@ console.log(
         ) {
 
             const indexConflit =
-                actionsFinales.indexOf(
-                    conflit
-                );
+                actionsFinales.indexOf(conflit);
 
-
-            if (
-                indexConflit !== -1
-            ) {
-
-                console.log(
-                    "🔄 ACTION REMPLACÉE :",
-                    conflit.termeDetecte,
-                    "→",
-                    action.termeDetecte
-                );
-
+            if (indexConflit !== -1) {
 
                 actionsFinales.splice(
                     indexConflit,
                     1
                 );
 
-
-                actionsFinales.push(
-                    action
-                );
+                actionsFinales.push(action);
             }
 
         } else {
@@ -1484,70 +1319,70 @@ console.log(
         }
     }
 
-
     //================================================
-    // 📊 TRI FINAL
+    // TRI FINAL
     //================================================
 
     actionsFinales.sort(
         (a, b) =>
-            a.index -
-            b.index
+            a.index - b.index
+    );
+
+    //================================================
+// 🔢 NUMÉROTATION
+//================================================
+
+const resultat =
+    actionsFinales.map(
+        (action, index) => {
+
+            const {
+                fin,
+                longueur,
+                index: position,
+                termeNormalise,
+                ...actionPropre
+            } = action;
+
+            return {
+
+                ...actionPropre,
+
+                ordre:
+                    index + 1,
+
+                numero:
+                    index + 1,
+
+                position
+            };
+        }
     );
 
 
-    //================================================
-    // 🔢 NUMÉROTATION
-    //================================================
+//================================================
+// 📋 DEBUG FINAL
+//================================================
 
-    const resultat =
-        actionsFinales.map(
-            (action, index) => {
-
-                const {
-                    fin,
-                    longueur,
-                    index: position,
-                    termeNormalise,
-                    ...actionPropre
-                } = action;
-
-
-                return {
-
-                    ...actionPropre,
-
-                    ordre:
-                        index + 1,
-
-                    numero:
-                        index + 1,
-
-                    position
-                };
-            }
-        );
+console.log(
+    "✅ ACTIONS FINALES :",
+    resultat.map(a => ({
+        ordre: a.ordre,
+        id: a.id,
+        nom: a.nom,
+        terme: a.termeDetecte,
+        categorie: a.categorie,
+        groupe: a.groupe,
+        position: a.position
+    }))
+);
 
 
-    //================================================
-    // 📋 DEBUG FINAL
-    //================================================
+//================================================
+// ↩️ RETOUR
+//================================================
 
-    console.log(
-        "✅ ACTIONS FINALES :",
-        resultat.map(a => ({
-            ordre: a.ordre,
-            id: a.id,
-            nom: a.nom,
-            terme: a.termeDetecte,
-            categorie: a.categorie,
-            groupe: a.groupe,
-            position: a.position
-        }))
-    );
-
-
-    return resultat;
+return resultat;
 }
 
 
@@ -2039,6 +1874,44 @@ function extraireDirection(texte = "") {
     return null;
 }
 
+
+//================================================
+// 📏⚡MODIFICATION DE DISTANCE 
+//================================================
+function detecterModificateursDeplacement(texte = "") {
+
+    const t = normaliserAction(texte);
+
+    const result = {
+        course: false,
+        sprint: false,
+        acceleration: false
+    };
+
+    for (const [type, termes] of Object.entries(
+        MODIFICATEURS_DEPLACEMENT
+    )) {
+
+        for (const terme of termes) {
+
+            const termeN = normaliserAction(terme);
+
+            if (!termeN) continue;
+
+            const regex = new RegExp(
+                `(^|\\s)${echapperRegex(termeN)}(?=\\s|$)`,
+                "i"
+            );
+
+            if (regex.test(t)) {
+                result[type] = true;
+                break;
+            }
+        }
+    }
+
+    return result;
+}
 //================================================
 // 📏⚡ DISTANCE + VITESSE
 //================================================
