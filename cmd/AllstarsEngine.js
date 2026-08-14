@@ -2673,50 +2673,79 @@ function obtenirToutesLesActions() {
 
     const actions = [];
 
-    for (const [categorie, groupes] of Object.entries(ACTIONS_MAP)) {
+    //================================================
+    // PARCOURIR LES CATÉGORIES
+    //================================================
+
+    for (
+        const [categorie, groupes] of Object.entries(ACTIONS_MAP)
+    ) {
 
         if (!gruposValide(groupes)) {
+
             console.log(
-                "⚠️ Groupe invalide dans ACTIONS_MAP :",
+                "⚠️ Catégorie invalide dans ACTIONS_MAP :",
                 categorie
             );
+
             continue;
         }
 
-        for (const [groupe, listeActions] of Object.entries(groupes)) {
 
-            if (!listeActions || typeof listeActions !== "object") {
+        //================================================
+        // PARCOURIR LES ACTIONS
+        //================================================
+
+        for (
+            const [id, action] of Object.entries(groupes)
+        ) {
+
+            // Une vraie action doit être un objet
+            if (
+                !action ||
+                typeof action !== "object" ||
+                Array.isArray(action)
+            ) {
                 continue;
             }
 
-            for (const [id, action] of Object.entries(listeActions)) {
 
-                if (!action || typeof action !== "object") {
-                    continue;
-                }
-
-                actions.push({
-
-                    id,
-
-                    categorie,
-
-                    groupe,
-
-                    nom:
-                        action.nom || id,
-
-                    aliases:
-                        Array.isArray(action.aliases)
-                            ? action.aliases
-                            : [],
-
-                    description:
-                        action.description || ""
-                });
+            // Une action possède "nom"
+            if (
+                typeof action.nom !== "string"
+            ) {
+                continue;
             }
+
+
+            actions.push({
+
+                id,
+
+                categorie,
+
+                // Ici le groupe = l'id de l'action
+                groupe: id,
+
+                nom:
+                    action.nom,
+
+                aliases:
+                    Array.isArray(action.aliases)
+                        ? action.aliases
+                        : [],
+
+                parametres:
+                    Array.isArray(action.parametres)
+                        ? action.parametres
+                        : [],
+
+                description:
+                    action.description || ""
+            });
         }
     }
+
 
     return actions;
 }
