@@ -1062,20 +1062,18 @@ const ACTIONS_MAP = {
 //================================================
 // 🔎 NORMALISATION
 //================================================
-
 function normaliserAction(texte = "") {
 
     return String(texte)
         .normalize("NFKD")
         .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, "")
         .toLowerCase()
         .replace(/[’']/g, " ")
-        .replace(/[^a-z0-9°\s-]/g, " ")
+        .replace(/[^\p{L}\p{N}°\s-]/gu, " ")
         .replace(/\s+/g, " ")
         .trim();
 }
-    
-
 
 //================================================
 // 🎮 CONFIGURATION PAVÉ ALL STARS
