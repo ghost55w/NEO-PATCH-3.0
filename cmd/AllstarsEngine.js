@@ -1182,112 +1182,166 @@ console.log(
 
 
     //================================================
-    // 🔎 RECHERCHE DE TOUTES LES OCCURRENCES
-    //================================================
+// 🔎 RECHERCHE DE TOUTES LES OCCURRENCES
+//================================================
 
-    for (const action of toutesLesActions) {
+for (const action of toutesLesActions) {
 
-        const termes = [
-            action.nom,
-            ...(action.aliases || [])
-        ];
+    const termes = [
+        action.nom,
+        ...(action.aliases || [])
+    ];
 
+    for (const terme of termes) {
 
-        for (const terme of termes) {
+        const termeNormalise =
+            normaliserAction(terme);
 
-            const termeNormalise =
-                normaliserAction(terme);
-
-            if (!termeNormalise) {
-                continue;
-            }
-
-
-            //============================================
+        if (!termeNormalise) {
+            continue;
+        }
+//============================================
             // REGEX
             //============================================
+        
+        const regex =
+            new RegExp(
+                `(^|\\s)${echapperRegex(termeNormalise)}(?=\\s|$)`,
+                "g"
+            );
 
-            const regex =
-                new RegExp(
-                    `(^|\\s)${echapperRegex(termeNormalise)}(?=\\s|$)`,
-                    "g"
-                );
+        let match;
 
+        while (
+            (match = regex.exec(texteNormalise))
+            !== null
+        ) {
 
-            let match;
+            const index =
+                match.index +
+                match[1].length;
 
+            occurrences.push({
 
-            while (
-                (match = regex.exec(texteNormalise))
-                !== null
+                index,
+
+                fin:
+                    index +
+                    termeNormalise.length,
+
+                longueur:
+                    termeNormalise.length,
+
+                id:
+                    action.id,
+
+                nom:
+                    action.nom,
+
+                categorie:
+                    action.categorie,
+
+                groupe:
+                    action.groupe,
+
+                termeDetecte:
+                    terme,
+
+                termeNormalise,
+
+                description:
+                    action.description || ""
+            });
+
+            if (
+                regex.lastIndex ===
+                match.index
             ) {
-
-                const index =
-                    match.index +
-                    match[1].length;
-
-
-                occurrences.push({
-
-                    index,
-
-                    fin:
-                        index +
-                        termeNormalise.length,
-
-                    longueur:
-                        termeNormalise.length,
-
-                    id:
-                        action.id,
-
-                    nom:
-                        action.nom,
-
-                    categorie:
-                        action.categorie,
-
-                    groupe:
-                        action.groupe,
-
-                    termeDetecte:
-                        terme,
-
-                    termeNormalise,
-
-                    description:
-                        action.description || ""
-                });
-
-
-                // Sécurité regex
-                if (
-                    regex.lastIndex ===
-                    match.index
-                ) {
-                    regex.lastIndex++;
-                }
+                regex.lastIndex++;
             }
         }
     }
+}
 
 
-    //================================================
-    // 📋 DEBUG OCCURRENCES BRUTES
-    //================================================
+//================================================
+// 🧠 REGROUPEMENT DES ALIAS D'UNE MÊME ACTION
+//================================================
+const occurrencesFiltrees = [];
 
-    console.log(
-        "🔍 OCCURRENCES BRUTES :",
-        occurrences.map(a => ({
-            index: a.index,
-            fin: a.fin,
-            terme: a.termeDetecte,
-            id: a.id,
-            nom: a.nom,
-            categorie: a.categorie,
-            groupe: a.groupe
-        }))
+for (const occurrence of occurrences) {
+
+    const dejaPresente =
+        occurrencesFiltrees.find(existing => {
+
+            // Même action
+            if (
+                existing.id !==
+                occurrence.id
+            ) {
+                return false;
+            }
+
+            // Même zone d'expression
+            //
+            // On considère qu'un deuxième alias
+            // proche du premier décrit le même mouvement.
+            //
+            const distance =
+                occurrence.index -
+                existing.fin;
+
+            return (
+                distance >= 0 &&
+                distance <= 20
+            );
+        });
+
+    if (dejaPresente) {
+
+        console.log(
+            "♻️ ALIAS IGNORÉ — MÊME ACTION :",
+            occurrence.termeDetecte,
+            "→ action",
+            occurrence.id
+        );
+
+        continue;
+    }
+
+    occurrencesFiltrees.push(
+        occurrence
     );
+}
+
+
+//================================================
+// 🔄 REMPLACER PAR LES OCCURRENCES FILTRÉES
+//================================================
+
+occurrences.length = 0;
+
+occurrences.push(
+    ...occurrencesFiltrees
+);
+
+
+//================================================
+// 📋 DEBUG OCCURRENCES BRUTES
+//================================================
+
+console.log(
+    "🔍 OCCURRENCES BRUTES :",
+    occurrences.map(a => ({
+        index: a.index,
+        fin: a.fin,
+        terme: a.termeDetecte,
+        id: a.id,
+        nom: a.nom,
+        categorie: a.categorie,
+        groupe: a.groupe
+    }))
+);
 
 
     //================================================
