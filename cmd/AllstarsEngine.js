@@ -1099,6 +1099,37 @@ function extraireActionsChronologiques(texte = "") {
     const toutesLesActions =
         obtenirToutesLesActions();
 
+    console.log(
+    "🧪 TEST ACTION AVANCER :",
+    toutesLesActions.find(
+        a => a.id === "avancer"
+    )
+);
+
+console.log(
+    "🧪 TEST ALIAS FONCE :",
+    toutesLesActions.find(
+        a =>
+            Array.isArray(a.aliases) &&
+            a.aliases.some(
+                alias =>
+                    normaliserAction(alias) === "fonce"
+            )
+    )
+);
+
+console.log(
+    "🧪 TEST ALIAS COURSE :",
+    toutesLesActions.find(
+        a =>
+            Array.isArray(a.aliases) &&
+            a.aliases.some(
+                alias =>
+                    normaliserAction(alias) === "course"
+            )
+    )
+);
+
     const occurrences = [];
 
 
