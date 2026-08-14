@@ -1098,37 +1098,76 @@ function extraireActionsChronologiques(texte = "") {
 
     const toutesLesActions =
         obtenirToutesLesActions();
+console.log(
+    "🧪 ===== INSPECTION ACTIONS CHARGÉES ====="
+);
 
-    console.log(
-    "🧪 TEST ACTION AVANCER :",
-    toutesLesActions.find(
+console.log(
+    "🧪 TOTAL :",
+    toutesLesActions.length
+);
+
+console.log(
+    "🧪 PREMIÈRES ACTIONS :",
+    toutesLesActions.slice(0, 20).map(a => ({
+        id: a.id,
+        categorie: a.categorie,
+        groupe: a.groupe,
+        nom: a.nom
+    }))
+);
+
+console.log(
+    "🧪 ACTIONS DÉPLACEMENT :",
+    toutesLesActions
+        .filter(a =>
+            a.categorie === "déplacements"
+        )
+        .map(a => ({
+            id: a.id,
+            categorie: a.categorie,
+            groupe: a.groupe,
+            nom: a.nom,
+            aliases: a.aliases
+        }))
+);
+
+console.log(
+    "🧪 RECHERCHE ID avancer :",
+    toutesLesActions.filter(
         a => a.id === "avancer"
     )
 );
 
 console.log(
-    "🧪 TEST ALIAS FONCE :",
-    toutesLesActions.find(
-        a =>
-            Array.isArray(a.aliases) &&
-            a.aliases.some(
-                alias =>
-                    normaliserAction(alias) === "fonce"
-            )
+    "🧪 RECHERCHE NOM Avancer :",
+    toutesLesActions.filter(
+        a => a.nom === "Avancer"
     )
 );
 
 console.log(
-    "🧪 TEST ALIAS COURSE :",
-    toutesLesActions.find(
+    "🧪 RECHERCHE ALIAS fonce :",
+    toutesLesActions.filter(
         a =>
             Array.isArray(a.aliases) &&
-            a.aliases.some(
-                alias =>
-                    normaliserAction(alias) === "course"
-            )
+            a.aliases.includes("fonce")
     )
 );
+
+console.log(
+    "🧪 RECHERCHE ALIAS course :",
+    toutesLesActions.filter(
+        a =>
+            Array.isArray(a.aliases) &&
+            a.aliases.includes("course")
+    )
+);
+
+console.log(
+    "🧪 ======================================="
+);
+    
 
     const occurrences = [];
 
