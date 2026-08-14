@@ -1114,7 +1114,7 @@ function extraireActionsChronologiques(texte = "") {
 
 
     //================================================
-    // 🔎 RECHERCHE
+    // 🔎 RECHERCHE DE TOUTES LES OCCURRENCES
     //================================================
 
     for (const action of toutesLesActions) {
@@ -1135,21 +1135,23 @@ function extraireActionsChronologiques(texte = "") {
             }
 
 
-            //========================================
-            // REGEX AVEC FRONTIÈRES DE MOT
-            //========================================
+            //============================================
+            // REGEX
+            //============================================
 
-            const regex = new RegExp(
-                `(^|\\s)${echapperRegex(termeNormalise)}(?=\\s|$)`,
-                "g"
-            );
+            const regex =
+                new RegExp(
+                    `(^|\\s)${echapperRegex(termeNormalise)}(?=\\s|$)`,
+                    "g"
+                );
 
 
             let match;
 
 
             while (
-                (match = regex.exec(texteNormalise)) !== null
+                (match = regex.exec(texteNormalise))
+                !== null
             ) {
 
                 const index =
@@ -1183,12 +1185,14 @@ function extraireActionsChronologiques(texte = "") {
                     termeDetecte:
                         terme,
 
+                    termeNormalise,
+
                     description:
                         action.description || ""
                 });
 
 
-                // sécurité regex
+                // Sécurité regex
                 if (
                     regex.lastIndex ===
                     match.index
@@ -1201,22 +1205,37 @@ function extraireActionsChronologiques(texte = "") {
 
 
     //================================================
-    // 📋 DEBUG BRUT
+    // 📋 DEBUG OCCURRENCES BRUTES
     //================================================
 
     console.log(
         "🔍 OCCURRENCES BRUTES :",
         occurrences.map(a => ({
             index: a.index,
+            fin: a.fin,
             terme: a.termeDetecte,
             id: a.id,
-            categorie: a.categorie
+            nom: a.nom,
+            categorie: a.categorie,
+            groupe: a.groupe
         }))
     );
 
 
     //================================================
-    // 📊 TRI
+    // 📊 TRI PAR POSITION
+    //================================================
+    //
+    // Si deux termes commencent au même endroit,
+    // le terme le plus long est prioritaire.
+    //
+    // Exemple :
+    //
+    // "tir"
+    // "tir puissant"
+    //
+    // => "tir puissant" gagne.
+    //
     //================================================
 
     occurrences.sort(
@@ -1237,7 +1256,7 @@ function extraireActionsChronologiques(texte = "") {
 
 
     //================================================
-    // 🛡️ SUPPRESSION CHEVAUCHEMENTS
+    // 🛡️ SUPPRESSION DES CHEVAUCHEMENTS
     //================================================
 
     const actionsFinales = [];
@@ -1245,29 +1264,46 @@ function extraireActionsChronologiques(texte = "") {
 
     for (const action of occurrences) {
 
-        const dejaCouverte =
-            actionsFinales.some(
-                precedente => {
-
-                    return (
-
-                        action.index >=
-                        precedente.index
-
-                        &&
-
-                        action.fin <=
-                        precedente.fin
-                    );
-                }
-            );
+        let conflit = null;
 
 
-        if (dejaCouverte) {
+        //============================================
+        // Chercher une action déjà retenue
+        // qui chevauche celle-ci
+        //============================================
 
-            console.log(
-                "♻️ ACTION IGNORÉE — TERME DÉJÀ COUVERT :",
-                action.termeDetecte
+        for (
+            const precedente of actionsFinales
+        ) {
+
+            const chevauchement =
+
+                action.index <
+                precedente.fin
+
+                &&
+
+                action.fin >
+                precedente.index;
+
+
+            if (chevauchement) {
+
+                conflit = precedente;
+
+                break;
+            }
+        }
+
+
+        //============================================
+        // Aucun conflit
+        //============================================
+
+        if (!conflit) {
+
+            actionsFinales.push(
+                action
             );
 
             continue;
@@ -1275,52 +1311,55 @@ function extraireActionsChronologiques(texte = "") {
 
 
         //============================================
-        // SI L'ACTION ACTUELLE CONTIENT UNE
-        // ACTION PRÉCÉDENTE
+        // Deux termes commencent au même endroit
+        // ou se chevauchent :
+        //
+        // le plus long gagne.
         //============================================
 
-        for (
-            let i =
-                actionsFinales.length - 1;
-
-            i >= 0;
-
-            i--
+        if (
+            action.longueur >
+            conflit.longueur
         ) {
 
-            const precedente =
-                actionsFinales[i];
+            const indexConflit =
+                actionsFinales.indexOf(
+                    conflit
+                );
 
 
-            const precedenteContenue =
-
-                precedente.index >=
-                action.index
-
-                &&
-
-                precedente.fin <=
-                action.fin;
-
-
-            if (precedenteContenue) {
+            if (
+                indexConflit !== -1
+            ) {
 
                 console.log(
                     "🔄 ACTION REMPLACÉE :",
-                    precedente.termeDetecte,
+                    conflit.termeDetecte,
                     "→",
                     action.termeDetecte
                 );
 
+
                 actionsFinales.splice(
-                    i,
+                    indexConflit,
                     1
                 );
+
+
+                actionsFinales.push(
+                    action
+                );
             }
+
+        } else {
+
+            console.log(
+                "♻️ ACTION IGNORÉE — CHEVAUCHEMENT :",
+                action.termeDetecte,
+                "avec",
+                conflit.termeDetecte
+            );
         }
-
-
-        actionsFinales.push(action);
     }
 
 
@@ -1347,8 +1386,10 @@ function extraireActionsChronologiques(texte = "") {
                     fin,
                     longueur,
                     index: position,
+                    termeNormalise,
                     ...actionPropre
                 } = action;
+
 
                 return {
 
@@ -1378,7 +1419,8 @@ function extraireActionsChronologiques(texte = "") {
             nom: a.nom,
             terme: a.termeDetecte,
             categorie: a.categorie,
-            groupe: a.groupe
+            groupe: a.groupe,
+            position: a.position
         }))
     );
 
