@@ -1117,6 +1117,19 @@ const DUREE_ACTION_NORMALE = 1;   // 1 seconde
 const DUREE_ACTION_COMBO = 0.5;   // 0.5 seconde
 
 //================================================
+// 🧩 MOTS DE STRUCTURE
+//================================================
+
+const MOTS_STRUCTURE = new Set([
+    "combo",
+    "enchaîne",
+    "enchaîne avec",
+    "puis",
+    "ensuite",
+    "après"
+]);
+
+//================================================
 // 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
 //================================================
 
