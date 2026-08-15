@@ -3472,35 +3472,182 @@ function genererResultatAnalysePave(
                *JUMP BATTLE ARENA 🌀🔆*`;
     }
 
-
     //============================================
     // 🌀 DESCRIPTION GLOBALE
     //============================================
 
-    let description =
-        `${analyse.acteur} attaque ${analyse.cible}`;
+    const actions = analyse.actions || [];
 
-    if (analyse.nombreActions > 1) {
+    let description = "";
 
-        description +=
-            ` avec un enchaînement de ${analyse.nombreActions} actions`;
+    // Première action réelle
+    const actionPrincipale = actions[0];
+
+    if (!actionPrincipale) {
+
+        description =
+            `${analyse.acteur} effectue une action vers ${analyse.cible}`;
 
     } else {
 
-        description +=
-            ` avec une action`;
+        //============================================
+        // 🏃 DÉPLACEMENT
+        //============================================
+
+        if (
+            actionPrincipale.categorie === "déplacements"
+        ) {
+
+            // Distance
+            const distanceMatch =
+                analyse.pave.match(
+                    /(\d+(?:[.,]\d+)?)\s*m\b/i
+                );
+
+            const distance =
+                distanceMatch
+                    ? `${distanceMatch[1]}m`
+                    : null;
+
+            // Vitesse
+            const vitesseMatch =
+                analyse.pave.match(
+                    /(?:vmax|vitesse|max|à)\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\/s/i
+                );
+
+            const vitesse =
+                vitesseMatch
+                    ? `${vitesseMatch[1]}m/s`
+                    : null;
+
+            // Course / sprint / accélération
+            const texte = normaliserAction(analyse.pave);
+
+            const course =
+                /\b(course|en course|court|courir|sprint|sprinte|sprinter)\b/
+                    .test(texte);
+
+            const acceleration =
+                /\b(accelere|acceleration)\b/
+                    .test(texte);
+
+            //========================================
+            // Construction du résumé
+            //========================================
+
+            description =
+                `${analyse.acteur} `;
+
+            // Direction principale
+            switch (actionPrincipale.id) {
+
+                case "avancer":
+                    description += "avance";
+                    break;
+
+                case "reculer":
+                    description += "recule";
+                    break;
+
+                case "gauche":
+                    description += "se déplace vers la gauche";
+                    break;
+
+                case "droite":
+                    description += "se déplace vers la droite";
+                    break;
+
+                case "diagonal_avant_gauche":
+                    description +=
+                        "avance en diagonale vers la gauche";
+                    break;
+
+                case "diagonal_avant_droite":
+                    description +=
+                        "avance en diagonale vers la droite";
+                    break;
+
+                case "diagonal_arriere_gauche":
+                    description +=
+                        "recule en diagonale vers la gauche";
+                    break;
+
+                case "diagonal_arriere_droite":
+                    description +=
+                        "recule en diagonale vers la droite";
+                    break;
+
+                default:
+                    description +=
+                        `effectue un déplacement (${actionPrincipale.nom.toLowerCase()})`;
+            }
+
+            //========================================
+            // Style de déplacement
+            //========================================
+
+            if (course) {
+                description += " à grande vitesse en course";
+            }
+
+            if (acceleration) {
+                description += " en accélération";
+            }
+
+            //========================================
+            // Distance
+            //========================================
+
+            if (distance) {
+                description += ` sur ${distance}`;
+            }
+
+            //========================================
+            // Vitesse
+            //========================================
+
+            if (vitesse) {
+                description += ` à ${vitesse}`;
+            }
+
+            //========================================
+            // Cible
+            //========================================
+
+            if (analyse.cible) {
+                description +=
+                    ` vers ${analyse.cible}`;
+            }
+
+        }
+
+        //============================================
+        // 🥊 ACTION OFFENSIVE
+        //============================================
+
+        else {
+
+            description =
+                `${analyse.acteur} attaque ${analyse.cible}`;
+
+            if (analyse.nombreActions > 1) {
+
+                description +=
+                    ` avec un enchaînement de ${analyse.nombreActions} actions`;
+
+            } else {
+
+                description +=
+                    ` avec une action`;
+            }
+
+            if (analyse.combo) {
+                description += " en combo";
+            }
+        }
     }
-
-
-    if (analyse.combo) {
-
-        description +=
-            " en combo";
-    }
-
 
     description += ".";
-
 
     //============================================
     // ✅ VALIDATION
