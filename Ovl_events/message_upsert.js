@@ -300,9 +300,64 @@ if (!estPaveJeu) {
             );
 
 
-            //============================================
+            
+//================================================
+// 🧠 DÉTERMINER LE TYPE D'ACTION
+//================================================
+
+const actionPrincipale =
+    analyse.actions?.[0];
+
+if (!actionPrincipale) {
+
+    console.log(
+        "❌ Aucune action principale détectée"
+    );
+
+    return;
+}
+
+
+//================================================
+// 🏷️ TYPE D'ACTION
+//================================================
+
+const estDeplacement =
+    actionPrincipale.categorie === "déplacements";
+
+const estAttaque =
+    actionPrincipale.categorie === "attaques" ||
+    actionPrincipale.categorie === "combat";
+
+
+//================================================
+// 🔍 DEBUG
+//================================================
+
+console.log(
+    "🎮 ACTION PRINCIPALE :",
+    actionPrincipale.nom
+);
+
+console.log(
+    "🏷️ CATÉGORIE :",
+    actionPrincipale.categorie
+);
+
+console.log(
+    "🏃 DÉPLACEMENT :",
+    estDeplacement
+);
+
+console.log(
+    "🥊 ATTAQUE :",
+    estAttaque
+);
+
+
+//================================================
 // 🔄 DÉTERMINER LE JOUEUR SUIVANT
-//============================================
+//================================================
 
 const prochainJoueur =
     match.joueurs?.find(
@@ -310,16 +365,105 @@ const prochainJoueur =
     );
 
 if (!prochainJoueur) {
-    console.log("❌ Impossible de trouver le joueur suivant");
+
+    console.log(
+        "❌ Impossible de trouver le joueur suivant"
+    );
+
     return;
 }
 
-//============================================
-// 🔥 CHANGEMENT RÉEL DU TOUR
-//============================================
 
-match.joueurActif = prochainJoueur;
-match.joueurActifJid = prochainJoueur.jid;
+//================================================
+// 🟢 PHASE NEUTRE — DÉPLACEMENT
+//================================================
+
+if (estDeplacement) {
+
+    match.phase = "neutre";
+
+    // Le joueur qui vient de jouer
+    // n'est PAS considéré comme attaquant.
+
+    match.attaquant = null;
+    match.defenseur = null;
+
+    console.log(
+        "🟢 PHASE NEUTRE — DÉPLACEMENT"
+    );
+
+    console.log(
+        "🏃 ACTEUR :",
+        joueur.pseudo
+    );
+
+    console.log(
+        "➡️ PROCHAIN JOUEUR :",
+        prochainJoueur.pseudo
+    );
+}
+
+
+//================================================
+// 🔴 PHASE DÉFENSE — ATTAQUE
+//================================================
+
+else if (estAttaque) {
+
+    match.phase = "defense";
+
+    // Celui qui vient d'attaquer
+    // devient l'attaquant.
+
+    match.attaquant = joueur;
+
+    // Celui qui doit répondre
+    // devient le défenseur.
+
+    match.defenseur = prochainJoueur;
+
+    console.log(
+        "🔴 PHASE DÉFENSE — ATTAQUE DÉTECTÉE"
+    );
+
+    console.log(
+        "🥊 ATTAQUANT :",
+        joueur.pseudo
+    );
+
+    console.log(
+        "🛡️ DÉFENSEUR :",
+        prochainJoueur.pseudo
+    );
+}
+
+
+//================================================
+// 🟡 AUTRE ACTION
+//================================================
+
+else {
+
+    match.phase = "neutre";
+
+    match.attaquant = null;
+    match.defenseur = null;
+
+    console.log(
+        "🟡 ACTION NON-OFFENSIVE — PHASE NEUTRE"
+    );
+}
+
+
+//================================================
+// 🔥 CHANGEMENT RÉEL DU TOUR
+//================================================
+
+match.joueurActif =
+    prochainJoueur;
+
+match.joueurActifJid =
+    prochainJoueur.jid;
 
 console.log(
     "🔄 TOUR CHANGÉ :",
@@ -328,12 +472,21 @@ console.log(
     prochainJoueur.jid
 );
 
-//============================================
-// ⏱️ RELANCER LE TIMER DU NOUVEAU JOUEUR
-//============================================
+console.log(
+    "🎮 PHASE ACTUELLE :",
+    match.phase
+);
 
-lancerTimerTour(match, ms_org, ovl);
 
+//================================================
+// ⏱️ RELANCER LE TIMER
+//================================================
+
+lancerTimerTour(
+    match,
+    ms_org,
+    ovl
+);
 
             if (!prochainJoueur) {
 
