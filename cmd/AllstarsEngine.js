@@ -3452,6 +3452,9 @@ function AnalysePaveMatch(
 //================================================
 // 📊 RÉSULTAT ANALYSE PAVÉ
 //================================================
+//================================================
+// 📊 RÉSULTAT ANALYSE PAVÉ
+//================================================
 
 function genererResultatAnalysePave(
     analyse,
@@ -3485,185 +3488,328 @@ function genererResultatAnalysePave(
                *JUMP BATTLE ARENA 🌀🔆*`;
     }
 
+
     //============================================
-    // 🌀 DESCRIPTION GLOBALE
+    // 🧠 ACTIONS
     //============================================
 
-    const actions = analyse.actions || [];
+    const actions =
+        analyse.actions || [];
 
-    let description = "";
+    const actionPrincipale =
+        actions[0];
 
-    // Première action réelle
-    const actionPrincipale = actions[0];
+
+    //============================================
+    // 🛑 SÉCURITÉ
+    //============================================
 
     if (!actionPrincipale) {
 
-        description =
-            `${analyse.acteur} effectue une action vers ${analyse.cible}`;
+        return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-    } else {
+❌ Aucune action reconnue dans le pavé.
 
-        //============================================
-        // 🏃 DÉPLACEMENT
-        //============================================
+📊Note du pavé : ${analyse.note}/10 ❌
 
-        if (
-            actionPrincipale.categorie === "déplacements"
-        ) {
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆joueur suivant:
+➡️ @${prochainJoueur.pseudo} NEXT!! 🔥
 
-            // Distance
-            const distanceMatch =
-                analyse.pave.match(
-                    /(\d+(?:[.,]\d+)?)\s*m\b/i
-                );
-
-            const distance =
-                distanceMatch
-                    ? `${distanceMatch[1]}m`
-                    : null;
-
-            // Vitesse
-            const vitesseMatch =
-                analyse.pave.match(
-                    /(?:vmax|vitesse|max|à)\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\/s/i
-                );
-
-            const vitesse =
-                vitesseMatch
-                    ? `${vitesseMatch[1]}m/s`
-                    : null;
-
-            // Course / sprint / accélération
-            const texte = normaliserAction(analyse.pave);
-
-            const course =
-                /\b(course|en course|court|courir|sprint|sprinte|sprinter)\b/
-                    .test(texte);
-
-            const acceleration =
-                /\b(accelere|acceleration)\b/
-                    .test(texte);
-
-            //========================================
-            // Construction du résumé
-            //========================================
-
-            description =
-                `${analyse.acteur} `;
-
-            // Direction principale
-            switch (actionPrincipale.id) {
-
-                case "avancer":
-                    description += "avance";
-                    break;
-
-                case "reculer":
-                    description += "recule";
-                    break;
-
-                case "gauche":
-                    description += "se déplace vers la gauche";
-                    break;
-
-                case "droite":
-                    description += "se déplace vers la droite";
-                    break;
-
-                case "diagonal_avant_gauche":
-                    description +=
-                        "avance en diagonale vers la gauche";
-                    break;
-
-                case "diagonal_avant_droite":
-                    description +=
-                        "avance en diagonale vers la droite";
-                    break;
-
-                case "diagonal_arriere_gauche":
-                    description +=
-                        "recule en diagonale vers la gauche";
-                    break;
-
-                case "diagonal_arriere_droite":
-                    description +=
-                        "recule en diagonale vers la droite";
-                    break;
-
-                default:
-                    description +=
-                        `effectue un déplacement (${actionPrincipale.nom.toLowerCase()})`;
-            }
-
-            //========================================
-            // Style de déplacement
-            //========================================
-
-            if (course) {
-                description += " à grande vitesse en course";
-            }
-
-            if (acceleration) {
-                description += " en accélération";
-            }
-
-            //========================================
-            // Distance
-            //========================================
-
-            if (distance) {
-                description += ` sur ${distance}`;
-            }
-
-            //========================================
-            // Vitesse
-            //========================================
-
-            if (vitesse) {
-                description += ` à ${vitesse}`;
-            }
-
-            //========================================
-            // Cible
-            //========================================
-
-            if (analyse.cible) {
-                description +=
-                    ` vers ${analyse.cible}`;
-            }
-
-        }
-
-        //============================================
-        // 🥊 ACTION OFFENSIVE
-        //============================================
-
-        else {
-
-            description =
-                `${analyse.acteur} attaque ${analyse.cible}`;
-
-            if (analyse.nombreActions > 1) {
-
-                description +=
-                    ` avec un enchaînement de ${analyse.nombreActions} actions`;
-
-            } else {
-
-                description +=
-                    ` avec une action`;
-            }
-
-            if (analyse.combo) {
-                description += " en combo";
-            }
-        }
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
     }
+
+
+    //============================================
+    // 🏷️ TYPE D'ACTION
+    //============================================
+
+    const estDeplacement =
+        actionPrincipale.categorie === "déplacements";
+
+    const estAttaque =
+        actionPrincipale.categorie === "attaques" ||
+        actionPrincipale.categorie === "combat" ||
+        actionPrincipale.categorie === "offensives";
+
+
+    console.log(
+        "📝 TYPE RÉSUMÉ :",
+        estDeplacement
+            ? "DÉPLACEMENT"
+            : estAttaque
+                ? "ATTAQUE"
+                : "AUTRE"
+    );
+
+
+    //============================================
+    // 🌀 DESCRIPTION
+    //============================================
+
+    let description = "";
+
+
+    //================================================
+    // 🏃 DÉPLACEMENT
+    //================================================
+
+    if (estDeplacement) {
+
+        //============================================
+        // 📏 DISTANCE
+        //============================================
+
+        const distanceMatch =
+            analyse.pave.match(
+                /(\d+(?:[.,]\d+)?)\s*m\b/i
+            );
+
+        const distance =
+            distanceMatch
+                ? `${distanceMatch[1]}m`
+                : null;
+
+
+        //============================================
+        // ⚡ VITESSE
+        //============================================
+
+        const vitesseMatch =
+            analyse.pave.match(
+                /(?:vmax|vitesse|max|à)\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\/s/i
+            );
+
+        const vitesse =
+            vitesseMatch
+                ? `${vitesseMatch[1]}m/s`
+                : null;
+
+
+        //============================================
+        // 🏃 STYLE DE COURSE
+        //============================================
+
+        const texte =
+            normaliserAction(
+                analyse.pave
+            );
+
+
+        const course =
+    /\b(course|en course|court|courir|sprint|sprinte|sprinter)\b/
+        .test(texte);
+
+const acceleration =
+    /\b(accelere|acceleration)\b/
+        .test(texte);
+        
+
+
+        //============================================
+        // 🧭 DIRECTION
+        //============================================
+
+        switch (actionPrincipale.id) {
+
+            case "avancer":
+
+                description =
+                    `${analyse.acteur} avance`;
+
+                break;
+
+
+            case "reculer":
+
+                description =
+                    `${analyse.acteur} recule`;
+
+                break;
+
+
+            case "gauche":
+
+                description =
+                    `${analyse.acteur} se déplace vers la gauche`;
+
+                break;
+
+
+            case "droite":
+
+                description =
+                    `${analyse.acteur} se déplace vers la droite`;
+
+                break;
+
+
+            case "diagonal_avant_gauche":
+
+                description =
+                    `${analyse.acteur} avance en diagonale vers la gauche`;
+
+                break;
+
+
+            case "diagonal_avant_droite":
+
+                description =
+                    `${analyse.acteur} avance en diagonale vers la droite`;
+
+                break;
+
+
+            case "diagonal_arriere_gauche":
+
+                description =
+                    `${analyse.acteur} recule en diagonale vers la gauche`;
+
+                break;
+
+
+            case "diagonal_arriere_droite":
+
+                description =
+                    `${analyse.acteur} recule en diagonale vers la droite`;
+
+                break;
+
+
+            default:
+
+                description =
+                    `${analyse.acteur} effectue un déplacement`;
+
+                break;
+        }
+
+
+        //============================================
+        // 🏃 COURSE
+        //============================================
+
+        if (course) {
+
+            description +=
+                " à grande vitesse en course";
+        }
+
+
+        //============================================
+        // ⚡ ACCÉLÉRATION
+        //============================================
+
+        if (acceleration) {
+
+            description +=
+                " en accélération";
+        }
+
+
+        //============================================
+        // 📏 DISTANCE
+        //============================================
+
+        if (distance) {
+
+            description +=
+                ` sur ${distance}`;
+        }
+
+
+        //============================================
+        // ⚡ VITESSE
+        //============================================
+
+        if (vitesse) {
+
+            description +=
+                ` à ${vitesse}`;
+        }
+
+
+        //============================================
+        // 🎯 DIRECTION / CIBLE
+        //============================================
+
+        if (analyse.cible) {
+
+            description +=
+                ` vers ${analyse.cible}`;
+        }
+
+    }
+
+
+    //================================================
+    // 🥊 ATTAQUE
+    //================================================
+
+    else if (estAttaque) {
+
+        description =
+            `${analyse.acteur} attaque ${analyse.cible}`;
+
+
+        //============================================
+        // 🔢 NOMBRE D'ACTIONS
+        //============================================
+
+        if (analyse.nombreActions > 1) {
+
+            description +=
+                ` avec un enchaînement de ${analyse.nombreActions} actions`;
+
+        } else {
+
+            description +=
+                ` avec une action`;
+        }
+
+
+        //============================================
+        // 🌀 COMBO
+        //============================================
+
+        if (analyse.combo) {
+
+            description +=
+                " en combo";
+        }
+
+    }
+
+
+    //================================================
+    // 🟡 AUTRE ACTION
+    //================================================
+
+    else {
+
+        description =
+            `${analyse.acteur} effectue ${actionPrincipale.nom.toLowerCase()}`;
+
+        if (analyse.cible) {
+
+            description +=
+                ` vers ${analyse.cible}`;
+        }
+
+    }
+
+
+    //============================================
+    // 🔚 FIN DESCRIPTION
+    //============================================
 
     description += ".";
 
+
     //============================================
-    // ✅ VALIDATION
+    // 📤 MESSAGE FINAL
     //============================================
 
     return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
@@ -3680,7 +3826,9 @@ function genererResultatAnalysePave(
 
 ╰───────────────────
                *JUMP BATTLE ARENA 🌀🔆*`;
-}    
+}
+                
+
 
 
 
