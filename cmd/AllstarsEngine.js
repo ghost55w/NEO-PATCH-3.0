@@ -566,7 +566,7 @@ modes_deplacement: {
             "accélération"
         ]
     }
-}
+}, 
 
         //================================================
         // 🦘 SAUT / BOND / VOL
