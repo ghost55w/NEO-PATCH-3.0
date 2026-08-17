@@ -1130,6 +1130,50 @@ const MOTS_STRUCTURE = new Set([
 ]);
 
 //================================================
+// 📏⚡ MODIFICATEURS DE DÉPLACEMENT
+//================================================
+
+const MODIFICATEURS_DEPLACEMENT = {
+
+    course: [
+        "course",
+        "en course",
+        "court",
+        "courant",
+        "courir"
+    ],
+
+    sprint: [
+        "sprint",
+        "en sprint",
+        "sprinte",
+        "sprinter"
+    ],
+
+    acceleration: [
+        "accélère",
+        "accelere",
+        "accélération",
+        "acceleration",
+        "accélérer",
+        "accelerer"
+    ],
+
+    vmax: [
+        "vmax",
+        "v max",
+        "vitesse maximale",
+        "à vitesse maximale",
+        "a vitesse maximale",
+        "pleine vitesse",
+        "à pleine vitesse",
+        "a pleine vitesse",
+        "vitesse max"
+    ]
+};
+
+
+//================================================
 // 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
 //================================================
 
@@ -1898,7 +1942,8 @@ function detecterModificateursDeplacement(texte = "") {
     const result = {
         course: false,
         sprint: false,
-        acceleration: false
+        acceleration: false,
+        vmax: false
     };
 
     for (const [type, termes] of Object.entries(
@@ -1924,6 +1969,41 @@ function detecterModificateursDeplacement(texte = "") {
     }
 
     return result;
+}
+
+//================================================
+// ⚡ CALCUL DE LA VITESSE DE DÉPLACEMENT
+//================================================
+function determinerVitesseDeplacement(
+    joueur,
+    modificateurs = {}
+) {
+
+    // Par défaut : déplacement lent
+    if (modificateurs.vmax) {
+
+        // Vitesse maximale réelle du personnage
+        return joueur.vitesseMax || joueur.speed || 1;
+    }
+
+    if (modificateurs.sprint) {
+
+        return joueur.vitesseSprint
+            || joueur.vitesseMax
+            || joueur.speed
+            || 1;
+    }
+
+    if (modificateurs.course) {
+
+        return joueur.vitesseCourse
+            || joueur.vitesseMax
+            || joueur.speed
+            || 1;
+    }
+
+    // Aucun modificateur = déplacement lent
+    return 1;
 }
 //================================================
 // 📏⚡ DISTANCE + VITESSE
