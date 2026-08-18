@@ -5077,44 +5077,141 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
         joueur.pseudo
     );
 
+// ============================================
+// 🎴 RÉCUPÉRATION DES CARTES
+// 🔥 MÊME SYSTÈME QUE LA BOUTIQUE
+// ============================================
 
-    // ============================================
-    // 📂 FICHE DU JOUEUR DÉJÀ SAUVEGARDÉE
-    // ============================================
-    const ficheData = joueur.fiche.dataValues || joueur.fiche;
+const allCards = [];
+
+for (const [placementKey, placementCards] of Object.entries(cards)) {
+
+    for (const c of placementCards) {
+
+        allCards.push({
+            ...c,
+            placement: placementKey
+        });
+
+    }
+}
 
 
-    // ============================================
-    // 🎴 CARTES POSSÉDÉES
-    // ============================================
-    const cartesJoueur = ficheData.cards
-        ? ficheData.cards
-            .split("\n")
-            .map(c => c.trim())
-            .filter(Boolean)
-        : [];
+// ============================================
+// 🔎 NORMALISATION
+// ============================================
 
+const normaliserCarte = str =>
+    String(str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s\-_]/g, "")
+        .trim();
+
+const recherche = normaliserCarte(nomCarte);
+
+console.log("🔎 Recherche carte normalisée :", recherche);
+
+
+// ============================================
+// 🎴 RECHERCHE EXACTE
+// ============================================
+
+let carte = allCards.find(c =>
+    normaliserCarte(c.name) === recherche
+);
+
+
+// ============================================
+// 🎴 RECHERCHE PARTIELLE
+// ============================================
+
+if (!carte) {
+
+    carte = allCards.find(c =>
+        normaliserCarte(c.name).includes(recherche)
+    );
+
+}
+
+
+// ============================================
+// ❌ CARTE INTROUVABLE
+// ============================================
+
+if (!carte) {
 
     console.log(
-        "🎴 Cartes de",
-        joueur.pseudo,
-        ":",
-        cartesJoueur
+        "❌ Carte introuvable dans la base :",
+        nomCarte
     );
 
-
-    // ============================================
-    // ✅ VÉRIFICATION DE POSSESSION
-    // ============================================
-    const cartePossedee = cartesJoueur.find(c =>
-        normalize(c) === normalize(nomCarte)
+    console.log(
+        "🔎 Recherche utilisée :",
+        recherche
     );
 
+    return;
+}
 
-    if (!cartePossedee) {
 
-        await ovl.sendMessage(chat, {
-            text:
+// ============================================
+// ✅ CARTE TROUVÉE
+// ============================================
+
+console.log(
+    "🎴 CARTE TROUVÉE :",
+    carte.name
+);
+
+console.log(
+    "📊 Grade :",
+    carte.grade,
+    "| Catégorie :",
+    carte.category
+);
+   
+// ============================================
+// 📂 FICHE DU JOUEUR DÉJÀ SAUVEGARDÉE
+// ============================================
+
+const ficheData = joueur.fiche.dataValues || joueur.fiche;
+
+
+// ============================================
+// 🎴 CARTES POSSÉDÉES
+// ============================================
+
+const cartesJoueur = ficheData.cards
+    ? ficheData.cards
+        .split("\n")
+        .map(c => c.trim())
+        .filter(Boolean)
+    : [];
+
+
+console.log(
+    "🎴 Cartes de",
+    joueur.pseudo,
+    ":",
+    cartesJoueur
+);
+
+
+// ============================================
+// ✅ VÉRIFICATION DE POSSESSION
+// ============================================
+
+const cartePossedee = cartesJoueur.find(c =>
+    normaliserCarte(c) === recherche
+);
+
+
+if (!cartePossedee) {
+
+    await ovl.sendMessage(chat, {
+        text:
 `❌ CARTE NON POSSÉDÉE
 
 🎮 ${joueur.pseudo}
@@ -5122,63 +5219,25 @@ n'a pas la carte :
 🎴 ${nomCarte}
 
 Choisis une carte présente dans ta fiche.`
-        });
-
-        return;
-    }
-
-
-    //================================================
-// 🎴 RÉCUPÉRATION EXACTE DES CARTES DE LA BOUTIQUE
-//================================================
-const allCards = [];
-
-for (const [placementKey, placementCards] of Object.entries(cards)) {
-
-    if (!Array.isArray(placementCards)) continue;
-
-    for (const c of placementCards) {
-
-        if (!c) continue;
-
-        allCards.push({
-            ...c,
-            placement: placementKey
-        });
-    }
-}
-
-
-console.log(
-    "🎴 Nombre total de cartes dans la base :",
-    allCards.length
-);
-
-
-//================================================
-// 🔎 RECHERCHE EXACTE DE LA CARTE
-//================================================
-// 🔎 Recherche exacte de la carte
-const card = allCards.find(c =>
-    normalize(c.name || "") === normalize(nomCarte)
-);
-
-if (!card) {
-    await ovl.sendMessage(chat, {
-        text:
-`❌ Carte introuvable dans la base :
-🎴 ${nomCarte}`
     });
 
     return;
 }
 
+
+// ============================================
+// 🎴 CARTE DÉJÀ TROUVÉE DANS LA BASE
+// ============================================
+
+const card = carte;
+
 console.log("🎴 CARTE TROUVÉE :", card);
 
 
-    // ============================================
-    // 💾 SAUVEGARDE DU PERSONNAGE
-    // ============================================
+// ============================================
+// 💾 SAUVEGARDE DU PERSONNAGE
+// ============================================
+
 joueur.personnage = card;
 
 console.log(
@@ -5188,10 +5247,11 @@ console.log(
     card.name
 );
 
-    // ============================================
-    // 🖼️ CONFIRMATION
-    // ============================================
-// 🖼️ Confirmation avec les caractéristiques de la carte
+
+// ============================================
+// 🖼️ CONFIRMATION
+// ============================================
+
 await ovl.sendMessage(chat, {
     image: {
         url: card.image
@@ -5206,8 +5266,8 @@ Catégorie : ${card.category}
 ▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
                                  🔆🌀`
 });
-    
 
+   
     // ============================================
     // 🔥 LES DEUX JOUEURS ONT CHOISI
     // ============================================
