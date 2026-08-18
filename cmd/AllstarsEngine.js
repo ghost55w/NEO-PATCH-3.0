@@ -5063,8 +5063,8 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
 
 
     const nomCarte = texte
-        .replace(/^🌀/, "")
-        .trim();
+    .replace(/^[🌀]\s*/u, "")
+    .trim();
 
 
     if (!nomCarte) return;
