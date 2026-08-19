@@ -2555,6 +2555,7 @@ function construireSequencePave(
     if (!actions.length) {
 
         return {
+
             valide: false,
 
             erreur:
@@ -2566,12 +2567,50 @@ function construireSequencePave(
 
 
     //============================================
+    // 🧩 VALIDATION DES PARAMÈTRES
+    //============================================
+
+    for (const action of actions) {
+
+        const validation =
+            validerParametresAction(
+                action,
+                pave
+            );
+
+
+        if (!validation.valide) {
+
+            console.log(
+                "❌ PARAMÈTRE MANQUANT :",
+                validation.erreur
+            );
+
+            return {
+
+                valide: false,
+
+                erreur:
+                    validation.erreur,
+
+                actions
+            };
+        }
+
+
+        action.details =
+            validation.details;
+    }
+
+
+    //============================================
     // 🚫 MAXIMUM 4 ACTIONS
     //============================================
 
     if (actions.length > MAX_ACTIONS_PAVE) {
 
         return {
+
             valide: false,
 
             erreur:
@@ -2597,9 +2636,11 @@ function construireSequencePave(
     if (!relation.valide) {
 
         return {
+
             valide: false,
 
-            erreur: relation.erreur,
+            erreur:
+                relation.erreur,
 
             actions
         };
@@ -2636,15 +2677,20 @@ function construireSequencePave(
     const sequence = actions.map(
         (action, index) => ({
 
-            ordre: index + 1,
+            ordre:
+                index + 1,
 
-            id: action.id,
+            id:
+                action.id,
 
-            nom: action.nom,
+            nom:
+                action.nom,
 
-            categorie: action.categorie,
+            categorie:
+                action.categorie,
 
-            groupe: action.groupe,
+            groupe:
+                action.groupe,
 
             termeDetecte:
                 action.termeDetecte,
@@ -2654,6 +2700,10 @@ function construireSequencePave(
 
             cible:
                 relation.cible.nom,
+
+            // 🎯 PARAMÈTRES
+            details:
+                action.details || {},
 
             combo,
 
@@ -2682,94 +2732,127 @@ function construireSequencePave(
 
         dureeTotale,
 
-        actions: sequence
+        actions:
+            sequence
     };
 }
+
 
 //================================================
 // 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
 //================================================
+
 function obtenirToutesLesActions() {
 
-    const actions = [];
+const actions = [];  
 
-    //================================================
-    // PARCOURIR LES CATÉGORIES
-    //================================================
+//================================================  
+// 🔁 PARCOURS RÉCURSIF  
+//================================================  
 
-    for (
-        const [categorie, groupes] of Object.entries(ACTIONS_MAP)
-    ) {
+function parcourir(  
+    objet,  
+    categorie = null,  
+    groupe = null  
+) {  
 
-        if (!gruposValide(groupes)) {
-
-            console.log(
-                "⚠️ Catégorie invalide dans ACTIONS_MAP :",
-                categorie
-            );
-
-            continue;
-        }
-
-
-        //================================================
-        // PARCOURIR LES ACTIONS
-        //================================================
-
-        for (
-            const [id, action] of Object.entries(groupes)
-        ) {
-
-            // Une vraie action doit être un objet
-            if (
-                !action ||
-                typeof action !== "object" ||
-                Array.isArray(action)
-            ) {
-                continue;
-            }
+    if (  
+        !objet ||  
+        typeof objet !== "object" ||  
+        Array.isArray(objet)  
+    ) {  
+        return;  
+    }  
 
 
-            // Une action possède "nom"
-            if (
-                typeof action.nom !== "string"
-            ) {
-                continue;
-            }
+    for (  
+        const [id, valeur] of Object.entries(objet)  
+    ) {  
+
+        if (  
+            !valeur ||  
+            typeof valeur !== "object" ||  
+            Array.isArray(valeur)  
+        ) {  
+            continue;  
+        }  
 
 
-            actions.push({
+        //================================================  
+        // 🎯 VRAIE ACTION  
+        //================================================  
 
-                id,
+        if (  
+            typeof valeur.nom === "string"  
+        ) {  
 
-                categorie,
+            actions.push({  
 
-                // Ici le groupe = l'id de l'action
-                groupe: id,
+                id,  
 
-                nom:
-                    action.nom,
+                categorie:  
+                    categorie || id,  
 
-                aliases:
-                    Array.isArray(action.aliases)
-                        ? action.aliases
-                        : [],
+                groupe:  
+                    groupe || id,  
 
-                parametres:
-                    Array.isArray(action.parametres)
-                        ? action.parametres
-                        : [],
+                nom:  
+                    valeur.nom,  
 
-                description:
-                    action.description || ""
-            });
-        }
-    }
+                aliases:  
+                    Array.isArray(valeur.aliases)  
+                        ? valeur.aliases  
+                        : [],  
+
+                parametres:  
+                    Array.isArray(valeur.parametres)  
+                        ? valeur.parametres  
+                        : [],  
+
+                description:  
+                    valeur.description || ""  
+            });  
+
+            continue;  
+        }  
 
 
-    return actions;
+        //================================================  
+        // 📂 SOUS-GROUPE  
+        //================================================  
+
+        parcourir(  
+
+            valeur,  
+
+            categorie || id,  
+
+            groupe || id  
+
+        );  
+    }  
+}  
+
+
+//================================================  
+// 🚀 LANCEMENT  
+//================================================  
+
+for (  
+    const [categorie, groupes] of Object.entries(ACTIONS_MAP)  
+) {  
+
+    parcourir(  
+        groupes,  
+        categorie,  
+        null  
+    );  
+}  
+
+
+return actions;
+
 }
-
 
 //================================================
 // 🛡️ VÉRIFICATION GROUPE
