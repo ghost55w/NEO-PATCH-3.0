@@ -91,9 +91,40 @@ const clean = texte
     const mentionnes = ms.message?.[mtype]?.contextInfo?.mentionedJid || [];
     const mention_JID = await Promise.all(mentionnes.map(lid => getJid(lid, ms_org, ovl)));
 
-    const auteur_Message = verif_Groupe
-      ? await getJid(decodeJid(ms.key.participant), ms_org, ovl)
-      : ms.key.fromMe ? id_Bot : decodeJid(ms.key.remoteJid);
+    // ============================================
+// 👤 AUTEUR RÉEL DU MESSAGE
+// ============================================
+
+let auteur_Message;
+
+if (ms.key.fromMe) {
+
+    // 🤖 Le message vient du bot lui-même
+    auteur_Message = id_Bot;
+
+} else if (verif_Groupe) {
+
+    // 👤 Message envoyé par un membre du groupe
+    auteur_Message = await getJid(
+        decodeJid(ms.key.participant),
+        ms_org,
+        ovl
+    );
+
+} else {
+
+    // 👤 Message privé
+    auteur_Message = decodeJid(ms.key.remoteJid);
+}
+
+console.log(
+    "👤 AUTEUR MESSAGE :",
+    auteur_Message,
+    "| fromMe :",
+    ms.key.fromMe,
+    "| participant :",
+    ms.key.participant
+);
 
     const nom_Auteur_Message = ms.pushName;
 
