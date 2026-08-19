@@ -5025,30 +5025,50 @@ async function verifierCardsMatch(message, chat, ovl, sender) {
 
 
     // ============================================
-    // 👤 UTILISER UNIQUEMENT LE JID DÉJÀ SAUVEGARDÉ
-    // ============================================
-    console.log("🆔 JID reçu pour choix carte :", sender);
+// 🎮 DÉTERMINER LE JOUEUR QUI DOIT CHOISIR
+// ============================================
+
+// ⚠️ Le message peut venir du BOT lui-même.
+// On ne doit donc PAS utiliser `sender` pour identifier
+// le joueur qui choisit sa carte.
+
+console.log(
+    "🤖 JID du message reçu :",
+    sender
+);
+
+console.log(
+    "🆔 JID des joueurs sauvegardés :",
+    match.joueurs.map(j => j.jid)
+);
+
+
+// ============================================
+// 🎴 CHERCHER LE PREMIER JOUEUR
+// QUI N'A PAS ENCORE CHOISI
+// ============================================
+
+const joueur = match.joueurs.find(
+    j => !j.personnage
+);
+
+
+if (!joueur) {
 
     console.log(
-        "🆔 JID des joueurs sauvegardés :",
-        match.joueurs.map(j => j.jid)
+        "❌ Tous les joueurs ont déjà choisi leur personnage."
     );
 
-    const joueur = match.joueurs.find(j =>
-        j.jid === sender
-    );
+    return;
+}
 
-    if (!joueur) {
-        console.log("❌ Joueur non trouvé :", sender);
-        return;
-    }
 
-    console.log(
-        "✅ Joueur identifié :",
-        joueur.pseudo,
-        "| JID :",
-        joueur.jid
-    );
+console.log(
+    "✅ Joueur identifié pour le choix :",
+    joueur.pseudo,
+    "| JID :",
+    joueur.jid
+);
 
 
     const texte = clean(message);
