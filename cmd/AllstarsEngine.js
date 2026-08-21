@@ -1176,7 +1176,6 @@ const MODIFICATEURS_DEPLACEMENT = {
 //================================================
 // 🔎 EXTRACTION DES ACTIONS DANS L'ORDRE
 //================================================
-
 function extraireActionsChronologiques(texte = "") {
 
     const texteOriginal = String(texte);
@@ -1394,8 +1393,6 @@ const resultat =
         (action, index) => {
 
             const {
-                fin,
-                longueur,
                 index: position,
                 termeNormalise,
                 ...actionPropre
@@ -1462,41 +1459,60 @@ function extraireParametresAction(
     actionsToutes = []
 ) {
 
-    const texteComplet = String(texte);
+    const texteComplet =
+        String(texte);
 
     //================================================
-    // ✂️ CONTEXTE DE CETTE ACTION UNIQUEMENT
+    // 📍 POSITION DE DÉBUT
     //================================================
 
-    let debut = Number.isInteger(action.position)
-        ? action.position
-        : 0;
+    const debut =
+        Number.isInteger(action.position)
+            ? action.position
+            : 0;
 
-    let fin = texteComplet.length;
 
-    // Action suivante = fin du contexte actuel
+    //================================================
+    // 📍 POSITION DE FIN
+    //================================================
+
+    let fin =
+        texteComplet.length;
+
     if (Array.isArray(actionsToutes)) {
 
-        const suivantes = actionsToutes
-            .filter(a =>
-                Number.isInteger(a.position) &&
-                a.position > debut
-            )
-            .sort((a, b) =>
-                a.position - b.position
-            );
+        const actionSuivante =
+            actionsToutes
+                .filter(a =>
+                    Number.isInteger(a.position) &&
+                    a.position > debut
+                )
+                .sort(
+                    (a, b) =>
+                        a.position - b.position
+                )[0];
 
-        if (suivantes.length) {
-            fin = suivantes[0].position;
+        if (actionSuivante) {
+
+            fin =
+                actionSuivante.position;
         }
     }
 
-    let contexte = texteComplet.slice(
-        debut,
-        fin
-    );
 
-    const t = normaliserAction(contexte);
+    //================================================
+    // ✂️ CONTEXTE DE L'ACTION
+    //================================================
+
+    const contexte =
+        texteComplet.slice(
+            debut,
+            fin
+        );
+
+
+    const t =
+        normaliserAction(contexte);
 
 
     console.log(
@@ -1602,7 +1618,8 @@ function extraireParametresAction(
                 "pivote",
                 "pivoter",
                 "rotation",
-                "tourne"
+                "tourne",
+                "tourner"
             ]
         }
     ];
@@ -1611,10 +1628,13 @@ function extraireParametresAction(
     for (const mouvement of mouvements) {
 
         if (
-            mouvement.termes.some(terme =>
-                t.includes(
-                    normaliserAction(terme)
-                )
+            mouvement.termes.some(
+                terme =>
+                    t.includes(
+                        normaliserAction(
+                            terme
+                        )
+                    )
             )
         ) {
 
@@ -1631,7 +1651,9 @@ function extraireParametresAction(
     //================================================
 
     params.direction =
-        extraireDirection(contexte);
+        extraireDirection(
+            contexte
+        );
 
 
     //================================================
@@ -1639,7 +1661,9 @@ function extraireParametresAction(
     //================================================
 
     const vitesseDistance =
-        extraireVitesseDistance(contexte);
+        extraireVitesseDistance(
+            contexte
+        );
 
     params.distance =
         vitesseDistance.distance;
@@ -1654,7 +1678,7 @@ function extraireParametresAction(
 
 
     //================================================
-    // ⚡ VMAX NUMÉRIQUE
+    // ⚡ VMAX
     //================================================
 
     const vmaxNumerique =
@@ -1671,14 +1695,14 @@ function extraireParametresAction(
             );
     }
 
-    // VMAX sans valeur
     else if (
         /\bvmax\b/.test(t) ||
         /\bvitesse max\b/.test(t) ||
         /\bvitesse maximale\b/.test(t)
     ) {
 
-        params.vitesse = "vmax";
+        params.vitesse =
+            "vmax";
     }
 
 
@@ -1687,37 +1711,53 @@ function extraireParametresAction(
     //================================================
 
     params.hauteur =
-        extraireHauteur(contexte);
+        extraireHauteur(
+            contexte
+        );
 
 
     //================================================
     // 🔄 PIVOT / ROTATION
     //================================================
 
-    const pivotMatch = t.match(
-        /\b(?:pivote|pivoter|rotation|tourne|tourner)\b[\s\S]*?\b(60|90|180|360|540|720)\s*(?:°|degres?|deg)?\b/
-    );
+    const pivotMatch =
+        t.match(
+            /\b(?:pivote|pivoter|rotation|tourne|tourner)\b[\s\S]*?\b(60|90|180|360|540|720)\s*(?:°|degres?|deg)?\b/
+        );
 
     if (pivotMatch) {
 
         params.pivot.angle =
-            Number(pivotMatch[1]);
+            Number(
+                pivotMatch[1]
+            );
 
-        // Sens du pivot
+
+        //-------------------------------
+        // ↩️ GAUCHE
+        //-------------------------------
+
         if (
             /\b(?:sur|vers|a)\s+(?:ma\s+)?gauche\b/.test(t) ||
-            /\bpivote\s+(?:de\s+)?\s*gauche\b/.test(t)
+            /\bpivote\s+(?:de\s+)?gauche\b/.test(t)
         ) {
 
-            params.pivot.sens = "gauche";
+            params.pivot.sens =
+                "gauche";
         }
+
+
+        //-------------------------------
+        // ↪️ DROITE
+        //-------------------------------
 
         else if (
             /\b(?:sur|vers|a)\s+(?:ma\s+)?droite\b/.test(t) ||
-            /\bpivote\s+(?:de\s+)?\s*droite\b/.test(t)
+            /\bpivote\s+(?:de\s+)?droite\b/.test(t)
         ) {
 
-            params.pivot.sens = "droite";
+            params.pivot.sens =
+                "droite";
         }
     }
 
@@ -1731,7 +1771,9 @@ function extraireParametresAction(
     ) {
 
         params.angle =
-            extraireAngle(contexte);
+            extraireAngle(
+                contexte
+            );
     }
 
 
@@ -1740,7 +1782,9 @@ function extraireParametresAction(
     //================================================
 
     params.coteEngagement =
-        extraireCoteEngagement(contexte);
+        extraireCoteEngagement(
+            contexte
+        );
 
 
     //================================================
@@ -1748,7 +1792,9 @@ function extraireParametresAction(
     //================================================
 
     params.main =
-        extraireMain(contexte);
+        extraireMain(
+            contexte
+        );
 
 
     //================================================
@@ -1756,7 +1802,9 @@ function extraireParametresAction(
     //================================================
 
     params.pied =
-        extrairePied(contexte);
+        extrairePied(
+            contexte
+        );
 
 
     //================================================
@@ -1767,23 +1815,27 @@ function extraireParametresAction(
         /\bgenou\s+gauche\b/.test(t)
     ) {
 
-        params.genou = "gauche";
+        params.genou =
+            "gauche";
     }
 
     else if (
         /\bgenou\s+droit\b/.test(t)
     ) {
 
-        params.genou = "droite";
+        params.genou =
+            "droite";
     }
 
 
     //================================================
-    // 🎯 PARTIE DU CORPS VISÉE
+    // 🎯 ZONE VISÉE
     //================================================
 
     params.zoneVisee =
-        extraireZoneVisee(contexte);
+        extraireZoneVisee(
+            contexte
+        );
 
     params.partieCorps =
         params.zoneVisee;
@@ -1818,6 +1870,7 @@ function extraireParametresAction(
 
     return params;
 }
+
 
 //================================================
 // 🧭 EXTRACTION DIRECTION
