@@ -2535,7 +2535,7 @@ function detecterCombo(pave = "") {
     );
 }
 
-//================================================
+  //================================================
 // 🎮 CONSTRUIRE LA SÉQUENCE DU PAVÉ
 //================================================
 
@@ -2543,6 +2543,10 @@ function construireSequencePave(
     pave,
     match
 ) {
+
+    //============================================
+    // 🔎 DÉTECTION BRUTE DES ACTIONS
+    //============================================
 
     const actions =
         extraireActionsChronologiques(pave);
@@ -2567,43 +2571,6 @@ function construireSequencePave(
 
 
     //============================================
-    // 🧩 VALIDATION DES PARAMÈTRES
-    //============================================
-
-    for (const action of actions) {
-
-        const validation =
-            validerParametresAction(
-                action,
-                pave
-            );
-
-
-        if (!validation.valide) {
-
-            console.log(
-                "❌ PARAMÈTRE MANQUANT :",
-                validation.erreur
-            );
-
-            return {
-
-                valide: false,
-
-                erreur:
-                    validation.erreur,
-
-                actions
-            };
-        }
-
-
-        action.details =
-            validation.details;
-    }
-
-
-    //============================================
     // 🚫 MAXIMUM 4 ACTIONS
     //============================================
 
@@ -2622,13 +2589,36 @@ function construireSequencePave(
 
 
     //============================================
+    // 🧩 EXTRACTION DES PARAMÈTRES
+    //============================================
+
+    const actionsAvecParametres =
+        actions.map(action => {
+
+            const details =
+                extraireParametresAction(
+                    pave,
+                    action,
+                    actions
+                );
+
+            return {
+
+                ...action,
+
+                details
+            };
+        });
+
+
+    //============================================
     // 👤 ACTEUR / CIBLE
     //============================================
 
     const relation =
         determinerActeurEtCible(
             pave,
-            actions,
+            actionsAvecParametres,
             match
         );
 
@@ -2642,7 +2632,8 @@ function construireSequencePave(
             erreur:
                 relation.erreur,
 
-            actions
+            actions:
+                actionsAvecParametres
         };
     }
 
@@ -2666,7 +2657,7 @@ function construireSequencePave(
 
 
     const dureeTotale =
-        actions.length *
+        actionsAvecParametres.length *
         dureeParAction;
 
 
@@ -2674,44 +2665,64 @@ function construireSequencePave(
     // 📦 SÉQUENCE FINALE
     //============================================
 
-    const sequence = actions.map(
-        (action, index) => ({
+    const sequence =
+        actionsAvecParametres.map(
+            (action, index) => ({
 
-            ordre:
-                index + 1,
+                ordre:
+                    index + 1,
 
-            id:
-                action.id,
+                id:
+                    action.id,
 
-            nom:
-                action.nom,
+                nom:
+                    action.nom,
 
-            categorie:
-                action.categorie,
+                categorie:
+                    action.categorie,
 
-            groupe:
-                action.groupe,
+                groupe:
+                    action.groupe,
 
-            termeDetecte:
-                action.termeDetecte,
+                termeDetecte:
+                    action.termeDetecte ||
+                    action.terme,
 
-            acteur:
-                relation.acteur.nom,
+                acteur:
+                    relation.acteur.nom,
 
-            cible:
-                relation.cible.nom,
+                cible:
+                    relation.cible.nom,
 
-            // 🎯 PARAMÈTRES
-            details:
-                action.details || {},
+                // ⭐ PARAMÈTRES EXTRAITS
+                details:
+                    action.details || {},
 
-            combo,
+                combo,
 
-            duree:
-                dureeParAction
-        })
+                duree:
+                    dureeParAction
+            })
+        );
+
+
+    //============================================
+    // 📋 DEBUG
+    //============================================
+
+    console.log(
+        "🧠 ACTIONS AVEC PARAMÈTRES :",
+        JSON.stringify(
+            sequence,
+            null,
+            2
+        )
     );
 
+
+    //============================================
+    // ✅ RÉSULTAT
+    //============================================
 
     return {
 
@@ -2735,8 +2746,7 @@ function construireSequencePave(
         actions:
             sequence
     };
-}
-
+}  
 
 //================================================
 // 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
