@@ -55,6 +55,32 @@ function obtenirVitesseMaxParGrade(grade) {
     }
 }
 
+//================================================
+// ⚡ RÉCUPÉRER LA VITESSE MAXIMALE DU PERSONNAGE
+//================================================
+
+function obtenirVitesseMaxPersonnage(
+    personnage
+) {
+
+    if (!personnage) {
+        return null;
+    }
+
+    // Si déjà calculée lors de la préparation du match
+    if (
+        typeof personnage.vitesseMax === "number"
+    ) {
+
+        return personnage.vitesseMax;
+    }
+
+    // Sécurité : recalcul depuis le grade
+    return obtenirVitesseMaxParGrade(
+        personnage.grade
+    );
+}
+
 
 //================================================
 // ⚡ VITESSE EFFECTIVE DU PERSONNAGE
