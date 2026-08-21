@@ -3678,9 +3678,6 @@ function AnalysePaveMatch(
 //================================================
 // 📊 RÉSULTAT ANALYSE PAVÉ
 //================================================
-//================================================
-// 📊 RÉSULTAT ANALYSE PAVÉ
-//================================================
 
 function genererResultatAnalysePave(
     analyse,
@@ -3720,17 +3717,16 @@ function genererResultatAnalysePave(
     //============================================
 
     const actions =
-        analyse.actions || [];
-
-    const actionPrincipale =
-        actions[0];
+        Array.isArray(analyse.actions)
+            ? analyse.actions
+            : [];
 
 
     //============================================
     // 🛑 SÉCURITÉ
     //============================================
 
-    if (!actionPrincipale) {
+    if (!actions.length) {
 
         return `░▒░   *🎮COMBAT ♨️🌀* ░▒░
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
@@ -3749,289 +3745,302 @@ function genererResultatAnalysePave(
 
 
     //============================================
-    // 🏷️ TYPE D'ACTION
+    // 🧍 ACTEUR
     //============================================
 
-    const estDeplacement =
-        actionPrincipale.categorie === "déplacements";
-
-    const estAttaque =
-        actionPrincipale.categorie === "attaques" ||
-        actionPrincipale.categorie === "combat" ||
-        actionPrincipale.categorie === "offensives";
-
-
-    console.log(
-        "📝 TYPE RÉSUMÉ :",
-        estDeplacement
-            ? "DÉPLACEMENT"
-            : estAttaque
-                ? "ATTAQUE"
-                : "AUTRE"
-    );
+    const acteur =
+        analyse.acteur ||
+        actions[0].acteur ||
+        "Le joueur";
 
 
     //============================================
-    // 🌀 DESCRIPTION
+    // 📝 GÉNÉRATEUR DE DESCRIPTION COURTE
     //============================================
 
-    let description = "";
+    function genererDescriptionAction(action) {
+
+        const nom =
+            String(
+                action.nom || ""
+            ).toLowerCase();
+
+        const details =
+            action.details || {};
+
+        const categorie =
+            String(
+                action.categorie || ""
+            ).toLowerCase();
 
 
-    //================================================
-    // 🏃 DÉPLACEMENT
-    //================================================
+        //========================================
+        // 🏃 DÉPLACEMENTS
+        //========================================
 
-    if (estDeplacement) {
+        if (
+            categorie === "déplacements" ||
+            categorie === "deplacements"
+        ) {
 
-        //============================================
-        // 📏 DISTANCE
-        //============================================
-
-        const distanceMatch =
-            analyse.pave.match(
-                /(\d+(?:[.,]\d+)?)\s*m\b/i
-            );
-
-        const distance =
-            distanceMatch
-                ? `${distanceMatch[1]}m`
-                : null;
+            let texte = "";
 
 
-        //============================================
-        // ⚡ VITESSE
-        //============================================
+            switch (action.id) {
 
-        const vitesseMatch =
-            analyse.pave.match(
-                /(?:vmax|vitesse|max|à)\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\/s/i
-            );
+                case "avancer":
+                    texte = "avance";
+                    break;
 
-        const vitesse =
-            vitesseMatch
-                ? `${vitesseMatch[1]}m/s`
-                : null;
+                case "reculer":
+                    texte = "recule";
+                    break;
 
+                case "gauche":
+                    texte =
+                        "se déplace vers la gauche";
+                    break;
 
-        //============================================
-        // 🏃 STYLE DE COURSE
-        //============================================
+                case "droite":
+                    texte =
+                        "se déplace vers la droite";
+                    break;
 
-        const texte =
-            normaliserAction(
-                analyse.pave
-            );
+                case "diagonal_avant_gauche":
+                    texte =
+                        "avance en diagonale vers la gauche";
+                    break;
 
+                case "diagonal_avant_droite":
+                    texte =
+                        "avance en diagonale vers la droite";
+                    break;
 
-        const course =
-    /\b(course|en course|court|courir|sprint|sprinte|sprinter)\b/
-        .test(texte);
+                case "diagonal_arriere_gauche":
+                    texte =
+                        "recule en diagonale vers la gauche";
+                    break;
 
-const acceleration =
-    /\b(accelere|acceleration)\b/
-        .test(texte);
-        
+                case "diagonal_arriere_droite":
+                    texte =
+                        "recule en diagonale vers la droite";
+                    break;
 
-
-        //============================================
-        // 🧭 DIRECTION
-        //============================================
-
-        switch (actionPrincipale.id) {
-
-            case "avancer":
-
-                description =
-                    `${analyse.acteur} avance`;
-
-                break;
-
-
-            case "reculer":
-
-                description =
-                    `${analyse.acteur} recule`;
-
-                break;
+                default:
+                    texte =
+                        nom
+                            ? nom
+                            : "effectue un déplacement";
+                    break;
+            }
 
 
-            case "gauche":
+            //====================================
+            // ⚡ STYLE
+            //====================================
 
-                description =
-                    `${analyse.acteur} se déplace vers la gauche`;
+            if (
+                details.mouvement === "court"
+            ) {
 
-                break;
+                texte +=
+                    " à grande vitesse en course";
 
+            } else if (
+                details.mouvement === "fonce"
+            ) {
 
-            case "droite":
-
-                description =
-                    `${analyse.acteur} se déplace vers la droite`;
-
-                break;
-
-
-            case "diagonal_avant_gauche":
-
-                description =
-                    `${analyse.acteur} avance en diagonale vers la gauche`;
-
-                break;
+                texte +=
+                    " à grande vitesse";
+            }
 
 
-            case "diagonal_avant_droite":
+            //====================================
+            // 🎯 CIBLE
+            //====================================
 
-                description =
-                    `${analyse.acteur} avance en diagonale vers la droite`;
+            if (
+                details.cible
+            ) {
 
-                break;
+                texte +=
+                    ` vers ${details.cible}`;
 
+            } else if (
+                action.cible &&
+                action.cible !== acteur
+            ) {
 
-            case "diagonal_arriere_gauche":
-
-                description =
-                    `${analyse.acteur} recule en diagonale vers la gauche`;
-
-                break;
-
-
-            case "diagonal_arriere_droite":
-
-                description =
-                    `${analyse.acteur} recule en diagonale vers la droite`;
-
-                break;
+                texte +=
+                    ` vers ${action.cible}`;
+            }
 
 
-            default:
-
-                description =
-                    `${analyse.acteur} effectue un déplacement`;
-
-                break;
+            return texte;
         }
 
 
-        //============================================
-        // 🏃 COURSE
-        //============================================
+        //========================================
+        // 🥊 ATTAQUES / COMBAT
+        //========================================
 
-        if (course) {
+        if (
+            categorie === "attaques" ||
+            categorie === "attaque" ||
+            categorie === "combat" ||
+            categorie === "offensives" ||
+            categorie === "offensive"
+        ) {
 
-            description +=
-                " à grande vitesse en course";
+            /*
+             * On utilise le NOM DE L'ACTION.
+             *
+             * Exemple :
+             *
+             * "coup de poing"
+             * "reverse punch"
+             * "coup de pied"
+             * "uppercut"
+             *
+             * Mais on ne raconte PAS les détails :
+             *
+             * ❌ "frappe Tobirama au visage avec..."
+             * ❌ "pivot de 90°..."
+             * ❌ "à 8 m/s..."
+             */
+
+            let attaque =
+                nom || "attaque";
+
+
+            // Petites corrections de formulation
+            if (
+                attaque === "attaque"
+            ) {
+
+                attaque =
+                    "attaque";
+            }
+
+
+            if (
+                /^coup de poing$/i.test(attaque)
+            ) {
+
+                return "attaque avec un coup de poing";
+            }
+
+
+            if (
+                /^coup de pied$/i.test(attaque)
+            ) {
+
+                return "attaque avec un coup de pied";
+            }
+
+
+            if (
+                /^frappe$/i.test(attaque)
+            ) {
+
+                return "frappe";
+            }
+
+
+            if (
+                /^tir$/i.test(attaque)
+            ) {
+
+                return "tire";
+            }
+
+
+            return `attaque avec ${attaque}`;
         }
 
 
-        //============================================
-        // ⚡ ACCÉLÉRATION
-        //============================================
+        //========================================
+        // 🌀 DRIBBLE
+        //========================================
 
-        if (acceleration) {
+        if (
+            categorie === "dribbles" ||
+            categorie === "dribble"
+        ) {
 
-            description +=
-                " en accélération";
+            return `effectue ${nom}`;
         }
 
 
-        //============================================
-        // 📏 DISTANCE
-        //============================================
+        //========================================
+        // ⚽ PASSE
+        //========================================
 
-        if (distance) {
+        if (
+            categorie === "passes" ||
+            categorie === "passe"
+        ) {
 
-            description +=
-                ` sur ${distance}`;
+            return `effectue une ${nom}`;
         }
 
 
-        //============================================
-        // ⚡ VITESSE
-        //============================================
+        //========================================
+        // 🎯 AUTRE
+        //========================================
 
-        if (vitesse) {
-
-            description +=
-                ` à ${vitesse}`;
-        }
-
-
-        //============================================
-        // 🎯 DIRECTION / CIBLE
-        //============================================
-
-        if (analyse.cible) {
-
-            description +=
-                ` vers ${analyse.cible}`;
-        }
-
-    }
-
-
-    //================================================
-    // 🥊 ATTAQUE
-    //================================================
-
-    else if (estAttaque) {
-
-        description =
-            `${analyse.acteur} attaque ${analyse.cible}`;
-
-
-        //============================================
-        // 🔢 NOMBRE D'ACTIONS
-        //============================================
-
-        if (analyse.nombreActions > 1) {
-
-            description +=
-                ` avec un enchaînement de ${analyse.nombreActions} actions`;
-
-        } else {
-
-            description +=
-                ` avec une action`;
-        }
-
-
-        //============================================
-        // 🌀 COMBO
-        //============================================
-
-        if (analyse.combo) {
-
-            description +=
-                " en combo";
-        }
-
-    }
-
-
-    //================================================
-    // 🟡 AUTRE ACTION
-    //================================================
-
-    else {
-
-        description =
-            `${analyse.acteur} effectue ${actionPrincipale.nom.toLowerCase()}`;
-
-        if (analyse.cible) {
-
-            description +=
-                ` vers ${analyse.cible}`;
-        }
-
+        return nom ||
+            "effectue une action";
     }
 
 
     //============================================
-    // 🔚 FIN DESCRIPTION
+    // 🧩 CONSTRUCTION DE LA NARRATION
+    //============================================
+
+    const descriptions =
+        actions.map(
+            action =>
+                genererDescriptionAction(
+                    action
+                )
+        );
+
+
+    //============================================
+    // 🔗 ASSEMBLAGE
+    //============================================
+
+    let description =
+        `${acteur} ${descriptions[0]}`;
+
+
+    for (
+        let i = 1;
+        i < descriptions.length;
+        i++
+    ) {
+
+        description +=
+            ` puis ${descriptions[i]}`;
+    }
+
+
+    //============================================
+    // 🔚 FIN
     //============================================
 
     description += ".";
+
+
+    //============================================
+    // 📋 DEBUG
+    //============================================
+
+    console.log(
+        "📝 NARRATION FINALE :",
+        description
+    );
 
 
     //============================================
@@ -4053,10 +4062,8 @@ const acceleration =
 ╰───────────────────
                *JUMP BATTLE ARENA 🌀🔆*`;
 }
-                
 
-
-
+               
 
 //================= RECHERCHE FICHE PAR PSEUDO =================
 async function getFicheByPseudo(pseudo) {
