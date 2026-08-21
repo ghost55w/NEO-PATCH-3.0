@@ -4685,21 +4685,25 @@ function comparerCategories(categorie1, categorie2) {
     return 0;
 }
 
-
 //================================================
 // 🎴 PREPARATION DES PERSONNAGES POUR LE MATCH
 //================================================
 function preparerPersonnageMatch(joueur, personnage) {
 
-    //================================================
+    //========================================
     // ⚡ VITESSE MAXIMALE SELON LE GRADE
-    //================================================
-
+    //========================================
     const vitesseMax =
         obtenirVitesseMaxParGrade(
             personnage.grade
         );
 
+    console.log(
+        "⚡ VITESSE PERSONNAGE :",
+        personnage.name,
+        "| Grade :", personnage.grade,
+        "| Vmax :", vitesseMax, "m/s"
+    );
 
     return {
 
@@ -4716,29 +4720,25 @@ function preparerPersonnageMatch(joueur, personnage) {
 
         category: personnage.category,
 
-        //================================================
+        //========================================
         // ⚡ VITESSE
-        //================================================
+        //========================================
+        vitesseMax: vitesseMax,
 
-        vitesseMax,
-
-        //================================================
+        //========================================
         // ❤️ STATS DE COMBAT
-        //================================================
-
+        //========================================
         stats: {
 
-            // Endurance
             sta: 100,
 
-            // Energie
             energie: 100,
 
-            // Points de vie
             pv: 100
         }
     };
 }
+
 
 //================================================
 // 🆚 CREATION DU DUEL
