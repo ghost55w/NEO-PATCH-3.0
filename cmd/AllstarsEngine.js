@@ -3807,6 +3807,7 @@ function AnalysePaveMatch(
     };
 }
 
+
 //================================================
 // 📊 RÉSULTAT ANALYSE PAVÉ
 //================================================
@@ -3877,7 +3878,7 @@ function genererResultatAnalysePave(
 
 
     //============================================
-    // 🧍 ACTEUR
+    // 👤 ACTEUR
     //============================================
 
     const acteur =
@@ -3887,27 +3888,183 @@ function genererResultatAnalysePave(
 
 
     //============================================
-    // 📝 GÉNÉRATEUR DE DESCRIPTION COURTE
+    // 🎯 CIBLE
     //============================================
 
-    function genererDescriptionAction(action) {
+    const cible =
+        analyse.cible ||
+        actions.find(
+            a => a.cible
+        )?.cible ||
+        null;
+
+
+    //============================================
+    // 🔗 CONNECTEURS DU PAVÉ
+    //============================================
+
+    const texteOriginal =
+        String(
+            analyse.pave || ""
+        );
+
+    const texteNormalise =
+        normaliserAction(
+            texteOriginal
+        );
+
+
+    const connecteursDetectes = [];
+
+
+    if (
+        /\bpuis\b/.test(
+            texteNormalise
+        )
+    ) {
+
+        connecteursDetectes.push(
+            "puis"
+        );
+    }
+
+    if (
+        /\bensuite\b/.test(
+            texteNormalise
+        )
+    ) {
+
+        connecteursDetectes.push(
+            "ensuite"
+        );
+    }
+
+    if (
+        /\bavant de\b/.test(
+            texteNormalise
+        )
+    ) {
+
+        connecteursDetectes.push(
+            "avant de"
+        );
+    }
+
+    if (
+        /\baprès\b/.test(
+            texteNormalise
+        ) ||
+        /\bapres\b/.test(
+            texteNormalise
+        )
+    ) {
+
+        connecteursDetectes.push(
+            "ensuite"
+        );
+    }
+
+
+    //============================================
+    // 🔗 CONNECTEURS NATURELS
+    //============================================
+
+    const connecteursNaturels = [
+
+        "puis",
+
+        "ensuite",
+
+        "et enchaîne avec",
+
+        "poursuit avec",
+
+        "continue avec",
+
+        "enchaîne ensuite avec",
+
+        "avant de"
+    ];
+
+
+    //============================================
+    // 🎲 CONNECTEUR
+    //============================================
+
+    let indexConnecteur =
+        0;
+
+
+    function obtenirConnecteur(
+        index
+    ) {
+
+        // Premier lien :
+        // priorité au connecteur utilisé
+        // dans le pavé du joueur.
+
+        if (
+            index === 1 &&
+            connecteursDetectes.length
+        ) {
+
+            return (
+                connecteursDetectes[0]
+            );
+        }
+
+
+        // Ensuite variation naturelle.
+
+        const connecteur =
+            connecteursNaturels[
+                indexConnecteur %
+                connecteursNaturels.length
+            ];
+
+        indexConnecteur++;
+
+        return connecteur;
+    }
+
+
+    //============================================
+    // 📝 GÉNÉRATION D'UNE ACTION
+    //============================================
+
+    function genererActionNarrative(
+        action,
+        index
+    ) {
 
         const nom =
             String(
                 action.nom || ""
-            ).toLowerCase();
+            )
+            .trim()
+            .toLowerCase();
 
-        const details =
-            action.details || {};
+
+        const id =
+            String(
+                action.id || ""
+            )
+            .toLowerCase();
+
 
         const categorie =
             String(
                 action.categorie || ""
-            ).toLowerCase();
+            )
+            .toLowerCase();
+
+
+        const details =
+            action.details || {};
 
 
         //========================================
-        // 🏃 DÉPLACEMENTS
+        // 🏃 DÉPLACEMENT
         //========================================
 
         if (
@@ -3915,74 +4072,100 @@ function genererResultatAnalysePave(
             categorie === "deplacements"
         ) {
 
-            let texte = "";
+            let mouvement = "";
 
 
-            switch (action.id) {
+            switch (id) {
 
                 case "avancer":
-                    texte = "avance";
+
+                    mouvement =
+                        "avance";
+
                     break;
+
 
                 case "reculer":
-                    texte = "recule";
+
+                    mouvement =
+                        "recule";
+
                     break;
+
 
                 case "gauche":
-                    texte =
+
+                    mouvement =
                         "se déplace vers la gauche";
+
                     break;
+
 
                 case "droite":
-                    texte =
+
+                    mouvement =
                         "se déplace vers la droite";
+
                     break;
+
 
                 case "diagonal_avant_gauche":
-                    texte =
+
+                    mouvement =
                         "avance en diagonale vers la gauche";
+
                     break;
+
 
                 case "diagonal_avant_droite":
-                    texte =
+
+                    mouvement =
                         "avance en diagonale vers la droite";
+
                     break;
+
 
                 case "diagonal_arriere_gauche":
-                    texte =
+
+                    mouvement =
                         "recule en diagonale vers la gauche";
+
                     break;
+
 
                 case "diagonal_arriere_droite":
-                    texte =
+
+                    mouvement =
                         "recule en diagonale vers la droite";
+
                     break;
 
+
                 default:
-                    texte =
-                        nom
-                            ? nom
-                            : "effectue un déplacement";
+
+                    mouvement =
+                        nom || "se déplace";
+
                     break;
             }
 
 
             //====================================
-            // ⚡ STYLE
+            // ⚡ STYLE DE DÉPLACEMENT
             //====================================
 
             if (
                 details.mouvement === "court"
             ) {
 
-                texte +=
+                mouvement +=
                     " à grande vitesse en course";
 
             } else if (
                 details.mouvement === "fonce"
             ) {
 
-                texte +=
+                mouvement +=
                     " à grande vitesse";
             }
 
@@ -3991,32 +4174,31 @@ function genererResultatAnalysePave(
             // 🎯 CIBLE
             //====================================
 
+            const cibleAction =
+                details.cible ||
+                action.cible;
+
+
             if (
-                details.cible
+                cibleAction &&
+                cibleAction !== acteur
             ) {
 
-                texte +=
-                    ` vers ${details.cible}`;
-
-            } else if (
-                action.cible &&
-                action.cible !== acteur
-            ) {
-
-                texte +=
-                    ` vers ${action.cible}`;
+                mouvement +=
+                    ` vers ${cibleAction}`;
             }
 
 
-            return texte;
+            return mouvement;
         }
 
 
         //========================================
-        // 🥊 ATTAQUES / COMBAT
+        // 🥊 FRAPPES / ATTAQUES
         //========================================
 
         if (
+            categorie === "frappes" ||
             categorie === "attaques" ||
             categorie === "attaque" ||
             categorie === "combat" ||
@@ -4024,70 +4206,123 @@ function genererResultatAnalysePave(
             categorie === "offensive"
         ) {
 
-            /*
-             * On utilise le NOM DE L'ACTION.
-             *
-             * Exemple :
-             *
-             * "coup de poing"
-             * "reverse punch"
-             * "coup de pied"
-             * "uppercut"
-             *
-             * Mais on ne raconte PAS les détails :
-             *
-             * ❌ "frappe Tobirama au visage avec..."
-             * ❌ "pivot de 90°..."
-             * ❌ "à 8 m/s..."
-             */
+            //====================================
+            // COUP DIRECT
+            //====================================
 
-            let attaque =
-                nom || "attaque";
-
-
-            // Petites corrections de formulation
             if (
-                attaque === "attaque"
+                id === "coup_direct"
             ) {
 
-                attaque =
-                    "attaque";
+                return (
+                    index === 0
+                        ? "porte un coup de poing direct"
+                        : "enchaîne avec un coup de poing direct"
+                );
             }
 
 
+            //====================================
+            // REVERSE PUNCH
+            //====================================
+
             if (
-                /^coup de poing$/i.test(attaque)
+                id.includes(
+                    "reverse"
+                )
             ) {
 
-                return "attaque avec un coup de poing";
+                return (
+                    index === 0
+                        ? "porte un reverse punch"
+                        : "enchaîne avec un reverse punch"
+                );
             }
 
 
+            //====================================
+            // UPPERCUT
+            //====================================
+
             if (
-                /^coup de pied$/i.test(attaque)
+                id.includes(
+                    "uppercut"
+                ) ||
+                nom.includes(
+                    "uppercut"
+                )
             ) {
 
-                return "attaque avec un coup de pied";
+                return (
+                    index === 0
+                        ? "porte un uppercut"
+                        : "enchaîne avec un uppercut"
+                );
             }
 
 
+            //====================================
+            // COUP DE POING
+            //====================================
+
             if (
-                /^frappe$/i.test(attaque)
+                nom.includes(
+                    "coup de poing"
+                )
             ) {
 
-                return "frappe";
+                return (
+                    index === 0
+                        ? "porte un coup de poing"
+                        : "enchaîne avec un coup de poing"
+                );
             }
 
 
+            //====================================
+            // COUP DE PIED
+            //====================================
+
             if (
-                /^tir$/i.test(attaque)
+                nom.includes(
+                    "coup de pied"
+                )
             ) {
 
-                return "tire";
+                return (
+                    index === 0
+                        ? "porte un coup de pied"
+                        : "enchaîne avec un coup de pied"
+                );
             }
 
 
-            return `attaque avec ${attaque}`;
+            //====================================
+            // FRAPPE GÉNÉRIQUE
+            //====================================
+
+            if (
+                nom === "frappe" ||
+                nom === "frapper"
+            ) {
+
+                return (
+                    index === 0
+                        ? "frappe"
+                        : "enchaîne avec une frappe"
+                );
+            }
+
+
+            //====================================
+            // AUTRE FRAPPE
+            //====================================
+
+            return (
+                index === 0
+                    ? `effectue ${nom || "une frappe"}`
+                    : `enchaîne avec ${nom || "une frappe"}`
+            );
         }
 
 
@@ -4100,7 +4335,22 @@ function genererResultatAnalysePave(
             categorie === "dribble"
         ) {
 
-            return `effectue ${nom}`;
+            let phrase =
+                index === 0
+                    ? `effectue ${nom}`
+                    : `enchaîne avec ${nom}`;
+
+
+            if (
+                details.cible
+            ) {
+
+                phrase +=
+                    ` face à ${details.cible}`;
+            }
+
+
+            return phrase;
         }
 
 
@@ -4113,49 +4363,81 @@ function genererResultatAnalysePave(
             categorie === "passe"
         ) {
 
-            return `effectue une ${nom}`;
+            return (
+                index === 0
+                    ? `effectue ${nom || "une passe"}`
+                    : `enchaîne avec ${nom || "une passe"}`
+            );
         }
 
 
         //========================================
-        // 🎯 AUTRE
+        // 🟡 AUTRE
         //========================================
 
-        return nom ||
-            "effectue une action";
+        return (
+            index === 0
+                ? nom
+                : `enchaîne avec ${nom}`
+        );
     }
 
 
     //============================================
-    // 🧩 CONSTRUCTION DE LA NARRATION
-    //============================================
-
-    const descriptions =
-        actions.map(
-            action =>
-                genererDescriptionAction(
-                    action
-                )
-        );
-
-
-    //============================================
-    // 🔗 ASSEMBLAGE
+    // 🧩 CONSTRUCTION
     //============================================
 
     let description =
-        `${acteur} ${descriptions[0]}`;
+        `${acteur} ${genererActionNarrative(
+            actions[0],
+            0
+        )}`;
 
 
     for (
         let i = 1;
-        i < descriptions.length;
+        i < actions.length;
         i++
     ) {
 
-        description +=
-            ` puis ${descriptions[i]}`;
+        const actionNarrative =
+            genererActionNarrative(
+                actions[i],
+                i
+            );
+
+
+        const connecteur =
+            obtenirConnecteur(i);
+
+
+        // "avant de" demande généralement
+        // une structure différente.
+
+        if (
+            connecteur === "avant de"
+        ) {
+
+            description +=
+                ` ${connecteur} ${actionNarrative}`;
+
+        } else {
+
+            description +=
+                `, ${connecteur} ${actionNarrative}`;
+        }
     }
+
+
+    //============================================
+    // 🎯 CIBLE FINALE
+    //============================================
+
+    /*
+     * On évite de rajouter la cible ici si elle
+     * est déjà présente dans le déplacement ou
+     * l'action.
+     */
 
 
     //============================================
@@ -4193,9 +4475,9 @@ function genererResultatAnalysePave(
 
 ╰───────────────────
                *JUMP BATTLE ARENA 🌀🔆*`;
-}
+        }
 
-               
+            
 
 //================= RECHERCHE FICHE PAR PSEUDO =================
 async function getFicheByPseudo(pseudo) {
