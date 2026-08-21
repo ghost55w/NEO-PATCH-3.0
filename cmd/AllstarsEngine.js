@@ -55,30 +55,86 @@ function obtenirVitesseMaxParGrade(grade) {
     }
 }
 
+
 //================================================
 // ⚡ RÉCUPÉRER LA VITESSE MAXIMALE DU PERSONNAGE
 //================================================
-
 function obtenirVitesseMaxPersonnage(
-    personnage
+    nomPersonnage,
+    match
 ) {
 
-    if (!personnage) {
+    if (!nomPersonnage || !match) {
         return null;
     }
 
-    // Si déjà calculée lors de la préparation du match
-    if (
-        typeof personnage.vitesseMax === "number"
-    ) {
+    const nom =
+        normaliserAction(
+            nomPersonnage
+        );
 
-        return personnage.vitesseMax;
+    //============================================
+    // 🔎 RECHERCHE DANS LES ÉQUIPES DU MATCH
+    //============================================
+
+    const equipes = [
+        match.players?.team1,
+        match.players?.team2
+    ];
+
+    for (const equipe of equipes) {
+
+        if (!equipe) {
+            continue;
+        }
+
+        const personnages = [
+            ...(equipe.lineup || []),
+            ...(equipe.joueurs || []),
+            ...(equipe.players || [])
+        ];
+
+        for (const personnage of personnages) {
+
+            if (!personnage) {
+                continue;
+            }
+
+            const nomPerso =
+                normaliserAction(
+                    personnage.nom ||
+                    personnage.name ||
+                    ""
+                );
+
+            if (nomPerso !== nom) {
+                continue;
+            }
+
+            //====================================
+            // ⚡ VITESSE DÉJÀ CALCULÉE
+            //====================================
+
+            if (
+                Number.isFinite(
+                    personnage.vitesseMax
+                )
+            ) {
+
+                return personnage.vitesseMax;
+            }
+
+            //====================================
+            // 🏆 SÉCURITÉ : CALCUL PAR GRADE
+            //====================================
+
+            return obtenirVitesseMaxParGrade(
+                personnage.grade
+            );
+        }
     }
 
-    // Sécurité : recalcul depuis le grade
-    return obtenirVitesseMaxParGrade(
-        personnage.grade
-    );
+    return null;
 }
 
 
@@ -2848,7 +2904,40 @@ function construireSequencePave(
         };
     }
 
+//================================================
+// ⚡ RÉSOLUTION DE LA VITESSE MAXIMALE
+//================================================
 
+for (const action of actionsAvecParametres) {
+
+    if (!action.details) {
+        continue;
+    }
+
+    // Seulement si le pavé demande VMAX
+    if (action.details.vmax !== true) {
+        continue;
+    }
+
+    const vitesseMax =
+        obtenirVitesseMaxPersonnage(
+            relation.acteur,
+            match
+        );
+
+    action.details.vitesse =
+        vitesseMax;
+
+    console.log(
+        "⚡ VMAX RÉSOLUE :",
+        relation.acteur,
+        "| Vitesse :",
+        vitesseMax,
+        "m/s"
+    );
+}
+
+    
     //============================================
     // 🌀 COMBO
     //============================================
