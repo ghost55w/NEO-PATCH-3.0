@@ -29,7 +29,83 @@ const normalize = str =>
         .replace(/[^a-z0-9]/g, "");
 
 
+//================================================
+// ⚡ VITESSE EFFECTIVE DU PERSONNAGE
+//================================================
 
+function obtenirVitesseEffective(
+    joueur,
+    details = {}
+) {
+
+    //============================================
+    // 🚫 Aucune vitesse maximale demandée
+    //============================================
+
+    if (details.vmax !== true) {
+
+        // Vitesse numérique explicitement donnée
+        if (
+            typeof details.vmax === "number"
+        ) {
+
+            return details.vmax;
+        }
+
+        // Vitesse normale
+        if (
+            typeof details.vitesse === "number"
+        ) {
+
+            return details.vitesse;
+        }
+
+        return null;
+    }
+
+
+    //============================================
+    // 🎴 RÉCUPÉRATION DU GRADE
+    //============================================
+
+    const grade =
+        joueur?.grade ||
+        joueur?.Grade ||
+        joueur?.card?.grade ||
+        joueur?.carte?.grade ||
+        null;
+
+
+    //============================================
+    // ⚡ VMAX SELON LE GRADE
+    //============================================
+
+    const vitesse =
+        obtenirVitesseMaxParGrade(
+            grade
+        );
+
+
+    //============================================
+    // 📋 DEBUG
+    //============================================
+
+    console.log(
+        "⚡ VMAX PERSONNAGE :",
+        joueur?.nom ||
+        joueur?.name ||
+        "Inconnu",
+        "| Grade :",
+        grade,
+        "| Vitesse :",
+        vitesse
+            ? `${vitesse} m/s`
+            : "INCONNUE"
+    );
+
+
+    return vitesse;
+}
 
 //================= UTILS =================
 function limiterStats(stats, stat, val) {
@@ -1677,34 +1753,48 @@ function extraireParametresAction(
         vitesseDistance.vitesse;
 
 
-    //================================================
-    // ⚡ VMAX
-    //================================================
+//================================================
+// ⚡ VMAX
+//================================================
 
-    const vmaxNumerique =
-        t.match(
-            /\bvmax\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\s*\/?\s*s\b/
+params.vmax = false;
+
+
+//-----------------------------------------------
+// VMAX AVEC VALEUR EXPLICITE
+//-----------------------------------------------
+
+const vmaxNumerique =
+    t.match(
+        /\bvmax\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*m\s*\/?\s*s\b/
+    );
+
+if (vmaxNumerique) {
+
+    params.vmax =
+        Number(
+            vmaxNumerique[1]
+                .replace(",", ".")
         );
 
-    if (vmaxNumerique) {
+    params.vitesse = null;
+}
 
-        params.vmax =
-            Number(
-                vmaxNumerique[1]
-                    .replace(",", ".")
-            );
-    }
 
-    else if (
-        /\bvmax\b/.test(t) ||
-        /\bvitesse max\b/.test(t) ||
-        /\bvitesse maximale\b/.test(t)
-    ) {
+//-----------------------------------------------
+// VMAX SANS VALEUR
+//-----------------------------------------------
 
-        params.vitesse =
-            "vmax";
-    }
+else if (
+    /\bvmax\b/.test(t) ||
+    /\bvitesse\s+max\b/.test(t) ||
+    /\bvitesse\s+maximale\b/.test(t)
+) {
 
+    params.vmax = true;
+
+    params.vitesse = null;
+}
 
     //================================================
     // 🦘 HAUTEUR
@@ -1829,8 +1919,23 @@ function extraireParametresAction(
 
 
     //================================================
-    // 🎯 ZONE VISÉE
-    //================================================
+// 🎯 ZONE VISÉE / PARTIE DU CORPS
+//================================================
+
+// Un déplacement ne vise jamais une partie
+// du corps. Les paramètres corporels appartiennent
+// aux attaques/frappes/actions concernées.
+
+if (
+    action.categorie === "déplacements" ||
+    action.categorie === "deplacements"
+) {
+
+    params.zoneVisee = null;
+
+    params.partieCorps = null;
+
+} else {
 
     params.zoneVisee =
         extraireZoneVisee(
@@ -1839,7 +1944,7 @@ function extraireParametresAction(
 
     params.partieCorps =
         params.zoneVisee;
-
+}
 
     //================================================
     // 🎯 CIBLE
