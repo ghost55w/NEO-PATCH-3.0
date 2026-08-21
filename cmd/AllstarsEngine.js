@@ -28,6 +28,33 @@ const normalize = str =>
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]/g, "");
 
+//================================================
+// ⚡ VITESSE MAXIMALE SELON LE GRADE
+//================================================
+
+function obtenirVitesseMaxParGrade(grade) {
+
+    const g =
+        String(grade || "")
+            .toLowerCase()
+            .trim();
+
+    switch (g) {
+
+        case "bronze":
+            return 6;
+
+        case "argent":
+            return 8;
+
+        case "or":
+            return 10;
+
+        default:
+            return null;
+    }
+}
+
 
 //================================================
 // ⚡ VITESSE EFFECTIVE DU PERSONNAGE
@@ -4350,10 +4377,21 @@ function comparerCategories(categorie1, categorie2) {
     return 0;
 }
 
+
 //================================================
 // 🎴 PREPARATION DES PERSONNAGES POUR LE MATCH
 //================================================
 function preparerPersonnageMatch(joueur, personnage) {
+
+    //================================================
+    // ⚡ VITESSE MAXIMALE SELON LE GRADE
+    //================================================
+
+    const vitesseMax =
+        obtenirVitesseMaxParGrade(
+            personnage.grade
+        );
+
 
     return {
 
@@ -4370,9 +4408,16 @@ function preparerPersonnageMatch(joueur, personnage) {
 
         category: personnage.category,
 
-        //========================================
+        //================================================
+        // ⚡ VITESSE
+        //================================================
+
+        vitesseMax,
+
+        //================================================
         // ❤️ STATS DE COMBAT
-        //========================================
+        //================================================
+
         stats: {
 
             // Endurance
