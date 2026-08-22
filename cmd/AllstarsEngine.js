@@ -274,6 +274,7 @@ const ACTIONS_MAP = {
                     "hook gauche"
                 ],
                 parametres: [
+                    "main",
                     "zoneVisee"
                 ]
             },
@@ -286,6 +287,7 @@ const ACTIONS_MAP = {
                     "hook droit"
                 ],
                 parametres: [
+                    "main",
                     "zoneVisee"
                 ]
             },
@@ -389,7 +391,6 @@ const ACTIONS_MAP = {
                 ]
             }
         },
-
 
         //================================================
         // 🦵 PIEDS
