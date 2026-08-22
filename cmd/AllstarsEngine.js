@@ -1732,46 +1732,62 @@ function extraireParametresAction(
     );
 
 
-    //================================================
+//================================================
 // 📦 PARAMÈTRES
 //================================================
 
 const params = {
 
+    // Direction par défaut
     direction: null,
 
     // Distance initiale entre les deux personnages
     distance: 5,
 
+    // Vitesse réelle du personnage au moment de l'action
     vitesse: null,
 
+    // Vitesse maximale selon le grade
     vmax: null,
 
     // Les personnages commencent au sol
+    // 0 = sol, puis 1m, 2m... jusqu'à 10m
     hauteur: 0,
 
-    // Aucun pivot ni décalage
+    // Aucun pivot ni décalage par défaut
     angle: 0,
 
+    // Côté d'engagement pour les techniques circulaires
     coteEngagement: null,
 
+    // Main utilisée : gauche / droite
     main: null,
 
+    // Partie de la main utilisée
+    partieMain: null,
+
+    // Pied utilisé : gauche / droite
     pied: null,
 
+    // Partie du pied utilisée
+    partiePied: null,
+
+    // Genou utilisé si nécessaire
     genou: null,
 
+    // Zone du corps adverse visée
     zoneVisee: null,
 
-    partieCorps: null,
-
+    // Type de mouvement
     mouvement: null,
 
+    // Gestion des pivots
     pivot: {
         angle: 0,
         sens: null
     },
 
+    // Personnage ciblé
     cible: null
 };
 
