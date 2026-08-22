@@ -2898,25 +2898,45 @@ for (const action of actionsAvecParametres) {
         action.categorie !== "deplacements"
     ) {
         continue;
+//================================================
+// ⚡ RÉSOLUTION IMMÉDIATE DE LA VITESSE
+//================================================
+
+for (const action of actionsAvecParametres) {
+
+    if (!action.details) {
+        continue;
+    }
+
+    //================================================
+    // 🚫 UNIQUEMENT LES DÉPLACEMENTS
+    //================================================
+
+    if (
+        action.categorie !== "déplacements" &&
+        action.categorie !== "deplacements"
+    ) {
+        continue;
     }
 
     //================================================
     // ⚡ VMAX
+    // La vitesse est déjà stockée sur le personnage
     //================================================
 
     if (action.details.vmax === true) {
 
         const vitesseMax =
-            obtenirVitesseMaxPersonnage(
-                action.acteur,
-                match
-            );
+            relation.acteur.vitesseMax;
 
-        action.details.vitesse = vitesseMax;
+        action.details.vitesse =
+            vitesseMax;
 
         console.log(
             "⚡ VMAX RÉSOLUE :",
-            action.acteur,
+            relation.acteur.nom,
+            "| Grade :",
+            relation.acteur.grade,
             "| Vitesse :",
             vitesseMax,
             "m/s"
@@ -2933,11 +2953,11 @@ for (const action of actionsAvecParametres) {
 
         console.log(
             "🏃 VITESSE NORMALE :",
-            action.acteur,
+            relation.acteur.nom,
             "| Vitesse : 1 m/s"
         );
     }
-}
+} 
     
     //============================================
     // 🌀 COMBO
