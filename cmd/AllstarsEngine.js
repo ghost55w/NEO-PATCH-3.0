@@ -235,7 +235,6 @@ function normalizeName(str = "") {
         .trim();
 }
 
-
 //================================================
 // 🎮 ACTIONS MAP — GAMEPLAY COMPLET
 //================================================
@@ -247,6 +246,10 @@ const ACTIONS_MAP = {
     //================================================
 
     frappes: {
+
+        //================================================
+        // 🥊 MAINS
+        //================================================
 
         mains: {
 
@@ -262,6 +265,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -275,6 +279,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -288,6 +293,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -300,6 +306,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -313,6 +320,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "hauteur",
                     "direction",
                     "zoneVisee"
@@ -328,6 +336,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -343,6 +352,7 @@ const ACTIONS_MAP = {
                     "angle",
                     "coteEngagement",
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -358,6 +368,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "zoneVisee"
                 ]
             },
@@ -372,6 +383,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "direction",
                     "zoneVisee"
                 ]
@@ -386,6 +398,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "main",
+                    "partieMain",
                     "direction",
                     "zoneVisee"
                 ]
@@ -408,6 +421,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "direction",
                     "zoneVisee"
                 ]
@@ -424,6 +438,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "coteEngagement",
                     "zoneVisee"
                 ]
@@ -439,6 +454,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "direction",
                     "zoneVisee"
                 ]
@@ -454,6 +470,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "angle",
                     "coteEngagement",
                     "zoneVisee"
@@ -470,6 +487,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "direction",
                     "zoneVisee"
                 ]
@@ -485,6 +503,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "hauteur",
                     "zoneVisee"
                 ]
@@ -499,9 +518,10 @@ const ACTIONS_MAP = {
                     "spinning backkick"
                 ],
                 parametres: [
+                    "pied",
+                    "partiePied",
                     "angle",
                     "coteEngagement",
-                    "pied",
                     "direction",
                     "zoneVisee"
                 ]
@@ -517,6 +537,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "zoneVisee"
                 ]
             },
@@ -530,6 +551,7 @@ const ACTIONS_MAP = {
                 ],
                 parametres: [
                     "pied",
+                    "partiePied",
                     "direction",
                     "zoneVisee"
                 ]
@@ -546,15 +568,16 @@ const ACTIONS_MAP = {
                     "kick sauté"
                 ],
                 parametres: [
+                    "pied",
+                    "partiePied",
                     "hauteur",
                     "direction",
-                    "pied",
                     "zoneVisee"
                 ]
             }
         }
-    },
-
+    }
+};                                           
 
     //================================================
     // 🏃 DÉPLACEMENTS
