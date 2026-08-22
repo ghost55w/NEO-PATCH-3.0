@@ -3952,6 +3952,69 @@ function AnalysePaveMatch(
         sequence.nombreActions >= 1 &&
         note >= 4;
 
+    //============================================
+// ⚡ RÉSOLUTION IMMÉDIATE DES VITESSES
+//============================================
+
+if (valide) {
+
+    for (const action of sequence.actions || []) {
+
+        if (!action.details) {
+            continue;
+        }
+
+        //========================================
+        // 🚫 UNIQUEMENT LES DÉPLACEMENTS
+        //========================================
+
+        if (
+            action.categorie !== "déplacements" &&
+            action.categorie !== "deplacements"
+        ) {
+            continue;
+        }
+
+        //========================================
+        // ⚡ VMAX
+        //========================================
+
+        if (action.details.vmax === true) {
+
+            const vitesseMax =
+                obtenirVitesseMaxPersonnage(
+                    action.acteur,
+                    match
+                );
+
+            action.details.vitesse =
+                vitesseMax;
+
+            console.log(
+                "⚡ VMAX RÉSOLUE :",
+                action.acteur,
+                "| Vitesse :",
+                vitesseMax,
+                "m/s"
+            );
+        }
+
+        //========================================
+        // 🐢 VITESSE NORMALE
+        //========================================
+
+        else {
+
+            action.details.vitesse = 1;
+
+            console.log(
+                "🏃 VITESSE NORMALE :",
+                action.acteur,
+                "| Vitesse : 1 m/s"
+            );
+        }
+    }
+}
 
     console.log(
         "📊 NOTE :",
