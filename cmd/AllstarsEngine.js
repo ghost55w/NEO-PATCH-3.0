@@ -1709,44 +1709,47 @@ function extraireParametresAction(
 
 
     //================================================
-    // 📦 PARAMÈTRES
-    //================================================
+// 📦 PARAMÈTRES
+//================================================
 
-    const params = {
+const params = {
 
-        direction: null,
+    direction: null,
 
-        distance: null,
+    // Distance initiale entre les deux personnages
+    distance: 5,
 
-        vitesse: null,
+    vitesse: null,
 
-        vmax: null,
+    vmax: null,
 
-        hauteur: null,
+    // Les personnages commencent au sol
+    hauteur: 0,
 
-        angle: null,
+    // Aucun pivot ni décalage
+    angle: 0,
 
-        coteEngagement: null,
+    coteEngagement: null,
 
-        main: null,
+    main: null,
 
-        pied: null,
+    pied: null,
 
-        genou: null,
+    genou: null,
 
-        zoneVisee: null,
+    zoneVisee: null,
 
-        partieCorps: null,
+    partieCorps: null,
 
-        mouvement: null,
+    mouvement: null,
 
-        pivot: {
-            angle: 0,
-            sens: null
-        },
+    pivot: {
+        angle: 0,
+        sens: null
+    },
 
-        cible: null
-    };
+    cible: null
+};
 
 
     //================================================
