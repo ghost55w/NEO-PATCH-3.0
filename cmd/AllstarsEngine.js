@@ -2987,7 +2987,7 @@ function construireSequencePave(
     }
 
 //================================================
-// ⚡ RÉSOLUTION DE LA VITESSE DES DÉPLACEMENTS
+// ⚡ RÉSOLUTION IMMÉDIATE DE LA VITESSE
 //================================================
 
 for (const action of actionsAvecParametres) {
@@ -2997,8 +2997,7 @@ for (const action of actionsAvecParametres) {
     }
 
     //================================================
-    // 🚫 LA VITESSE CONCERNE UNIQUEMENT
-    // LES ACTIONS DE DÉPLACEMENT
+    // 🚫 UNIQUEMENT LES DÉPLACEMENTS
     //================================================
 
     if (
@@ -3016,21 +3015,19 @@ for (const action of actionsAvecParametres) {
 
         const vitesseMax =
             obtenirVitesseMaxPersonnage(
-                relation.acteur,
+                action.acteur,
                 match
             );
 
-        action.details.vitesse =
-            vitesseMax;
+        action.details.vitesse = vitesseMax;
 
         console.log(
             "⚡ VMAX RÉSOLUE :",
-            relation.acteur,
+            action.acteur,
             "| Vitesse :",
             vitesseMax,
             "m/s"
         );
-
     }
 
     //================================================
@@ -3043,7 +3040,7 @@ for (const action of actionsAvecParametres) {
 
         console.log(
             "🏃 VITESSE NORMALE :",
-            relation.acteur,
+            action.acteur,
             "| Vitesse : 1 m/s"
         );
     }
