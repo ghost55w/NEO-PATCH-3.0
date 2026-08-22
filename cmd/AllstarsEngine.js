@@ -107,10 +107,29 @@ function obtenirVitesseMaxPersonnage(
                     ""
                 );
 
+console.log(
+    "🔎 RECHERCHE VITESSE :",
+    {
+        recherche: nom,
+        personnage: nomPerso,
+        nomOriginal: personnage.nom,
+        grade: personnage.grade,
+        vitesseMax: personnage.vitesseMax
+    }
+);
+            
             if (nomPerso !== nom) {
                 continue;
             }
-
+console.log(
+    "✅ PERSONNAGE TROUVÉ POUR VMAX :",
+    personnage.nom || personnage.name,
+    "| Grade :",
+    personnage.grade,
+    "| vitesseMax :",
+    personnage.vitesseMax
+);
+            
             //====================================
             // ⚡ VITESSE DÉJÀ CALCULÉE
             //====================================
