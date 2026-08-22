@@ -59,103 +59,108 @@ function obtenirVitesseMaxParGrade(grade) {
 //================================================
 // ⚡ RÉCUPÉRER LA VITESSE MAXIMALE DU PERSONNAGE
 //================================================
-function obtenirVitesseMaxPersonnage(
-    nomPersonnage,
-    match
-) {
+function obtenirVitesseMaxPersonnage(nomPersonnage, match) {
 
-    if (!nomPersonnage || !match) {
-        return null;
-    }
+console.log(  
+    "🔎 RECHERCHE VITESSE POUR :",  
+    nomPersonnage  
+);  
 
-    const nom =
-        normaliserAction(
-            nomPersonnage
-        );
+if (!nomPersonnage || !match) {  
+    console.log("❌ nomPersonnage ou match absent");  
+    return null;  
+}  
 
-    //============================================
-    // 🔎 RECHERCHE DANS LES ÉQUIPES DU MATCH
-    //============================================
+const nom =  
+    normaliserAction(nomPersonnage);  
 
-    const equipes = [
-        match.players?.team1,
-        match.players?.team2
-    ];
+console.log(  
+    "🔤 NOM NORMALISÉ :",  
+    nom  
+);  
 
-    for (const equipe of equipes) {
+const equipes = [  
+    match.players?.team1,  
+    match.players?.team2  
+];  
 
-        if (!equipe) {
-            continue;
-        }
+for (const equipe of equipes) {  
 
-        const personnages = [
-            ...(equipe.lineup || []),
-            ...(equipe.joueurs || []),
-            ...(equipe.players || [])
-        ];
+    if (!equipe) continue;  
 
-        for (const personnage of personnages) {
+    const personnages = [  
+        ...(equipe.lineup || []),  
+        ...(equipe.joueurs || []),  
+        ...(equipe.players || [])  
+    ];  
 
-            if (!personnage) {
-                continue;
-            }
+    for (const personnage of personnages) {  
 
-            const nomPerso =
-                normaliserAction(
-                    personnage.nom ||
-                    personnage.name ||
-                    ""
-                );
+        if (!personnage) continue;  
 
-console.log(
-    "🔎 RECHERCHE VITESSE :",
-    {
-        recherche: nom,
-        personnage: nomPerso,
-        nomOriginal: personnage.nom,
-        grade: personnage.grade,
-        vitesseMax: personnage.vitesseMax
-    }
-);
-            
-            if (nomPerso !== nom) {
-                continue;
-            }
-console.log(
-    "✅ PERSONNAGE TROUVÉ POUR VMAX :",
-    personnage.nom || personnage.name,
-    "| Grade :",
-    personnage.grade,
-    "| vitesseMax :",
-    personnage.vitesseMax
-);
-            
-            //====================================
-            // ⚡ VITESSE DÉJÀ CALCULÉE
-            //====================================
+        const nomPerso =  
+            normaliserAction(  
+                personnage.nom ||  
+                personnage.name ||  
+                ""  
+            );  
 
-            if (
-                Number.isFinite(
-                    personnage.vitesseMax
-                )
-            ) {
+        console.log(  
+            "👤 PERSONNAGE TESTÉ :",  
+            nomPerso,  
+            "| GRADE :",  
+            personnage.grade,  
+            "| VMAX :",  
+            personnage.vitesseMax  
+        );  
 
-                return personnage.vitesseMax;
-            }
+        if (nomPerso !== nom) {  
+            continue;  
+        }  
 
-            //====================================
-            // 🏆 SÉCURITÉ : CALCUL PAR GRADE
-            //====================================
+        console.log(  
+            "✅ PERSONNAGE TROUVÉ :",  
+            personnage  
+        );  
 
-            return obtenirVitesseMaxParGrade(
-                personnage.grade
-            );
-        }
-    }
+        if (  
+            Number.isFinite(  
+                personnage.vitesseMax  
+            )  
+        ) {  
 
-    return null;
+            console.log(  
+                "⚡ VITESSE EXISTANTE :",  
+                personnage.vitesseMax  
+            );  
+
+            return personnage.vitesseMax;  
+        }  
+
+        const vitesse =  
+            obtenirVitesseMaxParGrade(  
+                personnage.grade  
+            );  
+
+        console.log(  
+            "🏆 VITESSE PAR GRADE :",  
+            personnage.grade,  
+            "=>",  
+            vitesse  
+        );  
+
+        return vitesse;  
+    }  
+}  
+
+console.log(  
+    "❌ PERSONNAGE INTROUVABLE :",  
+    nomPersonnage  
+);  
+
+return null;
+
 }
-
 
 //================================================
 // ⚡ VITESSE EFFECTIVE DU PERSONNAGE
