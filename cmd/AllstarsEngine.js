@@ -235,8 +235,7 @@ function normalizeName(str = "") {
         .trim();
 }
 
-
-     //================================================
+//================================================
 // 🎮 ACTIONS MAP — GAMEPLAY COMPLET
 //================================================
 
@@ -254,6 +253,10 @@ const ACTIONS_MAP = {
 
         mains: {
 
+            //================================================
+            // 👊 COUPS DE POING
+            //================================================
+
             coup_direct: {
                 nom: "Coup direct",
                 aliases: [
@@ -264,15 +267,9 @@ const ACTIONS_MAP = {
                     "jab",
                     "straight"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "phalanges"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    zoneVisee: true
                 }
             },
 
@@ -283,15 +280,9 @@ const ACTIONS_MAP = {
                     "left hook",
                     "hook gauche"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "phalanges"
-                    ]
+                parametres: {
+                    main: ["gauche"],
+                    zoneVisee: true
                 }
             },
 
@@ -302,15 +293,9 @@ const ACTIONS_MAP = {
                     "right hook",
                     "hook droit"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "phalanges"
-                    ]
+                parametres: {
+                    main: ["droite"],
+                    zoneVisee: true
                 }
             },
 
@@ -320,15 +305,9 @@ const ACTIONS_MAP = {
                     "uppercut",
                     "coup uppercut"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "phalanges"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    zoneVisee: true
                 }
             },
 
@@ -339,17 +318,11 @@ const ACTIONS_MAP = {
                     "uppercut saute",
                     "rising uppercut"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "hauteur",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "phalanges"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    hauteur: true,
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -360,15 +333,10 @@ const ACTIONS_MAP = {
                     "revers",
                     "backfist"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "dos de la main"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    partieMain: ["dos de la main"],
+                    zoneVisee: true
                 }
             },
 
@@ -379,17 +347,12 @@ const ACTIONS_MAP = {
                     "spinning backfist",
                     "spinning back fist"
                 ],
-                parametres: [
-                    "angle",
-                    "coteEngagement",
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "dos de la main"
-                    ]
+                parametres: {
+                    angle: true,
+                    coteEngagement: true,
+                    main: ["gauche", "droite"],
+                    partieMain: ["dos de la main"],
+                    zoneVisee: true
                 }
             },
 
@@ -402,15 +365,10 @@ const ACTIONS_MAP = {
                     "hammer fist",
                     "hammer"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "base du poing"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    partieMain: ["base du poing"],
+                    zoneVisee: true
                 }
             },
 
@@ -422,16 +380,11 @@ const ACTIONS_MAP = {
                     "hammer fist side",
                     "hammer side"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "base du poing"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    partieMain: ["base du poing"],
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -442,16 +395,11 @@ const ACTIONS_MAP = {
                     "reverse hammer",
                     "reverse hammer fist"
                 ],
-                parametres: [
-                    "main",
-                    "partieMain",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partieMain: [
-                        "base du poing"
-                    ]
+                parametres: {
+                    main: ["gauche", "droite"],
+                    partieMain: ["base du poing"],
+                    direction: true,
+                    zoneVisee: true
                 }
             }
         },
@@ -470,17 +418,14 @@ const ACTIONS_MAP = {
                     "frontkick",
                     "coup frontal"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
+                parametres: {
+                    pied: ["gauche", "droite"],
                     partiePied: [
                         "semelle",
                         "pointe du pied"
-                    ]
+                    ],
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -493,17 +438,14 @@ const ACTIONS_MAP = {
                     "roundhouse",
                     "kick circulaire"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "coteEngagement",
-                    "zoneVisee"
-                ],
-                contraintes: {
+                parametres: {
+                    pied: ["gauche", "droite"],
                     partiePied: [
                         "cou-de-pied",
                         "tibia"
-                    ]
+                    ],
+                    coteEngagement: true,
+                    zoneVisee: true
                 }
             },
 
@@ -515,17 +457,14 @@ const ACTIONS_MAP = {
                     "side kick",
                     "sidekick"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
+                parametres: {
+                    pied: ["gauche", "droite"],
                     partiePied: [
                         "tranchant du pied",
                         "talon"
-                    ]
+                    ],
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -537,17 +476,12 @@ const ACTIONS_MAP = {
                     "back kick",
                     "backkick"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "angle",
-                    "coteEngagement",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partiePied: [
-                        "talon"
-                    ]
+                parametres: {
+                    pied: ["gauche", "droite"],
+                    partiePied: ["talon"],
+                    angle: true,
+                    coteEngagement: true,
+                    zoneVisee: true
                 }
             },
 
@@ -559,16 +493,11 @@ const ACTIONS_MAP = {
                     "hookkick",
                     "kick crochet"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partiePied: [
-                        "talon"
-                    ]
+                parametres: {
+                    pied: ["gauche", "droite"],
+                    partiePied: ["talon"],
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -580,16 +509,11 @@ const ACTIONS_MAP = {
                     "axekick",
                     "coup descendant"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "hauteur",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partiePied: [
-                        "talon"
-                    ]
+                parametres: {
+                    pied: ["gauche", "droite"],
+                    partiePied: ["talon"],
+                    hauteur: true,
+                    zoneVisee: true
                 }
             },
 
@@ -601,18 +525,13 @@ const ACTIONS_MAP = {
                     "spinning back kick",
                     "spinning backkick"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "angle",
-                    "coteEngagement",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partiePied: [
-                        "talon"
-                    ]
+                parametres: {
+                    pied: ["gauche", "droite"],
+                    partiePied: ["talon"],
+                    angle: true,
+                    coteEngagement: true,
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -624,16 +543,13 @@ const ACTIONS_MAP = {
                     "low kick",
                     "lowkick"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "zoneVisee"
-                ],
-                contraintes: {
+                parametres: {
+                    pied: ["gauche", "droite"],
                     partiePied: [
                         "tibia",
                         "cou-de-pied"
-                    ]
+                    ],
+                    zoneVisee: true
                 }
             },
 
@@ -644,16 +560,11 @@ const ACTIONS_MAP = {
                     "genou",
                     "knee strike"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
-                    partiePied: [
-                        "genou"
-                    ]
+                parametres: {
+                    pied: ["gauche", "droite"],
+                    partiePied: ["genou"],
+                    direction: true,
+                    zoneVisee: true
                 }
             },
 
@@ -667,26 +578,21 @@ const ACTIONS_MAP = {
                     "flyingkick",
                     "kick sauté"
                 ],
-                parametres: [
-                    "pied",
-                    "partiePied",
-                    "hauteur",
-                    "direction",
-                    "zoneVisee"
-                ],
-                contraintes: {
+                parametres: {
+                    pied: ["gauche", "droite"],
                     partiePied: [
                         "semelle",
                         "pointe du pied",
                         "talon",
                         "cou-de-pied"
-                    ]
+                    ],
+                    hauteur: true,
+                    direction: true,
+                    zoneVisee: true
                 }
             }
-        }
-    }
-};           
-                
+        } 
+    }                                                             
 
     //================================================
     // 🏃 DÉPLACEMENTS
