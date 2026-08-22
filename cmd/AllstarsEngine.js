@@ -2905,7 +2905,7 @@ function construireSequencePave(
     }
 
 //================================================
-// ⚡ RÉSOLUTION DE LA VITESSE MAXIMALE
+// ⚡ RÉSOLUTION DE LA VITESSE DES DÉPLACEMENTS
 //================================================
 
 for (const action of actionsAvecParametres) {
@@ -2914,29 +2914,58 @@ for (const action of actionsAvecParametres) {
         continue;
     }
 
-    // Seulement si le pavé demande VMAX
-    if (action.details.vmax !== true) {
+    //================================================
+    // 🚫 LA VITESSE CONCERNE UNIQUEMENT
+    // LES ACTIONS DE DÉPLACEMENT
+    //================================================
+
+    if (
+        action.categorie !== "déplacements" &&
+        action.categorie !== "deplacements"
+    ) {
         continue;
     }
 
-    const vitesseMax =
-        obtenirVitesseMaxPersonnage(
+    //================================================
+    // ⚡ VMAX
+    //================================================
+
+    if (action.details.vmax === true) {
+
+        const vitesseMax =
+            obtenirVitesseMaxPersonnage(
+                relation.acteur,
+                match
+            );
+
+        action.details.vitesse =
+            vitesseMax;
+
+        console.log(
+            "⚡ VMAX RÉSOLUE :",
             relation.acteur,
-            match
+            "| Vitesse :",
+            vitesseMax,
+            "m/s"
         );
 
-    action.details.vitesse =
-        vitesseMax;
+    }
 
-    console.log(
-        "⚡ VMAX RÉSOLUE :",
-        relation.acteur,
-        "| Vitesse :",
-        vitesseMax,
-        "m/s"
-    );
+    //================================================
+    // 🐢 DÉPLACEMENT NORMAL
+    //================================================
+
+    else {
+
+        action.details.vitesse = 1;
+
+        console.log(
+            "🏃 VITESSE NORMALE :",
+            relation.acteur,
+            "| Vitesse : 1 m/s"
+        );
+    }
 }
-
     
     //============================================
     // 🌀 COMBO
