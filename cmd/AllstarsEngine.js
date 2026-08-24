@@ -2903,21 +2903,22 @@ for (const action of actionsAvecParametres) {
 
     //================================================
     // ⚡ VMAX
+    // La vitesse est déjà stockée sur le personnage
     //================================================
 
     if (action.details.vmax === true) {
 
         const vitesseMax =
-            obtenirVitesseMaxPersonnage(
-                action.acteur,
-                match
-            );
+            relation.acteur.vitesseMax;
 
-        action.details.vitesse = vitesseMax;
+        action.details.vitesse =
+            vitesseMax;
 
         console.log(
             "⚡ VMAX RÉSOLUE :",
-            action.acteur,
+            relation.acteur.nom,
+            "| Grade :",
+            relation.acteur.grade,
             "| Vitesse :",
             vitesseMax,
             "m/s"
@@ -2934,11 +2935,12 @@ for (const action of actionsAvecParametres) {
 
         console.log(
             "🏃 VITESSE NORMALE :",
-            action.acteur,
+            relation.acteur.nom,
             "| Vitesse : 1 m/s"
         );
     }
 }
+
     
     //============================================
     // 🌀 COMBO
