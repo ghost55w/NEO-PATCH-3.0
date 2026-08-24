@@ -1258,6 +1258,24 @@ const MAX_ACTIONS_PAVE = 4;
 const DUREE_ACTION_NORMALE = 1;   // 1 seconde
 const DUREE_ACTION_COMBO = 0.5;   // 0.5 seconde
 
+
+//================================================
+// 📏⚔️ CONFIGURATION DISTANCES COMBAT ALL STARS
+//================================================
+
+// Distance initiale entre deux combattants
+const DISTANCE_INITIALE_COMBAT = 5;
+
+// Distance "close"
+const DISTANCE_CLOSE = 0.5;
+
+// Portée maximale des attaques
+const PORTEE_MAIN = 0.5;
+const PORTEE_PIED = 1.0;
+
+// Tolérance pour éviter les erreurs de décimales
+const TOLERANCE_DISTANCE = 0.01;
+
 //================================================
 // 🧩 MOTS DE STRUCTURE
 //================================================
@@ -1674,8 +1692,21 @@ const params = {
     // Direction par défaut
     direction: null,
 
-    // Distance initiale entre les deux personnages
-    distance: 5,
+   //================================================
+// 📏 DISTANCES COMBAT
+//================================================
+
+// Distance connue avant l'action
+distanceActuelle: null,
+
+// Distance finale entre acteur et cible
+distance: null,
+
+// Distance réellement parcourue
+distanceParcourue: 0,
+
+// Relation demandée dans le texte
+relationDistance: null, 
 
     // Vitesse réelle du personnage au moment de l'action
     vitesse: null,
@@ -1817,18 +1848,146 @@ const params = {
         );
 
 
-    //================================================
-    // 📏 DISTANCE
-    //================================================
+//================================================
+// 📏 DISTANCE COMBAT
+//================================================
 
-    const vitesseDistance =
-        extraireVitesseDistance(
-            contexte
+const vitesseDistance =
+    extraireVitesseDistance(
+        contexte
+    );
+
+//============================================
+// 📡 DISTANCE ACTUELLE DU TRACKER
+//============================================
+
+let distanceActuelle =
+    DISTANCE_INITIALE_COMBAT;
+
+// On ne récupère le tracker que si
+// une cible existe réellement.
+
+if (
+    params.cible
+) {
+
+    distanceActuelle =
+        obtenirDistanceTracker(
+            match,
+            action.acteur,
+            params.cible
+        );
+}
+
+params.distanceActuelle =
+    distanceActuelle;
+
+
+//============================================
+// 🔎 RELATION DE DISTANCE
+//============================================
+
+params.relationDistance =
+    extraireRelationDistance(
+        contexte
+    );
+
+
+//============================================
+// 📏 DISTANCE ÉCRITE PAR LE JOUEUR
+//============================================
+
+const distanceEcrite =
+    vitesseDistance.distance;
+
+
+//============================================
+// 🎯 DISTANCE FINALE
+//============================================
+
+params.distance =
+    determinerDistanceCible(
+        params.relationDistance,
+        distanceActuelle,
+        distanceEcrite
+    );
+
+
+//============================================
+// 🏃 DISTANCE PARCOURUE
+//============================================
+
+if (
+    params.distance !== null
+) {
+
+    if (
+        params.mouvement === "recule"
+    ) {
+
+        params.distanceParcourue =
+            Math.abs(
+                params.distance -
+                distanceActuelle
+            );
+
+    }
+
+    else if (
+        params.mouvement === "avance" ||
+        params.mouvement === "fonce" ||
+        params.mouvement === "court" ||
+        params.mouvement === "deplace"
+    ) {
+
+        params.distanceParcourue =
+            Math.abs(
+                distanceActuelle -
+                params.distance
+            );
+    }
+
+    else {
+
+        params.distanceParcourue = 0;
+    }
+}
+
+
+//============================================
+// ❌ DISTANCE INCOHÉRENTE
+//============================================
+
+if (
+    distanceEcrite !== null &&
+    params.mouvement &&
+    params.relationDistance
+) {
+
+    const distanceCalculee =
+        Math.abs(
+            distanceActuelle -
+            distanceEcrite
         );
 
-    params.distance =
-        vitesseDistance.distance;
+    console.log(
+        "📏 DISTANCE ÉCRITE :",
+        distanceEcrite,
+        "m"
+    );
 
+    console.log(
+        "📡 DISTANCE TRACKER :",
+        distanceActuelle,
+        "m"
+    );
+
+    console.log(
+        "📐 DISTANCE PARCOURUE CALCULÉE :",
+        distanceCalculee,
+        "m"
+    );
+}
 
     //================================================
     // ⚡ VITESSE
@@ -2031,35 +2190,78 @@ if (
         params.zoneVisee;
 }
 
-    //================================================
-    // 🎯 CIBLE
-    //================================================
+//================================================
+// 🎯 CIBLE
+//================================================
 
-    const cibleMatch =
-        t.match(
-            /\b(?:vers|sur|contre|attaque|frappe|vise|cible)\s+([a-z0-9_()'-]+)/
-        );
+let cibleDetectee = null;
 
-    if (cibleMatch) {
-
-        params.cible =
-            cibleMatch[1];
-    }
-
-
-    //================================================
-    // 📋 DEBUG
-    //================================================
-
-    console.log(
-        "🧠 PARAMÈTRES ACTION :",
-        action.nom,
-        params
+const cibleMatch =
+    t.match(
+        /\b(?:vers|sur|contre|attaque|frappe|vise|cible)\s+([a-z0-9_()'-]+)/
     );
 
+if (cibleMatch) {
 
-    return params;
+    const mot =
+        cibleMatch[1];
+
+    //============================================
+    // 🚫 MOTS QUI NE SONT PAS DES PERSONNAGES
+    //============================================
+
+    const pronoms = [
+        "son",
+        "sa",
+        "ses",
+        "leur",
+        "leurs",
+        "lui",
+        "eux"
+    ];
+
+    if (
+        !pronoms.includes(mot)
+    ) {
+
+        cibleDetectee =
+            mot;
+    }
 }
+
+
+//================================================
+// 🎴 CIBLE DÉJÀ CONNUE PAR L'ACTION
+//================================================
+
+if (
+    !cibleDetectee &&
+    action.cible
+) {
+
+    cibleDetectee =
+        normaliserAction(
+            action.cible
+        );
+}
+
+
+//================================================
+// 🎯 CIBLE FINALE
+//================================================
+
+params.cible =
+    cibleDetectee;
+
+
+//================================================
+// 📋 DEBUG
+//================================================
+
+console.log(
+    "🎯 CIBLE DÉTECTÉE :",
+    params.cible
+);
 
 
 //================================================
@@ -3052,6 +3254,57 @@ for (const action of actionsAvecParametres) {
     };
 }  
 
+    //================================================
+// 🥊📏 PORTÉE DES ATTAQUES
+//================================================
+
+function determinerPorteeAttaque(
+    action
+) {
+
+    const categorie =
+        normaliserAction(
+            action.groupe ||
+            ""
+        );
+
+    //============================================
+    // ✊ MAINS
+    //============================================
+
+    if (
+        categorie === "mains"
+    ) {
+
+        return PORTEE_MAIN;
+    }
+
+    //============================================
+    // 🦶 PIEDS
+    //============================================
+
+    if (
+        categorie === "pieds"
+    ) {
+
+        return PORTEE_PIED;
+    }
+
+    //============================================
+    // 🦵 GENOU
+    //============================================
+
+    if (
+        categorie === "genoux" ||
+        categorie === "genou"
+    ) {
+
+        return PORTEE_MAIN;
+    }
+
+    return null;
+}
+
 //================================================
 // 📚 OBTENIR TOUTES LES ACTIONS DISPONIBLES
 //================================================
@@ -3996,6 +4249,252 @@ if (action.details.vmax === true) {
             : null
     };
 }
+
+//================================================
+// 📏🔎 DÉTECTION DE LA RELATION DE DISTANCE
+//================================================
+
+function extraireRelationDistance(texte = "") {
+
+    const t = normaliserAction(texte);
+
+    //============================================
+    // 🔴 CLOSE
+    //============================================
+
+    if (
+        t.includes("close distance") ||
+        t.includes("distance close") ||
+        t.includes("distance rapprochee") ||
+        t.includes("tres pres") ||
+        t.includes("au corps a corps") ||
+        t.includes("corps a corps")
+    ) {
+
+        return "close";
+    }
+
+    //============================================
+    // 🟢 PROCHE
+    //============================================
+
+    if (
+        t.includes("pres de") ||
+        t.includes("proche de") ||
+        t.includes("a proximite")
+    ) {
+
+        return "proche";
+    }
+
+    //============================================
+    // 🔵 LOIN
+    //============================================
+
+    if (
+        t.includes("loin") ||
+        t.includes("a distance") ||
+        t.includes("garde ses distances") ||
+        t.includes("prend ses distances")
+    ) {
+
+        return "loin";
+    }
+
+    //============================================
+    // 🟣 AUTOUR
+    //============================================
+
+    if (
+        t.includes("autour de") ||
+        t.includes("tourne autour de") ||
+        t.includes("se deplace autour de") ||
+        t.includes("se deplace autour")
+    ) {
+
+        return "autour";
+    }
+
+    return null;
+}
+
+
+//================================================
+// 📏🎯 DISTANCE CIBLE SELON LA RELATION
+//================================================
+
+function determinerDistanceCible(
+    relation,
+    distanceActuelle = DISTANCE_INITIALE_COMBAT,
+    distanceExplicite = null
+) {
+
+    //============================================
+    // 📐 DISTANCE EXPLICITE
+    //============================================
+
+    if (
+        typeof distanceExplicite === "number" &&
+        Number.isFinite(distanceExplicite)
+    ) {
+
+        return distanceExplicite;
+    }
+
+    //============================================
+    // 🔴 CLOSE
+    //============================================
+
+    if (relation === "close") {
+
+        return DISTANCE_CLOSE;
+    }
+
+    //============================================
+    // 🟢 PROCHE
+    //============================================
+
+    if (relation === "proche") {
+
+        return 1;
+    }
+
+    //============================================
+    // 🔵 LOIN
+    //============================================
+
+    if (relation === "loin") {
+
+        // On considère "loin" comme
+        // une augmentation de 2 mètres
+        return distanceActuelle + 2;
+    }
+
+    //============================================
+    // 🟣 AUTOUR
+    //============================================
+
+    if (relation === "autour") {
+
+        // La distance reste globalement identique.
+        return distanceActuelle;
+    }
+
+    return null;
+}
+
+//================================================
+// 📡📏 DISTANCE TRACKER ENTRE DEUX PERSONNAGES
+//================================================
+
+function obtenirDistanceTracker(
+    match,
+    acteurNom,
+    cibleNom
+) {
+
+    if (
+        !match ||
+        !match.tracker ||
+        !match.tracker.joueurs
+    ) {
+
+        return DISTANCE_INITIALE_COMBAT;
+    }
+
+    const joueurs =
+        match.tracker.joueurs;
+
+    // Recherche insensible à la casse
+    const trouverJoueur = nom => {
+
+        const recherche =
+            normaliserAction(nom);
+
+        for (const key of Object.keys(joueurs)) {
+
+            const joueur =
+                joueurs[key];
+
+            if (!joueur) continue;
+
+            const nomJoueur =
+                normaliserAction(
+                    joueur.nom ||
+                    joueur.pseudo ||
+                    joueur.personnage?.name ||
+                    ""
+                );
+
+            if (
+                nomJoueur === recherche
+            ) {
+
+                return joueur;
+            }
+        }
+
+        return null;
+    };
+
+    const acteur =
+        trouverJoueur(acteurNom);
+
+    const cible =
+        trouverJoueur(cibleNom);
+
+    if (
+        !acteur ||
+        !cible ||
+        !acteur.position ||
+        !cible.position
+    ) {
+
+        console.log(
+            "⚠️ DISTANCE TRACKER INTROUVABLE :",
+            acteurNom,
+            "↔",
+            cibleNom
+        );
+
+        return DISTANCE_INITIALE_COMBAT;
+    }
+
+    const ax =
+        Number(acteur.position.x);
+
+    const ay =
+        Number(acteur.position.y);
+
+    const cx =
+        Number(cible.position.x);
+
+    const cy =
+        Number(cible.position.y);
+
+    if (
+        !Number.isFinite(ax) ||
+        !Number.isFinite(ay) ||
+        !Number.isFinite(cx) ||
+        !Number.isFinite(cy)
+    ) {
+
+        return DISTANCE_INITIALE_COMBAT;
+    }
+
+    const dx =
+        cx - ax;
+
+    const dy =
+        cy - ay;
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+}
+
+
 
 
 //================================================
