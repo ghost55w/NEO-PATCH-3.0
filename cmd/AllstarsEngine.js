@@ -3871,29 +3871,37 @@ if (valide) {
             continue;
         }
 
-        //========================================
-        // ⚡ VMAX
-        //========================================
+//========================================
+// ⚡ VMAX
+//========================================
 
-        if (action.details.vmax === true) {
+if (action.details.vmax === true) {
 
-            const vitesseMax =
-                obtenirVitesseMaxPersonnage(
-                    action.acteur,
-                    match
-                );
+    const joueurVitesse = Object.values(match.joueurs || {})
+        .flatMap(equipe => Array.isArray(equipe) ? equipe : [equipe])
+        .find(j =>
+            j &&
+            (
+                j.nom === action.acteur ||
+                j.pseudo === action.acteur
+            )
+        );
 
-            action.details.vitesse =
-                vitesseMax;
+    const grade = joueurVitesse?.grade || "Bronze";
 
-            console.log(
-                "⚡ VMAX RÉSOLUE :",
-                action.acteur,
-                "| Vitesse :",
-                vitesseMax,
-                "m/s"
-            );
-        }
+    const vitesseMax =
+        obtenirVitesseMaxParGrade(grade);
+
+    action.details.vitesse = vitesseMax;
+
+    console.log(
+        "⚡ VMAX RÉSOLUE :",
+        action.acteur,
+        "| Grade :", grade,
+        "| Vitesse :", vitesseMax,
+        "m/s"
+    );
+}
 
         //========================================
         // 🐢 VITESSE NORMALE
