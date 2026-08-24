@@ -53,7 +53,114 @@ function obtenirVitesseMaxParGrade(grade) {
         default:
             return null;
     }
-}          
+}
+
+
+//================================================
+// ⚡ RÉCUPÉRER LA VITESSE MAXIMALE DU PERSONNAGE
+//================================================
+function obtenirVitesseMaxPersonnage(nomPersonnage, match) {
+
+console.log(  
+    "🔎 RECHERCHE VITESSE POUR :",  
+    nomPersonnage  
+);  
+
+if (!nomPersonnage || !match) {  
+    console.log("❌ nomPersonnage ou match absent");  
+    return null;  
+}  
+
+const nom =  
+    normaliserAction(nomPersonnage);  
+
+console.log(  
+    "🔤 NOM NORMALISÉ :",  
+    nom  
+);  
+
+const equipes = [  
+    match.players?.team1,  
+    match.players?.team2  
+];  
+
+for (const equipe of equipes) {  
+
+    if (!equipe) continue;  
+
+    const personnages = [  
+        ...(equipe.lineup || []),  
+        ...(equipe.joueurs || []),  
+        ...(equipe.players || [])  
+    ];  
+
+    for (const personnage of personnages) {  
+
+        if (!personnage) continue;  
+
+        const nomPerso =  
+            normaliserAction(  
+                personnage.nom ||  
+                personnage.name ||  
+                ""  
+            );  
+
+        console.log(  
+            "👤 PERSONNAGE TESTÉ :",  
+            nomPerso,  
+            "| GRADE :",  
+            personnage.grade,  
+            "| VMAX :",  
+            personnage.vitesseMax  
+        );  
+
+        if (nomPerso !== nom) {  
+            continue;  
+        }  
+
+        console.log(  
+            "✅ PERSONNAGE TROUVÉ :",  
+            personnage  
+        );  
+
+        if (  
+            Number.isFinite(  
+                personnage.vitesseMax  
+            )  
+        ) {  
+
+            console.log(  
+                "⚡ VITESSE EXISTANTE :",  
+                personnage.vitesseMax  
+            );  
+
+            return personnage.vitesseMax;  
+        }  
+
+        const vitesse =  
+            obtenirVitesseMaxParGrade(  
+                personnage.grade  
+            );  
+
+        console.log(  
+            "🏆 VITESSE PAR GRADE :",  
+            personnage.grade,  
+            "=>",  
+            vitesse  
+        );  
+
+        return vitesse;  
+    }  
+}  
+
+console.log(  
+    "❌ PERSONNAGE INTROUVABLE :",  
+    nomPersonnage  
+);  
+
+return null;
+
+}
 
 //================================================
 // ⚡ VITESSE EFFECTIVE DU PERSONNAGE
@@ -2898,45 +3005,25 @@ for (const action of actionsAvecParametres) {
         action.categorie !== "deplacements"
     ) {
         continue;
-//================================================
-// ⚡ RÉSOLUTION IMMÉDIATE DE LA VITESSE
-//================================================
-
-for (const action of actionsAvecParametres) {
-
-    if (!action.details) {
-        continue;
-    }
-
-    //================================================
-    // 🚫 UNIQUEMENT LES DÉPLACEMENTS
-    //================================================
-
-    if (
-        action.categorie !== "déplacements" &&
-        action.categorie !== "deplacements"
-    ) {
-        continue;
     }
 
     //================================================
     // ⚡ VMAX
-    // La vitesse est déjà stockée sur le personnage
     //================================================
 
     if (action.details.vmax === true) {
 
         const vitesseMax =
-            relation.acteur.vitesseMax;
+            obtenirVitesseMaxPersonnage(
+                action.acteur,
+                match
+            );
 
-        action.details.vitesse =
-            vitesseMax;
+        action.details.vitesse = vitesseMax;
 
         console.log(
             "⚡ VMAX RÉSOLUE :",
-            relation.acteur.nom,
-            "| Grade :",
-            relation.acteur.grade,
+            action.acteur,
             "| Vitesse :",
             vitesseMax,
             "m/s"
@@ -2953,11 +3040,11 @@ for (const action of actionsAvecParametres) {
 
         console.log(
             "🏃 VITESSE NORMALE :",
-            relation.acteur.nom,
+            action.acteur,
             "| Vitesse : 1 m/s"
         );
     }
-} 
+}
     
     //============================================
     // 🌀 COMBO
