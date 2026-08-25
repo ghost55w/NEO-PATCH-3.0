@@ -152,68 +152,8 @@ function normalizeName(str = "") {
         .toLowerCase()
         .trim();
 }
-
-
-
-                                            
+                                           
             
-            nom: "Vrille 180°",
-            aliases: [
-                "vrille 180",
-                "vrille à 180",
-                "vrille a 180"
-            ],
-            parametres: [
-                "angle",
-                "hauteur",
-                "direction",
-                "coteEngagement"
-            ]
-        },
-
-        vrille_360: {
-            nom: "Vrille 360°",
-            aliases: [
-                "vrille 360",
-                "vrille à 360",
-                "vrille a 360"
-            ],
-            parametres: [
-                "angle",
-                "hauteur",
-                "direction",
-                "zoneVisee"
-            ]
-        },
-
-        projection: {
-            nom: "Projection",
-            aliases: [
-                "projection",
-                "projette",
-                "jette au sol"
-            ],
-            parametres: [
-                "direction",
-                "distance"
-            ]
-        },
-
-        repousser: {
-            nom: "Repousser",
-            aliases: [
-                "repousse",
-                "repousser",
-                "pousse"
-            ],
-            parametres: [
-                "direction",
-                "distance"
-            ]
-        }
-    }
-};
-        
                     
 //================================================
 // 🔎 NORMALISATION
