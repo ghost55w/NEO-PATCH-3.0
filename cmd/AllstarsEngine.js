@@ -153,6 +153,25 @@ function normalizeName(str = "") {
         .trim();
 }
 
+function determinerPorteeAttaque(action) {
+
+    if (
+        action.groupe === "mains"
+    ) {
+        return 0.5;
+    }
+
+
+    if (
+        action.groupe === "pieds"
+    ) {
+        return 1;
+    }
+
+
+    return null;
+}
+
 //================================================
 // 🎮 ACTIONS MAP — GAMEPLAY COMPLET
 //================================================
@@ -1682,7 +1701,6 @@ function extraireParametresAction(
         contexte
     );
 
-
 //================================================
 // 📦 PARAMÈTRES
 //================================================
@@ -1692,21 +1710,36 @@ const params = {
     // Direction par défaut
     direction: null,
 
-   //================================================
-// 📏 DISTANCES COMBAT
-//================================================
 
-// Distance connue avant l'action
-distanceActuelle: null,
+    //================================================
+    // 📏 DISTANCES COMBAT
+    //================================================
 
-// Distance finale entre acteur et cible
-distance: null,
+    // Distance connue avant l'action
+    distanceActuelle: null,
 
-// Distance réellement parcourue
-distanceParcourue: 0,
+    // Distance finale entre acteur et cible
+    distance: null,
 
-// Relation demandée dans le texte
-relationDistance: null, 
+    // Distance réellement parcourue
+    distanceParcourue: 0,
+
+    // Relation demandée dans le texte
+    relationDistance: null,
+
+
+    //================================================
+    // 📏 PORTÉE DE L'ATTAQUE
+    //================================================
+
+    // Distance maximale nécessaire pour toucher
+    // Main = 0.5m | Pied = 1m
+    portee: null,
+
+
+    //================================================
+    // ⚡ VITESSE
+    //================================================
 
     // Vitesse réelle du personnage au moment de l'action
     vitesse: null,
@@ -1714,36 +1747,48 @@ relationDistance: null,
     // Vitesse maximale selon le grade
     vmax: null,
 
-    // Les personnages commencent au sol
-    // 0 = sol, puis 1m, 2m... jusqu'à 10m
+
+    //================================================
+    // 🦘 HAUTEUR
+    //================================================
+
     hauteur: 0,
 
-    // Aucun pivot ni décalage par défaut
+
+    //================================================
+    // 🔄 ROTATION / ENGAGEMENT
+    //================================================
+
     angle: 0,
 
-    // Côté d'engagement pour les techniques circulaires
     coteEngagement: null,
 
-    // Main utilisée : gauche / droite
+
+    //================================================
+    // ✊🦶 ARMES CORPORELLES
+    //================================================
+
     main: null,
 
-    // Partie de la main utilisée
     partieMain: null,
 
-    // Pied utilisé : gauche / droite
     pied: null,
 
-    // Partie du pied utilisée
     partiePied: null,
 
-    // Genou utilisé si nécessaire
     genou: null,
 
-    // Zone du corps adverse visée
+
+    //================================================
+    // 🎯 CIBLE
+    //================================================
+
     zoneVisee: null,
+
 
     // Type de mouvement
     mouvement: null,
+
 
     // Gestion des pivots
     pivot: {
@@ -1751,10 +1796,10 @@ relationDistance: null,
         sens: null
     },
 
+
     // Personnage ciblé
     cible: null
 };
-
 
     //================================================
     // 🏃 MOUVEMENT
@@ -2140,7 +2185,23 @@ else if (
             contexte
         );
 
+//================================================
+// 📏 DÉTERMINATION DE LA PORTÉE
+//================================================
 
+if (
+    action.groupe === "mains"
+) {
+
+    params.portee = 0.5;
+}
+
+else if (
+    action.groupe === "pieds"
+) {
+
+    params.portee = 1;
+}
     //================================================
     // 🦵 GENOU
     //================================================
