@@ -1770,7 +1770,7 @@ const params = {
 
     main: null,
 
-    partieMain: null,
+    partieMain: null, 
 
     pied: null,
 
@@ -2167,23 +2167,35 @@ else if (
 
 
     //================================================
-    // ✊ MAIN
-    //================================================
+// ✊ MAIN
+//================================================
 
-    params.main =
-        extraireMain(
-            contexte
-        );
+params.main =
+    extraireMain(
+        contexte
+    );
 
 
-    //================================================
-    // 🦶 PIED
-    //================================================
+params.partieMain =
+    extrairePartieMain(
+        contexte
+    );
 
-    params.pied =
-        extrairePied(
-            contexte
-        );
+
+//================================================
+// 🦶 PIED
+//================================================
+
+params.pied =
+    extrairePied(
+        contexte
+    );
+
+
+params.partiePied =
+    extrairePartiePied(
+        contexte
+    );
 
 //================================================
 // 📏 DÉTERMINATION DE LA PORTÉE
@@ -2799,6 +2811,89 @@ function extrairePied(texte = "") {
 }
 
 //================================================
+// 🦶 Extraction PARTIE PIED
+//================================================
+function extrairePartiePied(t){
+
+    const parties = [
+        "semelle",
+        "talon",
+        "dessus du pied",
+        "pointe",
+        "plante"
+    ];
+
+    for(const p of parties){
+
+        if(t.includes(p)){
+            return p;
+        }
+
+    }
+
+    return null;
+
+}
+
+//================================================
+// ✋ EXTRACTION PARTIE MAIN
+//================================================
+
+function extrairePartieMain(t){
+
+    const correspondances = [
+
+        {
+            mots:["coup de poing","poing","poing fermé"],
+            valeur:"poing"
+        },
+
+        {
+            mots:["phalanges"],
+            valeur:"phalanges"
+        },
+
+        {
+            mots:["paume"],
+            valeur:"paume"
+        },
+
+        {
+            mots:["tranchant de la main","tranchant"],
+            valeur:"tranchant de la main"
+        },
+
+        {
+            mots:["dos de la main"],
+            valeur:"dos de la main"
+        },
+
+        {
+            mots:["doigts","bout des doigts"],
+            valeur:"doigts"
+        }
+
+    ];
+
+
+    for(const item of correspondances){
+
+        for(const mot of item.mots){
+
+            if(t.includes(mot)){
+                return item.valeur;
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+//================================================
 // 🎯 ZONE VISÉE
 //================================================
 
@@ -2811,44 +2906,40 @@ function extraireZoneVisee(
 
     const zones = [
 
-        "pied gauche",
-        "pied droit",
+    "flanc gauche",
+    "flanc droit",
 
-        "flanc gauche",
-        "flanc droit",
+    "avant bras",
 
-        "avant bras",
+    "visage",
+    "tete",
+    "menton",
+    "machoire",
 
-        "visage",
-        "tete",
-        "menton",
-        "machoire",
+    "cou",
 
-        "cou",
+    "torse",
+    "poitrine",
 
-        "torse",
-        "poitrine",
+    "abdomen",
+    "ventre",
 
-        "abdomen",
-        "ventre",
+    "cotes",
+    "flanc",
 
-        "cotes",
-        "flanc",
+    "epaule",
 
-        "epaule",
+    "bras",
+    "coude",
+    "poignet",
 
-        "bras",
-        "coude",
-        "poignet",
-        "main",
+    "cuisse",
+    "genou",
+    "tibia",
+    "mollet",
+    "cheville"
 
-        "cuisse",
-        "genou",
-        "tibia",
-        "mollet",
-        "cheville",
-        "pied"
-    ];
+];
 
     zones.sort(
         (a, b) =>
