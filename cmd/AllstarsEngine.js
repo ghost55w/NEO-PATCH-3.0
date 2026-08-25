@@ -2257,38 +2257,60 @@ if (
 
 let cibleDetectee = null;
 
-const cibleMatch =
-    t.match(
-        /\b(?:vers|sur|contre|attaque|frappe|vise|cible)\s+([a-z0-9_()'-]+)/
-    );
 
-if (cibleMatch) {
+const patternsCible = [
 
-    const mot =
-        cibleMatch[1];
+    // vers Tobirama
+    /\b(?:vers|sur|contre|attaque|frappe|vise|cible)\s+([a-z0-9_()'-]+)/i,
 
-    //============================================
-    // 🚫 MOTS QUI NE SONT PAS DES PERSONNAGES
-    //============================================
 
-    const pronoms = [
-        "son",
-        "sa",
-        "ses",
-        "leur",
-        "leurs",
-        "lui",
-        "eux"
-    ];
+    // visage de Tobirama
+    /\b(?:visage|tête|abdomen|ventre|torse|poitrine)\s+de\s+([a-z0-9_()'-]+)/i,
 
-    if (
-        !pronoms.includes(mot)
-    ) {
 
-        cibleDetectee =
-            mot;
+    // frappe Tobirama
+    /\b(?:frappe|frapper|touche|toucher)\s+([a-z0-9_()'-]+)/i,
+
+
+    // de Tobirama après une action
+    /\bde\s+([a-z0-9_()'-]+)\b/i
+];
+
+
+
+for (const regex of patternsCible) {
+
+    const match =
+        t.match(regex);
+
+
+    if (match) {
+
+        const mot =
+            match[1];
+
+
+        const pronoms = [
+            "son",
+            "sa",
+            "ses",
+            "leur",
+            "leurs",
+            "lui",
+            "eux"
+        ];
+
+
+        if (!pronoms.includes(mot)) {
+
+            cibleDetectee = mot;
+            break;
+
+        }
+
     }
 }
+
 
 
 //================================================
@@ -2304,7 +2326,9 @@ if (
         normaliserAction(
             action.cible
         );
+
 }
+
 
 
 //================================================
@@ -2315,9 +2339,6 @@ params.cible =
     cibleDetectee;
 
 
-//================================================
-// 📋 DEBUG
-//================================================
 
 console.log(
     "🎯 CIBLE DÉTECTÉE :",
