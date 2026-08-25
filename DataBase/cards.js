@@ -17,7 +17,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/amfh8w.jpg",
   Price: "600K",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -28,7 +28,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/5vqryh.jpg",
   Price: "400K",
-  specs: "force:, speed:, attacks:",
+  specs: "force:1, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -39,7 +39,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/dy20sv.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
+  specs: "force:3, speed:1, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -50,7 +50,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/2mbwpb.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:2, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -61,7 +61,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/qgrflk.jpg",
   Price: "800K",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -123,7 +123,7 @@ const cards = [
 {
   name: "Android17(Dbz)",
   grade: "Argent",
-  category: "SS Mega",
+  category: "SS mega",
   images: "",
   card: "https://files.catbox.moe/hohfci.jpg",
   Price: "200nc",
@@ -156,7 +156,7 @@ const cards = [
 {
   name: "Android19",
   grade: "Bronze",
-  category: "SS+",
+  category: "SS+ ultimate",
   images: "",
   card: "https://files.catbox.moe/1lao5m.jpg",
   Price: "90nc",
