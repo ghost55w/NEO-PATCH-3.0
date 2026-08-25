@@ -1760,8 +1760,6 @@ module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
     lancerMatchAllStars,
-    AnalysePaveMatch,
-    genererResultatAnalysePave,
     duelsEnCours,
     matchAttente,
     lancerTimerTour
