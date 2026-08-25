@@ -28,7 +28,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/5vqryh.jpg",
   Price: "400K",
-  specs: "force:1, speed:1, attacks:2",
+  specs: "force:1, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -39,7 +39,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/dy20sv.jpg",
   Price: "1M",
-  specs: "force:3, speed:1, attacks:3",
+  specs: "force:3, speed:0, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -50,7 +50,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/2mbwpb.jpg",
   Price: "1M",
-  specs: "force:3, speed:2, attacks:4",
+  specs: "force:3, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -61,7 +61,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/qgrflk.jpg",
   Price: "800K",
-  specs: "force:2, speed:1, attacks:3",
+  specs: "force:2, speed:0, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -72,7 +72,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/o8waf7.jpg",
   Price: "450K",
-  specs: "force:2, speed:2, attacks:2",
+  specs: "force:2, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -83,7 +83,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/nvdw2s.jpg",
   Price: "1M",
-  specs: "force:3, speed:2, attacks:4",
+  specs: "force:3, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -94,7 +94,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/u18ovi.jpg",
   Price: "1M",
-  specs: "force:3, speed:2, attacks:3",
+  specs: "force:3, speed:0, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -105,7 +105,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/3x7bn9.jpg",
   Price: "1M",
-  specs: "force:3, speed:2, attacks:3",
+  specs: "force:3, speed:0, attacks:3",
   Moves: "",
   Patterns: ""
 }, 
@@ -116,7 +116,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/tt79m2.jpg",
   Price: "100nc",
-  specs: "force:4, speed:2, attacks:4",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -127,7 +127,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/hohfci.jpg",
   Price: "200nc",
-  specs: "force:4, speed:2, attacks:",
+  specs: "force:4, speed:1, attacks:",
   Moves: "",
   Patterns: ""
 },
@@ -138,7 +138,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/4bl67g.jpg",
   Price: "420nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -149,7 +149,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/b7neim.jpg",
   Price: "190nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -160,7 +160,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/1lao5m.jpg",
   Price: "90nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -171,7 +171,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/0rocs7.jpg",
   Price: "350k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:1",
   Moves: "",
   Patterns: ""
 },
@@ -182,7 +182,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/dhy54u.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:0, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -193,7 +193,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/fairbf.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -204,7 +204,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/tjsj81.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -215,7 +215,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/2cd5ht.jpg",
   Price: "450k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:3, speed:1, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -226,7 +226,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/e9h4s7.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:1, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -237,7 +237,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/ihy73q.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -248,7 +248,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/wgv1t5.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -259,7 +259,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/ahxz48.jpg",
   Price: "310nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -270,7 +270,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/gz77gh.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -281,7 +281,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/pidi5o.jpg",
   Price: "110nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -292,7 +292,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/yis1od.jpg",
   Price: "450k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -303,7 +303,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/y9cgpo.jpg",
   Price: "530nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:6, speed:1, attacks:6",
   Moves: "",
   Patterns: ""
 },
@@ -314,7 +314,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/8qo8yi.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
+  specs: "force:3, speed:0, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -325,7 +325,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/un7c3l.jpg",
   Price: "460nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -336,7 +336,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/q3qznx.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:1, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -347,7 +347,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/ck3vpk.jpg",
   Price: "120nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -358,7 +358,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/bokgxn.jpg",
   Price: "700k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -369,7 +369,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/ofoqc5.jpg",
   Price: "2M",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:3",
   Moves: "",
   Patterns: ""
 },
@@ -380,7 +380,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/ayb8n5.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:2, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -391,7 +391,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/8qzmzr.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:1, speed:1, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -402,7 +402,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/au0pd6.jpg",
   Price: "300nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:5, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
@@ -413,7 +413,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/2qvkfx.jpg",
   Price: "480nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:5, speed:1, attacks:5",
   Moves: "",
   Patterns: ""
 },
@@ -424,7 +424,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/kf359g.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
+  specs: "force:1, speed:0, attacks:2",
   Moves: "",
   Patterns: ""
 },
@@ -435,7 +435,7 @@ const cards = [
   images: "",
   card: "https://files.catbox.moe/2tbn9y.jpg",
   Price: "340nc",
-  specs: "force:, speed:, attacks:",
+  specs: "force:4, speed:1, attacks:4",
   Moves: "",
   Patterns: ""
 },
