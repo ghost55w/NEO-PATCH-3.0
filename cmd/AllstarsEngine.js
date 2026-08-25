@@ -198,7 +198,36 @@ const PORTEE_PIED = 1.0;
 // Tolérance pour éviter les erreurs de décimales
 const TOLERANCE_DISTANCE = 0.01;
 
-    
+ //================= RECHERCHE FICHE PAR PSEUDO =================
+async function getFicheByPseudo(pseudo) {
+
+    const fiches = await getAllFiches();
+
+    // 1️⃣ Correspondance exacte d'abord
+    let fiche = fiches.find(f => f.pseudo === pseudo);
+
+    if (fiche) return fiche;
+
+    // 2️⃣ Correspondance insensible à la casse
+    fiche = fiches.find(f =>
+        String(f.pseudo).toLowerCase() === String(pseudo).toLowerCase()
+    );
+
+    if (fiche) return fiche;
+
+    // 3️⃣ En dernier seulement, version normalisée
+    const candidats = fiches.filter(f =>
+        normalizeName(f.pseudo) === normalizeName(pseudo)
+    );
+
+    // Si plusieurs fiches correspondent, on privilégie celle qui possède un JID
+    return candidats.find(f => f.jid && f.jid !== "aucun") || candidats[0];
+}
+
+function randomImage(list) {
+    return list[Math.floor(Math.random() * list.length)];
+}
+   
                 
 //================================================
 // 🏟️ ARENES
