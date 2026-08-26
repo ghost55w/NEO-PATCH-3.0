@@ -12,13 +12,11 @@ const cards = [
         speed: 3,
         attacks: 3
     },
-
     Moves: {
         basic: [],
         special: [],
         ultime: []
     },
-
     Patterns: []
 }, 
 {
@@ -34,13 +32,11 @@ const cards = [
         speed: 3,
         attacks: 3
     },
-
     Moves: {
         basic: [],
         special: [],
         ultime: []
     },
-
     Patterns: []
 },
 {
@@ -56,13 +52,11 @@ const cards = [
         speed: 2,
         attacks: 2
     },
-
     Moves: {
         basic: [],
         special: [],
         ultime: []
     },
-
     Patterns: []
 }, 
 {
@@ -78,7 +72,6 @@ const cards = [
         speed: 4,
         attacks: 3
     },
-
     Moves: {
         basic: [],
         special: [],
@@ -100,7 +93,6 @@ const cards = [
         speed: 4,
         attacks: 4
     },
-
     Moves: {
         basic: [],
         special: [],
@@ -122,13 +114,11 @@ const cards = [
         speed: 2,
         attacks: 3
     },
-
     Moves: {
         basic: [],
         special: [],
         ultime: []
     },
-
     Patterns: []
 }, 
 {
@@ -144,13 +134,11 @@ const cards = [
         speed: 2,
         attacks: 2
     },
-
     Moves: {
         basic: [],
         special: [],
         ultime: []
     },
-
     Patterns: []
 }, 
 {
@@ -159,109 +147,225 @@ const cards = [
   category: "S-",
   images: "",
   card: "https://files.catbox.moe/nvdw2s.jpg",
+{
+  name: "Akaza",
+  grade: "Bronze",
+  rarete: "Ultra UL",
+  category: "S+",
+  images: [],
+  card: "https://files.catbox.moe/o8waf7.jpg",
+  Price: "450K",
+  specs: {
+    force: 3,
+    speed: 2,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
+{
+  name: "Aldebaran",
+  grade: "Or",
+  rarete: "",
+  category: "S-",
+  images: [],
+  card: "https://files.catbox.moe/nvdw2s.jpg",
   Price: "1M",
-  specs: "force:3, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 3,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "AllForOne",
   grade: "Or",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/u18ovi.jpg",
   Price: "1M",
-  specs: "force:3, speed:0, attacks:3",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 3,
+    speed: 1,
+    attacks: 3
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "AllMight",
   grade: "Or",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/3x7bn9.jpg",
   Price: "1M",
-  specs: "force:3, speed:0, attacks:3",
-  Moves: "",
-  Patterns: ""
-}, 
+  specs: {
+    force: 3,
+    speed: 1,
+    attacks: 3
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
 {
   name: "Android16",
   grade: "Bronze",
+  rarete: "",
   category: "SS+ ultimate",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/tt79m2.jpg",
   Price: "100nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Android17(Dbz)",
   grade: "Argent",
+  rarete: "Legends LE",
   category: "SS mega",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/hohfci.jpg",
   Price: "200nc",
-  specs: "force:4, speed:1, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Android17(Dbs)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/4bl67g.jpg",
   Price: "420nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Android18",
   grade: "Argent",
+  rarete: "",
   category: "SS super",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/b7neim.jpg",
   Price: "190nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Android19",
   grade: "Bronze",
+  rarete: "",
   category: "SS+ ultimate",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/1lao5m.jpg",
   Price: "90nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Aoi",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/0rocs7.jpg",
   Price: "350k",
-  specs: "force:2, speed:1, attacks:1",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Aokiji",
   grade: "Argent",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/dhy54u.jpg",
   Price: "800k",
-  specs: "force:2, speed:0, attacks:3",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 3
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Aphrodite",
