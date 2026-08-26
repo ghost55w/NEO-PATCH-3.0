@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { ovlcmd } = require("../lib/ovlcmd");
 
 const {
@@ -11,6 +12,77 @@ const { AllStarsDivsFiche } = require("../DataBase/allstars_divs_fiches");
 const { cards } = require("../DataBase/cards");
 const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
+
+//================================================
+// 🤖 APPEL GEMINI
+//================================================
+
+async function appelerGemini(prompt) {
+
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        throw new Error(
+            "❌ GEMINI_API_KEY n'est pas configurée sur Render"
+        );
+    }
+
+    const url =
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+        apiKey;
+
+    try {
+
+        const response = await axios.post(
+            url,
+            {
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    temperature: 0,
+                    responseMimeType: "application/json"
+                }
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const texte =
+            response.data
+                ?.candidates?.[0]
+                ?.content?.parts?.[0]
+                ?.text;
+
+        if (!texte) {
+            throw new Error(
+                "❌ Gemini n'a renvoyé aucune réponse"
+            );
+        }
+
+        return JSON.parse(texte);
+
+    } catch (error) {
+
+        console.error(
+            "❌ ERREUR GEMINI :",
+            error.response?.data ||
+            error.message
+        );
+
+        throw error;
+    }
+}
+
 
 //-------- UTILITAIRES
 const formatNumber = n => {
