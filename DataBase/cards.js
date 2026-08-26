@@ -1367,291 +1367,537 @@ const cards = [
   },
   Patterns: []
 },  
-  {
+ {
   name: "Deepa",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/epjakr.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Deidara",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/m0wm1s.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "DekuRogueHero",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/z5hzqb.jpg",
   Price: "700k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Deku",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/oh99hl.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Delta",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/h68hzb.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Denki",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/xerqh0.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Diavolo",
   grade: "Argent",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/yw5xb8.jpg",
   Price: "900k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Dio",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/32pw7w.jpg",
   Price: "900k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-},
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+}, 
 {
   name: "Doflamingo",
   grade: "Argent",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/v126vu.jpg",
   Price: "550k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Doma",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/4xdikn.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Dr.Gero",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/glg41l.jpg",
   Price: "600k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Dyspo",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/tr27u0.jpg",
   Price: "400nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Edward",
   grade: "Argent",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/q5bapo.jpg",
   Price: "1m200k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Eida",
   grade: "Or",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/5tx64p.jpg",
   Price: "1m800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Eijiro",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ljz7bk.jpg.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Endeavor",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/qcunun.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Enmu",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/x4hsa6.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Erza",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/otsr2e.jpg",
   Price: "450k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-}, 
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
 {
   name: "FlashyFlash",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/git5xh.jpg",
   Price: "700k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Franky",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/t46wfj.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Frieza(super)",
   grade: "Argent",
+  rarete: "",
   category: "SS",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/l97ml8.jpg",
   Price: "160nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: null,
+    speed: null,
+    attacks: null
+  },
+
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+
+  Patterns: []
 },
 {
   name: "Frieza(Base)",
   grade: "Bronze",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/i84paz.jpg",
   Price: "150nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: null,
+    speed: null,
+    attacks: null
+  },
+
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+
+  Patterns: []
 },
 {
   name: "Frieza(Golden)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/dptorv.jpg",
   Price: "420nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: null,
+    speed: null,
+    attacks: null
+  },
+
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+
+  Patterns: []
 },
 {
   name: "Fuegoleon",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/2ocv94.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: null,
+    speed: null,
+    attacks: null
+  },
+
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+
+  Patterns: []
 },
 {
   name: "Fujitora",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/fslosy.jpg",
   Price: "700k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: null,
+    speed: null,
+    attacks: null
+  },
+
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+
+  Patterns: []
 },
 {
   name: "Fumikage",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/mucucs.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: null,
+    speed: null,
+    attacks: null
+  },
+
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+
+  Patterns: []
 },
 {
   name: "Gaara(4GG)",
