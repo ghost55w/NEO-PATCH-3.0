@@ -83,6 +83,410 @@ async function appelerGemini(prompt) {
     }
 }
 
+//================================================
+// 🤖 ANALYSE PAVÉ AVEC GEMINI
+//================================================
+
+async function analysePaveAvecGemini(message, contexteMatch = {}) {
+
+    try {
+
+        //================================================
+        // 1️⃣ RÉCUPÉRATION DU TEXTE
+        //================================================
+
+        const texte =
+            typeof message === "string"
+                ? message
+                : message?.body ||
+                  message?.text ||
+                  message?.message?.conversation ||
+                  "";
+
+        if (!texte) {
+            return {
+                ok: false,
+                paveDetecte: false,
+                erreur: "Message vide"
+            };
+        }
+
+
+        //================================================
+        // 2️⃣ DÉTECTION DU PAVÉ
+        //================================================
+
+        const marqueurDebut =
+            "░▒░ RAZORX⚡™ | 🪀GAMING 🎮░▒░";
+
+        const marqueurActions =
+            "🌀🎮:";
+
+        const marqueurFin =
+            "░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░";
+
+
+        const estPave =
+            texte.includes(marqueurDebut) &&
+            texte.includes(marqueurActions) &&
+            texte.includes(marqueurFin);
+
+
+        if (!estPave) {
+
+            return {
+                ok: true,
+                paveDetecte: false
+            };
+
+        }
+
+
+        //================================================
+        // 3️⃣ RÉCUPÉRATION DE L'AUTEUR
+        //================================================
+
+        const user =
+            message?.sender ||
+            message?.participant ||
+            message?.key?.participant ||
+            message?.key?.remoteJid ||
+            contexteMatch?.user ||
+            null;
+
+
+        //================================================
+        // 4️⃣ EXTRACTION DU CONTENU APRÈS 🌀🎮:
+        //================================================
+
+        const positionActions =
+            texte.indexOf(marqueurActions);
+
+        if (positionActions === -1) {
+
+            return {
+                ok: false,
+                paveDetecte: true,
+                user,
+                erreur: "Marqueur 🌀🎮: introuvable"
+            };
+
+        }
+
+
+        let actionsTexte =
+            texte
+                .slice(
+                    positionActions +
+                    marqueurActions.length
+                )
+                .split(marqueurFin)[0]
+                .trim();
+
+
+        if (!actionsTexte) {
+
+            return {
+                ok: false,
+                paveDetecte: true,
+                user,
+                erreur: "Aucune action trouvée après 🌀🎮:"
+            };
+
+        }
+
+
+        //================================================
+        // 5️⃣ PROMPT GEMINI
+        //================================================
+
+        const prompt = `
+
+TU ES L'ARBITRE OFFICIEL DU JEU JUMP BATTLE ARENA.
+
+Tu dois analyser exclusivement le pavé d'action fourni.
+
+NE DOIS JAMAIS INVENTER une information absente du pavé.
+
+================================================
+RÈGLES GÉNÉRALES
+================================================
+
+1. Le pavé doit contenir des actions de combat.
+
+2. Tu dois identifier et compter les actions
+   réellement effectuées par le joueur.
+
+3. Un pavé peut contenir au maximum 4 actions.
+
+4. Si le pavé contient plus de 4 actions :
+   - le pavé est REFUSÉ ;
+   - indique clairement que la limite de 4 actions
+     est dépassée.
+
+5. Analyse les actions dans leur ordre chronologique.
+
+6. Vérifie la cohérence entre les actions.
+
+7. Une action dont les informations obligatoires
+   sont absentes doit être refusée.
+
+8. Tu dois respecter strictement les règles techniques
+   fournies par le système de combat.
+
+================================================
+RÈGLES DE VITESSE
+================================================
+
+Bronze = 6 m/s
+Argent = 8 m/s
+Or = 10 m/s
+
+Un joueur ne peut pas parcourir plus de 10 mètres
+sans action intermédiaire.
+
+================================================
+RÈGLES DES FRAPPES
+================================================
+
+Pour une frappe de poing :
+
+- le membre utilisé doit être identifiable ;
+- la zone visée doit être identifiable.
+
+Pour une frappe de pied :
+
+- le pied utilisé doit être identifiable ;
+- la surface utilisée doit être identifiable ;
+- la zone visée doit être identifiable.
+
+Si une information obligatoire manque,
+la frappe est invalide.
+
+================================================
+MISSION
+================================================
+
+Tu dois :
+
+1. compter les actions ;
+2. vérifier que le nombre est <= 4 ;
+3. identifier chaque action ;
+4. analyser chaque action ;
+5. vérifier les règles ;
+6. déterminer si le pavé est valide ;
+7. attribuer une note sur 10 ;
+8. produire un résumé narratif court des actions validées ;
+9. déterminer le joueur suivant à partir du contexte du match ;
+10. si le pavé est invalide, expliquer précisément pourquoi.
+
+================================================
+CONTEXTE DU MATCH
+================================================
+
+${JSON.stringify(contexteMatch, null, 2)}
+
+================================================
+PAVÉ À ANALYSER
+================================================
+
+${actionsTexte}
+
+================================================
+FORMAT DE RÉPONSE OBLIGATOIRE
+================================================
+
+Réponds UNIQUEMENT avec un JSON valide.
+
+{
+    "paveValide": true,
+    "nombreActions": 0,
+    "actions": [
+        {
+            "ordre": 1,
+            "acteur": "",
+            "cible": "",
+            "type": "",
+            "description": "",
+            "valide": true,
+            "raison": ""
+        }
+    ],
+    "note": 0,
+    "verdict": "",
+    "resume": "",
+    "joueurSuivant": {
+        "nom": "",
+        "jid": ""
+    },
+    "consequences": {
+        "touche": false,
+        "contre": false,
+        "mauvaisContre": false,
+        "degats": 0,
+        "effets": []
+    },
+    "erreurs": []
+}
+
+RÈGLE IMPORTANTE :
+Ne retourne aucun Markdown.
+Ne retourne aucun texte avant ou après le JSON.
+`;
+
+
+        //================================================
+        // 6️⃣ APPEL GEMINI
+        //================================================
+
+        const apiKey =
+            process.env.GEMINI_API_KEY;
+
+        if (!apiKey) {
+
+            throw new Error(
+                "GEMINI_API_KEY manquante dans Render"
+            );
+
+        }
+
+
+        const url =
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+            apiKey;
+
+
+        const response =
+            await axios.post(
+                url,
+                {
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: prompt
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0,
+                        responseMimeType: "application/json"
+                    }
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    timeout: 30000
+                }
+            );
+
+
+        //================================================
+        // 7️⃣ EXTRACTION DE LA RÉPONSE
+        //================================================
+
+        let resultatTexte =
+            response
+                ?.data
+                ?.candidates?.[0]
+                ?.content
+                ?.parts?.[0]
+                ?.text;
+
+
+        if (!resultatTexte) {
+
+            throw new Error(
+                "Gemini n'a retourné aucune réponse"
+            );
+
+        }
+
+
+        resultatTexte =
+            resultatTexte
+                .replace(/^```json\s*/i, "")
+                .replace(/^```\s*/i, "")
+                .replace(/\s*```$/i, "")
+                .trim();
+
+
+        //================================================
+        // 8️⃣ PARSE JSON
+        //================================================
+
+        let resultat;
+
+        try {
+
+            resultat =
+                JSON.parse(resultatTexte);
+
+        } catch (e) {
+
+            console.error(
+                "❌ JSON GEMINI INVALIDE :",
+                resultatTexte
+            );
+
+            return {
+                ok: false,
+                paveDetecte: true,
+                user,
+                actionsTexte,
+                erreur: "Réponse Gemini invalide"
+            };
+
+        }
+
+
+        //================================================
+        // 9️⃣ RETOUR FINAL
+        //================================================
+
+        return {
+
+            ok: true,
+
+            paveDetecte: true,
+
+            user,
+
+            actionsTexte,
+
+            ...resultat
+
+        };
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ ERREUR analysePaveAvecGemini :",
+            error?.response?.data ||
+            error?.message ||
+            error
+        );
+
+        return {
+
+            ok: false,
+
+            paveDetecte: false,
+
+            erreur:
+                error?.response?.data?.error?.message ||
+                error?.message ||
+                "Erreur inconnue Gemini"
+
+        };
+
+    }
+
+}
+
 
 //-------- UTILITAIRES
 const formatNumber = n => {
