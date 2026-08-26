@@ -255,41 +255,81 @@ if (matchId) {
 
         if (joueur) {
 
-//============================================
-// 🎮 VÉRIFIER QUE C'EST UN PAVÉ DE JEU
-//============================================
+            //============================================
+            // 🎮 VÉRIFIER QUE C'EST UN PAVÉ DE JEU
+            //============================================
 
-const estPaveJeu =
-    texte.includes("🌀🎮") ||
-    texte.includes("🎮🌀");
+            const estPaveJeu =
+                texte.includes("🌀🎮") ||
+                texte.includes("🎮🌀");
 
-if (!estPaveJeu) {
-    return;
+            if (!estPaveJeu) {
+                return;
+            }
+
+            //============================================
+            // 🤖 ANALYSE AVEC GEMINI
+            //============================================
+
+            const resultatGemini =
+                await analysePaveAvecGemini(
+                    texte,
+                    {
+                        user: auteur_Message,
+                        joueur,
+                        match
+                    }
+                );
+
+            //============================================
+            // 🚫 PAVÉ NON DÉTECTÉ
+            //============================================
+
+            if (!resultatGemini?.paveDetecte) {
+                return;
+            }
+
+            //============================================
+            // 🧠 DEBUG GEMINI
+            //============================================
+
+            console.log(
+                "🤖 GEMINI — PAVÉ DÉTECTÉ"
+            );
+
+            console.log(
+                "👤 Auteur :",
+                auteur_Message
+            );
+
+            console.log(
+                "🌀 Actions :",
+                resultatGemini.nombreActions
+            );
+
+            console.log(
+                "📊 Note :",
+                resultatGemini.note
+            );
+
+            console.log(
+                "⚖️ Verdict :",
+                resultatGemini.verdict
+            );
+
+            console.log(
+                "🤖 Résultat complet :",
+                JSON.stringify(
+                    resultatGemini,
+                    null,
+                    2
+                )
+            );
+
+        }
+    }
 }
-           
-//================================================
-// 🔥 CHANGEMENT RÉEL DU TOUR
-//================================================
-
-match.joueurActif =
-    prochainJoueur;
-
-match.joueurActifJid =
-    prochainJoueur.jid;
-
-console.log(
-    "🔄 TOUR CHANGÉ :",
-    prochainJoueur.pseudo,
-    "| JID :",
-    prochainJoueur.jid
-);
-
-console.log(
-    "🎮 PHASE ACTUELLE :",
-    match.phase
-);
-
-
+    
 //================================================
 // ⏱️ RELANCER LE TIMER
 //================================================
