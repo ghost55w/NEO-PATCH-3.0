@@ -508,7 +508,7 @@ const cards = [
 {
   name: "Bakugo",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "My Hero Academia",
   images: [],
@@ -516,7 +516,7 @@ const cards = [
   Price: "300k",
   specs: {
     force: 2,
-    speed: 1,
+    speed: 2,
     attacks: 2
   },
   Moves: {
@@ -529,7 +529,7 @@ const cards = [
 {
   name: "Bardock",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS- super",
   univers: "Dragon Ball",
   images: [],
@@ -537,7 +537,7 @@ const cards = [
   Price: "110nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 4,
     attacks: 4
   },
   Moves: {
@@ -550,7 +550,7 @@ const cards = [
 {
   name: "Bang",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S+",
   univers: "One Punch Man",
   images: [],
@@ -558,7 +558,7 @@ const cards = [
   Price: "450k",
   specs: {
     force: 2,
-    speed: 1,
+    speed: 2,
     attacks: 2
   },
   Moves: {
@@ -571,7 +571,7 @@ const cards = [
 {
   name: "Beerus",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS+ ultimate",
   univers: "Dragon Ball",
   images: [],
@@ -579,7 +579,7 @@ const cards = [
   Price: "530nc",
   specs: {
     force: 6,
-    speed: 1,
+    speed: 6,
     attacks: 6
   },
   Moves: {
@@ -592,7 +592,7 @@ const cards = [
 {
   name: "Bigmom",
   grade: "Argent",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S-",
   univers: "One Piece",
   images: [],
@@ -613,16 +613,16 @@ const cards = [
 {
   name: "BlackGoku",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS+ super",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/un7c3l.jpg",
   Price: "460nc",
   specs: {
-    force: 4,
-    speed: 1,
-    attacks: 4
+    force: 5,
+    speed: 5,
+    attacks: 5
   },
   Moves: {
     basic: [],
@@ -634,7 +634,7 @@ const cards = [
 {
   name: "Blizzard",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "One Punch Man",
   images: [],
@@ -655,7 +655,7 @@ const cards = [
 {
   name: "Bojack",
   grade: "Argent",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS-",
   univers: "Dragon Ball",
   images: [],
@@ -663,7 +663,7 @@ const cards = [
   Price: "120nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 4,
     attacks: 4
   },
   Moves: {
@@ -676,15 +676,15 @@ const cards = [
 {
   name: "Boro",
   grade: "Argent",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
-  univers: "Naruto",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/bokgxn.jpg",
   Price: "700k",
   specs: {
     force: 2,
-    speed: 1,
+    speed: 2,
     attacks: 2
   },
   Moves: {
@@ -697,7 +697,7 @@ const cards = [
 {
   name: "Boros",
   grade: "Or",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S+ ultimate",
   univers: "One Punch Man",
   images: [],
@@ -705,8 +705,8 @@ const cards = [
   Price: "2M",
   specs: {
     force: 4,
-    speed: 1,
-    attacks: 3
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -718,7 +718,7 @@ const cards = [
 {
   name: "Borushiki",
   grade: "Argent",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S+",
   univers: "Boruto",
   images: [],
@@ -726,7 +726,7 @@ const cards = [
   Price: "800k",
   specs: {
     force: 2,
-    speed: 1,
+    speed: 3,
     attacks: 2
   },
   Moves: {
@@ -739,15 +739,15 @@ const cards = [
 {
   name: "Boruto",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/8qzmzr.jpg",
   Price: "300k",
   specs: {
-    force: 1,
-    speed: 1,
+    force: 2,
+    speed: 2,
     attacks: 2
   },
   Moves: {
@@ -760,7 +760,7 @@ const cards = [
 {
   name: "Broly",
   grade: "Argent",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS+ Extreme",
   univers: "Dragon Ball",
   images: [],
@@ -768,8 +768,8 @@ const cards = [
   Price: "300nc",
   specs: {
     force: 5,
-    speed: 1,
-    attacks: 4
+    speed: 4,
+    attacks: 5
   },
   Moves: {
     basic: [],
@@ -781,7 +781,7 @@ const cards = [
 {
   name: "Broly(Dbs)",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS+ Super",
   univers: "Dragon Ball",
   images: [],
@@ -789,7 +789,7 @@ const cards = [
   Price: "480nc",
   specs: {
     force: 5,
-    speed: 1,
+    speed: 5,
     attacks: 5
   },
   Moves: {
@@ -802,7 +802,7 @@ const cards = [
 {
   name: "Brooks",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "One Piece",
   images: [],
@@ -823,7 +823,7 @@ const cards = [
 {
   name: "Buhan",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS",
   univers: "Dragon Ball",
   images: [],
@@ -831,8 +831,8 @@ const cards = [
   Price: "340nc",
   specs: {
     force: 4,
-    speed: 1,
-    attacks: 4
+    speed: 4,
+    attacks: 5
   },
   Moves: {
     basic: [],
@@ -844,16 +844,16 @@ const cards = [
 {
   name: "Burter",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS+",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/jkx88l.jpg",
   Price: "90nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 3
   },
   Moves: {
     basic: [],
@@ -865,16 +865,16 @@ const cards = [
 {
   name: "Super Buu",
   grade: "Or",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS- Super",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/5lfqpz.jpg",
   Price: "310nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -886,16 +886,16 @@ const cards = [
 {
   name: "Fat Buu",
   grade: "Or",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS-",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/xnl4el.jpg",
   Price: "300nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -907,16 +907,16 @@ const cards = [
 {
   name: "Kid Buu",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS- Super",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/bb2e50.jpg",
   Price: "360nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -928,16 +928,16 @@ const cards = [
 {
   name: "Buutenks",
   grade: "Or",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "SS- ultimate",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/1gcugi.jpg",
   Price: "320nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -949,16 +949,16 @@ const cards = [
 {
   name: "Cabba",
   grade: "Bronze",
-  rarete: "",
-  category: "S+",
+  rarete: "Sparking SP",
+  category: "SS+ Ultimate",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/rkdbjj.jpg",
   Price: "130nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 3,
+    speed: 4,
+    attacks: 3
   },
   Moves: {
     basic: [],
@@ -970,16 +970,16 @@ const cards = [
 {
   name: "Caufila",
   grade: "Argent",
-  rarete: "",
-  category: "SS",
+  rarete: "Sparking SP",
+  category: "SS- super",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/36yixr.jpg",
   Price: "200nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 3,
+    attacks: 3
   },
   Moves: {
     basic: [],
@@ -991,16 +991,16 @@ const cards = [
 {
   name: "Cell perfect",
   grade: "Argent",
-  rarete: "",
-  category: "SS+",
+  rarete: "Legends LE",
+  category: "SS+ Ultimate",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/3vv40w.jpg",
   Price: "280nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -1012,16 +1012,16 @@ const cards = [
 {
   name: "Cell super",
   grade: "Argent",
-  rarete: "",
-  category: "SS",
+  rarete: "Sparking SP",
+  category: "SS Extreme",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/6mi2yw.jpg",
   Price: "210nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -1033,16 +1033,16 @@ const cards = [
 {
   name: "Cell",
   grade: "Bronze",
-  rarete: "",
-  category: "SS+",
+  rarete: "Sparking SP",
+  category: "SS+ Ultimate",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/xsh1ot.jpg",
   Price: "100nc",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 4,
+    speed: 4,
+    attacks: 3
   },
   Moves: {
     basic: [],
@@ -1054,16 +1054,16 @@ const cards = [
 {
   name: "Chiyo",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/5m69a3.jpg",
   Price: "100k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 1,
+    speed: 1,
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -1075,16 +1075,16 @@ const cards = [
 {
   name: "Choji",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/caghzt.jpg",
   Price: "100k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 2,
+    speed: 1,
+    attacks: 2
   },
   Moves: {
     basic: [],
@@ -1096,16 +1096,16 @@ const cards = [
 {
   name: "Choso",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "Jujutsu Kaisen",
   images: [],
   card: "https://files.catbox.moe/ww982g.jpg",
   Price: "300k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 2,
+    speed: 1,
+    attacks: 2
   },
   Moves: {
     basic: [],
@@ -1117,16 +1117,16 @@ const cards = [
 {
   name: "Chrollo",
   grade: "Argent",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S+",
   univers: "Hunter x Hunter",
   images: [],
   card: "https://files.catbox.moe/jpuv9q.jpg",
   Price: "500k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 1,
+    speed: 2,
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -1138,16 +1138,16 @@ const cards = [
 {
   name: "Code",
   grade: "Argent",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S+",
   univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/bhq7oh.jpg",
   Price: "500k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 2,
+    speed: 2,
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -1159,16 +1159,16 @@ const cards = [
 {
   name: "Code(TBV)",
   grade: "Or",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S",
   univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/3vhh0l.jpg",
   Price: "1m200k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 2,
+    speed: 3,
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -1180,16 +1180,16 @@ const cards = [
 {
   name: "Crocodile",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S+",
   univers: "One Piece",
   images: [],
   card: "https://files.catbox.moe/s8yttz.jpg",
   Price: "400k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 2,
+    speed: 1,
+    attacks: 2
   },
   Moves: {
     basic: [],
