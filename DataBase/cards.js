@@ -884,7 +884,6 @@ const cards = [
   Patterns: []
 },
 {
-{
   name: "Burter",
   grade: "Bronze",
   rarete: "",
