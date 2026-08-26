@@ -2,80 +2,157 @@ const cards = [
 {
   name: "3rdRaikage",
   grade: "Argent",
+  rarete: "Sparking SP",
   category: "S",
-  images: "",
+  images: [], 
   card: "https://files.catbox.moe/7c3pgw.jpg",
   Price: "800K",
-  specs: "force:2, speed:1, attacks:3",
-  Moves: "",
-  Patterns: ""
-},
+  specs: {
+        force: 3,
+        speed: 3,
+        attacks: 3
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
+}, 
 {
   name: "A",
   grade: "Argent",
+  rarete: "Sparking SP",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/amfh8w.jpg",
   Price: "600K",
-  specs: "force:2, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+        force: 2,
+        speed: 3,
+        attacks: 3
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
 },
 {
   name: "Ace",
   grade: "Bronze",
+  rarete: "Sparking SP",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/5vqryh.jpg",
   Price: "400K",
-  specs: "force:1, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
-},
+  specs: {
+        force: 1,
+        speed: 2,
+        attacks: 2
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
+}, 
 {
   name: "Acnologia",
   grade: "Or",
+  rarete: "Legends LE",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/dy20sv.jpg",
   Price: "1M",
-  specs: "force:3, speed:0, attacks:3",
-  Moves: "",
-  Patterns: ""
+  specs: {
+        force: 3,
+        speed: 4,
+        attacks: 3
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
 },
 {
   name: "Aiolia",
   grade: "Or",
+  rarete: "Sparking SP",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/2mbwpb.jpg",
   Price: "1M",
-  specs: "force:3, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+        force: 3,
+        speed: 4,
+        attacks: 4
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
 },
 {
   name: "Akainu",
   grade: "Argent",
+  rarete: "Sparking SP",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/qgrflk.jpg",
   Price: "800K",
-  specs: "force:2, speed:0, attacks:3",
-  Moves: "",
-  Patterns: ""
-},
+  specs: {
+        force: 2,
+        speed: 2,
+        attacks: 3
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
+}, 
 {
   name: "Akaza",
   grade: "Bronze",
+  rarete: "Ultra UL",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/o8waf7.jpg",
   Price: "450K",
-  specs: "force:2, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
-},
+  specs: {
+        force: 3,
+        speed: 2,
+        attacks: 2
+    },
+
+    Moves: {
+        basic: [],
+        special: [],
+        ultime: []
+    },
+
+    Patterns: []
+}, 
 {
   name: "Aldebaran",
   grade: "Or",
