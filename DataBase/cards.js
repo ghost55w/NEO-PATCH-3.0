@@ -264,7 +264,7 @@ const cards = [
   Price: "420nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 5,
     attacks: 4
   },
   Moves: {
@@ -277,7 +277,7 @@ const cards = [
 {
   name: "Android18",
   grade: "Argent",
-  rarete: "",
+  rarete: "Legends LE",
   category: "SS super",
   univers: "Dragon Ball",
   images: [],
@@ -285,7 +285,7 @@ const cards = [
   Price: "190nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 4,
     attacks: 4
   },
   Moves: {
@@ -298,7 +298,7 @@ const cards = [
 {
   name: "Android19",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS+ ultimate",
   univers: "Dragon Ball",
   images: [],
@@ -306,7 +306,7 @@ const cards = [
   Price: "90nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 3,
     attacks: 4
   },
   Moves: {
@@ -319,7 +319,7 @@ const cards = [
 {
   name: "Aoi",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "Jujutsu Kaisen",
   images: [],
@@ -340,7 +340,7 @@ const cards = [
 {
   name: "Aokiji",
   grade: "Argent",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S+",
   univers: "One Piece",
   images: [],
@@ -348,7 +348,7 @@ const cards = [
   Price: "800k",
   specs: {
     force: 2,
-    speed: 1,
+    speed: 2,
     attacks: 3
   },
   Moves: {
@@ -361,7 +361,7 @@ const cards = [
 {
   name: "Aphrodite",
   grade: "Or",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "Saint Seiya",
   images: [],
@@ -369,7 +369,7 @@ const cards = [
   Price: "1M",
   specs: {
     force: 2,
-    speed: 1,
+    speed: 3,
     attacks: 2
   },
   Moves: {
@@ -382,7 +382,7 @@ const cards = [
 {
   name: "Asta",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "Black Clover",
   images: [],
@@ -390,8 +390,8 @@ const cards = [
   Price: "300k",
   specs: {
     force: 2,
-    speed: 1,
-    attacks: 2
+    speed: 2,
+    attacks: 3
   },
   Moves: {
     basic: [],
@@ -403,7 +403,7 @@ const cards = [
 {
   name: "Asta(Arc2)",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S+",
   univers: "Black Clover",
   images: [],
@@ -411,7 +411,7 @@ const cards = [
   Price: "450k",
   specs: {
     force: 3,
-    speed: 1,
+    speed: 2,
     attacks: 3
   },
   Moves: {
@@ -424,7 +424,7 @@ const cards = [
 {
   name: "Asuma",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "Naruto",
   images: [],
@@ -432,7 +432,7 @@ const cards = [
   Price: "300k",
   specs: {
     force: 1,
-    speed: 1,
+    speed: 2,
     attacks: 2
   },
   Moves: {
@@ -445,15 +445,15 @@ const cards = [
 {
   name: "AtomicSamurai",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "One Punch Man",
   images: [],
   card: "https://files.catbox.moe/ihy73q.jpg",
   Price: "100k",
   specs: {
-    force: 2,
-    speed: 1,
+    force: 1,
+    speed: 2,
     attacks: 2
   },
   Moves: {
@@ -466,7 +466,7 @@ const cards = [
 {
   name: "Avdol",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S",
   univers: "JoJo's Bizarre Adventure",
   images: [],
@@ -487,7 +487,7 @@ const cards = [
 {
   name: "BabyVegeta",
   grade: "Or",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS- ultimate",
   univers: "Dragon Ball",
   images: [],
@@ -495,7 +495,7 @@ const cards = [
   Price: "310nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 4,
     attacks: 4
   },
   Moves: {
