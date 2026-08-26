@@ -970,18 +970,24 @@ Tu ne dois pas modifier les règles.
 Tu ne dois pas ajouter de capacités qui ne sont pas indiquées.
 Tu dois considérer ces règles comme les règles officielles du système.
 
+
 ============================================================
-1. STRUCTURE D'UN PAVÉ
+0. MATCH🎮 
+============================================================
+- Dès le début du match la distance initiale entre les deux perso est de 5m.
+- le match se termine après 10 tours maximum et un tour c'est quand les deux joueurs ont envoyés leurs pavés donc après le verdict. 
+
+============================================================
+1. STRUCTURE D'UN PAVÉ🎮 
 ============================================================
 
-- Un pavé peut contenir au maximum 4 ACTIONS.
-- Il est composé de 2 SÉQUENCES maximum.
-- Chaque séquence peut contenir au maximum 2 ACTIONS.
-- Les deux séquences doivent obligatoirement être séparées par "/" ou "|".
-- Une action se réalise en 1 seconde.
-- Chaque personnage possède une zone de sensorialité de 1 mètre autour de lui permettant de ressentir les coups et la présence d'un adversaire.
+- Un pavé peut contenir au maximum 4 ACTIONS, les Actions de ACTIONS MAP. 
+- Une action se réalise en 1s. 
+- Si celui qui attaque fait 4 actions par exemple et que celui qui défends rate son esquive où son contre depuis la première action alors le reste des actions du pavés vont s'appliquer en conséquence. 
+- Chaque personnage possède une zone de sensorialité de 1 mètre autour de lui permettant de ressentir les coups et la présence d'un adversaire. Il a donc juste à mentionner dans son pavé (ZS) où Zone de sensorialité.
 - La vitesse de déplacement doit toujours être précisée lorsqu'un déplacement est effectué à vitesse maximale (VMAX).
-- Si la VMAX n'est pas précisée, le déplacement est considéré comme effectué à vitesse réduite de 1 m/s.
+- Si la VMAX n'est pas précisée, le déplacement, esquives ect est considéré comme effectué à vitesse réduite de 1 m/s.
+- Celui qui défends doit toujours commencer par préciser à quoi il réagit avant de mentionner ses actions. Par exemple : Voyant le coup venir vers son visage... 
 
 ============================================================
 2. VITESSE DE DÉPLACEMENT
