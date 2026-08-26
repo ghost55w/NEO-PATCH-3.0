@@ -151,16 +151,16 @@ const cards = [
 {
   name: "Aldebaran",
   grade: "Or",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "S-",
   univers: "Saint Seiya",
   images: [],
   card: "https://files.catbox.moe/nvdw2s.jpg",
   Price: "",
   specs: {
-        force: 0,
-        speed: 0,
-        attacks: 0
+        force: 4,
+        speed: 3,
+        attacks: 4
     },
     Moves: {
         basic: [],
@@ -170,51 +170,9 @@ const cards = [
     Patterns: []
 },
 {
-  name: "Akaza",
-  grade: "Bronze",
-  rarete: "Ultra UL",
-  category: "S+",
-  univers: "Demon Slayer",
-  images: [],
-  card: "https://files.catbox.moe/o8waf7.jpg",
-  Price: "450K",
-  specs: {
-    force: 3,
-    speed: 2,
-    attacks: 2
-  },
-  Moves: {
-    basic: [],
-    special: [],
-    ultime: []
-  },
-  Patterns: []
-},
-{
-  name: "Aldebaran",
-  grade: "Or",
-  rarete: "",
-  category: "S-",
-  univers: "Saint Seiya",
-  images: [],
-  card: "https://files.catbox.moe/nvdw2s.jpg",
-  Price: "1M",
-  specs: {
-    force: 3,
-    speed: 1,
-    attacks: 4
-  },
-  Moves: {
-    basic: [],
-    special: [],
-    ultime: []
-  },
-  Patterns: []
-},
-{
   name: "AllForOne",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S-",
   univers: "My Hero Academia",
   images: [],
@@ -222,7 +180,7 @@ const cards = [
   Price: "1M",
   specs: {
     force: 3,
-    speed: 1,
+    speed: 3,
     attacks: 3
   },
   Moves: {
@@ -235,15 +193,15 @@ const cards = [
 {
   name: "AllMight",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S-",
   univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/3x7bn9.jpg",
   Price: "1M",
   specs: {
-    force: 3,
-    speed: 1,
+    force: 4,
+    speed: 3,
     attacks: 3
   },
   Moves: {
@@ -256,7 +214,7 @@ const cards = [
 {
   name: "Android16",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Sparking SP",
   category: "SS+ ultimate",
   univers: "Dragon Ball",
   images: [],
@@ -264,7 +222,7 @@ const cards = [
   Price: "100nc",
   specs: {
     force: 4,
-    speed: 1,
+    speed: 3,
     attacks: 4
   },
   Moves: {
@@ -285,8 +243,8 @@ const cards = [
   Price: "200nc",
   specs: {
     force: 4,
-    speed: 1,
-    attacks: 0
+    speed: 4,
+    attacks: 4
   },
   Moves: {
     basic: [],
@@ -298,7 +256,7 @@ const cards = [
 {
   name: "Android17(Dbs)",
   grade: "Or",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "SS+",
   univers: "Dragon Ball",
   images: [],
