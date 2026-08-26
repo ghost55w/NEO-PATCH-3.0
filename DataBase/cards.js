@@ -4490,7 +4490,7 @@ const cards = [
 {
   name: "Yahaba",
   grade: "Bronze",
-  category: "Sparking SM",
+  category: "S-",
   images: "",
   card: "https://files.catbox.moe/jqa4l1.jpg",
   Price: "100k",
@@ -4501,7 +4501,7 @@ const cards = [
 {
   name: "Yamato",
   grade: "Bronze",
-  category: "Sparking S",
+  category: "S",
   images: "",
   card: "https://files.catbox.moe/ngy97w.jpg",
   Price: "300k",
