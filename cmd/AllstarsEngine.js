@@ -198,6 +198,764 @@ const PORTEE_PIED = 1.0;
 // Tolérance pour éviter les erreurs de décimales
 const TOLERANCE_DISTANCE = 0.01;
 
+//================================================
+// 🎮 ACTIONS MAP — ALL STARS
+//================================================
+
+const ACTIONS_MAP = {
+
+    //================================================
+    // 🥊 FRAPPES
+    //================================================
+
+    frapper: {
+
+        //================================================
+        // 👊 FRAPPES AVEC LES MAINS
+        //================================================
+
+        mains: {
+
+            // 1 — COUP DIRECT
+            coup_direct: {
+                aliases: [
+                    "coup direct",
+                    "direct",
+                    "coup de poing direct",
+                    "poing direct",
+                    "jab",
+                    "straight"
+                ],
+                type: "poing",
+                trajectoire: "directe",
+                surface: [
+                    "phalanges",
+                    "poing"
+                ]
+            },
+
+            // 2 — CROCHET GAUCHE
+            crochet_gauche: {
+                aliases: [
+                    "crochet gauche",
+                    "left hook",
+                    "hook gauche"
+                ],
+                type: "poing",
+                main: "gauche",
+                trajectoire: "circulaire",
+                surface: [
+                    "phalanges",
+                    "poing"
+                ]
+            },
+
+            // 3 — CROCHET DROIT
+            crochet_droit: {
+                aliases: [
+                    "crochet droit",
+                    "right hook",
+                    "hook droit"
+                ],
+                type: "poing",
+                main: "droite",
+                trajectoire: "circulaire",
+                surface: [
+                    "phalanges",
+                    "poing"
+                ]
+            },
+
+            // 4 — UPPERCUT
+            uppercut: {
+                aliases: [
+                    "uppercut",
+                    "coup de poing remontant"
+                ],
+                type: "poing",
+                trajectoire: "montante",
+                surface: [
+                    "phalanges",
+                    "poing"
+                ]
+            },
+
+            // 5 — UPPERCUT SAUTÉ
+            uppercut_saute: {
+                aliases: [
+                    "uppercut sauté",
+                    "rising uppercut",
+                    "uppercut en sautant"
+                ],
+                type: "poing",
+                trajectoire: "montante",
+                mouvement: "saut",
+                surface: [
+                    "phalanges",
+                    "poing"
+                ]
+            },
+
+            // 6 — COUP EN REVERS
+            backfist: {
+                aliases: [
+                    "coup en revers",
+                    "backfist",
+                    "revers"
+                ],
+                type: "poing",
+                trajectoire: [
+                    "horizontale",
+                    "diagonale"
+                ],
+                surface: [
+                    "dos du poing"
+                ]
+            },
+
+            // 7 — REVERS CIRCULAIRE
+            spinning_backfist: {
+                aliases: [
+                    "revers circulaire",
+                    "spinning backfist",
+                    "spinning back fist"
+                ],
+                type: "poing",
+                trajectoire: "circulaire",
+                rotation: [
+                    "180",
+                    "360"
+                ],
+                surface: [
+                    "dos du poing"
+                ]
+            },
+
+            // 8 — MARTEAU DESCENDANT
+            hammer_descendant: {
+                aliases: [
+                    "coup marteau descendant",
+                    "marteau descendant",
+                    "hammer",
+                    "hammer fist",
+                    "hammer descendant"
+                ],
+                type: "poing",
+                trajectoire: "descendante",
+                surface: [
+                    "tranchant du poing",
+                    "poing"
+                ]
+            },
+
+            // 9 — MARTEAU LATÉRAL
+            hammer_lateral: {
+                aliases: [
+                    "coup marteau latéral",
+                    "marteau latéral",
+                    "hammer fist side",
+                    "side hammer"
+                ],
+                type: "poing",
+                trajectoire: "latérale",
+                surface: [
+                    "tranchant du poing",
+                    "poing"
+                ]
+            },
+
+            // 10 — MARTEAU EN REVERS
+            reverse_hammer: {
+                aliases: [
+                    "coup marteau en revers",
+                    "marteau en revers",
+                    "reverse hammer",
+                    "reverse hammer fist"
+                ],
+                type: "poing",
+                trajectoire: [
+                    "horizontale",
+                    "diagonale"
+                ],
+                surface: [
+                    "dos du poing"
+                ]
+            }
+        },
+
+
+        //================================================
+        // 🦵 FRAPPES AVEC LES PIEDS
+        //================================================
+
+        pieds: {
+
+            // 1 — FRONT KICK
+            front_kick: {
+                aliases: [
+                    "front kick",
+                    "coup de pied frontal",
+                    "coup de pied direct",
+                    "coup de pied avant"
+                ],
+                type: "pied",
+                trajectoire: "directe",
+                surface: [
+                    "semelle",
+                    "plante du pied"
+                ]
+            },
+
+            // 2 — ROUNDHOUSE KICK
+            roundhouse_kick: {
+                aliases: [
+                    "roundhouse kick",
+                    "coup circulaire",
+                    "coup de pied circulaire"
+                ],
+                type: "pied",
+                trajectoire: "circulaire",
+                surface: [
+                    "cou-de-pied",
+                    "tibia"
+                ]
+            },
+
+            // 3 — SIDE KICK
+            side_kick: {
+                aliases: [
+                    "side kick",
+                    "coup de pied latéral"
+                ],
+                type: "pied",
+                trajectoire: "latérale",
+                surface: [
+                    "tranchant du pied",
+                    "talon"
+                ]
+            },
+
+            // 4 — BACK KICK
+            back_kick: {
+                aliases: [
+                    "back kick",
+                    "coup de pied arrière"
+                ],
+                type: "pied",
+                trajectoire: "arrière",
+                rotation: true,
+                surface: [
+                    "talon"
+                ]
+            },
+
+            // 5 — HOOK KICK
+            hook_kick: {
+                aliases: [
+                    "hook kick",
+                    "coup de pied en crochet"
+                ],
+                type: "pied",
+                trajectoire: "crochet",
+                surface: [
+                    "talon",
+                    "plante du pied"
+                ]
+            },
+
+            // 6 — AXE KICK
+            axe_kick: {
+                aliases: [
+                    "axe kick",
+                    "coup de pied descendant",
+                    "coup de pied en axe"
+                ],
+                type: "pied",
+                trajectoire: "descendante",
+                surface: [
+                    "talon",
+                    "plante du pied"
+                ]
+            },
+
+            // 7 — SPINNING BACK KICK
+            spinning_back_kick: {
+                aliases: [
+                    "spinning back kick",
+                    "coup de pied arrière circulaire"
+                ],
+                type: "pied",
+                trajectoire: "arrière",
+                rotation: "360",
+                surface: [
+                    "talon"
+                ]
+            },
+
+            // 8 — LOW KICK
+            low_kick: {
+                aliases: [
+                    "low kick",
+                    "coup bas",
+                    "coup de pied bas"
+                ],
+                type: "pied",
+                trajectoire: "latérale",
+                cible: [
+                    "cuisse",
+                    "mollet"
+                ],
+                surface: [
+                    "tibia",
+                    "cou-de-pied"
+                ]
+            },
+
+            // 9 — KNEE STRIKE
+            knee_strike: {
+                aliases: [
+                    "knee strike",
+                    "coup de genou",
+                    "coup genou",
+                    "genou"
+                ],
+                type: "genou",
+                trajectoire: "montante",
+                surface: [
+                    "genou"
+                ]
+            },
+
+            // 10 — FLYING KICK
+            flying_kick: {
+                aliases: [
+                    "flying kick",
+                    "coup sauté",
+                    "coup de pied sauté"
+                ],
+                type: "pied",
+                mouvement: "saut",
+                trajectoire: [
+                    "directe",
+                    "latérale"
+                ],
+                surface: [
+                    "pied",
+                    "talon"
+                ]
+            }
+        }
+    },
+
+
+    //================================================
+    // 🏃 DÉPLACEMENTS
+    //================================================
+
+    deplacer: {
+
+        avancer: [
+            "avance",
+            "avancer",
+            "avance vers",
+            "fonce vers",
+            "se rapproche",
+            "approche"
+        ],
+
+        reculer: [
+            "recule",
+            "reculer",
+            "se recule",
+            "prend du recul"
+        ],
+
+        gauche: [
+            "va à gauche",
+            "se déplace à gauche",
+            "déplacement gauche"
+        ],
+
+        droite: [
+            "va à droite",
+            "se déplace à droite",
+            "déplacement droite"
+        ],
+
+        dash: [
+            "dash",
+            "dash avant",
+            "dash arrière",
+            "dash gauche",
+            "dash droit"
+        ],
+
+        course: [
+            "court",
+            "course",
+            "fonce",
+            "sprint"
+        ],
+
+        vmax: [
+            "vmax",
+            "à vitesse maximale",
+            "vitesse maximale",
+            "à pleine vitesse"
+        ],
+
+        deplacement_instantane: [
+            "déplacement instantané",
+            "instantané",
+            "téléportation"
+        ],
+
+        saut: [
+            "saute",
+            "saut",
+            "bond"
+        ],
+
+        bond: [
+            "bondit",
+            "bond",
+            "bond en avant",
+            "bond en arrière"
+        ]
+    },
+
+
+    //================================================
+    // 🛡️ BLOCAGES
+    //================================================
+
+    bloquer: {
+
+        blocage: [
+            "bloque",
+            "blocage",
+            "bloquer",
+            "pare",
+            "parer"
+        ],
+
+        blocage_main: [
+            "bloque avec la main",
+            "blocage à une main",
+            "pare avec la main"
+        ],
+
+        blocage_deux_mains: [
+            "bloque à deux mains",
+            "blocage deux mains",
+            "pare à deux mains"
+        ],
+
+        garde_haute: [
+            "garde haute",
+            "bloque en garde haute"
+        ],
+
+        garde_basse: [
+            "garde basse",
+            "bloque en garde basse"
+        ],
+
+        garde_corps: [
+            "protège son corps",
+            "garde du corps",
+            "bloque le corps"
+        ],
+
+        garde_visage: [
+            "protège son visage",
+            "garde du visage",
+            "bloque le visage"
+        ]
+    },
+
+
+    //================================================
+    // 🌀 ESQUIVES
+    //================================================
+
+    esquiver: {
+
+        esquive: [
+            "esquive",
+            "esquiver",
+            "évite",
+            "éviter"
+        ],
+
+        esquive_gauche: [
+            "esquive à gauche",
+            "évite à gauche"
+        ],
+
+        esquive_droite: [
+            "esquive à droite",
+            "évite à droite"
+        ],
+
+        esquive_arriere: [
+            "esquive en arrière",
+            "recule pour esquiver"
+        ],
+
+        esquive_avant: [
+            "esquive vers l'avant"
+        ],
+
+        esquive_basse: [
+            "se baisse",
+            "esquive basse",
+            "duck"
+        ],
+
+        esquive_laterale: [
+            "esquive latérale",
+            "déplacement latéral pour esquiver"
+        ],
+
+        esquive_vmax: [
+            "esquive à vmax",
+            "esquive à vitesse maximale"
+        ]
+    },
+
+
+    //================================================
+    // ✋ SAISIES / GRAPPLES
+    //================================================
+
+    saisir: {
+
+        saisie: [
+            "saisit",
+            "saisie",
+            "attrape",
+            "agrippe",
+            "empoigne"
+        ],
+
+        saisir_bras: [
+            "saisit le bras",
+            "attrape le bras",
+            "agrippe le bras"
+        ],
+
+        saisir_jambe: [
+            "saisit la jambe",
+            "attrape la jambe",
+            "agrippe la jambe"
+        ],
+
+        saisir_corps: [
+            "saisit le corps",
+            "attrape le corps",
+            "agrippe le corps"
+        ],
+
+        saisir_coup: [
+            "saisit le coup",
+            "attrape le coup",
+            "saisit l'attaque"
+        ]
+    },
+
+
+    //================================================
+    // ↪️ DÉVIATIONS
+    //================================================
+
+    devier: {
+
+        deviation: [
+            "dévie",
+            "dévier",
+            "déviation",
+            "dévie le coup"
+        ],
+
+        deviation_main: [
+            "dévie avec la main",
+            "dévie le coup avec la main"
+        ],
+
+        deviation_bras: [
+            "dévie avec le bras",
+            "dévie avec l'avant-bras"
+        ],
+
+        deviation_jambe: [
+            "dévie avec la jambe",
+            "dévie le coup avec la jambe"
+        ]
+    },
+
+
+    //================================================
+    // 🔄 CHANGEMENTS DE TRAJECTOIRE
+    //================================================
+
+    modifier_trajectoire: {
+
+        changer_trajectoire: [
+            "change la trajectoire",
+            "modifie la trajectoire",
+            "change la direction du coup"
+        ],
+
+        rediriger: [
+            "redirige le coup",
+            "redirige son attaque",
+            "redirige l'attaque"
+        ]
+    },
+
+
+    //================================================
+    // ⚡ ACTIONS DE VITESSE
+    //================================================
+
+    vitesse: {
+
+        acceleration: [
+            "accélère",
+            "accélération",
+            "accélère sa course"
+        ],
+
+        boost: [
+            "boost",
+            "booste",
+            "mouvement boosté",
+            "se booste"
+        ],
+
+        vitesse_reduite: [
+            "vitesse réduite",
+            "avance lentement"
+        ]
+    },
+
+
+    //================================================
+    // 👁️ SENSORIALITÉ / RECHERCHE
+    //================================================
+
+    rechercher: {
+
+        regarder: [
+            "regarde autour",
+            "regarde autour de lui",
+            "observe autour"
+        ],
+
+        localiser: [
+            "localise",
+            "cherche l'adversaire",
+            "recherche l'adversaire",
+            "tente de localiser"
+        ],
+
+        detection: [
+            "détecte",
+            "détecte l'adversaire",
+            "ressent sa présence"
+        ]
+    },
+
+
+    //================================================
+    // 💥 PROJECTIONS
+    //================================================
+
+    projeter: {
+
+        projection: [
+            "projette",
+            "projection",
+            "envoie valser",
+            "jette"
+        ],
+
+        repousser: [
+            "repousse",
+            "repousser",
+            "fait reculer"
+        ],
+
+        envoyer_sol: [
+            "projette au sol",
+            "envoie au sol",
+            "écrase au sol"
+        ],
+
+        envoyer_mur: [
+            "projette contre un mur",
+            "envoie contre un mur",
+            "projette contre un bâtiment"
+        ]
+    },
+
+
+    //================================================
+    // 🗡️ PROJECTILES
+    //================================================
+
+    lancer: {
+
+        projectile: [
+            "lance",
+            "lancer",
+            "projectile",
+            "projette un projectile"
+        ],
+
+        shuriken: [
+            "shuriken",
+            "lance un shuriken"
+        ],
+
+        kunai: [
+            "kunai",
+            "lance un kunai"
+        ],
+
+        couteau: [
+            "couteau",
+            "lance un couteau"
+        ]
+    },
+
+
+    //================================================
+    // 🔋 ÉNERGIE / RÉCUPÉRATION
+    //================================================
+
+    energie: {
+
+        charger: [
+            "charge son énergie",
+            "accumule son énergie"
+        ],
+
+        recuperer: [
+            "récupère",
+            "récupère son énergie",
+            "récupère sa stamina"
+        ],
+
+        degager_energie: [
+            "dégage son énergie",
+            "libère son énergie"
+        ]
+    }
+};
+
+
  //================= RECHERCHE FICHE PAR PSEUDO =================
 async function getFicheByPseudo(pseudo) {
 
