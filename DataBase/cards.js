@@ -367,370 +367,667 @@ const cards = [
   },
   Patterns: []
 },
-{
+ {
   name: "Aphrodite",
   grade: "Or",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/fairbf.jpg",
   Price: "1M",
-  specs: "force:2, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Asta",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/tjsj81.jpg",
   Price: "300k",
-  specs: "force:2, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Asta(Arc2)",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/2cd5ht.jpg",
   Price: "450k",
-  specs: "force:3, speed:1, attacks:3",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 3,
+    speed: 1,
+    attacks: 3
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Asuma",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/e9h4s7.jpg",
   Price: "300k",
-  specs: "force:1, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "AtomicSamurai",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ihy73q.jpg",
   Price: "100k",
-  specs: "force:2, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Avdol",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/wgv1t5.jpg",
   Price: "300k",
-  specs: "force:2, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "BabyVegeta",
   grade: "Or",
+  rarete: "",
   category: "SS- ultimate",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ahxz48.jpg",
   Price: "310nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Bakugo",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/gz77gh.jpg",
   Price: "300k",
-  specs: "force:2, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Bardock",
   grade: "Bronze",
+  rarete: "",
   category: "SS- super",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/pidi5o.jpg",
   Price: "110nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Bang",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/yis1od.jpg",
   Price: "450k",
-  specs: "force:2, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Beerus",
   grade: "Or",
+  rarete: "",
   category: "SS+ ultimate",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/y9cgpo.jpg",
   Price: "530nc",
-  specs: "force:6, speed:1, attacks:6",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 6,
+    speed: 1,
+    attacks: 6
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Bigmom",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/8qo8yi.jpg",
   Price: "1M",
-  specs: "force:3, speed:0, attacks:3",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 3,
+    speed: 1,
+    attacks: 3
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "BlackGoku",
   grade: "Or",
+  rarete: "",
   category: "SS+ super",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/un7c3l.jpg",
   Price: "460nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Blizzard",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/q3qznx.jpg",
   Price: "100k",
-  specs: "force:1, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Bojack",
   grade: "Argent",
+  rarete: "",
   category: "SS-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ck3vpk.jpg",
   Price: "120nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Boro",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/bokgxn.jpg",
   Price: "700k",
-  specs: "force:2, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Boros",
   grade: "Or",
+  rarete: "",
   category: "S+ ultimate",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ofoqc5.jpg",
   Price: "2M",
-  specs: "force:4, speed:1, attacks:3",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 3
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Borushiki",
   grade: "Argent",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ayb8n5.jpg",
   Price: "800k",
-  specs: "force:2, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Boruto",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/8qzmzr.jpg",
   Price: "300k",
-  specs: "force:1, speed:1, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Broly",
   grade: "Argent",
+  rarete: "",
   category: "SS+ Extreme",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/au0pd6.jpg",
   Price: "300nc",
-  specs: "force:5, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 5,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Broly(Dbs)",
   grade: "Or",
+  rarete: "",
   category: "SS+ Super",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/2qvkfx.jpg",
   Price: "480nc",
-  specs: "force:5, speed:1, attacks:5",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 5,
+    speed: 1,
+    attacks: 5
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Brooks",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/kf359g.jpg",
   Price: "100k",
-  specs: "force:1, speed:0, attacks:2",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Buhan",
   grade: "Or",
+  rarete: "",
   category: "SS",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/2tbn9y.jpg",
   Price: "340nc",
-  specs: "force:4, speed:1, attacks:4",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 4,
+    speed: 1,
+    attacks: 4
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Burter",
   grade: "Bronze",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/jkx88l.jpg",
   Price: "90nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Super Buu",
   grade: "Or",
+  rarete: "",
   category: "SS- Super",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/5lfqpz.jpg",
   Price: "310nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
-  name: " Fat Buu",
+  name: "Fat Buu",
   grade: "Or",
+  rarete: "",
   category: "SS-",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/xnl4el.jpg",
   Price: "300nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Kid Buu",
   grade: "Or",
+  rarete: "",
   category: "SS- Super",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/bb2e50.jpg",
   Price: "360nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Buutenks",
   grade: "Or",
+  rarete: "",
   category: "SS- ultimate",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/1gcugi.jpg",
   Price: "320nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-}, 
-  {
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
+{
   name: "Cabba",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/rkdbjj.jpg",
   Price: "130nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Caufila",
   grade: "Argent",
+  rarete: "",
   category: "SS",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/36yixr.jpg",
   Price: "200nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
-  name: "Cell(perfect)",
+  name: "Cell perfect",
   grade: "Argent",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/3vv40w.jpg",
   Price: "280nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
-  name: "Cell(super)",
+  name: "Cell super",
   grade: "Argent",
+  rarete: "",
   category: "SS",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/6mi2yw.jpg",
   Price: "210nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
-  name: "Cell(base)",
+  name: "Cell",
   grade: "Bronze",
+  rarete: "",
   category: "SS+",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/xsh1ot.jpg",
   Price: "100nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
-{
+  {
   name: "Chiyo",
   grade: "Bronze",
   category: "S-",
