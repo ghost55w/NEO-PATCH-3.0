@@ -884,10 +884,12 @@ const cards = [
   Patterns: []
 },
 {
+{
   name: "Burter",
   grade: "Bronze",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/jkx88l.jpg",
   Price: "90nc",
@@ -908,6 +910,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "SS- Super",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/5lfqpz.jpg",
   Price: "310nc",
@@ -928,6 +931,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "SS-",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/xnl4el.jpg",
   Price: "300nc",
@@ -948,6 +952,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "SS- Super",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/bb2e50.jpg",
   Price: "360nc",
@@ -968,6 +973,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "SS- ultimate",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/1gcugi.jpg",
   Price: "320nc",
@@ -988,6 +994,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/rkdbjj.jpg",
   Price: "130nc",
@@ -1008,6 +1015,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "SS",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/36yixr.jpg",
   Price: "200nc",
@@ -1028,6 +1036,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/3vv40w.jpg",
   Price: "280nc",
@@ -1048,6 +1057,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "SS",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/6mi2yw.jpg",
   Price: "210nc",
@@ -1068,6 +1078,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/xsh1ot.jpg",
   Price: "100nc",
@@ -1088,6 +1099,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/5m69a3.jpg",
   Price: "100k",
@@ -1108,6 +1120,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/caghzt.jpg",
   Price: "100k",
@@ -1128,6 +1141,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "Jujutsu Kaisen",
   images: [],
   card: "https://files.catbox.moe/ww982g.jpg",
   Price: "300k",
@@ -1148,6 +1162,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S+",
+  univers: "Hunter x Hunter",
   images: [],
   card: "https://files.catbox.moe/jpuv9q.jpg",
   Price: "500k",
@@ -1168,6 +1183,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S+",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/bhq7oh.jpg",
   Price: "500k",
@@ -1188,6 +1204,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "S",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/3vhh0l.jpg",
   Price: "1m200k",
@@ -1208,6 +1225,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S+",
+  univers: "One Piece",
   images: [],
   card: "https://files.catbox.moe/s8yttz.jpg",
   Price: "400k",
@@ -1228,6 +1246,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S+",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/mjb4lj.jpg",
   Price: "400k",
@@ -1248,6 +1267,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/edan2e.jpg",
   Price: "250nc",
@@ -1268,6 +1288,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "S",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/s0sucf.jpg",
   Price: "1m800k",
@@ -1288,6 +1309,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "Jujutsu Kaisen",
   images: [],
   card: "https://files.catbox.moe/cp5op5.jpg",
   Price: "300k",
@@ -1308,6 +1330,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "Demon Slayer",
   images: [],
   card: "https://files.catbox.moe/14j5af.jpg",
   Price: "150k",
@@ -1328,6 +1351,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "S+",
+  univers: "Black Clover",
   images: [],
   card: "https://files.catbox.moe/n4dlb1.jpg",
   Price: "1m",
@@ -1348,6 +1372,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/jve2vt.jpg",
   Price: "300k",
@@ -1368,6 +1393,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/zs80ob.jpg",
   Price: "300k",
@@ -1388,6 +1414,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "S",
+  univers: "Saint Seiya",
   images: [],
   card: "https://files.catbox.moe/m6zwzi.jpg",
   Price: "1m500k",
@@ -1408,6 +1435,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S",
+  univers: "One Punch Man",
   images: [],
   card: "https://files.catbox.moe/yqiviz.jpg",
   Price: "700k",
@@ -1423,11 +1451,12 @@ const cards = [
   },
   Patterns: []
 },  
- {
+{
   name: "Deepa",
   grade: "Argent",
   rarete: "",
   category: "S-",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/epjakr.jpg",
   Price: "500k",
@@ -1448,6 +1477,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "Naruto",
   images: [],
   card: "https://files.catbox.moe/m0wm1s.jpg",
   Price: "300k",
@@ -1468,6 +1498,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/z5hzqb.jpg",
   Price: "700k",
@@ -1488,6 +1519,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/oh99hl.jpg",
   Price: "300k",
@@ -1508,6 +1540,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S-",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/h68hzb.jpg",
   Price: "500k",
@@ -1528,6 +1561,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/xerqh0.jpg",
   Price: "100k",
@@ -1548,6 +1582,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S+",
+  univers: "JoJo's Bizarre Adventure",
   images: [],
   card: "https://files.catbox.moe/yw5xb8.jpg",
   Price: "900k",
@@ -1568,6 +1603,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S",
+  univers: "JoJo's Bizarre Adventure",
   images: [],
   card: "https://files.catbox.moe/32pw7w.jpg",
   Price: "900k",
@@ -1588,6 +1624,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S+",
+  univers: "One Piece",
   images: [],
   card: "https://files.catbox.moe/v126vu.jpg",
   Price: "550k",
@@ -1608,6 +1645,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S",
+  univers: "Demon Slayer",
   images: [],
   card: "https://files.catbox.moe/4xdikn.jpg",
   Price: "300k",
@@ -1628,6 +1666,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/glg41l.jpg",
   Price: "600k",
@@ -1648,6 +1687,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/tr27u0.jpg",
   Price: "400nc",
@@ -1668,6 +1708,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S+",
+  univers: "Fullmetal Alchemist",
   images: [],
   card: "https://files.catbox.moe/q5bapo.jpg",
   Price: "1m200k",
@@ -1688,6 +1729,7 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "S",
+  univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/5tx64p.jpg",
   Price: "1m800k",
@@ -1708,6 +1750,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/ljz7bk.jpg.jpg",
   Price: "100k",
@@ -1728,6 +1771,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S-",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/qcunun.jpg",
   Price: "500k",
@@ -1748,6 +1792,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "Demon Slayer",
   images: [],
   card: "https://files.catbox.moe/x4hsa6.jpg",
   Price: "100k",
@@ -1768,6 +1813,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S+",
+  univers: "Fairy Tail",
   images: [],
   card: "https://files.catbox.moe/otsr2e.jpg",
   Price: "450k",
@@ -1788,6 +1834,7 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S",
+  univers: "One Punch Man",
   images: [],
   card: "https://files.catbox.moe/git5xh.jpg",
   Price: "700k",
@@ -1808,6 +1855,7 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "One Piece",
   images: [],
   card: "https://files.catbox.moe/t46wfj.jpg",
   Price: "100k",
@@ -1828,13 +1876,14 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "SS",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/l97ml8.jpg",
   Price: "160nc",
   specs: {
-    force: null,
-    speed: null,
-    attacks: null
+    force: 0,
+    speed: 0,
+    attacks: 0
   },
 
   Moves: {
@@ -1850,13 +1899,14 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/i84paz.jpg",
   Price: "150nc",
   specs: {
-    force: null,
-    speed: null,
-    attacks: null
+    force: 0,
+    speed: 0,
+    attacks: 0
   },
 
   Moves: {
@@ -1872,13 +1922,14 @@ const cards = [
   grade: "Or",
   rarete: "",
   category: "SS+",
+  univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/dptorv.jpg",
   Price: "420nc",
   specs: {
-    force: null,
-    speed: null,
-    attacks: null
+    force: 0,
+    speed: 0,
+    attacks: 0
   },
 
   Moves: {
@@ -1894,13 +1945,14 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S-",
+  univers: "Black Clover",
   images: [],
   card: "https://files.catbox.moe/2ocv94.jpg",
   Price: "500k",
   specs: {
-    force: null,
-    speed: null,
-    attacks: null
+    force: 0,
+    speed: 0,
+    attacks: 0
   },
 
   Moves: {
@@ -1916,13 +1968,14 @@ const cards = [
   grade: "Argent",
   rarete: "",
   category: "S",
+  univers: "One Piece",
   images: [],
   card: "https://files.catbox.moe/fslosy.jpg",
   Price: "700k",
   specs: {
-    force: null,
-    speed: null,
-    attacks: null
+    force: 0,
+    speed: 0,
+    attacks: 0
   },
 
   Moves: {
@@ -1938,13 +1991,14 @@ const cards = [
   grade: "Bronze",
   rarete: "",
   category: "S-",
+  univers: "My Hero Academia",
   images: [],
   card: "https://files.catbox.moe/mucucs.jpg",
   Price: "100k",
   specs: {
-    force: null,
-    speed: null,
-    attacks: null
+    force: 0,
+    speed: 0,
+    attacks: 0
   },
 
   Moves: {
@@ -1958,321 +2012,611 @@ const cards = [
 {
   name: "Gaara(4GG)",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/v3nvkj.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gaara",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/cto2vg.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gajeel",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "Fairy Tail",
+  images: [],
   card: "https://files.catbox.moe/8j1xus.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Garou",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/hbdp8l.jpg",
   Price: "450k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "GarouMonster",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/joebj6.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Garou(cosmic)",
   grade: "Or",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/6qyvrq.jpg",
   Price: "200nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Garp",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "One Piece",
+  images: [],
   card: "https://files.catbox.moe/20h2tl.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gauche",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/7gv4r9.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gengetsu",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/77h87l.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Genos(forme 2)",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/0p7zf7.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Genos",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/yvk9j3.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Geto",
   grade: "Bronze",
+  rarete: "",
   category: "S+",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/ytx8vy.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Geto(student)",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/0o4is7.jpg",
   Price: "350k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gildarts",
   grade: "Argent",
+  rarete: "",
   category: "S+",
-  images: "",
+  univers: "Fairy Tail",
+  images: [],
   card: "https://files.catbox.moe/41g7x4.jpg",
   Price: "900k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Ginyu",
   grade: "Bronze",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/1nhx0y.jpg",
   Price: "100nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Giorno",
   grade: "Or",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "JoJo's Bizarre Adventure",
+  images: [],
   card: "https://files.catbox.moe/5wvjc1.jpg",
   Price: "1m200k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Giyu",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/7ehtyz.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gogeta(Dbz)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ddf764.jpg",
   Price: "450nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gogeta(Dbs)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ru0r9d.jpg",
   Price: "550nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gogeta(SSJ4)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/agk0gp.jpg",
   Price: "460nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(Beast)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/aj97ba.jpg",
   Price: "550nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(Futur)",
   grade: "Argent",
+  rarete: "",
   category: "SS",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ghl7so.jpg",
   Price: "190nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(SSj2)",
   grade: "Argent",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ym9696.jpg",
   Price: "290nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(SSJ)",
   grade: "Argent",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/d39zp8.jpg",
   Price: "150nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(Buu arc)",
   grade: "Argent",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/r3za80.jpg",
   Price: "260nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(Kid)",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/3b7ypn.jpg",
   Price: "90nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(ultime)",
   grade: "Or",
+  rarete: "",
   category: "SS",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/arcs79.jpg",
   Price: "350nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gohan(Dbs)",
   grade: "Or",
+  rarete: "",
   category: "SS+",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/gfnu6y.jpg",
   Price: "430nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gojo",
   grade: "Argent",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/3hmg8k.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Gojo(shinjuku)",
