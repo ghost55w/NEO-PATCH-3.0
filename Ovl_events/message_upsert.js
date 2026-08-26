@@ -225,7 +225,6 @@ try {
         ovl
     );
 
-
     // 🎴 Choix des personnages
     await verifierCardsMatch(
         texte,
@@ -234,131 +233,118 @@ try {
         auteur_Message
     );
 
-//================================================
-// 🥊 ANALYSE DU PAVÉ ALL STARS
-//================================================
+    //================================================
+    // 🥊 ANALYSE DU PAVÉ ALL STARS
+    //================================================
 
-const matchId = matchAttente[ms_org];
+    const matchId = matchAttente[ms_org];
 
-if (matchId) {
+    if (matchId) {
 
-    const match = duelsEnCours[matchId];
+        const match = duelsEnCours[matchId];
 
-    if (
-        match &&
-        match.etat === "in_match"
-    ) {
+        if (
+            match &&
+            match.etat === "in_match"
+        ) {
 
-        const joueur = match.joueurs?.find(
-            j => j.jid === auteur_Message
-        );
+            const joueur = match.joueurs?.find(
+                j => j.jid === auteur_Message
+            );
 
-        if (joueur) {
+            if (joueur) {
 
-            //============================================
-            // 🎮 VÉRIFIER QUE C'EST UN PAVÉ DE JEU
-            //============================================
+                //============================================
+                // 🎮 VÉRIFIER QUE C'EST UN PAVÉ DE JEU
+                //============================================
 
-            const estPaveJeu =
-                texte.includes("🌀🎮") ||
-                texte.includes("🎮🌀");
+                const estPaveJeu =
+                    texte.includes("🌀🎮") ||
+                    texte.includes("🎮🌀");
 
-            if (!estPaveJeu) {
-                return;
-            }
+                if (estPaveJeu) {
 
-            //============================================
-            // 🤖 ANALYSE AVEC GEMINI
-            //============================================
+                    //============================================
+                    // 🤖 ANALYSE AVEC GEMINI
+                    //============================================
 
-            const resultatGemini =
-                await analysePaveAvecGemini(
-                    texte,
-                    {
-                        user: auteur_Message,
-                        joueur,
-                        match
+                    const resultatGemini =
+                        await analysePaveAvecGemini(
+                            texte,
+                            {
+                                user: auteur_Message,
+                                joueur,
+                                match
+                            }
+                        );
+
+                    //============================================
+                    // 🚫 PAVÉ NON DÉTECTÉ
+                    //============================================
+
+                    if (!resultatGemini?.paveDetecte) {
+                        console.log(
+                            "❌ Gemini : aucun pavé détecté"
+                        );
+
+                    } else {
+
+                        //============================================
+                        // 🧠 DEBUG GEMINI
+                        //============================================
+
+                        console.log(
+                            "🤖 GEMINI — PAVÉ DÉTECTÉ"
+                        );
+
+                        console.log(
+                            "👤 Auteur :",
+                            auteur_Message
+                        );
+
+                        console.log(
+                            "🌀 Actions :",
+                            resultatGemini.nombreActions
+                        );
+
+                        console.log(
+                            "📊 Note :",
+                            resultatGemini.note
+                        );
+
+                        console.log(
+                            "⚖️ Verdict :",
+                            resultatGemini.verdict
+                        );
+
+                        console.log(
+                            "🤖 Résultat complet :",
+                            JSON.stringify(
+                                resultatGemini,
+                                null,
+                                2
+                            )
+                        );
                     }
-                );
-
-            //============================================
-            // 🚫 PAVÉ NON DÉTECTÉ
-            //============================================
-
-            if (!resultatGemini?.paveDetecte) {
-                return;
+                }
             }
-
-            //============================================
-            // 🧠 DEBUG GEMINI
-            //============================================
-
-            console.log(
-                "🤖 GEMINI — PAVÉ DÉTECTÉ"
-            );
-
-            console.log(
-                "👤 Auteur :",
-                auteur_Message
-            );
-
-            console.log(
-                "🌀 Actions :",
-                resultatGemini.nombreActions
-            );
-
-            console.log(
-                "📊 Note :",
-                resultatGemini.note
-            );
-
-            console.log(
-                "⚖️ Verdict :",
-                resultatGemini.verdict
-            );
-
-            console.log(
-                "🤖 Résultat complet :",
-                JSON.stringify(
-                    resultatGemini,
-                    null,
-                    2
-                )
-            );
-
         }
     }
-}
-    
-//================================================
-// ⏱️ RELANCER LE TIMER
-//================================================
 
-lancerTimerTour(
-    match,
-    ms_org,
-    ovl
-);
+    //================================================
+    // 📄 DÉTECTION FICHE BLUELOCK
+    //================================================
 
-            if (!prochainJoueur) {
-
-                console.log(
-                    "❌ Impossible de trouver le joueur suivant"
-                );
-
-                return;
-            }
-   
-
-    // 📄 Détection fiche BlueLock
     await verifierFiche(
         texte,
         ms_org,
         ovl
     );
 
+    //================================================
+    // ⚽ GESTION MATCH BLUELOCK
+    //================================================
 
-    // ⚽ Gestion match BlueLock
     await messageMatch(
         ms,
         ovl
