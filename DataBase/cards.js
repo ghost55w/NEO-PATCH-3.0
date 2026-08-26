@@ -6780,1212 +6780,2312 @@ const cards = [
 {
   name: "Rui",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/y1uty1.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Ryu",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/gjbi4u.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sabo",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "One Piece",
+  images: [],
   card: "https://files.catbox.moe/38qeen.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Saga",
   grade: "Or",
+  rarete: "",
   category: "Ultra SP",
-  images: "",
+  univers: "Saint Seiya",
+  images: [],
   card: "https://files.catbox.moe/1qtha5.jpg",
   Price: "2M",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sai",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/dg8f61.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Saitama",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/kskpcn.jpg",
   Price: "300nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sakura (4GG)",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/s64n58.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sakura",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/a10aqp.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sanemi",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra S",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/nbat3b.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sanji",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "One Piece",
+  images: [],
   card: "https://files.catbox.moe/dx9mlf.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sarada",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/0gmxiu.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasori",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/230r8w.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (EMS)",
   grade: "Argent",
+  rarete: "",
   category: "Legend S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/pia2pc.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (Taka)",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/7kbi9l.jpg",
   Price: "600k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra SP",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/1qsskp.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (Hebi)",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra SP",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/cwaaa7.jpg",
   Price: "450k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (Akatsuki)",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra SP",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/uxne57.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (SP)",
   grade: "Or",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/7d0flm.jpg",
   Price: "1M200k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (Shinden)",
   grade: "Or",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/haef5r.jpg",
   Price: "1m200k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sasuke (Boruto)",
   grade: "Or",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/9bduze.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-  }, 
- {
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
+{
   name: "Seiya",
   grade: "Argent",
+  rarete: "",
   category: "Ultra S",
-  images: "",
+  univers: "Saint Seiya",
+  images: [],
   card: "https://files.catbox.moe/epeq5l.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shaka",
   grade: "Or",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "Saint Seiya",
+  images: [],
   card: "https://files.catbox.moe/ehburs.jpg",
   Price: "2M500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shanks",
   grade: "Or",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "One Piece",
+  images: [],
   card: "https://files.catbox.moe/17r2x4.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shigaraki",
   grade: "Argent",
+  rarete: "",
   category: "Ultra S",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/jqjscv.jpg",
   Price: "700k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shikadai",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/fn3b4a.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shikamaru",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/olrdcv.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shinki",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/iz2ttd.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shin",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/n977zq.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shino",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/o4izh4.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shinobu",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/kqej55.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shinso",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/z5mpoh.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shiryu",
   grade: "Argent",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Saint Seiya",
+  images: [],
   card: "https://files.catbox.moe/tsh66g.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shisui",
   grade: "Argent",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/gdcvd8.jpg",
   Price: "700k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shoto",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/3cfj4z.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Shun",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Saint Seiya",
+  images: [],
   card: "https://files.catbox.moe/ndxmd6.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Silva",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Hunter x Hunter",
+  images: [],
   card: "https://files.catbox.moe/p7p2e3.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sonic",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SP",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/jzy3gr.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Stain",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/l7ermt.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Star and Stripes",
   grade: "Argent",
+  rarete: "",
   category: "Ultra S",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/blqhww.jpg",
   Price: "100nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Sting",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Fairy Tail",
+  images: [],
   card: "https://files.catbox.moe/t869qh.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Suigetsu",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/1p68ff.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Suiryu",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SP",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/agtxsf.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Super Android 17",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/mjnton.jpg",
   Price: "380nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (Super)",
   grade: "Argent",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ktvi11.jpg",
   Price: "250nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Susamaru",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/fin05s.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-}, 
-  {
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
+{
   name: "Tanjiro (Demon)",
   grade: "Argent",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/xlwdvp.jpg",
   Price: "50nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tanjiro (Début)",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/aq59kx.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tanjiro",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra S",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/y3pnjx.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tanktop Marcel",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/xxfbj7.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Takako",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/d1ypx9.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tatsumaki",
   grade: "Or",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "One Punch Man",
+  images: [],
   card: "https://files.catbox.moe/4puqzw.jpg",
   Price: "1m",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Teach",
   grade: "Argent",
+  rarete: "",
   category: "Legend SM",
-  images: "",
+  univers: "One Piece",
+  images: [],
   card: "https://files.catbox.moe/khap3e.jpg",
   Price: "1M",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Temari",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/lvnx8y.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tengen",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/vg4cyw.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tenshinhan",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra SP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/binc1i.jpg",
   Price: "600k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tenten",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/hhl7t4.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tenya",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/y5u0vt.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Thales",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ljrcbk.jpg",
   Price: "110nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Thanatos",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Saint Seiya",
+  images: [],
   card: "https://files.catbox.moe/gycytd.jpg",
   Price: "400nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tobi (4GG)",
   grade: "Argent",
+  rarete: "",
   category: "Legend S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/yde4i0.jpg",
   Price: "800k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tobirama",
   grade: "Argent",
+  rarete: "",
   category: "Legend SP",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/lomjn4.jpg",
   Price: "900k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Toga",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/pvg87z.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Toge",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/818k07.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Toji",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/mo6e5z.jpg",
   Price: "600k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Toneri",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SP",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/nrog1q.jpg",
   Price: "1m",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Toppo",
   grade: "Or",
+  rarete: "",
   category: "Ultra SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/fhqr3r.jpg",
   Price: "420nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Trunks (Kid)",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SSM",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ptpckm.jpg",
   Price: "150nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Trunks",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SSM",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/alprgr.jpg",
   Price: "200nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Trunks (Futur)",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SSM",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/ougnbx.jpg",
   Price: "170nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Trunks (DBS)",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/zicnsn.jpg",
   Price: "230nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Tsunade",
   grade: "Bronze",
+  rarete: "",
   category: "Ultra S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/nlggb9.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Twice",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "My Hero Academia",
+  images: [],
   card: "https://files.catbox.moe/rk9zp5.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-  }, 
-  {
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
+{
   name: "Uraume",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/mugdkc.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vanessa",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/kyael1.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vanica",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/dekzwe.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (SSJ)",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SSM",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/k2cdjt.jpg",
   Price: "180nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (Tracker)",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/swz65c.jpg",
   Price: "130nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (SSJ4)",
   grade: "Or",
+  rarete: "",
   category: "Legend SS",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/fgqu2w.jpg",
   Price: "340nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (SSJ Blue)",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/l3gss8.jpg",
   Price: "450nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (UE)",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/b9svgt.jpg",
   Price: "550nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegeta (SSJ God)",
   grade: "Or",
+  rarete: "",
   category: "Ultra SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/7pznu1.jpg",
   Price: "420nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegito (DBZ)",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/rgybyi.jpg",
   Price: "450nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vegito (DBS)",
   grade: "Or",
+  rarete: "",
   category: "Legend SSP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/wujmrs.jpg",
   Price: "550nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vengeance",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/aupjwj.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Vetto",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/xp0i8c.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Victor",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/m3hq7x.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Videl",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/0mubo7.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Weather Report",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SM",
-  images: "",
+  univers: "JoJo's Bizarre Adventure",
+  images: [],
   card: "https://files.catbox.moe/eq2wxq.jpg",
   Price: "900k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Wendy",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Fairy Tail",
+  images: [],
   card: "https://files.catbox.moe/uowygv.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yahaba",
   grade: "Bronze",
+  rarete: "",
   category: "S-",
-  images: "",
+  univers: "Demon Slayer",
+  images: [],
   card: "https://files.catbox.moe/jqa4l1.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yamato",
   grade: "Bronze",
+  rarete: "",
   category: "S",
-  images: "",
+  univers: "Naruto",
+  images: [],
   card: "https://files.catbox.moe/ngy97w.jpg",
   Price: "300k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yamcha",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SP",
-  images: "",
+  univers: "Dragon Ball",
+  images: [],
   card: "https://files.catbox.moe/03fmv6.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yami",
   grade: "Argent",
+  rarete: "",
   category: "Legend S",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/alpzdx.jpg",
   Price: "50nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yorozu",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/zydytg.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuji (Shibuya)",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking S",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/w0j4ll.jpg",
   Price: "200k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuji (CG)",
   grade: "Argent",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/q3yidh.jpg",
   Price: "50nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuji",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/dh6evb.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuki",
   grade: "Argent",
+  rarete: "",
   category: "Ultra SM",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/16a2yx.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuno",
   grade: "Bronze",
+  rarete: "",
   category: "Sparking SM",
-  images: "",
+  univers: "Black Clover",
+  images: [],
   card: "https://files.catbox.moe/v3bnlo.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuta",
   grade: "Bronze",
+  rarete: "",
   category: "Legend SP",
-  images: "",
+  univers: "Jujutsu Kaisen",
+  images: [],
   card: "https://files.catbox.moe/06fvgx.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Yuta (CG)",
   grade: "Argent",
+  rarete: "",
+  univers: "Jujutsu Kaisen",
   category: "Ultra SM",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/pm6ioo.jpg",
   Price: "50nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
-}, 
-  {
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
+},
+{
   name: "Zabuza",
   grade: "Bronze",
+  rarete: "",
+  univers: "Naruto",
   category: "Sparking SM",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/44fdv2.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zamasu",
   grade: "Or",
+  rarete: "",
+  univers: "Dragon Ball",
   category: "Legend SSP",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/163ro4.jpg",
   Price: "520nc",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zenitsu",
   grade: "Bronze",
+  rarete: "",
+  univers: "Demon Slayer",
   category: "Sparking SM",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/fqil2d.jpg",
   Price: "200k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zeno",
   grade: "Bronze",
+  rarete: "",
+  univers: "Dragon Ball",
   category: "Sparking SP",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/cem49v.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zenon",
   grade: "Or",
+  rarete: "",
+  univers: "Black Clover",
   category: "Ultra SM",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/ezuqry.jpg",
   Price: "1m",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zeref",
   grade: "Argent",
+  rarete: "",
+  univers: "Fairy Tail",
   category: "Sparking S",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/7than2.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zohakuten",
   grade: "Bronze",
+  rarete: "",
+  univers: "Demon Slayer",
   category: "Ultra SP",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/1yh0jf.jpg",
   Price: "400k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zora",
   grade: "Bronze",
+  rarete: "",
+  univers: "Black Clover",
   category: "Sparking SM",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/dgoqx7.jpg",
   Price: "100k",
-  specs: "force:, speed:, attacks:",
-  moves: "",
-  patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 },
 {
   name: "Zorro",
   grade: "Argent",
+  rarete: "",
+  univers: "One Piece",
   category: "Ultra SM",
-  images: "",
+  images: [],
   card: "https://files.catbox.moe/h2cvdu.jpg",
   Price: "500k",
-  specs: "force:, speed:, attacks:",
-  Moves: "",
-  Patterns: ""
+  specs: {
+    force: 0,
+    speed: 0,
+    attacks: 0
+  },
+  Moves: {
+    basic: [],
+    special: [],
+    ultime: []
+  },
+  Patterns: []
 }
 ];
 
