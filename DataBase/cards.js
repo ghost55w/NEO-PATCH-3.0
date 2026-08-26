@@ -4045,8 +4045,6 @@ const cards = [
   },
   Patterns: []
 },
-
-  {
 {
   name: "Kakashi",
   grade: "Bronze",
