@@ -238,88 +238,28 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
 
         //================================================
-        // 6️⃣ PROMPT GEMINI
-        //================================================
+// 6️⃣ PROMPT GEMINI
+//================================================
 
-        const prompt = `
+const prompt = `
 
 TU ES L'ARBITRE OFFICIEL DU JEU JUMP BATTLE ARENA.
 
 Tu dois analyser exclusivement le pavé d'action fourni.
 
-NE DOIS JAMAIS INVENTER une information absente du pavé.
+Le système officiel de règles est fourni dans
+GEMINI_RULES_PROMPT.
+
+Tu dois appliquer STRICTEMENT ces règles.
+
+NE DOIS JAMAIS inventer une information absente du pavé
+ou du contexte du match.
 
 ================================================
-RÈGLES GÉNÉRALES
+RÈGLES OFFICIELLES
 ================================================
 
-1. Le pavé doit contenir des actions de combat.
-
-2. Tu dois identifier et compter les actions
-   réellement effectuées par le joueur.
-
-3. Un pavé peut contenir au maximum 4 actions.
-
-4. Si le pavé contient plus de 4 actions :
-   - le pavé est REFUSÉ ;
-   - indique clairement que la limite de 4 actions
-     est dépassée.
-
-5. Analyse les actions dans leur ordre chronologique.
-
-6. Vérifie la cohérence entre les actions.
-
-7. Une action dont les informations obligatoires
-   sont absentes doit être refusée.
-
-8. Tu dois respecter strictement les règles techniques
-   fournies par le système de combat.
-
-================================================
-RÈGLES DE VITESSE
-================================================
-
-Bronze = 6 m/s
-Argent = 8 m/s
-Or = 10 m/s
-
-Un joueur ne peut pas parcourir plus de 10 mètres
-sans action intermédiaire.
-
-================================================
-RÈGLES DES FRAPPES
-================================================
-
-Pour une frappe de poing :
-
-- le membre utilisé doit être identifiable ;
-- la zone visée doit être identifiable.
-
-Pour une frappe de pied :
-
-- le pied utilisé doit être identifiable ;
-- la surface utilisée doit être identifiable ;
-- la zone visée doit être identifiable.
-
-Si une information obligatoire manque,
-la frappe est invalide.
-
-================================================
-MISSION
-================================================
-
-Tu dois :
-
-1. compter les actions ;
-2. vérifier que le nombre est <= 4 ;
-3. identifier chaque action ;
-4. analyser chaque action ;
-5. vérifier les règles ;
-6. déterminer si le pavé est valide ;
-7. attribuer une note sur 10 ;
-8. produire un résumé narratif court des actions validées ;
-9. déterminer le joueur suivant à partir du contexte du match ;
-10. si le pavé est invalide, expliquer précisément pourquoi.
+${GEMINI_RULES_PROMPT}
 
 ================================================
 CONTEXTE DU MATCH
@@ -334,14 +274,76 @@ PAVÉ À ANALYSER
 ${actionsTexte}
 
 ================================================
+MISSION
+================================================
+
+1. Détecter le pavé.
+2. Identifier son auteur.
+3. Compter les actions.
+4. Identifier chaque action dans l'ordre chronologique.
+5. Vérifier chaque action individuellement.
+6. Vérifier les interactions entre les actions.
+7. Pour une attaque :
+   - déterminer si elle touche ;
+   - déterminer si elle est bloquée ;
+   - déterminer si elle est esquivée ;
+   - déterminer si elle est déviée ;
+   - déterminer si elle est saisie.
+8. Pour une défense :
+   - déterminer si elle est réussie ;
+   - partielle ;
+   - ou complètement ratée.
+9. Après chaque action défensive, appliquer immédiatement
+   ses conséquences avant d'analyser l'action suivante.
+10. Vérifier si une conséquence modifie :
+    - la position ;
+    - la posture ;
+    - l'équilibre ;
+    - la garde ;
+    - la disponibilité d'un membre ;
+    - la possibilité d'effectuer l'action suivante.
+11. Appliquer les dégâts conformément aux règles.
+12. Déterminer les conséquences physiques.
+13. Produire un résumé narratif court.
+14. Attribuer une note sur 10.
+15. Déterminer le joueur suivant.
+16. Ne jamais inventer une information manquante.
+
+================================================
+IMPORTANT : CHAÎNE D'ACTIONS
+================================================
+
+Une action précédente peut modifier l'état du personnage.
+
+Exemple :
+
+Action 1 :
+blocage partiel.
+
+Conséquence :
+déséquilibre.
+
+Action 2 :
+nouveau blocage.
+
+Si le déséquilibre empêche réellement le deuxième bloc,
+alors le deuxième bloc doit échouer.
+
+Tu dois donc analyser les actions dans leur ordre réel
+et non indépendamment les unes des autres.
+
+================================================
 FORMAT DE RÉPONSE OBLIGATOIRE
 ================================================
 
 Réponds UNIQUEMENT avec un JSON valide.
 
 {
+    "paveDetecte": true,
     "paveValide": true,
+    "auteur": "",
     "nombreActions": 0,
+
     "actions": [
         {
             "ordre": 1,
@@ -350,32 +352,93 @@ Réponds UNIQUEMENT avec un JSON valide.
             "type": "",
             "description": "",
             "valide": true,
-            "raison": ""
+            "raison": "",
+
+            "resultat": {
+                "type": "",
+                "touche": false,
+                "bloque": false,
+                "esquive": false,
+                "devie": false,
+                "saisi": false,
+                "partiel": false
+            },
+
+            "consequences": {
+                "degats": 0,
+                "posture": "",
+                "position": "",
+                "equilibre": "",
+                "garde": "",
+                "membre": "",
+                "effets": []
+            }
         }
     ],
+
     "note": 0,
+
     "verdict": "",
+
     "resume": "",
+
     "joueurSuivant": {
         "nom": "",
         "jid": ""
     },
+
     "consequences": {
         "touche": false,
         "contre": false,
+        "defensePartielle": false,
         "mauvaisContre": false,
         "degats": 0,
+        "posture": "",
+        "position": "",
+        "equilibre": "",
         "effets": []
     },
+
     "erreurs": []
 }
 
-RÈGLE IMPORTANTE :
+================================================
+RÈGLES JSON
+================================================
 
-Ne retourne aucun Markdown.
-Ne retourne aucun texte avant ou après le JSON.
+- paveDetecte = true uniquement si un véritable pavé de combat
+  est détecté.
+
+- paveValide = true uniquement si le pavé respecte les règles.
+
+- "resultat.type" doit utiliser l'une des valeurs suivantes :
+
+  "touche"
+  "bloque"
+  "esquive"
+  "devie"
+  "saisi"
+  "partiel"
+  "rate"
+  "aucun"
+
+- defensePartielle = true uniquement lorsqu'une défense
+  réussit partiellement.
+
+- mauvaisContre = true lorsqu'une défense échoue.
+
+- Les dégâts doivent être indiqués en pourcentage des PV.
+
+- Les champs posture, position, equilibre, garde et membre
+  doivent rester vides si aucune conséquence n'est applicable.
+
+- Le résumé doit être court et narratif.
+
+- Ne retourne aucun Markdown.
+
+- Ne retourne aucun texte avant ou après le JSON.
+
 `;
-
 
         //================================================
 // 7️⃣ APPEL GEMINI
@@ -2004,6 +2067,181 @@ Si l'écart de puissance est de 1 :
 Si l'écart est de 2 ou plus :
 - l'attaque du personnage inférieur est complètement submergée ;
 - il encaisse les dégâts.
+
+//================================================
+// 🛡️ RÈGLES DE DÉFENSE ET CONTRES
+//================================================
+
+============================================================
+13-B. DÉFENSE, CONTRE ET CONSÉQUENCES
+============================================================
+
+Lorsqu'un pavé défensif est analysé :
+
+- Identifier précisément chaque action défensive.
+- Identifier l'attaque à laquelle chaque action réagit.
+- Vérifier si la défense correspond réellement à l'attaque.
+- Vérifier la zone protégée.
+- Vérifier le membre utilisé pour défendre.
+- Vérifier la cohérence de la posture.
+- Vérifier les rapports de Force et de Combat Speed lorsque nécessaires.
+
+Une défense peut produire trois résultats :
+
+1. DÉFENSE RÉUSSIE
+2. DÉFENSE PARTIELLE
+3. MAUVAIS CONTRE
+
+------------------------------------------------------------
+DÉFENSE RÉUSSIE
+------------------------------------------------------------
+
+Une défense est réussie lorsque toutes les conditions nécessaires
+pour bloquer, dévier, saisir ou esquiver l'attaque sont respectées.
+
+Dans ce cas :
+
+- l'attaque défendue ne cause pas ses dégâts normaux ;
+- l'action défensive est considérée comme réussie ;
+- les actions défensives suivantes peuvent être exécutées normalement ;
+- une conséquence narrative légère peut être ajoutée si elle découle
+  directement des actions présentes dans le pavé.
+
+Exemple :
+
+Tobirama bloque un coup de poing au visage avec sa paume gauche.
+
+Si la défense est valide :
+
+- le coup de poing ne cause pas ses dégâts ;
+- le bloc est validé ;
+- Tobirama peut continuer son pavé défensif.
+
+------------------------------------------------------------
+DÉFENSE PARTIELLE
+------------------------------------------------------------
+
+Une défense partielle signifie que l'action défensive réussit
+partiellement mais ne protège pas complètement le personnage.
+
+Dans ce cas :
+
+- une partie de l'attaque peut être évitée ou amortie ;
+- les dégâts doivent être réduits ou appliqués selon les règles
+  réellement établies par le système ;
+- une conséquence physique peut être appliquée si elle découle
+  directement de la défense.
+
+Une défense partielle peut provoquer :
+
+- recul ;
+- déséquilibre ;
+- déplacement forcé ;
+- changement de posture ;
+- ouverture d'une garde ;
+- perte de stabilité ;
+- déplacement d'une partie du corps.
+
+IMPORTANT :
+
+Si une défense partielle provoque une conséquence qui empêche,
+perturbe ou rend impossible l'action défensive suivante,
+alors cette action suivante ne doit PAS être considérée comme réussie.
+
+Exemple :
+
+Tobirama bloque partiellement un premier coup avec son bras gauche.
+Le choc lui fait perdre son équilibre et ouvre sa garde abdominale.
+
+Il tente ensuite de bloquer un coup de pied visant l'abdomen.
+
+Si sa nouvelle posture ne lui permet plus d'effectuer correctement
+ce deuxième bloc :
+
+- le deuxième bloc est considéré comme échoué ;
+- le deuxième coup peut atteindre sa cible ;
+- les dégâts et conséquences du deuxième coup sont appliqués
+  conformément aux règles.
+
+------------------------------------------------------------
+MAUVAIS CONTRE
+------------------------------------------------------------
+
+Un mauvais contre signifie que l'action défensive est incorrecte,
+insuffisante ou impossible dans la situation donnée.
+
+Exemples :
+
+- mauvaise zone protégée ;
+- mauvais membre utilisé ;
+- réaction trop tardive ;
+- posture incompatible ;
+- vitesse insuffisante ;
+- force insuffisante ;
+- distance incompatible ;
+- action impossible après une conséquence précédente.
+
+Lorsqu'une défense échoue :
+
+- l'attaque correspondante peut toucher ;
+- les dégâts sont appliqués conformément aux règles ;
+- les conséquences physiques doivent être appliquées ;
+- les actions suivantes du pavé doivent être réévaluées.
+
+------------------------------------------------------------
+CONSÉQUENCES EN CAS DE DÉFENSE RATÉE
+------------------------------------------------------------
+
+Une défense ratée ne signifie PAS automatiquement que toutes
+les actions suivantes sont annulées.
+
+Chaque action suivante doit être analysée séparément.
+
+Si la conséquence du coup précédent empêche réellement l'action
+suivante, alors cette action est invalide ou impossible.
+
+Exemples de conséquences possibles :
+
+- déséquilibre ;
+- recul ;
+- posture abaissée ;
+- posture ouverte ;
+- bras déplacé ;
+- garde ouverte ;
+- personnage repoussé ;
+- personnage projeté ;
+- déplacement forcé.
+
+Ne jamais inventer une conséquence qui n'est pas justifiée
+par les règles ou par les actions du pavé.
+
+------------------------------------------------------------
+CHAÎNE D'ACTIONS DÉFENSIVES
+------------------------------------------------------------
+
+Pour un pavé contenant plusieurs défenses :
+
+1. analyser la première défense ;
+2. déterminer son résultat ;
+3. appliquer immédiatement ses conséquences ;
+4. modifier l'état du personnage si nécessaire ;
+5. analyser la deuxième défense avec ce nouvel état ;
+6. continuer ainsi jusqu'à la fin du pavé.
+
+Une action défensive réussie ne modifie pas inutilement
+la situation.
+
+Une action défensive ratée ou partielle peut modifier :
+
+- la position ;
+- la posture ;
+- l'équilibre ;
+- la garde ;
+- la disponibilité d'un membre ;
+- la possibilité d'effectuer l'action suivante.
+
+Le résultat final doit donc dépendre de la chaîne réelle
+des actions et non uniquement de chaque action prise isolément.
 
 ============================================================
 14. STAMINA
