@@ -3684,6 +3684,7 @@ module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
     analysePaveAvecGemini,
+    envoyerResultatPaveGemini,
     lancerMatchAllStars,
     duelsEnCours,
     matchAttente,
