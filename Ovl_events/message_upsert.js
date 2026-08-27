@@ -9,6 +9,7 @@ const {
     verifierJoueursMatch,
     verifierCardsMatch,
     analysePaveAvecGemini,
+    envoyerResultatPaveGemini,
     duelsEnCours,
     matchAttente,
     lancerTimerTour
