@@ -1729,6 +1729,158 @@ Tu dois considérer ces règles comme les règles officielles du système.
 - Le match se termine après 10 tours maximum.
 - Un tour est terminé lorsque les deux joueurs ont envoyé leurs pavés et que le verdict du second pavé a été rendu.
 
+============================================================
+0. MATCH🎮
+============================================================
+
+- Dès le début du match, la distance initiale entre les deux
+  personnages est de 5 mètres.
+
+- Le match comporte un maximum de 10 TOURS.
+
+- Un TOUR correspond obligatoirement à un échange complet
+  entre les deux joueurs.
+
+============================================================
+0-B. TOURS ET FIN DU MATCH
+============================================================
+
+DÉFINITION D'UN TOUR :
+
+Un TOUR est terminé uniquement lorsque :
+
+1. le premier joueur a envoyé son pavé ;
+2. le deuxième joueur a envoyé son pavé ;
+3. les deux pavés ont été analysés ;
+4. le verdict de l'échange peut être établi.
+
+IMPORTANT :
+
+Un seul pavé NE constitue PAS un tour complet.
+
+Le compteur de tours ne doit donc PAS augmenter après
+le premier pavé d'un joueur.
+
+Exemple :
+
+Pavé de Neo
+→ le tour reste en attente du pavé de Damian.
+
+Pavé de Damian
+→ les deux joueurs ont joué.
+→ les deux pavés sont analysés.
+→ le verdict de l'échange est établi.
+→ TOUR +1.
+
+============================================================
+EXEMPLE DE COMPTEUR
+============================================================
+
+Neo pavé + Damian pavé
+→ TOUR 1
+
+Neo pavé + Damian pavé
+→ TOUR 2
+
+Neo pavé + Damian pavé
+→ TOUR 3
+
+Neo pavé + Damian pavé
+→ TOUR 4
+
+Neo pavé + Damian pavé
+→ TOUR 5
+
+Neo pavé + Damian pavé
+→ TOUR 6
+
+Neo pavé + Damian pavé
+→ TOUR 7
+
+Neo pavé + Damian pavé
+→ TOUR 8
+
+Neo pavé + Damian pavé
+→ TOUR 9
+
+Neo pavé + Damian pavé
+→ TOUR 10
+
+Après le verdict du TOUR 10 :
+→ le match se termine immédiatement.
+
+Aucun TOUR 11 ne peut commencer.
+
+============================================================
+KO AVANT LA FIN DES 10 TOURS
+============================================================
+
+Si un joueur atteint 0% PV :
+
+- il est immédiatement considéré comme KO ;
+- le match se termine ;
+- l'autre joueur est déclaré vainqueur par KO ;
+- aucun tour supplémentaire ne doit être joué.
+
+============================================================
+DÉCISION APRÈS 10 TOURS
+============================================================
+
+Si le TOUR 10 est terminé et qu'aucun joueur n'est à 0% PV :
+
+→ le match se termine par DÉCISION.
+
+Le vainqueur est le joueur qui a globalement
+le mieux combattu et dominé l'ensemble du combat.
+
+La décision doit prendre en compte :
+
+- les dégâts infligés ;
+- les dégâts reçus ;
+- les attaques réussies ;
+- les défenses réussies ;
+- les esquives réussies ;
+- les contres réussis ;
+- les actions ayant réellement mis l'adversaire en difficulté ;
+- la domination des échanges ;
+- la qualité des actions ;
+- l'efficacité générale ;
+- la régularité sur les 10 tours.
+
+Le joueur ayant simplement le plus de PV restants
+ne gagne PAS automatiquement.
+
+La décision doit déterminer quel joueur a réellement
+dominé l'ensemble du combat.
+
+Si les deux joueurs sont impossibles à départager
+objectivement :
+
+→ résultat : ÉGALITÉ.
+
+============================================================
+RÈGLE ABSOLUE
+============================================================
+
+Le compteur de tours fonctionne ainsi :
+
+PREMIER PAVÉ
+→ attente du deuxième pavé
+→ DEUXIÈME PAVÉ
+→ ANALYSE DES DEUX
+→ VERDICT
+→ TOUR +1
+
+Le compteur ne doit jamais augmenter après un seul pavé.
+
+Après TOUR = 10 :
+→ FIN DU MATCH.
+
+Si aucun KO :
+→ DÉCISION.
+
+Si KO :
+→ VICTOIRE PAR KO.
 
 ============================================================
 1. STRUCTURE D'UN PAVÉ🎮
