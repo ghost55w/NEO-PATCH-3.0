@@ -86,7 +86,6 @@ async function appelerGemini(prompt) {
 //================================================
 // 🤖 ANALYSE PAVÉ AVEC GEMINI
 //================================================
-
 async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
     try {
@@ -118,10 +117,14 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
         const marqueurDebut =
             "░▒░ RAZORX⚡™ | 🪀GAMING 🎮░▒░";
+        
+const regexMarqueurActions = /🌀🎮\s*:/;
 
-        const marqueurActions =
-            "🌀🎮:";
-
+const estPave =
+    texte.includes(marqueurDebut) &&
+    regexMarqueurActions.test(texte) &&
+    texte.includes(marqueurFin); 
+        
         const marqueurFin =
             "░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░";
 
@@ -159,10 +162,22 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
         // 4️⃣ EXTRACTION DU CONTENU APRÈS 🌀🎮:
         //================================================
 
-        const positionActions =
-            texte.indexOf(marqueurActions);
+        const matchMarqueur =
+    texte.match(/🌀🎮\s*:/);
 
-        if (positionActions === -1) {
+if (!matchMarqueur) {
+
+    return {
+        ok: false,
+        paveDetecte: true,
+        user,
+        erreur: "Marqueur 🌀🎮: introuvable"
+    };
+
+}
+
+const positionActions =
+    matchMarqueur.index;
 
             return {
                 ok: false,
@@ -175,13 +190,13 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
 
         let actionsTexte =
-            texte
-                .slice(
-                    positionActions +
-                    marqueurActions.length
-                )
-                .split(marqueurFin)[0]
-                .trim();
+    texte
+        .slice(
+            positionActions +
+            matchMarqueur[0].length
+        )
+        .split(marqueurFin)[0]
+        .trim();
 
 
         if (!actionsTexte) {
