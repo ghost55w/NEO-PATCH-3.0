@@ -2399,28 +2399,131 @@ en fonction de l'état résultant des actions précédentes.
 
 
 ============================================================
-14. STAMINA
+14. STAMINA ET CHANGEMENT DE TRAJECTOIRE
 ============================================================
 
 Les esquives à VMAX précisée coûtent 10% de Stamina.
-
-IMPORTANT :
-
-Si "VMAX" est utilisé et que le grade du personnage est connu,
-la VMAX est considérée comme précisée et la règle de coût VMAX s'applique.
-
-Changer la trajectoire d'un coup déjà en cours coûte 5% de Stamina.
-
-Après cette modification de trajectoire :
-
-- la partie du corps utilisée ne peut plus être ramenée ;
-- elle ne peut plus être utilisée pour effectuer un bloc ;
-- elle ne peut plus être utilisée pour changer une nouvelle fois la trajectoire.
 
 Les dashs coûtent 10% de Stamina.
 
 Saisir un coup coûte 5% de Stamina.
 
+============================================================
+CHANGEMENT DE TRAJECTOIRE D'UNE ATTAQUE
+============================================================
+
+Lorsqu'un personnage lance une frappe et que l'adversaire
+effectue une tentative de blocage ou de contre, l'attaquant
+peut modifier la trajectoire de sa frappe afin d'adapter
+son attaque à la réaction adverse.
+
+Modifier la trajectoire d'une frappe déjà engagée coûte :
+
+→ -5% de Stamina.
+
+Cette modification de trajectoire ne constitue PAS une
+nouvelle attaque.
+
+============================================================
+LIMITATION APRÈS MODIFICATION DE TRAJECTOIRE
+============================================================
+
+Après avoir modifié une fois la trajectoire de sa frappe :
+
+- cette même frappe ne peut plus modifier une nouvelle fois
+  sa trajectoire ;
+
+- le membre utilisé pour cette frappe reste engagé dans
+  l'action en cours ;
+
+- ce membre ne peut pas être immédiatement utilisé pour
+  effectuer un bloc ;
+
+- le personnage ne peut pas interrompre instantanément
+  cette frappe pour utiliser le même membre afin de bloquer
+  une nouvelle attaque ;
+
+- une deuxième modification de trajectoire est INTERDITE.
+
+Cette limitation concerne le membre et l'action engagés,
+et non l'ensemble du personnage.
+
+============================================================
+CONTRE-ATTAQUE APRÈS UNE MODIFICATION DE TRAJECTOIRE
+============================================================
+
+Si l'adversaire contre-attaque pendant que le personnage
+vient de modifier la trajectoire de sa frappe :
+
+- le personnage ne peut plus utiliser le membre engagé
+  dans sa frappe pour bloquer ;
+
+- il ne peut plus modifier une deuxième fois la trajectoire
+  de cette même frappe ;
+
+- il ne peut pas interrompre instantanément sa frappe pour
+  effectuer un blocage avec le membre engagé ;
+
+- pour éviter la contre-attaque, sa défense possible est
+  une ESQUIVE PAR DÉPLACEMENT ;
+
+- cette esquive doit être réalisée en déplaçant le corps
+  hors de la trajectoire de l'attaque adverse ;
+
+- si aucune esquive par déplacement n'est possible selon
+  la situation, l'attaque adverse peut atteindre sa cible.
+
+============================================================
+BLOCAGE IMPOSSIBLE AVEC LE MEMBRE ENGAGÉ
+============================================================
+
+Si le personnage tente malgré tout d'utiliser le membre
+encore engagé dans sa frappe pour bloquer la contre-attaque :
+
+→ le bloc est considéré comme un MAUVAIS CONTRE (MC).
+
+La raison est que le personnage ne peut pas arrêter
+instantanément une frappe déjà engagée afin de transformer
+le même membre en défense contre une attaque déjà en cours.
+
+Cette tentative provoque un retard de 2 actions,
+soit 2 secondes, pour effectuer correctement le blocage.
+
+L'attaque adverse peut donc atteindre sa cible.
+
+============================================================
+RÈGLE ABSOLUE
+============================================================
+
+Après une modification de trajectoire :
+
+→ coût : -5% Stamina ;
+→ aucune deuxième modification de trajectoire ;
+→ le membre utilisé reste engagé dans la frappe ;
+→ ce membre ne peut pas immédiatement servir à bloquer ;
+→ en cas de contre-attaque adverse, la défense possible
+  est une ESQUIVE PAR DÉPLACEMENT ;
+→ tenter de bloquer avec le membre engagé = MAUVAIS CONTRE ;
+→ ce mauvais contre entraîne un retard de 2 actions / 2 secondes.
+
+============================================================
+RÈGLE ABSOLUE
+============================================================
+
+Une même frappe peut modifier sa trajectoire UNE SEULE FOIS.
+
+Modification de trajectoire :
+→ -5% Stamina.
+
+Après cette modification :
+→ aucune deuxième modification ;
+→ le membre utilisé reste engagé ;
+→ ce membre ne peut pas servir immédiatement à bloquer ;
+→ en cas de contre-attaque, l'esquive devient la défense
+   possible avec une partie du corps disponible ;
+→ tenter de bloquer avec le membre engagé constitue
+   un MAUVAIS CONTRE et provoque un retard de 2 actions
+   / 2 secondes.
 
 ============================================================
 15. DÉPLACEMENTS BOOSTÉS
