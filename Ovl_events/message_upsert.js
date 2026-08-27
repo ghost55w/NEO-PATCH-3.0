@@ -325,7 +325,7 @@ try {
                         // 🎮 ENVOI DU RENDU VISUEL
                         //================================================
 
-                        await envoyerResultatPaveGemini(
+    await envoyerResultatPaveGemini(
     ovl,
     ms_org,
     resultatGemini,
