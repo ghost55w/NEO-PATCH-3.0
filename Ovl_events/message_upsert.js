@@ -269,14 +269,27 @@ try {
                     //============================================
 
                     const resultatGemini =
-                        await analysePaveAvecGemini(
-                            texte,
-                            {
-                                user: auteur_Message,
-                                joueur,
-                                match
-                            }
-                        );
+    await analysePaveAvecGemini(
+        texte,
+        {
+            user: auteur_Message,
+
+            joueur: {
+                jid: joueur.jid,
+                nom: joueur.nom,
+                personnage: joueur.personnage,
+                grade: joueur.grade,
+                categorie: joueur.categorie
+            },
+
+            match: {
+                id: match.id,
+                etat: match.etat,
+                tour: match.tour,
+                joueurTour: match.joueurTour
+            }
+        }
+    );
 
                     //============================================
                     // 🚫 PAVÉ NON DÉTECTÉ
