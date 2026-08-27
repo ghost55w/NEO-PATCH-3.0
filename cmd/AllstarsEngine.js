@@ -378,52 +378,52 @@ Ne retourne aucun texte avant ou après le JSON.
 
 
         //================================================
-        // 7️⃣ APPEL GEMINI
-        //================================================
+// 7️⃣ APPEL GEMINI
+//================================================
 
-        const apiKey =
-            process.env.GEMINI_API_KEY;
+const apiKey =
+    process.env.GEMINI_API_KEY;
 
-        if (!apiKey) {
+if (!apiKey) {
 
-            throw new Error(
-                "GEMINI_API_KEY manquante dans Render"
-            );
+    throw new Error(
+        "GEMINI_API_KEY manquante dans Render"
+    );
 
-        }
-
-
-        const url =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-            apiKey;
+}
 
 
-        const response =
-            await axios.post(
-                url,
+const url =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
+    apiKey;
+
+
+const response =
+    await axios.post(
+        url,
+        {
+            contents: [
                 {
-                    contents: [
+                    parts: [
                         {
-                            parts: [
-                                {
-                                    text: prompt
-                                }
-                            ]
+                            text: prompt
                         }
-                    ],
-                    generationConfig: {
-                        temperature: 0,
-                        responseMimeType: "application/json"
-                    }
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    timeout: 30000
+                    ]
                 }
-            );
+            ],
 
+            generationConfig: {
+                responseMimeType: "application/json"
+            }
+        },
+        {
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            timeout: 30000
+        }
+    );
 
         //================================================
         // 8️⃣ EXTRACTION RÉPONSE
