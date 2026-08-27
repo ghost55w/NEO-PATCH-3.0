@@ -326,11 +326,11 @@ try {
                         //================================================
 
                         await envoyerResultatPaveGemini(
-                            ovl,
-                            ms_org,
-                            resultatGemini,
-                            match
-                        );
+    ovl,
+    ms_org,
+    resultatGemini,
+    match
+);
 
                         //================================================
                         // ⏱️ TIMER
