@@ -232,118 +232,133 @@ try {
         ovl,
         auteur_Message
     );
+//================================================
+// 🥊 ANALYSE DU PAVÉ ALL STARS
+//================================================
 
-    //================================================
-    // 🥊 ANALYSE DU PAVÉ ALL STARS
-    //================================================
+const matchId = matchAttente[ms_org];
 
-    const matchId = matchAttente[ms_org];
+if (matchId) {
 
-    if (matchId) {
+    const match = duelsEnCours[matchId];
 
-        const match = duelsEnCours[matchId];
+    if (
+        match &&
+        match.etat === "in_match"
+    ) {
 
-        if (
-            match &&
-            match.etat === "in_match"
-        ) {
+        //================================================
+        // 👤 VÉRIFIER QUE L'AUTEUR EST UN JOUEUR
+        //================================================
 
-            const joueur = match.joueurs?.find(
+        const joueur =
+            match.joueurs?.find(
                 j => j.jid === auteur_Message
             );
 
-            if (joueur) {
+        if (joueur) {
 
-                //============================================
-                // 🎮 VÉRIFIER QUE C'EST UN PAVÉ DE JEU
-                //============================================
+            //================================================
+            // 🌀 DÉTECTION RAPIDE DU PAVÉ
+            //================================================
 
-                const estPaveJeu =
-                    texte.includes("🌀🎮") ||
-                    texte.includes("🎮🌀");
+            const estPaveJeu =
+                texte.includes("🌀🎮:") ||
+                texte.includes("🌀🎮 :");
 
-                if (estPaveJeu) {
 
-                    //============================================
-                    // 🤖 ANALYSE AVEC GEMINI
-                    //============================================
+            if (estPaveJeu) {
 
-                    const resultatGemini =
-    await analysePaveAvecGemini(
-        texte,
-        {
-            user: auteur_Message,
+                //================================================
+                // 🤖 ANALYSE AVEC GEMINI
+                //================================================
 
-            joueur: {
-                jid: joueur.jid,
-                nom: joueur.nom,
-                personnage: joueur.personnage,
-                grade: joueur.grade,
-                categorie: joueur.categorie
-            },
+                const resultatGemini =
+                    await analysePaveAvecGemini(
+                        texte,
+                        {
+                            user: auteur_Message,
+                            joueur: joueur,
+                            match: match
+                        }
+                    );
 
-            match: {
-                id: match.id,
-                etat: match.etat,
-                tour: match.tour,
-                joueurTour: match.joueurTour
-            }
-        }
-    );
 
-                    //============================================
-                    // 🚫 PAVÉ NON DÉTECTÉ
-                    //============================================
+                //================================================
+                // 🚫 PAVÉ NON DÉTECTÉ
+                //================================================
 
-                    if (!resultatGemini?.paveDetecte) {
-                        console.log(
-                            "❌ Gemini : aucun pavé détecté"
-                        );
+                if (!resultatGemini?.paveDetecte) {
 
-                    } else {
+                    console.log(
+                        "❌ Gemini : aucun pavé détecté"
+                    );
 
-                        //============================================
-                        // 🧠 DEBUG GEMINI
-                        //============================================
+                } else {
 
-                        console.log(
-                            "🤖 GEMINI — PAVÉ DÉTECTÉ"
-                        );
+                    //================================================
+                    // 🧠 DEBUG GEMINI
+                    //================================================
 
-                        console.log(
-                            "👤 Auteur :",
-                            auteur_Message
-                        );
+                    console.log(
+                        "🤖 GEMINI — PAVÉ DÉTECTÉ"
+                    );
 
-                        console.log(
-                            "🌀 Actions :",
-                            resultatGemini.nombreActions
-                        );
+                    console.log(
+                        "👤 Auteur :",
+                        auteur_Message
+                    );
 
-                        console.log(
-                            "📊 Note :",
-                            resultatGemini.note
-                        );
+                    console.log(
+                        "🌀 Actions :",
+                        resultatGemini.nombreActions
+                    );
 
-                        console.log(
-                            "⚖️ Verdict :",
-                            resultatGemini.verdict
-                        );
+                    console.log(
+                        "📊 Note :",
+                        resultatGemini.note
+                    );
 
-                        console.log(
-                            "🤖 Résultat complet :",
-                            JSON.stringify(
-                                resultatGemini,
-                                null,
-                                2
-                            )
-                        );
-                    }
+                    console.log(
+                        "⚖️ Verdict :",
+                        resultatGemini.verdict
+                    );
+
+                    console.log(
+                        "➡️ Joueur suivant :",
+                        resultatGemini.joueurSuivant
+                    );
+
+                    console.log(
+                        "🤖 Résultat complet :",
+                        JSON.stringify(
+                            resultatGemini,
+                            null,
+                            2
+                        )
+                    );
+
+
+                    //================================================
+                    // ⏱️ TIMER
+                    //================================================
+
+                    lancerTimerTour(
+                        match,
+                        ms_org,
+                        ovl
+                    );
+
                 }
+
             }
+
         }
+
     }
 
+}
+    
     //================================================
     // 📄 DÉTECTION FICHE BLUELOCK
     //================================================
