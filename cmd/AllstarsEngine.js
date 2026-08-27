@@ -240,26 +240,41 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
         //================================================
 // 6️⃣ PROMPT GEMINI
 //================================================
-
 const prompt = `
 
-TU ES L'ARBITRE OFFICIEL DU JEU JUMP BATTLE ARENA.
-
-Tu dois analyser exclusivement le pavé d'action fourni.
-
-Le système officiel de règles est fourni dans
-GEMINI_RULES_PROMPT.
-
-Tu dois appliquer STRICTEMENT ces règles.
-
-NE DOIS JAMAIS inventer une information absente du pavé
-ou du contexte du match.
-
-================================================
-RÈGLES OFFICIELLES
-================================================
-
 ${GEMINI_RULES_PROMPT}
+
+================================================
+MISSION SPÉCIFIQUE DE CETTE ANALYSE
+================================================
+
+Tu dois maintenant analyser le pavé suivant en appliquant
+STRICTEMENT toutes les règles ci-dessus.
+
+Tu dois notamment :
+
+1. Identifier toutes les actions.
+2. Les remettre dans leur ordre chronologique.
+3. Compter les actions.
+4. Vérifier la limite de 4 actions.
+5. Utiliser le grade du personnage pour déterminer sa VMAX
+   lorsqu'il écrit "VMAX" ou une formulation équivalente.
+6. Ne jamais exiger une valeur numérique de VMAX si le grade
+   est disponible dans le contexte.
+7. Pour une défense, identifier précisément l'attaque à laquelle
+   chaque action répond.
+8. Évaluer chaque défense séparément.
+9. Déterminer si elle est réussie, partielle ou ratée.
+10. Appliquer immédiatement les conséquences d'une défense
+    avant d'analyser la suivante.
+11. Si une défense partielle provoque un déséquilibre,
+    changement de posture, ouverture de garde ou déplacement
+    empêchant la défense suivante, alors la défense suivante
+    doit être réévaluée avec ce nouvel état.
+12. Appliquer les dégâts lorsqu'une attaque atteint sa cible.
+13. Décrire les conséquences physiques justifiées.
+14. Produire un résumé narratif court.
+15. Déterminer le joueur suivant.
 
 ================================================
 CONTEXTE DU MATCH
@@ -274,76 +289,14 @@ PAVÉ À ANALYSER
 ${actionsTexte}
 
 ================================================
-MISSION
-================================================
-
-1. Détecter le pavé.
-2. Identifier son auteur.
-3. Compter les actions.
-4. Identifier chaque action dans l'ordre chronologique.
-5. Vérifier chaque action individuellement.
-6. Vérifier les interactions entre les actions.
-7. Pour une attaque :
-   - déterminer si elle touche ;
-   - déterminer si elle est bloquée ;
-   - déterminer si elle est esquivée ;
-   - déterminer si elle est déviée ;
-   - déterminer si elle est saisie.
-8. Pour une défense :
-   - déterminer si elle est réussie ;
-   - partielle ;
-   - ou complètement ratée.
-9. Après chaque action défensive, appliquer immédiatement
-   ses conséquences avant d'analyser l'action suivante.
-10. Vérifier si une conséquence modifie :
-    - la position ;
-    - la posture ;
-    - l'équilibre ;
-    - la garde ;
-    - la disponibilité d'un membre ;
-    - la possibilité d'effectuer l'action suivante.
-11. Appliquer les dégâts conformément aux règles.
-12. Déterminer les conséquences physiques.
-13. Produire un résumé narratif court.
-14. Attribuer une note sur 10.
-15. Déterminer le joueur suivant.
-16. Ne jamais inventer une information manquante.
-
-================================================
-IMPORTANT : CHAÎNE D'ACTIONS
-================================================
-
-Une action précédente peut modifier l'état du personnage.
-
-Exemple :
-
-Action 1 :
-blocage partiel.
-
-Conséquence :
-déséquilibre.
-
-Action 2 :
-nouveau blocage.
-
-Si le déséquilibre empêche réellement le deuxième bloc,
-alors le deuxième bloc doit échouer.
-
-Tu dois donc analyser les actions dans leur ordre réel
-et non indépendamment les unes des autres.
-
-================================================
 FORMAT DE RÉPONSE OBLIGATOIRE
 ================================================
 
 Réponds UNIQUEMENT avec un JSON valide.
 
 {
-    "paveDetecte": true,
     "paveValide": true,
-    "auteur": "",
     "nombreActions": 0,
-
     "actions": [
         {
             "ordre": 1,
@@ -353,92 +306,35 @@ Réponds UNIQUEMENT avec un JSON valide.
             "description": "",
             "valide": true,
             "raison": "",
-
-            "resultat": {
-                "type": "",
-                "touche": false,
-                "bloque": false,
-                "esquive": false,
-                "devie": false,
-                "saisi": false,
-                "partiel": false
-            },
-
-            "consequences": {
-                "degats": 0,
-                "posture": "",
-                "position": "",
-                "equilibre": "",
-                "garde": "",
-                "membre": "",
-                "effets": []
-            }
+            "resultatDefense": "",
+            "consequence": ""
         }
     ],
-
     "note": 0,
-
     "verdict": "",
-
     "resume": "",
-
     "joueurSuivant": {
         "nom": "",
         "jid": ""
     },
-
     "consequences": {
         "touche": false,
         "contre": false,
-        "defensePartielle": false,
         "mauvaisContre": false,
         "degats": 0,
-        "posture": "",
+        "effets": [],
         "position": "",
+        "posture": "",
         "equilibre": "",
-        "effets": []
+        "garde": ""
     },
-
     "erreurs": []
 }
 
-================================================
-RÈGLES JSON
-================================================
-
-- paveDetecte = true uniquement si un véritable pavé de combat
-  est détecté.
-
-- paveValide = true uniquement si le pavé respecte les règles.
-
-- "resultat.type" doit utiliser l'une des valeurs suivantes :
-
-  "touche"
-  "bloque"
-  "esquive"
-  "devie"
-  "saisi"
-  "partiel"
-  "rate"
-  "aucun"
-
-- defensePartielle = true uniquement lorsqu'une défense
-  réussit partiellement.
-
-- mauvaisContre = true lorsqu'une défense échoue.
-
-- Les dégâts doivent être indiqués en pourcentage des PV.
-
-- Les champs posture, position, equilibre, garde et membre
-  doivent rester vides si aucune conséquence n'est applicable.
-
-- Le résumé doit être court et narratif.
-
-- Ne retourne aucun Markdown.
-
-- Ne retourne aucun texte avant ou après le JSON.
-
+Ne retourne aucun Markdown.
+Ne retourne aucun texte avant ou après le JSON.
 `;
+
 
         //================================================
 // 7️⃣ APPEL GEMINI
@@ -1814,7 +1710,7 @@ const ACTIONS_MAP = {
 // 🤖 RÈGLES ARBITRE GEMINI
 //================================================
 const GEMINI_RULES_PROMPT = `
-TU ES L'ARBITRE D'UN SYSTÈME DE COMBAT DYNAMIQUE.
+TU ES L'ARBITRE OFFICIEL D'UN SYSTÈME DE COMBAT DYNAMIQUE.
 
 Ton rôle est UNIQUEMENT de parcourir et appliquer les règles ci-dessous
 lorsque tu analyses un pavé de combat.
@@ -1826,22 +1722,71 @@ Tu dois considérer ces règles comme les règles officielles du système.
 
 
 ============================================================
-0. MATCH🎮 
-============================================================
-- Dès le début du match la distance initiale entre les deux perso est de 5m.
-- le match se termine après 10 tours maximum et un tour c'est quand les deux joueurs ont envoyés leurs pavés donc après le verdict. 
-
-============================================================
-1. STRUCTURE D'UN PAVÉ🎮 
+0. MATCH🎮
 ============================================================
 
-- Un pavé peut contenir au maximum 4 ACTIONS, les Actions de ACTIONS MAP. 
-- Une action se réalise en 1s. 
-- Si celui qui attaque fait 4 actions par exemple et que celui qui défends rate son esquive où son contre depuis la première action alors le reste des actions du pavés vont s'appliquer en conséquence. 
-- Chaque personnage possède une zone de sensorialité de 1 mètre autour de lui permettant de ressentir les coups et la présence d'un adversaire. Il a donc juste à mentionner dans son pavé (ZS) où Zone de sensorialité.
-- La vitesse de déplacement doit toujours être précisée lorsqu'un déplacement est effectué à vitesse maximale (VMAX).
-- Si la VMAX n'est pas précisée, le déplacement, esquives ect est considéré comme effectué à vitesse réduite de 1 m/s.
-- Celui qui défends doit toujours commencer par préciser à quoi il réagit avant de mentionner ses actions. Par exemple : Voyant le coup venir vers son visage... 
+- Dès le début du match la distance initiale entre les deux personnages est de 5 mètres.
+- Le match se termine après 10 tours maximum.
+- Un tour est terminé lorsque les deux joueurs ont envoyé leurs pavés et que le verdict du second pavé a été rendu.
+
+
+============================================================
+1. STRUCTURE D'UN PAVÉ🎮
+============================================================
+
+- Un pavé peut contenir au maximum 4 ACTIONS issues de ACTIONS MAP.
+- Une action se réalise en 1 seconde.
+- Chaque action distincte doit être comptée séparément.
+- Une action composée de plusieurs mouvements distincts doit être décomposée en plusieurs actions.
+- Si un attaquant effectue plusieurs actions et que le défenseur échoue à défendre une action intermédiaire, les actions suivantes doivent être réévaluées selon les conséquences de l'action précédente.
+- Une action suivante n'est jamais automatiquement annulée uniquement parce qu'une action précédente a échoué.
+- Elle doit être analysée avec le nouvel état du personnage.
+
+ZONE DE SENSORIALITÉ :
+
+- Chaque personnage possède une zone de sensorialité de 1 mètre autour de lui.
+- Cette zone permet de ressentir les coups et la présence d'un adversaire.
+- Le joueur peut simplement mentionner "ZS" ou "Zone de sensorialité" dans son pavé.
+
+RÈGLE VMAX :
+
+Lorsqu'un joueur indique :
+
+- "VMAX"
+- "vitesse maximale"
+- "à vitesse maximale"
+- "en course VMAX"
+- ou toute formulation équivalente,
+
+la vitesse maximale doit être récupérée automatiquement depuis le grade
+du personnage présent dans le contexte du match.
+
+CORRESPONDANCE :
+
+- Bronze = 6 m/s
+- Argent / Silver = 8 m/s
+- Or / Gold = 10 m/s
+
+IMPORTANT :
+
+- Le joueur n'a PAS besoin d'écrire la valeur exacte en m/s.
+- Si le joueur écrit simplement "VMAX" et que le grade du personnage est connu dans le contexte du match, la vitesse est considérée comme suffisamment précisée.
+- Gemini doit récupérer la valeur correspondante au grade depuis le contexte du match.
+- Gemini ne doit PAS refuser un pavé uniquement parce que la valeur "6 m/s", "8 m/s" ou "10 m/s" n'est pas écrite.
+- Si le grade du personnage est inconnu et que le pavé utilise VMAX, alors la vitesse maximale ne peut pas être déterminée et l'information doit être signalée comme manquante.
+
+IMPORTANT :
+
+- Si aucun terme VMAX ou équivalent n'est utilisé, le déplacement est considéré comme effectué à vitesse réduite de 1 m/s.
+- Cela concerne notamment les déplacements, esquives et mouvements de repositionnement lorsque leur vitesse n'est pas spécifiée.
+- VMAX ne doit donc être refusée que si le grade nécessaire pour déterminer sa valeur est inconnu.
+
+DÉFENSE :
+
+- Celui qui défend doit toujours commencer par préciser à quoi il réagit avant de mentionner ses actions.
+- Exemple :
+  "Voyant le coup venir vers son visage, Tobirama place sa paume gauche en opposition."
+
 
 ============================================================
 2. VITESSE DE DÉPLACEMENT
@@ -1856,6 +1801,12 @@ GRADES :
 - Gold / Or : 10 m/s.
 
 Le powerscaling réduit peut modifier la vitesse selon les règles du personnage.
+
+Si VMAX est utilisée :
+- récupérer automatiquement la vitesse correspondant au grade du personnage.
+
+Ne jamais exiger que le joueur écrive lui-même la valeur numérique de la VMAX.
+
 
 ============================================================
 3. COMBAT SPEED
@@ -1879,20 +1830,25 @@ Si la Combat Speed est SUPÉRIEURE de +2 :
 - saisir ne coûte plus de Stamina ;
 - esquiver coûte 5% de Stamina.
 
-Les personnages SS peuvent combattre tous les tiers S sans retard et sont donc toujours considérés comme supérieurs de +2.
+Les personnages SS peuvent combattre tous les tiers S sans retard
+et sont donc toujours considérés comme supérieurs de +2.
+
 
 ============================================================
 4. DÉPLACEMENTS INSTANTANÉS
 ============================================================
 
-Les déplacements instantanés coûtent 10% de Stamina ou d'énergie selon le personnage.
+Les déplacements instantanés coûtent 10% de Stamina ou d'énergie
+selon le personnage.
 
 Après avoir utilisé un déplacement instantané :
+
 - le personnage prend l'adversaire de vitesse avec un effet de surprise ;
 - un adversaire de vitesse égale ou inférieure ne peut que réagir aux actions venant après le déplacement ;
 - il peut uniquement esquiver ou bloquer ;
 - il ne peut pas saisir le coup ;
 - il peut cependant bloquer, dévier et esquiver.
+
 
 ============================================================
 5. ZONE D'EFFET DES ATTAQUES
@@ -1901,11 +1857,14 @@ Après avoir utilisé un déplacement instantané :
 La zone d'effet de vitesse d'une attaque frontale est de 5 mètres.
 
 Si une attaque est lancée depuis cette distance :
+
 - l'esquive coûte 20% de Stamina si le personnage n'est pas plus rapide que l'attaque ;
 - normalement, une esquive coûte 10% de Stamina.
 
 Exception :
+
 - les déplacements instantanés ne suivent pas cette règle.
+
 
 ============================================================
 6. TEMPS D'UNE ATTAQUE
@@ -1914,10 +1873,12 @@ Exception :
 Une attaque est lancée en 1 seconde.
 
 Elle nécessite :
+
 - 0,5 seconde de préparation ;
 - 0,5 seconde de lancement.
 
 Une attaque ne peut pas être lancée en combo pendant sa préparation.
+
 
 ============================================================
 7. PRÉPARATION D'UNE ATTAQUE
@@ -1932,10 +1893,12 @@ Une attaque d'énergie peut être lancée en projectile pour 5% d'énergie.
 La vitesse de ce projectile est de 6 m/s.
 
 Un personnage peut également récupérer son énergie :
+
 - en dégageant son énergie ;
 - ou en restant debout sans effectuer d'action.
 
 Cette récupération rapporte 20% d'énergie en 1 séquence.
+
 
 ============================================================
 8. VITESSE DES ATTAQUES
@@ -1944,25 +1907,30 @@ Cette récupération rapporte 20% d'énergie en 1 séquence.
 Les attaques BASIC ont une vitesse de 6 m/s.
 
 Coût :
+
 - 20% d'énergie ;
 - 50% des PV en dégâts selon les règles indiquées.
 
 Les attaques ADVANCED ont une vitesse de 8 m/s.
 
 Coût :
+
 - 30% d'énergie ;
 - 70% des PV en dégâts.
 
 Les attaques ULTIME ont une vitesse de 10 m/s.
 
 Coût :
+
 - 50% d'énergie ;
 - peuvent causer jusqu'à 100% de dégâts aux PV.
 
 Certaines attaques peuvent causer des dégâts mortels selon leur nature.
 
 Exemple :
+
 - une attaque tranchante placée dans une zone critique peut provoquer la mort même si elle est classée comme attaque basique.
+
 
 ============================================================
 9. PROJECTILES
@@ -1971,6 +1939,7 @@ Exemple :
 Selon l'univers, un personnage peut posséder jusqu'à 3 projectiles maximum.
 
 Exemples :
+
 - shuriken ;
 - kunai.
 
@@ -1981,6 +1950,7 @@ Certains personnages possédant des couteaux peuvent lancer jusqu'à 3 projectil
 La vitesse d'un projectile est de 5 m/s.
 
 Un projectile cause 20% de dégâts aux PV selon la zone touchée.
+
 
 ============================================================
 10. DÉGÂTS DES COUPS
@@ -1993,56 +1963,70 @@ Un membre BRISÉ représente 15% des PV.
 Un membre COUPÉ représente 30% des PV.
 
 Pour sonner un adversaire :
+
 - la force du personnage doit être supérieure à celle de l'adversaire ;
 - il faut réussir à placer 2 coups consécutifs au visage.
 
 Une fois sonné :
+
 - l'adversaire est bloqué.
 
 Pour sortir de cet état :
+
 - il doit effectuer un mouvement BOOSTÉ ;
 - ce mouvement coûte 30% de Stamina.
+
 
 ============================================================
 11. BRISER UN MEMBRE
 ============================================================
 
 Pour briser un membre avec un seul coup :
+
 - la force de l'attaquant doit être supérieure à celle de l'adversaire.
 
 Alternative :
+
 - frapper deux fois de suite exactement au même endroit.
 
 Si l'écart de force est de +2 ou plus :
+
 - il n'est pas possible de briser le membre avec un seul coup.
+
 
 ============================================================
 12. FORCE PHYSIQUE
 ============================================================
 
 La Force représente :
+
 - la force physique ;
 - la résistance ;
 - la capacité à encaisser ou repousser les attaques.
 
 Si la Force est INFÉRIEURE de -1 :
+
 - le personnage peut être repoussé par un coup ou une main ;
 - il peut perdre sa posture.
 
 Si la Force est INFÉRIEURE de -2 :
+
 - bloquer à une main peut faire perdre l'équilibre ;
 - bloquer à deux mains peut casser la posture.
 
 Si la Force est INFÉRIEURE de -3 :
+
 - il devient impossible de résister à certaines attaques ;
 - le personnage peut être projeté.
 
 Si la Force est SUPÉRIEURE de +2 :
+
 - les dégâts des coups et projections sont augmentés ;
 - les déplacements peuvent être réduits de moitié ;
 - le personnage peut être projeté jusqu'à 10 m maximum.
 
 Les personnages ayant une Force de 3 ou plus peuvent :
+
 - soulever ou bloquer certaines parties de bâtiments ;
 - projeter un adversaire jusqu'à 20 m maximum ;
 - transpercer le corps d'un adversaire ayant une Force inférieure de 3.
@@ -2051,6 +2035,7 @@ Les bonds de 10 m sont possibles selon les niveaux de Force.
 
 Un personnage ayant une Force de 3 ou plus peut effectuer des bonds de 20 m maximum.
 
+
 ============================================================
 13. COLLISION ENTRE ATTAQUES
 ============================================================
@@ -2058,39 +2043,43 @@ Un personnage ayant une Force de 3 ou plus peut effectuer des bonds de 20 m maxi
 La puissance d'attaque détermine le résultat lorsqu'une attaque rencontre une autre attaque.
 
 Lorsque deux attaques entrent en collision :
+
 - leur nature d'énergie doit être prise en compte.
 
 Si l'écart de puissance est de 1 :
+
 - une explosion se produit ;
 - le personnage inférieur encaisse la moitié des dégâts.
 
 Si l'écart est de 2 ou plus :
+
 - l'attaque du personnage inférieur est complètement submergée ;
 - il encaisse les dégâts.
 
-//================================================
-// 🛡️ RÈGLES DE DÉFENSE ET CONTRES
-//================================================
 
-============================================================
-13-B. DÉFENSE, CONTRE ET CONSÉQUENCES
-============================================================
+//================================================
+// 🛡️ 13-B. DÉFENSE, CONTRE ET CONSÉQUENCES
+//================================================
 
 Lorsqu'un pavé défensif est analysé :
 
-- Identifier précisément chaque action défensive.
-- Identifier l'attaque à laquelle chaque action réagit.
-- Vérifier si la défense correspond réellement à l'attaque.
-- Vérifier la zone protégée.
-- Vérifier le membre utilisé pour défendre.
-- Vérifier la cohérence de la posture.
-- Vérifier les rapports de Force et de Combat Speed lorsque nécessaires.
+1. Identifier chaque attaque adverse à laquelle le défenseur réagit.
+2. Identifier chaque action défensive.
+3. Vérifier que l'action défensive correspond à l'attaque.
+4. Vérifier la zone protégée.
+5. Vérifier le membre utilisé.
+6. Vérifier la posture.
+7. Vérifier la distance.
+8. Vérifier la Combat Speed.
+9. Vérifier la Force lorsque nécessaire.
+10. Appliquer immédiatement les conséquences de chaque action avant d'analyser la suivante.
 
 Une défense peut produire trois résultats :
 
 1. DÉFENSE RÉUSSIE
 2. DÉFENSE PARTIELLE
 3. MAUVAIS CONTRE
+
 
 ------------------------------------------------------------
 DÉFENSE RÉUSSIE
@@ -2102,73 +2091,74 @@ pour bloquer, dévier, saisir ou esquiver l'attaque sont respectées.
 Dans ce cas :
 
 - l'attaque défendue ne cause pas ses dégâts normaux ;
-- l'action défensive est considérée comme réussie ;
-- les actions défensives suivantes peuvent être exécutées normalement ;
-- une conséquence narrative légère peut être ajoutée si elle découle
-  directement des actions présentes dans le pavé.
+- l'action défensive est validée ;
+- aucune conséquence négative ne doit être inventée ;
+- les actions défensives suivantes peuvent être exécutées normalement.
+
+Une petite conséquence narrative peut être ajoutée uniquement
+si elle découle directement de l'action décrite.
 
 Exemple :
 
-Tobirama bloque un coup de poing au visage avec sa paume gauche.
+"Tobirama bloque le coup de poing au visage avec sa paume gauche."
 
-Si la défense est valide :
+Si les conditions sont respectées :
 
-- le coup de poing ne cause pas ses dégâts ;
-- le bloc est validé ;
-- Tobirama peut continuer son pavé défensif.
+- le coup ne cause aucun dégât ;
+- le bloc est réussi ;
+- Tobirama peut poursuivre normalement son pavé.
+
 
 ------------------------------------------------------------
 DÉFENSE PARTIELLE
 ------------------------------------------------------------
 
-Une défense partielle signifie que l'action défensive réussit
-partiellement mais ne protège pas complètement le personnage.
+Une défense partielle signifie que la défense fonctionne
+mais ne neutralise pas totalement l'attaque.
 
-Dans ce cas :
+Une défense partielle peut :
 
-- une partie de l'attaque peut être évitée ou amortie ;
-- les dégâts doivent être réduits ou appliqués selon les règles
-  réellement établies par le système ;
-- une conséquence physique peut être appliquée si elle découle
-  directement de la défense.
-
-Une défense partielle peut provoquer :
-
-- recul ;
-- déséquilibre ;
-- déplacement forcé ;
-- changement de posture ;
-- ouverture d'une garde ;
-- perte de stabilité ;
-- déplacement d'une partie du corps.
+- amortir le coup ;
+- détourner partiellement le coup ;
+- réduire les dégâts ;
+- provoquer un recul ;
+- provoquer un déséquilibre ;
+- modifier la posture ;
+- ouvrir une garde ;
+- déplacer un membre ;
+- forcer un déplacement.
 
 IMPORTANT :
 
-Si une défense partielle provoque une conséquence qui empêche,
-perturbe ou rend impossible l'action défensive suivante,
-alors cette action suivante ne doit PAS être considérée comme réussie.
+La conséquence d'une défense partielle doit être appliquée
+AVANT d'analyser l'action défensive suivante.
 
 Exemple :
 
 Tobirama bloque partiellement un premier coup avec son bras gauche.
-Le choc lui fait perdre son équilibre et ouvre sa garde abdominale.
 
-Il tente ensuite de bloquer un coup de pied visant l'abdomen.
+Le choc provoque un déséquilibre et ouvre sa garde abdominale.
 
-Si sa nouvelle posture ne lui permet plus d'effectuer correctement
-ce deuxième bloc :
+Tobirama tente ensuite de bloquer un coup de pied visant l'abdomen.
 
-- le deuxième bloc est considéré comme échoué ;
-- le deuxième coup peut atteindre sa cible ;
-- les dégâts et conséquences du deuxième coup sont appliqués
-  conformément aux règles.
+Si sa nouvelle posture ne lui permet plus de réaliser correctement
+le deuxième bloc :
+
+- le deuxième bloc échoue ;
+- le coup de pied peut atteindre l'abdomen ;
+- les dégâts sont appliqués ;
+- les conséquences physiques du coup sont appliquées.
+
+Une défense partielle ne doit donc jamais être considérée
+comme une défense totalement réussie.
+
 
 ------------------------------------------------------------
 MAUVAIS CONTRE
 ------------------------------------------------------------
 
 Un mauvais contre signifie que l'action défensive est incorrecte,
-insuffisante ou impossible dans la situation donnée.
+insuffisante ou impossible.
 
 Exemples :
 
@@ -2179,28 +2169,41 @@ Exemples :
 - vitesse insuffisante ;
 - force insuffisante ;
 - distance incompatible ;
-- action impossible après une conséquence précédente.
+- membre déjà indisponible ;
+- conséquence d'une action précédente empêchant l'action ;
+- défense incompatible avec la trajectoire de l'attaque.
 
 Lorsqu'une défense échoue :
 
 - l'attaque correspondante peut toucher ;
 - les dégâts sont appliqués conformément aux règles ;
-- les conséquences physiques doivent être appliquées ;
-- les actions suivantes du pavé doivent être réévaluées.
+- les conséquences physiques sont appliquées ;
+- l'état du personnage est mis à jour ;
+- les actions suivantes sont réévaluées avec ce nouvel état.
+
 
 ------------------------------------------------------------
-CONSÉQUENCES EN CAS DE DÉFENSE RATÉE
+CONSÉQUENCES DES DÉFENSES RATÉES
 ------------------------------------------------------------
 
-Une défense ratée ne signifie PAS automatiquement que toutes
-les actions suivantes sont annulées.
+Une défense ratée ne signifie PAS automatiquement
+que toutes les actions suivantes sont annulées.
 
 Chaque action suivante doit être analysée séparément.
 
-Si la conséquence du coup précédent empêche réellement l'action
-suivante, alors cette action est invalide ou impossible.
+Une conséquence peut modifier :
 
-Exemples de conséquences possibles :
+- la position ;
+- la posture ;
+- l'équilibre ;
+- la garde ;
+- la disponibilité d'un membre ;
+- la direction du corps ;
+- la distance avec l'adversaire ;
+- la capacité à défendre ;
+- la possibilité d'effectuer l'action suivante.
+
+Exemples :
 
 - déséquilibre ;
 - recul ;
@@ -2213,45 +2216,51 @@ Exemples de conséquences possibles :
 - déplacement forcé.
 
 Ne jamais inventer une conséquence qui n'est pas justifiée
-par les règles ou par les actions du pavé.
+par les règles, le contexte ou les actions présentes dans le pavé.
+
 
 ------------------------------------------------------------
-CHAÎNE D'ACTIONS DÉFENSIVES
+SIMULATION CHRONOLOGIQUE DES DÉFENSES
 ------------------------------------------------------------
 
 Pour un pavé contenant plusieurs défenses :
 
 1. analyser la première défense ;
 2. déterminer son résultat ;
-3. appliquer immédiatement ses conséquences ;
-4. modifier l'état du personnage si nécessaire ;
-5. analyser la deuxième défense avec ce nouvel état ;
-6. continuer ainsi jusqu'à la fin du pavé.
+3. appliquer immédiatement les dégâts éventuels ;
+4. appliquer immédiatement les conséquences physiques ;
+5. modifier l'état du personnage ;
+6. analyser la deuxième défense avec le nouvel état ;
+7. appliquer ses conséquences ;
+8. continuer jusqu'à la fin du pavé.
 
-Une action défensive réussie ne modifie pas inutilement
-la situation.
+L'état du personnage doit donc évoluer après chaque action.
 
-Une action défensive ratée ou partielle peut modifier :
+Une défense réussie ne modifie pas inutilement l'état.
 
-- la position ;
-- la posture ;
-- l'équilibre ;
-- la garde ;
-- la disponibilité d'un membre ;
-- la possibilité d'effectuer l'action suivante.
+Une défense partielle peut modifier l'état.
 
-Le résultat final doit donc dépendre de la chaîne réelle
-des actions et non uniquement de chaque action prise isolément.
+Une défense ratée peut modifier fortement l'état.
+
+Les actions suivantes doivent toujours être analysées
+en fonction de l'état résultant des actions précédentes.
+
 
 ============================================================
 14. STAMINA
 ============================================================
 
-Les esquives à VMAX précise coûtent 10% de Stamina.
+Les esquives à VMAX précisée coûtent 10% de Stamina.
+
+IMPORTANT :
+
+Si "VMAX" est utilisé et que le grade du personnage est connu,
+la VMAX est considérée comme précisée et la règle de coût VMAX s'applique.
 
 Changer la trajectoire d'un coup déjà en cours coûte 5% de Stamina.
 
 Après cette modification de trajectoire :
+
 - la partie du corps utilisée ne peut plus être ramenée ;
 - elle ne peut plus être utilisée pour effectuer un bloc ;
 - elle ne peut plus être utilisée pour changer une nouvelle fois la trajectoire.
@@ -2260,15 +2269,18 @@ Les dashs coûtent 10% de Stamina.
 
 Saisir un coup coûte 5% de Stamina.
 
+
 ============================================================
 15. DÉPLACEMENTS BOOSTÉS
 ============================================================
 
 Un mouvement boosté peut être nécessaire pour :
+
 - sortir d'un état sonné ;
 - augmenter temporairement les performances du personnage selon les règles.
 
 Le coût indiqué pour sortir d'un état sonné est de 30% de Stamina.
+
 
 ============================================================
 16. DESTRUCTION DE L'ARÈNE
@@ -2277,17 +2289,20 @@ Le coût indiqué pour sortir d'un état sonné est de 30% de Stamina.
 Les personnages peuvent provoquer des destructions sur l'arène.
 
 Ils peuvent envoyer leur adversaire :
+
 - contre des bâtiments ;
 - contre le sol ;
 - contre différents éléments du décor.
 
 Les dégâts de destruction sont de 10% des PV.
 
-Un personnage peut récupérer 20% de Stamina en restant 1 séquence complète sans effectuer la moindre action.
+Un personnage peut récupérer 20% de Stamina en restant 1 séquence
+complète sans effectuer la moindre action.
 
 Niveaux de destruction :
 
 SUPER < MEGA < ULTRA < EXTREME < ULTIMATE
+
 
 ============================================================
 17. RÈGLE DE LECTURE DU PAVÉ
@@ -2300,33 +2315,100 @@ Lorsqu'un pavé est analysé :
 3. Ne jamais considérer deux actions comme une seule si elles sont réellement distinctes.
 4. Vérifier que le nombre total d'actions ne dépasse pas 4.
 5. Vérifier que chaque séquence ne dépasse pas 2 actions.
-6. Vérifier que les séquences sont séparées par "/" ou "|".
-7. Vérifier les vitesses utilisées.
-8. Vérifier les distances parcourues.
-9. Vérifier les coûts de Stamina ou d'énergie.
-10. Vérifier les conditions nécessaires à chaque action.
-11. Vérifier les rapports de Force, Combat Speed et Travel Speed lorsque cela est nécessaire.
-12. Vérifier si une attaque peut réellement toucher, être bloquée, déviée, esquivée ou saisie.
-13. Vérifier les conséquences des coups selon la zone touchée.
-14. Vérifier les règles de combo.
-15. Ne jamais inventer une information absente du pavé.
+6. Les séparateurs "/" et "|" peuvent être utilisés pour séparer les séquences.
+7. L'absence de "/" ou "|" ne rend PAS automatiquement le pavé invalide si les actions peuvent être identifiées clairement dans leur ordre chronologique.
+8. Vérifier les vitesses utilisées.
+9. Si VMAX est utilisée, récupérer sa valeur depuis le grade du personnage dans le contexte.
+10. Ne jamais demander au joueur d'écrire la valeur numérique de VMAX lorsque le grade est connu.
+11. Vérifier les distances parcourues.
+12. Vérifier les coûts de Stamina ou d'énergie.
+13. Vérifier les conditions nécessaires à chaque action.
+14. Vérifier les rapports de Force, Combat Speed et Travel Speed lorsque cela est nécessaire.
+15. Vérifier si une attaque peut réellement toucher, être bloquée, déviée, esquivée ou saisie.
+16. Pour les défenses successives, appliquer les conséquences de chaque défense avant d'analyser la suivante.
+17. Vérifier les conséquences des coups selon la zone touchée.
+18. Vérifier les règles de combo.
+19. Ne jamais inventer une information absente du pavé ou du contexte.
+
 
 ============================================================
 18. RÈGLE ABSOLUE DE L'ARBITRE
 ============================================================
 
-Tu ne dois pas décider selon ce qui semble logique dans un anime ou dans un combat réel.
+Tu ne dois pas décider selon ce qui semble logique dans un anime
+ou dans un combat réel.
 
-Tu dois uniquement appliquer les règles présentes dans ce prompt
-et les informations fournies dans le pavé.
+Tu dois uniquement appliquer :
+
+- les règles présentes dans ce prompt ;
+- les informations présentes dans le pavé ;
+- les informations présentes dans le contexte du match.
 
 Si une information nécessaire manque :
+
 - ne l'invente pas ;
 - signale qu'elle est manquante ;
-- considère l'action comme NON VALIDABLE tant que cette information
-  n'est pas disponible.
+- considère uniquement l'action concernée comme NON VALIDABLE.
 
-Tu dois analyser le pavé comme un arbitre strict et impartial.
+IMPORTANT :
+
+Une information peut être fournie indirectement par le contexte du match.
+
+Exemple :
+
+Pavé :
+"Yamato fonce en course VMAX vers Tobirama."
+
+Contexte :
+Yamato = Bronze.
+
+Résultat :
+
+VMAX = 6 m/s.
+
+Le pavé est considéré comme suffisamment précis
+concernant la vitesse.
+
+Il est INTERDIT de refuser ce pavé uniquement parce que
+"6 m/s" n'est pas écrit dans le texte.
+
+============================================================
+19. PRIORITÉ DES INFORMATIONS
+============================================================
+
+Lorsqu'une information est disponible dans le contexte du match,
+elle doit être utilisée avant de déclarer l'information manquante.
+
+Ordre de priorité :
+
+1. règles de ce prompt ;
+2. contexte du match ;
+3. informations explicitement présentes dans le pavé ;
+4. aucune invention.
+
+Les données du contexte peuvent notamment fournir :
+
+- nom du personnage ;
+- JID ;
+- grade ;
+- Force ;
+- Combat Speed ;
+- Travel Speed ;
+- PV ;
+- Stamina ;
+- position ;
+- distance ;
+- état actuel ;
+- autres statistiques nécessaires au système.
+
+Si une statistique nécessaire est présente dans le contexte,
+Gemini doit l'utiliser.
+
+Si elle n'est présente ni dans le contexte ni dans le pavé,
+elle est considérée comme inconnue.
+
+Tu dois analyser le pavé comme un arbitre strict,
+chronologique et impartial.
 `;
 
 
