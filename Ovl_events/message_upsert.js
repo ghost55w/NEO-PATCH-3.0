@@ -116,15 +116,6 @@ if (ms.key.fromMe) {
     auteur_Message = decodeJid(ms.key.remoteJid);
 }
 
-console.log(
-    "👤 AUTEUR MESSAGE :",
-    auteur_Message,
-    "| fromMe :",
-    ms.key.fromMe,
-    "| participant :",
-    ms.key.participant
-);
-
     const nom_Auteur_Message = ms.pushName;
 
     let arg = texte.trim().split(/ +/).slice(1);
@@ -343,13 +334,12 @@ if (matchId) {
     //================================================
 
     await envoyerResultatPaveGemini(
-        ovl,
-        chat,
-        resultat,
-        match
-    );
-
-                        }
+    ovl,
+    ms_org,
+    resultatGemini,
+    match
+);
+       }
 
                     
                     //================================================
