@@ -257,10 +257,55 @@ Tu dois notamment :
 2. Les remettre dans leur ordre chronologique.
 3. Compter les actions.
 4. Vérifier la limite de 4 actions.
-5. Utiliser le grade du personnage pour déterminer sa VMAX
-   lorsqu'il écrit "VMAX" ou une formulation équivalente.
-6. Ne jamais exiger une valeur numérique de VMAX si le grade
-   est disponible dans le contexte.
+5. RÈGLE VMAX OBLIGATOIRE :
+
+   Lorsque le pavé contient "VMAX", "vitesse maximale",
+   "à vitesse maximale", "course VMAX" ou toute formulation
+   équivalente, tu dois récupérer automatiquement la vitesse
+   depuis le grade du personnage dans le CONTEXTE DU MATCH.
+
+   Correspondance officielle :
+
+   - Bronze = 6 m/s
+   - Argent = 8 m/s
+   - Or = 10 m/s
+
+   Exemple :
+
+   Contexte :
+   Yamato = Bronze
+
+   Pavé :
+   "Yamato fonce en course VMAX vers Tobirama."
+
+   Tu dois obligatoirement interpréter :
+   Yamato VMAX = 6 m/s.
+
+6. Le joueur n'a PAS besoin d'écrire la valeur numérique
+   de la VMAX dans son pavé.
+
+   Si le grade du personnage est présent dans le contexte,
+   "VMAX" est une information COMPLÈTE et VALIDE.
+
+   NE REFUSE JAMAIS une VMAX uniquement parce que la valeur
+   en m/s n'est pas écrite dans le pavé lorsque le grade
+   du personnage est disponible dans le contexte.
+
+   Le CONTEXTE DU MATCH est une source officielle de données.
+
+   Si le contexte indique :
+   "Yamato | Grade : Bronze | Vmax : 6 m/s"
+
+   alors toute mention de "VMAX" par Yamato doit être
+   automatiquement évaluée à 6 m/s.
+
+   Tu dois utiliser cette valeur pour tous les calculs
+   de déplacement, distance et vitesse nécessaires.
+
+   Tu ne dois pas répondre :
+   "la VMAX est inconnue"
+   si le grade ou la VMAX du personnage est présent
+   dans le contexte.
 7. Pour une défense, identifier précisément l'attaque à laquelle
    chaque action répond.
 8. Évaluer chaque défense séparément.
@@ -1729,17 +1774,6 @@ Tu dois considérer ces règles comme les règles officielles du système.
 - Le match se termine après 10 tours maximum.
 - Un tour est terminé lorsque les deux joueurs ont envoyé leurs pavés et que le verdict du second pavé a été rendu.
 
-============================================================
-0. MATCH🎮
-============================================================
-
-- Dès le début du match, la distance initiale entre les deux
-  personnages est de 5 mètres.
-
-- Le match comporte un maximum de 10 TOURS.
-
-- Un TOUR correspond obligatoirement à un échange complet
-  entre les deux joueurs.
 
 ============================================================
 0-B. TOURS ET FIN DU MATCH
