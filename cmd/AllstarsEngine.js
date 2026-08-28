@@ -605,11 +605,9 @@ const response =
 
 }
 
-
 //================================================
 // 🎮 RENDU VISUEL DU PAVÉ GEMINI
 //================================================
-
 async function envoyerResultatPaveGemini(
     ovl,
     chat,
@@ -619,69 +617,17 @@ async function envoyerResultatPaveGemini(
 
     try {
 
-        if (!resultat?.ok || !resultat?.paveDetecte) {
-            console.log("❌ Aucun résultat de pavé à afficher");
-            return;
-        }
+        if (
+            !resultat?.ok ||
+            !resultat?.paveDetecte
+        ) {
 
-
-        //================================================
-        // ❌ PAVÉ INVALIDE
-        //================================================
-
-        if (!resultat.paveValide) {
-
-            const erreurs =
-                Array.isArray(resultat.erreurs)
-                    ? resultat.erreurs
-                        .map(e => `- ${e}`)
-                        .join("\n")
-                    : "Pavé invalide";
-
-
-            const texte =
-
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-❌ *PAVÉ REFUSÉ*
-
-${resultat.verdict || "Le pavé est invalide."}
-
-${erreurs}
-
-📊 *Note du pavé :* ${resultat.note ?? 0}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *Joueur actuel :*
-➡️ Le tour reste au joueur actuel.
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
-
-            await ovl.sendMessage(
-                chat,
-                {
-                    text: texte
-                }
+            console.log(
+                "❌ Aucun résultat de pavé à afficher"
             );
 
             return;
         }
-
-
-        //================================================
-        // ✅ ACTIONS VALIDÉES
-        //================================================
-
-        let resume =
-            resultat.resume ||
-            "Actions validées.";
-
-
-        const note =
-            Number(resultat.note) || 0;
 
 
         //================================================
@@ -696,19 +642,21 @@ ${erreurs}
             joueurSuivant.jid || null;
 
 
-        let prochainNom =
-            joueurSuivant.nom || null;
+        //================================================
+        // 👤 RÉCUPÉRATION DU PSEUDO
+        // ⚠️ JAMAIS LE NOM DU PERSONNAGE
+        //================================================
+
+        let prochainPseudo = null;
 
 
         //================================================
-        // 🔎 SI GEMINI N'A PAS DONNÉ LE NOM
-        // ON LE RÉCUPÈRE DANS LE MATCH
+        // 🔎 1️⃣ RECHERCHE DANS match.joueurs
         //================================================
 
         if (
-            !prochainNom &&
             prochainJid &&
-            Array.isArray(match.joueurs)
+            Array.isArray(match?.joueurs)
         ) {
 
             const joueur =
@@ -720,10 +668,11 @@ ${erreurs}
 
             if (joueur) {
 
-                prochainNom =
-                    joueur.nom ||
-                    joueur.name ||
+                prochainPseudo =
                     joueur.pseudo ||
+                    joueur.username ||
+                    joueur.user ||
+                    joueur.nomJoueur ||
                     null;
 
             }
@@ -732,16 +681,19 @@ ${erreurs}
 
 
         //================================================
-        // 🔎 AUTRE FORMAT POSSIBLE
+        // 🔎 2️⃣ RECHERCHE DANS match.players
         //================================================
 
         if (
-            !prochainNom &&
+            !prochainPseudo &&
             prochainJid &&
-            match.players
+            match?.players
         ) {
 
-            for (const equipe of Object.values(match.players)) {
+            for (
+                const equipe
+                of Object.values(match.players)
+            ) {
 
                 const joueur =
                     equipe?.find?.(
@@ -749,15 +701,20 @@ ${erreurs}
                             j?.jid === prochainJid
                     );
 
+
                 if (joueur) {
 
-                    prochainNom =
-                        joueur.nom ||
-                        joueur.name ||
+                    prochainPseudo =
                         joueur.pseudo ||
+                        joueur.username ||
+                        joueur.user ||
+                        joueur.nomJoueur ||
                         null;
 
-                    break;
+
+                    if (prochainPseudo) {
+                        break;
+                    }
 
                 }
 
@@ -767,65 +724,36 @@ ${erreurs}
 
 
         //================================================
-        // 👤 NOM DE SECOURS
+        // 🔎 3️⃣ GEMINI PEUT FOURNIR LE PSEUDO
         //================================================
 
-        if (!prochainNom) {
+        if (!prochainPseudo) {
 
-            prochainNom =
-                prochainJid || "Joueur suivant";
+            prochainPseudo =
+                joueurSuivant.pseudo ||
+                joueurSuivant.username ||
+                joueurSuivant.user ||
+                null;
 
         }
 
 
         //================================================
-        // 📤 MESSAGE VISUEL
+        // 👤 SECOURS
         //================================================
 
-        const texte =
+        if (!prochainPseudo) {
 
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+            prochainPseudo =
+                prochainJid ||
+                "Joueur suivant";
 
-✅ *ACTIONS VALIDÉES :*
-- ${resume}
-
-📊 *Note du pavé :* ${note}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆*joueur suivant:*
-➡️ @${prochainNom} *NEXT!!* 🔥
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
-
-        await ovl.sendMessage(
-            chat,
-            {
-                text: texte,
-                mentions:
-                    prochainJid
-                        ? [prochainJid]
-                        : []
-            }
-        );
-
-
-        console.log(
-            "🎮 RENDU PAVÉ ENVOYÉ"
-        );
-
-        console.log(
-            "➡️ PROCHAIN JOUEUR :",
-            prochainNom,
-            "|",
-            prochainJid
-        );
+        }
 
 
         //================================================
         // 🔄 TRANSFERT DU TOUR
+        // ⚠️ VALIDE OU REFUSÉ
         //================================================
 
         if (
@@ -842,8 +770,11 @@ ${erreurs}
             match.joueurActuel =
                 prochainJid;
 
+
             console.log(
                 "🔄 TOUR TRANSFÉRÉ À :",
+                prochainPseudo,
+                "|",
                 prochainJid
             );
 
@@ -851,7 +782,7 @@ ${erreurs}
 
 
         //================================================
-        // ⏱️ RELANCE DU TIMER
+        // ⏱️ TIMER DU PROCHAIN JOUEUR
         //================================================
 
         if (
@@ -868,6 +799,138 @@ ${erreurs}
         }
 
 
+        //================================================
+        // ❌ PAVÉ INVALIDE
+        //================================================
+
+        if (!resultat.paveValide) {
+
+            const erreurs =
+                Array.isArray(resultat.erreurs)
+                    ? resultat.erreurs
+                        .map(
+                            e => `- ${e}`
+                        )
+                        .join("\n")
+                    : "Pavé invalide";
+
+
+            const texte =
+
+`░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+❌ *PAVÉ REFUSÉ*
+
+${resultat.verdict ||
+    "Le pavé est invalide."}
+
+${erreurs}
+
+📊 *Note du pavé :*
+${resultat.note ?? 0}/10 ⭐
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆 *JOUEUR SUIVANT :*
+
+➡️ @${prochainPseudo} *GO!!* 🔥
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+
+
+            await ovl.sendMessage(
+                chat,
+                {
+                    text: texte,
+
+                    mentions:
+                        prochainJid
+                            ? [prochainJid]
+                            : []
+                }
+            );
+
+
+            console.log(
+                "🎮 PAVÉ REFUSÉ"
+            );
+
+            console.log(
+                "➡️ PROCHAIN GO :",
+                prochainPseudo,
+                "|",
+                prochainJid
+            );
+
+
+            return;
+        }
+
+
+        //================================================
+        // ✅ ACTIONS VALIDÉES
+        //================================================
+
+        const resume =
+            resultat.resume ||
+            "Actions validées.";
+
+
+        const note =
+            Number(resultat.note) || 0;
+
+
+        //================================================
+        // 📤 MESSAGE VISUEL
+        //================================================
+
+        const texte =
+
+`░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+✅ *ACTIONS VALIDÉES :*
+
+- ${resume}
+
+📊 *Note du pavé :*
+${note}/10 ⭐
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆 *JOUEUR SUIVANT :*
+
+➡️ @${prochainPseudo} *GO!!* 🔥
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+
+
+        await ovl.sendMessage(
+            chat,
+            {
+                text: texte,
+
+                mentions:
+                    prochainJid
+                        ? [prochainJid]
+                        : []
+            }
+        );
+
+
+        console.log(
+            "🎮 RENDU PAVÉ ENVOYÉ"
+        );
+
+        console.log(
+            "➡️ PROCHAIN GO :",
+            prochainPseudo,
+            "|",
+            prochainJid
+        );
+
+
     } catch (error) {
 
         console.error(
@@ -877,12 +940,12 @@ ${erreurs}
 
     }
 
-            }
+}
+
 
 //================================================
 // 🧠 TRACKER COMBAT GEMINI
 //================================================
-
 function initTrackerCombatGemini(match) {
 
     const joueurs =
