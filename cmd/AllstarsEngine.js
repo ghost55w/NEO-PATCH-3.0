@@ -879,6 +879,712 @@ ${erreurs}
 
             }
 
+//================================================
+// 🧠 TRACKER COMBAT GEMINI
+//================================================
+
+function initTrackerCombatGemini(match) {
+
+    const joueurs =
+        Array.isArray(match?.joueurs)
+            ? match.joueurs
+            : [];
+
+    const tracker = {
+
+        //================================================
+        // ⚔️ COMBAT
+        //================================================
+
+        combat: {
+
+            id:
+                match?.id ||
+                null,
+
+            etat:
+                match?.etat ||
+                "ACTIF",
+
+            // 1 tour = 2 pavés
+            tour: 0,
+
+            maxTours: 10,
+
+            // Joueur dont c'est actuellement le tour
+            joueurTour:
+                match?.joueurTour ||
+                null,
+
+            // Premier pavé du tour en attente
+            paveEnAttente:
+                null,
+
+            // Historique des tours
+            historique:
+                []
+        },
+
+        //================================================
+        // 👥 JOUEURS
+        //================================================
+
+        joueurs:
+            joueurs.map(j => {
+
+                const carte =
+                    j?.carte ||
+                    null;
+
+                const grade =
+                    carte?.grade ||
+                    j?.grade ||
+                    null;
+
+                //================================================
+                // ⚡ VMAX SELON LE GRADE
+                //================================================
+
+                let vitesseMax =
+                    j?.vitesseMax ??
+                    null;
+
+                if (vitesseMax == null) {
+
+                    const g =
+                        String(grade || "")
+                            .toLowerCase()
+                            .trim();
+
+                    if (g === "bronze") {
+
+                        vitesseMax = 6;
+                    }
+
+                    else if (
+                        g === "argent" ||
+                        g === "silver"
+                    ) {
+
+                        vitesseMax = 8;
+                    }
+
+                    else if (
+                        g === "or" ||
+                        g === "gold"
+                    ) {
+
+                        vitesseMax = 10;
+                    }
+                }
+
+                return {
+
+                    //================================================
+                    // 👤 IDENTITÉ
+                    //================================================
+
+                    jid:
+                        j?.jid ||
+                        null,
+
+                    nom:
+                        j?.nom ||
+                        j?.name ||
+                        null,
+
+                    personnage:
+                        carte?.name ||
+                        j?.personnage ||
+                        j?.nomPersonnage ||
+                        null,
+
+                    //================================================
+                    // 🎴 INFORMATIONS DE RÉFÉRENCE
+                    //================================================
+
+                    grade:
+                        grade,
+
+                    category:
+                        carte?.category ||
+                        j?.category ||
+                        null,
+
+                    vitesseMax:
+                        vitesseMax,
+
+                    //================================================
+                    // ❤️ RESSOURCES ACTUELLES
+                    //================================================
+
+                    pv: 100,
+
+                    stamina: 100,
+
+                    energie: 100,
+
+                    //================================================
+                    // 🧍 ÉTAT PHYSIQUE ACTUEL
+                    //================================================
+
+                    posture:
+                        "neutre",
+
+                    equilibre:
+                        "stable",
+
+                    //================================================
+                    // 📏 DISTANCE AVEC L'ADVERSAIRE
+                    //================================================
+
+                    distanceAdversaire:
+                        null,
+
+                    //================================================
+                    // 🧭 POSITION RELATIVE
+                    //
+                    // face
+                    // profil_gauche
+                    // profil_droit
+                    // avant_gauche
+                    // avant_droit
+                    // arriere
+                    // arriere_gauche
+                    // arriere_droit
+                    //================================================
+
+                    positionRelative:
+                        "face",
+
+                    //================================================
+                    // 🔪 ARME
+                    //================================================
+
+                    weapon:
+                        null,
+
+                    //================================================
+                    // ☠️ ÉTAT
+                    //================================================
+
+                    ko:
+                        false
+                };
+            })
+    };
+
+    //================================================
+    // 💾 ATTACHER LE TRACKER AU MATCH
+    //================================================
+
+    match.trackerCombatGemini =
+        tracker;
+
+    return tracker;
+}
+
+
+//================================================
+// 👤 RÉCUPÉRER UN JOUEUR DU TRACKER
+//================================================
+
+function getJoueurTrackerCombatGemini(
+    match,
+    identifiant
+) {
+
+    const tracker =
+        match?.trackerCombatGemini;
+
+    if (
+        !tracker ||
+        !Array.isArray(tracker.joueurs)
+    ) {
+
+        return null;
+    }
+
+    return tracker.joueurs.find(j =>
+
+        j?.jid === identifiant ||
+
+        j?.nom === identifiant ||
+
+        j?.personnage === identifiant
+
+    ) || null;
+}
+
+
+//================================================
+// ❤️ MODIFIER LES RESSOURCES
+//================================================
+
+function modifierRessourcesCombatGemini(
+    match,
+    identifiant,
+    modifications = {}
+) {
+
+    const joueur =
+        getJoueurTrackerCombatGemini(
+            match,
+            identifiant
+        );
+
+    if (!joueur) {
+        return null;
+    }
+
+    //================================================
+    // ❤️ PV
+    //================================================
+
+    if (
+        modifications.pv != null
+    ) {
+
+        joueur.pv =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(
+                        modifications.pv
+                    )
+                )
+            );
+    }
+
+    //================================================
+    // 🫀 STAMINA
+    //================================================
+
+    if (
+        modifications.stamina != null
+    ) {
+
+        joueur.stamina =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(
+                        modifications.stamina
+                    )
+                )
+            );
+    }
+
+    //================================================
+    // 🌀 ÉNERGIE
+    //================================================
+
+    if (
+        modifications.energie != null
+    ) {
+
+        joueur.energie =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(
+                        modifications.energie
+                    )
+                )
+            );
+    }
+
+    //================================================
+    // ☠️ KO AUTOMATIQUE
+    //================================================
+
+    if (
+        joueur.pv <= 0
+    ) {
+
+        joueur.pv = 0;
+
+        joueur.ko = true;
+    }
+
+    return joueur;
+}
+
+
+//================================================
+// 🧍 MODIFIER L'ÉTAT PHYSIQUE
+//================================================
+
+function modifierEtatPhysiqueCombatGemini(
+    match,
+    identifiant,
+    modifications = {}
+) {
+
+    const joueur =
+        getJoueurTrackerCombatGemini(
+            match,
+            identifiant
+        );
+
+    if (!joueur) {
+        return null;
+    }
+
+    //================================================
+    // 🧍 POSTURE
+    //================================================
+
+    if (
+        modifications.posture != null
+    ) {
+
+        joueur.posture =
+            String(
+                modifications.posture
+            ).trim();
+    }
+
+    //================================================
+    // ⚖️ ÉQUILIBRE
+    //================================================
+
+    if (
+        modifications.equilibre != null
+    ) {
+
+        joueur.equilibre =
+            String(
+                modifications.equilibre
+            ).trim();
+    }
+
+    return joueur;
+}
+
+
+//================================================
+// 📏 MODIFIER LA DISTANCE
+//================================================
+
+function modifierDistanceCombatGemini(
+    match,
+    identifiant,
+    distance
+) {
+
+    const joueur =
+        getJoueurTrackerCombatGemini(
+            match,
+            identifiant
+        );
+
+    if (!joueur) {
+        return null;
+    }
+
+    const valeur =
+        Number(distance);
+
+    if (
+        !Number.isFinite(valeur)
+    ) {
+
+        return joueur;
+    }
+
+    joueur.distanceAdversaire =
+        Math.max(
+            0,
+            valeur
+        );
+
+    //================================================
+    // 📏 LA DISTANCE EST COMMUNE
+    //================================================
+
+    const tracker =
+        match?.trackerCombatGemini;
+
+    if (
+        tracker?.joueurs
+    ) {
+
+        for (
+            const autre
+            of tracker.joueurs
+        ) {
+
+            if (
+                autre.jid !== joueur.jid
+            ) {
+
+                autre.distanceAdversaire =
+                    joueur.distanceAdversaire;
+            }
+        }
+    }
+
+    return joueur;
+}
+
+
+//================================================
+// 🧭 MODIFIER LA POSITION RELATIVE
+//================================================
+
+function modifierPositionRelativeCombatGemini(
+    match,
+    identifiant,
+    position
+) {
+
+    const joueur =
+        getJoueurTrackerCombatGemini(
+            match,
+            identifiant
+        );
+
+    if (!joueur) {
+        return null;
+    }
+
+    const positionsValides = [
+
+        "face",
+
+        "profil_gauche",
+
+        "profil_droit",
+
+        "avant_gauche",
+
+        "avant_droit",
+
+        "arriere",
+
+        "arriere_gauche",
+
+        "arriere_droit"
+    ];
+
+    const nouvellePosition =
+        String(
+            position || ""
+        )
+            .toLowerCase()
+            .trim();
+
+    if (
+        !positionsValides.includes(
+            nouvellePosition
+        )
+    ) {
+
+        return joueur;
+    }
+
+    joueur.positionRelative =
+        nouvellePosition;
+
+    return joueur;
+}
+
+
+//================================================
+// 🔪 MODIFIER L'ARME
+//================================================
+
+function modifierWeaponCombatGemini(
+    match,
+    identifiant,
+    weapon
+) {
+
+    const joueur =
+        getJoueurTrackerCombatGemini(
+            match,
+            identifiant
+        );
+
+    if (!joueur) {
+        return null;
+    }
+
+    //================================================
+    // 🔪 RETIRER L'ARME
+    //================================================
+
+    if (
+        weapon === null ||
+        weapon === false ||
+        weapon === ""
+    ) {
+
+        joueur.weapon = null;
+
+        return joueur;
+    }
+
+    //================================================
+    // 🔪 ARME SOUS FORME DE TEXTE
+    //================================================
+
+    if (
+        typeof weapon === "string"
+    ) {
+
+        joueur.weapon = {
+
+            active: true,
+
+            nom:
+                weapon.trim()
+        };
+
+        return joueur;
+    }
+
+    //================================================
+    // 🔪 ARME SOUS FORME D'OBJET
+    //================================================
+
+    if (
+        typeof weapon === "object"
+    ) {
+
+        joueur.weapon = {
+
+            active:
+                weapon.active !== false,
+
+            nom:
+                weapon.nom ||
+                weapon.name ||
+                null
+        };
+    }
+
+    return joueur;
+}
+
+
+//================================================
+// 🧠 APPLIQUER LES CONSÉQUENCES GEMINI
+//================================================
+
+function appliquerConsequencesCombatGemini(
+    match,
+    consequences = {}
+) {
+
+    if (
+        !match?.trackerCombatGemini
+    ) {
+
+        return null;
+    }
+
+    const identifiant =
+        consequences.jid ||
+        consequences.personnage ||
+        consequences.nom;
+
+    if (!identifiant) {
+        return null;
+    }
+
+    //================================================
+    // ❤️ RESSOURCES
+    //================================================
+
+    modifierRessourcesCombatGemini(
+        match,
+        identifiant,
+        {
+
+            pv:
+                consequences.pv,
+
+            stamina:
+                consequences.stamina,
+
+            energie:
+                consequences.energie
+        }
+    );
+
+    //================================================
+    // 🧍 ÉTAT PHYSIQUE
+    //================================================
+
+    modifierEtatPhysiqueCombatGemini(
+        match,
+        identifiant,
+        {
+
+            posture:
+                consequences.posture,
+
+            equilibre:
+                consequences.equilibre
+        }
+    );
+
+    //================================================
+    // 📏 DISTANCE
+    //================================================
+
+    if (
+        consequences.distanceAdversaire != null
+    ) {
+
+        modifierDistanceCombatGemini(
+            match,
+            identifiant,
+            consequences.distanceAdversaire
+        );
+    }
+
+    //================================================
+    // 🧭 POSITION
+    //================================================
+
+    if (
+        consequences.positionRelative
+    ) {
+
+        modifierPositionRelativeCombatGemini(
+            match,
+            identifiant,
+            consequences.positionRelative
+        );
+    }
+
+    //================================================
+    // 🔪 ARME
+    //================================================
+
+    if (
+        consequences.weapon !== undefined
+    ) {
+
+        modifierWeaponCombatGemini(
+            match,
+            identifiant,
+            consequences.weapon
+        );
+    }
+
+    return getJoueurTrackerCombatGemini(
+        match,
+        identifiant
+    );
+}
+
 //-------- UTILITAIRES
 const formatNumber = n => {
     try {
@@ -4267,6 +4973,221 @@ await lancerMatchAllStars(
 ); 
 }       
 }
+
+//================================================
+// 🌀 COMMANDE STATS DU COMBAT
+//================================================
+
+ovlcmd({
+    nom_cmd: "stats🌀",
+    classe: "ALLSTARS🌀",
+    react: "🌀",
+    desc: "Afficher les statistiques actuelles du combat"
+}, async (ms_org, ovl, cmd_options) => {
+
+    //================================================
+    // 📍 CHAT
+    //================================================
+
+    const chat =
+        ms_org.from ||
+        ms_org.key?.remoteJid ||
+        ms_org;
+
+    //================================================
+    // 🔎 RÉCUPÉRER LE MATCH
+    //================================================
+
+    const match =
+        matchsActifs.get(chat);
+
+    if (!match) {
+
+        await ovl.sendMessage(
+            chat,
+            {
+                text:
+                    "❌ Aucun combat actif dans ce groupe."
+            },
+            {
+                quoted: ms_org
+            }
+        );
+
+        return;
+    }
+
+    //================================================
+    // 🧠 TRACKER COMBAT GEMINI
+    //================================================
+
+    const tracker =
+        match.trackerCombatGemini;
+
+    if (
+        !tracker ||
+        !Array.isArray(tracker.joueurs)
+    ) {
+
+        await ovl.sendMessage(
+            chat,
+            {
+                text:
+                    "❌ Le tracker du combat n'est pas disponible."
+            },
+            {
+                quoted: ms_org
+            }
+        );
+
+        return;
+    }
+
+    //================================================
+    // 📊 BARRE DE STATS
+    //================================================
+
+    function barreStats(valeur) {
+
+        const longueur = 10;
+
+        const v =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(valeur) || 0
+                )
+            );
+
+        const pleins =
+            Math.round(
+                (v / 100) * longueur
+            );
+
+        return (
+            "█".repeat(pleins) +
+            "░".repeat(
+                longueur - pleins
+            )
+        );
+    }
+
+    //================================================
+    // 👤 AFFICHAGE JOUEUR
+    //================================================
+
+    function afficherJoueur(joueur) {
+
+        const nom =
+            joueur?.personnage ||
+            joueur?.nom ||
+            "Inconnu";
+
+        const pv =
+            Math.round(
+                Number(joueur?.pv) || 0
+            );
+
+        const stamina =
+            Math.round(
+                Number(joueur?.stamina) || 0
+            );
+
+        const energie =
+            Math.round(
+                Number(joueur?.energie) || 0
+            );
+
+        const posture =
+            joueur?.posture ||
+            "neutre";
+
+        const equilibre =
+            joueur?.equilibre ||
+            "stable";
+
+        const etat =
+            joueur?.ko
+                ? "🔴 KO"
+                : "🟢 ACTIF";
+
+        return `
+╭───────────────
+│ 👤 ${nom}
+│
+│ ❤️ PV       : ${pv}%
+│ ${barreStats(pv)}
+│
+│ 🫀 STAMINA  : ${stamina}%
+│ ${barreStats(stamina)}
+│
+│ 🌀 ÉNERGIE  : ${energie}%
+│ ${barreStats(energie)}
+│
+│ 🧍 Posture  : ${posture}
+│ ⚖️ Équilibre : ${equilibre}
+│
+│ ${etat}
+╰───────────────`;
+    }
+
+    //================================================
+    // ⚔️ TOUR
+    //================================================
+
+    const tour =
+        Number(
+            tracker.combat?.tour
+        ) || 0;
+
+    const maxTours =
+        Number(
+            tracker.combat?.maxTours
+        ) || 10;
+
+    //================================================
+    // 📝 MESSAGE
+    //================================================
+
+    let texte = `
+🌀🔆 *ANIME JUMP VERSUS*
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🌀 STATS DU COMBAT
+⚔️ TOUR : ${tour}/${maxTours}
+`;
+
+    for (
+        const joueur
+        of tracker.joueurs
+    ) {
+
+        texte +=
+            "\n" +
+            afficherJoueur(joueur) +
+            "\n";
+    }
+
+    texte += `
+                                     🌀🔆`;
+
+    //================================================
+    // 📤 ENVOI
+    //================================================
+
+    await ovl.sendMessage(
+        chat,
+        {
+            text: texte
+        },
+        {
+            quoted: ms_org
+        }
+    );
+
+});
+
 
 //================================================
 // 🛑 COMMANDE ARRÊT DU MATCH
