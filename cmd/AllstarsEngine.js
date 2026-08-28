@@ -205,36 +205,108 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
         const contexteGemini = {
 
-            user: contexteMatch?.user || user || null,
+    user: contexteMatch?.user || user || null,
 
-            joueur: contexteMatch?.joueur
-                ? {
-                    jid: contexteMatch.joueur.jid || null,
-                    nom: contexteMatch.joueur.nom || null,
-                    name: contexteMatch.joueur.name || null
-                }
-                : null,
+    joueur: contexteMatch?.joueur
+        ? {
+            jid: contexteMatch.joueur.jid || null,
+            nom: contexteMatch.joueur.nom || null,
+            name: contexteMatch.joueur.name || null
+        }
+        : null,
 
-            match: contexteMatch?.match
-                ? {
-                    id: contexteMatch.match.id || null,
-                    etat: contexteMatch.match.etat || null,
+    match: contexteMatch?.match
+        ? {
+            id: contexteMatch.match.id || null,
+            etat: contexteMatch.match.etat || null,
 
-                    // joueur dont c'est actuellement le tour
-                    joueurTour:
-                        contexteMatch.match.joueurTour || null,
+            joueurTour:
+                contexteMatch.match.joueurTour || null,
 
-                    // informations simples sur les joueurs
-                    joueurs:
-                        Array.isArray(contexteMatch.match.joueurs)
-                            ? contexteMatch.match.joueurs.map(j => ({
-                                jid: j?.jid || null,
-                                nom: j?.nom || j?.name || null
-                            }))
-                            : []
-                }
-                : null
-        };
+            joueurs:
+                Array.isArray(contexteMatch.match.joueurs)
+                    ? contexteMatch.match.joueurs.map(j => {
+
+                        const carte =
+                            j?.carte ||
+                            j?.card ||
+                            j?.personnage ||
+                            j?.character ||
+                            null;
+
+                        return {
+
+                            jid: j?.jid || null,
+
+                            nom:
+                                j?.nom ||
+                                j?.name ||
+                                null,
+
+                            carte: carte
+                                ? {
+                                    name: carte.name || null,
+                                    grade: carte.grade || null,
+                                    rarete: carte.rarete || null,
+                                    category: carte.category || null,
+                                    univers: carte.univers || null,
+
+                                    images:
+                                        Array.isArray(carte.images)
+                                            ? carte.images
+                                            : [],
+
+                                    card:
+                                        carte.card || null,
+
+                                    Price:
+                                        carte.Price || null,
+
+                                    specs: {
+                                        force:
+                                            carte.specs?.force ?? 0,
+
+                                        speed:
+                                            carte.specs?.speed ?? 0,
+
+                                        attacks:
+                                            carte.specs?.attacks ?? 0
+                                    },
+
+                                    Moves: {
+                                        basic:
+                                            Array.isArray(carte.Moves?.basic)
+                                                ? carte.Moves.basic
+                                                : [],
+
+                                        special:
+                                            Array.isArray(carte.Moves?.special)
+                                                ? carte.Moves.special
+                                                : [],
+
+                                        ultime:
+                                            Array.isArray(carte.Moves?.ultime)
+                                                ? carte.Moves.ultime
+                                                : []
+                                    },
+
+                                    Patterns:
+                                        Array.isArray(carte.Patterns)
+                                            ? carte.Patterns
+                                            : []
+                                }
+                                : null
+                        };
+                    })
+                    : []
+        }
+        : null
+};
+
+        console.log(
+    "🧠 CONTEXTE GEMINI JOUEURS :",
+    JSON.stringify(contexteGemini.match?.joueurs, null, 2)
+);
 
 
         //================================================
