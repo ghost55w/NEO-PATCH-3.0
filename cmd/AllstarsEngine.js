@@ -864,131 +864,63 @@ Ne retourne aucun Markdown.
 Ne retourne aucun texte avant ou après le JSON.
 `;
 
-        //================================================
-// 7️⃣ APPEL GEMINI
+//================================================
+// 7️⃣ APPEL ARBITRE
+// ☁️ GEMINI → 🧠 NEO
 //================================================
 
-const apiKey =
-    process.env.GEMINI_API_KEY;
+let resultat;
 
-if (!apiKey) {
+try {
 
-    throw new Error(
-        "GEMINI_API_KEY manquante dans Render"
+    resultat =
+        await appelerArbitreCombat(
+            prompt
+        );
+
+} catch (error) {
+
+    console.error(
+        "❌ ARBITRE COMBAT :",
+        error?.message ||
+        error
     );
 
+    return {
+
+        ok: false,
+        paveDetecte: true,
+        user,
+        actionsTexte,
+
+        erreur:
+            "Gemini et NEO sont indisponibles"
+    };
 }
 
 
-const url =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
-    apiKey;
+//================================================
+// 8️⃣ RETOUR FINAL
+//================================================
 
+console.log(
+    "⚖️ MOTEUR :",
+    resultat?.moteur
+);
 
-const response =
-    await axios.post(
-        url,
-        {
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: prompt
-                        }
-                    ]
-                }
-            ],
+return {
 
-            generationConfig: {
-                responseMimeType: "application/json"
-            }
-        },
-        {
-            headers: {
-                "Content-Type": "application/json"
-            },
+    ok: true,
 
-            timeout: 30000
-        }
-    );
+    paveDetecte: true,
 
-        //================================================
-        // 8️⃣ EXTRACTION RÉPONSE
-        //================================================
+    user,
 
-        let resultatTexte =
-            response
-                ?.data
-                ?.candidates?.[0]
-                ?.content
-                ?.parts?.[0]
-                ?.text;
+    actionsTexte,
 
+    ...resultat
 
-        if (!resultatTexte) {
-
-            throw new Error(
-                "Gemini n'a retourné aucune réponse"
-            );
-
-        }
-
-
-        resultatTexte =
-            resultatTexte
-                .replace(/^```json\s*/i, "")
-                .replace(/^```\s*/i, "")
-                .replace(/\s*```$/i, "")
-                .trim();
-
-
-        //================================================
-        // 9️⃣ PARSE JSON
-        //================================================
-
-        let resultat;
-
-        try {
-
-            resultat =
-                JSON.parse(resultatTexte);
-
-        } catch (e) {
-
-            console.error(
-                "❌ JSON GEMINI INVALIDE :",
-                resultatTexte
-            );
-
-            return {
-                ok: false,
-                paveDetecte: true,
-                user,
-                actionsTexte,
-                erreur: "Réponse Gemini invalide"
-            };
-
-        }
-
-
-        //================================================
-        // 🔟 RETOUR FINAL
-        //================================================
-
-        return {
-
-            ok: true,
-
-            paveDetecte: true,
-
-            user,
-
-            actionsTexte,
-
-            ...resultat
-
-        };
-
+};        
 
     } catch (error) {
 
