@@ -6111,8 +6111,8 @@ ${nomsJoueurs}
 module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
-    analysePaveAvecGemini,
-    envoyerResultatPaveGemini,
+    analysePaveCombat,
+    envoyerResultatPaveCombat,
     lancerMatchAllStars,
     duelsEnCours,
     matchAttente,
