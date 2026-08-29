@@ -7,22 +7,14 @@ const {
     getAllFiches
 } = require("../DataBase/allstars_divs_fiches");
 
-const {
-    AllStarsDivsFiche
-} = require("../DataBase/allstars_divs_fiches");
+const { AllStarsDivsFiche } = require("../DataBase/allstars_divs_fiches");
 
-const { cards } =
-    require("../DataBase/cards");
-
-const {
-    MyNeoFunctions
-} = require("../DataBase/myneo_lineup_team");
-
-const config =
-    require("../set");
+const { cards } = require("../DataBase/cards");
+const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
+const config = require("../set");
 
 
-//================================================
+   //================================================
 // 🤖 GEMINI — ARBITRE COMBAT
 //================================================
 
@@ -31,9 +23,9 @@ const GEMINI_COMBAT_MODELS = [
     "gemini-3.7-flash",
     "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-3.5-flash",
     "gemini-3.5-flash-lite",
 
+    // Secours supplémentaires
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite"
 
@@ -41,7 +33,7 @@ const GEMINI_COMBAT_MODELS = [
 
 
 //================================================
-// ⏱️ ATTENTE GEMINI
+// ⏱️ ATTENTE
 //================================================
 
 function attendreGemini(ms) {
@@ -55,7 +47,7 @@ function attendreGemini(ms) {
 
 
 //================================================
-// ☁️ APPEL GEMINI
+// 🤖 APPEL GEMINI
 //================================================
 
 async function appelerGemini(prompt) {
@@ -67,14 +59,14 @@ async function appelerGemini(prompt) {
     if (!apiKey) {
 
         throw new Error(
-            "GEMINI_API_KEY non configurée"
+            "❌ GEMINI_API_KEY non configurée"
         );
 
     }
 
 
     //================================================
-    // 🔁 ESSAI DES MODÈLES
+    // 🔁 ESSAI DE TOUS LES MODÈLES
     //================================================
 
     for (
@@ -95,7 +87,7 @@ async function appelerGemini(prompt) {
 
 
         console.log(
-            `☁️ GEMINI ARBITRE → ${modele}`
+            `🤖 GEMINI ARBITRE → ${modele}`
         );
 
 
@@ -133,6 +125,8 @@ async function appelerGemini(prompt) {
                                 "application/json"
                         },
 
+                        // IMPORTANT :
+                        // Ne pas bloquer 30 secondes
                         timeout: 10000
                     }
 
@@ -140,7 +134,7 @@ async function appelerGemini(prompt) {
 
 
             //================================================
-            // 📦 RÉPONSE
+            // 📦 RÉCUPÉRATION
             //================================================
 
             const texte =
@@ -160,12 +154,15 @@ async function appelerGemini(prompt) {
 
 
             //================================================
-            // 🧹 NETTOYAGE JSON
+            // 🧹 NETTOYAGE
             //================================================
 
-            const jsonTexte =
-                texte
-                    .trim()
+            let jsonTexte =
+                texte.trim();
+
+
+            jsonTexte =
+                jsonTexte
                     .replace(
                         /^```json\s*/i,
                         ""
@@ -181,14 +178,22 @@ async function appelerGemini(prompt) {
                     .trim();
 
 
+            //================================================
+            // 🔎 JSON
+            //================================================
+
             const resultat =
                 JSON.parse(
                     jsonTexte
                 );
 
 
+            //================================================
+            // ✅ GEMINI DISPONIBLE
+            //================================================
+
             console.log(
-                `✅ GEMINI OK → ${modele}`
+                `✅ GEMINI ARBITRE OK → ${modele}`
             );
 
 
@@ -202,7 +207,7 @@ async function appelerGemini(prompt) {
 
 
             console.error(
-                `❌ GEMINI ${modele}`,
+                `❌ GEMINI ${modele} ÉCHEC`,
                 {
                     status,
                     message:
@@ -212,7 +217,7 @@ async function appelerGemini(prompt) {
 
 
             //================================================
-            // 🚨 ERREUR DÉFINITIVE
+            // 🚨 ERREUR DE CLÉ / REQUÊTE
             //================================================
 
             if (
@@ -230,12 +235,18 @@ async function appelerGemini(prompt) {
             // 🔄 MODÈLE SUIVANT
             //================================================
 
-            if (
-                i <
-                GEMINI_COMBAT_MODELS.length - 1
-            ) {
+            const suivant =
+                GEMINI_COMBAT_MODELS[i + 1];
 
-                await attendreGemini(300);
+
+            if (suivant) {
+
+                console.log(
+                    `🔄 GEMINI → passage au secours : ${suivant}`
+                );
+
+
+                await attendreGemini(500);
 
             }
 
@@ -243,1124 +254,23 @@ async function appelerGemini(prompt) {
 
     }
 
+
+    //================================================
+    // ❌ TOUS LES MODÈLES ÉCHOUÉS
+    //================================================
 
     throw new Error(
-        "TOUS LES MODÈLES GEMINI SONT INDISPONIBLES"
+        "❌ TOUS LES MODÈLES GEMINI SONT INDISPONIBLES"
     );
 
-}
-
-
-//================================================
-// 🧠 NEO LOCAL — ARBITRE MANUEL
-//================================================
-
-async function appelerNEO(prompt) {
-
-    console.log(
-        "🧠 NEO MANUEL → ANALYSE"
-    );
-    
-    const contexte =
-        arguments[1] || {};
-
-
-    const texte =
-        contexte.actionsTexte ||
-        "";
-
-
-    const joueurs =
-        contexte.joueurs ||
-        [];
-
-
-    if (!texte) {
-
-        throw new Error(
-            "NEO : texte du pavé absent"
-        );
-
-    }
-
-
-    //================================================
-    // 🧠 ANALYSE
-    //================================================
-
-    const analyse =
-        analyserTexteCombatNeo(
-            texte,
-            joueurs
-        );
-
-
-    //================================================
-    // ⚖️ VALIDATION
-    //================================================
-
-    const verdict =
-        validerActionsNeo(
-            analyse,
-            contexte.match || {}
-        );
-
-
-    console.log(
-        "✅ NEO MANUEL → VERDICT"
-    );
-
-
-    return verdict;
-
-}
-
-
-//================================================
-// ⚖️ ARBITRE HYBRIDE
-//
-// ☁️ GEMINI
-//      ↓ échec
-// 🧠 NEO
-//================================================
-
-async function appelerArbitreCombat(
-    prompt,
-    contexteNeo = {}
-) {
-
-    //================================================
-    // ☁️ PRIORITÉ GEMINI
-    //================================================
-
-    try {
-
-        console.log(
-            "☁️ ARBITRE COMBAT → GEMINI"
-        );
-
-
-        const resultat =
-            await appelerGemini(
-                prompt
-            );
-
-
-        return {
-
-            ...resultat,
-
-            moteur: "gemini"
-
-        };
-
-
-    } catch (geminiError) {
-
-        console.error(
-            "⚠️ GEMINI INDISPONIBLE"
-        );
-
-        console.log(
-            "🔄 BASCULEMENT → NEO"
-        );
-
-
-        //================================================
-        // 🧠 SECOURS NEO
-        //================================================
-
-        try {
-
-            const resultat =
-                await appelerNEO(
-                    prompt,
-                    contexteNeo
-                );
-
-
-            return {
-
-                ...resultat,
-
-                moteur: "neo"
-
-            };
-
-
-        } catch (neoError) {
-
-            console.error(
-                "❌ NEO ÉCHEC :",
-                neoError.message
-            );
-
-
-            throw new Error(
-                "❌ GEMINI ET NEO SONT INDISPONIBLES"
-            );
-
-        }
-
-    }
-
-}        
-
-//================================================
-// 🧠 NEO AI ARBITRE — ANALYSE MANUELLE DU PAVÉ
-//================================================
-
-function analyserPaveNEO(
-    actionsTexte = "",
-    contexteCombat = {}
-) {
-
-    console.log(
-        "🧠 NEO AI → ANALYSE MANUELLE"
-    );
-
-    const texte =
-        actionsTexte
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/\s+/g, " ")
-            .trim();
-
-
-    //================================================
-    // ❌ TEXTE VIDE
-    //================================================
-
-    if (!texte) {
-
-        return {
-
-            paveValide: false,
-
-            nombreActions: 0,
-
-            actions: [],
-
-            note: 0,
-
-            verdict:
-                "Pavé vide.",
-
-            resume: "",
-
-            joueurSuivant: null,
-
-            consequences: {
-
-                touche: false,
-                contre: false,
-                mauvaisContre: false,
-                degats: 0,
-                effets: [],
-                position: "",
-                posture: "",
-                equilibre: "",
-                garde: ""
-
-            },
-
-            erreurs: [
-                "Aucune action détectée."
-            ]
-
-        };
-
-    }
-
-
-    //================================================
-    // 👥 JOUEURS DU MATCH
-    //================================================
-
-    const joueurs =
-        Array.isArray(
-            contexteCombat?.match?.joueurs
-        )
-            ? contexteCombat.match.joueurs
-            : [];
-
-
-    //================================================
-    // 🔎 TROUVER UN PERSONNAGE
-    //================================================
-
-    function trouverPersonnage(nom) {
-
-        if (!nom) return null;
-
-        const recherche =
-            nom
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "");
-
-        return joueurs.find(j => {
-
-            const personnage =
-                String(
-                    j?.personnage ||
-                    ""
-                )
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(
-                        /[\u0300-\u036f]/g,
-                        ""
-                    );
-
-            return (
-                personnage === recherche
-            );
-
-        }) || null;
-
-    }
-
-
-    //================================================
-    // 🎴 PERSONNAGE PRINCIPAL
-    //================================================
-
-    let acteur = null;
-
-    for (const joueur of joueurs) {
-
-        const nom =
-            joueur?.personnage;
-
-        if (!nom) continue;
-
-        const normalise =
-            nom
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "");
-
-        if (
-            texte.includes(
-                normalise
-            )
-        ) {
-
-            acteur = joueur;
-
-            break;
-
-        }
-
-    }
-
-
-    //================================================
-    // ❌ ACTEUR INTROUVABLE
-    //================================================
-
-    if (!acteur) {
-
-        return {
-
-            paveValide: false,
-
-            nombreActions: 0,
-
-            actions: [],
-
-            note: 0,
-
-            verdict:
-                "Impossible d'identifier le personnage qui agit.",
-
-            resume: "",
-
-            joueurSuivant: null,
-
-            consequences: {
-
-                touche: false,
-                contre: false,
-                mauvaisContre: false,
-                degats: 0,
-                effets: [],
-                position: "",
-                posture: "",
-                equilibre: "",
-                garde: ""
-
-            },
-
-            erreurs: [
-                "Acteur introuvable dans le contexte du match."
-            ]
-
-        };
-
-    }
-
-
-    //================================================
-    // 🎯 TROUVER LA CIBLE
-    //================================================
-
-    let cible = null;
-
-    for (const joueur of joueurs) {
-
-        if (
-            joueur?.jid ===
-            acteur?.jid
-        ) continue;
-
-        const nom =
-            joueur?.personnage;
-
-        if (!nom) continue;
-
-        const normalise =
-            nom
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "");
-
-        if (
-            texte.includes(
-                normalise
-            )
-        ) {
-
-            cible = joueur;
-
-            break;
-
-        }
-
-    }
-
-
-    //================================================
-    // 📦 ACTIONS
-    //================================================
-
-    const actions = [];
-
-//================================================
-// 📦 ANALYSE CHRONOLOGIQUE DES ACTIONS
-//================================================
-
-const actions = [];
-
-
-//================================================
-// 🔧 OUTILS
-//================================================
-
-function ajouterAction(action) {
-
-    actions.push({
-        ordre: actions.length + 1,
-        ...action
-    });
-
-}
-
-
-//================================================
-// ⚡ DÉPLACEMENT
-//================================================
-
-const contientDeplacement =
-    /fonce|court|courir|avance|s'avance|se deplace|deplace|accelere|course|vmax|vitesse maximale/
-        .test(texte);
-
-
-if (contientDeplacement) {
-
-    const vitesse =
-        acteur?.vitesseMax ??
-        (
-            typeof obtenirVitesseMaxParGrade === "function"
-                ? obtenirVitesseMaxParGrade(
-                    acteur?.grade
-                )
-                : null
-        );
-
-
-    //================================================
-    // 📏 DISTANCE
-    //================================================
-
-    let distance = null;
-
-    const matchDistance =
-        texte.match(
-            /(?:sur|pendant|parcourant|parcours)\s+(\d+(?:[.,]\d+)?)\s*(m|metres?|cm)/i
-        );
-
-
-    if (matchDistance) {
-
-        const valeur =
-            parseFloat(
-                matchDistance[1]
-                    .replace(",", ".")
-            );
-
-        const unite =
-            matchDistance[2]
-                .toLowerCase();
-
-
-        distance =
-            unite === "cm" ||
-            unite === "centimetre" ||
-            unite === "centimetres"
-
-                ? valeur / 100
-
-                : valeur;
-
-    }
-
-
-    //================================================
-    // 🎯 DISTANCE IMPLICITE → CLOSE DISTANCE
-    //================================================
-
-    if (
-        distance === null &&
-        /close distance|corps a corps|au corps a corps|a courte distance/
-            .test(texte)
-    ) {
-
-        distance = 5;
-
-    }
-
-
-    //================================================
-    // 🏃 TYPE DE DÉPLACEMENT
-    //================================================
-
-    let mode =
-        "deplacement";
-
-
-    if (
-        /vmax|vitesse maximale|course vmax/
-            .test(texte)
-    ) {
-
-        mode =
-            "course_vmax";
-
-    } else if (
-        /accelere|acceleration/
-            .test(texte)
-    ) {
-
-        mode =
-            "acceleration";
-
-    }
-
-
-    ajouterAction({
-
-        acteur:
-            acteur.personnage,
-
-        cible:
-            cible?.personnage || null,
-
-        type:
-            "deplacement",
-
-        mode,
-
-        vitesse,
-
-        distance,
-
-        destination:
-            cible?.personnage || null,
-
-        arrivee:
-            distance !== null
-                ? "close_distance"
-                : null,
-
-        valide:
-            vitesse !== null,
-
-        description:
-            distance !== null
-
-                ? `${acteur.personnage} s'élance à vitesse maximale (${vitesse} m/s) sur ${distance} m vers ${cible?.personnage || "la cible"}.`
-
-                : `${acteur.personnage} s'élance à vitesse maximale (${vitesse} m/s) vers ${cible?.personnage || "la cible"}.`,
-
-        raison:
-            vitesse !== null
-                ? "La vitesse maximale est déterminée par le grade."
-                : "Impossible de déterminer la vitesse maximale.",
-
-        resultatDefense:
-            "",
-
-        consequence:
-            ""
-
-    });
-
-}
-
-
-//================================================
-// 👊 COUP DE POING DIRECT
-//================================================
-
-const direct =
-    /coup de poing direct|coup direct|direct|jab|straight/
-        .test(texte);
-
-
-if (direct) {
-
-    let membre =
-        "inconnu";
-
-
-    if (
-        /du droit|main droite|poing droit/
-            .test(texte)
-    ) {
-
-        membre =
-            "main_droite";
-
-    } else if (
-        /du gauche|main gauche|poing gauche/
-            .test(texte)
-    ) {
-
-        membre =
-            "main_gauche";
-
-    }
-
-
-    let zone =
-        "inconnue";
-
-
-    if (/visage|face/.test(texte)) {
-
-        zone =
-            "visage";
-
-    } else if (/nez/.test(texte)) {
-
-        zone =
-            "nez";
-
-    } else if (/menton/.test(texte)) {
-
-        zone =
-            "menton";
-
-    } else if (/machoire/.test(texte)) {
-
-        zone =
-            "machoire";
-
-    } else if (/abdomen|ventre/.test(texte)) {
-
-        zone =
-            "abdomen";
-
-    } else if (/torse|poitrine/.test(texte)) {
-
-        zone =
-            "torse";
-
-    }
-
-
-    const valide =
-        membre !== "inconnu" &&
-        zone !== "inconnue";
-
-
-    ajouterAction({
-
-        acteur:
-            acteur.personnage,
-
-        cible:
-            cible?.personnage || null,
-
-        type:
-            "frappe",
-
-        technique:
-            "coup_direct",
-
-        membre,
-
-        zone,
-
-        valide,
-
-        description:
-            `Coup de poing direct du ${membre === "main_droite" ? "droit" : "gauche"} visant le ${zone}.`,
-
-        raison:
-            valide
-
-                ? "La main utilisée et la zone visée sont précisées."
-
-                : "La frappe doit préciser le membre utilisé et la zone visée.",
-
-        resultatDefense:
-            "",
-
-        consequence:
-            ""
-
-    });
-
-}
-
-
-//================================================
-// 🦵 COUP DE PIED FRONTAL
-//================================================
-
-const frontKick =
-    /coup de pied frontal|front kick|coup frontal/
-        .test(texte);
-
-
-if (frontKick) {
-
-    let membre =
-        "inconnu";
-
-
-    if (
-        /pied droit|du pied droit|jambe droite/
-            .test(texte)
-    ) {
-
-        membre =
-            "pied_droit";
-
-    } else if (
-        /pied gauche|du pied gauche|jambe gauche/
-            .test(texte)
-    ) {
-
-        membre =
-            "pied_gauche";
-
-    }
-
-
-    let zone =
-        "inconnue";
-
-
-    if (/abdomen|ventre/.test(texte)) {
-
-        zone =
-            "abdomen";
-
-    } else if (/visage|face/.test(texte)) {
-
-        zone =
-            "visage";
-
-    } else if (/torse|poitrine/.test(texte)) {
-
-        zone =
-            "torse";
-
-    }
-
-
-    let surface =
-        "inconnue";
-
-
-    if (/semelle/.test(texte)) {
-
-        surface =
-            "semelle";
-
-    } else if (/talon/.test(texte)) {
-
-        surface =
-            "talon";
-
-    } else if (/pointe|orteils/.test(texte)) {
-
-        surface =
-            "pointe";
-
-    }
-
-
-    const valide =
-        membre !== "inconnu" &&
-        surface !== "inconnue" &&
-        zone !== "inconnue";
-
-
-    ajouterAction({
-
-        acteur:
-            acteur.personnage,
-
-        cible:
-            cible?.personnage || null,
-
-        type:
-            "frappe",
-
-        technique:
-            "front_kick",
-
-        membre,
-
-        surface,
-
-        zone,
-
-        valide,
-
-        description:
-            `Coup de pied frontal du ${membre === "pied_droit" ? "pied droit" : "pied gauche"} avec la ${surface} visant le ${zone}.`,
-
-        raison:
-            valide
-
-                ? "Le pied, la surface utilisée et la zone visée sont précisés."
-
-                : "Le coup de pied doit préciser le pied, la surface utilisée et la zone visée.",
-
-        resultatDefense:
-            "",
-
-        consequence:
-            ""
-
-    });
-
-}
-
-
-//================================================
-// 🔢 RÉORDONNEMENT CHRONOLOGIQUE
-//================================================
-
-// Pour l'instant on utilise les positions
-// des formulations dans le texte.
-
-const positionsActions =
-    actions.map(action => {
-
-        let position =
-            texte.length;
-
-
-        if (action.type === "deplacement") {
-
-            const match =
-                texte.match(
-                    /fonce|court|avance|s'avance|se deplace|deplace|accelere|course|vmax|vitesse maximale/
-                );
-
-            if (match) {
-                position = match.index;
-            }
-
-        }
-
-
-        if (
-            action.technique ===
-            "coup_direct"
-        ) {
-
-            const match =
-                texte.match(
-                    /coup de poing direct|coup direct|direct|jab|straight/
-                );
-
-            if (match) {
-                position = match.index;
-            }
-
-        }
-
-
-        if (
-            action.technique ===
-            "front_kick"
-        ) {
-
-            const match =
-                texte.match(
-                    /coup de pied frontal|front kick|coup frontal/
-                );
-
-            if (match) {
-                position = match.index;
-            }
-
-        }
-
-
-        return {
-            action,
-            position
-        };
-
-    });
-
-
-positionsActions.sort(
-    (a, b) =>
-        a.position -
-        b.position
-);
-
-
-positionsActions.forEach(
-    (element, index) => {
-
-        element.action.ordre =
-            index + 1;
-
-    }
-);
-
-
-const actionsFinales =
-    positionsActions.map(
-        element =>
-            element.action
-    );
-
-    //================================================
-// 🧠 ACTIONS FINALES
-//================================================
-
-const actionsFinales =
-    actions.map((action, index) => ({
-
-        ...action,
-
-        ordre:
-            index + 1
-
-    }));
-    
-    //================================================
-    // 📊 LIMITE D'ACTIONS
-    //================================================
-
-    const nombreActions =
-    actionsFinales.length;
-
-const limiteRespectee =
-    nombreActions > 0 &&
-    nombreActions <= 4;
-
-const toutesValides =
-    actionsFinales.length > 0 &&
-    actionsFinales.every(
-        action =>
-            action.valide === true
-    );
-
-const paveValide =
-    limiteRespectee &&
-    toutesValides;
-
-
-    //================================================
-    // ⭐ NOTE
-    //================================================
-
-    let note = 0;
-
-    if (paveValide) {
-
-        note = 10;
-
-    } else if (nombreActions > 0) {
-
-        note = 5;
-
-    }
-
-
-    //================================================
-    // 📝 RAISONS
-    //================================================
-
-    const erreurs = [];
-
-    if (!limiteRespectee) {
-
-        erreurs.push(
-            nombreActions === 0
-                ? "Aucune action reconnue."
-                : "Le pavé doit contenir au maximum 4 actions."
-        );
-
-    }
-
-
-    for (const action of actions) {
-
-        if (!action.valide) {
-
-            erreurs.push(
-                action.raison
-            );
-
-        }
-
-    }
-
-
-    //================================================
-    // 📝 RÉSUMÉ
-    //================================================
-
-    const resume =
-        actions
-            .map(
-                action =>
-                    action.description
-            )
-            .join(" puis ");
-
-
-    //================================================
-    // ➡️ JOUEUR SUIVANT
-    //================================================
-
-    const joueurTour =
-        contexteCombat
-            ?.match
-            ?.joueurTour;
-
-
-    let indexTour =
-        joueurs.findIndex(
-            j =>
-                j?.jid === joueurTour
-        );
-
-
-    if (indexTour === -1) {
-
-        indexTour = 0;
-
-    }
-
-
-    const joueurSuivant =
-        joueurs.length > 0
-            ? joueurs[
-                (indexTour + 1) %
-                joueurs.length
-            ]
-            : null;
-
-
-    //================================================
-    // ⚖️ RÉSULTAT
-    //================================================
-
-    return {
-
-        paveValide,
-
-        nombreActions,
-
-        actions:
-    actionsFinales,
-
-        note,
-
-        verdict:
-            paveValide
-                ? "Pavé valide."
-                : "Pavé refusé.",
-
-        resume,
-
-        joueurSuivant:
-            joueurSuivant
-                ? {
-
-                    nom:
-                        joueurSuivant
-                            .pseudo ||
-                        joueurSuivant
-                            .personnage ||
-                        "",
-
-                    jid:
-                        joueurSuivant.jid ||
-                        ""
-
-                }
-                : null,
-
-        consequences: {
-
-            touche: false,
-
-            contre: false,
-
-            mauvaisContre: false,
-
-            degats: 0,
-
-            effets: [],
-
-            position: "",
-
-            posture: "",
-
-            equilibre: "",
-
-            garde: ""
-
-        },
-
-        erreurs
-
-    };
-
-}
+}                                           
 
 
 //================================================
 // 🤖 ANALYSE PAVÉ AVEC GEMINI
 //================================================
-async function analysePaveCombat(message, contexteMatch = {}) {
+
+async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
     try {
 
@@ -1730,7 +640,8 @@ const contexteGemini = {
                 // 👥 JOUEURS
                 //================================================
 
-                joueurs: joueursCombat
+                joueurs:
+                    joueursGemini
 
             }
             : null
@@ -1738,23 +649,22 @@ const contexteGemini = {
 };
 
 //================================================
-// 🧠 DEBUG CONTEXTE ARBITRE
+// 🧠 DEBUG CONTEXTE GEMINI
 //================================================
 
 console.log(
-    "🧠 CONTEXTE ARBITRE COMBAT :",
+    "🧠 CONTEXTE GEMINI COMBAT :",
     JSON.stringify(
-        joueursCombat,
+        joueursGemini,
         null,
         2
     )
 );
 
-        
-//================================================
-// 6️⃣ PROMPT ARBITRE COMBAT
-//================================================
 
+        //================================================
+// 6️⃣ PROMPT GEMINI
+//================================================
 const prompt = `
 
 ${GEMINI_RULES_PROMPT}
@@ -1766,13 +676,81 @@ MISSION SPÉCIFIQUE DE CETTE ANALYSE
 Tu dois maintenant analyser le pavé suivant en appliquant
 STRICTEMENT toutes les règles ci-dessus.
 
-...
+Tu dois notamment :
+
+1. Identifier toutes les actions.
+2. Les remettre dans leur ordre chronologique.
+3. Compter les actions.
+4. Vérifier la limite de 4 actions.
+5. RÈGLE VMAX OBLIGATOIRE :
+
+   Lorsque le pavé contient "VMAX", "vitesse maximale",
+   "à vitesse maximale", "course VMAX" ou toute formulation
+   équivalente, tu dois récupérer automatiquement la vitesse
+   depuis le grade du personnage dans le CONTEXTE DU MATCH.
+
+   Correspondance officielle :
+
+   - Bronze = 6 m/s
+   - Argent = 8 m/s
+   - Or = 10 m/s
+
+   Exemple :
+
+   Contexte :
+   Yamato = Bronze
+
+   Pavé :
+   "Yamato fonce en course VMAX vers Tobirama."
+
+   Tu dois obligatoirement interpréter :
+   Yamato VMAX = 6 m/s.
+
+6. Le joueur n'a PAS besoin d'écrire la valeur numérique
+   de la VMAX dans son pavé.
+
+   Si le grade du personnage est présent dans le contexte,
+   "VMAX" est une information COMPLÈTE et VALIDE.
+
+   NE REFUSE JAMAIS une VMAX uniquement parce que la valeur
+   en m/s n'est pas écrite dans le pavé lorsque le grade
+   du personnage est disponible dans le contexte.
+
+   Le CONTEXTE DU MATCH est une source officielle de données.
+
+   Si le contexte indique :
+   "Yamato | Grade : Bronze | Vmax : 6 m/s"
+
+   alors toute mention de "VMAX" par Yamato doit être
+   automatiquement évaluée à 6 m/s.
+
+   Tu dois utiliser cette valeur pour tous les calculs
+   de déplacement, distance et vitesse nécessaires.
+
+   Tu ne dois pas répondre :
+   "la VMAX est inconnue"
+   si le grade ou la VMAX du personnage est présent
+   dans le contexte.
+7. Pour une défense, identifier précisément l'attaque à laquelle
+   chaque action répond.
+8. Évaluer chaque défense séparément.
+9. Déterminer si elle est réussie, partielle ou ratée.
+10. Appliquer immédiatement les conséquences d'une défense
+    avant d'analyser la suivante.
+11. Si une défense partielle provoque un déséquilibre,
+    changement de posture, ouverture de garde ou déplacement
+    empêchant la défense suivante, alors la défense suivante
+    doit être réévaluée avec ce nouvel état.
+12. Appliquer les dégâts lorsqu'une attaque atteint sa cible.
+13. Décrire les conséquences physiques justifiées.
+14. Produire un résumé narratif court.
+15. Déterminer le joueur suivant.
 
 ================================================
 CONTEXTE DU MATCH
 ================================================
 
-${JSON.stringify(contexteCombat, null, 2)}
+${JSON.stringify(contexteGemini, null, 2)}
 
 ================================================
 PAVÉ À ANALYSER
@@ -1789,7 +767,19 @@ Réponds UNIQUEMENT avec un JSON valide.
 {
     "paveValide": true,
     "nombreActions": 0,
-    "actions": [],
+    "actions": [
+        {
+            "ordre": 1,
+            "acteur": "",
+            "cible": "",
+            "type": "",
+            "description": "",
+            "valide": true,
+            "raison": "",
+            "resultatDefense": "",
+            "consequence": ""
+        }
+    ],
     "note": 0,
     "verdict": "",
     "resume": "",
@@ -1815,63 +805,132 @@ Ne retourne aucun Markdown.
 Ne retourne aucun texte avant ou après le JSON.
 `;
 
+
+        //================================================
+// 7️⃣ APPEL GEMINI
 //================================================
-// 7️⃣ APPEL ARBITRE
-// ☁️ GEMINI → 🧠 NEO
-//================================================
 
-let resultat;
+const apiKey =
+    process.env.GEMINI_API_KEY;
 
-try {
+if (!apiKey) {
 
-    resultat =
-        await appelerArbitreCombat(
-            prompt
-        );
-
-} catch (error) {
-
-    console.error(
-        "❌ ARBITRE COMBAT :",
-        error?.message ||
-        error
+    throw new Error(
+        "GEMINI_API_KEY manquante dans Render"
     );
 
-    return {
-
-        ok: false,
-        paveDetecte: true,
-        user,
-        actionsTexte,
-
-        erreur:
-            "Gemini et NEO sont indisponibles"
-    };
 }
 
 
-//================================================
-// 8️⃣ RETOUR FINAL
-//================================================
+const url =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
+    apiKey;
 
-console.log(
-    "⚖️ MOTEUR :",
-    resultat?.moteur
-);
 
-return {
+const response =
+    await axios.post(
+        url,
+        {
+            contents: [
+                {
+                    parts: [
+                        {
+                            text: prompt
+                        }
+                    ]
+                }
+            ],
 
-    ok: true,
+            generationConfig: {
+                responseMimeType: "application/json"
+            }
+        },
+        {
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-    paveDetecte: true,
+            timeout: 30000
+        }
+    );
 
-    user,
+        //================================================
+        // 8️⃣ EXTRACTION RÉPONSE
+        //================================================
 
-    actionsTexte,
+        let resultatTexte =
+            response
+                ?.data
+                ?.candidates?.[0]
+                ?.content
+                ?.parts?.[0]
+                ?.text;
 
-    ...resultat
 
-};        
+        if (!resultatTexte) {
+
+            throw new Error(
+                "Gemini n'a retourné aucune réponse"
+            );
+
+        }
+
+
+        resultatTexte =
+            resultatTexte
+                .replace(/^```json\s*/i, "")
+                .replace(/^```\s*/i, "")
+                .replace(/\s*```$/i, "")
+                .trim();
+
+
+        //================================================
+        // 9️⃣ PARSE JSON
+        //================================================
+
+        let resultat;
+
+        try {
+
+            resultat =
+                JSON.parse(resultatTexte);
+
+        } catch (e) {
+
+            console.error(
+                "❌ JSON GEMINI INVALIDE :",
+                resultatTexte
+            );
+
+            return {
+                ok: false,
+                paveDetecte: true,
+                user,
+                actionsTexte,
+                erreur: "Réponse Gemini invalide"
+            };
+
+        }
+
+
+        //================================================
+        // 🔟 RETOUR FINAL
+        //================================================
+
+        return {
+
+            ok: true,
+
+            paveDetecte: true,
+
+            user,
+
+            actionsTexte,
+
+            ...resultat
+
+        };
+
 
     } catch (error) {
 
