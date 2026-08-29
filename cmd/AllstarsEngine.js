@@ -474,9 +474,8 @@ const joueursTracker =
         ? tracker.joueurs
         : [];
 
-
 //================================================
-// 👥 CONSTRUCTION DES JOUEURS
+// 👥 CONSTRUCTION DES JOUEURS POUR GEMINI
 //================================================
 
 const joueursGemini =
@@ -488,7 +487,20 @@ const joueursGemini =
 
 
         //================================================
-        // 🔎 CHERCHER LE JOUEUR DANS LE TRACKER
+        // 👤 PSEUDO DU JOUEUR
+        //================================================
+
+        const pseudo =
+            j?.pseudo ||
+            j?.user?.pseudo ||
+            j?.player?.pseudo ||
+            j?.nomJoueur ||
+            contexteMatch?.joueur?.pseudo ||
+            null;
+
+
+        //================================================
+        // 🔎 CHERCHER L'ÉTAT DANS LE TRACKER
         //================================================
 
         const etat =
@@ -499,44 +511,44 @@ const joueursGemini =
 
 
         //================================================
-        // 🎴 CARTE UNIQUEMENT POUR LES INFOS COMBAT
+        // 🎴 PERSONNAGE
         //================================================
-
-        const carte =
-            j?.carte ||
-            j?.card ||
-            j?.personnage ||
-            j?.character ||
-            null;
-
 
         const personnage =
             etat?.personnage ||
-            carte?.name ||
+            j?.nom ||
             j?.personnage ||
             j?.nomPersonnage ||
-            j?.name ||
-            null;
-
-
-        const grade =
-            etat?.grade ||
-            carte?.grade ||
-            null;
-
-
-        const category =
-            etat?.category ||
-            carte?.category ||
             null;
 
 
         //================================================
-        // ⚡ VMAX
+        // 🏷️ GRADE
+        //================================================
+
+        const grade =
+            etat?.grade ||
+            j?.grade ||
+            null;
+
+
+        //================================================
+        // 🏆 CATÉGORIE
+        //================================================
+
+        const category =
+            etat?.category ||
+            j?.category ||
+            null;
+
+
+        //================================================
+        // ⚡ VITESSE MAXIMALE
         //================================================
 
         const vitesseMax =
             etat?.vitesseMax ??
+            j?.vitesseMax ??
             (
                 grade === "Bronze"
                     ? 6
@@ -551,20 +563,22 @@ const joueursGemini =
 
 
         //================================================
-        // 📦 RETOUR JOUEUR
+        // 📦 DONNÉES COMBAT ENVOYÉES À GEMINI
         //================================================
 
         return {
 
+            //================================================
+            // 👤 JOUEUR
+            //================================================
+
             jid,
 
-            pseudo:
-    j?.pseudo ||
-    j?.user?.pseudo ||
-    j?.player?.pseudo ||
-    j?.nomJoueur ||
-    contexteMatch?.joueur?.pseudo ||
-    null,
+            pseudo,
+
+            //================================================
+            // 🎴 PERSONNAGE
+            //================================================
 
             personnage,
 
@@ -573,25 +587,28 @@ const joueursGemini =
             category,
 
             //================================================
-            // ⚡ VITESSE MAXIMALE DU PERSONNAGE
+            // ⚡ VITESSE MAXIMALE
             //================================================
 
             vitesseMax,
 
             //================================================
-            // ❤️ ÉTAT ACTUEL
+            // ❤️ RESSOURCES ACTUELLES
             //================================================
 
             pv:
                 etat?.pv ??
+                j?.stats?.pv ??
                 100,
 
             stamina:
                 etat?.stamina ??
+                j?.stats?.sta ??
                 100,
 
             energie:
                 etat?.energie ??
+                j?.stats?.energie ??
                 100,
 
             //================================================
@@ -644,7 +661,6 @@ const joueursGemini =
             ko:
                 etat?.ko ??
                 false
-
         };
 
     });
@@ -742,15 +758,14 @@ const contexteGemini = {
 
 };
 
-
 //================================================
-// 🧠 DEBUG
+// 🧠 DEBUG CONTEXTE GEMINI
 //================================================
 
 console.log(
     "🧠 CONTEXTE GEMINI COMBAT :",
     JSON.stringify(
-        contexteGemini.match,
+        joueursGemini,
         null,
         2
     )
