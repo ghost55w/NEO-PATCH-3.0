@@ -1371,7 +1371,7 @@ Réponds UNIQUEMENT avec du JSON valide.
 //================================================
 // 🎮 RENDU VISUEL DU PAVÉ GEMINI
 //================================================
-async function envoyerResultatPaveGemini(
+async function envoyerResultatPaveCombat(
     ovl,
     chat,
     resultat,
@@ -1697,9 +1697,9 @@ ${note}/10 ⭐
     } catch (error) {
 
         console.error(
-            "❌ ERREUR RENDU PAVÉ GEMINI :",
-            error
-        );
+    "❌ ERREUR RENDU PAVÉ COMBAT :",
+    error
+);
 
     }
 
