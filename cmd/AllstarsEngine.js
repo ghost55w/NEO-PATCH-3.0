@@ -14,83 +14,70 @@ const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
 
 
-//================================================
-// 🤖 GEMINI — CONFIGURATION ARBITRE COMBAT
+   //================================================
+// 🤖 GEMINI — ARBITRE COMBAT
 //================================================
 
 const GEMINI_COMBAT_MODELS = [
 
-    // Modèle principal
     "gemini-3.7-flash",
-
-    // Secours rapide
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
 
-    // Secours économique
-    "gemini-3.5-flash-lite"
+    // Secours supplémentaires
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite"
 
 ];
 
-const GEMINI_MAX_RETRIES = 3;
-
 
 //================================================
-// ⏱️ ATTENTE BACKOFF
+// ⏱️ ATTENTE
 //================================================
 
 function attendreGemini(ms) {
 
     return new Promise(
-        resolve => setTimeout(resolve, ms)
+        resolve =>
+            setTimeout(resolve, ms)
     );
 
-} 
+}
+
 
 //================================================
 // 🤖 APPEL GEMINI
 //================================================
+
 async function appelerGemini(prompt) {
 
     const apiKey =
         process.env.GEMINI_API_KEY;
 
+
     if (!apiKey) {
 
         throw new Error(
-            "❌ GEMINI_API_KEY n'est pas configurée sur Render"
+            "❌ GEMINI_API_KEY non configurée"
         );
 
     }
 
 
     //================================================
-    // 🤖 MODÈLES À ESSAYER
+    // 🔁 ESSAI DE TOUS LES MODÈLES
     //================================================
 
-    const modeles = [
+    for (
+        let i = 0;
+        i < GEMINI_COMBAT_MODELS.length;
+        i++
+    ) {
 
-        "gemini-2.5-flash",
+        const modele =
+            GEMINI_COMBAT_MODELS[i];
 
-        // Modèle de secours
-        "gemini-2.5-flash-lite"
-
-    ];
-
-
-    //================================================
-    // ⚙️ PARAMÈTRES
-    //================================================
-
-    const MAX_TENTATIVES_PAR_MODELE = 3;
-
-    const DELAI_BASE = 1500;
-
-
-    //================================================
-    // 🔁 BOUCLE MODÈLES
-    //================================================
-
-    for (const modele of modeles) {
 
         const url =
             "https://generativelanguage.googleapis.com/v1beta/models/" +
@@ -99,220 +86,167 @@ async function appelerGemini(prompt) {
             apiKey;
 
 
-        //================================================
-        // 🔄 RETRIES
-        //================================================
-
-        for (
-            let tentative = 1;
-            tentative <= MAX_TENTATIVES_PAR_MODELE;
-            tentative++
-        ) {
-
-            try {
-
-                console.log(
-                    `🤖 GEMINI : ${modele} | tentative ${tentative}/${MAX_TENTATIVES_PAR_MODELE}`
-                );
+        console.log(
+            `🤖 GEMINI ARBITRE → ${modele}`
+        );
 
 
-                //================================================
-                // 📡 APPEL API
-                //================================================
+        try {
 
-                const response =
-                    await axios.post(
+            const response =
+                await axios.post(
 
-                        url,
+                    url,
 
-                        {
-                            contents: [
-                                {
-                                    parts: [
-                                        {
-                                            text: prompt
-                                        }
-                                    ]
-                                }
-                            ],
-
-                            generationConfig: {
-
-                                temperature: 0,
-
-                                responseMimeType:
-                                    "application/json"
-
+                    {
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
                             }
+                        ],
 
-                        },
+                        generationConfig: {
 
-                        {
-                            headers: {
+                            temperature: 0,
 
-                                "Content-Type":
-                                    "application/json"
-
-                            },
-
-                            timeout: 30000
+                            responseMimeType:
+                                "application/json"
 
                         }
+                    },
 
-                    );
-
-
-                //================================================
-                // 📦 EXTRACTION
-                //================================================
-
-                const texte =
-                    response.data
-                        ?.candidates?.[0]
-                        ?.content?.parts?.[0]
-                        ?.text;
-
-
-                if (!texte) {
-
-                    throw new Error(
-                        "Gemini n'a renvoyé aucun texte"
-                    );
-
-                }
-
-
-                //================================================
-                // 🧹 NETTOYAGE JSON
-                //================================================
-
-                let jsonTexte =
-                    texte.trim();
-
-
-                // Retire éventuellement ```json ... ```
-                jsonTexte =
-                    jsonTexte
-                        .replace(/^```json\s*/i, "")
-                        .replace(/^```\s*/i, "")
-                        .replace(/\s*```$/i, "")
-                        .trim();
-
-
-                //================================================
-                // 🔎 PARSE JSON
-                //================================================
-
-                let resultat;
-
-                try {
-
-                    resultat =
-                        JSON.parse(jsonTexte);
-
-                } catch (parseError) {
-
-                    console.error(
-                        "❌ GEMINI : JSON invalide :",
-                        jsonTexte
-                    );
-
-                    throw new Error(
-                        "Gemini a renvoyé un JSON invalide"
-                    );
-
-                }
-
-
-                //================================================
-                // ✅ SUCCÈS
-                //================================================
-
-                console.log(
-                    `✅ GEMINI OK : ${modele}`
-                );
-
-                return resultat;
-
-
-            } catch (error) {
-
-                const status =
-                    error.response?.status;
-
-
-                const data =
-                    error.response?.data;
-
-
-                console.error(
-                    `❌ GEMINI ${modele} | tentative ${tentative}`,
                     {
-                        status,
-                        message:
-                            error.message,
-                        data
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        // IMPORTANT :
+                        // Ne pas bloquer 30 secondes
+                        timeout: 10000
                     }
+
                 );
 
 
-                //================================================
-                // 🚫 ERREURS NON TEMPORAIRES
-                //================================================
+            //================================================
+            // 📦 RÉCUPÉRATION
+            //================================================
 
-                const erreurDefinitive =
-                    status === 400 ||
-                    status === 401 ||
-                    status === 403;
+            const texte =
+                response.data
+                    ?.candidates?.[0]
+                    ?.content?.parts?.[0]
+                    ?.text;
 
 
-                if (erreurDefinitive) {
+            if (!texte) {
 
-                    throw error;
+                throw new Error(
+                    "Réponse Gemini vide"
+                );
 
+            }
+
+
+            //================================================
+            // 🧹 NETTOYAGE
+            //================================================
+
+            let jsonTexte =
+                texte.trim();
+
+
+            jsonTexte =
+                jsonTexte
+                    .replace(
+                        /^```json\s*/i,
+                        ""
+                    )
+                    .replace(
+                        /^```\s*/i,
+                        ""
+                    )
+                    .replace(
+                        /\s*```$/i,
+                        ""
+                    )
+                    .trim();
+
+
+            //================================================
+            // 🔎 JSON
+            //================================================
+
+            const resultat =
+                JSON.parse(
+                    jsonTexte
+                );
+
+
+            //================================================
+            // ✅ GEMINI DISPONIBLE
+            //================================================
+
+            console.log(
+                `✅ GEMINI ARBITRE OK → ${modele}`
+            );
+
+
+            return resultat;
+
+
+        } catch (error) {
+
+            const status =
+                error.response?.status;
+
+
+            console.error(
+                `❌ GEMINI ${modele} ÉCHEC`,
+                {
+                    status,
+                    message:
+                        error.message
                 }
+            );
 
 
-                //================================================
-                // 🔄 SI DERNIÈRE TENTATIVE
-                // PASSER AU MODÈLE SUIVANT
-                //================================================
+            //================================================
+            // 🚨 ERREUR DE CLÉ / REQUÊTE
+            //================================================
 
-                if (
-                    tentative ===
-                    MAX_TENTATIVES_PAR_MODELE
-                ) {
+            if (
+                status === 400 ||
+                status === 401 ||
+                status === 403
+            ) {
 
-                    console.log(
-                        `⚠️ ${modele} indisponible → modèle suivant`
-                    );
+                throw error;
 
-                    break;
-
-                }
+            }
 
 
-                //================================================
-                // ⏳ BACKOFF
-                //================================================
+            //================================================
+            // 🔄 MODÈLE SUIVANT
+            //================================================
 
-                const delai =
-                    DELAI_BASE *
-                    tentative;
+            const suivant =
+                GEMINI_COMBAT_MODELS[i + 1];
 
+
+            if (suivant) {
 
                 console.log(
-                    `⏳ Nouvelle tentative dans ${delai} ms...`
+                    `🔄 GEMINI → passage au secours : ${suivant}`
                 );
 
 
-                await new Promise(
-                    resolve =>
-                        setTimeout(
-                            resolve,
-                            delai
-                        )
-                );
+                await attendreGemini(500);
 
             }
 
@@ -322,14 +256,14 @@ async function appelerGemini(prompt) {
 
 
     //================================================
-    // ❌ TOUS LES MODÈLES ONT ÉCHOUÉ
+    // ❌ TOUS LES MODÈLES ÉCHOUÉS
     //================================================
 
     throw new Error(
-        "❌ GEMINI indisponible après toutes les tentatives"
+        "❌ TOUS LES MODÈLES GEMINI SONT INDISPONIBLES"
     );
 
-}
+}                                           
 
 
 //================================================
