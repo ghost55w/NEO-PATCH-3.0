@@ -648,308 +648,517 @@ function analyserPaveNEO(
 
     const actions = [];
 
+//================================================
+// 📦 ANALYSE CHRONOLOGIQUE DES ACTIONS
+//================================================
+
+const actions = [];
+
+
+//================================================
+// 🔧 OUTILS
+//================================================
+
+function ajouterAction(action) {
+
+    actions.push({
+        ordre: actions.length + 1,
+        ...action
+    });
+
+}
+
+
+//================================================
+// ⚡ DÉPLACEMENT
+//================================================
+
+const contientDeplacement =
+    /fonce|court|courir|avance|s'avance|se deplace|deplace|accelere|course|vmax|vitesse maximale/
+        .test(texte);
+
+
+if (contientDeplacement) {
+
+    const vitesse =
+        acteur?.vitesseMax ??
+        (
+            typeof obtenirVitesseMaxParGrade === "function"
+                ? obtenirVitesseMaxParGrade(
+                    acteur?.grade
+                )
+                : null
+        );
+
 
     //================================================
-    // ⚡ DÉPLACEMENT / VMAX
+    // 📏 DISTANCE
     //================================================
 
-    const contientDeplacement =
-        /fonce|court|courir|avance|s'avance|se deplace|deplace|accelere|course|vmax|vitesse maximale/
-            .test(texte);
+    let distance = null;
+
+    const matchDistance =
+        texte.match(
+            /(?:sur|pendant|parcourant|parcours)\s+(\d+(?:[.,]\d+)?)\s*(m|metres?|cm)/i
+        );
 
 
-    if (contientDeplacement) {
+    if (matchDistance) {
 
-        const vitesse =
-            acteur?.vitesseMax ??
-            (
-                typeof obtenirVitesseMaxParGrade ===
-                "function"
-                    ? obtenirVitesseMaxParGrade(
-                        acteur?.grade
-                    )
-                    : null
+        const valeur =
+            parseFloat(
+                matchDistance[1]
+                    .replace(",", ".")
             );
 
+        const unite =
+            matchDistance[2]
+                .toLowerCase();
 
-        actions.push({
 
-            ordre:
-                actions.length + 1,
+        distance =
+            unite === "cm" ||
+            unite === "centimetre" ||
+            unite === "centimetres"
 
-            acteur:
-                acteur.personnage,
+                ? valeur / 100
 
-            cible:
-                cible?.personnage || null,
-
-            type:
-                "deplacement",
-
-            vitesse,
-
-            valide:
-                vitesse !== null,
-
-            description:
-                vitesse !== null
-                    ? `${acteur.personnage} se déplace à vitesse maximale de ${vitesse} m/s.`
-                    : `${acteur.personnage} se déplace.`,
-
-            raison:
-                vitesse !== null
-                    ? "La vitesse maximale est déterminée par le grade."
-                    : "Impossible de déterminer la vitesse maximale.",
-
-            resultatDefense:
-                "",
-
-            consequence:
-                ""
-
-        });
+                : valeur;
 
     }
 
 
     //================================================
-    // 👊 COUP DE POING DIRECT
+    // 🎯 DISTANCE IMPLICITE → CLOSE DISTANCE
     //================================================
 
-    const direct =
-        /coup de poing direct|coup direct|direct|jab|straight/
-            .test(texte);
+    if (
+        distance === null &&
+        /close distance|corps a corps|au corps a corps|a courte distance/
+            .test(texte)
+    ) {
 
-
-    if (direct) {
-
-        let membre =
-            "inconnu";
-
-        if (
-            /du droit|main droite|poing droit|droit/
-                .test(texte)
-        ) {
-
-            membre =
-                "main_droite";
-
-        } else if (
-            /du gauche|main gauche|poing gauche|gauche/
-                .test(texte)
-        ) {
-
-            membre =
-                "main_gauche";
-
-        }
-
-
-        let zone =
-            "inconnue";
-
-
-        if (/visage|face/.test(texte)) {
-
-            zone =
-                "visage";
-
-        } else if (/nez/.test(texte)) {
-
-            zone =
-                "nez";
-
-        } else if (/menton/.test(texte)) {
-
-            zone =
-                "menton";
-
-        } else if (/machoire/.test(texte)) {
-
-            zone =
-                "machoire";
-
-        } else if (/abdomen|ventre/.test(texte)) {
-
-            zone =
-                "abdomen";
-
-        } else if (/torse|poitrine/.test(texte)) {
-
-            zone =
-                "torse";
-
-        }
-
-
-        const valide =
-            membre !== "inconnu" &&
-            zone !== "inconnue";
-
-
-        actions.push({
-
-            ordre:
-                actions.length + 1,
-
-            acteur:
-                acteur.personnage,
-
-            cible:
-                cible?.personnage || null,
-
-            type:
-                "frappe",
-
-            technique:
-                "coup_direct",
-
-            membre,
-
-            zone,
-
-            description:
-                `Coup de poing direct avec ${membre} visant ${zone}.`,
-
-            valide,
-
-            raison:
-                valide
-                    ? "La main utilisée et la zone visée sont précisées."
-                    : "La frappe doit préciser le membre utilisé et la zone visée.",
-
-            resultatDefense:
-                "",
-
-            consequence:
-                ""
-
-        });
+        distance = 5;
 
     }
 
 
     //================================================
-    // 🦵 COUP DE PIED FRONTAL
+    // 🏃 TYPE DE DÉPLACEMENT
     //================================================
 
-    const frontKick =
-        /coup de pied frontal|front kick|coup frontal/
-            .test(texte);
+    let mode =
+        "deplacement";
 
 
-    if (frontKick) {
+    if (
+        /vmax|vitesse maximale|course vmax/
+            .test(texte)
+    ) {
 
-        let membre =
-            "inconnu";
+        mode =
+            "course_vmax";
 
+    } else if (
+        /accelere|acceleration/
+            .test(texte)
+    ) {
 
-        if (
-            /pied droit|du pied droit|jambe droite/
-                .test(texte)
-        ) {
-
-            membre =
-                "pied_droit";
-
-        } else if (
-            /pied gauche|du pied gauche|jambe gauche/
-                .test(texte)
-        ) {
-
-            membre =
-                "pied_gauche";
-
-        }
-
-
-        let zone =
-            "inconnue";
-
-
-        if (
-            /abdomen|ventre/
-                .test(texte)
-        ) {
-
-            zone =
-                "abdomen";
-
-        } else if (
-            /visage|face/
-                .test(texte)
-        ) {
-
-            zone =
-                "visage";
-
-        } else if (
-            /torse|poitrine/
-                .test(texte)
-        ) {
-
-            zone =
-                "torse";
-
-        }
-
-
-        const surface =
-            /semelle/.test(texte)
-                ? "semelle"
-                : "inconnue";
-
-
-        const valide =
-            membre !== "inconnu" &&
-            zone !== "inconnue" &&
-            surface !== "inconnue";
-
-
-        actions.push({
-
-            ordre:
-                actions.length + 1,
-
-            acteur:
-                acteur.personnage,
-
-            cible:
-                cible?.personnage || null,
-
-            type:
-                "frappe",
-
-            technique:
-                "front_kick",
-
-            membre,
-
-            surface,
-
-            zone,
-
-            description:
-                `Coup de pied frontal avec ${membre} de la ${surface} visant ${zone}.`,
-
-            valide,
-
-            raison:
-                valide
-                    ? "Le pied, la surface utilisée et la zone visée sont précisés."
-                    : "Le coup de pied doit préciser le pied, la surface utilisée et la zone visée.",
-
-            resultatDefense:
-                "",
-
-            consequence:
-                ""
-
-        });
+        mode =
+            "acceleration";
 
     }
 
 
+    ajouterAction({
+
+        acteur:
+            acteur.personnage,
+
+        cible:
+            cible?.personnage || null,
+
+        type:
+            "deplacement",
+
+        mode,
+
+        vitesse,
+
+        distance,
+
+        destination:
+            cible?.personnage || null,
+
+        arrivee:
+            distance !== null
+                ? "close_distance"
+                : null,
+
+        valide:
+            vitesse !== null,
+
+        description:
+            distance !== null
+
+                ? `${acteur.personnage} s'élance à vitesse maximale (${vitesse} m/s) sur ${distance} m vers ${cible?.personnage || "la cible"}.`
+
+                : `${acteur.personnage} s'élance à vitesse maximale (${vitesse} m/s) vers ${cible?.personnage || "la cible"}.`,
+
+        raison:
+            vitesse !== null
+                ? "La vitesse maximale est déterminée par le grade."
+                : "Impossible de déterminer la vitesse maximale.",
+
+        resultatDefense:
+            "",
+
+        consequence:
+            ""
+
+    });
+
+}
+
+
+//================================================
+// 👊 COUP DE POING DIRECT
+//================================================
+
+const direct =
+    /coup de poing direct|coup direct|direct|jab|straight/
+        .test(texte);
+
+
+if (direct) {
+
+    let membre =
+        "inconnu";
+
+
+    if (
+        /du droit|main droite|poing droit/
+            .test(texte)
+    ) {
+
+        membre =
+            "main_droite";
+
+    } else if (
+        /du gauche|main gauche|poing gauche/
+            .test(texte)
+    ) {
+
+        membre =
+            "main_gauche";
+
+    }
+
+
+    let zone =
+        "inconnue";
+
+
+    if (/visage|face/.test(texte)) {
+
+        zone =
+            "visage";
+
+    } else if (/nez/.test(texte)) {
+
+        zone =
+            "nez";
+
+    } else if (/menton/.test(texte)) {
+
+        zone =
+            "menton";
+
+    } else if (/machoire/.test(texte)) {
+
+        zone =
+            "machoire";
+
+    } else if (/abdomen|ventre/.test(texte)) {
+
+        zone =
+            "abdomen";
+
+    } else if (/torse|poitrine/.test(texte)) {
+
+        zone =
+            "torse";
+
+    }
+
+
+    const valide =
+        membre !== "inconnu" &&
+        zone !== "inconnue";
+
+
+    ajouterAction({
+
+        acteur:
+            acteur.personnage,
+
+        cible:
+            cible?.personnage || null,
+
+        type:
+            "frappe",
+
+        technique:
+            "coup_direct",
+
+        membre,
+
+        zone,
+
+        valide,
+
+        description:
+            `Coup de poing direct du ${membre === "main_droite" ? "droit" : "gauche"} visant le ${zone}.`,
+
+        raison:
+            valide
+
+                ? "La main utilisée et la zone visée sont précisées."
+
+                : "La frappe doit préciser le membre utilisé et la zone visée.",
+
+        resultatDefense:
+            "",
+
+        consequence:
+            ""
+
+    });
+
+}
+
+
+//================================================
+// 🦵 COUP DE PIED FRONTAL
+//================================================
+
+const frontKick =
+    /coup de pied frontal|front kick|coup frontal/
+        .test(texte);
+
+
+if (frontKick) {
+
+    let membre =
+        "inconnu";
+
+
+    if (
+        /pied droit|du pied droit|jambe droite/
+            .test(texte)
+    ) {
+
+        membre =
+            "pied_droit";
+
+    } else if (
+        /pied gauche|du pied gauche|jambe gauche/
+            .test(texte)
+    ) {
+
+        membre =
+            "pied_gauche";
+
+    }
+
+
+    let zone =
+        "inconnue";
+
+
+    if (/abdomen|ventre/.test(texte)) {
+
+        zone =
+            "abdomen";
+
+    } else if (/visage|face/.test(texte)) {
+
+        zone =
+            "visage";
+
+    } else if (/torse|poitrine/.test(texte)) {
+
+        zone =
+            "torse";
+
+    }
+
+
+    let surface =
+        "inconnue";
+
+
+    if (/semelle/.test(texte)) {
+
+        surface =
+            "semelle";
+
+    } else if (/talon/.test(texte)) {
+
+        surface =
+            "talon";
+
+    } else if (/pointe|orteils/.test(texte)) {
+
+        surface =
+            "pointe";
+
+    }
+
+
+    const valide =
+        membre !== "inconnu" &&
+        surface !== "inconnue" &&
+        zone !== "inconnue";
+
+
+    ajouterAction({
+
+        acteur:
+            acteur.personnage,
+
+        cible:
+            cible?.personnage || null,
+
+        type:
+            "frappe",
+
+        technique:
+            "front_kick",
+
+        membre,
+
+        surface,
+
+        zone,
+
+        valide,
+
+        description:
+            `Coup de pied frontal du ${membre === "pied_droit" ? "pied droit" : "pied gauche"} avec la ${surface} visant le ${zone}.`,
+
+        raison:
+            valide
+
+                ? "Le pied, la surface utilisée et la zone visée sont précisés."
+
+                : "Le coup de pied doit préciser le pied, la surface utilisée et la zone visée.",
+
+        resultatDefense:
+            "",
+
+        consequence:
+            ""
+
+    });
+
+}
+
+
+//================================================
+// 🔢 RÉORDONNEMENT CHRONOLOGIQUE
+//================================================
+
+// Pour l'instant on utilise les positions
+// des formulations dans le texte.
+
+const positionsActions =
+    actions.map(action => {
+
+        let position =
+            texte.length;
+
+
+        if (action.type === "deplacement") {
+
+            const match =
+                texte.match(
+                    /fonce|court|avance|s'avance|se deplace|deplace|accelere|course|vmax|vitesse maximale/
+                );
+
+            if (match) {
+                position = match.index;
+            }
+
+        }
+
+
+        if (
+            action.technique ===
+            "coup_direct"
+        ) {
+
+            const match =
+                texte.match(
+                    /coup de poing direct|coup direct|direct|jab|straight/
+                );
+
+            if (match) {
+                position = match.index;
+            }
+
+        }
+
+
+        if (
+            action.technique ===
+            "front_kick"
+        ) {
+
+            const match =
+                texte.match(
+                    /coup de pied frontal|front kick|coup frontal/
+                );
+
+            if (match) {
+                position = match.index;
+            }
+
+        }
+
+
+        return {
+            action,
+            position
+        };
+
+    });
+
+
+positionsActions.sort(
+    (a, b) =>
+        a.position -
+        b.position
+);
+
+
+positionsActions.forEach(
+    (element, index) => {
+
+        element.action.ordre =
+            index + 1;
+
+    }
+);
+
+
+const actionsFinales =
+    positionsActions.map(
+        element =>
+            element.action
+    );
+
+    
     //================================================
     // 📊 LIMITE D'ACTIONS
     //================================================
@@ -1079,7 +1288,8 @@ function analyserPaveNEO(
 
         nombreActions,
 
-        actions,
+        actions:
+    actionsFinales,
 
         note,
 
