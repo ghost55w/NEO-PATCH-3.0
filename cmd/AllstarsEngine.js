@@ -446,115 +446,314 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
 
         //================================================
-        // 5️⃣ CONTEXTE SAFE POUR GEMINI
+// 5️⃣ CONTEXTE SAFE POUR GEMINI
+//================================================
+// Le contexte contient uniquement les informations
+// réellement nécessaires à l'arbitrage du combat.
+//
+// ⚠️ On ne donne PAS directement match à JSON.stringify()
+// car match peut contenir des Timeout/cycles.
+//
+// ⚠️ Pas de Price, images, rarete, Moves, Patterns, etc.
+//================================================
+
+const tracker =
+    contexteMatch?.match?.trackerCombatGemini ||
+    contexteMatch?.trackerCombatGemini ||
+    null;
+
+
+const joueursMatch =
+    Array.isArray(contexteMatch?.match?.joueurs)
+        ? contexteMatch.match.joueurs
+        : [];
+
+
+const joueursTracker =
+    Array.isArray(tracker?.joueurs)
+        ? tracker.joueurs
+        : [];
+
+
+//================================================
+// 👥 CONSTRUCTION DES JOUEURS
+//================================================
+
+const joueursGemini =
+    joueursMatch.map(j => {
+
+        const jid =
+            j?.jid ||
+            null;
+
+
         //================================================
-        // ⚠️ IMPORTANT :
-        // On ne donne PAS directement match à JSON.stringify()
-        // car match peut contenir des Timeout/cycles.
+        // 🔎 CHERCHER LE JOUEUR DANS LE TRACKER
+        //================================================
 
-        const contexteGemini = {
+        const etat =
+            joueursTracker.find(
+                t =>
+                    t?.jid === jid
+            ) || null;
 
-    user: contexteMatch?.user || user || null,
 
-    joueur: contexteMatch?.joueur
-        ? {
-            jid: contexteMatch.joueur.jid || null,
-            nom: contexteMatch.joueur.nom || null,
-            name: contexteMatch.joueur.name || null
-        }
-        : null,
+        //================================================
+        // 🎴 CARTE UNIQUEMENT POUR LES INFOS COMBAT
+        //================================================
 
-    match: contexteMatch?.match
-        ? {
-            id: contexteMatch.match.id || null,
-            etat: contexteMatch.match.etat || null,
+        const carte =
+            j?.carte ||
+            j?.card ||
+            j?.personnage ||
+            j?.character ||
+            null;
 
-            joueurTour:
-                contexteMatch.match.joueurTour || null,
 
-            joueurs:
-                Array.isArray(contexteMatch.match.joueurs)
-                    ? contexteMatch.match.joueurs.map(j => {
+        const personnage =
+            etat?.personnage ||
+            carte?.name ||
+            j?.personnage ||
+            j?.nomPersonnage ||
+            j?.name ||
+            null;
 
-                        const carte =
-                            j?.carte ||
-                            j?.card ||
-                            j?.personnage ||
-                            j?.character ||
-                            null;
 
-                        return {
+        const grade =
+            etat?.grade ||
+            carte?.grade ||
+            null;
 
-                            jid: j?.jid || null,
 
-                            nom:
-                                j?.nom ||
-                                j?.name ||
-                                null,
+        const category =
+            etat?.category ||
+            carte?.category ||
+            null;
 
-                            carte: carte
-                                ? {
-                                    name: carte.name || null,
-                                    grade: carte.grade || null,
-                                    rarete: carte.rarete || null,
-                                    category: carte.category || null,
-                                    univers: carte.univers || null,
 
-                                    images:
-                                        Array.isArray(carte.images)
-                                            ? carte.images
-                                            : [],
+        //================================================
+        // ⚡ VMAX
+        //================================================
 
-                                    card:
-                                        carte.card || null,
+        const vitesseMax =
+            etat?.vitesseMax ??
+            (
+                grade === "Bronze"
+                    ? 6
+                    : grade === "Argent" ||
+                      grade === "Silver"
+                        ? 8
+                        : grade === "Or" ||
+                          grade === "Gold"
+                            ? 10
+                            : null
+            );
 
-                                    Price:
-                                        carte.Price || null,
 
-                                    specs: {
-                                        force:
-                                            carte.specs?.force ?? 0,
+        //================================================
+        // 📦 RETOUR JOUEUR
+        //================================================
 
-                                        speed:
-                                            carte.specs?.speed ?? 0,
+        return {
 
-                                        attacks:
-                                            carte.specs?.attacks ?? 0
-                                    },
+            jid,
 
-                                    Moves: {
-                                        basic:
-                                            Array.isArray(carte.Moves?.basic)
-                                                ? carte.Moves.basic
-                                                : [],
+            pseudo:
+    j?.pseudo ||
+    j?.user?.pseudo ||
+    j?.player?.pseudo ||
+    j?.nomJoueur ||
+    contexteMatch?.joueur?.pseudo ||
+    null,
 
-                                        special:
-                                            Array.isArray(carte.Moves?.special)
-                                                ? carte.Moves.special
-                                                : [],
+            personnage,
 
-                                        ultime:
-                                            Array.isArray(carte.Moves?.ultime)
-                                                ? carte.Moves.ultime
-                                                : []
-                                    },
+            grade,
 
-                                    Patterns:
-                                        Array.isArray(carte.Patterns)
-                                            ? carte.Patterns
-                                            : []
-                                }
-                                : null
-                        };
-                    })
-                    : []
-        }
-        : null
+            category,
+
+            //================================================
+            // ⚡ VITESSE MAXIMALE DU PERSONNAGE
+            //================================================
+
+            vitesseMax,
+
+            //================================================
+            // ❤️ ÉTAT ACTUEL
+            //================================================
+
+            pv:
+                etat?.pv ??
+                100,
+
+            stamina:
+                etat?.stamina ??
+                100,
+
+            energie:
+                etat?.energie ??
+                100,
+
+            //================================================
+            // 🧍 ÉTAT PHYSIQUE
+            //================================================
+
+            posture:
+                etat?.posture ||
+                "neutre",
+
+            equilibre:
+                etat?.equilibre ||
+                "stable",
+
+            //================================================
+            // 📏 DISTANCE AVEC L'ADVERSAIRE
+            //================================================
+
+            distanceAdversaire:
+                etat?.distanceAdversaire ??
+                null,
+
+            //================================================
+            // 🧭 POSITION RELATIVE
+            //================================================
+
+            positionRelative:
+                etat?.positionRelative ||
+                "face",
+
+            //================================================
+            // 🗡️ ARME
+            //================================================
+
+            weapon: {
+
+                active:
+                    etat?.weapon?.active ??
+                    false,
+
+                nom:
+                    etat?.weapon?.nom ||
+                    null
+            },
+
+            //================================================
+            // ☠️ KO
+            //================================================
+
+            ko:
+                etat?.ko ??
+                false
+
+        };
+
+    });
+
+
+//================================================
+// 🧠 CONTEXTE FINAL GEMINI
+//================================================
+
+const contexteGemini = {
+
+    //================================================
+    // 👤 UTILISATEUR
+    //================================================
+
+    user:
+        contexteMatch?.user ||
+        user ||
+        null,
+
+
+    //================================================
+    // 🎮 JOUEUR QUI ENVOIE LE PAVÉ
+    //================================================
+
+    joueur:
+        contexteMatch?.joueur
+            ? {
+
+                jid:
+                    contexteMatch.joueur.jid ||
+                    null,
+
+                pseudo:
+                    contexteMatch.joueur.pseudo ||
+                    contexteMatch.joueur.nom ||
+                    contexteMatch.joueur.name ||
+                    null,
+
+                personnage:
+                    contexteMatch.joueur.personnage ||
+                    contexteMatch.joueur.nomPersonnage ||
+                    null
+
+            }
+            : null,
+
+
+    //================================================
+    // ⚔️ MATCH
+    //================================================
+
+    match:
+        contexteMatch?.match
+            ? {
+
+                id:
+                    contexteMatch.match.id ||
+                    null,
+
+                etat:
+                    contexteMatch.match.etat ||
+                    "ACTIF",
+
+                //================================================
+                // 🔆 JOUEUR QUI DOIT JOUER
+                //================================================
+
+                joueurTour:
+                    contexteMatch.match.joueurTour ||
+                    tracker?.combat?.joueurTour ||
+                    null,
+
+                //================================================
+                // ⚔️ TOUR
+                //================================================
+
+                tour:
+                    tracker?.combat?.tour ??
+                    0,
+
+                maxTours:
+                    tracker?.combat?.maxTours ??
+                    10,
+
+                //================================================
+                // 👥 JOUEURS
+                //================================================
+
+                joueurs:
+                    joueursGemini
+
+            }
+            : null
+
 };
 
-        console.log(
-    "🧠 CONTEXTE GEMINI JOUEURS :",
-    JSON.stringify(contexteGemini.match?.joueurs, null, 2)
+
+//================================================
+// 🧠 DEBUG
+//================================================
+
+console.log(
+    "🧠 CONTEXTE GEMINI COMBAT :",
+    JSON.stringify(
+        contexteGemini.match,
+        null,
+        2
+    )
 );
 
 
