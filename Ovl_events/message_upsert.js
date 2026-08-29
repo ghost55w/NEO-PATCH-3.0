@@ -8,8 +8,8 @@ const getJid = require("./cache_jid");
 const {
     verifierJoueursMatch,
     verifierCardsMatch,
-    analysePaveAvecGemini,
-    envoyerResultatPaveGemini,
+    analysePaveCombat,
+    envoyerResultatPaveCombat,
     duelsEnCours,
     matchAttente,
     lancerTimerTour
@@ -204,8 +204,8 @@ if (ms.key.fromMe) {
       getJid,
       mention_JID
     };
-    
-// ================================
+
+     // ================================
 // 🔥 SYSTEME MATCH GLOBAL
 // ================================
 try {
@@ -229,11 +229,13 @@ try {
     // 🥊 ANALYSE DU PAVÉ ALL STARS
     //================================================
 
-    const matchId = matchAttente[ms_org];
+    const matchId =
+        matchAttente[ms_org];
 
     if (matchId) {
 
-        const match = duelsEnCours[matchId];
+        const match =
+            duelsEnCours[matchId];
 
         if (
             match &&
@@ -244,9 +246,11 @@ try {
             // 👤 VÉRIFIER QUE L'AUTEUR EST UN JOUEUR
             //================================================
 
-            const joueur = match.joueurs?.find(
-                j => j.jid === auteur_Message
-            );
+            const joueur =
+                match.joueurs?.find(
+                    j =>
+                        j.jid === auteur_Message
+                );
 
             if (joueur) {
 
@@ -264,8 +268,14 @@ try {
 
                 if (estPaveJeu) {
 
-                    console.log("🌀 PAVÉ DÉTECTÉ");
-                    console.log("👤 Auteur :", auteur_Message);
+                    console.log(
+                        "🌀 PAVÉ DÉTECTÉ"
+                    );
+
+                    console.log(
+                        "👤 Auteur :",
+                        auteur_Message
+                    );
 
                     //================================================
                     // 🤖 ANALYSE AVEC GEMINI
@@ -275,9 +285,14 @@ try {
                         await analysePaveAvecGemini(
                             texte,
                             {
-                                user: auteur_Message,
-                                joueur: joueur,
-                                match: match
+                                user:
+                                    auteur_Message,
+
+                                joueur:
+                                    joueur,
+
+                                match:
+                                    match
                             }
                         );
 
@@ -285,7 +300,9 @@ try {
                     // 🚫 GEMINI N'A PAS DÉTECTÉ DE PAVÉ
                     //================================================
 
-                    if (!resultatGemini?.paveDetecte) {
+                    if (
+                        !resultatGemini?.paveDetecte
+                    ) {
 
                         console.log(
                             "❌ Gemini : aucun pavé détecté"
@@ -325,12 +342,12 @@ try {
                         // 🎮 ENVOI DU RENDU VISUEL
                         //================================================
 
-    await envoyerResultatPaveGemini(
-    ovl,
-    ms_org,
-    resultatGemini,
-    match
-);
+                        await envoyerResultatPaveCombat(
+                            ovl,
+                            ms_org,
+                            resultatGemini,
+                            match
+                        );
 
                         //================================================
                         // ⏱️ TIMER
@@ -345,8 +362,8 @@ try {
                 }
             }
         }
-    }
-
+    } 
+                        
     //================================================
     // 📄 DÉTECTION FICHE BLUELOCK
     //================================================
