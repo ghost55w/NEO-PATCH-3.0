@@ -282,19 +282,19 @@ try {
                     //================================================
 
                     const resultatGemini =
-                        await analysePaveAvecGemini(
-                            texte,
-                            {
-                                user:
-                                    auteur_Message,
+    await analysePaveCombat(
+        texte,
+        {
+            user:
+                auteur_Message,
 
-                                joueur:
-                                    joueur,
+            joueur:
+                joueur,
 
-                                match:
-                                    match
-                            }
-                        );
+            match:
+                match
+        }
+    );
 
                     //================================================
                     // 🚫 GEMINI N'A PAS DÉTECTÉ DE PAVÉ
