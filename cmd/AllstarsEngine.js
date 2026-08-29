@@ -409,8 +409,7 @@ async function appelerArbitreCombat(
 //================================================
 // 🤖 ANALYSE PAVÉ AVEC GEMINI
 //================================================
-
-async function analysePaveAvecGemini(message, contexteMatch = {}) {
+async function analysePaveCombat(message, contexteMatch = {}) {
 
     try {
 
@@ -780,8 +779,7 @@ const contexteGemini = {
                 // 👥 JOUEURS
                 //================================================
 
-                joueurs:
-                    joueursGemini
+                joueurs: joueursCombat
 
             }
             : null
@@ -789,22 +787,23 @@ const contexteGemini = {
 };
 
 //================================================
-// 🧠 DEBUG CONTEXTE GEMINI
+// 🧠 DEBUG CONTEXTE ARBITRE
 //================================================
 
 console.log(
-    "🧠 CONTEXTE GEMINI COMBAT :",
+    "🧠 CONTEXTE ARBITRE COMBAT :",
     JSON.stringify(
-        joueursGemini,
+        joueursCombat,
         null,
         2
     )
 );
 
-
-        //================================================
-// 6️⃣ PROMPT GEMINI
+        
 //================================================
+// 6️⃣ PROMPT ARBITRE COMBAT
+//================================================
+
 const prompt = `
 
 ${GEMINI_RULES_PROMPT}
@@ -816,81 +815,13 @@ MISSION SPÉCIFIQUE DE CETTE ANALYSE
 Tu dois maintenant analyser le pavé suivant en appliquant
 STRICTEMENT toutes les règles ci-dessus.
 
-Tu dois notamment :
-
-1. Identifier toutes les actions.
-2. Les remettre dans leur ordre chronologique.
-3. Compter les actions.
-4. Vérifier la limite de 4 actions.
-5. RÈGLE VMAX OBLIGATOIRE :
-
-   Lorsque le pavé contient "VMAX", "vitesse maximale",
-   "à vitesse maximale", "course VMAX" ou toute formulation
-   équivalente, tu dois récupérer automatiquement la vitesse
-   depuis le grade du personnage dans le CONTEXTE DU MATCH.
-
-   Correspondance officielle :
-
-   - Bronze = 6 m/s
-   - Argent = 8 m/s
-   - Or = 10 m/s
-
-   Exemple :
-
-   Contexte :
-   Yamato = Bronze
-
-   Pavé :
-   "Yamato fonce en course VMAX vers Tobirama."
-
-   Tu dois obligatoirement interpréter :
-   Yamato VMAX = 6 m/s.
-
-6. Le joueur n'a PAS besoin d'écrire la valeur numérique
-   de la VMAX dans son pavé.
-
-   Si le grade du personnage est présent dans le contexte,
-   "VMAX" est une information COMPLÈTE et VALIDE.
-
-   NE REFUSE JAMAIS une VMAX uniquement parce que la valeur
-   en m/s n'est pas écrite dans le pavé lorsque le grade
-   du personnage est disponible dans le contexte.
-
-   Le CONTEXTE DU MATCH est une source officielle de données.
-
-   Si le contexte indique :
-   "Yamato | Grade : Bronze | Vmax : 6 m/s"
-
-   alors toute mention de "VMAX" par Yamato doit être
-   automatiquement évaluée à 6 m/s.
-
-   Tu dois utiliser cette valeur pour tous les calculs
-   de déplacement, distance et vitesse nécessaires.
-
-   Tu ne dois pas répondre :
-   "la VMAX est inconnue"
-   si le grade ou la VMAX du personnage est présent
-   dans le contexte.
-7. Pour une défense, identifier précisément l'attaque à laquelle
-   chaque action répond.
-8. Évaluer chaque défense séparément.
-9. Déterminer si elle est réussie, partielle ou ratée.
-10. Appliquer immédiatement les conséquences d'une défense
-    avant d'analyser la suivante.
-11. Si une défense partielle provoque un déséquilibre,
-    changement de posture, ouverture de garde ou déplacement
-    empêchant la défense suivante, alors la défense suivante
-    doit être réévaluée avec ce nouvel état.
-12. Appliquer les dégâts lorsqu'une attaque atteint sa cible.
-13. Décrire les conséquences physiques justifiées.
-14. Produire un résumé narratif court.
-15. Déterminer le joueur suivant.
+...
 
 ================================================
 CONTEXTE DU MATCH
 ================================================
 
-${JSON.stringify(contexteGemini, null, 2)}
+${JSON.stringify(contexteCombat, null, 2)}
 
 ================================================
 PAVÉ À ANALYSER
@@ -907,19 +838,7 @@ Réponds UNIQUEMENT avec un JSON valide.
 {
     "paveValide": true,
     "nombreActions": 0,
-    "actions": [
-        {
-            "ordre": 1,
-            "acteur": "",
-            "cible": "",
-            "type": "",
-            "description": "",
-            "valide": true,
-            "raison": "",
-            "resultatDefense": "",
-            "consequence": ""
-        }
-    ],
+    "actions": [],
     "note": 0,
     "verdict": "",
     "resume": "",
@@ -944,7 +863,6 @@ Réponds UNIQUEMENT avec un JSON valide.
 Ne retourne aucun Markdown.
 Ne retourne aucun texte avant ou après le JSON.
 `;
-
 
         //================================================
 // 7️⃣ APPEL GEMINI
