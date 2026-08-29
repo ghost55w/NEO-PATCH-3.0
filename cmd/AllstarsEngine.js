@@ -329,31 +329,22 @@ async function analysePaveCombat(
 
 
         //================================================
-        // 3️⃣ DÉTECTION DU PAVÉ
-        //================================================
+// 3️⃣ DÉTECTION DU PAVÉ
+//================================================
 
-        const estPave =
-            texteNormalise.includes(
-                marqueurDebut
-                    .toLowerCase()
-            ) &&
-            texteNormalise.includes(
-                marqueurActions
-            ) &&
-            texteNormalise.includes(
-                marqueurFin
-                    .toLowerCase()
-            );
+const estPave =
+    texteNormalise.includes(
+        marqueurActions
+    );
 
+if (!estPave) {
 
-        if (!estPave) {
+    return {
+        ok: true,
+        paveDetecte: false
+    };
 
-            return {
-                ok: true,
-                paveDetecte: false
-            };
-
-        }
+}
 
 
         //================================================
@@ -1177,23 +1168,22 @@ Réponds UNIQUEMENT avec du JSON valide.
 
 
         if (
-            indexTour === -1 &&
-            joueurActeurGlobal
-        ) {
+    indexTour === -1 &&
+    interpretationGemini?.acteurPrincipal
+) {
 
-            indexTour =
-                joueursMatch.findIndex(
-                    j =>
-                        normalizeName(
-                            j?.personnage
-                        ) ===
-                        normalizeName(
-                            interpretationGemini
-                                .acteurPrincipal
-                        )
-                );
+    indexTour =
+        joueursMatch.findIndex(
+            j =>
+                normalizeName(
+                    j?.personnage
+                ) ===
+                normalizeName(
+                    interpretationGemini.acteurPrincipal
+                )
+        );
 
-        }
+}
 
 
         if (
