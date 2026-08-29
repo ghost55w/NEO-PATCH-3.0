@@ -64,6 +64,189 @@ async function appelerGemini(prompt) {
 
     }
 
+//================================================
+// 🧠 APPEL NEO LOCAL
+//================================================
+
+async function appelerNEO(prompt) {
+
+    const NEO_OLLAMA_URL =
+        process.env.NEO_OLLAMA_URL ||
+        "http://127.0.0.1:11434";
+
+    const NEO_MODEL =
+        process.env.NEO_MODEL ||
+        "qwen3";
+
+    console.log(
+        `🧠 NEO → ${NEO_MODEL}`
+    );
+
+    try {
+
+        const response =
+            await axios.post(
+
+                `${NEO_OLLAMA_URL}/api/generate`,
+
+                {
+                    model: NEO_MODEL,
+
+                    // 🔥 MÊME PROMPT QUE GEMINI
+                    prompt: prompt,
+
+                    stream: false,
+
+                    format: "json",
+
+                    options: {
+                        temperature: 0
+                    }
+                },
+
+                {
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    timeout: 120000
+                }
+            );
+
+
+        const texte =
+            response.data?.response;
+
+
+        if (!texte) {
+
+            throw new Error(
+                "NEO n'a renvoyé aucune réponse"
+            );
+
+        }
+
+
+        let jsonTexte =
+            texte.trim();
+
+
+        jsonTexte =
+            jsonTexte
+                .replace(
+                    /^```json\s*/i,
+                    ""
+                )
+                .replace(
+                    /^```\s*/i,
+                    ""
+                )
+                .replace(
+                    /\s*```$/i,
+                    ""
+                )
+                .trim();
+
+
+        const resultat =
+            JSON.parse(
+                jsonTexte
+            );
+
+
+        console.log(
+            "✅ NEO LOCAL → OK"
+        );
+
+
+        return resultat;
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ NEO LOCAL :",
+            error.message
+        );
+
+        throw error;
+    }
+}
+
+
+//================================================
+// ⚖️ ARBITRE COMBAT
+// ☁️ GEMINI → 🧠 NEO
+//================================================
+
+async function appelerArbitreCombat(prompt) {
+
+    //================================================
+    // ☁️ GEMINI PRIORITAIRE
+    //================================================
+
+    try {
+
+        console.log(
+            "☁️ ARBITRE → GEMINI"
+        );
+
+        const resultat =
+            await appelerGemini(
+                prompt
+            );
+
+        return {
+
+            ...resultat,
+
+            moteur: "gemini"
+
+        };
+
+    } catch (geminiError) {
+
+        console.error(
+            "⚠️ GEMINI INDISPONIBLE"
+        );
+
+        console.log(
+            "🔄 BASCULEMENT → NEO LOCAL"
+        );
+
+
+        //================================================
+        // 🧠 NEO SECOURS
+        //================================================
+
+        try {
+
+            const resultat =
+                await appelerNEO(
+                    prompt
+                );
+
+            return {
+
+                ...resultat,
+
+                moteur: "neo"
+
+            };
+
+        } catch (neoError) {
+
+            throw new Error(
+                "❌ GEMINI ET NEO SONT INDISPONIBLES"
+            );
+
+        }
+
+    }
+
+}
+    
 
     //================================================
     // 🔁 ESSAI DE TOUS LES MODÈLES
