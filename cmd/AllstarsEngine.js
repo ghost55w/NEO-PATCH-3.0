@@ -482,8 +482,17 @@ const joueursGemini =
     joueursMatch.map(j => {
 
         const jid =
-            j?.jid ||
-            null;
+            j?.jid || null;
+
+
+        //================================================
+        // 🔎 ÉTAT ACTUEL DU TRACKER
+        //================================================
+
+        const etat =
+            joueursTracker.find(
+                t => t?.jid === jid
+            ) || null;
 
 
         //================================================
@@ -492,22 +501,9 @@ const joueursGemini =
 
         const pseudo =
             j?.pseudo ||
-            j?.user?.pseudo ||
-            j?.player?.pseudo ||
             j?.nomJoueur ||
-            contexteMatch?.joueur?.pseudo ||
+            etat?.pseudo ||
             null;
-
-
-        //================================================
-        // 🔎 CHERCHER L'ÉTAT DANS LE TRACKER
-        //================================================
-
-        const etat =
-            joueursTracker.find(
-                t =>
-                    t?.jid === jid
-            ) || null;
 
 
         //================================================
@@ -516,9 +512,10 @@ const joueursGemini =
 
         const personnage =
             etat?.personnage ||
-            j?.nom ||
             j?.personnage ||
             j?.nomPersonnage ||
+            j?.carte?.name ||
+            j?.card?.name ||
             null;
 
 
@@ -529,16 +526,18 @@ const joueursGemini =
         const grade =
             etat?.grade ||
             j?.grade ||
+            j?.carte?.grade ||
             null;
 
 
         //================================================
-        // 🏆 CATÉGORIE
+        // 🏆 CATEGORY
         //================================================
 
         const category =
             etat?.category ||
             j?.category ||
+            j?.carte?.category ||
             null;
 
 
@@ -550,35 +549,21 @@ const joueursGemini =
             etat?.vitesseMax ??
             j?.vitesseMax ??
             (
-                grade === "Bronze"
-                    ? 6
-                    : grade === "Argent" ||
-                      grade === "Silver"
-                        ? 8
-                        : grade === "Or" ||
-                          grade === "Gold"
-                            ? 10
-                            : null
+                typeof obtenirVitesseMaxParGrade === "function"
+                    ? obtenirVitesseMaxParGrade(grade)
+                    : null
             );
 
 
         //================================================
-        // 📦 DONNÉES COMBAT ENVOYÉES À GEMINI
+        // 📦 CONTEXTE COMBAT MINIMAL
         //================================================
 
         return {
 
-            //================================================
-            // 👤 JOUEUR
-            //================================================
-
             jid,
 
             pseudo,
-
-            //================================================
-            // 🎴 PERSONNAGE
-            //================================================
 
             personnage,
 
@@ -586,15 +571,7 @@ const joueursGemini =
 
             category,
 
-            //================================================
-            // ⚡ VITESSE MAXIMALE
-            //================================================
-
             vitesseMax,
-
-            //================================================
-            // ❤️ RESSOURCES ACTUELLES
-            //================================================
 
             pv:
                 etat?.pv ??
@@ -611,10 +588,6 @@ const joueursGemini =
                 j?.stats?.energie ??
                 100,
 
-            //================================================
-            // 🧍 ÉTAT PHYSIQUE
-            //================================================
-
             posture:
                 etat?.posture ||
                 "neutre",
@@ -623,25 +596,13 @@ const joueursGemini =
                 etat?.equilibre ||
                 "stable",
 
-            //================================================
-            // 📏 DISTANCE AVEC L'ADVERSAIRE
-            //================================================
-
             distanceAdversaire:
                 etat?.distanceAdversaire ??
                 null,
 
-            //================================================
-            // 🧭 POSITION RELATIVE
-            //================================================
-
             positionRelative:
                 etat?.positionRelative ||
                 "face",
-
-            //================================================
-            // 🗡️ ARME
-            //================================================
 
             weapon: {
 
@@ -654,17 +615,12 @@ const joueursGemini =
                     null
             },
 
-            //================================================
-            // ☠️ KO
-            //================================================
-
             ko:
                 etat?.ko ??
                 false
         };
 
     });
-
 
 //================================================
 // 🧠 CONTEXTE FINAL GEMINI
