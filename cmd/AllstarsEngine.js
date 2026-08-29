@@ -260,26 +260,7 @@ async function appelerNEO(prompt) {
     console.log(
         "🧠 NEO MANUEL → ANALYSE"
     );
-
-
-    /*
-     * IMPORTANT :
-     *
-     * NEO n'est PAS Gemini.
-     *
-     * Ici on ne demande pas à un modèle
-     * de comprendre le texte.
-     *
-     * On utilise nos fonctions :
-     *
-     * - analyserTexteCombatNeo()
-     * - validerActionsNeo()
-     *
-     * Le prompt Gemini est donc ignoré
-     * par l'arbitre manuel.
-     */
-
-
+    
     const contexte =
         arguments[1] || {};
 
