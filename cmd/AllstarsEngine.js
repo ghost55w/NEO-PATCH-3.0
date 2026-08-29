@@ -407,6 +407,737 @@ async function appelerArbitreCombat(
 }        
 
 //================================================
+// 🧠 NEO AI ARBITRE — ANALYSE MANUELLE DU PAVÉ
+//================================================
+
+function analyserPaveNEO(
+    actionsTexte = "",
+    contexteCombat = {}
+) {
+
+    console.log(
+        "🧠 NEO AI → ANALYSE MANUELLE"
+    );
+
+    const texte =
+        actionsTexte
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+
+    //================================================
+    // ❌ TEXTE VIDE
+    //================================================
+
+    if (!texte) {
+
+        return {
+
+            paveValide: false,
+
+            nombreActions: 0,
+
+            actions: [],
+
+            note: 0,
+
+            verdict:
+                "Pavé vide.",
+
+            resume: "",
+
+            joueurSuivant: null,
+
+            consequences: {
+
+                touche: false,
+                contre: false,
+                mauvaisContre: false,
+                degats: 0,
+                effets: [],
+                position: "",
+                posture: "",
+                equilibre: "",
+                garde: ""
+
+            },
+
+            erreurs: [
+                "Aucune action détectée."
+            ]
+
+        };
+
+    }
+
+
+    //================================================
+    // 👥 JOUEURS DU MATCH
+    //================================================
+
+    const joueurs =
+        Array.isArray(
+            contexteCombat?.match?.joueurs
+        )
+            ? contexteCombat.match.joueurs
+            : [];
+
+
+    //================================================
+    // 🔎 TROUVER UN PERSONNAGE
+    //================================================
+
+    function trouverPersonnage(nom) {
+
+        if (!nom) return null;
+
+        const recherche =
+            nom
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+
+        return joueurs.find(j => {
+
+            const personnage =
+                String(
+                    j?.personnage ||
+                    ""
+                )
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(
+                        /[\u0300-\u036f]/g,
+                        ""
+                    );
+
+            return (
+                personnage === recherche
+            );
+
+        }) || null;
+
+    }
+
+
+    //================================================
+    // 🎴 PERSONNAGE PRINCIPAL
+    //================================================
+
+    let acteur = null;
+
+    for (const joueur of joueurs) {
+
+        const nom =
+            joueur?.personnage;
+
+        if (!nom) continue;
+
+        const normalise =
+            nom
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+
+        if (
+            texte.includes(
+                normalise
+            )
+        ) {
+
+            acteur = joueur;
+
+            break;
+
+        }
+
+    }
+
+
+    //================================================
+    // ❌ ACTEUR INTROUVABLE
+    //================================================
+
+    if (!acteur) {
+
+        return {
+
+            paveValide: false,
+
+            nombreActions: 0,
+
+            actions: [],
+
+            note: 0,
+
+            verdict:
+                "Impossible d'identifier le personnage qui agit.",
+
+            resume: "",
+
+            joueurSuivant: null,
+
+            consequences: {
+
+                touche: false,
+                contre: false,
+                mauvaisContre: false,
+                degats: 0,
+                effets: [],
+                position: "",
+                posture: "",
+                equilibre: "",
+                garde: ""
+
+            },
+
+            erreurs: [
+                "Acteur introuvable dans le contexte du match."
+            ]
+
+        };
+
+    }
+
+
+    //================================================
+    // 🎯 TROUVER LA CIBLE
+    //================================================
+
+    let cible = null;
+
+    for (const joueur of joueurs) {
+
+        if (
+            joueur?.jid ===
+            acteur?.jid
+        ) continue;
+
+        const nom =
+            joueur?.personnage;
+
+        if (!nom) continue;
+
+        const normalise =
+            nom
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+
+        if (
+            texte.includes(
+                normalise
+            )
+        ) {
+
+            cible = joueur;
+
+            break;
+
+        }
+
+    }
+
+
+    //================================================
+    // 📦 ACTIONS
+    //================================================
+
+    const actions = [];
+
+
+    //================================================
+    // ⚡ DÉPLACEMENT / VMAX
+    //================================================
+
+    const contientDeplacement =
+        /fonce|court|courir|avance|s'avance|se deplace|deplace|accelere|course|vmax|vitesse maximale/
+            .test(texte);
+
+
+    if (contientDeplacement) {
+
+        const vitesse =
+            acteur?.vitesseMax ??
+            (
+                typeof obtenirVitesseMaxParGrade ===
+                "function"
+                    ? obtenirVitesseMaxParGrade(
+                        acteur?.grade
+                    )
+                    : null
+            );
+
+
+        actions.push({
+
+            ordre:
+                actions.length + 1,
+
+            acteur:
+                acteur.personnage,
+
+            cible:
+                cible?.personnage || null,
+
+            type:
+                "deplacement",
+
+            vitesse,
+
+            valide:
+                vitesse !== null,
+
+            description:
+                vitesse !== null
+                    ? `${acteur.personnage} se déplace à vitesse maximale de ${vitesse} m/s.`
+                    : `${acteur.personnage} se déplace.`,
+
+            raison:
+                vitesse !== null
+                    ? "La vitesse maximale est déterminée par le grade."
+                    : "Impossible de déterminer la vitesse maximale.",
+
+            resultatDefense:
+                "",
+
+            consequence:
+                ""
+
+        });
+
+    }
+
+
+    //================================================
+    // 👊 COUP DE POING DIRECT
+    //================================================
+
+    const direct =
+        /coup de poing direct|coup direct|direct|jab|straight/
+            .test(texte);
+
+
+    if (direct) {
+
+        let membre =
+            "inconnu";
+
+        if (
+            /du droit|main droite|poing droit|droit/
+                .test(texte)
+        ) {
+
+            membre =
+                "main_droite";
+
+        } else if (
+            /du gauche|main gauche|poing gauche|gauche/
+                .test(texte)
+        ) {
+
+            membre =
+                "main_gauche";
+
+        }
+
+
+        let zone =
+            "inconnue";
+
+
+        if (/visage|face/.test(texte)) {
+
+            zone =
+                "visage";
+
+        } else if (/nez/.test(texte)) {
+
+            zone =
+                "nez";
+
+        } else if (/menton/.test(texte)) {
+
+            zone =
+                "menton";
+
+        } else if (/machoire/.test(texte)) {
+
+            zone =
+                "machoire";
+
+        } else if (/abdomen|ventre/.test(texte)) {
+
+            zone =
+                "abdomen";
+
+        } else if (/torse|poitrine/.test(texte)) {
+
+            zone =
+                "torse";
+
+        }
+
+
+        const valide =
+            membre !== "inconnu" &&
+            zone !== "inconnue";
+
+
+        actions.push({
+
+            ordre:
+                actions.length + 1,
+
+            acteur:
+                acteur.personnage,
+
+            cible:
+                cible?.personnage || null,
+
+            type:
+                "frappe",
+
+            technique:
+                "coup_direct",
+
+            membre,
+
+            zone,
+
+            description:
+                `Coup de poing direct avec ${membre} visant ${zone}.`,
+
+            valide,
+
+            raison:
+                valide
+                    ? "La main utilisée et la zone visée sont précisées."
+                    : "La frappe doit préciser le membre utilisé et la zone visée.",
+
+            resultatDefense:
+                "",
+
+            consequence:
+                ""
+
+        });
+
+    }
+
+
+    //================================================
+    // 🦵 COUP DE PIED FRONTAL
+    //================================================
+
+    const frontKick =
+        /coup de pied frontal|front kick|coup frontal/
+            .test(texte);
+
+
+    if (frontKick) {
+
+        let membre =
+            "inconnu";
+
+
+        if (
+            /pied droit|du pied droit|jambe droite/
+                .test(texte)
+        ) {
+
+            membre =
+                "pied_droit";
+
+        } else if (
+            /pied gauche|du pied gauche|jambe gauche/
+                .test(texte)
+        ) {
+
+            membre =
+                "pied_gauche";
+
+        }
+
+
+        let zone =
+            "inconnue";
+
+
+        if (
+            /abdomen|ventre/
+                .test(texte)
+        ) {
+
+            zone =
+                "abdomen";
+
+        } else if (
+            /visage|face/
+                .test(texte)
+        ) {
+
+            zone =
+                "visage";
+
+        } else if (
+            /torse|poitrine/
+                .test(texte)
+        ) {
+
+            zone =
+                "torse";
+
+        }
+
+
+        const surface =
+            /semelle/.test(texte)
+                ? "semelle"
+                : "inconnue";
+
+
+        const valide =
+            membre !== "inconnu" &&
+            zone !== "inconnue" &&
+            surface !== "inconnue";
+
+
+        actions.push({
+
+            ordre:
+                actions.length + 1,
+
+            acteur:
+                acteur.personnage,
+
+            cible:
+                cible?.personnage || null,
+
+            type:
+                "frappe",
+
+            technique:
+                "front_kick",
+
+            membre,
+
+            surface,
+
+            zone,
+
+            description:
+                `Coup de pied frontal avec ${membre} de la ${surface} visant ${zone}.`,
+
+            valide,
+
+            raison:
+                valide
+                    ? "Le pied, la surface utilisée et la zone visée sont précisés."
+                    : "Le coup de pied doit préciser le pied, la surface utilisée et la zone visée.",
+
+            resultatDefense:
+                "",
+
+            consequence:
+                ""
+
+        });
+
+    }
+
+
+    //================================================
+    // 📊 LIMITE D'ACTIONS
+    //================================================
+
+    const nombreActions =
+        actions.length;
+
+
+    const limiteRespectee =
+        nombreActions > 0 &&
+        nombreActions <= 4;
+
+
+    const toutesValides =
+        actions.length > 0 &&
+        actions.every(
+            action =>
+                action.valide === true
+        );
+
+
+    const paveValide =
+        limiteRespectee &&
+        toutesValides;
+
+
+    //================================================
+    // ⭐ NOTE
+    //================================================
+
+    let note = 0;
+
+    if (paveValide) {
+
+        note = 10;
+
+    } else if (nombreActions > 0) {
+
+        note = 5;
+
+    }
+
+
+    //================================================
+    // 📝 RAISONS
+    //================================================
+
+    const erreurs = [];
+
+    if (!limiteRespectee) {
+
+        erreurs.push(
+            nombreActions === 0
+                ? "Aucune action reconnue."
+                : "Le pavé doit contenir au maximum 4 actions."
+        );
+
+    }
+
+
+    for (const action of actions) {
+
+        if (!action.valide) {
+
+            erreurs.push(
+                action.raison
+            );
+
+        }
+
+    }
+
+
+    //================================================
+    // 📝 RÉSUMÉ
+    //================================================
+
+    const resume =
+        actions
+            .map(
+                action =>
+                    action.description
+            )
+            .join(" puis ");
+
+
+    //================================================
+    // ➡️ JOUEUR SUIVANT
+    //================================================
+
+    const joueurTour =
+        contexteCombat
+            ?.match
+            ?.joueurTour;
+
+
+    let indexTour =
+        joueurs.findIndex(
+            j =>
+                j?.jid === joueurTour
+        );
+
+
+    if (indexTour === -1) {
+
+        indexTour = 0;
+
+    }
+
+
+    const joueurSuivant =
+        joueurs.length > 0
+            ? joueurs[
+                (indexTour + 1) %
+                joueurs.length
+            ]
+            : null;
+
+
+    //================================================
+    // ⚖️ RÉSULTAT
+    //================================================
+
+    return {
+
+        paveValide,
+
+        nombreActions,
+
+        actions,
+
+        note,
+
+        verdict:
+            paveValide
+                ? "Pavé valide."
+                : "Pavé refusé.",
+
+        resume,
+
+        joueurSuivant:
+            joueurSuivant
+                ? {
+
+                    nom:
+                        joueurSuivant
+                            .pseudo ||
+                        joueurSuivant
+                            .personnage ||
+                        "",
+
+                    jid:
+                        joueurSuivant.jid ||
+                        ""
+
+                }
+                : null,
+
+        consequences: {
+
+            touche: false,
+
+            contre: false,
+
+            mauvaisContre: false,
+
+            degats: 0,
+
+            effets: [],
+
+            position: "",
+
+            posture: "",
+
+            equilibre: "",
+
+            garde: ""
+
+        },
+
+        erreurs
+
+    };
+
+}
+
+
+//================================================
 // 🤖 ANALYSE PAVÉ AVEC GEMINI
 //================================================
 async function analysePaveCombat(message, contexteMatch = {}) {
