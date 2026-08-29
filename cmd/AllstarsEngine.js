@@ -1158,31 +1158,41 @@ const actionsFinales =
             element.action
     );
 
+    //================================================
+// 🧠 ACTIONS FINALES
+//================================================
+
+const actionsFinales =
+    actions.map((action, index) => ({
+
+        ...action,
+
+        ordre:
+            index + 1
+
+    }));
     
     //================================================
     // 📊 LIMITE D'ACTIONS
     //================================================
 
     const nombreActions =
-        actions.length;
+    actionsFinales.length;
 
+const limiteRespectee =
+    nombreActions > 0 &&
+    nombreActions <= 4;
 
-    const limiteRespectee =
-        nombreActions > 0 &&
-        nombreActions <= 4;
+const toutesValides =
+    actionsFinales.length > 0 &&
+    actionsFinales.every(
+        action =>
+            action.valide === true
+    );
 
-
-    const toutesValides =
-        actions.length > 0 &&
-        actions.every(
-            action =>
-                action.valide === true
-        );
-
-
-    const paveValide =
-        limiteRespectee &&
-        toutesValides;
+const paveValide =
+    limiteRespectee &&
+    toutesValides;
 
 
     //================================================
