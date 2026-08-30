@@ -17,10 +17,6 @@ const {
 
 /* IMPORT SYSTEME MATCH BLUELOCK */
 const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
-// 🧠 NEO AI — SYSTÈME LINGUISTIQUE
-const {
-    traiterMessageNeoAI
-} = require("../cmd/NeoAIchat");
 
 
 function getTextMessage(msg) {
@@ -210,51 +206,7 @@ if (ms.key.fromMe) {
       mention_JID
     };
 
-//==============================================================
-// 🧠 NEO AI — TEST LINGUISTIQUE
-//==============================================================
-// Si aucune session NeoAI n'est active,
-// le message est ignoré.
-//==============================================================
 
-if (
-    typeof texte === "string" &&
-    /^\s*🌀\s*:/i.test(texte)
-) {
-
-    try {
-
-        const neoTraite =
-            await traiterMessageNeoAI(
-                ovl,
-                ms,
-                texte
-            );
-
-        //======================================================
-        // 🛑 SI NEOAI A TRAITÉ LE MESSAGE
-        //======================================================
-
-        if (neoTraite) {
-
-            console.log(
-                "🧠 NEO AI → MESSAGE TRAITÉ"
-            );
-
-            return;
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "❌ NEO AI → ERREUR :",
-            error
-        );
-
-    }
-
-}
       
 // ================================
 // 🔥 SYSTEME MATCH GLOBAL
