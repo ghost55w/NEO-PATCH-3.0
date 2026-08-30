@@ -1,31 +1,24 @@
 //==============================================================
 // 🧠 NEO AI CHAT — TESTEUR LINGUISTIQUE
 //==============================================================
-//
-// NeoAIchat.js
-//
-// RÔLE :
-// - Lance une session avec +testNeoAI🌀
-// - Charge NeoAI pendant 30 secondes
-// - Envoie l'image de présentation
-// - Attend un texte commençant par 🌀
-// - Analyse le texte avec NeoAI.js
-// - Affiche un résumé narratif
-// - Affiche le JSON complet
-//
-//==============================================================
+const { ovlcmd } = require('../lib/ovlcmd');
 
-const { ovlcmd } = require("../lib/ovlcmd");
-const path = require("path");
-console.log("🧠 NEO AI CHAT CHARGÉ !");
+const {
+    neoNormaliserTexte,
+    neoMinuscule,
+    neoSansAccents,
+    neoTokeniser,
+    neoDecouperPhrases,
+    neoRechercherMot,
+    neoRechercherTexte,
+    neoTrouverSynonymes,
+    neoTrouverAntonymes,
+    neoConnaitMot,
+    NEO_DICTIONNAIRES
+} = require("../DataBase/NeoAI");
 
-//==============================================================
-// 🧠 IMPORT NEO AI
-//==============================================================
 
-const NeoAI = require(
-    path.join(__dirname, "../DataBase/NeoAI")
-);
+
 
 
 //==============================================================
