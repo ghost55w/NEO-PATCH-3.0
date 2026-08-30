@@ -1,39 +1,44 @@
 //==============================================================
-// 🧠 NEO AI — MOTEUR LINGUISTIQUE GÉNÉRAL
+// 🧠 NEO AI — BASE DE CONNAISSANCES LINGUISTIQUES
 //==============================================================
 // NeoAI.js
 //
-// Objectif :
-// Comprendre le langage naturel français / anglais
-// indépendamment des règles d'un jeu.
+// RÔLE :
+// - Contenir le vocabulaire de NeoAI
+// - Organiser les mots par catégories
+// - Contenir les synonymes / antonymes
+// - Contenir les expressions
+// - Contenir les unités, temps, directions, etc.
+// - Permettre à NeoAIchat.js de rechercher dans cette base
 //
-// ⚠️ Ce fichier n'est PAS l'arbitre d'un jeu.
-// Il sert uniquement de cerveau linguistique.
+// ⚠️ CE FICHIER N'EST PAS L'ARBITRE D'UN JEU.
 //
-// Architecture :
+// NeoAIchat.js = moteur qui lit/analyse un texte
+// NeoAI.js     = mémoire linguistique de NeoAI
+//
+// ARCHITECTURE :
 //
 // TEXTE
 //   ↓
+// NeoAIchat.js
+//   ↓
 // NORMALISATION
 //   ↓
-// DÉTECTION LANGUE
+// RECHERCHE DANS NeoAI.js
 //   ↓
-// DÉCOUPAGE
-//   ↓
-// DICTIONNAIRES
+// CATÉGORIES
 //   ↓
 // SYNONYMES
 //   ↓
-// CONNECTEURS
-//   ↓
 // CONTEXTE
 //   ↓
-// EXTRACTION
+// COMPRÉHENSION
+//
 //==============================================================
 
 
 //==============================================================
-// 📦 CONFIGURATION GÉNÉRALE
+// 📦 CONFIGURATION
 //==============================================================
 
 const NEOAI_CONFIG = {
@@ -47,13 +52,15 @@ const NEOAI_CONFIG = {
 
     debug: true,
 
-    maxActions: 20
+    maxActions: 20,
+
+    version: "1.0.0"
 
 };
 
 
 //==============================================================
-// 🧹 NORMALISATION DU TEXTE
+// 🧹 NORMALISATION
 //==============================================================
 
 function neoNormaliserTexte(texte = "") {
@@ -68,26 +75,21 @@ function neoNormaliserTexte(texte = "") {
 
     return texte
 
-        // Supprimer espaces inutiles
         .replace(/\s+/g, " ")
 
-        // Normaliser apostrophes
         .replace(/[’`]/g, "'")
 
-        // Normaliser tirets
         .replace(/[‐-‒–—]/g, "-")
 
-        // Supprimer espaces avant ponctuation
         .replace(/\s+([,.!?;:])/g, "$1")
 
-        // Supprimer espaces multiples
         .trim();
 
 }
 
 
 //==============================================================
-// 🔡 TEXTE MINUSCULE
+// 🔡 MINUSCULE
 //==============================================================
 
 function neoMinuscule(texte = "") {
@@ -121,7 +123,9 @@ function neoSansAccents(texte = "") {
 function neoTokeniser(texte = "") {
 
     const texteNormalise =
-        neoNormaliserTexte(texte);
+        neoNormaliserTexte(
+            texte
+        );
 
     if (!texteNormalise) {
 
@@ -130,20 +134,24 @@ function neoTokeniser(texte = "") {
     }
 
     return texteNormalise
+
         .split(/\s+/)
+
         .filter(Boolean);
 
 }
 
 
 //==============================================================
-// ✂️ DÉCOUPAGE EN PHRASES
+// ✂️ DÉCOUPAGE DES PHRASES
 //==============================================================
 
 function neoDecouperPhrases(texte = "") {
 
     const texteNormalise =
-        neoNormaliserTexte(texte);
+        neoNormaliserTexte(
+            texte
+        );
 
     if (!texteNormalise) {
 
@@ -168,156 +176,621 @@ function neoDecouperPhrases(texte = "") {
 
 
 //==============================================================
-// 🌍 DÉTECTION SIMPLE DE LANGUE
+// 📚 NEO_VERBES
 //==============================================================
 
-function neoDetecterLangue(texte = "") {
+const NEO_VERBES = {
 
-    const t =
-        neoSansAccents(texte);
+    fr: [
 
-    if (!t) {
+        "être",
+        "avoir",
+        "faire",
+        "aller",
+        "venir",
+        "voir",
+        "regarder",
+        "parler",
+        "dire",
+        "penser",
+        "comprendre",
+        "savoir",
+        "vouloir",
+        "pouvoir",
+        "devoir",
 
-        return NEOAI_CONFIG.langueDefaut;
+        "marcher",
+        "courir",
+        "avancer",
+        "reculer",
+        "sauter",
+        "tomber",
+        "voler",
+
+        "frapper",
+        "attaquer",
+        "défendre",
+        "esquiver",
+        "bloquer",
+        "toucher",
+
+        "prendre",
+        "lancer",
+        "attraper",
+        "porter",
+        "pousser",
+        "tirer",
+
+        "entrer",
+        "sortir",
+        "arriver",
+        "partir",
+        "tourner",
+        "accélérer",
+        "ralentir"
+
+    ],
+
+    en: [
+
+        "be",
+        "have",
+        "do",
+        "go",
+        "come",
+        "see",
+        "watch",
+        "speak",
+        "say",
+        "think",
+        "understand",
+        "know",
+        "want",
+        "can",
+        "must",
+
+        "walk",
+        "run",
+        "move",
+        "advance",
+        "retreat",
+        "jump",
+        "fall",
+        "fly",
+
+        "hit",
+        "attack",
+        "defend",
+        "dodge",
+        "block",
+        "touch",
+
+        "take",
+        "throw",
+        "catch",
+        "carry",
+        "push",
+        "pull",
+
+        "enter",
+        "exit",
+        "arrive",
+        "leave",
+        "turn",
+        "accelerate",
+        "slow"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_NOMS
+//==============================================================
+
+const NEO_NOMS = {
+
+    fr: [
+
+        "personne",
+        "homme",
+        "femme",
+        "enfant",
+        "joueur",
+        "adversaire",
+        "ami",
+        "ennemi",
+
+        "corps",
+        "tête",
+        "visage",
+        "bras",
+        "main",
+        "jambe",
+        "pied",
+
+        "terrain",
+        "sol",
+        "mur",
+        "porte",
+        "route",
+        "ville",
+        "pays",
+        "monde",
+
+        "temps",
+        "distance",
+        "vitesse",
+        "direction",
+        "position",
+        "action",
+        "mouvement"
+
+    ],
+
+    en: [
+
+        "person",
+        "man",
+        "woman",
+        "child",
+        "player",
+        "opponent",
+        "friend",
+        "enemy",
+
+        "body",
+        "head",
+        "face",
+        "arm",
+        "hand",
+        "leg",
+        "foot",
+
+        "ground",
+        "wall",
+        "door",
+        "road",
+        "city",
+        "country",
+        "world",
+
+        "time",
+        "distance",
+        "speed",
+        "direction",
+        "position",
+        "action",
+        "movement"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_ADJECTIFS
+//==============================================================
+
+const NEO_ADJECTIFS = {
+
+    fr: [
+
+        "grand",
+        "petit",
+        "rapide",
+        "lent",
+        "fort",
+        "faible",
+        "proche",
+        "loin",
+        "long",
+        "court",
+
+        "haut",
+        "bas",
+        "gauche",
+        "droit",
+
+        "violent",
+        "puissant",
+        "précis",
+        "direct",
+        "brutal",
+        "calme",
+
+        "immédiat",
+        "simultané",
+        "successif"
+
+    ],
+
+    en: [
+
+        "big",
+        "small",
+        "fast",
+        "slow",
+        "strong",
+        "weak",
+        "near",
+        "far",
+        "long",
+        "short",
+
+        "high",
+        "low",
+        "left",
+        "right",
+
+        "violent",
+        "powerful",
+        "precise",
+        "direct",
+        "brutal",
+        "calm",
+
+        "immediate",
+        "simultaneous",
+        "successive"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_ADVERBES
+//==============================================================
+
+const NEO_ADVERBES = {
+
+    fr: [
+
+        "rapidement",
+        "lentement",
+        "immédiatement",
+        "directement",
+        "brusquement",
+        "précisément",
+        "fortement",
+        "doucement",
+        "soudainement",
+        "actuellement",
+        "maintenant",
+        "ensuite",
+        "déjà",
+        "encore",
+        "toujours",
+        "jamais",
+        "souvent",
+        "parfois"
+
+    ],
+
+    en: [
+
+        "quickly",
+        "slowly",
+        "immediately",
+        "directly",
+        "suddenly",
+        "precisely",
+        "strongly",
+        "gently",
+        "currently",
+        "now",
+        "then",
+        "already",
+        "again",
+        "always",
+        "never",
+        "often",
+        "sometimes"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_SYNONYMES
+//==============================================================
+
+const NEO_SYNONYMES = {
+
+    fr: {
+
+        courir: [
+            "courir",
+            "foncer",
+            "sprinter",
+            "se précipiter"
+        ],
+
+        frapper: [
+            "frapper",
+            "taper",
+            "cogner",
+            "porter un coup"
+        ],
+
+        regarder: [
+            "regarder",
+            "observer",
+            "fixer",
+            "contempler"
+        ],
+
+        avancer: [
+            "avancer",
+            "progresser",
+            "se déplacer vers",
+            "aller vers"
+        ],
+
+        reculer: [
+            "reculer",
+            "se retirer",
+            "s'éloigner"
+        ],
+
+        rapide: [
+            "rapide",
+            "vite",
+            "vif",
+            "prompt"
+        ],
+
+        lent: [
+            "lent",
+            "lentement",
+            "ralenti"
+        ]
+
+    },
+
+    en: {
+
+        run: [
+            "run",
+            "sprint",
+            "rush"
+        ],
+
+        hit: [
+            "hit",
+            "strike",
+            "punch",
+            "smash"
+        ],
+
+        look: [
+            "look",
+            "watch",
+            "observe",
+            "stare"
+        ],
+
+        move: [
+            "move",
+            "advance",
+            "approach"
+        ]
 
     }
 
+};
 
-    const motsFrancais = [
 
-        "le",
-        "la",
-        "les",
-        "un",
-        "une",
-        "des",
-        "dans",
-        "vers",
-        "avec",
+//==============================================================
+// 📚 NEO_ANTONYMES
+//==============================================================
+
+const NEO_ANTONYMES = {
+
+    fr: {
+
+        grand: [
+            "petit"
+        ],
+
+        petit: [
+            "grand"
+        ],
+
+        rapide: [
+            "lent"
+        ],
+
+        lent: [
+            "rapide"
+        ],
+
+        avancer: [
+            "reculer"
+        ],
+
+        reculer: [
+            "avancer"
+        ],
+
+        entrer: [
+            "sortir"
+        ],
+
+        sortir: [
+            "entrer"
+        ],
+
+        proche: [
+            "loin"
+        ],
+
+        loin: [
+            "proche"
+        ]
+
+    },
+
+    en: {
+
+        big: [
+            "small"
+        ],
+
+        small: [
+            "big"
+        ],
+
+        fast: [
+            "slow"
+        ],
+
+        slow: [
+            "fast"
+        ],
+
+        advance: [
+            "retreat"
+        ],
+
+        enter: [
+            "exit"
+        ]
+
+    }
+
+};
+
+
+//==============================================================
+// 📚 NEO_CONNECTEURS
+//==============================================================
+
+const NEO_CONNECTEURS = {
+
+    succession: [
+
         "puis",
         "ensuite",
-        "mais",
-        "sur",
-        "sous",
-        "pour",
-        "contre",
-        "et",
-        "ou"
+        "après",
+        "dans la foulée",
+        "immédiatement",
+        "enchaîne",
+        "enchaîne puis",
+        "aussitôt",
 
-    ];
-
-
-    const motsAnglais = [
-
-        "the",
-        "a",
-        "an",
-        "to",
-        "with",
         "then",
         "after",
+        "afterwards",
+        "immediately",
+        "next"
+
+    ],
+
+    simultaneite: [
+
+        "pendant que",
+        "alors que",
+        "en même temps",
+
+        "while",
+        "at the same time"
+
+    ],
+
+    condition: [
+
+        "si",
+        "lorsque",
+        "quand",
+        "dès que",
+        "une fois que",
+
+        "if",
+        "when",
+        "once",
+        "as soon as"
+
+    ],
+
+    opposition: [
+
+        "mais",
+        "cependant",
+        "pourtant",
+        "toutefois",
+        "en revanche",
+
         "but",
+        "however",
+        "yet",
+        "instead"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_PREPOSITIONS
+//==============================================================
+
+const NEO_PREPOSITIONS = {
+
+    fr: [
+
+        "à",
+        "de",
+        "dans",
+        "sur",
+        "sous",
+        "avec",
+        "sans",
+        "pour",
+        "contre",
+        "vers",
+        "entre",
+        "par",
+        "chez",
+        "devant",
+        "derrière",
+        "près de",
+        "loin de",
+        "au-dessus de",
+        "en dessous de"
+
+    ],
+
+    en: [
+
+        "to",
+        "from",
+        "in",
         "on",
         "under",
+        "with",
+        "without",
         "for",
         "against",
-        "and",
-        "or"
+        "toward",
+        "between",
+        "by",
+        "behind",
+        "near",
+        "far from",
+        "above",
+        "below"
 
-    ];
+    ]
 
-
-    const mots =
-        t.split(/\s+/);
-
-
-    let scoreFR = 0;
-    let scoreEN = 0;
-
-
-    for (
-        const mot of mots
-    ) {
-
-        if (
-            motsFrancais.includes(mot)
-        ) {
-
-            scoreFR++;
-
-        }
-
-        if (
-            motsAnglais.includes(mot)
-        ) {
-
-            scoreEN++;
-
-        }
-
-    }
-
-
-    if (
-        scoreEN > scoreFR
-    ) {
-
-        return "en";
-
-    }
-
-
-    return "fr";
-
-}
+};
 
 
 //==============================================================
-// 🔍 RECHERCHE D'UN MOT DANS UNE LISTE
-//==============================================================
-
-function neoContientMot(
-    texte = "",
-    liste = []
-) {
-
-    const t =
-        neoSansAccents(texte);
-
-
-    for (
-        const mot of liste
-    ) {
-
-        const recherche =
-            neoSansAccents(mot);
-
-
-        if (!recherche) {
-
-            continue;
-
-        }
-
-
-        if (
-            t.includes(recherche)
-        ) {
-
-            return true;
-
-        }
-
-    }
-
-
-    return false;
-
-}
-
-
-//==============================================================
-// 📚 DICTIONNAIRE DE BASE — PRONOMS
+// 📚 NEO_PRONOMS
 //==============================================================
 
 const NEO_PRONOMS = {
@@ -343,13 +816,11 @@ const NEO_PRONOMS = {
             "lui",
             "leur",
             "eux",
-            "elle",
             "y",
             "en"
         ]
 
     },
-
 
     en: {
 
@@ -377,76 +848,40 @@ const NEO_PRONOMS = {
 
 
 //==============================================================
-// 📚 DICTIONNAIRE DE BASE — CONNECTEURS
+// 📚 NEO_EXPRESSIONS
 //==============================================================
 
-const NEO_CONNECTEURS = {
+const NEO_EXPRESSIONS = {
 
-    succession: [
+    fr: [
 
-        "puis",
-        "ensuite",
-        "apres",
-        "après",
-        "dans la foulee",
+        "à toute vitesse",
+        "à pleine vitesse",
+        "à grande vitesse",
         "dans la foulée",
-        "immediatement",
-        "immédiatement",
-        "enchaine",
-        "enchaîne",
-        "aussitot",
-        "aussitôt",
-
-        "then",
-        "after",
-        "afterwards",
-        "immediately",
-        "next"
+        "en un instant",
+        "au même moment",
+        "face à",
+        "en direction de",
+        "à proximité de",
+        "à distance",
+        "au corps à corps",
+        "à bout portant"
 
     ],
 
+    en: [
 
-    simultaneite: [
-
-        "pendant que",
-        "alors que",
-        "en meme temps",
-        "en même temps",
-
-        "while",
-        "at the same time"
-    ],
-
-
-    condition: [
-
-        "si",
-        "lorsque",
-        "quand",
-        "des que",
-        "dès que",
-        "une fois que",
-
-        "if",
-        "when",
-        "once",
-        "as soon as"
-
-    ],
-
-
-    opposition: [
-
-        "mais",
-        "cependant",
-        "pourtant",
-        "toutefois",
-        "en revanche",
-
-        "but",
-        "however",
-        "yet",
-        "instead"
+        "at full speed",
+        "at high speed",
+        "in an instant",
+        "at the same time",
+        "facing",
+        "toward",
+        "near",
+        "at a distance",
+        "close range",
+        "point blank"
 
     ]
 
@@ -454,64 +889,1192 @@ const NEO_CONNECTEURS = {
 
 
 //==============================================================
-// 🧠 ANALYSE LINGUISTIQUE DE BASE
+// 📚 NEO_UNITES
 //==============================================================
 
-function neoAnalyserTexteBase(texte = "") {
+const NEO_UNITES = {
 
-    const original =
-        texte;
+    distance: [
 
-    const normalise =
-        neoNormaliserTexte(
-            texte
+        "mm",
+        "cm",
+        "m",
+        "km",
+        "millimètre",
+        "centimètre",
+        "mètre",
+        "kilomètre"
+
+    ],
+
+    temps: [
+
+        "ms",
+        "s",
+        "min",
+        "h",
+        "seconde",
+        "secondes",
+        "minute",
+        "minutes",
+        "heure",
+        "heures"
+
+    ],
+
+    vitesse: [
+
+        "m/s",
+        "km/h",
+        "mph"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_TEMPS
+//==============================================================
+
+const NEO_TEMPS = {
+
+    fr: [
+
+        "maintenant",
+        "avant",
+        "après",
+        "ensuite",
+        "plus tard",
+        "bientôt",
+        "immédiatement",
+        "hier",
+        "aujourd'hui",
+        "demain",
+        "matin",
+        "midi",
+        "soir",
+        "nuit"
+
+    ],
+
+    en: [
+
+        "now",
+        "before",
+        "after",
+        "then",
+        "later",
+        "soon",
+        "immediately",
+        "yesterday",
+        "today",
+        "tomorrow",
+        "morning",
+        "noon",
+        "evening",
+        "night"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_DIRECTIONS
+//==============================================================
+
+const NEO_DIRECTIONS = {
+
+    fr: [
+
+        "gauche",
+        "droite",
+        "devant",
+        "derrière",
+        "haut",
+        "bas",
+        "nord",
+        "sud",
+        "est",
+        "ouest",
+        "vers",
+        "depuis",
+        "en direction de",
+        "à gauche",
+        "à droite"
+
+    ],
+
+    en: [
+
+        "left",
+        "right",
+        "front",
+        "behind",
+        "up",
+        "down",
+        "north",
+        "south",
+        "east",
+        "west",
+        "toward",
+        "from",
+        "in the direction of"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_PARTIES_CORPS
+//==============================================================
+
+const NEO_PARTIES_CORPS = {
+
+    fr: [
+
+        "tête",
+        "visage",
+        "front",
+        "œil",
+        "yeux",
+        "nez",
+        "bouche",
+        "menton",
+        "mâchoire",
+        "cou",
+        "épaule",
+        "bras",
+        "avant-bras",
+        "coude",
+        "poignet",
+        "main",
+        "doigt",
+        "torse",
+        "poitrine",
+        "ventre",
+        "abdomen",
+        "dos",
+        "hanche",
+        "cuisse",
+        "genou",
+        "jambe",
+        "cheville",
+        "pied",
+        "talon",
+        "plante",
+        "orteil"
+
+    ],
+
+    en: [
+
+        "head",
+        "face",
+        "forehead",
+        "eye",
+        "eyes",
+        "nose",
+        "mouth",
+        "chin",
+        "jaw",
+        "neck",
+        "shoulder",
+        "arm",
+        "forearm",
+        "elbow",
+        "wrist",
+        "hand",
+        "finger",
+        "chest",
+        "torso",
+        "stomach",
+        "abdomen",
+        "back",
+        "hip",
+        "thigh",
+        "knee",
+        "leg",
+        "ankle",
+        "foot",
+        "heel",
+        "sole",
+        "toe"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_EMOTIONS
+//==============================================================
+
+const NEO_EMOTIONS = {
+
+    positives: [
+
+        "joie",
+        "bonheur",
+        "amour",
+        "plaisir",
+        "confiance",
+        "espoir",
+        "fierté",
+        "excitation",
+        "enthousiasme",
+
+        "joy",
+        "happiness",
+        "love",
+        "pleasure",
+        "confidence",
+        "hope",
+        "pride",
+        "excitement"
+
+    ],
+
+    negatives: [
+
+        "tristesse",
+        "peur",
+        "colère",
+        "haine",
+        "stress",
+        "angoisse",
+        "panique",
+        "déception",
+
+        "sadness",
+        "fear",
+        "anger",
+        "hate",
+        "stress",
+        "anxiety",
+        "panic",
+        "disappointment"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_INTENSITE
+//==============================================================
+
+const NEO_INTENSITE = {
+
+    faible: [
+
+        "un peu",
+        "légèrement",
+        "doucement",
+        "faiblement",
+        "presque"
+
+    ],
+
+    moyenne: [
+
+        "assez",
+        "normalement",
+        "modérément"
+
+    ],
+
+    forte: [
+
+        "très",
+        "extrêmement",
+        "fortement",
+        "énormément",
+        "totalement",
+        "complètement",
+        "brutalement"
+
+    ]
+
+};
+
+
+//==============================================================
+// 📚 NEO_VITESSE
+//==============================================================
+
+const NEO_VITESSE = {
+
+    lente: [
+
+        "lent",
+        "lentement",
+        "doucement",
+        "au ralenti"
+
+    ],
+
+    normale: [
+
+        "normalement",
+        "à vitesse normale",
+        "à vitesse moyenne"
+
+    ],
+
+    rapide: [
+
+        "rapidement",
+        "vite",
+        "très vite",
+        "à grande vitesse",
+        "à pleine vitesse",
+        "à toute vitesse",
+        "vitesse maximale",
+        "vmax",
+        "full speed",
+        "full vitesse"
+
+    ]
+
+};
+
+//==============================================================
+// 📚 NEO_RELATIONS
+//==============================================================
+
+const NEO_RELATIONS = {
+
+    fr: {
+
+        possession: [
+
+            "à",
+            "de",
+            "appartient à",
+            "possède"
+
+        ],
+
+        opposition: [
+
+            "contre",
+            "face à",
+            "opposé à",
+            "adversaire de"
+
+        ],
+
+        proximite: [
+
+            "près de",
+            "proche de",
+            "à côté de",
+            "à proximité de"
+
+        ],
+
+        eloignement: [
+
+            "loin de",
+            "éloigné de",
+            "à distance de"
+
+        ]
+
+    },
+
+    en: {
+
+        possession: [
+
+            "of",
+            "belongs to",
+            "owns"
+
+        ],
+
+        opposition: [
+
+            "against",
+            "facing",
+            "opposite"
+
+        ],
+
+        proximite: [
+
+            "near",
+            "close to",
+            "next to"
+
+        ],
+
+        eloignement: [
+
+            "far from",
+            "away from",
+            "at a distance from"
+
+        ]
+
+    }
+
+};
+
+//==============================================================
+// 🥊 NEO_COMBAT
+//==============================================================
+
+const NEO_COMBAT = {
+
+    attaques: {
+
+        fr: [
+            "attaque",
+            "offensive",
+            "assaut",
+            "agression"
+        ],
+
+        en: [
+            "attack",
+            "offensive",
+            "assault"
+        ]
+
+    },
+
+
+    frappes: {
+
+        fr: [
+            "frappe",
+            "coup",
+            "impact",
+            "strike"
+        ],
+
+        en: [
+            "strike",
+            "hit",
+            "blow"
+        ]
+
+    },
+
+
+    coups_de_poing: {
+
+        fr: [
+            "coup de poing",
+            "direct",
+            "jab",
+            "cross",
+            "crochet",
+            "uppercut",
+            "overhand",
+            "coup de poing direct"
+        ],
+
+        en: [
+            "punch",
+            "jab",
+            "cross",
+            "hook",
+            "uppercut",
+            "overhand",
+            "straight"
+        ]
+
+    },
+
+
+    coups_de_pied: {
+
+        fr: [
+            "coup de pied",
+            "coup de pied frontal",
+            "front kick",
+            "roundhouse",
+            "coup de pied circulaire",
+            "side kick",
+            "coup de pied latéral",
+            "back kick",
+            "coup de pied retourné",
+            "hook kick",
+            "axe kick",
+            "low kick",
+            "spinning back kick"
+        ],
+
+        en: [
+            "kick",
+            "front kick",
+            "roundhouse kick",
+            "side kick",
+            "back kick",
+            "hook kick",
+            "axe kick",
+            "low kick",
+            "spinning back kick"
+        ]
+
+    },
+
+
+    genoux: {
+
+        fr: [
+            "genou",
+            "coup de genou",
+            "genou direct",
+            "genou sauté"
+        ],
+
+        en: [
+            "knee",
+            "knee strike",
+            "knee kick",
+            "flying knee"
+        ]
+
+    },
+
+
+    coudes: {
+
+        fr: [
+            "coude",
+            "coup de coude",
+            "coude horizontal",
+            "coude circulaire",
+            "coude remontant"
+        ],
+
+        en: [
+            "elbow",
+            "elbow strike",
+            "horizontal elbow",
+            "rising elbow"
+        ]
+
+    },
+
+
+    projections: {
+
+        fr: [
+            "projection",
+            "jeter",
+            "projeter",
+            "faire tomber",
+            "balayage",
+            "fauchage"
+        ],
+
+        en: [
+            "throw",
+            "takedown",
+            "sweep",
+            "trip"
+        ]
+
+    },
+
+
+    saisies: {
+
+        fr: [
+            "saisie",
+            "attraper",
+            "agripper",
+            "empoigner",
+            "tenir",
+            "prise"
+        ],
+
+        en: [
+            "grab",
+            "grip",
+            "hold",
+            "clinch"
+        ]
+
+    },
+
+
+    esquives: {
+
+        fr: [
+            "esquive",
+            "esquiver",
+            "éviter",
+            "se décaler",
+            "pas de côté",
+            "retrait",
+            "reculer pour éviter",
+            "plonger",
+            "se pencher"
+        ],
+
+        en: [
+            "dodge",
+            "evade",
+            "avoid",
+            "sidestep",
+            "slip",
+            "duck",
+            "weave",
+            "backstep"
+        ]
+
+    },
+
+
+    blocages: {
+
+        fr: [
+            "blocage",
+            "bloquer",
+            "parer",
+            "parade",
+            "garde",
+            "protection",
+            "dévier"
+        ],
+
+        en: [
+            "block",
+            "guard",
+            "parry",
+            "deflect",
+            "protect"
+        ]
+
+    },
+
+
+    contres: {
+
+        fr: [
+            "contre",
+            "contre-attaque",
+            "riposte",
+            "riposter",
+            "contre offensif"
+        ],
+
+        en: [
+            "counter",
+            "counterattack",
+            "counter strike",
+            "retaliation"
+        ]
+
+    },
+
+
+    immobilisations: {
+
+        fr: [
+            "immobilisation",
+            "immobiliser",
+            "clé",
+            "clé de bras",
+            "clé de jambe",
+            "étranglement",
+            "soumission"
+        ],
+
+        en: [
+            "submission",
+            "arm lock",
+            "leg lock",
+            "choke",
+            "hold",
+            "immobilization"
+        ]
+
+    },
+
+
+    déplacements: {
+
+        fr: [
+            "avancer",
+            "reculer",
+            "pas de côté",
+            "déplacement latéral",
+            "approche",
+            "retrait",
+            "rotation",
+            "pivot"
+        ],
+
+        en: [
+            "advance",
+            "retreat",
+            "sidestep",
+            "lateral movement",
+            "approach",
+            "pivot",
+            "rotation"
+        ]
+
+    },
+
+
+    gardes: {
+
+        fr: [
+            "garde",
+            "garde haute",
+            "garde basse",
+            "garde ouverte",
+            "garde fermée",
+            "position de garde"
+        ],
+
+        en: [
+            "guard",
+            "high guard",
+            "low guard",
+            "open guard",
+            "closed guard",
+            "fighting stance"
+        ]
+
+    },
+
+
+    acrobaties: {
+
+        fr: [
+            "saut",
+            "roulade",
+            "salto",
+            "rotation",
+            "vrille",
+            "saut retourné",
+            "rotation aérienne"
+        ],
+
+        en: [
+            "jump",
+            "roll",
+            "flip",
+            "spin",
+            "aerial rotation"
+        ]
+
+    }
+
+}; 
+
+//==============================================================
+// 🗂️ INDEX GLOBAL DES DICTIONNAIRES
+//==============================================================
+//
+// Permet à NeoAIchat.js de parcourir toute la base
+// sans devoir importer chaque dictionnaire séparément.
+//
+//==============================================================
+
+const NEO_DICTIONNAIRES = {
+
+    NEO_VERBES,
+    NEO_NOMS,
+    NEO_ADJECTIFS,
+    NEO_ADVERBES,
+    NEO_SYNONYMES,
+    NEO_ANTONYMES,
+    NEO_CONNECTEURS,
+    NEO_PREPOSITIONS,
+    NEO_PRONOMS,
+    NEO_EXPRESSIONS,
+    NEO_UNITES,
+    NEO_TEMPS,
+    NEO_DIRECTIONS,
+    NEO_PARTIES_CORPS,
+    NEO_EMOTIONS,
+    NEO_INTENSITE,
+    NEO_VITESSE,
+    NEO_RELATIONS, 
+    NEO_COMBAT 
+
+};
+
+
+//==============================================================
+// 🔎 RECHERCHER UN MOT DANS UNE CATÉGORIE
+//==============================================================
+
+function neoChercherMotDansCategorie(
+    mot = "",
+    categorie = null
+) {
+
+    if (
+        !mot ||
+        !categorie
+    ) {
+
+        return false;
+
+    }
+
+    const recherche =
+        neoSansAccents(
+            mot
         );
 
-    const langue =
-        neoDetecterLangue(
-            normalise
+
+    function parcourir(
+        valeur,
+        chemin = []
+    ) {
+
+        if (
+            Array.isArray(valeur)
+        ) {
+
+            for (
+                const element of valeur
+            ) {
+
+                if (
+                    neoSansAccents(
+                        String(element)
+                    ) === recherche
+                ) {
+
+                    return {
+                        trouve: true,
+                        chemin
+                    };
+
+                }
+
+            }
+
+            return null;
+
+        }
+
+
+        if (
+            typeof valeur === "object" &&
+            valeur !== null
+        ) {
+
+            for (
+                const cle of Object.keys(valeur)
+            ) {
+
+                const resultat =
+                    parcourir(
+                        valeur[cle],
+                        [
+                            ...chemin,
+                            cle
+                        ]
+                    );
+
+                if (resultat) {
+
+                    return resultat;
+
+                }
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+
+    return (
+        parcourir(
+            categorie
+        ) || {
+            trouve: false,
+            chemin: []
+        }
+    );
+
+}
+
+
+//==============================================================
+// 🔎 RECHERCHER UN MOT DANS TOUT NEO
+//==============================================================
+
+function neoRechercherMot(
+    mot = ""
+) {
+
+    if (
+        !mot ||
+        typeof mot !== "string"
+    ) {
+
+        return {
+
+            trouve: false,
+
+            mot,
+
+            categories: []
+
+        };
+
+    }
+
+
+    const recherche =
+        neoSansAccents(
+            mot
         );
 
-    const phrases =
-        neoDecouperPhrases(
-            normalise
-        );
 
-    const tokens =
-        neoTokeniser(
-            normalise
-        );
+    const categories = [];
+
+
+    for (
+        const nomCategorie
+        of Object.keys(NEO_DICTIONNAIRES)
+    ) {
+
+        const resultat =
+            neoChercherMotDansCategorie(
+                recherche,
+                NEO_DICTIONNAIRES[
+                    nomCategorie
+                ]
+            );
+
+
+        if (
+            resultat.trouve
+        ) {
+
+            categories.push({
+
+                categorie:
+                    nomCategorie,
+
+                chemin:
+                    resultat.chemin
+
+            });
+
+        }
+
+    }
 
 
     return {
 
-        original,
+        trouve:
+            categories.length > 0,
 
-        texte: normalise,
+        mot,
 
-        texteMinuscule:
-            neoMinuscule(
-                normalise
-            ),
+        motNormalise:
+            recherche,
 
-        texteSansAccents:
-            neoSansAccents(
-                normalise
-            ),
-
-        langue,
-
-        phrases,
-
-        tokens,
-
-        nombreMots:
-            tokens.length,
-
-        nombrePhrases:
-            phrases.length
+        categories
 
     };
+
+}
+
+
+//==============================================================
+// 🔎 RECHERCHER PLUSIEURS MOTS
+//==============================================================
+
+function neoRechercherTexte(
+    texte = ""
+) {
+
+    const tokens =
+        neoTokeniser(
+            texte
+        );
+
+
+    return tokens.map(
+        mot =>
+            neoRechercherMot(
+                mot
+            )
+    );
+
+}
+
+
+//==============================================================
+// 🔗 RECHERCHER LES SYNONYMES
+//==============================================================
+
+function neoTrouverSynonymes(
+    mot = "",
+    langue = "fr"
+) {
+
+    const dictionnaire =
+        NEO_SYNONYMES[
+            langue
+        ] || {};
+
+
+    const recherche =
+        neoSansAccents(
+            mot
+        );
+
+
+    for (
+        const motPrincipal
+        of Object.keys(dictionnaire)
+    ) {
+
+        const groupe =
+            dictionnaire[
+                motPrincipal
+            ];
+
+
+        const tousLesMots = [
+
+            motPrincipal,
+
+            ...groupe
+
+        ];
+
+
+        if (
+            tousLesMots.some(
+                element =>
+                    neoSansAccents(
+                        element
+                    ) === recherche
+            )
+        ) {
+
+            return {
+
+                trouve: true,
+
+                motPrincipal,
+
+                synonymes: [
+                    ...new Set(
+                        tousLesMots
+                    )
+                ]
+
+            };
+
+        }
+
+    }
+
+
+    return {
+
+        trouve: false,
+
+        motPrincipal: null,
+
+        synonymes: []
+
+    };
+
+}
+
+
+//==============================================================
+// 🔄 RECHERCHER LES ANTONYMES
+//==============================================================
+
+function neoTrouverAntonymes(
+    mot = "",
+    langue = "fr"
+) {
+
+    const dictionnaire =
+        NEO_ANTONYMES[
+            langue
+        ] || {};
+
+
+    const recherche =
+        neoSansAccents(
+            mot
+        );
+
+
+    for (
+        const motPrincipal
+        of Object.keys(dictionnaire)
+    ) {
+
+        if (
+            neoSansAccents(
+                motPrincipal
+            ) === recherche
+        ) {
+
+            return {
+
+                trouve: true,
+
+                motPrincipal,
+
+                antonymes:
+                    dictionnaire[
+                        motPrincipal
+                    ]
+
+            };
+
+        }
+
+    }
+
+
+    return {
+
+        trouve: false,
+
+        motPrincipal: null,
+
+        antonymes: []
+
+    };
+
+}
+
+
+//==============================================================
+// 🔍 TESTER SI UN MOT EXISTE
+//==============================================================
+
+function neoConnaitMot(
+    mot = ""
+) {
+
+    return neoRechercherMot(
+        mot
+    ).trouve;
 
 }
 
@@ -524,24 +2087,41 @@ module.exports = {
 
     NEOAI_CONFIG,
 
-    NEO_PRONOMS,
-
+    NEO_VERBES,
+    NEO_NOMS,
+    NEO_ADJECTIFS,
+    NEO_ADVERBES,
+    NEO_SYNONYMES,
+    NEO_ANTONYMES,
     NEO_CONNECTEURS,
+    NEO_PREPOSITIONS,
+    NEO_PRONOMS,
+    NEO_EXPRESSIONS,
+    NEO_UNITES,
+    NEO_TEMPS,
+    NEO_DIRECTIONS,
+    NEO_PARTIES_CORPS,
+    NEO_EMOTIONS,
+    NEO_INTENSITE,
+    NEO_VITESSE,
+    NEO_RELATIONS,
+    NEO_COMBAT, 
+
+    NEO_DICTIONNAIRES,
 
     neoNormaliserTexte,
-
     neoMinuscule,
-
     neoSansAccents,
-
     neoTokeniser,
-
     neoDecouperPhrases,
 
-    neoDetecterLangue,
+    neoChercherMotDansCategorie,
+    neoRechercherMot,
+    neoRechercherTexte,
 
-    neoContientMot,
+    neoTrouverSynonymes,
+    neoTrouverAntonymes,
 
-    neoAnalyserTexteBase
+    neoConnaitMot
 
 };
