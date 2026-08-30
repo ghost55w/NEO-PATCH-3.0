@@ -17,7 +17,7 @@
 
 const { ovlcmd } = require("../lib/ovlcmd");
 const path = require("path");
-
+console.log("🧠 NEO AI CHAT CHARGÉ !");
 
 //==============================================================
 // 🧠 IMPORT NEO AI
