@@ -2,9 +2,8 @@
 // 🧠 NEO AI CHAT — TESTEUR LINGUISTIQUE
 //==============================================================
 
-const { ovlcmd } = require("../lib/ovlcmd");
+const { ovlcmd } = require('../lib/ovlcmd');
 
-// 🧠 BASE NEO AI
 const NeoAI = require("../DataBase/NeoAI");
 
 
@@ -32,7 +31,9 @@ const sleep = ms =>
 
 function extraireTexteMessage(reply) {
 
-    if (!reply) return "";
+    if (!reply) {
+        return "";
+    }
 
     return (
         reply.message?.extendedTextMessage?.text ||
@@ -40,6 +41,7 @@ function extraireTexteMessage(reply) {
         reply.body ||
         ""
     ).trim();
+
 }
 
 
@@ -63,7 +65,7 @@ function analyserTexteNeoAI(texte = "") {
 
 
     //==========================================================
-    // 🔎 RECHERCHE DES MOTS
+    // 🔎 MOTS
     //==========================================================
 
     const recherches =
@@ -84,7 +86,9 @@ function analyserTexteNeoAI(texte = "") {
 
         } else {
 
-            inconnus.push(resultat.mot);
+            inconnus.push(
+                resultat.mot
+            );
 
         }
 
@@ -105,7 +109,7 @@ function analyserTexteNeoAI(texte = "") {
                 "fr"
             );
 
-        if (resultat?.trouve) {
+        if (resultat.trouve) {
 
             synonymes.push({
 
@@ -138,7 +142,7 @@ function analyserTexteNeoAI(texte = "") {
                 "fr"
             );
 
-        if (resultat?.trouve) {
+        if (resultat.trouve) {
 
             antonymes.push({
 
@@ -173,7 +177,7 @@ function analyserTexteNeoAI(texte = "") {
                 NeoAI.NEO_COMBAT
             );
 
-        if (resultat?.trouve) {
+        if (resultat.trouve) {
 
             contexteCombat = true;
 
@@ -197,38 +201,32 @@ function analyserTexteNeoAI(texte = "") {
 
     let vitesse = null;
 
-    if (NeoAI.NEO_VITESSE) {
+    for (
+        const niveau of Object.keys(
+            NeoAI.NEO_VITESSE
+        )
+    ) {
 
-        for (
-            const niveau
-            of Object.keys(NeoAI.NEO_VITESSE)
-        ) {
+        const mots =
+            NeoAI.NEO_VITESSE[niveau];
 
-            const mots =
-                NeoAI.NEO_VITESSE[niveau];
+        for (const element of mots) {
 
-            for (const element of mots) {
+            const recherche =
+                NeoAI.neoSansAccents(element);
 
-                const recherche =
-                    NeoAI.neoSansAccents(element);
+            if (
+                sansAccents.includes(recherche)
+            ) {
 
-                if (
-                    sansAccents.includes(
-                        recherche
-                    )
-                ) {
-
-                    vitesse = niveau;
-
-                    break;
-
-                }
+                vitesse = niveau;
+                break;
 
             }
 
-            if (vitesse) break;
-
         }
+
+        if (vitesse) break;
 
     }
 
@@ -239,21 +237,17 @@ function analyserTexteNeoAI(texte = "") {
 
     const directions = [];
 
-    if (NeoAI.NEO_DIRECTIONS) {
+    for (const mot of tokens) {
 
-        for (const mot of tokens) {
+        const resultat =
+            NeoAI.neoChercherMotDansCategorie(
+                mot,
+                NeoAI.NEO_DIRECTIONS
+            );
 
-            const resultat =
-                NeoAI.neoChercherMotDansCategorie(
-                    mot,
-                    NeoAI.NEO_DIRECTIONS
-                );
+        if (resultat.trouve) {
 
-            if (resultat?.trouve) {
-
-                directions.push(mot);
-
-            }
+            directions.push(mot);
 
         }
 
@@ -266,21 +260,17 @@ function analyserTexteNeoAI(texte = "") {
 
     const partiesCorps = [];
 
-    if (NeoAI.NEO_PARTIES_CORPS) {
+    for (const mot of tokens) {
 
-        for (const mot of tokens) {
+        const resultat =
+            NeoAI.neoChercherMotDansCategorie(
+                mot,
+                NeoAI.NEO_PARTIES_CORPS
+            );
 
-            const resultat =
-                NeoAI.neoChercherMotDansCategorie(
-                    mot,
-                    NeoAI.NEO_PARTIES_CORPS
-                );
+        if (resultat.trouve) {
 
-            if (resultat?.trouve) {
-
-                partiesCorps.push(mot);
-
-            }
+            partiesCorps.push(mot);
 
         }
 
@@ -300,35 +290,29 @@ function analyserTexteNeoAI(texte = "") {
 
     };
 
-    if (NeoAI.NEO_CONNECTEURS) {
+
+    for (
+        const type of Object.keys(
+            NeoAI.NEO_CONNECTEURS
+        )
+    ) {
 
         for (
-            const type
-            of Object.keys(NeoAI.NEO_CONNECTEURS)
+            const connecteur
+            of NeoAI.NEO_CONNECTEURS[type]
         ) {
 
-            if (!connecteurs[type]) {
-                connecteurs[type] = [];
-            }
-
-            for (
-                const connecteur
-                of NeoAI.NEO_CONNECTEURS[type]
+            if (
+                sansAccents.includes(
+                    NeoAI.neoSansAccents(
+                        connecteur
+                    )
+                )
             ) {
 
-                if (
-                    sansAccents.includes(
-                        NeoAI.neoSansAccents(
-                            connecteur
-                        )
-                    )
-                ) {
-
-                    connecteurs[type].push(
-                        connecteur
-                    );
-
-                }
+                connecteurs[type].push(
+                    connecteur
+                );
 
             }
 
@@ -344,12 +328,15 @@ function analyserTexteNeoAI(texte = "") {
     let resume = texte;
 
     if (phrases.length > 0) {
-        resume = phrases.join(" ");
+
+        resume =
+            phrases.join(" ");
+
     }
 
 
     //==========================================================
-    // 📦 RÉSULTAT
+    // 📦 RESULTAT
     //==========================================================
 
     return {
@@ -467,7 +454,9 @@ function creerResumeNarratif(resultat) {
     }
 
 
-    if (contexte.connecteurs.succession.length) {
+    if (
+        contexte.connecteurs.succession.length
+    ) {
 
         resume +=
             `🔗 *Succession :* ` +
@@ -489,227 +478,15 @@ function creerResumeNarratif(resultat) {
         resume +=
             `\n\n⚠️ *Mots inconnus :* ` +
             [
-                ...new Set(mots.inconnus)
+                ...new Set(
+                    mots.inconnus
+                )
             ].join(", ");
 
     }
 
 
     return resume;
-
-}
-
-
-//==============================================================
-// 🧠 TRAITER MESSAGE NEO AI
-//==============================================================
-//
-// Cette fonction est appelée directement par message_upsert.js
-//
-// Format attendu :
-// 🌀: ton texte
-//
-//==============================================================
-
-async function traiterMessageNeoAI(
-    ovl,
-    ms,
-    texte
-) {
-
-    if (
-        typeof texte !== "string" ||
-        !/^\s*🌀\s*:/i.test(texte)
-    ) {
-
-        return false;
-
-    }
-
-
-    try {
-
-        const ms_org =
-            ms.key.remoteJid;
-
-
-        const texteAnalyse =
-            texte
-                .replace(
-                    /^\s*🌀\s*:\s*/i,
-                    ""
-                )
-                .trim();
-
-
-        if (!texteAnalyse) {
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "⚠️ *NeoAI n'a reçu aucun texte à analyser.*"
-                },
-                {
-                    quoted: ms
-                }
-            );
-
-            return true;
-
-        }
-
-
-        //======================================================
-        // 🔍 ANALYSE
-        //======================================================
-
-        let analyseMsg =
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🔍🧠 Analyse du text."
-                },
-                {
-                    quoted: ms
-                }
-            );
-
-
-        await sleep(7000);
-
-
-        try {
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🔍🧠 Analyse du text.."
-                },
-                {
-                    edit:
-                        analyseMsg.key
-                }
-            );
-
-        } catch {}
-
-
-        await sleep(7000);
-
-
-        try {
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🔍🧠 Analyse du text...."
-                },
-                {
-                    edit:
-                        analyseMsg.key
-                }
-            );
-
-        } catch {}
-
-
-        await sleep(6000);
-
-
-        //======================================================
-        // ✳️ PRÉPARATION
-        //======================================================
-
-        try {
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🧠✳️ Preparation du résultat..."
-                },
-                {
-                    edit:
-                        analyseMsg.key
-                }
-            );
-
-        } catch {}
-
-
-        //======================================================
-        // 🧠 ANALYSE
-        //======================================================
-
-        const resultat =
-            analyserTexteNeoAI(
-                texteAnalyse
-            );
-
-
-        //======================================================
-        // 📜 RÉSUMÉ
-        //======================================================
-
-        const resume =
-            creerResumeNarratif(
-                resultat
-            );
-
-
-        await ovl.sendMessage(
-            ms_org,
-            {
-                text: resume
-            },
-            {
-                quoted: ms
-            }
-        );
-
-
-        //======================================================
-        // 📦 JSON
-        //======================================================
-
-        const json =
-            JSON.stringify(
-                resultat,
-                null,
-                2
-            );
-
-
-        await ovl.sendMessage(
-            ms_org,
-            {
-                text:
-                    "```json\n" +
-                    json +
-                    "\n```"
-            },
-            {
-                quoted: ms
-            }
-        );
-
-
-        return true;
-
-    } catch (err) {
-
-        console.error(
-            "❌ NEO AI TRAITEMENT ERROR:",
-            err
-        );
-
-        return true;
-
-    }
 
 }
 
@@ -729,86 +506,103 @@ ovlcmd({
     desc: "Tester la compréhension linguistique de NeoAI"
 
 }, async (
+
     ms_org,
     ovl,
     {
         auteur_Message,
         repondre
     }
+
 ) => {
 
     try {
 
+
         //======================================================
-        // 🔎 CHARGEMENT
+        // 🧠 CHARGEMENT
         //======================================================
+
+        let chargement =
+            "🧠🔎 chargement de NeoAI.";
+
 
         const messageChargement =
             await repondre(
-                "🧠🔎 chargement de NeoAI."
+                chargement
             );
 
 
         //======================================================
-        // ⏱️ ANIMATION
+        // ⏱️ CHARGEMENT 30 SECONDES
         //======================================================
 
-        await sleep(5000);
+        const duree =
+            30000;
 
-        try {
+        const debut =
+            Date.now();
 
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🧠🔎 chargement de NeoAI.."
-                },
-                {
-                    edit:
-                        messageChargement.key
+        let etape = 0;
+
+
+        while (
+            Date.now() - debut <
+            duree
+        ) {
+
+            await sleep(5000);
+
+            etape++;
+
+
+            if (etape === 1) {
+
+                chargement =
+                    "🧠🔎 chargement de NeoAI..";
+
+            }
+
+            else if (etape === 2) {
+
+                chargement =
+                    "🧠🔎 chargement de NeoAI....";
+
+            }
+
+            else {
+
+                chargement =
+                    "🧠🔎 chargement de NeoAI.";
+
+            }
+
+
+            try {
+
+                if (messageChargement?.key) {
+
+                    await ovl.sendMessage(
+
+                        ms_org,
+
+                        {
+                            text:
+                                chargement
+                        },
+
+                        {
+                            edit:
+                                messageChargement.key
+                        }
+
+                    );
+
                 }
-            );
 
-        } catch {}
+            } catch {}
 
-
-        await sleep(5000);
-
-        try {
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🧠🔎 chargement de NeoAI...."
-                },
-                {
-                    edit:
-                        messageChargement.key
-                }
-            );
-
-        } catch {}
-
-
-        await sleep(5000);
-
-
-        try {
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🧠🔎 chargement de NeoAI."
-                },
-                {
-                    edit:
-                        messageChargement.key
-                }
-            );
-
-        } catch {}
+        }
 
 
         //======================================================
@@ -825,25 +619,24 @@ ovlcmd({
         //======================================================
 
         const pseudo =
-            `@${String(
-                auteur_Message
-            ).split("@")[0]}`;
+            `@${String(auteur_Message)
+                .split("@")[0]}`;
 
 
         const caption =
 `😄 Salut ${pseudo}, je suis NeoAI 🧠👋🏻
 
-Tu peux envoyer le text à analyser....
+Tu peux envoyer le texte à analyser.
 
-🌀: ton text ici
-
-Tape *close* pour fermer la session.`;
+🌀: ton texte ici`;
 
 
         if (NEOAI_IMAGE_URL) {
 
             await ovl.sendMessage(
+
                 ms_org,
+
                 {
 
                     image: {
@@ -858,6 +651,7 @@ Tape *close* pour fermer la session.`;
                     ]
 
                 }
+
             );
 
         } else {
@@ -885,6 +679,15 @@ Tape *close* pour fermer la session.`;
             timeout
         ) {
 
+
+            const tempsRestant =
+                timeout -
+                (
+                    Date.now() -
+                    startTime
+                );
+
+
             const reply =
                 await ovl.recup_msg({
 
@@ -894,11 +697,7 @@ Tape *close* pour fermer la session.`;
                     ms_org,
 
                     temps:
-                        timeout -
-                        (
-                            Date.now() -
-                            startTime
-                        )
+                        tempsRestant
 
                 });
 
@@ -919,15 +718,21 @@ Tape *close* pour fermer la session.`;
                 );
 
 
-            if (!body) continue;
+            if (!body) {
+
+                continue;
+
+            }
 
 
             //==================================================
-            // ❌ CLOSE
+            // ❌ FERMER
             //==================================================
 
             if (
-                body.trim().toLowerCase() ===
+                body
+                    .trim()
+                    .toLowerCase() ===
                 "close"
             ) {
 
@@ -941,11 +746,13 @@ Tape *close* pour fermer la session.`;
 
 
             //==================================================
-            // 🌀 TEXTE NEO AI
+            // 🌀 DÉTECTION
             //==================================================
 
             if (
-                !/^\s*🌀\s*:/i.test(body)
+                !body
+                    .trim()
+                    .startsWith("🌀")
             ) {
 
                 continue;
@@ -960,7 +767,7 @@ Tape *close* pour fermer la session.`;
             const texte =
                 body
                     .replace(
-                        /^\s*🌀\s*:\s*/i,
+                        /^🌀\s*:?\s*/i,
                         ""
                     )
                     .trim();
@@ -984,13 +791,18 @@ Tape *close* pour fermer la session.`;
             try {
 
                 await ovl.sendMessage(
+
                     ms_org,
+
                     {
+
                         react: {
                             text: "🧠",
                             key: reply.key
                         }
+
                     }
+
                 );
 
             } catch {}
@@ -1002,7 +814,7 @@ Tape *close* pour fermer la session.`;
 
             let analyseMsg =
                 await repondre(
-                    "🔍🧠 Analyse du text."
+                    "🔍🧠 Analyse du texte."
                 );
 
 
@@ -1011,17 +823,29 @@ Tape *close* pour fermer la session.`;
 
             try {
 
-                await ovl.sendMessage(
-                    ms_org,
-                    {
-                        text:
-                            "🔍🧠 Analyse du text.."
-                    },
-                    {
-                        edit:
-                            analyseMsg.key
-                    }
-                );
+                if (analyseMsg?.key) {
+
+                    await ovl.sendMessage(
+
+                        ms_org,
+
+                        {
+
+                            text:
+                                "🔍🧠 Analyse du texte.."
+
+                        },
+
+                        {
+
+                            edit:
+                                analyseMsg.key
+
+                        }
+
+                    );
+
+                }
 
             } catch {}
 
@@ -1031,17 +855,29 @@ Tape *close* pour fermer la session.`;
 
             try {
 
-                await ovl.sendMessage(
-                    ms_org,
-                    {
-                        text:
-                            "🔍🧠 Analyse du text...."
-                    },
-                    {
-                        edit:
-                            analyseMsg.key
-                    }
-                );
+                if (analyseMsg?.key) {
+
+                    await ovl.sendMessage(
+
+                        ms_org,
+
+                        {
+
+                            text:
+                                "🔍🧠 Analyse du texte...."
+
+                        },
+
+                        {
+
+                            edit:
+                                analyseMsg.key
+
+                        }
+
+                    );
+
+                }
 
             } catch {}
 
@@ -1055,23 +891,47 @@ Tape *close* pour fermer la session.`;
 
             try {
 
-                await ovl.sendMessage(
-                    ms_org,
-                    {
-                        text:
-                            "🧠✳️ Preparation du résultat..."
-                    },
-                    {
-                        edit:
-                            analyseMsg.key
-                    }
+                if (analyseMsg?.key) {
+
+                    await ovl.sendMessage(
+
+                        ms_org,
+
+                        {
+
+                            text:
+                                "🧠✳️ Préparation du résultat..."
+
+                        },
+
+                        {
+
+                            edit:
+                                analyseMsg.key
+
+                        }
+
+                    );
+
+                } else {
+
+                    await repondre(
+                        "🧠✳️ Préparation du résultat..."
+                    );
+
+                }
+
+            } catch {
+
+                await repondre(
+                    "🧠✳️ Préparation du résultat..."
                 );
 
-            } catch {}
+            }
 
 
             //==================================================
-            // 🧠 ANALYSE NEO AI
+            // 🧠 ANALYSE NEO
             //==================================================
 
             const resultat =
@@ -1099,36 +959,38 @@ Tape *close* pour fermer la session.`;
             // 📦 JSON
             //==================================================
 
-            await repondre(
-                "```json\n" +
+            const json =
                 JSON.stringify(
                     resultat,
                     null,
                     2
-                ) +
+                );
+
+
+            await repondre(
+                "```json\n" +
+                json +
                 "\n```"
             );
 
         }
 
+
     } catch (err) {
 
-        console.error(
+        console.log(
             "NEO AI CHAT ERROR:",
             err
         );
 
+        try {
+
+            await repondre(
+                "❌ Une erreur est survenue dans NeoAI."
+            );
+
+        } catch {}
+
     }
 
 });
-
-
-//==============================================================
-// 📤 EXPORT
-//==============================================================
-
-module.exports = {
-    traiterMessageNeoAI,
-    analyserTexteNeoAI,
-    creerResumeNarratif
-};
