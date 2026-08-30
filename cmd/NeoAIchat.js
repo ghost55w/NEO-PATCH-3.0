@@ -57,6 +57,132 @@ const neoAITests =
 
 
 //==============================================================
+// ⏱️ CONFIGURATION TIMEOUT
+//==============================================================
+
+const NEOAI_TIMEOUT =
+    5 * 60 * 1000;
+
+
+//==============================================================
+// ⏱️ DÉMARRER / RÉINITIALISER LE TIMER
+//==============================================================
+
+function demarrerTimeoutNeoAI(
+    jid
+) {
+
+    const session =
+        neoAITests.get(
+            jid
+        );
+
+
+    if (!session) {
+
+        return;
+
+    }
+
+
+    //==========================================================
+    // 🛑 SUPPRIMER ANCIEN TIMER
+    //==========================================================
+
+    if (
+        session.timer
+    ) {
+
+        clearTimeout(
+            session.timer
+        );
+
+    }
+
+
+    //==========================================================
+    // ⏱️ NOUVEAU TIMER 5 MINUTES
+    //==========================================================
+
+    session.timer =
+        setTimeout(
+
+            async () => {
+
+                const sessionActuelle =
+                    neoAITests.get(
+                        jid
+                    );
+
+
+                if (!sessionActuelle) {
+
+                    return;
+
+                }
+
+
+                //================================================
+                // 🧹 SUPPRIMER SESSION
+                //================================================
+
+                neoAITests.delete(
+                    jid
+                );
+
+
+                console.log(
+                    "⏱️ NEO AI → SESSION EXPIRÉE :",
+                    jid
+                );
+
+
+                //================================================
+                // 📤 MESSAGE EXPIRATION
+                //================================================
+
+                try {
+
+                    await sessionActuelle.ovl.sendMessage(
+
+                        sessionActuelle.ms_org,
+
+                        {
+
+                            text:
+
+                                "⏱️ *NEO AI🌀 — SESSION EXPIRÉE*\n\n" +
+
+                                "Tu n'as envoyé aucun texte " +
+                                "pendant 5 minutes.\n\n" +
+
+                                "🧠 La session NeoAI a été arrêtée.\n\n" +
+
+                                "👉 Utilise *+testNeoAI🌀* pour recommencer."
+
+                        }
+
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "❌ NEO AI → ERREUR TIMEOUT :",
+                        error
+                    );
+
+                }
+
+            },
+
+            NEOAI_TIMEOUT
+
+        );
+
+}
+
+
+//==============================================================
 // 🔎 EXTRAIRE 🌀:
 //==============================================================
 
@@ -613,10 +739,26 @@ ovlcmd(
                     true,
 
                 timestamp:
-                    Date.now()
+                    Date.now(),
+
+                timer:
+                    null,
+
+                ovl,
+
+                ms_org
 
             }
 
+        );
+
+
+        //======================================================
+        // ⏱️ DÉMARRER TIMER 5 MINUTES
+        //======================================================
+
+        demarrerTimeoutNeoAI(
+            jid
         );
 
 
@@ -743,6 +885,17 @@ async function traiterMessageNeoAI(
 
     ) {
 
+        if (
+            session.timer
+        ) {
+
+            clearTimeout(
+                session.timer
+            );
+
+        }
+
+
         neoAITests.delete(
             jid
         );
@@ -767,6 +920,19 @@ async function traiterMessageNeoAI(
         return false;
 
     }
+
+
+    //==========================================================
+    // 🔄 RÉINITIALISER LE TIMER
+    //==========================================================
+
+    session.timestamp =
+        Date.now();
+
+
+    demarrerTimeoutNeoAI(
+        jid
+    );
 
 
     //==========================================================
@@ -935,6 +1101,17 @@ async function traiterMessageNeoAI(
         );
 
 
+        if (
+            session.timer
+        ) {
+
+            clearTimeout(
+                session.timer
+            );
+
+        }
+
+
         neoAITests.delete(
             jid
         );
@@ -1050,12 +1227,26 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 🧹 FIN SESSION
+    // ⏱️ RÉINITIALISER LE TIMER APRÈS ANALYSE
     //==========================================================
 
-    neoAITests.delete(
-        jid
-    );
+    const sessionFinale =
+        neoAITests.get(
+            jid
+        );
+
+
+    if (sessionFinale) {
+
+        sessionFinale.timestamp =
+            Date.now();
+
+
+        demarrerTimeoutNeoAI(
+            jid
+        );
+
+    }
 
 
     console.log(
@@ -1066,6 +1257,7 @@ async function traiterMessageNeoAI(
     return true;
 
 }
+
 
 //==============================================================
 // 🛑 COMMANDE +stopNeo🌀
@@ -1227,10 +1419,10 @@ ovlcmd(
 );
 
 
-
 //==============================================================
 // 📤 EXPORTS
 //==============================================================
+
 module.exports = {
 
     traiterMessageNeoAI,
