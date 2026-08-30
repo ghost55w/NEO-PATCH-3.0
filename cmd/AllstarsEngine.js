@@ -265,6 +265,30 @@ async function appelerGemini(prompt) {
 
 }                                           
 
+function extraireNomPersonnage(personnage) {
+
+    if (!personnage) {
+        return null;
+    }
+
+    // Déjà une chaîne
+    if (typeof personnage === "string") {
+        return personnage;
+    }
+
+    // Objet carte
+    if (typeof personnage === "object") {
+
+        return (
+            personnage.name ||
+            personnage.nom ||
+            personnage.personnage ||
+            null
+        );
+    }
+
+    return null;
+}
 
 //================================================
 // 🤖 ANALYSE PAVÉ AVEC GEMINI
@@ -492,12 +516,16 @@ if (!estPave) {
                         null,
 
                     personnage:
-                        etat?.personnage ||
-                        j?.personnage ||
-                        j?.nomPersonnage ||
-                        j?.carte?.name ||
-                        j?.card?.name ||
-                        null,
+    extraireNomPersonnage(
+        etat?.personnage
+    ) ||
+    extraireNomPersonnage(
+        j?.personnage
+    ) ||
+    j?.nomPersonnage ||
+    j?.carte?.name ||
+    j?.card?.name ||
+    null,
 
                     grade,
 
@@ -774,6 +802,23 @@ Réponds UNIQUEMENT avec du JSON valide.
 
         const actionsNEO = [];
 
+        console.log(
+    "👥 JOUEURS ENVOYÉS À NEO :",
+    joueursGemini.map(j => ({
+        pseudo: j.pseudo,
+        personnage: j.personnage,
+        jid: j.jid
+    }))
+);
+
+console.log(
+    "🤖 ACTEURS RETOURNÉS PAR GEMINI :",
+    actionsGemini.map(a => ({
+        ordre: a.ordre,
+        acteur: a.acteur,
+        cible: a.cible
+    }))
+);
 
         for (
             const actionGemini
@@ -845,15 +890,30 @@ Réponds UNIQUEMENT avec du JSON valide.
             //================================================
 
             const joueurActeur =
-                joueursGemini.find(
-                    j =>
-                        normalizeName(
-                            j.personnage
-                        ) ===
-                        normalizeName(
-                            action.acteur
-                        )
-                );
+    joueursGemini.find(j => {
+
+        const nomPersonnage =
+            extraireNomPersonnage(
+                j.personnage
+            );
+
+        if (
+            !nomPersonnage ||
+            !action.acteur
+        ) {
+            return false;
+        }
+
+        return (
+            normalizeName(
+                nomPersonnage
+            ) ===
+            normalizeName(
+                action.acteur
+            )
+        );
+
+    });
 
 
             if (!joueurActeur) {
