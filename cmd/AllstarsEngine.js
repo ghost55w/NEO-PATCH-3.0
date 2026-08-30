@@ -14,40 +14,18 @@ const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
 
 
-   //================================================
+//================================================
 // 🤖 GEMINI — ARBITRE COMBAT
+// Gemini = COMPRÉHENSION LINGUISTIQUE
+// NEO = VALIDATION + VERDICT
 //================================================
 
-const GEMINI_COMBAT_MODELS = [
-
-    "gemini-3.7-flash",
-    "gemini-3.6-flash",
-    "gemini-3.5-flash",
-    "gemini-3.5-flash-lite",
-
-    // Secours supplémentaires
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite"
-
-];
+const GEMINI_COMBAT_MODEL =
+    "gemini-3.7-flash";
 
 
 //================================================
-// ⏱️ ATTENTE
-//================================================
-
-function attendreGemini(ms) {
-
-    return new Promise(
-        resolve =>
-            setTimeout(resolve, ms)
-    );
-
-}
-
-
-//================================================
-// 🤖 APPEL GEMINI
+// ⏱️ APPEL GEMINI
 //================================================
 
 async function appelerGemini(prompt) {
@@ -56,214 +34,395 @@ async function appelerGemini(prompt) {
         process.env.GEMINI_API_KEY;
 
 
+    //================================================
+    // 🔑 VÉRIFICATION CLÉ
+    //================================================
+
     if (!apiKey) {
 
         throw new Error(
-            "❌ GEMINI_API_KEY non configurée"
+            "GEMINI_API_KEY non configurée"
         );
 
     }
 
 
     //================================================
-    // 🔁 ESSAI DE TOUS LES MODÈLES
+    // 📡 URL GEMINI
     //================================================
 
-    for (
-        let i = 0;
-        i < GEMINI_COMBAT_MODELS.length;
-        i++
-    ) {
-
-        const modele =
-            GEMINI_COMBAT_MODELS[i];
+    const url =
+        "https://generativelanguage.googleapis.com/v1beta/models/" +
+        GEMINI_COMBAT_MODEL +
+        ":generateContent?key=" +
+        apiKey;
 
 
-        const url =
-            "https://generativelanguage.googleapis.com/v1beta/models/" +
-            modele +
-            ":generateContent?key=" +
-            apiKey;
+    console.log(
+        `🤖 GEMINI → ${GEMINI_COMBAT_MODEL}`
+    );
+
+    console.log(
+        "📤 GEMINI → envoi du pavé pour compréhension..."
+    );
+
+
+    const debut =
+        Date.now();
+
+
+    try {
+
+        //================================================
+        // 🚀 REQUÊTE
+        //================================================
+
+        const response =
+            await axios.post(
+
+                url,
+
+                {
+
+                    contents: [
+
+                        {
+
+                            parts: [
+
+                                {
+                                    text: prompt
+                                }
+
+                            ]
+
+                        }
+
+                    ],
+
+
+                    generationConfig: {
+
+                        // Gemini 3.x :
+                        // pas de temperature
+                        // pas de top_p
+                        // pas de top_k
+
+                        thinkingConfig: {
+
+                            thinkingLevel:
+                                "low"
+
+                        },
+
+
+                        responseMimeType:
+                            "application/json"
+
+                    }
+
+                },
+
+
+                {
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+
+                    //================================================
+                    // ⏱️ TIMEOUT
+                    //================================================
+                    //
+                    // 10 secondes était trop agressif.
+                    //
+                    // Gemini peut avoir besoin de temps
+                    // pour traiter le raisonnement.
+                    //
+                    timeout:
+                        30000
+
+                }
+
+            );
+
+
+        //================================================
+        // ⏱️ TEMPS DE RÉPONSE
+        //================================================
+
+        const duree =
+            Date.now() -
+            debut;
 
 
         console.log(
-            `🤖 GEMINI ARBITRE → ${modele}`
+            `⏱️ GEMINI → réponse reçue en ${duree} ms`
         );
+
+
+        //================================================
+        // 📦 EXTRACTION
+        //================================================
+
+        const texte =
+            response
+                ?.data
+                ?.candidates?.[0]
+                ?.content
+                ?.parts?.[0]
+                ?.text;
+
+
+        if (!texte) {
+
+            throw new Error(
+                "Réponse Gemini vide"
+            );
+
+        }
+
+
+        //================================================
+        // 🧹 NETTOYAGE
+        //================================================
+
+        let jsonTexte =
+            String(texte)
+                .trim();
+
+
+        // Retire éventuellement :
+        //
+        // ```json
+        // {...}
+        // ```
+
+        jsonTexte =
+            jsonTexte
+                .replace(
+                    /^```json\s*/i,
+                    ""
+                )
+                .replace(
+                    /^```\s*/i,
+                    ""
+                )
+                .replace(
+                    /\s*```$/i,
+                    ""
+                )
+                .trim();
+
+
+        //================================================
+        // 🔎 PARSING JSON
+        //================================================
+
+        let resultat;
 
 
         try {
 
-            const response =
-                await axios.post(
-
-                    url,
-
-                    {
-                        contents: [
-                            {
-                                parts: [
-                                    {
-                                        text: prompt
-                                    }
-                                ]
-                            }
-                        ],
-
-                        generationConfig: {
-
-                            temperature: 0,
-
-                            responseMimeType:
-                                "application/json"
-
-                        }
-                    },
-
-                    {
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        // IMPORTANT :
-                        // Ne pas bloquer 30 secondes
-                        timeout: 10000
-                    }
-
-                );
-
-
-            //================================================
-            // 📦 RÉCUPÉRATION
-            //================================================
-
-            const texte =
-                response.data
-                    ?.candidates?.[0]
-                    ?.content?.parts?.[0]
-                    ?.text;
-
-
-            if (!texte) {
-
-                throw new Error(
-                    "Réponse Gemini vide"
-                );
-
-            }
-
-
-            //================================================
-            // 🧹 NETTOYAGE
-            //================================================
-
-            let jsonTexte =
-                texte.trim();
-
-
-            jsonTexte =
-                jsonTexte
-                    .replace(
-                        /^```json\s*/i,
-                        ""
-                    )
-                    .replace(
-                        /^```\s*/i,
-                        ""
-                    )
-                    .replace(
-                        /\s*```$/i,
-                        ""
-                    )
-                    .trim();
-
-
-            //================================================
-            // 🔎 JSON
-            //================================================
-
-            const resultat =
+            resultat =
                 JSON.parse(
                     jsonTexte
                 );
 
-
-            //================================================
-            // ✅ GEMINI DISPONIBLE
-            //================================================
-
-            console.log(
-                `✅ GEMINI ARBITRE OK → ${modele}`
-            );
-
-
-            return resultat;
-
-
-        } catch (error) {
-
-            const status =
-                error.response?.status;
-
+        } catch (jsonError) {
 
             console.error(
-                `❌ GEMINI ${modele} ÉCHEC`,
-                {
-                    status,
-                    message:
-                        error.message
-                }
+                "❌ GEMINI → JSON INVALIDE"
             );
 
+            console.error(
+                "📦 Réponse brute :",
+                jsonTexte
+            );
 
-            //================================================
-            // 🚨 ERREUR DE CLÉ / REQUÊTE
-            //================================================
-
-            if (
-                status === 400 ||
-                status === 401 ||
-                status === 403
-            ) {
-
-                throw error;
-
-            }
-
-
-            //================================================
-            // 🔄 MODÈLE SUIVANT
-            //================================================
-
-            const suivant =
-                GEMINI_COMBAT_MODELS[i + 1];
-
-
-            if (suivant) {
-
-                console.log(
-                    `🔄 GEMINI → passage au secours : ${suivant}`
-                );
-
-
-                await attendreGemini(500);
-
-            }
+            throw new Error(
+                "Gemini a répondu avec un JSON invalide."
+            );
 
         }
 
+
+        //================================================
+        // 🔍 VÉRIFICATION MINIMALE
+        //================================================
+
+        if (
+            !resultat ||
+            typeof resultat !== "object"
+        ) {
+
+            throw new Error(
+                "Résultat Gemini invalide."
+            );
+
+        }
+
+
+        if (
+            !Array.isArray(
+                resultat.actions
+            )
+        ) {
+
+            throw new Error(
+                "Gemini n'a pas retourné le tableau actions."
+            );
+
+        }
+
+
+        //================================================
+        // ✅ GEMINI OK
+        //================================================
+
+        console.log(
+            "✅ GEMINI → COMPRÉHENSION REÇUE"
+        );
+
+        console.log(
+            `🌀 GEMINI → ${resultat.actions.length} action(s)`
+        );
+
+
+        console.log(
+            "🧠 GEMINI → acteur :",
+            resultat.acteurPrincipal
+        );
+
+
+        console.log(
+            "🎯 GEMINI → cible :",
+            resultat.ciblePrincipale
+        );
+
+
+        console.log(
+            "📝 GEMINI → résumé :",
+            resultat.resume
+        );
+
+
+        return resultat;
+
+
+    } catch (error) {
+
+        //================================================
+        // 📊 INFORMATIONS ERREUR
+        //================================================
+
+        const status =
+            error?.response?.status ||
+            null;
+
+
+        const data =
+            error?.response?.data ||
+            null;
+
+
+        const message =
+            error?.message ||
+            "Erreur inconnue";
+
+
+        console.error(
+            "❌ GEMINI → ÉCHEC"
+        );
+
+
+        console.error(
+            "🤖 Modèle :",
+            GEMINI_COMBAT_MODEL
+        );
+
+
+        console.error(
+            "📡 Status :",
+            status
+        );
+
+
+        console.error(
+            "💬 Message :",
+            message
+        );
+
+
+        if (data) {
+
+            console.error(
+                "📦 Réponse API :",
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            );
+
+        }
+
+
+        //================================================
+        // 🚨 ERREURS DÉFINITIVES
+        //================================================
+
+        if (
+            status === 400 ||
+            status === 401 ||
+            status === 403
+        ) {
+
+            throw error;
+
+        }
+
+
+        //================================================
+        // ⏱️ TIMEOUT
+        //================================================
+
+        if (
+            error?.code ===
+            "ECONNABORTED" ||
+            error?.code ===
+            "ETIMEDOUT" ||
+            String(message)
+                .toLowerCase()
+                .includes("timeout")
+        ) {
+
+            console.error(
+                "⏱️ GEMINI → TIMEOUT"
+            );
+
+
+            throw new Error(
+                "Gemini a dépassé le délai de réponse."
+            );
+
+        }
+
+
+        //================================================
+        // ❌ AUTRE ERREUR
+        //================================================
+
+        throw error;
+
     }
 
+}
 
-    //================================================
-    // ❌ TOUS LES MODÈLES ÉCHOUÉS
-    //================================================
-
-    throw new Error(
-        "❌ TOUS LES MODÈLES GEMINI SONT INDISPONIBLES"
-    );
-
-}                                           
 
 function extraireNomPersonnage(personnage) {
 
