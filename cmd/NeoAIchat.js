@@ -150,16 +150,11 @@ function analyserNeoAI(texte = "") {
 
 ovlcmd(
     {
-
         nom_cmd: 'testNeoAI🌀',
-
         classe: 'NeoAI🧠',
-
         react: '🧠',
-
         desc:
             "Teste la compréhension linguistique de NeoAI"
-
     },
 
 
