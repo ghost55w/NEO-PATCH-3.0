@@ -245,6 +245,8 @@ await ovl.sendMessage(
     }
 
 );
+    } 
+);
         
 //==============================================================
 // 🌀 TRAITEMENT DES TEXTES NEO AI
