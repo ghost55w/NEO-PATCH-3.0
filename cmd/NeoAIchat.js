@@ -45,7 +45,7 @@ const {
 
     NEO_DICTIONNAIRES
 
-} = require("./NeoAI");
+} = require("../DataBase/NeoAI");
 
 
 //==============================================================
