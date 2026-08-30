@@ -3,9 +3,7 @@
 //==============================================================
 
 const { ovlcmd } = require('../lib/ovlcmd');
-
-const NeoAI = require("../DataBase/NeoAI");
-
+const { NeoAI } = require("../DataBase/NeoAI");
 
 //==============================================================
 // 🖼️ IMAGE NEO AI
