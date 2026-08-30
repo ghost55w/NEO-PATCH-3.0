@@ -20,7 +20,7 @@
 // 30s → Résultat
 //==============================================================
 
-
+const ovlcmd = require("../lib/ovlcmd");
 const {
     neoAnalyserTexteBase
 } = require("./NeoAI");
