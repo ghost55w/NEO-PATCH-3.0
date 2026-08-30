@@ -1,6 +1,25 @@
 //==============================================================
 // 🧠 NEO AI CHAT — TESTEUR LINGUISTIQUE
 //==============================================================
+//
+// NeoAIchat.js
+//
+// Rôle :
+// - Lance une session de test avec +testNeoAI🌀
+// - Attend un texte commençant par 🌀:
+// - Envoie 3 étapes de progression
+// - Analyse le texte avec NeoAI.js
+// - Affiche d'abord le résumé
+// - Puis le JSON de compréhension
+//
+// Durée simulée de l'analyse : 30 secondes
+//
+// 0s  → 🧠 Analyse du texte...
+// 10s → 🔎 Réfléchis...
+// 20s → ❇️ Envoi de la réponse...
+// 30s → Résultat
+//==============================================================
+
 
 const {
     neoAnalyserTexteBase
@@ -23,18 +42,27 @@ function extraireTexteNeoAI(texte = "") {
     if (
         typeof texte !== "string"
     ) {
+
         return null;
+
     }
 
-    const match = texte.match(
-        /🌀\s*:\s*([\s\S]+)/i
-    );
+
+    const match =
+        texte.match(
+            /^\s*🌀\s*:\s*([\s\S]+)/i
+        );
+
 
     if (!match) {
+
         return null;
+
     }
 
+
     return match[1].trim();
+
 }
 
 
@@ -49,9 +77,12 @@ function construireResumeNeoAI(analyse) {
         !analyse.texte
     ) {
 
-        return "NeoAI n'a reçu aucun texte à analyser.";
+        return (
+            "NeoAI n'a reçu aucun texte à analyser."
+        );
 
     }
+
 
     return (
         "NeoAI comprend que : " +
@@ -63,6 +94,14 @@ function construireResumeNeoAI(analyse) {
 
 //==============================================================
 // 🧠 ANALYSE NEO AI
+//==============================================================
+//
+// Pour le moment NeoAI utilise uniquement
+// le moteur linguistique de base.
+//
+// Cette fonction sera progressivement enrichie
+// avec les dictionnaires, synonymes, verbes,
+// adjectifs, connecteurs, contexte, etc.
 //==============================================================
 
 function analyserNeoAI(texte = "") {
@@ -111,11 +150,18 @@ function analyserNeoAI(texte = "") {
 
 ovlcmd(
     {
+
         nom_cmd: 'testNeoAI🌀',
+
         classe: 'NeoAI🧠',
+
         react: '🧠',
-        desc: "Teste la compréhension linguistique de NeoAI"
+
+        desc:
+            "Teste la compréhension linguistique de NeoAI"
+
     },
+
 
     async (
         ms_org,
@@ -128,7 +174,7 @@ ovlcmd(
 
 
         //======================================================
-        // 👤 IDENTIFICATION
+        // 👤 IDENTIFICATION DU JOUEUR
         //======================================================
 
         const jid =
@@ -138,7 +184,7 @@ ovlcmd(
 
 
         //======================================================
-        // 🧹 ANCIENNE SESSION
+        // 🧹 SUPPRIMER UNE ANCIENNE SESSION
         //======================================================
 
         neoAITests.delete(
@@ -147,72 +193,98 @@ ovlcmd(
 
 
         //======================================================
-        // 🧠 CRÉER SESSION
+        // 🧠 CRÉER UNE NOUVELLE SESSION
         //======================================================
 
         neoAITests.set(
             jid,
             {
+
                 actif: true,
-                timestamp: Date.now()
+
+                timestamp:
+                    Date.now()
+
             }
         );
 
+//======================================================
+// 👋 ACCUEIL NEO AI — IMAGE + CAPTION
+//======================================================
 
-        //======================================================
-        // 👋 ACCUEIL
-        //======================================================
+await ovl.sendMessage(
 
-        await ovl.sendMessage(
-            ms.chat,
-            {
-                text:
-                    "🧠 *NEO AI🌀* 👋🏻\n\n" +
+    ms_org,
 
-                    "🙂 Bonjour ! Je suis *NeoAI*, " +
-                    "le moteur linguistique de NEO.\n\n" +
+    {
 
-                    "📖 Je vais analyser ton texte " +
-                    "et essayer d'en comprendre le contexte.\n\n" +
+        image: {
+            url: "URL_DE_TON_IMAGE"
+        },
 
-                    "✍️ *Envoie maintenant le texte à analyser :*\n\n" +
+        caption:
 
-                    "Exemple :\n" +
+            "🧠 *NEO AI🌀* 👋🏻\n\n" +
 
-                    "🌀: Les oiseaux volent dans le ciel " +
-                    "en plein midi vers le pays des fleurs."
-            },
+            "🙂 Bonjour ! Je suis *NeoAI*, " +
+            "le moteur linguistique de NEO.\n\n" +
 
-            {
-                quoted: ms
-            }
-        );
+            "📖 Je vais analyser ton texte " +
+            "et essayer d'en comprendre " +
+            "le langage, les actions et le contexte.\n\n" +
+
+            "✍️ *Envoie maintenant le texte à analyser :*\n\n" +
+
+            "Exemple :\n\n" +
+
+            "🌀: Les oiseaux volent dans le ciel " +
+            "en plein midi vers le pays des fleurs."
+
+    },
+
+    {
+
+        quoted:
+            ms
 
     }
+
 );
-
-
+        
 //==============================================================
 // 🌀 TRAITEMENT DES TEXTES NEO AI
 //==============================================================
 
 async function traiterMessageNeoAI(
+
     ovl,
+
     ms,
+
     texte = ""
+
 ) {
 
+
+    //==========================================================
+    // 👤 IDENTIFICATION DU JOUEUR
+    //==========================================================
+
     const jid =
+
         ms?.sender ||
+
         ms?.key?.participant ||
+
         ms?.key?.remoteJid;
 
 
     //==========================================================
-    // 🔎 SESSION ACTIVE ?
+    // 🔎 VÉRIFIER SI UNE SESSION EST ACTIVE
     //==========================================================
 
     const session =
+
         neoAITests.get(
             jid
         );
@@ -226,7 +298,7 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // ⏱️ EXPIRATION SESSION
+    // ⏱️ EXPIRATION DE LA SESSION
     //==========================================================
 
     const expiration =
@@ -234,9 +306,11 @@ async function traiterMessageNeoAI(
 
 
     if (
+
         Date.now() -
         session.timestamp >
         expiration
+
     ) {
 
         neoAITests.delete(
@@ -249,14 +323,19 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 🔎 EXTRAIRE 🌀:
-//==========================================================
+    // 🔎 VÉRIFIER LE PRÉFIXE 🌀:
+    //==========================================================
 
     const texteAnalyse =
+
         extraireTexteNeoAI(
             texte
         );
 
+
+    //==========================================================
+    // 🚫 PAS UN TEXTE NEO AI
+    //==========================================================
 
     if (!texteAnalyse) {
 
@@ -264,6 +343,10 @@ async function traiterMessageNeoAI(
 
     }
 
+
+    //==========================================================
+    // 📥 TEXTE REÇU
+    //==========================================================
 
     console.log(
         "🧠 NEO AI → TEXTE REÇU :"
@@ -275,7 +358,127 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 🧠 ANALYSE
+    // 🧠 ÉTAPE 1
+    //==========================================================
+
+    await ovl.sendMessage(
+
+        ms.key.remoteJid,
+
+        {
+
+            text:
+                "🧠 *Analyse du texte...*"
+
+        },
+
+        {
+
+            quoted:
+                ms
+
+        }
+
+    );
+
+
+    //==========================================================
+    // ⏱️ ATTENTE 10 SECONDES
+    //==========================================================
+
+    await new Promise(
+
+        resolve =>
+            setTimeout(
+                resolve,
+                10000
+            )
+
+    );
+
+
+    //==========================================================
+    // 🔎 ÉTAPE 2
+    //==========================================================
+
+    await ovl.sendMessage(
+
+        ms.key.remoteJid,
+
+        {
+
+            text:
+                "🔎 *Réfléchis...*"
+
+        },
+
+        {
+
+            quoted:
+                ms
+
+        }
+
+    );
+
+
+    //==========================================================
+    // ⏱️ ATTENTE 10 SECONDES
+    //==========================================================
+
+    await new Promise(
+
+        resolve =>
+            setTimeout(
+                resolve,
+                10000
+            )
+
+    );
+
+
+    //==========================================================
+    // ❇️ ÉTAPE 3
+    //==========================================================
+
+    await ovl.sendMessage(
+
+        ms.key.remoteJid,
+
+        {
+
+            text:
+                "❇️ *Envoi de la réponse...*"
+
+        },
+
+        {
+
+            quoted:
+                ms
+
+        }
+
+    );
+
+
+    //==========================================================
+    // ⏱️ ATTENTE 10 SECONDES
+    //==========================================================
+
+    await new Promise(
+
+        resolve =>
+            setTimeout(
+                resolve,
+                10000
+            )
+
+    );
+
+
+    //==========================================================
+    // 🧠 ANALYSE NEO AI
     //==========================================================
 
     let resultat;
@@ -284,9 +487,11 @@ async function traiterMessageNeoAI(
     try {
 
         resultat =
+
             analyserNeoAI(
                 texteAnalyse
             );
+
 
     } catch (error) {
 
@@ -295,20 +500,32 @@ async function traiterMessageNeoAI(
             error
         );
 
+
         await ovl.sendMessage(
-            ms.chat,
+
+            ms.key.remoteJid,
+
             {
+
                 text:
                     "❌ NeoAI a rencontré une erreur pendant l'analyse."
+
             },
+
             {
-                quoted: ms
+
+                quoted:
+                    ms
+
             }
+
         );
+
 
         neoAITests.delete(
             jid
         );
+
 
         return true;
 
@@ -320,30 +537,36 @@ async function traiterMessageNeoAI(
     //==========================================================
 
     const resume =
+
         resultat.resume;
 
 
     //==========================================================
-    // 📦 JSON
+    // 📦 CONVERSION JSON
     //==========================================================
 
     const json =
+
         JSON.stringify(
+
             resultat,
+
             null,
+
             2
+
         );
 
 
     //==========================================================
-    // 📤 RÉPONSE
+    // 📤 RÉPONSE FINALE
     //==========================================================
 
     const reponse =
 
-        "🧠 *NEO AI🌀 — ANALYSE*\n\n" +
+        "🧠 *NEO AI🌀 — ANALYSE TERMINÉE*\n\n" +
 
-        "📝 *Résumé :*\n" +
+        "📝 *Résumé :*\n\n" +
 
         resume +
 
@@ -358,25 +581,43 @@ async function traiterMessageNeoAI(
         "\n```";
 
 
+    //==========================================================
+    // 📤 ENVOYER LE RÉSULTAT
+    //==========================================================
+
     await ovl.sendMessage(
-        ms.chat,
+
+        ms.key.remoteJid,
+
         {
-            text: reponse
+
+            text:
+                reponse
+
         },
+
         {
-            quoted: ms
+
+            quoted:
+                ms
+
         }
+
     );
 
 
     //==========================================================
-    // 🧹 FIN SESSION
+    // 🧹 FIN DE SESSION
     //==========================================================
 
     neoAITests.delete(
         jid
     );
 
+
+    //==========================================================
+    // 📊 LOG
+    //==========================================================
 
     console.log(
         "✅ NEO AI → ANALYSE TERMINÉE"
@@ -389,7 +630,7 @@ async function traiterMessageNeoAI(
 
 
 //==============================================================
-// 📤 EXPORT
+// 📤 EXPORTS
 //==============================================================
 
 module.exports = {
