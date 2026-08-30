@@ -13,463 +13,89 @@ const { cards } = require("../DataBase/cards");
 const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
 
-
 //================================================
-// 🤖 GEMINI — ARBITRE COMBAT
-// Gemini = COMPRÉHENSION LINGUISTIQUE
-// NEO = VALIDATION + VERDICT
-//================================================
-
-const GEMINI_COMBAT_MODEL =
-    "gemini-3.7-flash";
-
-
-//================================================
-// ⏱️ APPEL GEMINI
+// 🤖 APPEL GEMINI
 //================================================
 
 async function appelerGemini(prompt) {
 
-    const apiKey =
-        process.env.GEMINI_API_KEY;
-
-
-    //================================================
-    // 🔑 VÉRIFICATION CLÉ
-    //================================================
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-
         throw new Error(
-            "GEMINI_API_KEY non configurée"
+            "❌ GEMINI_API_KEY n'est pas configurée sur Render"
         );
-
     }
 
-
-    //================================================
-    // 📡 URL GEMINI
-    //================================================
-
     const url =
-        "https://generativelanguage.googleapis.com/v1beta/models/" +
-        GEMINI_COMBAT_MODEL +
-        ":generateContent?key=" +
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
         apiKey;
-
-
-    console.log(
-        `🤖 GEMINI → ${GEMINI_COMBAT_MODEL}`
-    );
-
-    console.log(
-        "📤 GEMINI → envoi du pavé pour compréhension..."
-    );
-
-
-    const debut =
-        Date.now();
-
 
     try {
 
-        //================================================
-        // 🚀 REQUÊTE
-        //================================================
-
-        const response =
-            await axios.post(
-
-                url,
-
-                {
-
-                    contents: [
-
-                        {
-
-                            parts: [
-
-                                {
-                                    text: prompt
-                                }
-
-                            ]
-
-                        }
-
-                    ],
-
-
-                    generationConfig: {
-
-                        // Gemini 3.x :
-                        // pas de temperature
-                        // pas de top_p
-                        // pas de top_k
-
-                        thinkingConfig: {
-
-                            thinkingLevel:
-                                "low"
-
-                        },
-
-
-                        responseMimeType:
-                            "application/json"
-
+        const response = await axios.post(
+            url,
+            {
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            }
+                        ]
                     }
-
-                },
-
-
-                {
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-
-                    //================================================
-                    // ⏱️ TIMEOUT
-                    //================================================
-                    //
-                    // 10 secondes était trop agressif.
-                    //
-                    // Gemini peut avoir besoin de temps
-                    // pour traiter le raisonnement.
-                    //
-                    timeout:
-                        30000
-
+                ],
+                generationConfig: {
+                    temperature: 0,
+                    responseMimeType: "application/json"
                 }
-
-            );
-
-
-        //================================================
-        // ⏱️ TEMPS DE RÉPONSE
-        //================================================
-
-        const duree =
-            Date.now() -
-            debut;
-
-
-        console.log(
-            `⏱️ GEMINI → réponse reçue en ${duree} ms`
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
         );
-
-
-        //================================================
-        // 📦 EXTRACTION
-        //================================================
 
         const texte =
-            response
-                ?.data
+            response.data
                 ?.candidates?.[0]
-                ?.content
-                ?.parts?.[0]
+                ?.content?.parts?.[0]
                 ?.text;
 
-
         if (!texte) {
-
             throw new Error(
-                "Réponse Gemini vide"
+                "❌ Gemini n'a renvoyé aucune réponse"
             );
-
         }
 
-
-        //================================================
-        // 🧹 NETTOYAGE
-        //================================================
-
-        let jsonTexte =
-            String(texte)
-                .trim();
-
-
-        // Retire éventuellement :
-        //
-        // ```json
-        // {...}
-        // ```
-
-        jsonTexte =
-            jsonTexte
-                .replace(
-                    /^```json\s*/i,
-                    ""
-                )
-                .replace(
-                    /^```\s*/i,
-                    ""
-                )
-                .replace(
-                    /\s*```$/i,
-                    ""
-                )
-                .trim();
-
-
-        //================================================
-        // 🔎 PARSING JSON
-        //================================================
-
-        let resultat;
-
-
-        try {
-
-            resultat =
-                JSON.parse(
-                    jsonTexte
-                );
-
-        } catch (jsonError) {
-
-            console.error(
-                "❌ GEMINI → JSON INVALIDE"
-            );
-
-            console.error(
-                "📦 Réponse brute :",
-                jsonTexte
-            );
-
-            throw new Error(
-                "Gemini a répondu avec un JSON invalide."
-            );
-
-        }
-
-
-        //================================================
-        // 🔍 VÉRIFICATION MINIMALE
-        //================================================
-
-        if (
-            !resultat ||
-            typeof resultat !== "object"
-        ) {
-
-            throw new Error(
-                "Résultat Gemini invalide."
-            );
-
-        }
-
-
-        if (
-            !Array.isArray(
-                resultat.actions
-            )
-        ) {
-
-            throw new Error(
-                "Gemini n'a pas retourné le tableau actions."
-            );
-
-        }
-
-
-        //================================================
-        // ✅ GEMINI OK
-        //================================================
-
-        console.log(
-            "✅ GEMINI → COMPRÉHENSION REÇUE"
-        );
-
-        console.log(
-            `🌀 GEMINI → ${resultat.actions.length} action(s)`
-        );
-
-
-        console.log(
-            "🧠 GEMINI → acteur :",
-            resultat.acteurPrincipal
-        );
-
-
-        console.log(
-            "🎯 GEMINI → cible :",
-            resultat.ciblePrincipale
-        );
-
-
-        console.log(
-            "📝 GEMINI → résumé :",
-            resultat.resume
-        );
-
-
-        return resultat;
-
+        return JSON.parse(texte);
 
     } catch (error) {
 
-        //================================================
-        // 📊 INFORMATIONS ERREUR
-        //================================================
-
-        const status =
-            error?.response?.status ||
-            null;
-
-
-        const data =
-            error?.response?.data ||
-            null;
-
-
-        const message =
-            error?.message ||
-            "Erreur inconnue";
-
-
         console.error(
-            "❌ GEMINI → ÉCHEC"
+            "❌ ERREUR GEMINI :",
+            error.response?.data ||
+            error.message
         );
-
-
-        console.error(
-            "🤖 Modèle :",
-            GEMINI_COMBAT_MODEL
-        );
-
-
-        console.error(
-            "📡 Status :",
-            status
-        );
-
-
-        console.error(
-            "💬 Message :",
-            message
-        );
-
-
-        if (data) {
-
-            console.error(
-                "📦 Réponse API :",
-                JSON.stringify(
-                    data,
-                    null,
-                    2
-                )
-            );
-
-        }
-
-
-        //================================================
-        // 🚨 ERREURS DÉFINITIVES
-        //================================================
-
-        if (
-            status === 400 ||
-            status === 401 ||
-            status === 403
-        ) {
-
-            throw error;
-
-        }
-
-
-        //================================================
-        // ⏱️ TIMEOUT
-        //================================================
-
-        if (
-            error?.code ===
-            "ECONNABORTED" ||
-            error?.code ===
-            "ETIMEDOUT" ||
-            String(message)
-                .toLowerCase()
-                .includes("timeout")
-        ) {
-
-            console.error(
-                "⏱️ GEMINI → TIMEOUT"
-            );
-
-
-            throw new Error(
-                "Gemini a dépassé le délai de réponse."
-            );
-
-        }
-
-
-        //================================================
-        // ❌ AUTRE ERREUR
-        //================================================
 
         throw error;
-
     }
-
-}
-
-
-function extraireNomPersonnage(personnage) {
-
-    if (!personnage) {
-        return null;
-    }
-
-    // Déjà une chaîne
-    if (typeof personnage === "string") {
-        return personnage;
-    }
-
-    // Objet carte
-    if (typeof personnage === "object") {
-
-        return (
-            personnage.name ||
-            personnage.nom ||
-            personnage.personnage ||
-            null
-        );
-    }
-
-    return null;
 }
 
 //================================================
 // 🤖 ANALYSE PAVÉ AVEC GEMINI
 //================================================
-//================================================
-// 🧠 NEO AI ARBITRE HYBRIDE
-// GEMINI = COMPRÉHENSION
-// NEO = VALIDATION + VERDICT
-//================================================
 
-async function analysePaveCombat(
-    message,
-    contexteMatch = {}
-) {
+async function analysePaveAvecGemini(message, contexteMatch = {}) {
 
     try {
 
         //================================================
-        // 1️⃣ EXTRACTION DU MESSAGE
+        // 1️⃣ RÉCUPÉRATION DU TEXTE
         //================================================
 
-        const texteOriginal =
+        const texte =
             typeof message === "string"
                 ? message
                 : message?.body ||
@@ -477,19 +103,17 @@ async function analysePaveCombat(
                   message?.message?.conversation ||
                   "";
 
-        if (!texteOriginal) {
-
+        if (!texte) {
             return {
                 ok: false,
                 paveDetecte: false,
                 erreur: "Message vide"
             };
-
         }
 
 
         //================================================
-        // 2️⃣ MARQUEURS
+        // 2️⃣ DÉTECTION DU PAVÉ
         //================================================
 
         const marqueurDebut =
@@ -502,36 +126,24 @@ async function analysePaveCombat(
             "░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░";
 
 
-        const texteNormalise =
-            String(texteOriginal)
-                .normalize("NFKD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace(/\s+/g, " ")
-                .trim()
-                .toLowerCase();
+        const estPave =
+            texte.includes(marqueurDebut) &&
+            texte.includes(marqueurActions) &&
+            texte.includes(marqueurFin);
+
+
+        if (!estPave) {
+
+            return {
+                ok: true,
+                paveDetecte: false
+            };
+
+        }
 
 
         //================================================
-// 3️⃣ DÉTECTION DU PAVÉ
-//================================================
-
-const estPave =
-    texteNormalise.includes(
-        marqueurActions
-    );
-
-if (!estPave) {
-
-    return {
-        ok: true,
-        paveDetecte: false
-    };
-
-}
-
-
-        //================================================
-        // 4️⃣ AUTEUR
+        // 3️⃣ RÉCUPÉRATION DE L'AUTEUR
         //================================================
 
         const user =
@@ -544,22 +156,11 @@ if (!estPave) {
 
 
         //================================================
-        // 5️⃣ EXTRACTION DU PAVÉ
+        // 4️⃣ EXTRACTION DES ACTIONS
         //================================================
 
         const positionActions =
-            texteNormalise.indexOf(
-                marqueurActions
-            );
-
-
-        const positionFin =
-            texteNormalise.indexOf(
-                marqueurFin
-                    .toLowerCase(),
-                positionActions
-            );
-
+            texte.indexOf(marqueurActions);
 
         if (positionActions === -1) {
 
@@ -567,22 +168,19 @@ if (!estPave) {
                 ok: false,
                 paveDetecte: true,
                 user,
-                erreur:
-                    "Marqueur des actions introuvable."
+                erreur: "Marqueur 🌀🎮: introuvable"
             };
 
         }
 
 
         const actionsTexte =
-            texteNormalise
+            texte
                 .slice(
                     positionActions +
-                    marqueurActions.length,
-                    positionFin === -1
-                        ? undefined
-                        : positionFin
+                    marqueurActions.length
                 )
+                .split(marqueurFin)[0]
                 .trim();
 
 
@@ -592,857 +190,302 @@ if (!estPave) {
                 ok: false,
                 paveDetecte: true,
                 user,
-                erreur:
-                    "Aucune action trouvée."
+                erreur: "Aucune action trouvée après 🌀🎮:"
             };
 
         }
 
 
         //================================================
-        // 6️⃣ CONTEXTE MATCH
+        // 5️⃣ CONTEXTE SAFE POUR GEMINI
         //================================================
-
-        const match =
-            contexteMatch?.match ||
-            contexteMatch ||
-            {};
-
-
-        const tracker =
-            match?.trackerCombatGemini ||
-            null;
-
-
-        const joueursMatch =
-            Array.isArray(match?.joueurs)
-                ? match.joueurs
-                : [];
-
-
-        const joueursTracker =
-            Array.isArray(tracker?.joueurs)
-                ? tracker.joueurs
-                : [];
-
-
-        //================================================
-        // 7️⃣ CONTEXTE MINIMAL POUR GEMINI
-        //================================================
-
-        const joueursGemini =
-            joueursMatch.map(j => {
-
-                const jid =
-                    j?.jid ||
-                    null;
-
-
-                const etat =
-                    joueursTracker.find(
-                        t =>
-                            t?.jid === jid
-                    ) ||
-                    null;
-
-
-                const grade =
-                    etat?.grade ||
-                    j?.grade ||
-                    j?.carte?.grade ||
-                    j?.card?.grade ||
-                    null;
-
-
-                const vitesseMax =
-                    etat?.vitesseMax ??
-                    j?.vitesseMax ??
-                    obtenirVitesseMaxParGrade(
-                        grade
-                    );
-
-
-                return {
-
-                    jid,
-
-                    pseudo:
-                        j?.pseudo ||
-                        j?.username ||
-                        j?.user ||
-                        j?.nomJoueur ||
-                        etat?.pseudo ||
-                        null,
-
-                    personnage:
-    extraireNomPersonnage(
-        etat?.personnage
-    ) ||
-    extraireNomPersonnage(
-        j?.personnage
-    ) ||
-    j?.nomPersonnage ||
-    j?.carte?.name ||
-    j?.card?.name ||
-    null,
-
-                    grade,
-
-                    category:
-                        etat?.category ||
-                        j?.category ||
-                        j?.carte?.category ||
-                        j?.card?.category ||
-                        null,
-
-                    vitesseMax,
-
-                    pv:
-                        etat?.pv ??
-                        100,
-
-                    stamina:
-                        etat?.stamina ??
-                        100,
-
-                    energie:
-                        etat?.energie ??
-                        100,
-
-                    posture:
-                        etat?.posture ||
-                        "neutre",
-
-                    equilibre:
-                        etat?.equilibre ||
-                        "stable",
-
-                    distanceAdversaire:
-                        etat?.distanceAdversaire ??
-                        null,
-
-                    positionRelative:
-                        etat?.positionRelative ||
-                        "face",
-
-                    weapon:
-                        etat?.weapon ||
-                        null,
-
-                    ko:
-                        etat?.ko ??
-                        false
-
-                };
-
-            });
-
-
-        //================================================
-        // 8️⃣ CONTEXTE GEMINI
-        //================================================
+        // ⚠️ IMPORTANT :
+        // On ne donne PAS directement match à JSON.stringify()
+        // car match peut contenir des Timeout/cycles.
 
         const contexteGemini = {
 
-            user,
+            user: contexteMatch?.user || user || null,
 
-            joueur:
-                contexteMatch?.joueur
-                    ? {
-                        jid:
-                            contexteMatch.joueur.jid ||
-                            null,
+            joueur: contexteMatch?.joueur
+                ? {
+                    jid: contexteMatch.joueur.jid || null,
+                    nom: contexteMatch.joueur.nom || null,
+                    name: contexteMatch.joueur.name || null
+                }
+                : null,
 
-                        pseudo:
-                            contexteMatch.joueur.pseudo ||
-                            contexteMatch.joueur.nom ||
-                            null,
+            match: contexteMatch?.match
+                ? {
+                    id: contexteMatch.match.id || null,
+                    etat: contexteMatch.match.etat || null,
 
-                        personnage:
-                            contexteMatch.joueur.personnage ||
-                            null
-                    }
-                    : null,
+                    // joueur dont c'est actuellement le tour
+                    joueurTour:
+                        contexteMatch.match.joueurTour || null,
 
-            match: {
-
-                id:
-                    match?.id ||
-                    null,
-
-                etat:
-                    match?.etat ||
-                    "ACTIF",
-
-                joueurTour:
-                    match?.joueurTour ||
-                    tracker?.combat?.joueurTour ||
-                    null,
-
-                tour:
-                    tracker?.combat?.tour ??
-                    0,
-
-                maxTours:
-                    tracker?.combat?.maxTours ??
-                    10,
-
-                joueurs:
-                    joueursGemini
-
-            }
-
+                    // informations simples sur les joueurs
+                    joueurs:
+                        Array.isArray(contexteMatch.match.joueurs)
+                            ? contexteMatch.match.joueurs.map(j => ({
+                                jid: j?.jid || null,
+                                nom: j?.nom || j?.name || null
+                            }))
+                            : []
+                }
+                : null
         };
 
 
         //================================================
-        // 9️⃣ GEMINI = COMPRÉHENSION UNIQUEMENT
+        // 6️⃣ PROMPT GEMINI
         //================================================
 
         const prompt = `
 
-${GEMINI_RULES_PROMPT}
+TU ES L'ARBITRE OFFICIEL DU JEU JUMP BATTLE ARENA.
+
+Tu dois analyser exclusivement le pavé d'action fourni.
+
+NE DOIS JAMAIS INVENTER une information absente du pavé.
 
 ================================================
-RÔLE DE GEMINI
+RÈGLES GÉNÉRALES
 ================================================
 
-Tu es le moteur de compréhension du pavé.
+1. Le pavé doit contenir des actions de combat.
 
-TON RÔLE EST UNIQUEMENT :
+2. Tu dois identifier et compter les actions
+   réellement effectuées par le joueur.
 
-- lire et comprendre le texte ;
-- identifier l'acteur ;
-- identifier les cibles ;
-- détecter toutes les actions ;
-- conserver l'ordre chronologique ;
-- extraire les détails explicitement écrits ;
-- interpréter les formulations naturelles ;
-- déterminer la VMAX à partir du grade ;
-- produire une représentation JSON structurée.
+3. Un pavé peut contenir au maximum 4 actions.
 
-IMPORTANT :
+4. Si le pavé contient plus de 4 actions :
+   - le pavé est REFUSÉ ;
+   - indique clairement que la limite de 4 actions
+     est dépassée.
 
-Tu ne rends PAS le verdict final.
+5. Analyse les actions dans leur ordre chronologique.
 
-Tu ne décides PAS définitivement si le pavé est accepté.
+6. Vérifie la cohérence entre les actions.
 
-NEO AI effectuera ensuite la validation officielle.
+7. Une action dont les informations obligatoires
+   sont absentes doit être refusée.
 
-Tu dois donc transmettre fidèlement ce que le joueur a écrit.
+8. Tu dois respecter strictement les règles techniques
+   fournies par le système de combat.
 
 ================================================
-RÈGLE VMAX
+RÈGLES DE VITESSE
 ================================================
 
 Bronze = 6 m/s
 Argent = 8 m/s
 Or = 10 m/s
 
-Si le pavé dit VMAX et que le grade est connu,
-retourne automatiquement la vitesse correspondante.
+Un joueur ne peut pas parcourir plus de 10 mètres
+sans action intermédiaire.
 
 ================================================
-CONTEXTE
+RÈGLES DES FRAPPES
 ================================================
 
-${JSON.stringify(
-    contexteGemini,
-    null,
-    2
-)}
+Pour une frappe de poing :
+
+- le membre utilisé doit être identifiable ;
+- la zone visée doit être identifiable.
+
+Pour une frappe de pied :
+
+- le pied utilisé doit être identifiable ;
+- la surface utilisée doit être identifiable ;
+- la zone visée doit être identifiable.
+
+Si une information obligatoire manque,
+la frappe est invalide.
 
 ================================================
-PAVÉ
+MISSION
+================================================
+
+Tu dois :
+
+1. compter les actions ;
+2. vérifier que le nombre est <= 4 ;
+3. identifier chaque action ;
+4. analyser chaque action ;
+5. vérifier les règles ;
+6. déterminer si le pavé est valide ;
+7. attribuer une note sur 10 ;
+8. produire un résumé narratif court des actions validées ;
+9. déterminer le joueur suivant à partir du contexte du match ;
+10. si le pavé est invalide, expliquer précisément pourquoi.
+
+================================================
+CONTEXTE DU MATCH
+================================================
+
+${JSON.stringify(contexteGemini, null, 2)}
+
+================================================
+PAVÉ À ANALYSER
 ================================================
 
 ${actionsTexte}
 
 ================================================
-JSON OBLIGATOIRE
+FORMAT DE RÉPONSE OBLIGATOIRE
 ================================================
 
+Réponds UNIQUEMENT avec un JSON valide.
+
 {
+    "paveValide": true,
+    "nombreActions": 0,
     "actions": [
         {
             "ordre": 1,
             "acteur": "",
             "cible": "",
             "type": "",
-            "technique": "",
-            "membre": "",
-            "surface": "",
-            "zone": "",
-            "vitesse": null,
-            "distance": null,
-            "vmax": false,
-            "description": ""
+            "description": "",
+            "valide": true,
+            "raison": ""
         }
     ],
+    "note": 0,
+    "verdict": "",
     "resume": "",
-    "acteurPrincipal": "",
-    "ciblePrincipale": ""
+    "joueurSuivant": {
+        "nom": "",
+        "jid": ""
+    },
+    "consequences": {
+        "touche": false,
+        "contre": false,
+        "mauvaisContre": false,
+        "degats": 0,
+        "effets": []
+    },
+    "erreurs": []
 }
 
-Réponds UNIQUEMENT avec du JSON valide.
+RÈGLE IMPORTANTE :
+
+Ne retourne aucun Markdown.
+Ne retourne aucun texte avant ou après le JSON.
 `;
 
 
         //================================================
-        // 🔟 APPEL GEMINI
-        //================================================
+// 7️⃣ APPEL GEMINI
+//================================================
 
-        let interpretationGemini = null;
+const apiKey =
+    process.env.GEMINI_API_KEY;
 
+if (!apiKey) {
 
-        try {
-
-            interpretationGemini =
-                await appelerGemini(
-                    prompt
-                );
-
-
-            console.log(
-                "✅ GEMINI → COMPRÉHENSION REÇUE"
-            );
-
-
-        } catch (geminiError) {
-
-            console.error(
-                "⚠️ GEMINI INDISPONIBLE → FALLBACK NEO",
-                geminiError?.message
-            );
-
-        }
-
-
-        //================================================
-        // 1️⃣1️⃣ FALLBACK NEO
-        //================================================
-
-        if (
-            !interpretationGemini ||
-            !Array.isArray(
-                interpretationGemini.actions
-            )
-        ) {
-
-            console.log(
-                "🧠 NEO → ANALYSE LOCALE DU PAVÉ"
-            );
-
-
-            return analyserPaveNEO(
-                actionsTexte,
-                contexteMatch
-            );
-
-        }
-
-
-        //================================================
-        // 1️⃣2️⃣ GEMINI → NEO
-        //================================================
-
-        console.log(
-            "🧠 GEMINI → TRANSMISSION À NEO"
-        );
-
-
-        const actionsGemini =
-            interpretationGemini.actions;
-
-
-        //================================================
-        // 1️⃣3️⃣ VALIDATION OFFICIELLE NEO
-        //================================================
-
-        const actionsNEO = [];
-
-        console.log(
-    "👥 JOUEURS ENVOYÉS À NEO :",
-    joueursGemini.map(j => ({
-        pseudo: j.pseudo,
-        personnage: j.personnage,
-        jid: j.jid
-    }))
-);
-
-console.log(
-    "🤖 ACTEURS RETOURNÉS PAR GEMINI :",
-    actionsGemini.map(a => ({
-        ordre: a.ordre,
-        acteur: a.acteur,
-        cible: a.cible
-    }))
-);
-
-        for (
-            const actionGemini
-            of actionsGemini
-        ) {
-
-            const action = {
-
-                ordre:
-                    actionGemini.ordre ||
-                    actionsNEO.length + 1,
-
-                acteur:
-                    actionGemini.acteur ||
-                    null,
-
-                cible:
-                    actionGemini.cible ||
-                    null,
-
-                type:
-                    actionGemini.type ||
-                    "inconnu",
-
-                technique:
-                    actionGemini.technique ||
-                    null,
-
-                membre:
-                    actionGemini.membre ||
-                    null,
-
-                surface:
-                    actionGemini.surface ||
-                    null,
-
-                zone:
-                    actionGemini.zone ||
-                    null,
-
-                vitesse:
-                    actionGemini.vitesse ??
-                    null,
-
-                distance:
-                    actionGemini.distance ??
-                    null,
-
-                vmax:
-                    actionGemini.vmax === true,
-
-                description:
-                    actionGemini.description ||
-                    "",
-
-                valide: true,
-
-                raison: "",
-
-                resultatDefense: "",
-
-                consequence: ""
-
-            };
-
-
-            //================================================
-            // 👤 VÉRIFICATION ACTEUR
-            //================================================
-
-            const joueurActeur =
-    joueursGemini.find(j => {
-
-        const nomPersonnage =
-            extraireNomPersonnage(
-                j.personnage
-            );
-
-        if (
-            !nomPersonnage ||
-            !action.acteur
-        ) {
-            return false;
-        }
-
-        return (
-            normalizeName(
-                nomPersonnage
-            ) ===
-            normalizeName(
-                action.acteur
-            )
-        );
-
-    });
-
-
-            if (!joueurActeur) {
-
-                action.valide = false;
-
-                action.raison =
-                    "Acteur absent du match.";
-
-            }
-
-
-            //================================================
-            // ⚡ VMAX
-            //================================================
-
-            if (
-                action.valide &&
-                action.vmax
-            ) {
-
-                const vitesseOfficielle =
-                    obtenirVitesseMaxParGrade(
-                        joueurActeur.grade
-                    );
-
-
-                if (
-                    vitesseOfficielle ===
-                    null
-                ) {
-
-                    action.valide = false;
-
-                    action.raison =
-                        "Impossible de déterminer la VMAX.";
-
-                } else {
-
-                    action.vitesse =
-                        vitesseOfficielle;
-
-                }
-
-            }
-
-
-            //================================================
-            // 📏 DÉPLACEMENT
-            //================================================
-
-            if (
-                action.valide &&
-                action.type ===
-                "deplacement"
-            ) {
-
-                if (
-                    action.distance !== null &&
-                    Number(
-                        action.distance
-                    ) > 10
-                ) {
-
-                    action.valide = false;
-
-                    action.raison =
-                        "Un déplacement supérieur à 10 mètres est interdit sans action intermédiaire.";
-
-                }
-
-            }
-
-
-            //================================================
-            // 👊 FRAPPES
-            //================================================
-
-            if (
-                action.valide &&
-                action.type ===
-                "frappe"
-            ) {
-
-                const technique =
-                    normalizeName(
-                        action.technique
-                    );
-
-
-                const poing =
-                    technique.includes(
-                        "poing"
-                    ) ||
-                    technique.includes(
-                        "direct"
-                    ) ||
-                    technique.includes(
-                        "jab"
-                    );
-
-
-                const pied =
-                    technique.includes(
-                        "kick"
-                    ) ||
-                    technique.includes(
-                        "pied"
-                    );
-
-
-                if (poing && !action.membre) {
-
-                    action.valide = false;
-
-                    action.raison =
-                        "La main utilisée doit être précisée.";
-
-                }
-
-
-                if (
-                    pied &&
-                    !action.membre
-                ) {
-
-                    action.valide = false;
-
-                    action.raison =
-                        "Le pied utilisé doit être précisé.";
-
-                }
-
-
-                if (
-                    pied &&
-                    !action.surface
-                ) {
-
-                    action.valide = false;
-
-                    action.raison =
-                        "La surface du pied doit être précisée.";
-
-                }
-
-
-                if (
-                    !action.zone
-                ) {
-
-                    action.valide = false;
-
-                    action.raison =
-                        "La zone visée doit être précisée.";
-
-                }
-
-            }
-
-
-            actionsNEO.push(
-                action
-            );
-
-        }
-
-
-        //================================================
-        // 1️⃣4️⃣ LIMITE DES ACTIONS
-        //================================================
-
-        const nombreActions =
-            actionsNEO.length;
-
-
-        const limiteRespectee =
-            nombreActions > 0 &&
-            nombreActions <=
-            MAX_ACTIONS_PAVE;
-
-
-        if (!limiteRespectee) {
-
-            for (
-                const action
-                of actionsNEO
-            ) {
-
-                if (
-                    nombreActions >
-                    MAX_ACTIONS_PAVE
-                ) {
-
-                    action.valide =
-                        false;
-
-                    action.raison =
-                        `Maximum ${MAX_ACTIONS_PAVE} actions autorisées.`;
-
-                }
-
-            }
-
-        }
-
-
-        //================================================
-        // 1️⃣5️⃣ VALIDITÉ GLOBALE
-        //================================================
-
-        const toutesValides =
-            limiteRespectee &&
-            actionsNEO.length > 0 &&
-            actionsNEO.every(
-                a =>
-                    a.valide === true
-            );
-
-
-        const paveValide =
-            toutesValides;
-
-
-        //================================================
-        // 1️⃣6️⃣ NOTE
-        //================================================
-
-        const nombreValides =
-            actionsNEO.filter(
-                a =>
-                    a.valide
-            ).length;
-
-
-        const note =
-            paveValide
-                ? 10
-                : nombreActions > 0
-                    ? Math.round(
-                        (
-                            nombreValides /
-                            nombreActions
-                        ) * 10
-                    )
-                    : 0;
-
-
-        //================================================
-        // 1️⃣7️⃣ ERREURS
-        //================================================
-
-        const erreurs = [];
-
-
-        for (
-            const action
-            of actionsNEO
-        ) {
-
-            if (
-                !action.valide
-            ) {
-
-                erreurs.push(
-                    `Action ${action.ordre} : ${action.raison}`
-                );
-
-            }
-
-        }
-
-
-        if (
-            nombreActions === 0
-        ) {
-
-            erreurs.push(
-                "Aucune action reconnue."
-            );
-
-        }
-
-
-        if (
-            nombreActions >
-            MAX_ACTIONS_PAVE
-        ) {
-
-            erreurs.push(
-                `Le pavé contient ${nombreActions} actions. Maximum autorisé : ${MAX_ACTIONS_PAVE}.`
-            );
-
-        }
-
-
-        //================================================
-        // 1️⃣8️⃣ JOUEUR SUIVANT
-        //================================================
-
-        const joueurTour =
-            match?.joueurTour ||
-            tracker?.combat?.joueurTour ||
-            null;
-
-
-        let indexTour =
-            joueursMatch.findIndex(
-                j =>
-                    j?.jid === joueurTour
-            );
-
-
-        if (
-    indexTour === -1 &&
-    interpretationGemini?.acteurPrincipal
-) {
-
-    indexTour =
-        joueursMatch.findIndex(
-            j =>
-                normalizeName(
-                    j?.personnage
-                ) ===
-                normalizeName(
-                    interpretationGemini.acteurPrincipal
-                )
-        );
+    throw new Error(
+        "GEMINI_API_KEY manquante dans Render"
+    );
 
 }
 
 
-        if (
-            indexTour === -1
-        ) {
+const url =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
+    apiKey;
 
-            indexTour = 0;
+
+const response =
+    await axios.post(
+        url,
+        {
+            contents: [
+                {
+                    parts: [
+                        {
+                            text: prompt
+                        }
+                    ]
+                }
+            ],
+
+            generationConfig: {
+                responseMimeType: "application/json"
+            }
+        },
+        {
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            timeout: 30000
+        }
+    );
+
+        //================================================
+        // 8️⃣ EXTRACTION RÉPONSE
+        //================================================
+
+        let resultatTexte =
+            response
+                ?.data
+                ?.candidates?.[0]
+                ?.content
+                ?.parts?.[0]
+                ?.text;
+
+
+        if (!resultatTexte) {
+
+            throw new Error(
+                "Gemini n'a retourné aucune réponse"
+            );
 
         }
 
 
-        const prochain =
-            joueursMatch.length
-                ? joueursMatch[
-                    (
-                        indexTour + 1
-                    ) %
-                    joueursMatch.length
-                ]
-                : null;
+        resultatTexte =
+            resultatTexte
+                .replace(/^```json\s*/i, "")
+                .replace(/^```\s*/i, "")
+                .replace(/\s*```$/i, "")
+                .trim();
 
 
         //================================================
-        // 1️⃣9️⃣ RÉSUMÉ NEO
+        // 9️⃣ PARSE JSON
         //================================================
 
-        const resume =
-            actionsNEO
-                .map(
-                    action =>
-                        action.description
-                )
-                .filter(Boolean)
-                .join(" puis ") ||
-            interpretationGemini.resume ||
-            "Actions analysées.";
+        let resultat;
+
+        try {
+
+            resultat =
+                JSON.parse(resultatTexte);
+
+        } catch (e) {
+
+            console.error(
+                "❌ JSON GEMINI INVALIDE :",
+                resultatTexte
+            );
+
+            return {
+                ok: false,
+                paveDetecte: true,
+                user,
+                actionsTexte,
+                erreur: "Réponse Gemini invalide"
+            };
+
+        }
 
 
         //================================================
-        // 2️⃣0️⃣ RÉSULTAT FINAL
+        // 🔟 RETOUR FINAL
         //================================================
 
         return {
@@ -1455,65 +498,7 @@ console.log(
 
             actionsTexte,
 
-            paveValide,
-
-            nombreActions,
-
-            actions:
-                actionsNEO,
-
-            note,
-
-            verdict:
-                paveValide
-                    ? "Pavé valide."
-                    : "Pavé refusé.",
-
-            resume,
-
-            joueurSuivant:
-                prochain
-                    ? {
-
-                        nom:
-                            prochain.personnage ||
-                            prochain.pseudo ||
-                            "",
-
-                        pseudo:
-                            prochain.pseudo ||
-                            "",
-
-                        jid:
-                            prochain.jid ||
-                            ""
-
-                    }
-                    : null,
-
-            consequences: {
-
-                touche: false,
-
-                contre: false,
-
-                mauvaisContre: false,
-
-                degats: 0,
-
-                effets: [],
-
-                position: "",
-
-                posture: "",
-
-                equilibre: "",
-
-                garde: ""
-
-            },
-
-            erreurs
+            ...resultat
 
         };
 
@@ -1521,66 +506,35 @@ console.log(
     } catch (error) {
 
         console.error(
-            "❌ NEO AI ARBITRE HYBRIDE :",
+            "❌ ERREUR analysePaveAvecGemini :",
+            error?.response?.data ||
+            error?.message ||
             error
         );
-
 
         return {
 
             ok: false,
 
-            paveDetecte: true,
+            paveDetecte: false,
 
-            paveValide: false,
-
-            nombreActions: 0,
-
-            actions: [],
-
-            note: 0,
-
-            verdict:
-                "Erreur pendant l'analyse du pavé.",
-
-            resume: "",
-
-            joueurSuivant: null,
-
-            consequences: {
-
-                touche: false,
-
-                contre: false,
-
-                mauvaisContre: false,
-
-                degats: 0,
-
-                effets: [],
-
-                position: "",
-                posture: "",
-                equilibre: "",
-                garde: ""
-
-            },
-
-            erreurs: [
+            erreur:
+                error?.response?.data?.error?.message ||
                 error?.message ||
-                "Erreur inconnue."
-            ]
+                "Erreur inconnue Gemini"
 
         };
 
     }
 
 }
-                                
+
+
 //================================================
 // 🎮 RENDU VISUEL DU PAVÉ GEMINI
 //================================================
-async function envoyerResultatPaveCombat(
+
+async function envoyerResultatPaveGemini(
     ovl,
     chat,
     resultat,
@@ -1589,17 +543,69 @@ async function envoyerResultatPaveCombat(
 
     try {
 
-        if (
-            !resultat?.ok ||
-            !resultat?.paveDetecte
-        ) {
+        if (!resultat?.ok || !resultat?.paveDetecte) {
+            console.log("❌ Aucun résultat de pavé à afficher");
+            return;
+        }
 
-            console.log(
-                "❌ Aucun résultat de pavé à afficher"
+
+        //================================================
+        // ❌ PAVÉ INVALIDE
+        //================================================
+
+        if (!resultat.paveValide) {
+
+            const erreurs =
+                Array.isArray(resultat.erreurs)
+                    ? resultat.erreurs
+                        .map(e => `- ${e}`)
+                        .join("\n")
+                    : "Pavé invalide";
+
+
+            const texte =
+
+`░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+❌ *PAVÉ REFUSÉ*
+
+${resultat.verdict || "Le pavé est invalide."}
+
+${erreurs}
+
+📊 *Note du pavé :* ${resultat.note ?? 0}/10 ⭐
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆 *Joueur actuel :*
+➡️ Le tour reste au joueur actuel.
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+
+
+            await ovl.sendMessage(
+                chat,
+                {
+                    text: texte
+                }
             );
 
             return;
         }
+
+
+        //================================================
+        // ✅ ACTIONS VALIDÉES
+        //================================================
+
+        let resume =
+            resultat.resume ||
+            "Actions validées.";
+
+
+        const note =
+            Number(resultat.note) || 0;
 
 
         //================================================
@@ -1614,21 +620,19 @@ async function envoyerResultatPaveCombat(
             joueurSuivant.jid || null;
 
 
-        //================================================
-        // 👤 RÉCUPÉRATION DU PSEUDO
-        // ⚠️ JAMAIS LE NOM DU PERSONNAGE
-        //================================================
-
-        let prochainPseudo = null;
+        let prochainNom =
+            joueurSuivant.nom || null;
 
 
         //================================================
-        // 🔎 1️⃣ RECHERCHE DANS match.joueurs
+        // 🔎 SI GEMINI N'A PAS DONNÉ LE NOM
+        // ON LE RÉCUPÈRE DANS LE MATCH
         //================================================
 
         if (
+            !prochainNom &&
             prochainJid &&
-            Array.isArray(match?.joueurs)
+            Array.isArray(match.joueurs)
         ) {
 
             const joueur =
@@ -1640,11 +644,10 @@ async function envoyerResultatPaveCombat(
 
             if (joueur) {
 
-                prochainPseudo =
+                prochainNom =
+                    joueur.nom ||
+                    joueur.name ||
                     joueur.pseudo ||
-                    joueur.username ||
-                    joueur.user ||
-                    joueur.nomJoueur ||
                     null;
 
             }
@@ -1653,19 +656,16 @@ async function envoyerResultatPaveCombat(
 
 
         //================================================
-        // 🔎 2️⃣ RECHERCHE DANS match.players
+        // 🔎 AUTRE FORMAT POSSIBLE
         //================================================
 
         if (
-            !prochainPseudo &&
+            !prochainNom &&
             prochainJid &&
-            match?.players
+            match.players
         ) {
 
-            for (
-                const equipe
-                of Object.values(match.players)
-            ) {
+            for (const equipe of Object.values(match.players)) {
 
                 const joueur =
                     equipe?.find?.(
@@ -1673,20 +673,15 @@ async function envoyerResultatPaveCombat(
                             j?.jid === prochainJid
                     );
 
-
                 if (joueur) {
 
-                    prochainPseudo =
+                    prochainNom =
+                        joueur.nom ||
+                        joueur.name ||
                         joueur.pseudo ||
-                        joueur.username ||
-                        joueur.user ||
-                        joueur.nomJoueur ||
                         null;
 
-
-                    if (prochainPseudo) {
-                        break;
-                    }
+                    break;
 
                 }
 
@@ -1696,36 +691,65 @@ async function envoyerResultatPaveCombat(
 
 
         //================================================
-        // 🔎 3️⃣ GEMINI PEUT FOURNIR LE PSEUDO
+        // 👤 NOM DE SECOURS
         //================================================
 
-        if (!prochainPseudo) {
+        if (!prochainNom) {
 
-            prochainPseudo =
-                joueurSuivant.pseudo ||
-                joueurSuivant.username ||
-                joueurSuivant.user ||
-                null;
+            prochainNom =
+                prochainJid || "Joueur suivant";
 
         }
 
 
         //================================================
-        // 👤 SECOURS
+        // 📤 MESSAGE VISUEL
         //================================================
 
-        if (!prochainPseudo) {
+        const texte =
 
-            prochainPseudo =
-                prochainJid ||
-                "Joueur suivant";
+`░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-        }
+✅ *ACTIONS VALIDÉES :*
+- ${resume}
+
+📊 *Note du pavé :* ${note}/10 ⭐
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆*joueur suivant:*
+➡️ @${prochainNom} *NEXT!!* 🔥
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+
+
+        await ovl.sendMessage(
+            chat,
+            {
+                text: texte,
+                mentions:
+                    prochainJid
+                        ? [prochainJid]
+                        : []
+            }
+        );
+
+
+        console.log(
+            "🎮 RENDU PAVÉ ENVOYÉ"
+        );
+
+        console.log(
+            "➡️ PROCHAIN JOUEUR :",
+            prochainNom,
+            "|",
+            prochainJid
+        );
 
 
         //================================================
         // 🔄 TRANSFERT DU TOUR
-        // ⚠️ VALIDE OU REFUSÉ
         //================================================
 
         if (
@@ -1742,11 +766,8 @@ async function envoyerResultatPaveCombat(
             match.joueurActuel =
                 prochainJid;
 
-
             console.log(
                 "🔄 TOUR TRANSFÉRÉ À :",
-                prochainPseudo,
-                "|",
                 prochainJid
             );
 
@@ -1754,7 +775,7 @@ async function envoyerResultatPaveCombat(
 
 
         //================================================
-        // ⏱️ TIMER DU PROCHAIN JOUEUR
+        // ⏱️ RELANCE DU TIMER
         //================================================
 
         if (
@@ -1771,854 +792,16 @@ async function envoyerResultatPaveCombat(
         }
 
 
-        //================================================
-        // ❌ PAVÉ INVALIDE
-        //================================================
-
-        if (!resultat.paveValide) {
-
-            const erreurs =
-                Array.isArray(resultat.erreurs)
-                    ? resultat.erreurs
-                        .map(
-                            e => `- ${e}`
-                        )
-                        .join("\n")
-                    : "Pavé invalide";
-
-
-            const texte =
-
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-❌ *PAVÉ REFUSÉ*
-
-${resultat.verdict ||
-    "Le pavé est invalide."}
-
-${erreurs}
-
-📊 *Note du pavé :*
-${resultat.note ?? 0}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *JOUEUR SUIVANT :*
-
-➡️ @${prochainPseudo} *GO!!* 🔥
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
-
-            await ovl.sendMessage(
-                chat,
-                {
-                    text: texte,
-
-                    mentions:
-                        prochainJid
-                            ? [prochainJid]
-                            : []
-                }
-            );
-
-
-            console.log(
-                "🎮 PAVÉ REFUSÉ"
-            );
-
-            console.log(
-                "➡️ PROCHAIN GO :",
-                prochainPseudo,
-                "|",
-                prochainJid
-            );
-
-
-            return;
-        }
-
-
-        //================================================
-        // ✅ ACTIONS VALIDÉES
-        //================================================
-
-        const resume =
-            resultat.resume ||
-            "Actions validées.";
-
-
-        const note =
-            Number(resultat.note) || 0;
-
-
-        //================================================
-        // 📤 MESSAGE VISUEL
-        //================================================
-
-        const texte =
-
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-✅ *ACTIONS VALIDÉES :*
-
-- ${resume}
-
-📊 *Note du pavé :*
-${note}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *JOUEUR SUIVANT :*
-
-➡️ @${prochainPseudo} *GO!!* 🔥
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
-
-        await ovl.sendMessage(
-            chat,
-            {
-                text: texte,
-
-                mentions:
-                    prochainJid
-                        ? [prochainJid]
-                        : []
-            }
-        );
-
-
-        console.log(
-            "🎮 RENDU PAVÉ ENVOYÉ"
-        );
-
-        console.log(
-            "➡️ PROCHAIN GO :",
-            prochainPseudo,
-            "|",
-            prochainJid
-        );
-
-
     } catch (error) {
 
         console.error(
-    "❌ ERREUR RENDU PAVÉ COMBAT :",
-    error
-);
-
-    }
-
-}
-
-
-//================================================
-// 🧠 TRACKER COMBAT GEMINI
-//================================================
-function initTrackerCombatGemini(match) {
-
-    const joueurs =
-        Array.isArray(match?.joueurs)
-            ? match.joueurs
-            : [];
-
-    const tracker = {
-
-        //================================================
-        // ⚔️ COMBAT
-        //================================================
-
-        combat: {
-
-            id:
-                match?.id ||
-                null,
-
-            etat:
-                match?.etat ||
-                "ACTIF",
-
-            // 1 tour = 2 pavés
-            tour: 0,
-
-            maxTours: 10,
-
-            // Joueur dont c'est actuellement le tour
-            joueurTour:
-                match?.joueurTour ||
-                null,
-
-            // Premier pavé du tour en attente
-            paveEnAttente:
-                null,
-
-            // Historique des tours
-            historique:
-                []
-        },
-
-        //================================================
-        // 👥 JOUEURS
-        //================================================
-
-        joueurs:
-            joueurs.map(j => {
-
-                const carte =
-                    j?.carte ||
-                    null;
-
-                const grade =
-                    carte?.grade ||
-                    j?.grade ||
-                    null;
-
-                //================================================
-                // ⚡ VMAX SELON LE GRADE
-                //================================================
-
-                let vitesseMax =
-                    j?.vitesseMax ??
-                    null;
-
-                if (vitesseMax == null) {
-
-                    const g =
-                        String(grade || "")
-                            .toLowerCase()
-                            .trim();
-
-                    if (g === "bronze") {
-
-                        vitesseMax = 6;
-                    }
-
-                    else if (
-                        g === "argent" ||
-                        g === "silver"
-                    ) {
-
-                        vitesseMax = 8;
-                    }
-
-                    else if (
-                        g === "or" ||
-                        g === "gold"
-                    ) {
-
-                        vitesseMax = 10;
-                    }
-                }
-
-                return {
-
-                    //================================================
-                    // 👤 IDENTITÉ
-                    //================================================
-
-                    jid:
-                        j?.jid ||
-                        null,
-
-                    nom:
-                        j?.nom ||
-                        j?.name ||
-                        null,
-
-                    personnage:
-                        carte?.name ||
-                        j?.personnage ||
-                        j?.nomPersonnage ||
-                        null,
-
-                    //================================================
-                    // 🎴 INFORMATIONS DE RÉFÉRENCE
-                    //================================================
-
-                    grade:
-                        grade,
-
-                    category:
-                        carte?.category ||
-                        j?.category ||
-                        null,
-
-                    vitesseMax:
-                        vitesseMax,
-
-                    //================================================
-                    // ❤️ RESSOURCES ACTUELLES
-                    //================================================
-
-                    pv: 100,
-
-                    stamina: 100,
-
-                    energie: 100,
-
-                    //================================================
-                    // 🧍 ÉTAT PHYSIQUE ACTUEL
-                    //================================================
-
-                    posture:
-                        "neutre",
-
-                    equilibre:
-                        "stable",
-
-                    //================================================
-                    // 📏 DISTANCE AVEC L'ADVERSAIRE
-                    //================================================
-
-                    distanceAdversaire:
-                        null,
-
-                    //================================================
-                    // 🧭 POSITION RELATIVE
-                    //
-                    // face
-                    // profil_gauche
-                    // profil_droit
-                    // avant_gauche
-                    // avant_droit
-                    // arriere
-                    // arriere_gauche
-                    // arriere_droit
-                    //================================================
-
-                    positionRelative:
-                        "face",
-
-                    //================================================
-                    // 🔪 ARME
-                    //================================================
-
-                    weapon:
-                        null,
-
-                    //================================================
-                    // ☠️ ÉTAT
-                    //================================================
-
-                    ko:
-                        false
-                };
-            })
-    };
-
-    //================================================
-    // 💾 ATTACHER LE TRACKER AU MATCH
-    //================================================
-
-    match.trackerCombatGemini =
-        tracker;
-
-    return tracker;
-}
-
-
-//================================================
-// 👤 RÉCUPÉRER UN JOUEUR DU TRACKER
-//================================================
-
-function getJoueurTrackerCombatGemini(
-    match,
-    identifiant
-) {
-
-    const tracker =
-        match?.trackerCombatGemini;
-
-    if (
-        !tracker ||
-        !Array.isArray(tracker.joueurs)
-    ) {
-
-        return null;
-    }
-
-    return tracker.joueurs.find(j =>
-
-        j?.jid === identifiant ||
-
-        j?.nom === identifiant ||
-
-        j?.personnage === identifiant
-
-    ) || null;
-}
-
-
-//================================================
-// ❤️ MODIFIER LES RESSOURCES
-//================================================
-
-function modifierRessourcesCombatGemini(
-    match,
-    identifiant,
-    modifications = {}
-) {
-
-    const joueur =
-        getJoueurTrackerCombatGemini(
-            match,
-            identifiant
+            "❌ ERREUR RENDU PAVÉ GEMINI :",
+            error
         );
 
-    if (!joueur) {
-        return null;
     }
 
-    //================================================
-    // ❤️ PV
-    //================================================
-
-    if (
-        modifications.pv != null
-    ) {
-
-        joueur.pv =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Number(
-                        modifications.pv
-                    )
-                )
-            );
-    }
-
-    //================================================
-    // 🫀 STAMINA
-    //================================================
-
-    if (
-        modifications.stamina != null
-    ) {
-
-        joueur.stamina =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Number(
-                        modifications.stamina
-                    )
-                )
-            );
-    }
-
-    //================================================
-    // 🌀 ÉNERGIE
-    //================================================
-
-    if (
-        modifications.energie != null
-    ) {
-
-        joueur.energie =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Number(
-                        modifications.energie
-                    )
-                )
-            );
-    }
-
-    //================================================
-    // ☠️ KO AUTOMATIQUE
-    //================================================
-
-    if (
-        joueur.pv <= 0
-    ) {
-
-        joueur.pv = 0;
-
-        joueur.ko = true;
-    }
-
-    return joueur;
-}
-
-
-//================================================
-// 🧍 MODIFIER L'ÉTAT PHYSIQUE
-//================================================
-
-function modifierEtatPhysiqueCombatGemini(
-    match,
-    identifiant,
-    modifications = {}
-) {
-
-    const joueur =
-        getJoueurTrackerCombatGemini(
-            match,
-            identifiant
-        );
-
-    if (!joueur) {
-        return null;
-    }
-
-    //================================================
-    // 🧍 POSTURE
-    //================================================
-
-    if (
-        modifications.posture != null
-    ) {
-
-        joueur.posture =
-            String(
-                modifications.posture
-            ).trim();
-    }
-
-    //================================================
-    // ⚖️ ÉQUILIBRE
-    //================================================
-
-    if (
-        modifications.equilibre != null
-    ) {
-
-        joueur.equilibre =
-            String(
-                modifications.equilibre
-            ).trim();
-    }
-
-    return joueur;
-}
-
-
-//================================================
-// 📏 MODIFIER LA DISTANCE
-//================================================
-
-function modifierDistanceCombatGemini(
-    match,
-    identifiant,
-    distance
-) {
-
-    const joueur =
-        getJoueurTrackerCombatGemini(
-            match,
-            identifiant
-        );
-
-    if (!joueur) {
-        return null;
-    }
-
-    const valeur =
-        Number(distance);
-
-    if (
-        !Number.isFinite(valeur)
-    ) {
-
-        return joueur;
-    }
-
-    joueur.distanceAdversaire =
-        Math.max(
-            0,
-            valeur
-        );
-
-    //================================================
-    // 📏 LA DISTANCE EST COMMUNE
-    //================================================
-
-    const tracker =
-        match?.trackerCombatGemini;
-
-    if (
-        tracker?.joueurs
-    ) {
-
-        for (
-            const autre
-            of tracker.joueurs
-        ) {
-
-            if (
-                autre.jid !== joueur.jid
-            ) {
-
-                autre.distanceAdversaire =
-                    joueur.distanceAdversaire;
             }
-        }
-    }
-
-    return joueur;
-}
-
-
-//================================================
-// 🧭 MODIFIER LA POSITION RELATIVE
-//================================================
-
-function modifierPositionRelativeCombatGemini(
-    match,
-    identifiant,
-    position
-) {
-
-    const joueur =
-        getJoueurTrackerCombatGemini(
-            match,
-            identifiant
-        );
-
-    if (!joueur) {
-        return null;
-    }
-
-    const positionsValides = [
-
-        "face",
-
-        "profil_gauche",
-
-        "profil_droit",
-
-        "avant_gauche",
-
-        "avant_droit",
-
-        "arriere",
-
-        "arriere_gauche",
-
-        "arriere_droit"
-    ];
-
-    const nouvellePosition =
-        String(
-            position || ""
-        )
-            .toLowerCase()
-            .trim();
-
-    if (
-        !positionsValides.includes(
-            nouvellePosition
-        )
-    ) {
-
-        return joueur;
-    }
-
-    joueur.positionRelative =
-        nouvellePosition;
-
-    return joueur;
-}
-
-
-//================================================
-// 🔪 MODIFIER L'ARME
-//================================================
-
-function modifierWeaponCombatGemini(
-    match,
-    identifiant,
-    weapon
-) {
-
-    const joueur =
-        getJoueurTrackerCombatGemini(
-            match,
-            identifiant
-        );
-
-    if (!joueur) {
-        return null;
-    }
-
-    //================================================
-    // 🔪 RETIRER L'ARME
-    //================================================
-
-    if (
-        weapon === null ||
-        weapon === false ||
-        weapon === ""
-    ) {
-
-        joueur.weapon = null;
-
-        return joueur;
-    }
-
-    //================================================
-    // 🔪 ARME SOUS FORME DE TEXTE
-    //================================================
-
-    if (
-        typeof weapon === "string"
-    ) {
-
-        joueur.weapon = {
-
-            active: true,
-
-            nom:
-                weapon.trim()
-        };
-
-        return joueur;
-    }
-
-    //================================================
-    // 🔪 ARME SOUS FORME D'OBJET
-    //================================================
-
-    if (
-        typeof weapon === "object"
-    ) {
-
-        joueur.weapon = {
-
-            active:
-                weapon.active !== false,
-
-            nom:
-                weapon.nom ||
-                weapon.name ||
-                null
-        };
-    }
-
-    return joueur;
-}
-
-
-//================================================
-// 🧠 APPLIQUER LES CONSÉQUENCES GEMINI
-//================================================
-
-function appliquerConsequencesCombatGemini(
-    match,
-    consequences = {}
-) {
-
-    if (
-        !match?.trackerCombatGemini
-    ) {
-
-        return null;
-    }
-
-    const identifiant =
-        consequences.jid ||
-        consequences.personnage ||
-        consequences.nom;
-
-    if (!identifiant) {
-        return null;
-    }
-
-    //================================================
-    // ❤️ RESSOURCES
-    //================================================
-
-    modifierRessourcesCombatGemini(
-        match,
-        identifiant,
-        {
-
-            pv:
-                consequences.pv,
-
-            stamina:
-                consequences.stamina,
-
-            energie:
-                consequences.energie
-        }
-    );
-
-    //================================================
-    // 🧍 ÉTAT PHYSIQUE
-    //================================================
-
-    modifierEtatPhysiqueCombatGemini(
-        match,
-        identifiant,
-        {
-
-            posture:
-                consequences.posture,
-
-            equilibre:
-                consequences.equilibre
-        }
-    );
-
-    //================================================
-    // 📏 DISTANCE
-    //================================================
-
-    if (
-        consequences.distanceAdversaire != null
-    ) {
-
-        modifierDistanceCombatGemini(
-            match,
-            identifiant,
-            consequences.distanceAdversaire
-        );
-    }
-
-    //================================================
-    // 🧭 POSITION
-    //================================================
-
-    if (
-        consequences.positionRelative
-    ) {
-
-        modifierPositionRelativeCombatGemini(
-            match,
-            identifiant,
-            consequences.positionRelative
-        );
-    }
-
-    //================================================
-    // 🔪 ARME
-    //================================================
-
-    if (
-        consequences.weapon !== undefined
-    ) {
-
-        modifierWeaponCombatGemini(
-            match,
-            identifiant,
-            consequences.weapon
-        );
-    }
-
-    return getJoueurTrackerCombatGemini(
-        match,
-        identifiant
-    );
-}
 
 //-------- UTILITAIRES
 const formatNumber = n => {
@@ -3568,7 +1751,7 @@ const ACTIONS_MAP = {
 // 🤖 RÈGLES ARBITRE GEMINI
 //================================================
 const GEMINI_RULES_PROMPT = `
-TU ES L'ARBITRE OFFICIEL D'UN SYSTÈME DE COMBAT DYNAMIQUE.
+TU ES L'ARBITRE D'UN SYSTÈME DE COMBAT DYNAMIQUE.
 
 Ton rôle est UNIQUEMENT de parcourir et appliquer les règles ci-dessous
 lorsque tu analyses un pavé de combat.
@@ -3580,212 +1763,22 @@ Tu dois considérer ces règles comme les règles officielles du système.
 
 
 ============================================================
-0. MATCH🎮
+0. MATCH🎮 
 ============================================================
-
-- Dès le début du match la distance initiale entre les deux personnages est de 5 mètres.
-- Le match se termine après 10 tours maximum.
-- Un tour est terminé lorsque les deux joueurs ont envoyé leurs pavés et que le verdict du second pavé a été rendu.
-
+- Dès le début du match la distance initiale entre les deux perso est de 5m.
+- le match se termine après 10 tours maximum et un tour c'est quand les deux joueurs ont envoyés leurs pavés donc après le verdict. 
 
 ============================================================
-0-B. TOURS ET FIN DU MATCH
+1. STRUCTURE D'UN PAVÉ🎮 
 ============================================================
 
-DÉFINITION D'UN TOUR :
-
-Un TOUR est terminé uniquement lorsque :
-
-1. le premier joueur a envoyé son pavé ;
-2. le deuxième joueur a envoyé son pavé ;
-3. les deux pavés ont été analysés ;
-4. le verdict de l'échange peut être établi.
-
-IMPORTANT :
-
-Un seul pavé NE constitue PAS un tour complet.
-
-Le compteur de tours ne doit donc PAS augmenter après
-le premier pavé d'un joueur.
-
-Exemple :
-
-Pavé de Neo
-→ le tour reste en attente du pavé de Damian.
-
-Pavé de Damian
-→ les deux joueurs ont joué.
-→ les deux pavés sont analysés.
-→ le verdict de l'échange est établi.
-→ TOUR +1.
-
-============================================================
-EXEMPLE DE COMPTEUR
-============================================================
-
-Neo pavé + Damian pavé
-→ TOUR 1
-
-Neo pavé + Damian pavé
-→ TOUR 2
-
-Neo pavé + Damian pavé
-→ TOUR 3
-
-Neo pavé + Damian pavé
-→ TOUR 4
-
-Neo pavé + Damian pavé
-→ TOUR 5
-
-Neo pavé + Damian pavé
-→ TOUR 6
-
-Neo pavé + Damian pavé
-→ TOUR 7
-
-Neo pavé + Damian pavé
-→ TOUR 8
-
-Neo pavé + Damian pavé
-→ TOUR 9
-
-Neo pavé + Damian pavé
-→ TOUR 10
-
-Après le verdict du TOUR 10 :
-→ le match se termine immédiatement.
-
-Aucun TOUR 11 ne peut commencer.
-
-============================================================
-KO AVANT LA FIN DES 10 TOURS
-============================================================
-
-Si un joueur atteint 0% PV :
-
-- il est immédiatement considéré comme KO ;
-- le match se termine ;
-- l'autre joueur est déclaré vainqueur par KO ;
-- aucun tour supplémentaire ne doit être joué.
-
-============================================================
-DÉCISION APRÈS 10 TOURS
-============================================================
-
-Si le TOUR 10 est terminé et qu'aucun joueur n'est à 0% PV :
-
-→ le match se termine par DÉCISION.
-
-Le vainqueur est le joueur qui a globalement
-le mieux combattu et dominé l'ensemble du combat.
-
-La décision doit prendre en compte :
-
-- les dégâts infligés ;
-- les dégâts reçus ;
-- les attaques réussies ;
-- les défenses réussies ;
-- les esquives réussies ;
-- les contres réussis ;
-- les actions ayant réellement mis l'adversaire en difficulté ;
-- la domination des échanges ;
-- la qualité des actions ;
-- l'efficacité générale ;
-- la régularité sur les 10 tours.
-
-Le joueur ayant simplement le plus de PV restants
-ne gagne PAS automatiquement.
-
-La décision doit déterminer quel joueur a réellement
-dominé l'ensemble du combat.
-
-Si les deux joueurs sont impossibles à départager
-objectivement :
-
-→ résultat : ÉGALITÉ.
-
-============================================================
-RÈGLE ABSOLUE
-============================================================
-
-Le compteur de tours fonctionne ainsi :
-
-PREMIER PAVÉ
-→ attente du deuxième pavé
-→ DEUXIÈME PAVÉ
-→ ANALYSE DES DEUX
-→ VERDICT
-→ TOUR +1
-
-Le compteur ne doit jamais augmenter après un seul pavé.
-
-Après TOUR = 10 :
-→ FIN DU MATCH.
-
-Si aucun KO :
-→ DÉCISION.
-
-Si KO :
-→ VICTOIRE PAR KO.
-
-============================================================
-1. STRUCTURE D'UN PAVÉ🎮
-============================================================
-
-- Un pavé peut contenir au maximum 4 ACTIONS issues de ACTIONS MAP.
-- Une action se réalise en 1 seconde.
-- Chaque action distincte doit être comptée séparément.
-- Une action composée de plusieurs mouvements distincts doit être décomposée en plusieurs actions.
-- Si un attaquant effectue plusieurs actions et que le défenseur échoue à défendre une action intermédiaire, les actions suivantes doivent être réévaluées selon les conséquences de l'action précédente.
-- Une action suivante n'est jamais automatiquement annulée uniquement parce qu'une action précédente a échoué.
-- Elle doit être analysée avec le nouvel état du personnage.
-
-ZONE DE SENSORIALITÉ :
-
-- Chaque personnage possède une zone de sensorialité de 1 mètre autour de lui.
-- Cette zone permet de ressentir les coups et la présence d'un adversaire.
-- Le joueur peut simplement mentionner "ZS" ou "Zone de sensorialité" dans son pavé.
-
-RÈGLE VMAX :
-
-Lorsqu'un joueur indique :
-
-- "VMAX"
-- "vitesse maximale"
-- "à vitesse maximale"
-- "en course VMAX"
-- ou toute formulation équivalente,
-
-la vitesse maximale doit être récupérée automatiquement depuis le grade
-du personnage présent dans le contexte du match.
-
-CORRESPONDANCE :
-
-- Bronze = 6 m/s
-- Argent / Silver = 8 m/s
-- Or / Gold = 10 m/s
-
-IMPORTANT :
-
-- Le joueur n'a PAS besoin d'écrire la valeur exacte en m/s.
-- Si le joueur écrit simplement "VMAX" et que le grade du personnage est connu dans le contexte du match, la vitesse est considérée comme suffisamment précisée.
-- Gemini doit récupérer la valeur correspondante au grade depuis le contexte du match.
-- Gemini ne doit PAS refuser un pavé uniquement parce que la valeur "6 m/s", "8 m/s" ou "10 m/s" n'est pas écrite.
-- Si le grade du personnage est inconnu et que le pavé utilise VMAX, alors la vitesse maximale ne peut pas être déterminée et l'information doit être signalée comme manquante.
-
-IMPORTANT :
-
-- Si aucun terme VMAX ou équivalent n'est utilisé, le déplacement est considéré comme effectué à vitesse réduite de 1 m/s.
-- Cela concerne notamment les déplacements, esquives et mouvements de repositionnement lorsque leur vitesse n'est pas spécifiée.
-- VMAX ne doit donc être refusée que si le grade nécessaire pour déterminer sa valeur est inconnu.
-
-DÉFENSE :
-
-- Celui qui défend doit toujours commencer par préciser à quoi il réagit avant de mentionner ses actions.
-- Exemple :
-  "Voyant le coup venir vers son visage, Tobirama place sa paume gauche en opposition."
-
+- Un pavé peut contenir au maximum 4 ACTIONS, les Actions de ACTIONS MAP. 
+- Une action se réalise en 1s. 
+- Si celui qui attaque fait 4 actions par exemple et que celui qui défends rate son esquive où son contre depuis la première action alors le reste des actions du pavés vont s'appliquer en conséquence. 
+- Chaque personnage possède une zone de sensorialité de 1 mètre autour de lui permettant de ressentir les coups et la présence d'un adversaire. Il a donc juste à mentionner dans son pavé (ZS) où Zone de sensorialité.
+- La vitesse de déplacement doit toujours être précisée lorsqu'un déplacement est effectué à vitesse maximale (VMAX).
+- Si la VMAX n'est pas précisée, le déplacement, esquives ect est considéré comme effectué à vitesse réduite de 1 m/s.
+- Celui qui défends doit toujours commencer par préciser à quoi il réagit avant de mentionner ses actions. Par exemple : Voyant le coup venir vers son visage... 
 
 ============================================================
 2. VITESSE DE DÉPLACEMENT
@@ -3800,12 +1793,6 @@ GRADES :
 - Gold / Or : 10 m/s.
 
 Le powerscaling réduit peut modifier la vitesse selon les règles du personnage.
-
-Si VMAX est utilisée :
-- récupérer automatiquement la vitesse correspondant au grade du personnage.
-
-Ne jamais exiger que le joueur écrive lui-même la valeur numérique de la VMAX.
-
 
 ============================================================
 3. COMBAT SPEED
@@ -3829,25 +1816,20 @@ Si la Combat Speed est SUPÉRIEURE de +2 :
 - saisir ne coûte plus de Stamina ;
 - esquiver coûte 5% de Stamina.
 
-Les personnages SS peuvent combattre tous les tiers S sans retard
-et sont donc toujours considérés comme supérieurs de +2.
-
+Les personnages SS peuvent combattre tous les tiers S sans retard et sont donc toujours considérés comme supérieurs de +2.
 
 ============================================================
 4. DÉPLACEMENTS INSTANTANÉS
 ============================================================
 
-Les déplacements instantanés coûtent 10% de Stamina ou d'énergie
-selon le personnage.
+Les déplacements instantanés coûtent 10% de Stamina ou d'énergie selon le personnage.
 
 Après avoir utilisé un déplacement instantané :
-
 - le personnage prend l'adversaire de vitesse avec un effet de surprise ;
 - un adversaire de vitesse égale ou inférieure ne peut que réagir aux actions venant après le déplacement ;
 - il peut uniquement esquiver ou bloquer ;
 - il ne peut pas saisir le coup ;
 - il peut cependant bloquer, dévier et esquiver.
-
 
 ============================================================
 5. ZONE D'EFFET DES ATTAQUES
@@ -3856,14 +1838,11 @@ Après avoir utilisé un déplacement instantané :
 La zone d'effet de vitesse d'une attaque frontale est de 5 mètres.
 
 Si une attaque est lancée depuis cette distance :
-
 - l'esquive coûte 20% de Stamina si le personnage n'est pas plus rapide que l'attaque ;
 - normalement, une esquive coûte 10% de Stamina.
 
 Exception :
-
 - les déplacements instantanés ne suivent pas cette règle.
-
 
 ============================================================
 6. TEMPS D'UNE ATTAQUE
@@ -3872,12 +1851,10 @@ Exception :
 Une attaque est lancée en 1 seconde.
 
 Elle nécessite :
-
 - 0,5 seconde de préparation ;
 - 0,5 seconde de lancement.
 
 Une attaque ne peut pas être lancée en combo pendant sa préparation.
-
 
 ============================================================
 7. PRÉPARATION D'UNE ATTAQUE
@@ -3892,12 +1869,10 @@ Une attaque d'énergie peut être lancée en projectile pour 5% d'énergie.
 La vitesse de ce projectile est de 6 m/s.
 
 Un personnage peut également récupérer son énergie :
-
 - en dégageant son énergie ;
 - ou en restant debout sans effectuer d'action.
 
 Cette récupération rapporte 20% d'énergie en 1 séquence.
-
 
 ============================================================
 8. VITESSE DES ATTAQUES
@@ -3906,30 +1881,25 @@ Cette récupération rapporte 20% d'énergie en 1 séquence.
 Les attaques BASIC ont une vitesse de 6 m/s.
 
 Coût :
-
 - 20% d'énergie ;
 - 50% des PV en dégâts selon les règles indiquées.
 
 Les attaques ADVANCED ont une vitesse de 8 m/s.
 
 Coût :
-
 - 30% d'énergie ;
 - 70% des PV en dégâts.
 
 Les attaques ULTIME ont une vitesse de 10 m/s.
 
 Coût :
-
 - 50% d'énergie ;
 - peuvent causer jusqu'à 100% de dégâts aux PV.
 
 Certaines attaques peuvent causer des dégâts mortels selon leur nature.
 
 Exemple :
-
 - une attaque tranchante placée dans une zone critique peut provoquer la mort même si elle est classée comme attaque basique.
-
 
 ============================================================
 9. PROJECTILES
@@ -3938,7 +1908,6 @@ Exemple :
 Selon l'univers, un personnage peut posséder jusqu'à 3 projectiles maximum.
 
 Exemples :
-
 - shuriken ;
 - kunai.
 
@@ -3949,7 +1918,6 @@ Certains personnages possédant des couteaux peuvent lancer jusqu'à 3 projectil
 La vitesse d'un projectile est de 5 m/s.
 
 Un projectile cause 20% de dégâts aux PV selon la zone touchée.
-
 
 ============================================================
 10. DÉGÂTS DES COUPS
@@ -3962,70 +1930,56 @@ Un membre BRISÉ représente 15% des PV.
 Un membre COUPÉ représente 30% des PV.
 
 Pour sonner un adversaire :
-
 - la force du personnage doit être supérieure à celle de l'adversaire ;
 - il faut réussir à placer 2 coups consécutifs au visage.
 
 Une fois sonné :
-
 - l'adversaire est bloqué.
 
 Pour sortir de cet état :
-
 - il doit effectuer un mouvement BOOSTÉ ;
 - ce mouvement coûte 30% de Stamina.
-
 
 ============================================================
 11. BRISER UN MEMBRE
 ============================================================
 
 Pour briser un membre avec un seul coup :
-
 - la force de l'attaquant doit être supérieure à celle de l'adversaire.
 
 Alternative :
-
 - frapper deux fois de suite exactement au même endroit.
 
 Si l'écart de force est de +2 ou plus :
-
 - il n'est pas possible de briser le membre avec un seul coup.
-
 
 ============================================================
 12. FORCE PHYSIQUE
 ============================================================
 
 La Force représente :
-
 - la force physique ;
 - la résistance ;
 - la capacité à encaisser ou repousser les attaques.
 
 Si la Force est INFÉRIEURE de -1 :
-
 - le personnage peut être repoussé par un coup ou une main ;
 - il peut perdre sa posture.
 
 Si la Force est INFÉRIEURE de -2 :
-
 - bloquer à une main peut faire perdre l'équilibre ;
 - bloquer à deux mains peut casser la posture.
 
 Si la Force est INFÉRIEURE de -3 :
-
 - il devient impossible de résister à certaines attaques ;
 - le personnage peut être projeté.
 
 Si la Force est SUPÉRIEURE de +2 :
-
 - les dégâts des coups et projections sont augmentés ;
 - les déplacements peuvent être réduits de moitié ;
 - le personnage peut être projeté jusqu'à 10 m maximum.
 
 Les personnages ayant une Force de 3 ou plus peuvent :
-
 - soulever ou bloquer certaines parties de bâtiments ;
 - projeter un adversaire jusqu'à 20 m maximum ;
 - transpercer le corps d'un adversaire ayant une Force inférieure de 3.
@@ -4034,7 +1988,6 @@ Les bonds de 10 m sont possibles selon les niveaux de Force.
 
 Un personnage ayant une Force de 3 ou plus peut effectuer des bonds de 20 m maximum.
 
-
 ============================================================
 13. COLLISION ENTRE ATTAQUES
 ============================================================
@@ -4042,347 +1995,42 @@ Un personnage ayant une Force de 3 ou plus peut effectuer des bonds de 20 m maxi
 La puissance d'attaque détermine le résultat lorsqu'une attaque rencontre une autre attaque.
 
 Lorsque deux attaques entrent en collision :
-
 - leur nature d'énergie doit être prise en compte.
 
 Si l'écart de puissance est de 1 :
-
 - une explosion se produit ;
 - le personnage inférieur encaisse la moitié des dégâts.
 
 Si l'écart est de 2 ou plus :
-
 - l'attaque du personnage inférieur est complètement submergée ;
 - il encaisse les dégâts.
 
-
-//================================================
-// 🛡️ 13-B. DÉFENSE, CONTRE ET CONSÉQUENCES
-//================================================
-
-Lorsqu'un pavé défensif est analysé :
-
-1. Identifier chaque attaque adverse à laquelle le défenseur réagit.
-2. Identifier chaque action défensive.
-3. Vérifier que l'action défensive correspond à l'attaque.
-4. Vérifier la zone protégée.
-5. Vérifier le membre utilisé.
-6. Vérifier la posture.
-7. Vérifier la distance.
-8. Vérifier la Combat Speed.
-9. Vérifier la Force lorsque nécessaire.
-10. Appliquer immédiatement les conséquences de chaque action avant d'analyser la suivante.
-
-Une défense peut produire trois résultats :
-
-1. DÉFENSE RÉUSSIE
-2. DÉFENSE PARTIELLE
-3. MAUVAIS CONTRE
-
-
-------------------------------------------------------------
-DÉFENSE RÉUSSIE
-------------------------------------------------------------
-
-Une défense est réussie lorsque toutes les conditions nécessaires
-pour bloquer, dévier, saisir ou esquiver l'attaque sont respectées.
-
-Dans ce cas :
-
-- l'attaque défendue ne cause pas ses dégâts normaux ;
-- l'action défensive est validée ;
-- aucune conséquence négative ne doit être inventée ;
-- les actions défensives suivantes peuvent être exécutées normalement.
-
-Une petite conséquence narrative peut être ajoutée uniquement
-si elle découle directement de l'action décrite.
-
-Exemple :
-
-"Tobirama bloque le coup de poing au visage avec sa paume gauche."
-
-Si les conditions sont respectées :
-
-- le coup ne cause aucun dégât ;
-- le bloc est réussi ;
-- Tobirama peut poursuivre normalement son pavé.
-
-
-------------------------------------------------------------
-DÉFENSE PARTIELLE
-------------------------------------------------------------
-
-Une défense partielle signifie que la défense fonctionne
-mais ne neutralise pas totalement l'attaque.
-
-Une défense partielle peut :
-
-- amortir le coup ;
-- détourner partiellement le coup ;
-- réduire les dégâts ;
-- provoquer un recul ;
-- provoquer un déséquilibre ;
-- modifier la posture ;
-- ouvrir une garde ;
-- déplacer un membre ;
-- forcer un déplacement.
-
-IMPORTANT :
-
-La conséquence d'une défense partielle doit être appliquée
-AVANT d'analyser l'action défensive suivante.
-
-Exemple :
-
-Tobirama bloque partiellement un premier coup avec son bras gauche.
-
-Le choc provoque un déséquilibre et ouvre sa garde abdominale.
-
-Tobirama tente ensuite de bloquer un coup de pied visant l'abdomen.
-
-Si sa nouvelle posture ne lui permet plus de réaliser correctement
-le deuxième bloc :
-
-- le deuxième bloc échoue ;
-- le coup de pied peut atteindre l'abdomen ;
-- les dégâts sont appliqués ;
-- les conséquences physiques du coup sont appliquées.
-
-Une défense partielle ne doit donc jamais être considérée
-comme une défense totalement réussie.
-
-
-------------------------------------------------------------
-MAUVAIS CONTRE
-------------------------------------------------------------
-
-Un mauvais contre signifie que l'action défensive est incorrecte,
-insuffisante ou impossible.
-
-Exemples :
-
-- mauvaise zone protégée ;
-- mauvais membre utilisé ;
-- réaction trop tardive ;
-- posture incompatible ;
-- vitesse insuffisante ;
-- force insuffisante ;
-- distance incompatible ;
-- membre déjà indisponible ;
-- conséquence d'une action précédente empêchant l'action ;
-- défense incompatible avec la trajectoire de l'attaque.
-
-Lorsqu'une défense échoue :
-
-- l'attaque correspondante peut toucher ;
-- les dégâts sont appliqués conformément aux règles ;
-- les conséquences physiques sont appliquées ;
-- l'état du personnage est mis à jour ;
-- les actions suivantes sont réévaluées avec ce nouvel état.
-
-
-------------------------------------------------------------
-CONSÉQUENCES DES DÉFENSES RATÉES
-------------------------------------------------------------
-
-Une défense ratée ne signifie PAS automatiquement
-que toutes les actions suivantes sont annulées.
-
-Chaque action suivante doit être analysée séparément.
-
-Une conséquence peut modifier :
-
-- la position ;
-- la posture ;
-- l'équilibre ;
-- la garde ;
-- la disponibilité d'un membre ;
-- la direction du corps ;
-- la distance avec l'adversaire ;
-- la capacité à défendre ;
-- la possibilité d'effectuer l'action suivante.
-
-Exemples :
-
-- déséquilibre ;
-- recul ;
-- posture abaissée ;
-- posture ouverte ;
-- bras déplacé ;
-- garde ouverte ;
-- personnage repoussé ;
-- personnage projeté ;
-- déplacement forcé.
-
-Ne jamais inventer une conséquence qui n'est pas justifiée
-par les règles, le contexte ou les actions présentes dans le pavé.
-
-
-------------------------------------------------------------
-SIMULATION CHRONOLOGIQUE DES DÉFENSES
-------------------------------------------------------------
-
-Pour un pavé contenant plusieurs défenses :
-
-1. analyser la première défense ;
-2. déterminer son résultat ;
-3. appliquer immédiatement les dégâts éventuels ;
-4. appliquer immédiatement les conséquences physiques ;
-5. modifier l'état du personnage ;
-6. analyser la deuxième défense avec le nouvel état ;
-7. appliquer ses conséquences ;
-8. continuer jusqu'à la fin du pavé.
-
-L'état du personnage doit donc évoluer après chaque action.
-
-Une défense réussie ne modifie pas inutilement l'état.
-
-Une défense partielle peut modifier l'état.
-
-Une défense ratée peut modifier fortement l'état.
-
-Les actions suivantes doivent toujours être analysées
-en fonction de l'état résultant des actions précédentes.
-
-
 ============================================================
-14. STAMINA ET CHANGEMENT DE TRAJECTOIRE
+14. STAMINA
 ============================================================
 
-Les esquives à VMAX précisée coûtent 10% de Stamina.
+Les esquives à VMAX précise coûtent 10% de Stamina.
+
+Changer la trajectoire d'un coup déjà en cours coûte 5% de Stamina.
+
+Après cette modification de trajectoire :
+- la partie du corps utilisée ne peut plus être ramenée ;
+- elle ne peut plus être utilisée pour effectuer un bloc ;
+- elle ne peut plus être utilisée pour changer une nouvelle fois la trajectoire.
 
 Les dashs coûtent 10% de Stamina.
 
 Saisir un coup coûte 5% de Stamina.
 
 ============================================================
-CHANGEMENT DE TRAJECTOIRE D'UNE ATTAQUE
-============================================================
-
-Lorsqu'un personnage lance une frappe et que l'adversaire
-effectue une tentative de blocage ou de contre, l'attaquant
-peut modifier la trajectoire de sa frappe afin d'adapter
-son attaque à la réaction adverse.
-
-Modifier la trajectoire d'une frappe déjà engagée coûte :
-
-→ -5% de Stamina.
-
-Cette modification de trajectoire ne constitue PAS une
-nouvelle attaque.
-
-============================================================
-LIMITATION APRÈS MODIFICATION DE TRAJECTOIRE
-============================================================
-
-Après avoir modifié une fois la trajectoire de sa frappe :
-
-- cette même frappe ne peut plus modifier une nouvelle fois
-  sa trajectoire ;
-
-- le membre utilisé pour cette frappe reste engagé dans
-  l'action en cours ;
-
-- ce membre ne peut pas être immédiatement utilisé pour
-  effectuer un bloc ;
-
-- le personnage ne peut pas interrompre instantanément
-  cette frappe pour utiliser le même membre afin de bloquer
-  une nouvelle attaque ;
-
-- une deuxième modification de trajectoire est INTERDITE.
-
-Cette limitation concerne le membre et l'action engagés,
-et non l'ensemble du personnage.
-
-============================================================
-CONTRE-ATTAQUE APRÈS UNE MODIFICATION DE TRAJECTOIRE
-============================================================
-
-Si l'adversaire contre-attaque pendant que le personnage
-vient de modifier la trajectoire de sa frappe :
-
-- le personnage ne peut plus utiliser le membre engagé
-  dans sa frappe pour bloquer ;
-
-- il ne peut plus modifier une deuxième fois la trajectoire
-  de cette même frappe ;
-
-- il ne peut pas interrompre instantanément sa frappe pour
-  effectuer un blocage avec le membre engagé ;
-
-- pour éviter la contre-attaque, sa défense possible est
-  une ESQUIVE PAR DÉPLACEMENT ;
-
-- cette esquive doit être réalisée en déplaçant le corps
-  hors de la trajectoire de l'attaque adverse ;
-
-- si aucune esquive par déplacement n'est possible selon
-  la situation, l'attaque adverse peut atteindre sa cible.
-
-============================================================
-BLOCAGE IMPOSSIBLE AVEC LE MEMBRE ENGAGÉ
-============================================================
-
-Si le personnage tente malgré tout d'utiliser le membre
-encore engagé dans sa frappe pour bloquer la contre-attaque :
-
-→ le bloc est considéré comme un MAUVAIS CONTRE (MC).
-
-La raison est que le personnage ne peut pas arrêter
-instantanément une frappe déjà engagée afin de transformer
-le même membre en défense contre une attaque déjà en cours.
-
-Cette tentative provoque un retard de 2 actions,
-soit 2 secondes, pour effectuer correctement le blocage.
-
-L'attaque adverse peut donc atteindre sa cible.
-
-============================================================
-RÈGLE ABSOLUE
-============================================================
-
-Après une modification de trajectoire :
-
-→ coût : -5% Stamina ;
-→ aucune deuxième modification de trajectoire ;
-→ le membre utilisé reste engagé dans la frappe ;
-→ ce membre ne peut pas immédiatement servir à bloquer ;
-→ en cas de contre-attaque adverse, la défense possible
-  est une ESQUIVE PAR DÉPLACEMENT ;
-→ tenter de bloquer avec le membre engagé = MAUVAIS CONTRE ;
-→ ce mauvais contre entraîne un retard de 2 actions / 2 secondes.
-
-============================================================
-RÈGLE ABSOLUE
-============================================================
-
-Une même frappe peut modifier sa trajectoire UNE SEULE FOIS.
-
-Modification de trajectoire :
-→ -5% Stamina.
-
-Après cette modification :
-→ aucune deuxième modification ;
-→ le membre utilisé reste engagé ;
-→ ce membre ne peut pas servir immédiatement à bloquer ;
-→ en cas de contre-attaque, l'esquive devient la défense
-   possible avec une partie du corps disponible ;
-→ tenter de bloquer avec le membre engagé constitue
-   un MAUVAIS CONTRE et provoque un retard de 2 actions
-   / 2 secondes.
-
-============================================================
 15. DÉPLACEMENTS BOOSTÉS
 ============================================================
 
 Un mouvement boosté peut être nécessaire pour :
-
 - sortir d'un état sonné ;
 - augmenter temporairement les performances du personnage selon les règles.
 
 Le coût indiqué pour sortir d'un état sonné est de 30% de Stamina.
-
 
 ============================================================
 16. DESTRUCTION DE L'ARÈNE
@@ -4391,20 +2039,17 @@ Le coût indiqué pour sortir d'un état sonné est de 30% de Stamina.
 Les personnages peuvent provoquer des destructions sur l'arène.
 
 Ils peuvent envoyer leur adversaire :
-
 - contre des bâtiments ;
 - contre le sol ;
 - contre différents éléments du décor.
 
 Les dégâts de destruction sont de 10% des PV.
 
-Un personnage peut récupérer 20% de Stamina en restant 1 séquence
-complète sans effectuer la moindre action.
+Un personnage peut récupérer 20% de Stamina en restant 1 séquence complète sans effectuer la moindre action.
 
 Niveaux de destruction :
 
 SUPER < MEGA < ULTRA < EXTREME < ULTIMATE
-
 
 ============================================================
 17. RÈGLE DE LECTURE DU PAVÉ
@@ -4417,100 +2062,33 @@ Lorsqu'un pavé est analysé :
 3. Ne jamais considérer deux actions comme une seule si elles sont réellement distinctes.
 4. Vérifier que le nombre total d'actions ne dépasse pas 4.
 5. Vérifier que chaque séquence ne dépasse pas 2 actions.
-6. Les séparateurs "/" et "|" peuvent être utilisés pour séparer les séquences.
-7. L'absence de "/" ou "|" ne rend PAS automatiquement le pavé invalide si les actions peuvent être identifiées clairement dans leur ordre chronologique.
-8. Vérifier les vitesses utilisées.
-9. Si VMAX est utilisée, récupérer sa valeur depuis le grade du personnage dans le contexte.
-10. Ne jamais demander au joueur d'écrire la valeur numérique de VMAX lorsque le grade est connu.
-11. Vérifier les distances parcourues.
-12. Vérifier les coûts de Stamina ou d'énergie.
-13. Vérifier les conditions nécessaires à chaque action.
-14. Vérifier les rapports de Force, Combat Speed et Travel Speed lorsque cela est nécessaire.
-15. Vérifier si une attaque peut réellement toucher, être bloquée, déviée, esquivée ou saisie.
-16. Pour les défenses successives, appliquer les conséquences de chaque défense avant d'analyser la suivante.
-17. Vérifier les conséquences des coups selon la zone touchée.
-18. Vérifier les règles de combo.
-19. Ne jamais inventer une information absente du pavé ou du contexte.
-
+6. Vérifier que les séquences sont séparées par "/" ou "|".
+7. Vérifier les vitesses utilisées.
+8. Vérifier les distances parcourues.
+9. Vérifier les coûts de Stamina ou d'énergie.
+10. Vérifier les conditions nécessaires à chaque action.
+11. Vérifier les rapports de Force, Combat Speed et Travel Speed lorsque cela est nécessaire.
+12. Vérifier si une attaque peut réellement toucher, être bloquée, déviée, esquivée ou saisie.
+13. Vérifier les conséquences des coups selon la zone touchée.
+14. Vérifier les règles de combo.
+15. Ne jamais inventer une information absente du pavé.
 
 ============================================================
 18. RÈGLE ABSOLUE DE L'ARBITRE
 ============================================================
 
-Tu ne dois pas décider selon ce qui semble logique dans un anime
-ou dans un combat réel.
+Tu ne dois pas décider selon ce qui semble logique dans un anime ou dans un combat réel.
 
-Tu dois uniquement appliquer :
-
-- les règles présentes dans ce prompt ;
-- les informations présentes dans le pavé ;
-- les informations présentes dans le contexte du match.
+Tu dois uniquement appliquer les règles présentes dans ce prompt
+et les informations fournies dans le pavé.
 
 Si une information nécessaire manque :
-
 - ne l'invente pas ;
 - signale qu'elle est manquante ;
-- considère uniquement l'action concernée comme NON VALIDABLE.
+- considère l'action comme NON VALIDABLE tant que cette information
+  n'est pas disponible.
 
-IMPORTANT :
-
-Une information peut être fournie indirectement par le contexte du match.
-
-Exemple :
-
-Pavé :
-"Yamato fonce en course VMAX vers Tobirama."
-
-Contexte :
-Yamato = Bronze.
-
-Résultat :
-
-VMAX = 6 m/s.
-
-Le pavé est considéré comme suffisamment précis
-concernant la vitesse.
-
-Il est INTERDIT de refuser ce pavé uniquement parce que
-"6 m/s" n'est pas écrit dans le texte.
-
-============================================================
-19. PRIORITÉ DES INFORMATIONS
-============================================================
-
-Lorsqu'une information est disponible dans le contexte du match,
-elle doit être utilisée avant de déclarer l'information manquante.
-
-Ordre de priorité :
-
-1. règles de ce prompt ;
-2. contexte du match ;
-3. informations explicitement présentes dans le pavé ;
-4. aucune invention.
-
-Les données du contexte peuvent notamment fournir :
-
-- nom du personnage ;
-- JID ;
-- grade ;
-- Force ;
-- Combat Speed ;
-- Travel Speed ;
-- PV ;
-- Stamina ;
-- position ;
-- distance ;
-- état actuel ;
-- autres statistiques nécessaires au système.
-
-Si une statistique nécessaire est présente dans le contexte,
-Gemini doit l'utiliser.
-
-Si elle n'est présente ni dans le contexte ni dans le pavé,
-elle est considérée comme inconnue.
-
-Tu dois analyser le pavé comme un arbitre strict,
-chronologique et impartial.
+Tu dois analyser le pavé comme un arbitre strict et impartial.
 `;
 
 
@@ -6010,221 +3588,6 @@ await lancerMatchAllStars(
 }
 
 //================================================
-// 🌀 COMMANDE STATS DU COMBAT
-//================================================
-
-ovlcmd({
-    nom_cmd: "stats🌀",
-    classe: "ALLSTARS🌀",
-    react: "🌀",
-    desc: "Afficher les statistiques actuelles du combat"
-}, async (ms_org, ovl, cmd_options) => {
-
-    //================================================
-    // 📍 CHAT
-    //================================================
-
-    const chat =
-        ms_org.from ||
-        ms_org.key?.remoteJid ||
-        ms_org;
-
-    //================================================
-    // 🔎 RÉCUPÉRER LE MATCH
-    //================================================
-
-    const match =
-        matchsActifs.get(chat);
-
-    if (!match) {
-
-        await ovl.sendMessage(
-            chat,
-            {
-                text:
-                    "❌ Aucun combat actif dans ce groupe."
-            },
-            {
-                quoted: ms_org
-            }
-        );
-
-        return;
-    }
-
-    //================================================
-    // 🧠 TRACKER COMBAT GEMINI
-    //================================================
-
-    const tracker =
-        match.trackerCombatGemini;
-
-    if (
-        !tracker ||
-        !Array.isArray(tracker.joueurs)
-    ) {
-
-        await ovl.sendMessage(
-            chat,
-            {
-                text:
-                    "❌ Le tracker du combat n'est pas disponible."
-            },
-            {
-                quoted: ms_org
-            }
-        );
-
-        return;
-    }
-
-    //================================================
-    // 📊 BARRE DE STATS
-    //================================================
-
-    function barreStats(valeur) {
-
-        const longueur = 10;
-
-        const v =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Number(valeur) || 0
-                )
-            );
-
-        const pleins =
-            Math.round(
-                (v / 100) * longueur
-            );
-
-        return (
-            "█".repeat(pleins) +
-            "░".repeat(
-                longueur - pleins
-            )
-        );
-    }
-
-    //================================================
-    // 👤 AFFICHAGE JOUEUR
-    //================================================
-
-    function afficherJoueur(joueur) {
-
-        const nom =
-            joueur?.personnage ||
-            joueur?.nom ||
-            "Inconnu";
-
-        const pv =
-            Math.round(
-                Number(joueur?.pv) || 0
-            );
-
-        const stamina =
-            Math.round(
-                Number(joueur?.stamina) || 0
-            );
-
-        const energie =
-            Math.round(
-                Number(joueur?.energie) || 0
-            );
-
-        const posture =
-            joueur?.posture ||
-            "neutre";
-
-        const equilibre =
-            joueur?.equilibre ||
-            "stable";
-
-        const etat =
-            joueur?.ko
-                ? "🔴 KO"
-                : "🟢 ACTIF";
-
-        return `
-╭───────────────
-│ 👤 ${nom}
-│
-│ ❤️ PV       : ${pv}%
-│ ${barreStats(pv)}
-│
-│ 🫀 STAMINA  : ${stamina}%
-│ ${barreStats(stamina)}
-│
-│ 🌀 ÉNERGIE  : ${energie}%
-│ ${barreStats(energie)}
-│
-│ 🧍 Posture  : ${posture}
-│ ⚖️ Équilibre : ${equilibre}
-│
-│ ${etat}
-╰───────────────`;
-    }
-
-    //================================================
-    // ⚔️ TOUR
-    //================================================
-
-    const tour =
-        Number(
-            tracker.combat?.tour
-        ) || 0;
-
-    const maxTours =
-        Number(
-            tracker.combat?.maxTours
-        ) || 10;
-
-    //================================================
-    // 📝 MESSAGE
-    //================================================
-
-    let texte = `
-🌀🔆 *ANIME JUMP VERSUS*
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🌀 STATS DU COMBAT
-⚔️ TOUR : ${tour}/${maxTours}
-`;
-
-    for (
-        const joueur
-        of tracker.joueurs
-    ) {
-
-        texte +=
-            "\n" +
-            afficherJoueur(joueur) +
-            "\n";
-    }
-
-    texte += `
-                                     🌀🔆`;
-
-    //================================================
-    // 📤 ENVOI
-    //================================================
-
-    await ovl.sendMessage(
-        chat,
-        {
-            text: texte
-        },
-        {
-            quoted: ms_org
-        }
-    );
-
-});
-
-
-//================================================
 // 🛑 COMMANDE ARRÊT DU MATCH
 //================================================
 ovlcmd({
@@ -6320,8 +3683,8 @@ ${nomsJoueurs}
 module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
-    analysePaveCombat,
-    envoyerResultatPaveCombat,
+    analysePaveAvecGemini,
+    envoyerResultatPaveGemini,
     lancerMatchAllStars,
     duelsEnCours,
     matchAttente,
