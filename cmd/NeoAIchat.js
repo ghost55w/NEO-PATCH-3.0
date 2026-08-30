@@ -219,7 +219,7 @@ await ovl.sendMessage(
     {
 
         image: {
-            url: "URL_DE_TON_IMAGE"
+            url: "https://files.catbox.moe/6s72pg.jpg"
         },
 
         caption:
