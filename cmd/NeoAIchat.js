@@ -7,22 +7,44 @@
 // Rôle :
 // - Lance une session de test avec +testNeoAI🌀
 // - Attend un texte commençant par 🌀:
-// - Envoie 3 étapes de progression
-// - Analyse le texte avec NeoAI.js
+// - Parcourt les dictionnaires de NeoAI.js
+// - Identifie les mots connus
+// - Identifie les catégories linguistiques
+// - Identifie les termes de combat
+// - Détecte les synonymes / antonymes disponibles
+// - Analyse le contexte de base
 // - Affiche d'abord le résumé
 // - Puis le JSON de compréhension
 //
-// Durée simulée de l'analyse : 30 secondes
+// NeoAIchat.js = MOTEUR DE TEST
+// NeoAI.js     = BASE DE CONNAISSANCES
 //
-// 0s  → 🧠 Analyse du texte...
-// 10s → 🔎 Réfléchis...
-// 20s → ❇️ Envoi de la réponse...
-// 30s → Résultat
 //==============================================================
 
+
 const ovlcmd = require("../lib/ovlcmd");
+
+
+//==============================================================
+// 🧠 IMPORT NEO AI
+//==============================================================
+
 const {
-    neoAnalyserTexteBase
+
+    neoAnalyserTexteBase,
+
+    neoRechercherMot,
+
+    neoRechercherTexte,
+
+    neoTrouverSynonymes,
+
+    neoTrouverAntonymes,
+
+    neoConnaitMot,
+
+    NEO_DICTIONNAIRES
+
 } = require("./NeoAI");
 
 
@@ -30,14 +52,17 @@ const {
 // 🧠 SESSIONS DE TEST
 //==============================================================
 
-const neoAITests = new Map();
+const neoAITests =
+    new Map();
 
 
 //==============================================================
 // 🔎 EXTRAIRE 🌀:
 //==============================================================
 
-function extraireTexteNeoAI(texte = "") {
+function extraireTexteNeoAI(
+    texte = ""
+) {
 
     if (
         typeof texte !== "string"
@@ -70,7 +95,9 @@ function extraireTexteNeoAI(texte = "") {
 // 📝 CONSTRUIRE LE RÉSUMÉ
 //==============================================================
 
-function construireResumeNeoAI(analyse) {
+function construireResumeNeoAI(
+    analyse
+) {
 
     if (
         !analyse ||
@@ -84,60 +111,158 @@ function construireResumeNeoAI(analyse) {
     }
 
 
-    return (
+    const motsConnus =
+        analyse.motsConnus || [];
+
+
+    const motsInconnus =
+        analyse.motsInconnus || [];
+
+
+    const categories =
+        analyse.categories || [];
+
+
+    let resume =
         "NeoAI comprend que : " +
-        analyse.texte
-    );
+        analyse.texte;
+
+
+    resume +=
+        "\n\n📚 Mots reconnus : " +
+        motsConnus.length;
+
+
+    resume +=
+        "\n❓ Mots inconnus : " +
+        motsInconnus.length;
+
+
+    if (
+        categories.length
+    ) {
+
+        resume +=
+            "\n🏷️ Catégories détectées : " +
+            categories.join(", ");
+
+    }
+
+
+    if (
+        analyse.combat?.detecte
+    ) {
+
+        resume +=
+            "\n🥊 Contexte combat détecté.";
+
+    }
+
+
+    return resume;
 
 }
 
 
 //==============================================================
-// 🧠 ANALYSE NEO AI
-//==============================================================
-//
-// Pour le moment NeoAI utilise uniquement
-// le moteur linguistique de base.
-//
-// Cette fonction sera progressivement enrichie
-// avec les dictionnaires, synonymes, verbes,
-// adjectifs, connecteurs, contexte, etc.
+// 🔍 ANALYSER LES MOTS DU TEXTE
 //==============================================================
 
-function analyserNeoAI(texte = "") {
+function analyserMotsNeoAI(
+    tokens = []
+) {
 
-    const analyse =
-        neoAnalyserTexteBase(
-            texte
-        );
+    const motsConnus = [];
+
+    const motsInconnus = [];
+
+    const categoriesTrouvees =
+        new Set();
+
+
+    for (
+        const token of tokens
+    ) {
+
+        //======================================================
+        // 🧹 NETTOYAGE
+        //======================================================
+
+        const mot =
+            token
+                .replace(
+                    /^[^\p{L}\p{N}'-]+|[^\p{L}\p{N}'-]+$/gu,
+                    ""
+                )
+                .trim();
+
+
+        if (!mot) {
+
+            continue;
+
+        }
+
+
+        //======================================================
+        // 🔎 RECHERCHE DANS NEOAI.JS
+        //======================================================
+
+        const recherche =
+            neoRechercherMot(
+                mot
+            );
+
+
+        if (
+            recherche?.trouve
+        ) {
+
+            motsConnus.push({
+
+                mot,
+
+                categorie:
+                    recherche.categorie,
+
+                sousCategorie:
+                    recherche.sousCategorie || null,
+
+                valeur:
+                    recherche.valeur || mot
+
+            });
+
+
+            if (
+                recherche.categorie
+            ) {
+
+                categoriesTrouvees.add(
+                    recherche.categorie
+                );
+
+            }
+
+        } else {
+
+            motsInconnus.push(
+                mot
+            );
+
+        }
+
+    }
 
 
     return {
 
-        valid: true,
+        motsConnus,
 
-        langue:
-            analyse.langue,
+        motsInconnus,
 
-        texte:
-            analyse.texte,
-
-        phrases:
-            analyse.phrases,
-
-        mots:
-            analyse.tokens,
-
-        nombreMots:
-            analyse.nombreMots,
-
-        nombrePhrases:
-            analyse.nombrePhrases,
-
-        resume:
-            construireResumeNeoAI(
-                analyse
-            )
+        categories:
+            [...categoriesTrouvees]
 
     };
 
@@ -145,26 +270,310 @@ function analyserNeoAI(texte = "") {
 
 
 //==============================================================
-// 🎮 COMMANDE
+// 🥊 ANALYSE COMBAT
+//==============================================================
+
+function analyserCombatNeoAI(
+    texte = ""
+) {
+
+    const resultat =
+        neoRechercherTexte(
+            texte,
+            "NEO_COMBAT"
+        );
+
+
+    if (
+        !resultat?.trouve
+    ) {
+
+        return {
+
+            detecte: false,
+
+            elements: []
+
+        };
+
+    }
+
+
+    return {
+
+        detecte: true,
+
+        elements:
+            resultat.elements || []
+
+    };
+
+}
+
+
+//==============================================================
+// 🔗 ANALYSE DES SYNONYMES
+//==============================================================
+
+function analyserSynonymesNeoAI(
+    motsConnus = []
+) {
+
+    const resultat = [];
+
+
+    for (
+        const element of motsConnus
+    ) {
+
+        const synonymes =
+            neoTrouverSynonymes(
+                element.mot
+            );
+
+
+        if (
+            synonymes?.length
+        ) {
+
+            resultat.push({
+
+                mot:
+                    element.mot,
+
+                synonymes
+
+            });
+
+        }
+
+    }
+
+
+    return resultat;
+
+}
+
+
+//==============================================================
+// 🔄 ANALYSE DES ANTONYMES
+//==============================================================
+
+function analyserAntonymesNeoAI(
+    motsConnus = []
+) {
+
+    const resultat = [];
+
+
+    for (
+        const element of motsConnus
+    ) {
+
+        const antonymes =
+            neoTrouverAntonymes(
+                element.mot
+            );
+
+
+        if (
+            antonymes?.length
+        ) {
+
+            resultat.push({
+
+                mot:
+                    element.mot,
+
+                antonymes
+
+            });
+
+        }
+
+    }
+
+
+    return resultat;
+
+}
+
+
+//==============================================================
+// 🧠 ANALYSE COMPLÈTE NEO AI
+//==============================================================
+
+function analyserNeoAI(
+    texte = ""
+) {
+
+    //==========================================================
+    // 📖 ANALYSE LINGUISTIQUE DE BASE
+    //==========================================================
+
+    const analyseBase =
+        neoAnalyserTexteBase(
+            texte
+        );
+
+
+    //==========================================================
+    // 🔎 RECHERCHE DES MOTS
+    //==========================================================
+
+    const analyseMots =
+        analyserMotsNeoAI(
+            analyseBase.tokens
+        );
+
+
+    //==========================================================
+    // 🥊 RECHERCHE COMBAT
+    //==========================================================
+
+    const combat =
+        analyserCombatNeoAI(
+            analyseBase.texte
+        );
+
+
+    //==========================================================
+    // 🔗 SYNONYMES
+    //==========================================================
+
+    const synonymes =
+        analyserSynonymesNeoAI(
+            analyseMots.motsConnus
+        );
+
+
+    //==========================================================
+    // 🔄 ANTONYMES
+    //==========================================================
+
+    const antonymes =
+        analyserAntonymesNeoAI(
+            analyseMots.motsConnus
+        );
+
+
+    //==========================================================
+    // 📦 RÉSULTAT FINAL
+    //==========================================================
+
+    const resultat = {
+
+        valid: true,
+
+        langue:
+            analyseBase.langue,
+
+        texte:
+            analyseBase.texte,
+
+        texteMinuscule:
+            analyseBase.texteMinuscule,
+
+        texteSansAccents:
+            analyseBase.texteSansAccents,
+
+        phrases:
+            analyseBase.phrases,
+
+        mots:
+            analyseBase.tokens,
+
+        nombreMots:
+            analyseBase.nombreMots,
+
+        nombrePhrases:
+            analyseBase.nombrePhrases,
+
+
+        //======================================================
+        // 📚 DICTIONNAIRES
+        //======================================================
+
+        motsConnus:
+            analyseMots.motsConnus,
+
+        motsInconnus:
+            analyseMots.motsInconnus,
+
+        categories:
+            analyseMots.categories,
+
+
+        //======================================================
+        // 🥊 COMBAT
+        //======================================================
+
+        combat,
+
+
+        //======================================================
+        // 🔗 RELATIONS LINGUISTIQUES
+        //======================================================
+
+        synonymes,
+
+        antonymes
+
+    };
+
+
+    //==========================================================
+    // 📝 RÉSUMÉ
+    //==========================================================
+
+    resultat.resume =
+        construireResumeNeoAI(
+            resultat
+        );
+
+
+    return resultat;
+
+}
+
+
+//==============================================================
+// 🎮 COMMANDE +testNeoAI🌀
 //==============================================================
 
 ovlcmd(
+
     {
-        nom_cmd: 'testNeoAI🌀',
-        classe: 'NeoAI🧠',
-        react: '🧠',
+
+        nom_cmd:
+            "testNeoAI🌀",
+
+        classe:
+            "NeoAI🧠",
+
+        react:
+            "🧠",
+
         desc:
             "Teste la compréhension linguistique de NeoAI"
+
     },
 
 
     async (
+
         ms_org,
+
         ovl,
+
         {
+
             arg,
+
             ms
+
         }
+
     ) => {
 
 
@@ -173,13 +582,16 @@ ovlcmd(
         //======================================================
 
         const jid =
+
             ms?.sender ||
+
             ms?.key?.participant ||
+
             ms?.key?.remoteJid;
 
 
         //======================================================
-        // 🧹 SUPPRIMER UNE ANCIENNE SESSION
+        // 🧹 SUPPRIMER ANCIENNE SESSION
         //======================================================
 
         neoAITests.delete(
@@ -188,66 +600,88 @@ ovlcmd(
 
 
         //======================================================
-        // 🧠 CRÉER UNE NOUVELLE SESSION
+        // 🧠 CRÉER SESSION
         //======================================================
 
         neoAITests.set(
+
             jid,
+
             {
 
-                actif: true,
+                actif:
+                    true,
 
                 timestamp:
                     Date.now()
 
             }
+
         );
 
-//======================================================
-// 👋 ACCUEIL NEO AI — IMAGE + CAPTION
-//======================================================
 
-await ovl.sendMessage(
+        //======================================================
+        // 👋 ACCUEIL NEO AI — IMAGE + CAPTION
+        //======================================================
 
-    ms_org,
+        await ovl.sendMessage(
 
-    {
+            ms_org,
 
-        image: {
-            url: "https://files.catbox.moe/6s72pg.jpg"
-        },
+            {
 
-        caption:
+                image: {
 
-            "🧠 *NEO AI🌀* 👋🏻\n\n" +
+                    url:
+                        "https://files.catbox.moe/6s72pg.jpg"
 
-            "🙂 Bonjour ! Je suis *NeoAI*, " +
-            "le moteur linguistique de NEO.\n\n" +
+                },
 
-            "📖 Je vais analyser ton texte " +
-            "et essayer d'en comprendre " +
-            "le langage, les actions et le contexte.\n\n" +
 
-            "✍️ *Envoie maintenant le texte à analyser :*\n\n" +
+                caption:
 
-            "Exemple :\n\n" +
+                    "🧠 *NEO AI🌀* 👋🏻\n\n" +
 
-            "🌀: Les oiseaux volent dans le ciel " +
-            "en plein midi vers le pays des fleurs."
+                    "🙂 Bonjour ! Je suis *NeoAI*, " +
 
-    },
+                    "le moteur linguistique de NEO.\n\n" +
 
-    {
+                    "📖 Je vais analyser ton texte " +
 
-        quoted:
-            ms
+                    "et parcourir ma base de connaissances " +
+
+                    "pour essayer d'en comprendre " +
+
+                    "les mots, les actions et le contexte.\n\n" +
+
+                    "🥊 Je peux également reconnaître " +
+
+                    "les termes liés au combat.\n\n" +
+
+                    "✍️ *Envoie maintenant le texte à analyser :*\n\n" +
+
+                    "Exemple :\n\n" +
+
+                    "🌀: Maki esquive le coup de poing " +
+
+                    "de Tobirama puis riposte avec un crochet."
+
+            },
+
+            {
+
+                quoted:
+                    ms
+
+            }
+
+        );
 
     }
 
 );
-    } 
-);
-        
+
+
 //==============================================================
 // 🌀 TRAITEMENT DES TEXTES NEO AI
 //==============================================================
@@ -264,7 +698,7 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 👤 IDENTIFICATION DU JOUEUR
+    // 👤 IDENTIFICATION
     //==========================================================
 
     const jid =
@@ -277,11 +711,10 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 🔎 VÉRIFIER SI UNE SESSION EST ACTIVE
+    // 🔎 SESSION
     //==========================================================
 
     const session =
-
         neoAITests.get(
             jid
         );
@@ -295,7 +728,7 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // ⏱️ EXPIRATION DE LA SESSION
+    // ⏱️ EXPIRATION
     //==========================================================
 
     const expiration =
@@ -320,19 +753,14 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 🔎 VÉRIFIER LE PRÉFIXE 🌀:
+    // 🔎 PRÉFIXE 🌀:
     //==========================================================
 
     const texteAnalyse =
-
         extraireTexteNeoAI(
             texte
         );
 
-
-    //==========================================================
-    // 🚫 PAS UN TEXTE NEO AI
-    //==========================================================
 
     if (!texteAnalyse) {
 
@@ -342,7 +770,7 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 📥 TEXTE REÇU
+    // 📥 LOG
     //==========================================================
 
     console.log(
@@ -379,10 +807,6 @@ async function traiterMessageNeoAI(
     );
 
 
-    //==========================================================
-    // ⏱️ ATTENTE 10 SECONDES
-    //==========================================================
-
     await new Promise(
 
         resolve =>
@@ -405,7 +829,7 @@ async function traiterMessageNeoAI(
         {
 
             text:
-                "🔎 *Réfléchis...*"
+                "🔎 *Je parcours mon dictionnaire...*"
 
         },
 
@@ -418,10 +842,6 @@ async function traiterMessageNeoAI(
 
     );
 
-
-    //==========================================================
-    // ⏱️ ATTENTE 10 SECONDES
-    //==========================================================
 
     await new Promise(
 
@@ -445,7 +865,7 @@ async function traiterMessageNeoAI(
         {
 
             text:
-                "❇️ *Envoi de la réponse...*"
+                "❇️ *Je construis ma compréhension...*"
 
         },
 
@@ -459,23 +879,20 @@ async function traiterMessageNeoAI(
     );
 
 
-    //==========================================================
-    // ⏱️ ATTENTE 10 SECONDES
-    //==========================================================
-
     await new Promise(
 
         resolve =>
             setTimeout(
                 resolve,
                 10000
+
             )
 
     );
 
 
     //==========================================================
-    // 🧠 ANALYSE NEO AI
+    // 🧠 ANALYSE
     //==========================================================
 
     let resultat;
@@ -484,7 +901,6 @@ async function traiterMessageNeoAI(
     try {
 
         resultat =
-
             analyserNeoAI(
                 texteAnalyse
             );
@@ -530,20 +946,10 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 📝 RÉSUMÉ
-    //==========================================================
-
-    const resume =
-
-        resultat.resume;
-
-
-    //==========================================================
-    // 📦 CONVERSION JSON
+    // 📦 JSON
     //==========================================================
 
     const json =
-
         JSON.stringify(
 
             resultat,
@@ -556,7 +962,7 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 📤 RÉPONSE FINALE
+    // 📤 RÉPONSE
     //==========================================================
 
     const reponse =
@@ -565,7 +971,47 @@ async function traiterMessageNeoAI(
 
         "📝 *Résumé :*\n\n" +
 
-        resume +
+        resultat.resume +
+
+        "\n\n" +
+
+        "📚 *MOTS RECONNUS :*\n\n" +
+
+        (
+            resultat.motsConnus.length
+                ? resultat.motsConnus
+                    .map(
+                        m =>
+                            `• ${m.mot} → ${m.categorie}` +
+                            (
+                                m.sousCategorie
+                                    ? ` → ${m.sousCategorie}`
+                                    : ""
+                            )
+                    )
+                    .join("\n")
+                : "Aucun"
+        ) +
+
+        "\n\n" +
+
+        "❓ *MOTS INCONNUS :*\n\n" +
+
+        (
+            resultat.motsInconnus.length
+                ? resultat.motsInconnus.join(", ")
+                : "Aucun"
+        ) +
+
+        "\n\n" +
+
+        "🥊 *COMBAT :*\n\n" +
+
+        (
+            resultat.combat.detecte
+                ? "Détecté"
+                : "Non détecté"
+        ) +
 
         "\n\n" +
 
@@ -579,7 +1025,7 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 📤 ENVOYER LE RÉSULTAT
+    // 📤 ENVOYER
     //==========================================================
 
     await ovl.sendMessage(
@@ -604,17 +1050,13 @@ async function traiterMessageNeoAI(
 
 
     //==========================================================
-    // 🧹 FIN DE SESSION
+    // 🧹 FIN SESSION
     //==========================================================
 
     neoAITests.delete(
         jid
     );
 
-
-    //==========================================================
-    // 📊 LOG
-    //==========================================================
 
     console.log(
         "✅ NEO AI → ANALYSE TERMINÉE"
@@ -625,11 +1067,170 @@ async function traiterMessageNeoAI(
 
 }
 
+//==============================================================
+// 🛑 COMMANDE +stopNeo🌀
+//==============================================================
+
+ovlcmd(
+
+    {
+
+        nom_cmd:
+            "stopNeo🌀",
+
+        classe:
+            "NeoAI🧠",
+
+        react:
+            "🛑",
+
+        desc:
+            "Arrête la session de test NeoAI"
+
+    },
+
+
+    async (
+
+        ms_org,
+
+        ovl,
+
+        {
+
+            ms
+
+        }
+
+    ) => {
+
+
+        //======================================================
+        // 👤 IDENTIFICATION DU JOUEUR
+        //======================================================
+
+        const jid =
+
+            ms?.sender ||
+
+            ms?.key?.participant ||
+
+            ms?.key?.remoteJid;
+
+
+        //======================================================
+        // 🔎 RECHERCHER LA SESSION
+        //======================================================
+
+        const session =
+            neoAITests.get(
+                jid
+            );
+
+
+        //======================================================
+        // ℹ️ AUCUNE SESSION
+        //======================================================
+
+        if (!session) {
+
+            await ovl.sendMessage(
+
+                ms_org,
+
+                {
+
+                    text:
+                        "ℹ️ *Aucune session NeoAI active.*"
+
+                },
+
+                {
+
+                    quoted:
+                        ms
+
+                }
+
+            );
+
+            return;
+
+        }
+
+
+        //======================================================
+        // 🛑 ARRÊTER LE TIMER
+        //======================================================
+
+        if (
+            session.timer
+        ) {
+
+            clearTimeout(
+                session.timer
+            );
+
+        }
+
+
+        //======================================================
+        // 🧹 SUPPRIMER LA SESSION
+        //======================================================
+
+        neoAITests.delete(
+            jid
+        );
+
+
+        //======================================================
+        // 📤 CONFIRMATION
+        //======================================================
+
+        await ovl.sendMessage(
+
+            ms_org,
+
+            {
+
+                text:
+
+                    "🛑 *NEO AI🌀 — SESSION ARRÊTÉE*\n\n" +
+
+                    "La session NeoAI a été arrêtée.\n\n" +
+
+                    "👉 Utilise *+testNeoAI🌀* pour recommencer."
+
+            },
+
+            {
+
+                quoted:
+                    ms
+
+            }
+
+        );
+
+
+        //======================================================
+        // 📊 LOG
+        //======================================================
+
+        console.log(
+            "🛑 NEO AI → SESSION ARRÊTÉE :",
+            jid
+        );
+
+    }
+
+);
+
+
 
 //==============================================================
 // 📤 EXPORTS
 //==============================================================
-
 module.exports = {
 
     traiterMessageNeoAI,
