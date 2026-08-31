@@ -510,7 +510,9 @@ ovlcmd(
   }
 );
 
-
+//==============================================================
+// 🌀🧠 NEOAI BUILD 
+//==============================================================
 ovlcmd(
   {
     nom_cmd: "testNeoAI🌀",
@@ -534,7 +536,7 @@ ovlcmd(
         ms_org,
         {
           image: {
-            url: "https://files.catbox.moe/zxbny1.jpg"
+            url: "https://files.catbox.moe/6s72pg.jpg"
           },
           caption: stylize(caption),
           mentions: [userJid]
