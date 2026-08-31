@@ -543,6 +543,15 @@ ovlcmd(
       console.log("🧠 [NeoAI] JID :", userJid);
       console.log("🧠 [NeoAI] Lancement de la session...");
 
+        //==========================================================
+// 🧠 CRÉATION DE LA SESSION NEOAI
+//==========================================================
+
+demarrerSessionNeoAI(
+    userJid,
+    ms_org
+);
+
       const pseudo = userJid.split("@")[0];
 
       //==========================================================
