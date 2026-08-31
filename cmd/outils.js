@@ -510,9 +510,8 @@ ovlcmd(
   }
 );
 
-
 //==============================================================
-// 🌀🧠 NEOAI - BUILD 
+// 🌀🧠 NEOAI - BUILD
 //==============================================================
 ovlcmd(
   {
@@ -522,12 +521,19 @@ ovlcmd(
     alias: ["neo🌀"],
     desc: "Lance une session de test NeoAI",
   },
+
   async (ms_org, ovl, cmd_options) => {
+
     console.log("🧠 [NeoAI] COMMANDE DÉTECTÉE !");
 
     const { ms } = cmd_options;
 
     try {
+
+      //==========================================================
+      // 👤 RÉCUPÉRATION DU JID
+      //==========================================================
+
       const userJid =
         ms?.key?.participant ||
         ms?.participant ||
@@ -539,6 +545,96 @@ ovlcmd(
 
       const pseudo = userJid.split("@")[0];
 
+      //==========================================================
+      // 🌀 ÉTAPE 1 — CHARGEMENT
+      //==========================================================
+
+      const loadingMsg = await ovl.sendMessage(
+        ms_org,
+        {
+          text: "🌀 Chargement de NeoAI."
+        },
+        {
+          quoted: ms
+        }
+      );
+
+      //==========================================================
+      // 🌀 ÉTAPE 2
+      //==========================================================
+
+      await new Promise(resolve => setTimeout(resolve, 10000));
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: "🌀 Chargement de NeoAI..",
+          edit: loadingMsg.key
+        }
+      );
+
+      //==========================================================
+      // 🌀 ÉTAPE 3
+      //==========================================================
+
+      await new Promise(resolve => setTimeout(resolve, 10000));
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: "🌀 Chargement de NeoAI...",
+          edit: loadingMsg.key
+        }
+      );
+
+      //==========================================================
+      // 🧠 ÉTAPE 4 — NEOAI PRÊT
+      //==========================================================
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: "🌀🧠 NeoAi est prêt.",
+          edit: loadingMsg.key
+        }
+      );
+
+      //==========================================================
+      // 🧠 ÉTAPE 5
+      //==========================================================
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: "🌀🧠 NeoAi est prêt..",
+          edit: loadingMsg.key
+        }
+      );
+
+      //==========================================================
+      // 🧠 ÉTAPE 6
+      //==========================================================
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: "🌀🧠 NeoAI est prêt...",
+          edit: loadingMsg.key
+        }
+      );
+
+      //==========================================================
+      // 👋 ÉTAPE FINALE — MESSAGE D'ACCUEIL
+      //==========================================================
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       const caption =
         `🌀 Salut @${pseudo}, je suis NeoAI 🧠👋🏻, ` +
         `tu peux envoyer le texte à analyser....`;
@@ -549,7 +645,7 @@ ovlcmd(
           image: {
             url: "https://files.catbox.moe/6s72pg.jpg"
           },
-          caption: caption, 
+          caption: caption,
           mentions: [userJid]
         },
         {
@@ -560,6 +656,7 @@ ovlcmd(
       console.log("✅ [NeoAI] Session lancée avec succès.");
 
     } catch (error) {
+
       console.error(
         "❌ [NeoAI] Erreur lors de l'exécution :",
         error
