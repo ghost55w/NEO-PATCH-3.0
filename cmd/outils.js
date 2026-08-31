@@ -549,7 +549,7 @@ ovlcmd(
           image: {
             url: "https://files.catbox.moe/6s72pg.jpg"
           },
-          caption: stylize(caption),
+          caption: caption, 
           mentions: [userJid]
         },
         {
