@@ -516,10 +516,10 @@ ovlcmd(
 //==============================================================
 ovlcmd(
   {
-    nom_cmd: "Neo",
+    nom_cmd: "neo",
     classe: "Outils",
     react: "🧠",
-    alias: ["Neo🌀"],
+    alias: ["neo🌀"],
     desc: "Lance une session de test NeoAI",
   },
   async (ms_org, ovl, cmd_options) => {
