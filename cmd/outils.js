@@ -833,9 +833,8 @@ function extraireTexteNeoAI(ms) {
 
 
 //==============================================================
-// 🌀 ANALYSE DU TEXTE NEOAI
+// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
-
 async function analyserNeoAI(text) {
 
   console.log("🧠 [NeoAI] Début de l'analyse.");
@@ -843,48 +842,136 @@ async function analyserNeoAI(text) {
   const texteOriginal = String(text || "").trim();
 
   if (!texteOriginal) {
-
     return {
       success: false,
-      texte: "",
       message: "❌ Aucun texte à analyser."
     };
-
   }
 
-
   //============================================================
-  // 🌀 DÉTECTION DU PRÉFIXE NEOAI
+  // 🌀 RETIRER LE PRÉFIXE NEOAI
   //============================================================
 
   let texte = texteOriginal;
 
   if (texte.startsWith("🌀:")) {
-
-    texte = texte
-      .slice(3)
-      .trim();
-
+    texte = texte.slice(3).trim();
   }
-
-
-  //============================================================
-  // ❌ TEXTE VIDE
-  //============================================================
 
   if (!texte) {
-
     return {
       success: false,
-      texte: "",
       message: "❌ Le texte NeoAI est vide."
     };
-
   }
 
+  //============================================================
+  // 🧹 NORMALISATION
+  //============================================================
+
+  const normaliser = (mot) => {
+    return String(mot || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  };
 
   //============================================================
-  // 🧠 DÉCOUPAGE DES MOTS
+  // 📚 BASE LINGUISTIQUE DE BASE
+  //============================================================
+
+  const ACTIONS = {
+
+    avancer: {
+      type: "action",
+      categorie: "deplacement",
+      synonymes: [
+        "avance",
+        "avancer",
+        "avançe",
+        "avançer",
+        "progresse",
+        "progresser"
+      ]
+    },
+
+    reculer: {
+      type: "action",
+      categorie: "deplacement",
+      synonymes: [
+        "recule",
+        "reculer",
+        "retourne",
+        "revenir"
+      ]
+    },
+
+    courir: {
+      type: "action",
+      categorie: "deplacement",
+      synonymes: [
+        "court",
+        "courir",
+        "fonce",
+        "foncer"
+      ]
+    },
+
+    marcher: {
+      type: "action",
+      categorie: "deplacement",
+      synonymes: [
+        "marche",
+        "marcher"
+      ]
+    }
+
+  };
+
+  const DIRECTIONS = {
+
+    avant: [
+      "avant",
+      "vers l'avant",
+      "en avant",
+      "devant"
+    ],
+
+    arriere: [
+      "arriere",
+      "vers l'arriere",
+      "en arriere",
+      "derriere"
+    ],
+
+    gauche: [
+      "gauche",
+      "vers la gauche",
+      "a gauche"
+    ],
+
+    droite: [
+      "droite",
+      "vers la droite",
+      "a droite"
+    ]
+
+  };
+
+  //============================================================
+  // 👤 PERSONNAGES
+  //============================================================
+  const PERSONNAGES = [
+    "tobirama",
+    "maki",
+    "isagi",
+    "neo",
+    "damian"
+  ];
+
+  //============================================================
+  // 🧠 TOKENISATION
   //============================================================
 
   const mots = texte
@@ -892,9 +979,207 @@ async function analyserNeoAI(text) {
     .map(mot => mot.trim())
     .filter(Boolean);
 
+  //============================================================
+  // 🧠 DÉTECTION DES MOTS
+  //============================================================
+
+  const motsAnalyses = [];
+
+  for (const motOriginal of mots) {
+
+    const mot = normaliser(motOriginal);
+
+    let resultat = {
+      mot: motOriginal,
+      normalise: mot,
+      connu: false,
+      type: "inconnu"
+    };
+
+    //==========================================================
+    // 👤 PERSONNAGE
+    //==========================================================
+
+    if (PERSONNAGES.includes(mot)) {
+
+      resultat = {
+        mot: motOriginal,
+        normalise: mot,
+        connu: true,
+        type: "personnage",
+        valeur: motOriginal
+      };
+
+      motsAnalyses.push(resultat);
+      continue;
+    }
+
+    //==========================================================
+    // ⚔️ ACTION
+    //==========================================================
+
+    for (const [nomAction, data] of Object.entries(ACTIONS)) {
+
+      const correspond =
+        mot === nomAction ||
+        data.synonymes.some(s => normaliser(s) === mot);
+
+      if (correspond) {
+
+        resultat = {
+          mot: motOriginal,
+          normalise: mot,
+          connu: true,
+          type: data.type,
+          categorie: data.categorie,
+          action: nomAction
+        };
+
+        break;
+      }
+    }
+
+    if (resultat.connu) {
+      motsAnalyses.push(resultat);
+      continue;
+    }
+
+    //==========================================================
+    // 🧭 DIRECTION SIMPLE
+    //==========================================================
+
+    for (const [direction, variantes] of Object.entries(DIRECTIONS)) {
+
+      if (
+        mot === direction ||
+        variantes.some(v => normaliser(v) === mot)
+      ) {
+
+        resultat = {
+          mot: motOriginal,
+          normalise: mot,
+          connu: true,
+          type: "direction",
+          direction: direction
+        };
+
+        break;
+      }
+    }
+
+    motsAnalyses.push(resultat);
+  }
 
   //============================================================
-  // 🧠 RÉSULTAT
+  // 🧭 DÉTECTION DES EXPRESSIONS DE DIRECTION
+  //============================================================
+
+  let directionDetectee = null;
+
+  const texteNormalise = normaliser(texte);
+
+  for (const [direction, variantes] of Object.entries(DIRECTIONS)) {
+
+    for (const variante of variantes) {
+
+      if (texteNormalise.includes(normaliser(variante))) {
+
+        directionDetectee = direction;
+        break;
+      }
+    }
+
+    if (directionDetectee) break;
+  }
+
+  //============================================================
+  // 👤 DÉTECTION DU SUJET / ACTEUR
+  //============================================================
+
+  let acteur = null;
+
+  for (const personnage of PERSONNAGES) {
+
+    if (
+      texteNormalise.includes(
+        normaliser(personnage)
+      )
+    ) {
+
+      acteur = personnage;
+      break;
+    }
+  }
+
+  //============================================================
+  // ⚔️ DÉTECTION DE L'ACTION
+  //============================================================
+
+  let actionDetectee = null;
+  let categorieAction = null;
+
+  for (const [nomAction, data] of Object.entries(ACTIONS)) {
+
+    const trouve = data.synonymes.some(
+      s => texteNormalise.includes(normaliser(s))
+    );
+
+    if (
+      trouve ||
+      texteNormalise.includes(normaliser(nomAction))
+    ) {
+
+      actionDetectee = nomAction;
+      categorieAction = data.categorie;
+
+      break;
+    }
+  }
+
+  //============================================================
+  // 🧠 CONSTRUCTION DES ACTIONS
+  //============================================================
+
+  const actions = [];
+
+  if (acteur && actionDetectee) {
+
+    actions.push({
+
+      acteur: acteur,
+
+      action: actionDetectee,
+
+      categorie: categorieAction,
+
+      direction: directionDetectee
+
+    });
+
+  }
+
+  //============================================================
+  // 🧠 CONTEXTE
+  //============================================================
+
+  let contexte = "general";
+
+  if (categorieAction === "deplacement") {
+    contexte = "deplacement";
+  }
+
+  //============================================================
+  // 📊 STATISTIQUES
+  //============================================================
+
+  const motsConnus =
+    motsAnalyses.filter(m => m.connu);
+
+  const motsInconnus =
+    motsAnalyses.filter(m => !m.connu);
+
+  //============================================================
+  // 📦 JSON FINAL
   //============================================================
 
   const resultat = {
@@ -907,171 +1192,45 @@ async function analyserNeoAI(text) {
 
     nombreMots: mots.length,
 
-    mots: mots,
+    nombreMotsConnus: motsConnus.length,
+
+    nombreMotsInconnus: motsInconnus.length,
+
+    mots: motsAnalyses,
+
+    motsConnus: motsConnus.map(m => m.mot),
+
+    motsInconnus: motsInconnus.map(m => m.mot),
+
+    comprehension: {
+
+      acteur: acteur,
+
+      action: actionDetectee,
+
+      categorie: categorieAction,
+
+      direction: directionDetectee,
+
+      contexte: contexte
+
+    },
+
+    actions: actions,
 
     dateAnalyse: Date.now()
 
   };
 
-
   console.log(
-    "🧠 [NeoAI] Texte analysé :",
-    texte
+    "🧠 [NeoAI] JSON :",
+    JSON.stringify(resultat, null, 2)
   );
-
-  console.log(
-    "🧠 [NeoAI] Nombre de mots :",
-    mots.length
-  );
-
 
   return resultat;
 }
 
-
-//==============================================================
-// 🧠 TRAITER UN MESSAGE POUR UNE SESSION NEOAI
-//==============================================================
-//
-// Cette fonction sera appelée par le système qui reçoit les
-// messages WhatsApp.
-//
-// Elle ne traite QUE les utilisateurs ayant une session active.
-//
-//==============================================================
-
-async function traiterMessageNeoAI(ms, ms_org, ovl) {
-
-  try {
-
-    const userJid = getNeoAIUserJid(ms, ms_org);
-
-    if (!userJid) {
-      return null;
-    }
-
-
-    //============================================================
-    // 🔎 VÉRIFICATION DE LA SESSION
-    //============================================================
-
-    const session = getSessionNeoAI(userJid);
-
-    if (!session) {
-      return null;
-    }
-
-
-    //============================================================
-    // 📝 RÉCUPÉRATION DU TEXTE
-    //============================================================
-
-    const texte = extraireTexteNeoAI(ms);
-
-    if (!texte) {
-      return null;
-    }
-
-
-    //============================================================
-    // 🌀 LE MESSAGE DOIT COMMENCER PAR 🌀:
-    //============================================================
-
-    if (!texte.trim().startsWith("🌀:")) {
-
-      return null;
-
-    }
-
-
-    console.log(
-      "🧠 [NeoAI] Message détecté pour :",
-      userJid
-    );
-
-    console.log(
-      "🌀 [NeoAI] Texte :",
-      texte
-    );
-
-
-    //============================================================
-    // 🧠 ANALYSE
-    //============================================================
-
-    const resultat = await analyserNeoAI(texte);
-
-
-    //============================================================
-    // 📊 COMPTEUR
-    //============================================================
-
-    session.messagesAnalyses++;
-
-
-    //============================================================
-    // ❌ ERREUR
-    //============================================================
-
-    if (!resultat.success) {
-
-      await ovl.sendMessage(
-        ms_org,
-        {
-          text: resultat.message
-        },
-        {
-          quoted: ms
-        }
-      );
-
-      return resultat;
-    }
-
-
-    //============================================================
-    // 📤 RÉSULTAT TEMPORAIRE
-    //============================================================
-
-    let reponse =
-      `🌀🧠 *NeoAI — Analyse*\n\n` +
-      `📝 Texte : ${resultat.texte}\n\n` +
-      `🔢 Nombre de mots : ${resultat.nombreMots}\n\n` +
-      `📚 Mots détectés :\n` +
-      resultat.mots
-        .map((mot, index) => `${index + 1}. ${mot}`)
-        .join("\n");
-
-
-    await ovl.sendMessage(
-      ms_org,
-      {
-        text: reponse
-      },
-      {
-        quoted: ms
-      }
-    );
-
-
-    console.log(
-      "✅ [NeoAI] Analyse envoyée."
-    );
-
-
-    return resultat;
-
-  } catch (error) {
-
-    console.error(
-      "❌ [NeoAI] Erreur traitement message :",
-      error
-    );
-
-    return null;
-  }
-
-}
+  
         
 module.exports.traiterMessageNeoAI = traiterMessageNeoAI;
 module.exports.demarrerSessionNeoAI = demarrerSessionNeoAI;
