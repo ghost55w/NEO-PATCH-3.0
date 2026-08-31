@@ -1064,3 +1064,7 @@ async function traiterMessageNeoAI(ms, ms_org, ovl) {
 
 }
         
+module.exports.traiterMessageNeoAI = traiterMessageNeoAI;
+module.exports.demarrerSessionNeoAI = demarrerSessionNeoAI;
+module.exports.getSessionNeoAI = getSessionNeoAI;
+module.exports.fermerSessionNeoAI = fermerSessionNeoAI;
