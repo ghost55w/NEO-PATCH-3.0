@@ -674,3 +674,393 @@ ovlcmd(
     }
   }
 );
+
+
+//==============================================================
+// 🌀🧠 NEOAI — GESTION DES SESSIONS
+//==============================================================
+
+// Sessions NeoAI actuellement actives
+//
+// clé : JID de l'utilisateur
+// valeur : informations de sa session
+//
+const neoAISessions = new Map();
+
+
+//==============================================================
+// 🧠 DÉMARRER UNE SESSION NEOAI
+//==============================================================
+
+function demarrerSessionNeoAI(userJid, chatJid) {
+
+  if (!userJid) {
+    console.error("❌ [NeoAI] Impossible de démarrer la session : JID absent.");
+    return false;
+  }
+
+  neoAISessions.set(userJid, {
+    userJid: userJid,
+    chatJid: chatJid,
+    active: true,
+    startedAt: Date.now(),
+    messagesAnalyses: 0
+  });
+
+  console.log(
+    "🧠 [NeoAI] Session démarrée pour :",
+    userJid
+  );
+
+  return true;
+}
+
+
+//==============================================================
+// 🧠 RÉCUPÉRER UNE SESSION NEOAI
+//==============================================================
+
+function getSessionNeoAI(userJid) {
+
+  if (!userJid) return null;
+
+  const session = neoAISessions.get(userJid);
+
+  if (!session) {
+    return null;
+  }
+
+  if (!session.active) {
+    return null;
+  }
+
+  return session;
+}
+
+
+//==============================================================
+// 🧠 VÉRIFIER SI UNE SESSION EST ACTIVE
+//==============================================================
+
+function sessionNeoAIActive(userJid) {
+
+  const session = getSessionNeoAI(userJid);
+
+  return !!session;
+}
+
+
+//==============================================================
+// 🧠 FERMER UNE SESSION NEOAI
+//==============================================================
+
+function fermerSessionNeoAI(userJid) {
+
+  if (!userJid) return false;
+
+  const session = neoAISessions.get(userJid);
+
+  if (!session) {
+    return false;
+  }
+
+  session.active = false;
+
+  neoAISessions.delete(userJid);
+
+  console.log(
+    "🧠 [NeoAI] Session fermée pour :",
+    userJid
+  );
+
+  return true;
+}
+
+
+//==============================================================
+// 🧠 EXTRAIRE LE JID DE L'UTILISATEUR
+//==============================================================
+
+function getNeoAIUserJid(ms, ms_org) {
+
+  return (
+    ms?.key?.participant ||
+    ms?.participant ||
+    ms?.key?.remoteJid ||
+    ms_org
+  );
+
+}
+
+
+//==============================================================
+// 🧠 EXTRAIRE LE TEXTE D'UN MESSAGE
+//==============================================================
+
+function extraireTexteNeoAI(ms) {
+
+  if (!ms) return "";
+
+  const message = ms.message || ms;
+
+  if (message.conversation) {
+    return message.conversation;
+  }
+
+  if (message.extendedTextMessage?.text) {
+    return message.extendedTextMessage.text;
+  }
+
+  if (message.imageMessage?.caption) {
+    return message.imageMessage.caption;
+  }
+
+  if (message.videoMessage?.caption) {
+    return message.videoMessage.caption;
+  }
+
+  return "";
+}
+
+
+//==============================================================
+// 🌀 ANALYSE DU TEXTE NEOAI
+//==============================================================
+
+async function analyserNeoAI(text) {
+
+  console.log("🧠 [NeoAI] Début de l'analyse.");
+
+  const texteOriginal = String(text || "").trim();
+
+  if (!texteOriginal) {
+
+    return {
+      success: false,
+      texte: "",
+      message: "❌ Aucun texte à analyser."
+    };
+
+  }
+
+
+  //============================================================
+  // 🌀 DÉTECTION DU PRÉFIXE NEOAI
+  //============================================================
+
+  let texte = texteOriginal;
+
+  if (texte.startsWith("🌀:")) {
+
+    texte = texte
+      .slice(3)
+      .trim();
+
+  }
+
+
+  //============================================================
+  // ❌ TEXTE VIDE
+  //============================================================
+
+  if (!texte) {
+
+    return {
+      success: false,
+      texte: "",
+      message: "❌ Le texte NeoAI est vide."
+    };
+
+  }
+
+
+  //============================================================
+  // 🧠 DÉCOUPAGE DES MOTS
+  //============================================================
+
+  const mots = texte
+    .split(/\s+/)
+    .map(mot => mot.trim())
+    .filter(Boolean);
+
+
+  //============================================================
+  // 🧠 RÉSULTAT
+  //============================================================
+
+  const resultat = {
+
+    success: true,
+
+    texteOriginal: texteOriginal,
+
+    texte: texte,
+
+    nombreMots: mots.length,
+
+    mots: mots,
+
+    dateAnalyse: Date.now()
+
+  };
+
+
+  console.log(
+    "🧠 [NeoAI] Texte analysé :",
+    texte
+  );
+
+  console.log(
+    "🧠 [NeoAI] Nombre de mots :",
+    mots.length
+  );
+
+
+  return resultat;
+}
+
+
+//==============================================================
+// 🧠 TRAITER UN MESSAGE POUR UNE SESSION NEOAI
+//==============================================================
+//
+// Cette fonction sera appelée par le système qui reçoit les
+// messages WhatsApp.
+//
+// Elle ne traite QUE les utilisateurs ayant une session active.
+//
+//==============================================================
+
+async function traiterMessageNeoAI(ms, ms_org, ovl) {
+
+  try {
+
+    const userJid = getNeoAIUserJid(ms, ms_org);
+
+    if (!userJid) {
+      return null;
+    }
+
+
+    //============================================================
+    // 🔎 VÉRIFICATION DE LA SESSION
+    //============================================================
+
+    const session = getSessionNeoAI(userJid);
+
+    if (!session) {
+      return null;
+    }
+
+
+    //============================================================
+    // 📝 RÉCUPÉRATION DU TEXTE
+    //============================================================
+
+    const texte = extraireTexteNeoAI(ms);
+
+    if (!texte) {
+      return null;
+    }
+
+
+    //============================================================
+    // 🌀 LE MESSAGE DOIT COMMENCER PAR 🌀:
+    //============================================================
+
+    if (!texte.trim().startsWith("🌀:")) {
+
+      return null;
+
+    }
+
+
+    console.log(
+      "🧠 [NeoAI] Message détecté pour :",
+      userJid
+    );
+
+    console.log(
+      "🌀 [NeoAI] Texte :",
+      texte
+    );
+
+
+    //============================================================
+    // 🧠 ANALYSE
+    //============================================================
+
+    const resultat = await analyserNeoAI(texte);
+
+
+    //============================================================
+    // 📊 COMPTEUR
+    //============================================================
+
+    session.messagesAnalyses++;
+
+
+    //============================================================
+    // ❌ ERREUR
+    //============================================================
+
+    if (!resultat.success) {
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: resultat.message
+        },
+        {
+          quoted: ms
+        }
+      );
+
+      return resultat;
+    }
+
+
+    //============================================================
+    // 📤 RÉSULTAT TEMPORAIRE
+    //============================================================
+
+    let reponse =
+      `🌀🧠 *NeoAI — Analyse*\n\n` +
+      `📝 Texte : ${resultat.texte}\n\n` +
+      `🔢 Nombre de mots : ${resultat.nombreMots}\n\n` +
+      `📚 Mots détectés :\n` +
+      resultat.mots
+        .map((mot, index) => `${index + 1}. ${mot}`)
+        .join("\n");
+
+
+    await ovl.sendMessage(
+      ms_org,
+      {
+        text: reponse
+      },
+      {
+        quoted: ms
+      }
+    );
+
+
+    console.log(
+      "✅ [NeoAI] Analyse envoyée."
+    );
+
+
+    return resultat;
+
+  } catch (error) {
+
+    console.error(
+      "❌ [NeoAI] Erreur traitement message :",
+      error
+    );
+
+    return null;
+  }
+
+}
+        
