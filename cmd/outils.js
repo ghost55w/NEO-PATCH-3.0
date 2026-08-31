@@ -513,30 +513,37 @@ ovlcmd(
 //==============================================================
 // 🌀🧠 NEOAI BUILD 
 //==============================================================
+console.log("🧠 ENREGISTREMENT COMMANDE : testNeoAI");
 ovlcmd(
   {
-    nom_cmd: "testNeoAI🌀",
+    nom_cmd: "testNeoAI",
     classe: "Outils",
     react: "🧠",
+    alias: ["testNeoAI🌀"],
     desc: "Lance une session de test NeoAI",
   },
   async (ms_org, ovl, cmd_options) => {
-    const { ms, auteur_Msg_Repondu } = cmd_options;
+    const { ms } = cmd_options;
 
     try {
-      // JID de l'utilisateur qui a lancé la commande
-      const userJid = ms?.key?.participant || ms?.participant || ms_org;
+      // Récupération du JID de l'utilisateur qui lance la commande
+      const userJid =
+        ms?.key?.participant ||
+        ms?.participant ||
+        ms?.key?.remoteJid ||
+        ms_org;
 
-      // Pseudo affiché dans la mention
       const pseudo = userJid.split("@")[0];
 
-      const caption = `🌀 Salut @${pseudo} de l'user qui a taper la commande, je suis NeoAI 🧠👋🏻, tu peux envoyer le text à Analyser....`;
+      const caption =
+        `🌀 Salut @${pseudo}, je suis NeoAI 🧠👋🏻, ` +
+        `tu peux envoyer le texte à analyser....`;
 
       await ovl.sendMessage(
         ms_org,
         {
           image: {
-            url: "https://files.catbox.moe/6s72pg.jpg"
+            url: "https://files.catbox.moe/zxbny1.jpg"
           },
           caption: stylize(caption),
           mentions: [userJid]
@@ -547,7 +554,11 @@ ovlcmd(
       );
 
     } catch (error) {
-      console.error("Erreur lors du lancement de testNeoAI🌀 :", error);
+      console.error(
+        "❌ Erreur lors de l'exécution de testNeoAI :",
+        error
+      );
+
       await ovl.sendMessage(
         ms_org,
         {
