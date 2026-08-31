@@ -24,7 +24,7 @@ const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
 
 const {
     traiterMessageNeoAI
-} = require("..cmd/outils");
+} = require("../cmd/outils");
 
 function getTextMessage(msg) {
   return (
