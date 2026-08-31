@@ -509,3 +509,52 @@ ovlcmd(
     }
   }
 );
+
+
+ovlcmd(
+  {
+    nom_cmd: "testNeoAI🌀",
+    classe: "Outils",
+    react: "🧠",
+    desc: "Lance une session de test NeoAI",
+  },
+  async (ms_org, ovl, cmd_options) => {
+    const { ms, auteur_Msg_Repondu } = cmd_options;
+
+    try {
+      // JID de l'utilisateur qui a lancé la commande
+      const userJid = ms?.key?.participant || ms?.participant || ms_org;
+
+      // Pseudo affiché dans la mention
+      const pseudo = userJid.split("@")[0];
+
+      const caption = `🌀 Salut @${pseudo} de l'user qui a taper la commande, je suis NeoAI 🧠👋🏻, tu peux envoyer le text à Analyser....`;
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          image: {
+            url: "https://files.catbox.moe/zxbny1.jpg"
+          },
+          caption: stylize(caption),
+          mentions: [userJid]
+        },
+        {
+          quoted: ms
+        }
+      );
+
+    } catch (error) {
+      console.error("Erreur lors du lancement de testNeoAI🌀 :", error);
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text: "❌ Une erreur est survenue lors du lancement de NeoAI."
+        },
+        {
+          quoted: ms
+        }
+      );
+    }
+  }
+);
