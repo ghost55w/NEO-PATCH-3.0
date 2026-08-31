@@ -18,6 +18,13 @@ const {
 /* IMPORT SYSTEME MATCH BLUELOCK */
 const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
 
+//==============================================================
+// 🌀🧠 NEOAI
+//==============================================================
+
+const {
+    traiterMessageNeoAI
+} = require("../cmd/TON_FICHIER_NEOAI");
 
 function getTextMessage(msg) {
   return (
