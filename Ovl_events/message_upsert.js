@@ -24,7 +24,7 @@ const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
 
 const {
     traiterMessageNeoAI
-} = require("../cmd/TON_FICHIER_NEOAI");
+} = require("..cmd/outils");
 
 function getTextMessage(msg) {
   return (
@@ -212,7 +212,27 @@ if (ms.key.fromMe) {
       getJid,
       mention_JID
     };
+      
+//==============================================================
+// 🌀🧠 NEOAI — MESSAGE
+//==============================================================
 
+try {
+
+    await traiterMessageNeoAI(
+        ms,
+        ms_org,
+        ovl
+    );
+
+} catch (err) {
+
+    console.error(
+        "❌ [NeoAI] Erreur traitement message :",
+        err
+    );
+
+}
 
       
 // ================================
