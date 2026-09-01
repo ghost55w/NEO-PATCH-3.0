@@ -219,11 +219,21 @@ if (ms.key.fromMe) {
 
 try {
 
-    await traiterMessageNeoAI(
-        ms,
-        ms_org,
-        ovl
-    );
+    const neoAIHandled =
+        await traiterMessageNeoAI(
+            ms,
+            ms_org,
+            ovl,
+            auteur_Message
+        );
+
+    //==========================================================
+    // 🧠 NEOAI A TRAITÉ LE MESSAGE
+    //==========================================================
+
+    if (neoAIHandled) {
+        return;
+    }
 
 } catch (err) {
 
