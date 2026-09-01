@@ -1000,7 +1000,6 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
-
 function analyserNeoAI(text) {
 
     if (typeof text !== "string") {
@@ -1217,24 +1216,40 @@ function analyserNeoAI(text) {
     //==========================================================
     // 8️⃣ RÉSULTAT FINAL
     //==========================================================
+return {
 
-    return {
+    success: true,
 
-        success: true,
+    texteOriginal,
 
-        texteOriginal,
+    texte,
 
-        texte,
+    nombreMots: mots.length,
 
-        mots: motsAnalyses,
+    mots: motsAnalyses,
 
-        comprehension,
+    motsConnus: motsAnalyses
+        .filter(m => m.connu)
+        .map(m => m.mot),
 
-        reformulation,
+    motsInconnus: motsAnalyses
+        .filter(m => !m.connu)
+        .map(m => m.mot),
 
-        dateAnalyse: Date.now()
+    nombreMotsConnus:
+        motsAnalyses.filter(m => m.connu).length,
 
-    };
+    nombreMotsInconnus:
+        motsAnalyses.filter(m => !m.connu).length,
+
+    comprehension,
+
+    reformulation,
+
+    dateAnalyse: Date.now()
+
+};
+    
 }
 
 
@@ -1305,84 +1320,86 @@ function genererResumeNeoAI(resultat) {
     return resume + ".";
 }
 
-
 //==============================================================
-// 🌀🧠 ENVOYER LE RÉSULTAT NEOAI
+// 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
 //==============================================================
 
-async function envoyerResultatNeoAI(
-    ovl,
-    ms_org,
-    ms,
-    resultat
-) {
+async function envoyerResultatNeoAI(ovl, chatJid, resultat) {
 
-    //==========================================================
-    // 🧠 RÉSUMÉ
-    //==========================================================
+    const c = resultat.comprehension;
 
-    const resume =
-        genererResumeNeoAI(resultat);
+    let comprehension = "";
 
+    if (c.sujet) {
+        comprehension += `• Sujet : ${c.sujet}\n`;
+    }
 
-    //==========================================================
-    // 📚 LISTE DES MOTS
-    //==========================================================
+    if (c.actions.length) {
+        comprehension += `• Action : ${
+            c.actions
+                .map(a => a.verbe)
+                .join(", ")
+        }\n`;
+    }
 
-    const listeMots =
-        Array.isArray(resultat.mots)
-            ? resultat.mots
-                .map(
-                    (m, index) =>
-                        `${index + 1}. ${m.mot}`
-                )
-                .join("\n")
-            : "Aucun mot détecté.";
+    if (c.directions.length) {
+        comprehension += `• Direction : ${
+            c.directions.join(", ")
+        }\n`;
+    }
 
+    if (c.objets.length) {
+        comprehension += `• Objet : ${
+            c.objets.join(", ")
+        }\n`;
+    }
 
-    //==========================================================
-    // 📝 MESSAGE
-    //==========================================================
+    if (c.cibles.length) {
+        comprehension += `• Cible : ${
+            c.cibles.join(", ")
+        }\n`;
+    }
 
-    const caption =
-`🌀🧠 *NeoAI Open license source*
-▔▔▔▔▔▔▔▔▔▔
+    if (c.lieux.length) {
+        comprehension += `• Lieu : ${
+            c.lieux.join(", ")
+        }\n`;
+    }
 
-📝*Texte:* ${resultat.texte}
+    if (c.temps.length) {
+        comprehension += `• Temps : ${
+            c.temps.join(", ")
+        }\n`;
+    }
 
-*📚Résumé:* ${resume}
+    if (!comprehension) {
+        comprehension = "• Compréhension insuffisante";
+    }
 
-▔▔▔▔▔▔▔▔▔▔
+    const message = `
+🌀🧠 *NeoAI*
+━━━━━━━━━━━━━━━━━━
 
-🔢 Nombre de mots : ${resultat.nombreMots}
+📝 *Texte :*
+${resultat.texte}
 
-📚 Mots détectés :
-${listeMots}
+📚 *Compréhension :*
+${comprehension}
+
+💡 *Résumé :*
+${resultat.reformulation}
 
 ╰──────────────────
-                     *Powered by NEOVERSE™🌀*`;
-
-
-    //==========================================================
-    // 📤 ENVOI
-    //==========================================================
+                     *Powered by NEOVERSE™🌀*
+`;
 
     await ovl.sendMessage(
-        ms_org,
+        chatJid,
         {
-            image: {
-                url:
-                    "https://files.catbox.moe/6s72pg.jpg"
-            },
-
-            caption
-        },
-        {
-            quoted: ms
+            text: message
         }
     );
 }
-
 
 
 //==============================================================
