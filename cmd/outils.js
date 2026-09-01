@@ -849,7 +849,7 @@ async function analyserNeoAI(text) {
   }
 
   //============================================================
-  // 🌀 RETIRER LE PRÉFIXE NEOAI
+  // 🌀 RETIRER LE PRÉFIXE
   //============================================================
 
   let texte = texteOriginal;
@@ -870,105 +870,16 @@ async function analyserNeoAI(text) {
   //============================================================
 
   const normaliser = (mot) => {
+
     return String(mot || "")
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .trim();
-  };
-
-  //============================================================
-  // 📚 BASE LINGUISTIQUE DE BASE
-  //============================================================
-
-  const ACTIONS = {
-
-    avancer: {
-      type: "action",
-      categorie: "deplacement",
-      synonymes: [
-        "avance",
-        "avancer",
-        "avançe",
-        "avançer",
-        "progresse",
-        "progresser"
-      ]
-    },
-
-    reculer: {
-      type: "action",
-      categorie: "deplacement",
-      synonymes: [
-        "recule",
-        "reculer",
-        "retourne",
-        "revenir"
-      ]
-    },
-
-    courir: {
-      type: "action",
-      categorie: "deplacement",
-      synonymes: [
-        "court",
-        "courir",
-        "fonce",
-        "foncer"
-      ]
-    },
-
-    marcher: {
-      type: "action",
-      categorie: "deplacement",
-      synonymes: [
-        "marche",
-        "marcher"
-      ]
-    }
 
   };
 
-  const DIRECTIONS = {
-
-    avant: [
-      "avant",
-      "vers l'avant",
-      "en avant",
-      "devant"
-    ],
-
-    arriere: [
-      "arriere",
-      "vers l'arriere",
-      "en arriere",
-      "derriere"
-    ],
-
-    gauche: [
-      "gauche",
-      "vers la gauche",
-      "a gauche"
-    ],
-
-    droite: [
-      "droite",
-      "vers la droite",
-      "a droite"
-    ]
-
-  };
-
-  //============================================================
-  // 👤 PERSONNAGES
-  //============================================================
-  const PERSONNAGES = [
-    "tobirama",
-    "maki",
-    "isagi",
-    "neo",
-    "damian"
-  ];
+  const texteNormalise = normaliser(texte);
 
   //============================================================
   // 🧠 TOKENISATION
@@ -980,183 +891,160 @@ async function analyserNeoAI(text) {
     .filter(Boolean);
 
   //============================================================
-  // 🧠 DÉTECTION DES MOTS
+  // 📚 PARCOURS DU DICTIONNAIRE NEOAI.JS
   //============================================================
 
   const motsAnalyses = [];
 
   for (const motOriginal of mots) {
 
-    const mot = normaliser(motOriginal);
+    const mot = normaliser(
+      motOriginal
+        .replace(/[.,!?;:()[\]{}"']/g, "")
+    );
 
     let resultat = {
+
       mot: motOriginal,
+
       normalise: mot,
+
       connu: false,
+
       type: "inconnu"
+
     };
 
     //==========================================================
-    // 👤 PERSONNAGE
+    // 📚 PARCOURS DE TOUTES LES CATÉGORIES
     //==========================================================
 
-    if (PERSONNAGES.includes(mot)) {
+    for (const [categorie, data] of Object.entries(NeoAI)) {
 
-      resultat = {
-        mot: motOriginal,
-        normalise: mot,
-        connu: true,
-        type: "personnage",
-        valeur: motOriginal
-      };
+      if (!data || typeof data !== "object") {
+        continue;
+      }
 
-      motsAnalyses.push(resultat);
-      continue;
-    }
+      const variantes = [];
 
-    //==========================================================
-    // ⚔️ ACTION
-    //==========================================================
+      // Nom de la catégorie
+      variantes.push(categorie);
 
-    for (const [nomAction, data] of Object.entries(ACTIONS)) {
+      // Mots du dictionnaire
+      if (Array.isArray(data.mots)) {
 
-      const correspond =
-        mot === nomAction ||
-        data.synonymes.some(s => normaliser(s) === mot);
+        variantes.push(
+          ...data.mots
+        );
 
-      if (correspond) {
+      }
+
+      //========================================================
+      // 🔎 RECHERCHE DU MOT
+      //========================================================
+
+      const trouve = variantes.some(
+        variante =>
+          normaliser(variante) === mot
+      );
+
+      if (trouve) {
 
         resultat = {
+
           mot: motOriginal,
+
           normalise: mot,
+
           connu: true,
-          type: data.type,
-          categorie: data.categorie,
-          action: nomAction
+
+          type: "lexical",
+
+          categorie: categorie,
+
+          description:
+            data.description || ""
+
         };
 
         break;
       }
-    }
 
-    if (resultat.connu) {
-      motsAnalyses.push(resultat);
-      continue;
-    }
-
-    //==========================================================
-    // 🧭 DIRECTION SIMPLE
-    //==========================================================
-
-    for (const [direction, variantes] of Object.entries(DIRECTIONS)) {
-
-      if (
-        mot === direction ||
-        variantes.some(v => normaliser(v) === mot)
-      ) {
-
-        resultat = {
-          mot: motOriginal,
-          normalise: mot,
-          connu: true,
-          type: "direction",
-          direction: direction
-        };
-
-        break;
-      }
     }
 
     motsAnalyses.push(resultat);
   }
 
   //============================================================
-  // 🧭 DÉTECTION DES EXPRESSIONS DE DIRECTION
+  // 🧠 DÉTECTION DES EXPRESSIONS MULTI-MOTS
   //============================================================
 
-  let directionDetectee = null;
+  const expressionsDetectees = [];
 
-  const texteNormalise = normaliser(texte);
+  for (const [categorie, data] of Object.entries(NeoAI)) {
 
-  for (const [direction, variantes] of Object.entries(DIRECTIONS)) {
+    if (!data || !Array.isArray(data.mots)) {
+      continue;
+    }
 
-    for (const variante of variantes) {
+    for (const expression of data.mots) {
 
-      if (texteNormalise.includes(normaliser(variante))) {
+      const expressionNormalisee =
+        normaliser(expression);
 
-        directionDetectee = direction;
-        break;
+      // On ne traite ici que les expressions
+      // contenant plusieurs mots.
+
+      if (!expressionNormalisee.includes(" ")) {
+        continue;
+      }
+
+      if (
+        texteNormalise.includes(
+          expressionNormalisee
+        )
+      ) {
+
+        expressionsDetectees.push({
+
+          expression: expression,
+
+          categorie: categorie,
+
+          description:
+            data.description || ""
+
+        });
+
       }
     }
-
-    if (directionDetectee) break;
   }
 
   //============================================================
-  // 👤 DÉTECTION DU SUJET / ACTEUR
+  // 📊 MOTS CONNUS / INCONNUS
   //============================================================
 
-  let acteur = null;
-
-  for (const personnage of PERSONNAGES) {
-
-    if (
-      texteNormalise.includes(
-        normaliser(personnage)
-      )
-    ) {
-
-      acteur = personnage;
-      break;
-    }
-  }
-
-  //============================================================
-  // ⚔️ DÉTECTION DE L'ACTION
-  //============================================================
-
-  let actionDetectee = null;
-  let categorieAction = null;
-
-  for (const [nomAction, data] of Object.entries(ACTIONS)) {
-
-    const trouve = data.synonymes.some(
-      s => texteNormalise.includes(normaliser(s))
+  const motsConnus =
+    motsAnalyses.filter(
+      mot => mot.connu
     );
 
-    if (
-      trouve ||
-      texteNormalise.includes(normaliser(nomAction))
-    ) {
-
-      actionDetectee = nomAction;
-      categorieAction = data.categorie;
-
-      break;
-    }
-  }
+  const motsInconnus =
+    motsAnalyses.filter(
+      mot => !mot.connu
+    );
 
   //============================================================
-  // 🧠 CONSTRUCTION DES ACTIONS
+  // 🧠 CATÉGORIES DÉTECTÉES
   //============================================================
 
-  const actions = [];
-
-  if (acteur && actionDetectee) {
-
-    actions.push({
-
-      acteur: acteur,
-
-      action: actionDetectee,
-
-      categorie: categorieAction,
-
-      direction: directionDetectee
-
-    });
-
-  }
+  const categoriesDetectees = [
+    ...new Set(
+      motsConnus
+        .map(m => m.categorie)
+        .filter(Boolean)
+    )
+  ];
 
   //============================================================
   // 🧠 CONTEXTE
@@ -1164,19 +1052,25 @@ async function analyserNeoAI(text) {
 
   let contexte = "general";
 
-  if (categorieAction === "deplacement") {
+  if (
+    categoriesDetectees.includes("combat") ||
+    categoriesDetectees.includes("attaque") ||
+    categoriesDetectees.includes("frappe") ||
+    categoriesDetectees.includes("coup_de_poing") ||
+    categoriesDetectees.includes("coup_de_pied") ||
+    categoriesDetectees.includes("projection") ||
+    categoriesDetectees.includes("saisie") ||
+    categoriesDetectees.includes("immobilisation")
+  ) {
+
+    contexte = "combat";
+
+  } else if (
+    categoriesDetectees.includes("deplacement")
+  ) {
+
     contexte = "deplacement";
   }
-
-  //============================================================
-  // 📊 STATISTIQUES
-  //============================================================
-
-  const motsConnus =
-    motsAnalyses.filter(m => m.connu);
-
-  const motsInconnus =
-    motsAnalyses.filter(m => !m.connu);
 
   //============================================================
   // 📦 JSON FINAL
@@ -1186,37 +1080,47 @@ async function analyserNeoAI(text) {
 
     success: true,
 
-    texteOriginal: texteOriginal,
+    texteOriginal,
 
-    texte: texte,
+    texte,
 
     nombreMots: mots.length,
 
-    nombreMotsConnus: motsConnus.length,
+    nombreMotsConnus:
+      motsConnus.length,
 
-    nombreMotsInconnus: motsInconnus.length,
+    nombreMotsInconnus:
+      motsInconnus.length,
 
     mots: motsAnalyses,
 
-    motsConnus: motsConnus.map(m => m.mot),
+    motsConnus:
+      motsConnus.map(
+        m => m.mot
+      ),
 
-    motsInconnus: motsInconnus.map(m => m.mot),
+    motsInconnus:
+      motsInconnus.map(
+        m => m.mot
+      ),
+
+    expressions:
+      expressionsDetectees,
+
+    categories:
+      categoriesDetectees,
 
     comprehension: {
 
-      acteur: acteur,
+      contexte,
 
-      action: actionDetectee,
+      categories:
+        categoriesDetectees,
 
-      categorie: categorieAction,
-
-      direction: directionDetectee,
-
-      contexte: contexte
+      expressions:
+        expressionsDetectees
 
     },
-
-    actions: actions,
 
     dateAnalyse: Date.now()
 
@@ -1224,14 +1128,98 @@ async function analyserNeoAI(text) {
 
   console.log(
     "🧠 [NeoAI] JSON :",
-    JSON.stringify(resultat, null, 2)
+    JSON.stringify(
+      resultat,
+      null,
+      2
+    )
   );
 
   return resultat;
 }
 
-  
-        
+//============================================================
+  // 🧠🔎 NeoAI résumé 🌀 
+  //============================================================
+function genererResumeNeoAI(resultat) {
+
+  if (!resultat) {
+    return "Aucune compréhension.";
+  }
+
+  const categories =
+    resultat.categories || [];
+
+  const motsConnus =
+    resultat.motsConnus || [];
+
+  if (!categories.length) {
+
+    return "NeoAI n'a détecté aucun élément linguistique connu.";
+
+  }
+
+  return (
+    `NeoAI a identifié ${motsConnus.length} ` +
+    `mot(s) connu(s) appartenant aux catégories : ` +
+    `${categories.join(", ")}.`
+  );
+
+}      
+
+//==============================================================
+// 🌀🧠 ENVOYER LE RÉSULTAT NEOAI
+//==============================================================
+async function envoyerResultatNeoAI(
+  ovl,
+  ms_org,
+  ms,
+  resultat
+) {
+
+  const resume =
+    genererResumeNeoAI(resultat);
+
+  const listeMots =
+    resultat.mots
+      .map(
+        (m, index) =>
+          `${index + 1}. ${m.mot}`
+      )
+      .join("\n");
+
+  const caption =
+`🌀🧠 *NeoAI Open license source 2.0*
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+📝*Texte:* ${resultat.texte}
+
+*📚Résumé:* ${resume}
+
+▔▔▔▔▔▔▔▔▔▔
+
+🔢 Nombre de mots : ${resultat.nombreMots}
+
+📚 Mots détectés :
+${listeMots}
+
+╰──────────────────
+            *Powered by NEOVERSE™🌀*`;
+
+  await ovl.sendMessage(
+    ms_org,
+    {
+      image: {
+        url: "https://files.catbox.moe/6s72pg.jpg"
+      },
+      caption: caption
+    },
+    {
+      quoted: ms
+    }
+  );
+
+}
+
 module.exports.traiterMessageNeoAI = traiterMessageNeoAI;
 module.exports.demarrerSessionNeoAI = demarrerSessionNeoAI;
 module.exports.getSessionNeoAI = getSessionNeoAI;
