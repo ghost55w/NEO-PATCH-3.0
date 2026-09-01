@@ -183,6 +183,10 @@ const NEO_VERBES = {
 
     fr: [
 
+        //======================================================
+        // 🧠 Général
+        //======================================================
+
         "être",
         "avoir",
         "faire",
@@ -198,6 +202,16 @@ const NEO_VERBES = {
         "vouloir",
         "pouvoir",
         "devoir",
+        "sentir",
+        "entendre",
+        "écouter",
+        "chercher",
+        "trouver",
+
+
+        //======================================================
+        // 🚶 Déplacement
+        //======================================================
 
         "marcher",
         "courir",
@@ -206,6 +220,26 @@ const NEO_VERBES = {
         "sauter",
         "tomber",
         "voler",
+        "ramper",
+        "grimper",
+        "descendre",
+        "monter",
+        "entrer",
+        "sortir",
+        "arriver",
+        "partir",
+        "revenir",
+        "approcher",
+        "s'éloigner",
+        "tourner",
+        "accélérer",
+        "ralentir",
+        "voyager",
+
+
+        //======================================================
+        // ⚔️ Action / combat
+        //======================================================
 
         "frapper",
         "attaquer",
@@ -213,25 +247,87 @@ const NEO_VERBES = {
         "esquiver",
         "bloquer",
         "toucher",
-
         "prendre",
         "lancer",
         "attraper",
         "porter",
         "pousser",
         "tirer",
+        "projeter",
+        "saisir",
+        "agripper",
+        "immobiliser",
+        "protéger",
+        "viser",
+        "combattre",
+        "poursuivre",
 
-        "entrer",
-        "sortir",
-        "arriver",
-        "partir",
-        "tourner",
-        "accélérer",
-        "ralentir"
+
+        //======================================================
+        // 🏠 Vie courante
+        //======================================================
+
+        "manger",
+        "boire",
+        "dormir",
+        "se réveiller",
+        "se lever",
+        "s'asseoir",
+        "s'allonger",
+        "se laver",
+        "se doucher",
+        "se baigner",
+        "s'habiller",
+        "se déshabiller",
+        "se coiffer",
+        "se brosser",
+        "nettoyer",
+        "cuisiner",
+        "préparer",
+        "servir",
+        "acheter",
+        "vendre",
+        "payer",
+        "coûter",
+        "gagner",
+        "perdre",
+        "travailler",
+        "étudier",
+        "apprendre",
+        "lire",
+        "écrire",
+        "dessiner",
+        "jouer",
+        "chanter",
+        "danser",
+        "rire",
+        "sourire",
+        "pleurer",
+        "aimer",
+        "détester",
+        "préférer",
+        "choisir",
+        "utiliser",
+        "ouvrir",
+        "fermer",
+        "allumer",
+        "éteindre",
+        "attendre",
+        "commencer",
+        "finir",
+        "continuer",
+        "arrêter"
 
     ],
 
+
+    //==========================================================
+    // 🇬🇧 ANGLAIS
+    //==========================================================
+
     en: [
+
+        // 🧠 Général
 
         "be",
         "have",
@@ -248,6 +344,14 @@ const NEO_VERBES = {
         "want",
         "can",
         "must",
+        "feel",
+        "hear",
+        "listen",
+        "search",
+        "find",
+
+
+        // 🚶 Déplacement
 
         "walk",
         "run",
@@ -257,6 +361,24 @@ const NEO_VERBES = {
         "jump",
         "fall",
         "fly",
+        "crawl",
+        "climb",
+        "descend",
+        "go up",
+        "enter",
+        "exit",
+        "arrive",
+        "leave",
+        "return",
+        "approach",
+        "move away",
+        "turn",
+        "accelerate",
+        "slow",
+        "travel",
+
+
+        // ⚔️ Action / combat
 
         "hit",
         "attack",
@@ -264,26 +386,78 @@ const NEO_VERBES = {
         "dodge",
         "block",
         "touch",
-
         "take",
         "throw",
         "catch",
         "carry",
         "push",
         "pull",
+        "project",
+        "grab",
+        "grip",
+        "immobilize",
+        "protect",
+        "aim",
+        "fight",
+        "pursue",
 
-        "enter",
-        "exit",
-        "arrive",
-        "leave",
-        "turn",
-        "accelerate",
-        "slow"
+
+        // 🏠 Vie courante
+
+        "eat",
+        "drink",
+        "sleep",
+        "wake up",
+        "get up",
+        "sit down",
+        "lie down",
+        "wash",
+        "shower",
+        "bathe",
+        "dress",
+        "undress",
+        "comb",
+        "brush",
+        "clean",
+        "cook",
+        "prepare",
+        "serve",
+        "buy",
+        "sell",
+        "pay",
+        "cost",
+        "win",
+        "lose",
+        "work",
+        "study",
+        "learn",
+        "read",
+        "write",
+        "draw",
+        "play",
+        "sing",
+        "dance",
+        "laugh",
+        "smile",
+        "cry",
+        "love",
+        "hate",
+        "prefer",
+        "choose",
+        "use",
+        "open",
+        "close",
+        "turn on",
+        "turn off",
+        "wait",
+        "start",
+        "finish",
+        "continue",
+        "stop"
 
     ]
 
 };
-
 
 //==============================================================
 // 📚 NEO_NOMS
