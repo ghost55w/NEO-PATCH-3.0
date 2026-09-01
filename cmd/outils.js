@@ -1001,381 +1001,242 @@ function extraireTexteNeoAI(
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
 
-async function analyserNeoAI(text) {
+function analyserNeoAI(text) {
 
-  console.log(
-    "🧠 [NeoAI] Début de l'analyse."
-  );
-
-  const texteOriginal =
-    String(text || "").trim();
-
-  if (!texteOriginal) {
-
-    return {
-      success: false,
-      message: "❌ Aucun texte à analyser."
-    };
-  }
-
-  //============================================================
-  // 🌀 RETIRER LE PRÉFIXE
-  //============================================================
-
-  let texte =
-    texteOriginal;
-
-  if (
-    /^🌀\s*:/u.test(texte)
-  ) {
-
-    texte =
-      texte
-        .replace(/^🌀\s*:/u, "")
-        .trim();
-  }
-
-  if (!texte) {
-
-    return {
-      success: false,
-      message: "❌ Le texte NeoAI est vide."
-    };
-  }
-
-  //============================================================
-  // 🧹 NORMALISATION
-  //============================================================
-
-  const normaliser = (mot) => {
-
-    return String(mot || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim();
-
-  };
-
-  const texteNormalise =
-    normaliser(texte);
-
-  //============================================================
-  // 🧠 TOKENISATION
-  //============================================================
-
-  const mots =
-    texte
-      .split(/\s+/)
-      .map(
-        mot => mot.trim()
-      )
-      .filter(Boolean);
-
-  //============================================================
-  // 📚 PARCOURS DU DICTIONNAIRE NEOAI
-  //============================================================
-
-  const motsAnalyses = [];
-
-  // Sécurité si NeoAI n'est pas chargé
-  const dictionnaire = NeoAI;
-
-console.log(
-  "🧠 [NeoAI] Catégories chargées :",
-  Object.keys(dictionnaire)
-);
-
-  for (
-    const motOriginal of mots
-  ) {
-
-    const mot =
-      normaliser(
-        motOriginal
-          .replace(
-            /[.,!?;:()[\]{}"']/g,
-            ""
-          )
-      );
-
-    let resultat = {
-
-      mot: motOriginal,
-
-      normalise: mot,
-
-      connu: false,
-
-      type: "inconnu"
-
-    };
-
-    //==========================================================
-    // 📚 PARCOURS DES CATÉGORIES
-    //==========================================================
-
-    for (
-      const [categorie, data]
-      of Object.entries(dictionnaire)
-    ) {
-
-      if (
-        !data ||
-        typeof data !== "object"
-      ) {
-        continue;
-      }
-
-      const variantes = [];
-
-      // Nom de la catégorie
-      variantes.push(categorie);
-
-      // Mots du dictionnaire
-      if (
-        Array.isArray(data.mots)
-      ) {
-
-        variantes.push(
-          ...data.mots
-        );
-      }
-
-      //========================================================
-      // 🔎 RECHERCHE DU MOT
-      //========================================================
-
-      const trouve =
-        variantes.some(
-          variante =>
-            normaliser(variante) === mot
-        );
-
-      if (trouve) {
-
-        resultat = {
-
-          mot: motOriginal,
-
-          normalise: mot,
-
-          connu: true,
-
-          type: "lexical",
-
-          categorie: categorie,
-
-          description:
-            data.description || ""
-
+    if (typeof text !== "string") {
+        return {
+            success: false,
+            erreur: "Texte invalide."
         };
-
-        break;
-      }
     }
 
-    motsAnalyses.push(resultat);
-  }
+    //==========================================================
+    // 1️⃣ EXTRACTION DU TEXTE
+    //==========================================================
 
-  //============================================================
-  // 🧠 DÉTECTION DES EXPRESSIONS MULTI-MOTS
-  //============================================================
+    const texteOriginal = text.trim();
 
-  const expressionsDetectees = [];
+    const texte = texteOriginal
+        .replace(/^🌀\s*:\s*/i, "")
+        .trim();
 
-  for (
-    const [categorie, data]
-    of Object.entries(dictionnaire)
-  ) {
-
-    if (
-      !data ||
-      !Array.isArray(data.mots)
-    ) {
-      continue;
+    if (!texte) {
+        return {
+            success: false,
+            erreur: "Texte vide."
+        };
     }
 
-    for (
-      const expression of data.mots
-    ) {
+    //==========================================================
+    // 2️⃣ EXTRACTION DES MOTS
+    //==========================================================
 
-      const expressionNormalisee =
-        normaliser(expression);
+    const texteNormalise =
+        typeof NeoAI.neoNormaliserTexte === "function"
+            ? NeoAI.neoNormaliserTexte(texte)
+            : texte;
 
-      if (
-        !expressionNormalisee.includes(" ")
-      ) {
-        continue;
-      }
+    const mots =
+        typeof NeoAI.neoTokeniser === "function"
+            ? NeoAI.neoTokeniser(texteNormalise)
+            : texteNormalise.split(/\s+/);
 
-      if (
-        texteNormalise.includes(
-          expressionNormalisee
-        )
-      ) {
+    //==========================================================
+    // 3️⃣ RECHERCHE DE CHAQUE MOT DANS NEOAI.JS
+    //==========================================================
 
-        expressionsDetectees.push({
+    const motsAnalyses = [];
 
-          expression: expression,
+    for (const mot of mots) {
 
-          categorie: categorie,
+        let connaissance = null;
 
-          description:
-            data.description || ""
+        if (
+            typeof NeoAI.neoRechercherMot === "function"
+        ) {
+            connaissance =
+                NeoAI.neoRechercherMot(mot);
+        }
+
+        motsAnalyses.push({
+
+            mot,
+
+            connu:
+                connaissance?.trouve === true,
+
+            categories:
+                connaissance?.categories || []
 
         });
-      }
     }
-  }
 
-  //============================================================
-  // 📊 MOTS CONNUS / INCONNUS
-  //============================================================
+    //==========================================================
+    // 4️⃣ COMPRÉHENSION DU TEXTE
+    //==========================================================
 
-  const motsConnus =
-    motsAnalyses.filter(
-      mot => mot.connu
-    );
+    const comprehension = {
 
-  const motsInconnus =
-    motsAnalyses.filter(
-      mot => !mot.connu
-    );
+        sujet: null,
 
-  //============================================================
-  // 🧠 CATÉGORIES DÉTECTÉES
-  //============================================================
+        actions: [],
 
-  const categoriesDetectees = [
-    ...new Set(
-      motsConnus
-        .map(
-          m => m.categorie
-        )
-        .filter(Boolean)
-    )
-  ];
+        directions: [],
 
-  //============================================================
-  // 🧠 CATÉGORIES DES EXPRESSIONS
-  //============================================================
+        objets: [],
 
-  for (
-    const expression
-    of expressionsDetectees
-  ) {
+        cibles: [],
+
+        lieux: [],
+
+        temps: [],
+
+        contexte: "general"
+
+    };
+
+    // On parcourt les connaissances trouvées
+    for (const element of motsAnalyses) {
+
+        if (!element.connu) continue;
+
+        for (const categorie of element.categories) {
+
+            const nom =
+                String(
+                    categorie.categorie || ""
+                ).toLowerCase();
+
+            // Direction
+            if (
+                nom.includes("direction")
+            ) {
+
+                comprehension.directions.push(
+                    element.mot
+                );
+            }
+
+            // Verbe
+            if (
+                nom.includes("verbe")
+            ) {
+
+                comprehension.actions.push({
+
+                    verbe: element.mot,
+
+                    categories:
+                        element.categories
+
+                });
+            }
+
+            // Temps
+            if (
+                nom.includes("temps")
+            ) {
+
+                comprehension.temps.push(
+                    element.mot
+                );
+            }
+        }
+    }
+
+    //==========================================================
+    // 5️⃣ DÉTECTION DU SUJET
+    //==========================================================
+
+    const indexAction =
+        motsAnalyses.findIndex(
+            m =>
+                m.categories?.some(
+                    c =>
+                        String(
+                            c.categorie || ""
+                        )
+                        .toLowerCase()
+                        .includes("verbe")
+                )
+        );
+
+    if (indexAction > 0) {
+
+        comprehension.sujet =
+            mots
+                .slice(0, indexAction)
+                .join(" ");
+    }
+
+    //==========================================================
+    // 6️⃣ CONTEXTE
+    //==========================================================
 
     if (
-      expression.categorie &&
-      !categoriesDetectees.includes(
-        expression.categorie
-      )
+        comprehension.directions.length > 0 &&
+        comprehension.actions.length > 0
     ) {
 
-      categoriesDetectees.push(
-        expression.categorie
-      );
+        comprehension.contexte =
+            "deplacement";
     }
-  }
 
-  //============================================================
-  // 🧠 CONTEXTE
-  //============================================================
+    //==========================================================
+    // 7️⃣ REFORMULATION
+    //==========================================================
 
-  let contexte =
-    "general";
+    let reformulation = texte;
 
-  if (
-    categoriesDetectees.includes("combat") ||
-    categoriesDetectees.includes("attaque") ||
-    categoriesDetectees.includes("frappe") ||
-    categoriesDetectees.includes("coup_de_poing") ||
-    categoriesDetectees.includes("coup_de_pied") ||
-    categoriesDetectees.includes("projection") ||
-    categoriesDetectees.includes("saisie") ||
-    categoriesDetectees.includes("immobilisation")
-  ) {
+    if (
+        comprehension.sujet &&
+        comprehension.actions.length
+    ) {
 
-    contexte =
-      "combat";
+        const action =
+            comprehension.actions[0].verbe;
 
-  } else if (
-    categoriesDetectees.includes("deplacement")
-  ) {
+        if (
+            comprehension.contexte === "deplacement" &&
+            comprehension.directions.length
+        ) {
 
-    contexte =
-      "deplacement";
-  }
+            const direction =
+                comprehension.directions[0];
 
-  //============================================================
-  // 📦 JSON FINAL
-  //============================================================
+            reformulation =
+                `${comprehension.sujet} se déplacent en direction du ${direction}.`;
 
-  const resultat = {
+        } else {
 
-    success: true,
+            reformulation =
+                `${comprehension.sujet} ${action}.`;
+        }
+    }
 
-    texteOriginal,
+    //==========================================================
+    // 8️⃣ RÉSULTAT FINAL
+    //==========================================================
 
-    texte,
+    return {
 
-    nombreMots:
-      mots.length,
+        success: true,
 
-    nombreMotsConnus:
-      motsConnus.length,
+        texteOriginal,
 
-    nombreMotsInconnus:
-      motsInconnus.length,
+        texte,
 
-    mots:
-      motsAnalyses,
+        mots: motsAnalyses,
 
-    motsConnus:
-      motsConnus.map(
-        m => m.mot
-      ),
+        comprehension,
 
-    motsInconnus:
-      motsInconnus.map(
-        m => m.mot
-      ),
+        reformulation,
 
-    expressions:
-      expressionsDetectees,
+        dateAnalyse: Date.now()
 
-    categories:
-      categoriesDetectees,
-
-    comprehension: {
-
-      contexte,
-
-      categories:
-        categoriesDetectees,
-
-      expressions:
-        expressionsDetectees
-
-    },
-
-    dateAnalyse:
-      Date.now()
-
-  };
-
-  console.log(
-    "🧠 [NeoAI] JSON :",
-    JSON.stringify(
-      resultat,
-      null,
-      2
-    )
-  );
-
-  return resultat;
+    };
 }
+
 
 
 //==============================================================
