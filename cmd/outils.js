@@ -701,20 +701,34 @@ const neoAISessions = new Map();
 // 🧠 DÉMARRER UNE SESSION NEOAI
 //==============================================================
 
-function demarrerSessionNeoAI(userJid, chatJid) {
+function demarrerSessionNeoAI(
+  userJid,
+  chatJid
+) {
 
   if (!userJid) {
-    console.error("❌ [NeoAI] Impossible de démarrer la session : JID absent.");
+
+    console.error(
+      "❌ [NeoAI] Impossible de démarrer la session : JID absent."
+    );
+
     return false;
   }
 
-  neoAISessions.set(userJid, {
-    userJid: userJid,
-    chatJid: chatJid,
-    active: true,
-    startedAt: Date.now(),
-    messagesAnalyses: 0
-  });
+  //============================================================
+  // 🧠 CRÉATION DE LA SESSION
+  //============================================================
+
+  neoAISessions.set(
+    userJid,
+    {
+      userJid: userJid,
+      chatJid: chatJid || null,
+      active: true,
+      startedAt: Date.now(),
+      messagesAnalyses: 0
+    }
+  );
 
   console.log(
     "🧠 [NeoAI] Session démarrée pour :",
@@ -729,17 +743,29 @@ function demarrerSessionNeoAI(userJid, chatJid) {
 // 🧠 RÉCUPÉRER UNE SESSION NEOAI
 //==============================================================
 
-function getSessionNeoAI(userJid) {
+function getSessionNeoAI(
+  userJid
+) {
 
-  if (!userJid) return null;
+  if (!userJid) {
+    return null;
+  }
 
-  const session = neoAISessions.get(userJid);
+  const session =
+    neoAISessions.get(
+      userJid
+    );
 
   if (!session) {
     return null;
   }
 
   if (!session.active) {
+
+    neoAISessions.delete(
+      userJid
+    );
+
     return null;
   }
 
@@ -751,11 +777,13 @@ function getSessionNeoAI(userJid) {
 // 🧠 VÉRIFIER SI UNE SESSION EST ACTIVE
 //==============================================================
 
-function sessionNeoAIActive(userJid) {
+function sessionNeoAIActive(
+  userJid
+) {
 
-  const session = getSessionNeoAI(userJid);
-
-  return !!session;
+  return !!getSessionNeoAI(
+    userJid
+  );
 }
 
 
@@ -763,22 +791,39 @@ function sessionNeoAIActive(userJid) {
 // 🧠 FERMER UNE SESSION NEOAI
 //==============================================================
 
-function fermerSessionNeoAI(userJid) {
+function fermerSessionNeoAI(
+  userJid
+) {
 
-  if (!userJid) return false;
+  if (!userJid) {
+    return false;
+  }
 
-  const session = neoAISessions.get(userJid);
+  const session =
+    neoAISessions.get(
+      userJid
+    );
 
   if (!session) {
     return false;
   }
 
+  //============================================================
+  // 🔴 DÉSACTIVATION
+  //============================================================
+
   session.active = false;
 
-  neoAISessions.delete(userJid);
+  //============================================================
+  // 🗑️ SUPPRESSION
+  //============================================================
+
+  neoAISessions.delete(
+    userJid
+  );
 
   console.log(
-    "🧠 [NeoAI] Session fermée pour :",
+    "🛑 [NeoAI] Session fermée pour :",
     userJid
   );
 
@@ -790,13 +835,20 @@ function fermerSessionNeoAI(userJid) {
 // 🧠 EXTRAIRE LE JID DE L'UTILISATEUR
 //==============================================================
 
-function getNeoAIUserJid(ms, ms_org) {
+function getNeoAIUserJid(
+  ms,
+  ms_org
+) {
 
   return (
     ms?.key?.participant ||
     ms?.participant ||
-    ms?.key?.remoteJid ||
-    ms_org
+    (
+      ms?.key?.remoteJid &&
+      !ms.key.remoteJid.endsWith("@g.us")
+        ? ms.key.remoteJid
+        : null
+    )
   );
 
 }
@@ -806,26 +858,71 @@ function getNeoAIUserJid(ms, ms_org) {
 // 🧠 EXTRAIRE LE TEXTE D'UN MESSAGE
 //==============================================================
 
-function extraireTexteNeoAI(ms) {
+function extraireTexteNeoAI(
+  ms
+) {
 
-  if (!ms) return "";
+  if (!ms) {
+    return "";
+  }
 
-  const message = ms.message || ms;
+  const message =
+    ms.message ||
+    ms;
 
-  if (message.conversation) {
+  //============================================================
+  // 📝 TEXTE SIMPLE
+  //============================================================
+
+  if (
+    message.conversation
+  ) {
+
     return message.conversation;
   }
 
-  if (message.extendedTextMessage?.text) {
+  //============================================================
+  // 📝 TEXTE ÉTENDU
+  //============================================================
+
+  if (
+    message.extendedTextMessage?.text
+  ) {
+
     return message.extendedTextMessage.text;
   }
 
-  if (message.imageMessage?.caption) {
+  //============================================================
+  // 🖼️ IMAGE
+  //============================================================
+
+  if (
+    message.imageMessage?.caption
+  ) {
+
     return message.imageMessage.caption;
   }
 
-  if (message.videoMessage?.caption) {
+  //============================================================
+  // 🎥 VIDÉO
+  //============================================================
+
+  if (
+    message.videoMessage?.caption
+  ) {
+
     return message.videoMessage.caption;
+  }
+
+  //============================================================
+  // 📄 DOCUMENT
+  //============================================================
+
+  if (
+    message.documentMessage?.caption
+  ) {
+
+    return message.documentMessage.caption;
   }
 
   return "";
