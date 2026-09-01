@@ -526,53 +526,72 @@ ovlcmd(
 
     console.log("🧠 [NeoAI] COMMANDE DÉTECTÉE !");
 
-    const { ms } = cmd_options;
+    const {
+      ms,
+      auteur_Message
+    } = cmd_options;
 
     try {
 
       //==========================================================
-      // 👤 RÉCUPÉRATION DU JID
+      // 👤 JID CANONIQUE
       //==========================================================
 
       const userJid =
+        auteur_Message ||
         ms?.key?.participant ||
         ms?.participant ||
-        ms?.key?.remoteJid ||
+        (
+          ms?.key?.remoteJid &&
+          !ms.key.remoteJid.endsWith("@g.us")
+            ? ms.key.remoteJid
+            : null
+        ) ||
         ms_org;
+
+      if (!userJid) {
+        console.error("❌ [NeoAI] JID utilisateur introuvable.");
+        return;
+      }
 
       console.log("🧠 [NeoAI] JID :", userJid);
       console.log("🧠 [NeoAI] Lancement de la session...");
 
-        //==========================================================
-// 🧠 CRÉATION DE LA SESSION NEOAI
-//==========================================================
+      //==========================================================
+      // 🧠 CRÉATION DE LA SESSION NEOAI
+      //==========================================================
 
-demarrerSessionNeoAI(
-    userJid,
-    ms_org
-);
+      demarrerSessionNeoAI(
+        userJid,
+        ms_org
+      );
 
-      const pseudo = userJid.split("@")[0];
+      const pseudo =
+        String(userJid)
+          .split("@")[0];
 
       //==========================================================
       // 🌀 ÉTAPE 1 — CHARGEMENT
       //==========================================================
 
-      const loadingMsg = await ovl.sendMessage(
-        ms_org,
-        {
-          text: "🌀 Chargement de NeoAI."
-        },
-        {
-          quoted: ms
-        }
-      );
+      const loadingMsg =
+        await ovl.sendMessage(
+          ms_org,
+          {
+            text: "🌀 Chargement de NeoAI."
+          },
+          {
+            quoted: ms
+          }
+        );
 
       //==========================================================
       // 🌀 ÉTAPE 2
       //==========================================================
 
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise(
+        resolve => setTimeout(resolve, 10000)
+      );
 
       await ovl.sendMessage(
         ms_org,
@@ -586,7 +605,9 @@ demarrerSessionNeoAI(
       // 🌀 ÉTAPE 3
       //==========================================================
 
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise(
+        resolve => setTimeout(resolve, 10000)
+      );
 
       await ovl.sendMessage(
         ms_org,
@@ -600,7 +621,9 @@ demarrerSessionNeoAI(
       // 🧠 ÉTAPE 4 — NEOAI PRÊT
       //==========================================================
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(
+        resolve => setTimeout(resolve, 3000)
+      );
 
       await ovl.sendMessage(
         ms_org,
@@ -614,7 +637,9 @@ demarrerSessionNeoAI(
       // 🧠 ÉTAPE 5
       //==========================================================
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(
+        resolve => setTimeout(resolve, 3000)
+      );
 
       await ovl.sendMessage(
         ms_org,
@@ -628,7 +653,9 @@ demarrerSessionNeoAI(
       // 🧠 ÉTAPE 6
       //==========================================================
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(
+        resolve => setTimeout(resolve, 3000)
+      );
 
       await ovl.sendMessage(
         ms_org,
@@ -642,7 +669,9 @@ demarrerSessionNeoAI(
       // 👋 ÉTAPE FINALE — MESSAGE D'ACCUEIL
       //==========================================================
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(
+        resolve => setTimeout(resolve, 1000)
+      );
 
       const caption =
         `🌀 Salut @${pseudo}, je suis NeoAI 🧠👋🏻, ` +
@@ -662,7 +691,10 @@ demarrerSessionNeoAI(
         }
       );
 
-      console.log("✅ [NeoAI] Session lancée avec succès.");
+      console.log(
+        "✅ [NeoAI] Session lancée avec succès pour :",
+        userJid
+      );
 
     } catch (error) {
 
@@ -674,7 +706,8 @@ demarrerSessionNeoAI(
       await ovl.sendMessage(
         ms_org,
         {
-          text: "❌ Une erreur est survenue lors du lancement de NeoAI."
+          text:
+            "❌ Une erreur est survenue lors du lancement de NeoAI."
         },
         {
           quoted: ms
@@ -689,12 +722,23 @@ demarrerSessionNeoAI(
 // 🌀🧠 NEOAI — GESTION DES SESSIONS
 //==============================================================
 
-// Sessions NeoAI actuellement actives
-//
-// clé : JID de l'utilisateur
-// valeur : informations de sa session
-//
 const neoAISessions = new Map();
+
+
+//==============================================================
+// 🧠 NORMALISER UN JID NEOAI
+//==============================================================
+
+function normaliserJidNeoAI(jid) {
+
+  if (!jid) {
+    return null;
+  }
+
+  return String(jid)
+    .trim()
+    .replace(/^lid:/i, "");
+}
 
 
 //==============================================================
@@ -706,7 +750,10 @@ function demarrerSessionNeoAI(
   chatJid
 ) {
 
-  if (!userJid) {
+  const jid =
+    normaliserJidNeoAI(userJid);
+
+  if (!jid) {
 
     console.error(
       "❌ [NeoAI] Impossible de démarrer la session : JID absent."
@@ -716,9 +763,9 @@ function demarrerSessionNeoAI(
   }
 
   neoAISessions.set(
-    userJid,
+    jid,
     {
-      userJid: userJid,
+      userJid: jid,
       chatJid: chatJid || null,
       active: true,
       startedAt: Date.now(),
@@ -728,7 +775,7 @@ function demarrerSessionNeoAI(
 
   console.log(
     "🧠 [NeoAI] Session démarrée pour :",
-    userJid
+    jid
   );
 
   return true;
@@ -743,14 +790,15 @@ function getSessionNeoAI(
   userJid
 ) {
 
-  if (!userJid) {
+  const jid =
+    normaliserJidNeoAI(userJid);
+
+  if (!jid) {
     return null;
   }
 
   const session =
-    neoAISessions.get(
-      userJid
-    );
+    neoAISessions.get(jid);
 
   if (!session) {
     return null;
@@ -758,9 +806,7 @@ function getSessionNeoAI(
 
   if (!session.active) {
 
-    neoAISessions.delete(
-      userJid
-    );
+    neoAISessions.delete(jid);
 
     return null;
   }
@@ -777,9 +823,7 @@ function sessionNeoAIActive(
   userJid
 ) {
 
-  return !!getSessionNeoAI(
-    userJid
-  );
+  return !!getSessionNeoAI(userJid);
 }
 
 
@@ -791,14 +835,15 @@ function fermerSessionNeoAI(
   userJid
 ) {
 
-  if (!userJid) {
+  const jid =
+    normaliserJidNeoAI(userJid);
+
+  if (!jid) {
     return false;
   }
 
   const session =
-    neoAISessions.get(
-      userJid
-    );
+    neoAISessions.get(jid);
 
   if (!session) {
     return false;
@@ -806,13 +851,11 @@ function fermerSessionNeoAI(
 
   session.active = false;
 
-  neoAISessions.delete(
-    userJid
-  );
+  neoAISessions.delete(jid);
 
   console.log(
     "🛑 [NeoAI] Session fermée pour :",
-    userJid
+    jid
   );
 
   return true;
@@ -834,7 +877,8 @@ function estCommandeArretNeoAI(
   const normalise =
     String(texte)
       .toLowerCase()
-      .trim();
+      .trim()
+      .replace(/\s+/g, " ");
 
   return (
     normalise === "🌀 stop" ||
@@ -843,7 +887,8 @@ function estCommandeArretNeoAI(
     normalise === "🌀 arrêter" ||
     normalise === "🌀 stop neoai" ||
     normalise === "🌀 arrête neoai" ||
-    normalise === "🌀 arrete neoai"
+    normalise === "🌀 arrete neoai" ||
+    normalise === "🌀 arrêter neoai"
   );
 }
 
@@ -857,17 +902,29 @@ function getNeoAIUserJid(
   ms_org
 ) {
 
-  return (
-    ms?.key?.participant ||
-    ms?.participant ||
-    (
-      ms?.key?.remoteJid &&
-      !ms.key.remoteJid.endsWith("@g.us")
-        ? ms.key.remoteJid
-        : null
-    )
-  );
+  if (!ms) {
+    return null;
+  }
 
+  const participant =
+    ms?.key?.participant ||
+    ms?.participant;
+
+  if (participant) {
+    return normaliserJidNeoAI(participant);
+  }
+
+  const remoteJid =
+    ms?.key?.remoteJid;
+
+  if (
+    remoteJid &&
+    !remoteJid.endsWith("@g.us")
+  ) {
+    return normaliserJidNeoAI(remoteJid);
+  }
+
+  return null;
 }
 
 
@@ -887,56 +944,73 @@ function extraireTexteNeoAI(
     ms.message ||
     ms;
 
-  if (
-    message.conversation
-  ) {
+  if (typeof message === "string") {
+    return message;
+  }
 
+  if (message.conversation) {
     return message.conversation;
   }
 
   if (
     message.extendedTextMessage?.text
   ) {
-
     return message.extendedTextMessage.text;
   }
 
   if (
     message.imageMessage?.caption
   ) {
-
     return message.imageMessage.caption;
   }
 
   if (
     message.videoMessage?.caption
   ) {
-
     return message.videoMessage.caption;
   }
 
   if (
     message.documentMessage?.caption
   ) {
-
     return message.documentMessage.caption;
+  }
+
+  if (
+    message.buttonsResponseMessage?.selectedButtonId
+  ) {
+    return message.buttonsResponseMessage.selectedButtonId;
+  }
+
+  if (
+    message.listResponseMessage
+      ?.singleSelectReply
+      ?.selectedRowId
+  ) {
+    return message.listResponseMessage
+      .singleSelectReply
+      .selectedRowId;
   }
 
   return "";
 }
-  
 
 
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
+
 async function analyserNeoAI(text) {
 
-  console.log("🧠 [NeoAI] Début de l'analyse.");
+  console.log(
+    "🧠 [NeoAI] Début de l'analyse."
+  );
 
-  const texteOriginal = String(text || "").trim();
+  const texteOriginal =
+    String(text || "").trim();
 
   if (!texteOriginal) {
+
     return {
       success: false,
       message: "❌ Aucun texte à analyser."
@@ -947,13 +1021,21 @@ async function analyserNeoAI(text) {
   // 🌀 RETIRER LE PRÉFIXE
   //============================================================
 
-  let texte = texteOriginal;
+  let texte =
+    texteOriginal;
 
-  if (texte.startsWith("🌀:")) {
-    texte = texte.slice(3).trim();
+  if (
+    /^🌀\s*:/u.test(texte)
+  ) {
+
+    texte =
+      texte
+        .replace(/^🌀\s*:/u, "")
+        .trim();
   }
 
   if (!texte) {
+
     return {
       success: false,
       message: "❌ Le texte NeoAI est vide."
@@ -974,29 +1056,49 @@ async function analyserNeoAI(text) {
 
   };
 
-  const texteNormalise = normaliser(texte);
+  const texteNormalise =
+    normaliser(texte);
 
   //============================================================
   // 🧠 TOKENISATION
   //============================================================
 
-  const mots = texte
-    .split(/\s+/)
-    .map(mot => mot.trim())
-    .filter(Boolean);
+  const mots =
+    texte
+      .split(/\s+/)
+      .map(
+        mot => mot.trim()
+      )
+      .filter(Boolean);
 
   //============================================================
-  // 📚 PARCOURS DU DICTIONNAIRE NEOAI.JS
+  // 📚 PARCOURS DU DICTIONNAIRE NEOAI
   //============================================================
 
   const motsAnalyses = [];
 
-  for (const motOriginal of mots) {
+  // Sécurité si NeoAI n'est pas chargé
+  const dictionnaire =
+    (
+      typeof NeoAI !== "undefined" &&
+      NeoAI &&
+      typeof NeoAI === "object"
+    )
+      ? NeoAI
+      : {};
 
-    const mot = normaliser(
-      motOriginal
-        .replace(/[.,!?;:()[\]{}"']/g, "")
-    );
+  for (
+    const motOriginal of mots
+  ) {
+
+    const mot =
+      normaliser(
+        motOriginal
+          .replace(
+            /[.,!?;:()[\]{}"']/g,
+            ""
+          )
+      );
 
     let resultat = {
 
@@ -1011,12 +1113,18 @@ async function analyserNeoAI(text) {
     };
 
     //==========================================================
-    // 📚 PARCOURS DE TOUTES LES CATÉGORIES
+    // 📚 PARCOURS DES CATÉGORIES
     //==========================================================
 
-    for (const [categorie, data] of Object.entries(NeoAI)) {
+    for (
+      const [categorie, data]
+      of Object.entries(dictionnaire)
+    ) {
 
-      if (!data || typeof data !== "object") {
+      if (
+        !data ||
+        typeof data !== "object"
+      ) {
         continue;
       }
 
@@ -1026,22 +1134,24 @@ async function analyserNeoAI(text) {
       variantes.push(categorie);
 
       // Mots du dictionnaire
-      if (Array.isArray(data.mots)) {
+      if (
+        Array.isArray(data.mots)
+      ) {
 
         variantes.push(
           ...data.mots
         );
-
       }
 
       //========================================================
       // 🔎 RECHERCHE DU MOT
       //========================================================
 
-      const trouve = variantes.some(
-        variante =>
-          normaliser(variante) === mot
-      );
+      const trouve =
+        variantes.some(
+          variante =>
+            normaliser(variante) === mot
+        );
 
       if (trouve) {
 
@@ -1064,7 +1174,6 @@ async function analyserNeoAI(text) {
 
         break;
       }
-
     }
 
     motsAnalyses.push(resultat);
@@ -1076,21 +1185,28 @@ async function analyserNeoAI(text) {
 
   const expressionsDetectees = [];
 
-  for (const [categorie, data] of Object.entries(NeoAI)) {
+  for (
+    const [categorie, data]
+    of Object.entries(dictionnaire)
+  ) {
 
-    if (!data || !Array.isArray(data.mots)) {
+    if (
+      !data ||
+      !Array.isArray(data.mots)
+    ) {
       continue;
     }
 
-    for (const expression of data.mots) {
+    for (
+      const expression of data.mots
+    ) {
 
       const expressionNormalisee =
         normaliser(expression);
 
-      // On ne traite ici que les expressions
-      // contenant plusieurs mots.
-
-      if (!expressionNormalisee.includes(" ")) {
+      if (
+        !expressionNormalisee.includes(" ")
+      ) {
         continue;
       }
 
@@ -1110,7 +1226,6 @@ async function analyserNeoAI(text) {
             data.description || ""
 
         });
-
       }
     }
   }
@@ -1136,16 +1251,41 @@ async function analyserNeoAI(text) {
   const categoriesDetectees = [
     ...new Set(
       motsConnus
-        .map(m => m.categorie)
+        .map(
+          m => m.categorie
+        )
         .filter(Boolean)
     )
   ];
 
   //============================================================
+  // 🧠 CATÉGORIES DES EXPRESSIONS
+  //============================================================
+
+  for (
+    const expression
+    of expressionsDetectees
+  ) {
+
+    if (
+      expression.categorie &&
+      !categoriesDetectees.includes(
+        expression.categorie
+      )
+    ) {
+
+      categoriesDetectees.push(
+        expression.categorie
+      );
+    }
+  }
+
+  //============================================================
   // 🧠 CONTEXTE
   //============================================================
 
-  let contexte = "general";
+  let contexte =
+    "general";
 
   if (
     categoriesDetectees.includes("combat") ||
@@ -1158,13 +1298,15 @@ async function analyserNeoAI(text) {
     categoriesDetectees.includes("immobilisation")
   ) {
 
-    contexte = "combat";
+    contexte =
+      "combat";
 
   } else if (
     categoriesDetectees.includes("deplacement")
   ) {
 
-    contexte = "deplacement";
+    contexte =
+      "deplacement";
   }
 
   //============================================================
@@ -1179,7 +1321,8 @@ async function analyserNeoAI(text) {
 
     texte,
 
-    nombreMots: mots.length,
+    nombreMots:
+      mots.length,
 
     nombreMotsConnus:
       motsConnus.length,
@@ -1187,7 +1330,8 @@ async function analyserNeoAI(text) {
     nombreMotsInconnus:
       motsInconnus.length,
 
-    mots: motsAnalyses,
+    mots:
+      motsAnalyses,
 
     motsConnus:
       motsConnus.map(
@@ -1217,7 +1361,8 @@ async function analyserNeoAI(text) {
 
     },
 
-    dateAnalyse: Date.now()
+    dateAnalyse:
+      Date.now()
 
   };
 
@@ -1233,10 +1378,14 @@ async function analyserNeoAI(text) {
   return resultat;
 }
 
-//============================================================
-  // 🧠🔎 NeoAI résumé 🌀 
-  //============================================================
-function genererResumeNeoAI(resultat) {
+
+//==============================================================
+// 🧠🔎 NEOAI — RÉSUMÉ
+//==============================================================
+
+function genererResumeNeoAI(
+  resultat
+) {
 
   if (!resultat) {
     return "Aucune compréhension.";
@@ -1248,23 +1397,45 @@ function genererResumeNeoAI(resultat) {
   const motsConnus =
     resultat.motsConnus || [];
 
-  if (!categories.length) {
+  const expressions =
+    resultat.expressions || [];
 
-    return "NeoAI n'a détecté aucun élément linguistique connu.";
+  if (
+    !categories.length &&
+    !expressions.length
+  ) {
 
+    return (
+      "NeoAI n'a détecté aucun élément linguistique connu."
+    );
   }
 
-  return (
+  let resume =
     `NeoAI a identifié ${motsConnus.length} ` +
-    `mot(s) connu(s) appartenant aux catégories : ` +
-    `${categories.join(", ")}.`
-  );
+    `mot(s) connu(s)`;
 
-}      
+  if (categories.length) {
+
+    resume +=
+      ` appartenant aux catégories : ` +
+      `${categories.join(", ")}`;
+  }
+
+  if (expressions.length) {
+
+    resume +=
+      `. Expressions détectées : ` +
+      `${expressions.map(e => e.expression).join(", ")}`;
+  }
+
+  return resume + ".";
+}
+
 
 //==============================================================
 // 🌀🧠 ENVOYER LE RÉSULTAT NEOAI
 //==============================================================
+
 async function envoyerResultatNeoAI(
   ovl,
   ms_org,
@@ -1273,13 +1444,20 @@ async function envoyerResultatNeoAI(
 ) {
 
   const resume =
-    genererResumeNeoAI(resultat);
+    genererResumeNeoAI(
+      resultat
+    );
 
   const listeMots =
-    resultat.mots
+    (resultat.mots || [])
       .map(
         (m, index) =>
-          `${index + 1}. ${m.mot}`
+          `${index + 1}. ${m.mot}` +
+          (
+            m.connu
+              ? ` ✅`
+              : ` ❌`
+          )
       )
       .join("\n");
 
@@ -1304,16 +1482,19 @@ ${listeMots}
     ms_org,
     {
       image: {
-        url: "https://files.catbox.moe/6s72pg.jpg"
+        url:
+          "https://files.catbox.moe/6s72pg.jpg"
       },
-      caption: caption
+      caption:
+        caption
     },
     {
       quoted: ms
     }
   );
-
 }
+
+
 //==============================================================
 // 🌀🧠 TRAITER UN MESSAGE NEOAI
 //==============================================================
@@ -1325,154 +1506,253 @@ async function traiterMessageNeoAI(
   auteur_Message
 ) {
 
-  //============================================================
-  // 👤 RÉCUPÉRER LE JID UTILISATEUR
-  //============================================================
+  try {
 
-  const userJid =
-    auteur_Message ||
-    getNeoAIUserJid(
-      ms,
-      ms_org
+    //==========================================================
+    // 👤 JID UTILISATEUR
+    //==========================================================
+
+    const userJid =
+      normaliserJidNeoAI(
+        auteur_Message ||
+        getNeoAIUserJid(
+          ms,
+          ms_org
+        )
+      );
+
+    if (!userJid) {
+
+      console.log(
+        "⚠️ [NeoAI] Aucun JID utilisateur."
+      );
+
+      return false;
+    }
+
+    //==========================================================
+    // 📝 EXTRAIRE LE TEXTE
+    //==========================================================
+
+    const texte =
+      extraireTexteNeoAI(ms);
+
+    if (!texte) {
+      return false;
+    }
+
+    const texteNormalise =
+      texte
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, " ");
+
+    console.log(
+      "🧠 [NeoAI] Message reçu :",
+      texte
     );
 
-  if (!userJid) {
-    return false;
-  }
+    console.log(
+      "🧠 [NeoAI] Auteur :",
+      userJid
+    );
 
-  //============================================================
-  // 📝 EXTRAIRE LE TEXTE
-  //============================================================
+    //==========================================================
+    // 🛑 ARRÊT NEOAI
+    //==========================================================
 
-  const texte =
-    extraireTexteNeoAI(ms);
+    if (
+      estCommandeArretNeoAI(
+        texte
+      )
+    ) {
 
-  if (!texte) {
-    return false;
-  }
+      if (
+        sessionNeoAIActive(
+          userJid
+        )
+      ) {
 
-  const texteNormalise =
-    texte
-      .toLowerCase()
-      .trim();
+        fermerSessionNeoAI(
+          userJid
+        );
 
-  //============================================================
-  // 🛑 ARRÊT NEOAI
-  //============================================================
+        await ovl.sendMessage(
+          ms_org,
+          {
+            text:
+              "🌀🧠 NeoAI a fermé la session.\n\n" +
+              "À bientôt 👋🏻"
+          },
+          {
+            quoted: ms
+          }
+        );
+      }
 
-  if (
-    texteNormalise === "🌀 stop" ||
-    texteNormalise === "🌀 arrête" ||
-    texteNormalise === "🌀 arrete" ||
-    texteNormalise === "🌀 arrêter" ||
-    texteNormalise === "🌀 stop neoai" ||
-    texteNormalise === "🌀 arrête neoai" ||
-    texteNormalise === "🌀 arrete neoai"
-  ) {
+      return true;
+    }
 
-    // On ferme uniquement si une session existe
-    if (sessionNeoAIActive(userJid)) {
+    //==========================================================
+    // 🧠 RÉCUPÉRER LA SESSION
+    //==========================================================
 
-      fermerSessionNeoAI(userJid);
+    const session =
+      getSessionNeoAI(
+        userJid
+      );
+
+    // Pas de session = NeoAI ignore
+    if (!session) {
+
+      console.log(
+        "ℹ️ [NeoAI] Aucune session active pour :",
+        userJid
+      );
+
+      return false;
+    }
+
+    //==========================================================
+    // 🌀 FORMAT NEOAI
+    // Accepte :
+    // 🌀: texte
+    // 🌀 : texte
+    //==========================================================
+
+    const estNeoAI =
+      /^🌀\s*:/u.test(
+        texte.trim()
+      );
+
+    if (!estNeoAI) {
+
+      console.log(
+        "ℹ️ [NeoAI] Session active mais message sans préfixe 🌀:"
+      );
+
+      return false;
+    }
+
+    console.log(
+      "🌀 [NeoAI] TEXTE D'ANALYSE DÉTECTÉ"
+    );
+
+    //==========================================================
+    // 🧠 ANALYSER
+    //==========================================================
+
+    const resultat =
+      await analyserNeoAI(
+        texte
+      );
+
+    //==========================================================
+    // ❌ ERREUR
+    //==========================================================
+
+    if (!resultat?.success) {
 
       await ovl.sendMessage(
         ms_org,
         {
           text:
-            "🌀🧠 NeoAI a fermé la session.\n\n" +
-            "À bientôt 👋🏻"
+            resultat?.message ||
+            "❌ NeoAI n'a pas pu analyser ce texte."
         },
         {
           quoted: ms
         }
       );
 
+      return true;
     }
 
-    // Le message est traité par NeoAI
-    return true;
-  }
+    //==========================================================
+    // 📊 COMPTEUR
+    //==========================================================
 
-  //============================================================
-  // 🧠 RÉCUPÉRER LA SESSION
-  //============================================================
+    session.messagesAnalyses =
+      (
+        session.messagesAnalyses ||
+        0
+      ) + 1;
 
-  const session =
-    getSessionNeoAI(userJid);
+    //==========================================================
+    // 🖼️ ENVOYER LE RÉSULTAT
+    //==========================================================
 
-  // Pas de session = NeoAI ne fait rien
-  if (!session) {
-    return false;
-  }
-
-  //============================================================
-  // 🌀 FORMAT OBLIGATOIRE
-  //============================================================
-
-  if (
-    !texte.startsWith("🌀:")
-  ) {
-
-    return false;
-  }
-
-  //============================================================
-  // 🧠 ANALYSER LE TEXTE
-  //============================================================
-
-  const resultat =
-    await analyserNeoAI(
-      texte
-    );
-
-  //============================================================
-  // ❌ ERREUR
-  //============================================================
-
-  if (!resultat?.success) {
-
-    await ovl.sendMessage(
+    await envoyerResultatNeoAI(
+      ovl,
       ms_org,
-      {
-        text:
-          resultat?.message ||
-          "❌ NeoAI n'a pas pu analyser ce texte."
-      },
-      {
-        quoted: ms
-      }
+      ms,
+      resultat
+    );
+
+    console.log(
+      "✅ [NeoAI] Analyse terminée pour :",
+      userJid
     );
 
     return true;
+
+  } catch (error) {
+
+    console.error(
+      "❌ [NeoAI] Erreur interne :",
+      error
+    );
+
+    try {
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text:
+            "❌ Une erreur est survenue pendant l'analyse NeoAI."
+        },
+        {
+          quoted: ms
+        }
+      );
+
+    } catch (sendError) {
+
+      console.error(
+        "❌ [NeoAI] Impossible d'envoyer l'erreur :",
+        sendError
+      );
+    }
+
+    return true;
   }
-
-  //============================================================
-  // 📊 COMPTEUR
-  //============================================================
-
-  session.messagesAnalyses =
-    (session.messagesAnalyses || 0) + 1;
-
-  //============================================================
-  // 🖼️ ENVOYER LE RÉSULTAT
-  //============================================================
-
-  await envoyerResultatNeoAI(
-    ovl,
-    ms_org,
-    ms,
-    resultat
-  );
-
-  console.log(
-    "✅ [NeoAI] Analyse terminée pour :",
-    userJid
-  );
-
-  return true;
 }
 
-module.exports.traiterMessageNeoAI = traiterMessageNeoAI;
-module.exports.demarrerSessionNeoAI = demarrerSessionNeoAI;
-module.exports.getSessionNeoAI = getSessionNeoAI;
-module.exports.fermerSessionNeoAI = fermerSessionNeoAI;
+
+//==============================================================
+// 📤 EXPORTS
+//==============================================================
+
+module.exports.traiterMessageNeoAI =
+  traiterMessageNeoAI;
+
+module.exports.demarrerSessionNeoAI =
+  demarrerSessionNeoAI;
+
+module.exports.getSessionNeoAI =
+  getSessionNeoAI;
+
+module.exports.sessionNeoAIActive =
+  sessionNeoAIActive;
+
+module.exports.fermerSessionNeoAI =
+  fermerSessionNeoAI;
+
+module.exports.estCommandeArretNeoAI =
+  estCommandeArretNeoAI;
+
+module.exports.analyserNeoAI =
+  analyserNeoAI;
+
+module.exports.extraireTexteNeoAI =
+  extraireTexteNeoAI;
