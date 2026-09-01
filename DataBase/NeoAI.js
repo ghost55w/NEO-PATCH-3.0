@@ -459,6 +459,780 @@ const NEO_VERBES = {
 
 };
 
+
+const NEO_VERBES_SPECIAUX = {
+    //==========================================================
+    // 🔴 ÊTRE / AVOIR
+    //==========================================================
+
+    "être": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "été",
+
+        present: {
+            je: "suis",
+            tu: "es",
+            il: "est",
+            elle: "est",
+            on: "est",
+            nous: "sommes",
+            vous: "êtes",
+            ils: "sont",
+            elles: "sont"
+        },
+
+        futur: {
+            je: "serai",
+            tu: "seras",
+            il: "sera",
+            elle: "sera",
+            on: "sera",
+            nous: "serons",
+            vous: "serez",
+            ils: "seront",
+            elles: "seront"
+        }
+    },
+
+
+    "avoir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "eu",
+
+        present: {
+            je: "ai",
+            tu: "as",
+            il: "a",
+            elle: "a",
+            on: "a",
+            nous: "avons",
+            vous: "avez",
+            ils: "ont",
+            elles: "ont"
+        },
+
+        futur: {
+            je: "aurai",
+            tu: "auras",
+            il: "aura",
+            elle: "aura",
+            on: "aura",
+            nous: "aurons",
+            vous: "aurez",
+            ils: "auront",
+            elles: "auront"
+        }
+    },
+
+
+    //==========================================================
+    // 🔴 VERBES TRÈS IRRÉGULIERS
+    //==========================================================
+
+    "aller": {
+        type: "irregulier",
+        auxiliaire: "être",
+        participePasse: "allé",
+
+        present: {
+            je: "vais",
+            tu: "vas",
+            il: "va",
+            elle: "va",
+            on: "va",
+            nous: "allons",
+            vous: "allez",
+            ils: "vont",
+            elles: "vont"
+        },
+
+        futur: {
+            je: "irai",
+            tu: "iras",
+            il: "ira",
+            elle: "ira",
+            on: "ira",
+            nous: "irons",
+            vous: "irez",
+            ils: "iront",
+            elles: "iront"
+        }
+    },
+
+
+    "faire": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "fait",
+
+        present: {
+            je: "fais",
+            tu: "fais",
+            il: "fait",
+            elle: "fait",
+            on: "fait",
+            nous: "faisons",
+            vous: "faites",
+            ils: "font",
+            elles: "font"
+        },
+
+        futur: {
+            je: "ferai",
+            tu: "feras",
+            il: "fera",
+            elle: "fera",
+            on: "fera",
+            nous: "ferons",
+            vous: "ferez",
+            ils: "feront",
+            elles: "feront"
+        }
+    },
+
+
+    "venir": {
+        type: "irregulier",
+        auxiliaire: "être",
+        participePasse: "venu",
+
+        present: {
+            je: "viens",
+            tu: "viens",
+            il: "vient",
+            elle: "vient",
+            on: "vient",
+            nous: "venons",
+            vous: "venez",
+            ils: "viennent",
+            elles: "viennent"
+        },
+
+        futur: {
+            je: "viendrai",
+            tu: "viendras",
+            il: "viendra",
+            elle: "viendra",
+            on: "viendra",
+            nous: "viendrons",
+            vous: "viendrez",
+            ils: "viendront",
+            elles: "viendront"
+        }
+    },
+
+
+    "voir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "vu",
+
+        present: {
+            je: "vois",
+            tu: "vois",
+            il: "voit",
+            elle: "voit",
+            on: "voit",
+            nous: "voyons",
+            vous: "voyez",
+            ils: "voient",
+            elles: "voient"
+        },
+
+        futur: {
+            je: "verrai",
+            tu: "verras",
+            il: "verra",
+            elle: "verra",
+            on: "verra",
+            nous: "verrons",
+            vous: "verrez",
+            ils: "verront",
+            elles: "verront"
+        }
+    },
+
+
+    "pouvoir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "pu",
+
+        present: {
+            je: "peux",
+            tu: "peux",
+            il: "peut",
+            elle: "peut",
+            on: "peut",
+            nous: "pouvons",
+            vous: "pouvez",
+            ils: "peuvent",
+            elles: "peuvent"
+        },
+
+        futur: {
+            je: "pourrai",
+            tu: "pourras",
+            il: "pourra",
+            elle: "pourra",
+            on: "pourra",
+            nous: "pourrons",
+            vous: "pourrez",
+            ils: "pourront",
+            elles: "pourront"
+        }
+    },
+
+
+    "vouloir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "voulu",
+
+        present: {
+            je: "veux",
+            tu: "veux",
+            il: "veut",
+            elle: "veut",
+            on: "veut",
+            nous: "voulons",
+            vous: "voulez",
+            ils: "veulent",
+            elles: "veulent"
+        },
+
+        futur: {
+            je: "voudrai",
+            tu: "voudras",
+            il: "voudra",
+            elle: "voudra",
+            on: "voudra",
+            nous: "voudrons",
+            vous: "voudrez",
+            ils: "voudront",
+            elles: "voudront"
+        }
+    },
+
+
+    "devoir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "dû",
+
+        present: {
+            je: "dois",
+            tu: "dois",
+            il: "doit",
+            elle: "doit",
+            on: "doit",
+            nous: "devons",
+            vous: "devez",
+            ils: "doivent",
+            elles: "doivent"
+        },
+
+        futur: {
+            je: "devrai",
+            tu: "devras",
+            il: "devra",
+            elle: "devra",
+            on: "devra",
+            nous: "devrons",
+            vous: "devrez",
+            ils: "devront",
+            elles: "devront"
+        }
+    },
+
+
+    "savoir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "su",
+
+        present: {
+            je: "sais",
+            tu: "sais",
+            il: "sait",
+            elle: "sait",
+            on: "sait",
+            nous: "savons",
+            vous: "savez",
+            ils: "savent",
+            elles: "savent"
+        },
+
+        futur: {
+            je: "saurai",
+            tu: "sauras",
+            il: "saura",
+            elle: "saura",
+            on: "saura",
+            nous: "saurons",
+            vous: "saurez",
+            ils: "sauront",
+            elles: "sauront"
+        }
+    },
+
+
+    "prendre": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "pris",
+
+        present: {
+            je: "prends",
+            tu: "prends",
+            il: "prend",
+            elle: "prend",
+            on: "prend",
+            nous: "prenons",
+            vous: "prenez",
+            ils: "prennent",
+            elles: "prennent"
+        },
+
+        futur: {
+            je: "prendrai",
+            tu: "prendras",
+            il: "prendra",
+            elle: "prendra",
+            on: "prendra",
+            nous: "prendrons",
+            vous: "prendrez",
+            ils: "prendront",
+            elles: "prendront"
+        }
+    },
+
+
+    "mettre": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "mis",
+
+        present: {
+            je: "mets",
+            tu: "mets",
+            il: "met",
+            elle: "met",
+            on: "met",
+            nous: "mettons",
+            vous: "mettez",
+            ils: "mettent",
+            elles: "mettent"
+        },
+
+        futur: {
+            je: "mettrai",
+            tu: "mettras",
+            il: "mettra",
+            elle: "mettra",
+            on: "mettra",
+            nous: "mettrons",
+            vous: "mettrez",
+            ils: "mettront",
+            elles: "mettront"
+        }
+    },
+
+
+    "dire": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "dit",
+
+        present: {
+            je: "dis",
+            tu: "dis",
+            il: "dit",
+            elle: "dit",
+            on: "dit",
+            nous: "disons",
+            vous: "dites",
+            ils: "disent",
+            elles: "disent"
+        },
+
+        futur: {
+            je: "dirai",
+            tu: "diras",
+            il: "dira",
+            elle: "dira",
+            on: "dira",
+            nous: "dirons",
+            vous: "direz",
+            ils: "diront",
+            elles: "diront"
+        }
+    },
+
+
+    "écrire": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "écrit",
+
+        present: {
+            je: "écris",
+            tu: "écris",
+            il: "écrit",
+            elle: "écrit",
+            on: "écrit",
+            nous: "écrivons",
+            vous: "écrivez",
+            ils: "écrivent",
+            elles: "écrivent"
+        },
+
+        futur: {
+            je: "écrirai",
+            tu: "écriras",
+            il: "écrira",
+            elle: "écrira",
+            on: "écrira",
+            nous: "écrirons",
+            vous: "écrirez",
+            ils: "écriront",
+            elles: "écriront"
+        }
+    },
+
+
+    "lire": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "lu",
+
+        present: {
+            je: "lis",
+            tu: "lis",
+            il: "lit",
+            elle: "lit",
+            on: "lit",
+            nous: "lisons",
+            vous: "lisez",
+            ils: "lisent",
+            elles: "lisent"
+        },
+
+        futur: {
+            je: "lirai",
+            tu: "liras",
+            il: "lira",
+            elle: "lira",
+            on: "lira",
+            nous: "lirons",
+            vous: "lirez",
+            ils: "liront",
+            elles: "liront"
+        }
+    },
+
+
+    "boire": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "bu",
+
+        present: {
+            je: "bois",
+            tu: "bois",
+            il: "boit",
+            elle: "boit",
+            on: "boit",
+            nous: "buvons",
+            vous: "buvez",
+            ils: "boivent",
+            elles: "boivent"
+        },
+
+        futur: {
+            je: "boirai",
+            tu: "boiras",
+            il: "boira",
+            elle: "boira",
+            on: "boira",
+            nous: "boirons",
+            vous: "boirez",
+            ils: "boiront",
+            elles: "boiront"
+        }
+    },
+
+
+    "manger": {
+        type: "regulier",
+        auxiliaire: "avoir",
+        participePasse: "mangé",
+
+        present: {
+            je: "mange",
+            tu: "manges",
+            il: "mange",
+            elle: "mange",
+            on: "mange",
+            nous: "mangeons",
+            vous: "mangez",
+            ils: "mangent",
+            elles: "mangent"
+        }
+    },
+
+
+    "venir": {
+        type: "irregulier",
+        auxiliaire: "être",
+        participePasse: "venu"
+    },
+
+
+    "dormir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "dormi",
+
+        present: {
+            je: "dors",
+            tu: "dors",
+            il: "dort",
+            elle: "dort",
+            on: "dort",
+            nous: "dormons",
+            vous: "dormez",
+            ils: "dorment",
+            elles: "dorment"
+        },
+
+        futur: {
+            je: "dormirai",
+            tu: "dormiras",
+            il: "dormira",
+            elle: "dormira",
+            on: "dormira",
+            nous: "dormirons",
+            vous: "dormirez",
+            ils: "dormiront",
+            elles: "dormiront"
+        }
+    },
+
+
+    "courir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "couru",
+
+        present: {
+            je: "cours",
+            tu: "cours",
+            il: "court",
+            elle: "court",
+            on: "court",
+            nous: "courons",
+            vous: "courez",
+            ils: "courent",
+            elles: "courent"
+        },
+
+        futur: {
+            je: "courrai",
+            tu: "courras",
+            il: "courra",
+            elle: "courra",
+            on: "courra",
+            nous: "courrons",
+            vous: "courrez",
+            ils: "courront",
+            elles: "courront"
+        }
+    },
+
+
+    "venir": {
+        type: "irregulier",
+        auxiliaire: "être",
+        participePasse: "venu"
+    },
+
+
+    "tenir": {
+        type: "irregulier",
+        auxiliaire: "avoir",
+        participePasse: "tenu",
+
+        present: {
+            je: "tiens",
+            tu: "tiens",
+            il: "tient",
+            elle: "tient",
+            on: "tient",
+            nous: "tenons",
+            vous: "tenez",
+            ils: "tiennent",
+            elles: "tiennent"
+        },
+
+        futur: {
+            je: "tiendrai",
+            tu: "tiendras",
+            il: "tiendra",
+            elle: "tiendra",
+            on: "tiendra",
+            nous: "tiendrons",
+            vous: "tiendrez",
+            ils: "tiendront",
+            elles: "tiendront"
+        }
+    },
+
+
+    //==========================================================
+    // 🟠 CAS PARTICULIERS EN -IR
+    //==========================================================
+
+    "ouvrir": {
+        type: "particulier",
+        auxiliaire: "avoir",
+        participePasse: "ouvert",
+
+        present: {
+            je: "ouvre",
+            tu: "ouvres",
+            il: "ouvre",
+            elle: "ouvre",
+            on: "ouvre",
+            nous: "ouvrons",
+            vous: "ouvrez",
+            ils: "ouvrent",
+            elles: "ouvrent"
+        },
+
+        futur: {
+            je: "ouvrirai",
+            tu: "ouvriras",
+            il: "ouvrira",
+            elle: "ouvrira",
+            on: "ouvrira",
+            nous: "ouvrirons",
+            vous: "ouvrirez",
+            ils: "ouvriront",
+            elles: "ouvriront"
+        }
+    },
+
+
+    "offrir": {
+        type: "particulier",
+        auxiliaire: "avoir",
+        participePasse: "offert",
+
+        present: {
+            je: "offre",
+            tu: "offres",
+            il: "offre",
+            elle: "offre",
+            on: "offre",
+            nous: "offrons",
+            vous: "offrez",
+            ils: "offrent",
+            elles: "offrent"
+        },
+
+        futur: {
+            je: "offrirai",
+            tu: "offriras",
+            il: "offrira",
+            elle: "offrira",
+            on: "offrira",
+            nous: "offrirons",
+            vous: "offrirez",
+            ils: "offriront",
+            elles: "offriront"
+        }
+    },
+
+
+    //==========================================================
+    // 🟡 VERBES PRONOMINAUX
+    //==========================================================
+
+    "s'éloigner": {
+        type: "pronominal",
+        verbeBase: "éloigner",
+        auxiliaire: "être",
+        participePasse: "éloigné"
+    },
+
+    "se réveiller": {
+        type: "pronominal",
+        verbeBase: "réveiller",
+        auxiliaire: "être",
+        participePasse: "réveillé"
+    },
+
+    "se lever": {
+        type: "pronominal",
+        verbeBase: "lever",
+        auxiliaire: "être",
+        participePasse: "levé"
+    },
+
+    "s'asseoir": {
+        type: "pronominal",
+        verbeBase: "asseoir",
+        auxiliaire: "être",
+        participePasse: "assis"
+    },
+
+    "s'allonger": {
+        type: "pronominal",
+        verbeBase: "allonger",
+        auxiliaire: "être",
+        participePasse: "allongé"
+    },
+
+    "se laver": {
+        type: "pronominal",
+        verbeBase: "laver",
+        auxiliaire: "être",
+        participePasse: "lavé"
+    },
+
+    "se baigner": {
+        type: "pronominal",
+        verbeBase: "baigner",
+        auxiliaire: "être",
+        participePasse: "baigné"
+    },
+
+    "s'habiller": {
+        type: "pronominal",
+        verbeBase: "habiller",
+        auxiliaire: "être",
+        participePasse: "habillé"
+    },
+
+    "se déshabiller": {
+        type: "pronominal",
+        verbeBase: "déshabiller",
+        auxiliaire: "être",
+        participePasse: "déshabillé"
+    },
+
+    "se coiffer": {
+        type: "pronominal",
+        verbeBase: "coiffer",
+        auxiliaire: "être",
+        participePasse: "coiffé"
+    }
+
+};
+
 //==============================================================
 // 📚 NEO_NOMS
 //==============================================================
