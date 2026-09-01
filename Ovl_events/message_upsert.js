@@ -214,47 +214,12 @@ if (ms.key.fromMe) {
       mention_JID
     };
       
+
 //==============================================================
 // 🌀🧠 NEOAI — MESSAGE
 //==============================================================
 
 try {
-
-    //==========================================================
-    // 🛑 ARRÊT DIRECT DE LA SESSION NEOAI
-    //==========================================================
-
-    const texteNeoAI =
-        String(texte || "")
-            .toLowerCase()
-            .trim();
-
-    if (
-        texteNeoAI === "🌀 stop" ||
-        texteNeoAI === "🌀 arrête" ||
-        texteNeoAI === "🌀 arrete"
-    ) {
-
-        fermerSessionNeoAI(auteur_Message);
-
-        await ovl.sendMessage(
-            ms_org,
-            {
-                text:
-                    "🌀🧠 NeoAI a fermé la session.\n\n" +
-                    "À bientôt 👋🏻"
-            },
-            {
-                quoted: ms
-            }
-        );
-
-        return;
-    }
-
-    //==========================================================
-    // 🧠 TRAITEMENT NORMAL NEOAI
-    //==========================================================
 
     const neoAIHandled =
         await traiterMessageNeoAI(
@@ -274,9 +239,7 @@ try {
         "❌ [NeoAI] Erreur traitement message :",
         err
     );
-
 }
-
       
 // ================================
 // 🔥 SYSTEME MATCH GLOBAL
