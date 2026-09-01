@@ -2622,9 +2622,105 @@ const NEO_COMBAT = {
 
 }; 
 
-==============================================================
+//==============================================================
+// 🧠 NEO AI — CONCEPTS SÉMANTIQUES
+//==============================================================
+//
+// Les concepts représentent les idées comprises par Neo.
+//
+// Plusieurs mots / expressions peuvent appartenir au même
+// concept.
+//
+// Exemple :
+//
+// "courir"
+// "foncer"
+// "sprinter"
+// "se précipiter"
+//
+//        ↓
+//
+// concept : deplacement_rapide
+//
+// NeoAIchat.js pourra ensuite utiliser ces concepts pour
+// comprendre le sens global d'une phrase.
+//
+//==============================================================
 
 const NEO_CONCEPTS = {
+
+    //==========================================================
+    // 🧠 GÉNÉRAL
+    //==========================================================
+
+    existence: {
+
+        description:
+            "Fait d'exister ou d'être présent",
+
+        mots: [
+            "être",
+            "exister",
+            "présent",
+            "présente",
+            "existe",
+            "existence"
+        ]
+
+    },
+
+
+    possession: {
+
+        description:
+            "Relation indiquant qu'une personne possède quelque chose",
+
+        mots: [
+            "avoir",
+            "posséder",
+            "appartenir",
+            "appartient",
+            "possède",
+            "à",
+            "de"
+        ]
+
+    },
+
+
+    action: {
+
+        description:
+            "Action réalisée par un sujet",
+
+        mots: [
+            "faire",
+            "agir",
+            "action",
+            "effectuer",
+            "réaliser",
+            "accomplir"
+        ]
+
+    },
+
+
+    changement: {
+
+        description:
+            "Modification d'un état ou d'une situation",
+
+        mots: [
+            "changer",
+            "modifier",
+            "transformer",
+            "évoluer",
+            "devenir",
+            "variation"
+        ]
+
+    },
+
 
     //==========================================================
     // 🚶 DÉPLACEMENT
@@ -2632,7 +2728,8 @@ const NEO_CONCEPTS = {
 
     deplacement: {
 
-        description: "Action de changer de position",
+        description:
+            "Action de changer de position",
 
         mots: [
             "marcher",
@@ -2640,11 +2737,13 @@ const NEO_CONCEPTS = {
             "avancer",
             "reculer",
             "bouger",
+            "déplacer",
             "se déplacer",
-            "approcher",
-            "s'éloigner",
             "partir",
-            "arriver"
+            "arriver",
+            "venir",
+            "revenir",
+            "voyager"
         ]
 
     },
@@ -2652,7 +2751,8 @@ const NEO_CONCEPTS = {
 
     deplacement_rapide: {
 
-        description: "Déplacement effectué rapidement",
+        description:
+            "Déplacement effectué à grande vitesse",
 
         mots: [
             "courir",
@@ -2660,9 +2760,15 @@ const NEO_CONCEPTS = {
             "sprinter",
             "se précipiter",
             "accélérer",
+            "rapidement",
+            "vite",
+            "très vite",
+            "à grande vitesse",
             "à pleine vitesse",
+            "à toute vitesse",
             "vitesse maximale",
-            "vmax"
+            "vmax",
+            "full speed"
         ]
 
     },
@@ -2670,13 +2776,103 @@ const NEO_CONCEPTS = {
 
     deplacement_lent: {
 
-        description: "Déplacement effectué lentement",
+        description:
+            "Déplacement effectué à faible vitesse",
 
         mots: [
             "marcher",
-            "ralentir",
             "avancer lentement",
-            "se déplacer doucement"
+            "ralentir",
+            "lentement",
+            "doucement",
+            "au ralenti"
+        ]
+
+    },
+
+
+    approche: {
+
+        description:
+            "Action de réduire la distance vers une cible",
+
+        mots: [
+            "approcher",
+            "s'approcher",
+            "avancer vers",
+            "venir vers",
+            "aller vers",
+            "se rapprocher",
+            "progresser vers"
+        ]
+
+    },
+
+
+    eloignement: {
+
+        description:
+            "Action d'augmenter la distance avec une cible",
+
+        mots: [
+            "reculer",
+            "s'éloigner",
+            "partir",
+            "se retirer",
+            "prendre ses distances",
+            "éloigner",
+            "fuir"
+        ]
+
+    },
+
+
+    changement_direction: {
+
+        description:
+            "Action consistant à changer de direction",
+
+        mots: [
+            "tourner",
+            "pivoter",
+            "changer de direction",
+            "faire demi-tour",
+            "virer",
+            "rotation"
+        ]
+
+    },
+
+
+    mouvement_vertical: {
+
+        description:
+            "Mouvement vers le haut ou vers le bas",
+
+        mots: [
+            "monter",
+            "descendre",
+            "sauter",
+            "tomber",
+            "s'élever",
+            "chuter"
+        ]
+
+    },
+
+
+    mouvement_lateral: {
+
+        description:
+            "Déplacement vers la gauche ou la droite",
+
+        mots: [
+            "se décaler",
+            "pas de côté",
+            "déplacement latéral",
+            "aller à gauche",
+            "aller à droite",
+            "sidestep"
         ]
 
     },
@@ -2686,35 +2882,36 @@ const NEO_CONCEPTS = {
     // ⚔️ COMBAT
     //==========================================================
 
-    attaque: {
+    combat: {
 
-        description: "Action visant à attaquer une cible",
+        description:
+            "Situation ou action impliquant un affrontement",
 
         mots: [
-            "attaquer",
-            "frapper",
-            "cogner",
-            "taper",
-            "assaut",
-            "offensive",
-            "agresser"
+            "combat",
+            "combattre",
+            "affrontement",
+            "duel",
+            "bataille",
+            "confrontation"
         ]
 
     },
 
 
-    defense: {
+    attaque: {
 
-        description: "Action visant à se protéger",
+        description:
+            "Action offensive visant une cible",
 
         mots: [
-            "défendre",
-            "bloquer",
-            "parer",
-            "esquiver",
-            "éviter",
-            "protéger",
-            "garde"
+            "attaquer",
+            "attaque",
+            "offensive",
+            "assaut",
+            "agression",
+            "frapper",
+            "coup"
         ]
 
     },
@@ -2722,15 +2919,93 @@ const NEO_CONCEPTS = {
 
     frappe: {
 
-        description: "Action physique portée contre une cible",
+        description:
+            "Action consistant à porter un coup",
 
         mots: [
             "frapper",
-            "coup",
             "frappe",
-            "impact",
+            "coup",
             "taper",
-            "cogner"
+            "cogner",
+            "impact",
+            "porter un coup"
+        ]
+
+    },
+
+
+    coup_de_poing: {
+
+        description:
+            "Frappe réalisée avec le poing",
+
+        mots: [
+            "coup de poing",
+            "punch",
+            "jab",
+            "direct",
+            "straight",
+            "cross",
+            "crochet",
+            "hook",
+            "uppercut",
+            "overhand"
+        ]
+
+    },
+
+
+    coup_de_pied: {
+
+        description:
+            "Frappe réalisée avec le pied ou la jambe",
+
+        mots: [
+            "coup de pied",
+            "kick",
+            "front kick",
+            "roundhouse",
+            "roundhouse kick",
+            "side kick",
+            "back kick",
+            "hook kick",
+            "axe kick",
+            "low kick",
+            "spinning back kick"
+        ]
+
+    },
+
+
+    genou: {
+
+        description:
+            "Frappe ou action réalisée avec le genou",
+
+        mots: [
+            "genou",
+            "coup de genou",
+            "knee",
+            "knee strike",
+            "flying knee"
+        ]
+
+    },
+
+
+    coude: {
+
+        description:
+            "Frappe réalisée avec le coude",
+
+        mots: [
+            "coude",
+            "coup de coude",
+            "elbow",
+            "elbow strike",
+            "coude horizontal",
+            "coude circulaire"
         ]
 
     },
@@ -2738,15 +3013,19 @@ const NEO_CONCEPTS = {
 
     projection: {
 
-        description: "Action visant à faire tomber ou projeter une cible",
+        description:
+            "Action visant à faire tomber ou projeter une cible",
 
         mots: [
             "projeter",
+            "projection",
             "jeter",
             "faire tomber",
-            "projection",
+            "takedown",
             "fauchage",
-            "balayage"
+            "balayage",
+            "sweep",
+            "trip"
         ]
 
     },
@@ -2754,7 +3033,8 @@ const NEO_CONCEPTS = {
 
     saisie: {
 
-        description: "Action consistant à saisir ou maintenir une cible",
+        description:
+            "Action consistant à saisir une personne ou un objet",
 
         mots: [
             "saisir",
@@ -2762,7 +3042,147 @@ const NEO_CONCEPTS = {
             "agripper",
             "empoigner",
             "tenir",
-            "prise"
+            "prise",
+            "grab",
+            "grip",
+            "hold"
+        ]
+
+    },
+
+
+    immobilisation: {
+
+        description:
+            "Action visant à empêcher une cible de bouger",
+
+        mots: [
+            "immobiliser",
+            "immobilisation",
+            "maintenir",
+            "bloquer",
+            "clé",
+            "clé de bras",
+            "clé de jambe",
+            "soumission",
+            "submission",
+            "choke"
+        ]
+
+    },
+
+
+    defense: {
+
+        description:
+            "Action visant à empêcher ou réduire une attaque",
+
+        mots: [
+            "défendre",
+            "défense",
+            "protéger",
+            "protection",
+            "garde"
+        ]
+
+    },
+
+
+    blocage: {
+
+        description:
+            "Action visant à bloquer une attaque",
+
+        mots: [
+            "bloquer",
+            "blocage",
+            "parer",
+            "parade",
+            "dévier",
+            "guard",
+            "block",
+            "parry"
+        ]
+
+    },
+
+
+    esquive: {
+
+        description:
+            "Action visant à éviter une attaque",
+
+        mots: [
+            "esquiver",
+            "esquive",
+            "éviter",
+            "se décaler",
+            "pas de côté",
+            "retrait",
+            "plonger",
+            "se pencher",
+            "dodge",
+            "evade",
+            "sidestep",
+            "slip",
+            "duck",
+            "weave"
+        ]
+
+    },
+
+
+    contre_attaque: {
+
+        description:
+            "Action offensive réalisée en réponse à une attaque",
+
+        mots: [
+            "contre",
+            "contre-attaque",
+            "riposte",
+            "riposter",
+            "contre offensif",
+            "counter",
+            "counterattack",
+            "retaliation"
+        ]
+
+    },
+
+
+    garde: {
+
+        description:
+            "Position destinée à se protéger ou combattre",
+
+        mots: [
+            "garde",
+            "garde haute",
+            "garde basse",
+            "garde ouverte",
+            "garde fermée",
+            "position de garde",
+            "fighting stance"
+        ]
+
+    },
+
+
+    acrobatie: {
+
+        description:
+            "Mouvement physique impliquant une rotation ou un saut",
+
+        mots: [
+            "saut",
+            "roulade",
+            "salto",
+            "vrille",
+            "rotation aérienne",
+            "flip",
+            "spin",
+            "roll"
         ]
 
     },
@@ -2774,7 +3194,8 @@ const NEO_CONCEPTS = {
 
     alimentation: {
 
-        description: "Action liée au fait de manger ou boire",
+        description:
+            "Actions liées à la nourriture et à l'alimentation",
 
         mots: [
             "manger",
@@ -2782,8 +3203,11 @@ const NEO_CONCEPTS = {
             "déjeuner",
             "dîner",
             "goûter",
+            "cuisiner",
+            "préparer",
             "se nourrir",
-            "repas"
+            "repas",
+            "nourriture"
         ]
 
     },
@@ -2791,14 +3215,17 @@ const NEO_CONCEPTS = {
 
     sommeil: {
 
-        description: "Action ou état lié au sommeil",
+        description:
+            "Actions et états liés au sommeil",
 
         mots: [
             "dormir",
             "s'endormir",
             "se réveiller",
-            "sieste",
-            "sommeil"
+            "se reposer",
+            "faire une sieste",
+            "sommeil",
+            "sieste"
         ]
 
     },
@@ -2806,33 +3233,103 @@ const NEO_CONCEPTS = {
 
     hygiene: {
 
-        description: "Actions liées à l'hygiène",
+        description:
+            "Actions liées à l'hygiène corporelle",
 
         mots: [
             "se laver",
+            "laver",
             "se doucher",
             "se baigner",
             "se brosser",
-            "se nettoyer"
+            "nettoyer",
+            "se nettoyer",
+            "se coiffer",
+            "s'habiller",
+            "se déshabiller"
+        ]
+
+    },
+
+
+    communication: {
+
+        description:
+            "Action consistant à transmettre une information",
+
+        mots: [
+            "parler",
+            "dire",
+            "expliquer",
+            "répondre",
+            "demander",
+            "raconter",
+            "écrire",
+            "lire",
+            "communiquer",
+            "discuter",
+            "conversation"
+        ]
+
+    },
+
+
+    travail: {
+
+        description:
+            "Actions liées au travail ou à une activité professionnelle",
+
+        mots: [
+            "travailler",
+            "étudier",
+            "apprendre",
+            "enseigner",
+            "construire",
+            "réparer",
+            "fabriquer",
+            "produire",
+            "organiser"
+        ]
+
+    },
+
+
+    achat: {
+
+        description:
+            "Actions liées aux achats et aux échanges",
+
+        mots: [
+            "acheter",
+            "vendre",
+            "payer",
+            "coûter",
+            "commander",
+            "choisir",
+            "recevoir",
+            "livrer"
         ]
 
     },
 
 
     //==========================================================
-    // 🧠 PERCEPTION
+    // 👁️ PERCEPTION
     //==========================================================
 
     vision: {
 
-        description: "Perception utilisant les yeux",
+        description:
+            "Perception utilisant les yeux",
 
         mots: [
             "voir",
             "regarder",
             "observer",
             "fixer",
-            "apercevoir"
+            "apercevoir",
+            "contempler",
+            "vision"
         ]
 
     },
@@ -2840,26 +3337,302 @@ const NEO_CONCEPTS = {
 
     audition: {
 
-        description: "Perception utilisant l'ouïe",
+        description:
+            "Perception utilisant l'ouïe",
 
         mots: [
             "entendre",
             "écouter",
-            "écoute",
             "son",
-            "bruit"
+            "bruit",
+            "voix",
+            "musique"
+        ]
+
+    },
+
+
+    toucher: {
+
+        description:
+            "Perception ou contact physique",
+
+        mots: [
+            "toucher",
+            "sentir",
+            "contact",
+            "contact physique",
+            "effleurer",
+            "palper"
+        ]
+
+    },
+
+
+    odorat: {
+
+        description:
+            "Perception des odeurs",
+
+        mots: [
+            "sentir",
+            "odeur",
+            "renifler",
+            "respirer"
         ]
 
     },
 
 
     //==========================================================
-    // 🧭 POSITION / ESPACE
+    // 🧠 PENSÉE / CONNAISSANCE
     //==========================================================
+
+    pensee: {
+
+        description:
+            "Action mentale consistant à réfléchir",
+
+        mots: [
+            "penser",
+            "réfléchir",
+            "imaginer",
+            "raisonner",
+            "analyser",
+            "considérer"
+        ]
+
+    },
+
+
+    connaissance: {
+
+        description:
+            "Possession ou acquisition d'une information",
+
+        mots: [
+            "savoir",
+            "connaître",
+            "comprendre",
+            "apprendre",
+            "connaissance",
+            "information"
+        ]
+
+    },
+
+
+    comprehension: {
+
+        description:
+            "Capacité à comprendre le sens d'une information",
+
+        mots: [
+            "comprendre",
+            "compris",
+            "comprendre",
+            "interpréter",
+            "saisir le sens",
+            "signification"
+        ]
+
+    },
+
+
+    memoire: {
+
+        description:
+            "Capacité à conserver ou retrouver une information",
+
+        mots: [
+            "se souvenir",
+            "souvenir",
+            "mémoriser",
+            "retenir",
+            "oublier",
+            "mémoire"
+        ]
+
+    },
+
+
+    //==========================================================
+    // ❤️ ÉMOTIONS
+    //==========================================================
+
+    joie: {
+
+        description:
+            "État émotionnel positif",
+
+        mots: [
+            "joie",
+            "heureux",
+            "heureuse",
+            "bonheur",
+            "plaisir",
+            "ravi",
+            "content",
+            "enthousiasme"
+        ]
+
+    },
+
+
+    tristesse: {
+
+        description:
+            "État émotionnel négatif lié à la peine",
+
+        mots: [
+            "tristesse",
+            "triste",
+            "malheureux",
+            "peine",
+            "chagrin",
+            "déception"
+        ]
+
+    },
+
+
+    peur: {
+
+        description:
+            "État émotionnel lié à la crainte ou au danger",
+
+        mots: [
+            "peur",
+            "craindre",
+            "crainte",
+            "angoisse",
+            "panique",
+            "terrifié"
+        ]
+
+    },
+
+
+    colere: {
+
+        description:
+            "État émotionnel lié à l'agressivité ou au mécontentement",
+
+        mots: [
+            "colère",
+            "colérique",
+            "énervé",
+            "énervement",
+            "rage",
+            "furieux",
+            "fureur"
+        ]
+
+    },
+
+
+    confiance: {
+
+        description:
+            "Sentiment de sécurité ou de certitude",
+
+        mots: [
+            "confiance",
+            "confiant",
+            "assurance",
+            "certain",
+            "certitude"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🗣️ COMMUNICATION
+    //==========================================================
+
+    question: {
+
+        description:
+            "Expression visant à obtenir une information",
+
+        mots: [
+            "question",
+            "demander",
+            "pourquoi",
+            "comment",
+            "quand",
+            "où",
+            "qui",
+            "quoi",
+            "quel",
+            "quelle"
+        ]
+
+    },
+
+
+    affirmation: {
+
+        description:
+            "Expression présentant une information comme vraie",
+
+        mots: [
+            "oui",
+            "exact",
+            "vrai",
+            "correct",
+            "certain",
+            "confirmer",
+            "affirmer"
+        ]
+
+    },
+
+
+    negation: {
+
+        description:
+            "Expression indiquant qu'une information est négative",
+
+        mots: [
+            "non",
+            "ne",
+            "pas",
+            "jamais",
+            "aucun",
+            "personne",
+            "rien"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 📍 ESPACE / POSITION
+    //==========================================================
+
+    position: {
+
+        description:
+            "Emplacement d'une personne ou d'un objet",
+
+        mots: [
+            "position",
+            "emplacement",
+            "place",
+            "localisation",
+            "situé",
+            "se trouve"
+        ]
+
+    },
+
 
     proximite: {
 
-        description: "Deux éléments sont proches",
+        description:
+            "Relation indiquant qu'une distance est faible",
 
         mots: [
             "près",
@@ -2873,16 +3646,36 @@ const NEO_CONCEPTS = {
     },
 
 
-    eloignement: {
+    distance: {
 
-        description: "Deux éléments sont éloignés",
+        description:
+            "Relation indiquant une séparation spatiale",
 
         mots: [
+            "distance",
             "loin",
             "éloigné",
             "à distance",
-            "away",
-            "far"
+            "far",
+            "away"
+        ]
+
+    },
+
+
+    contact: {
+
+        description:
+            "Deux éléments sont physiquement en contact",
+
+        mots: [
+            "contact",
+            "toucher",
+            "touche",
+            "contre",
+            "collé",
+            "au contact",
+            "corps à corps"
         ]
 
     },
@@ -2890,7 +3683,8 @@ const NEO_CONCEPTS = {
 
     orientation: {
 
-        description: "Direction ou orientation d'un élément",
+        description:
+            "Direction dans laquelle un élément se trouve ou se déplace",
 
         mots: [
             "gauche",
@@ -2902,7 +3696,167 @@ const NEO_CONCEPTS = {
             "nord",
             "sud",
             "est",
-            "ouest"
+            "ouest",
+            "vers",
+            "direction"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 📏 DISTANCE
+    //==========================================================
+
+    distance_courte: {
+
+        description:
+            "Distance faible entre deux éléments",
+
+        mots: [
+            "proche",
+            "près",
+            "à proximité",
+            "corps à corps",
+            "bout portant",
+            "close range"
+        ]
+
+    },
+
+
+    distance_moyenne: {
+
+        description:
+            "Distance intermédiaire entre deux éléments",
+
+        mots: [
+            "distance moyenne",
+            "à moyenne distance",
+            "mi-distance"
+        ]
+
+    },
+
+
+    distance_longue: {
+
+        description:
+            "Distance importante entre deux éléments",
+
+        mots: [
+            "loin",
+            "éloigné",
+            "longue distance",
+            "à longue distance",
+            "far"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🏃 VITESSE
+    //==========================================================
+
+    vitesse_lente: {
+
+        description:
+            "Déplacement ou action effectuée lentement",
+
+        mots: [
+            "lent",
+            "lentement",
+            "ralenti",
+            "doucement",
+            "au ralenti"
+        ]
+
+    },
+
+
+    vitesse_normale: {
+
+        description:
+            "Déplacement effectué à une vitesse normale",
+
+        mots: [
+            "normal",
+            "normalement",
+            "vitesse normale",
+            "vitesse moyenne"
+        ]
+
+    },
+
+
+    vitesse_rapide: {
+
+        description:
+            "Déplacement ou action effectué rapidement",
+
+        mots: [
+            "rapide",
+            "rapidement",
+            "vite",
+            "très vite",
+            "grande vitesse",
+            "pleine vitesse",
+            "toute vitesse",
+            "vitesse maximale",
+            "vmax"
+        ]
+
+    },
+
+
+    //==========================================================
+    // ⚡ INTENSITÉ
+    //==========================================================
+
+    intensite_faible: {
+
+        description:
+            "Action réalisée avec une faible intensité",
+
+        mots: [
+            "un peu",
+            "légèrement",
+            "doucement",
+            "faiblement",
+            "presque"
+        ]
+
+    },
+
+
+    intensite_moyenne: {
+
+        description:
+            "Action réalisée avec une intensité moyenne",
+
+        mots: [
+            "assez",
+            "normalement",
+            "modérément"
+        ]
+
+    },
+
+
+    intensite_forte: {
+
+        description:
+            "Action réalisée avec une forte intensité",
+
+        mots: [
+            "très",
+            "extrêmement",
+            "fortement",
+            "énormément",
+            "totalement",
+            "complètement",
+            "brutalement"
         ]
 
     },
@@ -2912,16 +3866,88 @@ const NEO_CONCEPTS = {
     // ⏱️ TEMPS
     //==========================================================
 
+    present: {
+
+        description:
+            "Action réalisée actuellement",
+
+        mots: [
+            "maintenant",
+            "actuellement",
+            "aujourd'hui",
+            "en ce moment"
+        ]
+
+    },
+
+
+    passe: {
+
+        description:
+            "Action réalisée avant le moment présent",
+
+        mots: [
+            "avant",
+            "hier",
+            "auparavant",
+            "précédemment",
+            "déjà"
+        ]
+
+    },
+
+
+    futur: {
+
+        description:
+            "Action qui doit avoir lieu après le moment présent",
+
+        mots: [
+            "demain",
+            "plus tard",
+            "bientôt",
+            "ensuite",
+            "après"
+        ]
+
+    },
+
+
+    instantane: {
+
+        description:
+            "Action réalisée immédiatement",
+
+        mots: [
+            "immédiatement",
+            "instantanément",
+            "aussitôt",
+            "en un instant",
+            "tout de suite"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🔄 RELATIONS TEMPORELLES
+    //==========================================================
+
     succession: {
 
-        description: "Une action arrive après une autre",
+        description:
+            "Une action se produit après une autre",
 
         mots: [
             "puis",
             "ensuite",
             "après",
+            "dans la foulée",
             "aussitôt",
-            "dans la foulée"
+            "enchaîne",
+            "next",
+            "then",
+            "after"
         ]
 
     },
@@ -2929,51 +3955,262 @@ const NEO_CONCEPTS = {
 
     simultaneite: {
 
-        description: "Deux actions ont lieu en même temps",
+        description:
+            "Deux actions se produisent en même temps",
 
         mots: [
-            "simultanément",
-            "en même temps",
             "pendant que",
-            "alors que"
+            "alors que",
+            "en même temps",
+            "simultanément",
+            "au même moment",
+            "while",
+            "at the same time"
+        ]
+
+    },
+
+
+    condition: {
+
+        description:
+            "Une action dépend d'une condition",
+
+        mots: [
+            "si",
+            "lorsque",
+            "quand",
+            "dès que",
+            "une fois que",
+            "if",
+            "when",
+            "once"
         ]
 
     },
 
 
     //==========================================================
-    // 🔗 RELATIONS
+    // 🔗 RELATIONS LOGIQUES
     //==========================================================
+
+    cause: {
+
+        description:
+            "Relation indiquant la raison d'un événement",
+
+        mots: [
+            "car",
+            "parce que",
+            "puisque",
+            "à cause de",
+            "grâce à",
+            "en raison de"
+        ]
+
+    },
+
+
+    consequence: {
+
+        description:
+            "Résultat produit par une action ou un événement",
+
+        mots: [
+            "donc",
+            "ainsi",
+            "alors",
+            "par conséquent",
+            "résultat",
+            "entraîne",
+            "provoque"
+        ]
+
+    },
+
 
     opposition: {
 
-        description: "Relation d'opposition entre deux éléments",
+        description:
+            "Deux idées ou actions sont opposées",
 
         mots: [
+            "mais",
+            "cependant",
+            "pourtant",
+            "toutefois",
+            "en revanche",
             "contre",
-            "face à",
-            "opposé",
-            "adversaire"
+            "opposé"
         ]
 
     },
 
 
-    possession: {
+    //==========================================================
+    // 🔢 QUANTITÉ
+    //==========================================================
 
-        description: "Relation indiquant qu'une chose appartient à quelqu'un",
+    quantite_faible: {
+
+        description:
+            "Petite quantité",
 
         mots: [
-            "à",
-            "de",
-            "possède",
-            "appartient"
+            "peu",
+            "quelques",
+            "un peu",
+            "presque aucun",
+            "faible quantité"
+        ]
+
+    },
+
+
+    quantite_moyenne: {
+
+        description:
+            "Quantité moyenne",
+
+        mots: [
+            "plusieurs",
+            "assez",
+            "beaucoup",
+            "une certaine quantité"
+        ]
+
+    },
+
+
+    quantite_forte: {
+
+        description:
+            "Grande quantité",
+
+        mots: [
+            "beaucoup",
+            "énormément",
+            "nombreux",
+            "plein",
+            "totalité",
+            "tous",
+            "tout"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 👤 PERSONNES / ENTITÉS
+    //==========================================================
+
+    personne: {
+
+        description:
+            "Être humain ou individu",
+
+        mots: [
+            "personne",
+            "homme",
+            "femme",
+            "enfant",
+            "individu",
+            "humain"
+        ]
+
+    },
+
+
+    acteur: {
+
+        description:
+            "Personne qui réalise une action",
+
+        mots: [
+            "joueur",
+            "combattant",
+            "attaquant",
+            "défenseur",
+            "personnage",
+            "acteur"
+        ]
+
+    },
+
+
+    cible: {
+
+        description:
+            "Personne ou objet qui subit ou reçoit une action",
+
+        mots: [
+            "cible",
+            "adversaire",
+            "ennemi",
+            "victime",
+            "destinataire"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🧩 INTERACTION
+    //==========================================================
+
+    interaction: {
+
+        description:
+            "Action impliquant plusieurs éléments",
+
+        mots: [
+            "interagir",
+            "rencontrer",
+            "toucher",
+            "parler",
+            "attaquer",
+            "aider",
+            "suivre",
+            "poursuivre"
+        ]
+
+    },
+
+
+    poursuite: {
+
+        description:
+            "Action consistant à suivre une cible",
+
+        mots: [
+            "poursuivre",
+            "suivre",
+            "chasser",
+            "rattraper",
+            "traquer",
+            "courir après"
+        ]
+
+    },
+
+
+    fuite: {
+
+        description:
+            "Action visant à s'éloigner d'un danger ou d'une cible",
+
+        mots: [
+            "fuir",
+            "s'échapper",
+            "s'enfuir",
+            "partir",
+            "s'éloigner",
+            "prendre la fuite"
         ]
 
     }
 
 };
-
 
 //==============================================================
 // 🗂️ INDEX GLOBAL DES DICTIONNAIRES
