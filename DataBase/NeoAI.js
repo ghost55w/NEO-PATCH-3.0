@@ -2878,316 +2878,594 @@ const NEO_CONCEPTS = {
     },
 
 
-    //==========================================================
-    // ⚔️ COMBAT
-    //==========================================================
-
+ //==========================================================
+// ⚔️ COMBAT
+//==========================================================
+ 
     combat: {
 
-        description:
-            "Situation ou action impliquant un affrontement",
-
-        mots: [
-            "combat",
-            "combattre",
-            "affrontement",
-            "duel",
-            "bataille",
-            "confrontation"
-        ]
-
-    },
-
-
-    attaque: {
-
-        description:
-            "Action offensive visant une cible",
-
-        mots: [
-            "attaquer",
-            "attaque",
-            "offensive",
-            "assaut",
-            "agression",
-            "frapper",
-            "coup"
-        ]
-
-    },
-
-
-    frappe: {
-
-        description:
-            "Action consistant à porter un coup",
-
-        mots: [
-            "frapper",
-            "frappe",
-            "coup",
-            "taper",
-            "cogner",
-            "impact",
-            "porter un coup"
-        ]
-
-    },
-
-
-    coup_de_poing: {
-
-        description:
-            "Frappe réalisée avec le poing",
-
-        mots: [
-            "coup de poing",
-            "punch",
-            "jab",
-            "direct",
-            "straight",
-            "cross",
-            "crochet",
-            "hook",
-            "uppercut",
-            "overhand"
-        ]
-
-    },
-
-
-    coup_de_pied: {
-
-        description:
-            "Frappe réalisée avec le pied ou la jambe",
-
-        mots: [
-            "coup de pied",
-            "kick",
-            "front kick",
-            "roundhouse",
-            "roundhouse kick",
-            "side kick",
-            "back kick",
-            "hook kick",
-            "axe kick",
-            "low kick",
-            "spinning back kick"
-        ]
-
-    },
-
-
-    genou: {
-
-        description:
-            "Frappe ou action réalisée avec le genou",
-
-        mots: [
-            "genou",
-            "coup de genou",
-            "knee",
-            "knee strike",
-            "flying knee"
-        ]
-
-    },
-
-
-    coude: {
-
-        description:
-            "Frappe réalisée avec le coude",
-
-        mots: [
-            "coude",
-            "coup de coude",
-            "elbow",
-            "elbow strike",
-            "coude horizontal",
-            "coude circulaire"
-        ]
-
-    },
-
-
-    projection: {
-
-        description:
-            "Action visant à faire tomber ou projeter une cible",
-
-        mots: [
-            "projeter",
-            "projection",
-            "jeter",
-            "faire tomber",
-            "takedown",
-            "fauchage",
-            "balayage",
-            "sweep",
-            "trip"
-        ]
-
-    },
-
-
-    saisie: {
-
-        description:
-            "Action consistant à saisir une personne ou un objet",
-
-        mots: [
-            "saisir",
-            "attraper",
-            "agripper",
-            "empoigner",
-            "tenir",
-            "prise",
-            "grab",
-            "grip",
-            "hold"
-        ]
-
-    },
-
-
-    immobilisation: {
-
-        description:
-            "Action visant à empêcher une cible de bouger",
-
-        mots: [
-            "immobiliser",
-            "immobilisation",
-            "maintenir",
-            "bloquer",
-            "clé",
-            "clé de bras",
-            "clé de jambe",
-            "soumission",
-            "submission",
-            "choke"
-        ]
-
-    },
-
-
-    defense: {
-
-        description:
-            "Action visant à empêcher ou réduire une attaque",
-
-        mots: [
-            "défendre",
-            "défense",
-            "protéger",
-            "protection",
-            "garde"
-        ]
-
-    },
-
-
-    blocage: {
-
-        description:
-            "Action visant à bloquer une attaque",
-
-        mots: [
-            "bloquer",
-            "blocage",
-            "parer",
-            "parade",
-            "dévier",
-            "guard",
-            "block",
-            "parry"
-        ]
-
-    },
-
-
-    esquive: {
-
-        description:
-            "Action visant à éviter une attaque",
-
-        mots: [
-            "esquiver",
-            "esquive",
-            "éviter",
-            "se décaler",
-            "pas de côté",
-            "retrait",
-            "plonger",
-            "se pencher",
-            "dodge",
-            "evade",
-            "sidestep",
-            "slip",
-            "duck",
-            "weave"
-        ]
-
-    },
-
-
-    contre_attaque: {
-
-        description:
-            "Action offensive réalisée en réponse à une attaque",
-
-        mots: [
-            "contre",
-            "contre-attaque",
-            "riposte",
-            "riposter",
-            "contre offensif",
-            "counter",
-            "counterattack",
-            "retaliation"
-        ]
-
-    },
-
-
-    garde: {
-
-        description:
-            "Position destinée à se protéger ou combattre",
-
-        mots: [
-            "garde",
-            "garde haute",
-            "garde basse",
-            "garde ouverte",
-            "garde fermée",
-            "position de garde",
-            "fighting stance"
-        ]
-
-    },
-
-
-    acrobatie: {
-
-        description:
-            "Mouvement physique impliquant une rotation ou un saut",
-
-        mots: [
-            "saut",
-            "roulade",
-            "salto",
-            "vrille",
-            "rotation aérienne",
-            "flip",
-            "spin",
-            "roll"
-        ]
-
-    },
-
-
+    description:
+        "Situation ou action impliquant un affrontement",
+
+    mots: [
+        "combat",
+        "combattre",
+        "affrontement",
+        "duel",
+        "bataille",
+        "confrontation",
+        "affronter",
+        "se battre",
+        "fight",
+        "fighting",
+        "battle",
+        "duel"
+    ]
+
+},
+
+
+attaque: {
+
+    description:
+        "Action offensive visant une cible",
+
+    mots: [
+        "attaquer",
+        "attaque",
+        "offensive",
+        "assaut",
+        "agression",
+        "asséner",
+        "frapper",
+        "porter un coup",
+        "lancer une attaque",
+        "passer à l'attaque",
+        "attack",
+        "offensive",
+        "assault"
+    ]
+
+},
+
+
+frappe: {
+
+    description:
+        "Action consistant à porter un coup physique",
+
+    mots: [
+        "frapper",
+        "frappe",
+        "coup",
+        "taper",
+        "cogner",
+        "heurter",
+        "percuter",
+        "impact",
+        "porter un coup",
+        "asséner un coup",
+        "asséner",
+        "strike",
+        "hit",
+        "blow",
+        "smash"
+    ]
+
+},
+
+
+coup_de_poing: {
+
+    description:
+        "Frappe réalisée avec le poing",
+
+    mots: [
+        "coup de poing",
+        "coup de poing direct",
+        "poing",
+        "punch",
+        "jab",
+        "direct",
+        "straight",
+        "cross",
+        "crochet",
+        "hook",
+        "uppercut",
+        "overhand",
+        "coup de poing circulaire",
+        "coup de poing remontant",
+        "coup de poing descendant"
+    ]
+
+},
+
+
+coup_de_pied: {
+
+    description:
+        "Frappe réalisée avec le pied ou la jambe",
+
+    mots: [
+        "coup de pied",
+        "kick",
+        "front kick",
+        "coup de pied frontal",
+        "roundhouse",
+        "roundhouse kick",
+        "coup de pied circulaire",
+        "side kick",
+        "coup de pied latéral",
+        "back kick",
+        "coup de pied retourné",
+        "hook kick",
+        "coup de pied crochet",
+        "axe kick",
+        "coup de pied en hache",
+        "low kick",
+        "coup de pied bas",
+        "spinning back kick",
+        "coup de pied retourné circulaire"
+    ]
+
+},
+
+
+genou: {
+
+    description:
+        "Frappe ou action réalisée avec le genou",
+
+    mots: [
+        "genou",
+        "coup de genou",
+        "genou direct",
+        "genou sauté",
+        "genou frontal",
+        "genou circulaire",
+        "knee",
+        "knee strike",
+        "knee kick",
+        "flying knee",
+        "jumping knee"
+    ]
+
+},
+
+
+coude: {
+
+    description:
+        "Frappe réalisée avec le coude",
+
+    mots: [
+        "coude",
+        "coup de coude",
+        "coude horizontal",
+        "coude circulaire",
+        "coude remontant",
+        "coude descendant",
+        "elbow",
+        "elbow strike",
+        "horizontal elbow",
+        "rising elbow",
+        "downward elbow"
+    ]
+
+},
+
+
+projection: {
+
+    description:
+        "Action visant à faire tomber ou projeter une cible",
+
+    mots: [
+        "projeter",
+        "projection",
+        "jeter",
+        "faire tomber",
+        "renverser",
+        "mettre au sol",
+        "envoyer au sol",
+        "faire chuter",
+        "takedown",
+        "throw",
+        "fauchage",
+        "balayage",
+        "sweep",
+        "trip",
+        "toss"
+    ]
+
+},
+
+
+saisie: {
+
+    description:
+        "Action consistant à saisir ou contrôler une personne ou un objet",
+
+    mots: [
+        "saisir",
+        "saisie",
+        "attraper",
+        "agripper",
+        "empoigner",
+        "tenir",
+        "prise",
+        "empoignade",
+        "grab",
+        "grip",
+        "hold",
+        "clinch",
+        "grapple",
+        "grappling"
+    ]
+
+},
+
+
+immobilisation: {
+
+    description:
+        "Action visant à empêcher une cible de bouger",
+
+    mots: [
+        "immobiliser",
+        "immobilisation",
+        "maintenir",
+        "retenir",
+        "bloquer",
+        "empêcher de bouger",
+        "maintenir au sol",
+        "clé",
+        "clé de bras",
+        "clé de jambe",
+        "clé d'épaule",
+        "étranglement",
+        "soumission",
+        "submission",
+        "arm lock",
+        "leg lock",
+        "choke",
+        "hold",
+        "pin"
+    ]
+
+},
+
+
+defense: {
+
+    description:
+        "Action visant à empêcher ou réduire les effets d'une attaque",
+
+    mots: [
+        "défendre",
+        "défense",
+        "se défendre",
+        "protéger",
+        "protection",
+        "se protéger",
+        "garde",
+        "defend",
+        "defense",
+        "protect",
+        "protection"
+    ]
+
+},
+
+
+blocage: {
+
+    description:
+        "Action consistant à arrêter ou absorber une attaque",
+
+    mots: [
+        "bloquer",
+        "blocage",
+        "bloque",
+        "parer",
+        "parade",
+        "garde",
+        "protection",
+        "absorber le coup",
+        "arrêter le coup",
+        "stopper le coup",
+        "block",
+        "guard",
+        "parry"
+    ]
+
+},
+
+
+deviation: {
+
+    description:
+        "Action consistant à détourner ou modifier la trajectoire d'une attaque",
+
+    mots: [
+        "dévier",
+        "déviation",
+        "dévie",
+        "détourner",
+        "détourne",
+        "détournement",
+        "dévier le coup",
+        "dévier l'attaque",
+        "détourner l'attaque",
+        "repousser sur le côté",
+        "écarter",
+        "écarter le coup",
+        "écarter l'attaque",
+        "déviation de trajectoire",
+        "deflect",
+        "deflection",
+        "redirect",
+        "redirecting"
+    ]
+
+},
+
+
+parade: {
+
+    description:
+        "Action défensive visant à détourner ou neutraliser une frappe",
+
+    mots: [
+        "parer",
+        "parade",
+        "parer le coup",
+        "parer l'attaque",
+        "bloquer avec la garde",
+        "détourner le coup",
+        "dévier le coup",
+        "parry",
+        "parried"
+    ]
+
+},
+
+
+esquive: {
+
+    description:
+        "Action visant à éviter une attaque sans nécessairement la bloquer",
+
+    mots: [
+        "esquiver",
+        "esquive",
+        "éviter",
+        "évite",
+        "se décaler",
+        "décaler",
+        "pas de côté",
+        "retrait",
+        "reculer pour éviter",
+        "plonger",
+        "se pencher",
+        "se baisser",
+        "se courber",
+        "duck",
+        "dodge",
+        "evade",
+        "sidestep",
+        "slip",
+        "weave",
+        "backstep"
+    ]
+
+},
+
+
+contre_attaque: {
+
+    description:
+        "Action offensive réalisée en réponse à une attaque adverse",
+
+    mots: [
+        "contre",
+        "contre-attaque",
+        "contre attaque",
+        "riposte",
+        "riposter",
+        "répliquer",
+        "réponse offensive",
+        "contre offensif",
+        "contre immédiatement",
+        "counter",
+        "counterattack",
+        "counter strike",
+        "retaliation"
+    ]
+
+},
+
+
+garde: {
+
+    description:
+        "Position défensive ou posture de combat",
+
+    mots: [
+        "garde",
+        "garde haute",
+        "garde basse",
+        "garde ouverte",
+        "garde fermée",
+        "garde latérale",
+        "position de garde",
+        "position défensive",
+        "posture de combat",
+        "stance",
+        "fighting stance",
+        "high guard",
+        "low guard",
+        "open guard",
+        "closed guard"
+    ]
+
+},
+
+
+clinch: {
+
+    description:
+        "Situation de combat à très courte distance avec contact physique",
+
+    mots: [
+        "clinch",
+        "corps à corps",
+        "au corps à corps",
+        "accrochage",
+        "prise rapprochée",
+        "combat rapproché",
+        "contact rapproché",
+        "s'agripper",
+        "agrippés",
+        "close combat"
+    ]
+
+},
+
+
+acrobatie: {
+
+    description:
+        "Mouvement physique impliquant un saut, une rotation ou une figure aérienne",
+
+    mots: [
+        "saut",
+        "sauter",
+        "roulade",
+        "salto",
+        "flip",
+        "vrille",
+        "rotation aérienne",
+        "rotation",
+        "tour aérien",
+        "saut retourné",
+        "saut périlleux",
+        "backflip",
+        "frontflip",
+        "spin",
+        "roll",
+        "aerial rotation"
+    ]
+
+},
+
+
+impact: {
+
+    description:
+        "Effet physique produit lorsqu'une attaque touche une cible",
+
+    mots: [
+        "impact",
+        "choc",
+        "coup",
+        "collision",
+        "percussion",
+        "frapper",
+        "toucher",
+        "atteindre",
+        "percuter",
+        "impact violent",
+        "gros impact",
+        "impact direct",
+        "impact puissant",
+        "hit",
+        "collision"
+    ]
+
+},
+
+
+precision: {
+
+    description:
+        "Qualité d'une action réalisée avec exactitude",
+
+    mots: [
+        "précis",
+        "précision",
+        "viser",
+        "visé",
+        "cibler",
+        "exact",
+        "exactement",
+        "directement",
+        "coup précis",
+        "frappe précise",
+        "precision",
+        "accurate",
+        "precise",
+        "aim"
+    ]
+
+},
+
+
+cible: {
+
+    description:
+        "Personne, objet ou zone visée par une action",
+
+    mots: [
+        "cible",
+        "viser",
+        "visé",
+        "cibler",
+        "adversaire",
+        "ennemi",
+        "target",
+        "aim",
+        "opponent"
+    ]
+
+}, 
+
+   projection: {
+
+    description:
+        "Action visant à faire tomber ou projeter une cible au sol",
+
+    mots: [
+        "projeter",
+        "projection",
+        "projection au sol",
+        "projeter au sol",
+        "jeter au sol",
+        "faire tomber",
+        "faire chuter",
+        "renverser",
+        "mettre au sol",
+        "envoyer au sol",
+        "plaquer au sol",
+        "balayer",
+        "balayage",
+        "faire un balayage",
+        "balayage de jambe",
+        "balayage des jambes",
+        "fauchage",
+        "faucher",
+        "takedown",
+        "take down",
+        "throw",
+        "slam",
+        "sweep",
+        "trip",
+        "toss"
+    ]
+
+   }
+            
+    
     //==========================================================
     // 🍽️ VIE COURANTE
     //==========================================================
