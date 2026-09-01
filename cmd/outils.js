@@ -1314,6 +1314,163 @@ ${listeMots}
   );
 
 }
+//==============================================================
+// 🌀🧠 TRAITER UN MESSAGE NEOAI
+//==============================================================
+
+async function traiterMessageNeoAI(
+  ms,
+  ms_org,
+  ovl,
+  auteur_Message
+) {
+
+  //============================================================
+  // 👤 RÉCUPÉRER LE JID UTILISATEUR
+  //============================================================
+
+  const userJid =
+    auteur_Message ||
+    getNeoAIUserJid(
+      ms,
+      ms_org
+    );
+
+  if (!userJid) {
+    return false;
+  }
+
+  //============================================================
+  // 📝 EXTRAIRE LE TEXTE
+  //============================================================
+
+  const texte =
+    extraireTexteNeoAI(ms);
+
+  if (!texte) {
+    return false;
+  }
+
+  const texteNormalise =
+    texte
+      .toLowerCase()
+      .trim();
+
+  //============================================================
+  // 🛑 ARRÊT NEOAI
+  //============================================================
+
+  if (
+    texteNormalise === "🌀 stop" ||
+    texteNormalise === "🌀 arrête" ||
+    texteNormalise === "🌀 arrete" ||
+    texteNormalise === "🌀 arrêter" ||
+    texteNormalise === "🌀 stop neoai" ||
+    texteNormalise === "🌀 arrête neoai" ||
+    texteNormalise === "🌀 arrete neoai"
+  ) {
+
+    // On ferme uniquement si une session existe
+    if (sessionNeoAIActive(userJid)) {
+
+      fermerSessionNeoAI(userJid);
+
+      await ovl.sendMessage(
+        ms_org,
+        {
+          text:
+            "🌀🧠 NeoAI a fermé la session.\n\n" +
+            "À bientôt 👋🏻"
+        },
+        {
+          quoted: ms
+        }
+      );
+
+    }
+
+    // Le message est traité par NeoAI
+    return true;
+  }
+
+  //============================================================
+  // 🧠 RÉCUPÉRER LA SESSION
+  //============================================================
+
+  const session =
+    getSessionNeoAI(userJid);
+
+  // Pas de session = NeoAI ne fait rien
+  if (!session) {
+    return false;
+  }
+
+  //============================================================
+  // 🌀 FORMAT OBLIGATOIRE
+  //============================================================
+
+  if (
+    !texte.startsWith("🌀:")
+  ) {
+
+    return false;
+  }
+
+  //============================================================
+  // 🧠 ANALYSER LE TEXTE
+  //============================================================
+
+  const resultat =
+    await analyserNeoAI(
+      texte
+    );
+
+  //============================================================
+  // ❌ ERREUR
+  //============================================================
+
+  if (!resultat?.success) {
+
+    await ovl.sendMessage(
+      ms_org,
+      {
+        text:
+          resultat?.message ||
+          "❌ NeoAI n'a pas pu analyser ce texte."
+      },
+      {
+        quoted: ms
+      }
+    );
+
+    return true;
+  }
+
+  //============================================================
+  // 📊 COMPTEUR
+  //============================================================
+
+  session.messagesAnalyses =
+    (session.messagesAnalyses || 0) + 1;
+
+  //============================================================
+  // 🖼️ ENVOYER LE RÉSULTAT
+  //============================================================
+
+  await envoyerResultatNeoAI(
+    ovl,
+    ms_org,
+    ms,
+    resultat
+  );
+
+  console.log(
+    "✅ [NeoAI] Analyse terminée pour :",
+    userJid
+  );
+
+  return true;
+}
 
 module.exports.traiterMessageNeoAI = traiterMessageNeoAI;
 module.exports.demarrerSessionNeoAI = demarrerSessionNeoAI;
