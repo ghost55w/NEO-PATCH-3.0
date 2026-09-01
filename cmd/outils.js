@@ -1383,52 +1383,66 @@ async function analyserNeoAI(text) {
 // 🧠🔎 NEOAI — RÉSUMÉ
 //==============================================================
 
-function genererResumeNeoAI(
-  resultat
-) {
+function genererResumeNeoAI(resultat) {
 
-  if (!resultat) {
-    return "Aucune compréhension.";
-  }
+    if (!resultat) {
+        return "Aucune compréhension.";
+    }
 
-  const categories =
-    resultat.categories || [];
+    const categories =
+        Array.isArray(resultat.categories)
+            ? resultat.categories
+            : [];
 
-  const motsConnus =
-    resultat.motsConnus || [];
+    const motsConnus =
+        Array.isArray(resultat.motsConnus)
+            ? resultat.motsConnus
+            : [];
 
-  const expressions =
-    resultat.expressions || [];
+    const expressions =
+        Array.isArray(resultat.expressions)
+            ? resultat.expressions
+            : [];
 
-  if (
-    !categories.length &&
-    !expressions.length
-  ) {
+    //==========================================================
+    // 🧠 RÉSUMÉ DE BASE
+    //==========================================================
 
-    return (
-      "NeoAI n'a détecté aucun élément linguistique connu."
-    );
-  }
+    let resume =
+        `NeoAI a identifié ${motsConnus.length} mot(s) connu(s)`;
 
-  let resume =
-    `NeoAI a identifié ${motsConnus.length} ` +
-    `mot(s) connu(s)`;
+    //==========================================================
+    // 📚 CATÉGORIES
+    //==========================================================
 
-  if (categories.length) {
+    if (categories.length) {
 
-    resume +=
-      ` appartenant aux catégories : ` +
-      `${categories.join(", ")}`;
-  }
+        resume +=
+            ` appartenant aux catégories : ` +
+            `${categories.join(", ")}`;
+    }
 
-  if (expressions.length) {
+    //==========================================================
+    // 🔗 EXPRESSIONS
+    //==========================================================
 
-    resume +=
-      `. Expressions détectées : ` +
-      `${expressions.map(e => e.expression).join(", ")}`;
-  }
+    if (expressions.length) {
 
-  return resume + ".";
+        const expressionsTexte =
+            expressions
+                .map(e => e.expression)
+                .filter(Boolean)
+                .join(", ");
+
+        if (expressionsTexte) {
+
+            resume +=
+                `. Expressions détectées : ` +
+                expressionsTexte;
+        }
+    }
+
+    return resume + ".";
 }
 
 
@@ -1437,33 +1451,43 @@ function genererResumeNeoAI(
 //==============================================================
 
 async function envoyerResultatNeoAI(
-  ovl,
-  ms_org,
-  ms,
-  resultat
+    ovl,
+    ms_org,
+    ms,
+    resultat
 ) {
 
-  const resume =
-    genererResumeNeoAI(
-      resultat
-    );
+    //==========================================================
+    // 🧠 RÉSUMÉ
+    //==========================================================
 
-  const listeMots =
-    (resultat.mots || [])
-      .map(
-        (m, index) =>
-          `${index + 1}. ${m.mot}` +
-          (
-            m.connu
-              ? ` ✅`
-              : ` ❌`
-          )
-      )
-      .join("\n");
+    const resume =
+        genererResumeNeoAI(resultat);
 
-  const caption =
-`🌀🧠 *NeoAI Open license source 2.0*
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+    //==========================================================
+    // 📚 LISTE DES MOTS
+    //==========================================================
+
+    const listeMots =
+        Array.isArray(resultat.mots)
+            ? resultat.mots
+                .map(
+                    (m, index) =>
+                        `${index + 1}. ${m.mot}`
+                )
+                .join("\n")
+            : "Aucun mot détecté.";
+
+
+    //==========================================================
+    // 📝 MESSAGE
+    //==========================================================
+
+    const caption =
+`🌀🧠 *NeoAI Open license source*
+▔▔▔▔▔▔▔▔▔▔
+
 📝*Texte:* ${resultat.texte}
 
 *📚Résumé:* ${resume}
@@ -1476,23 +1500,29 @@ async function envoyerResultatNeoAI(
 ${listeMots}
 
 ╰──────────────────
-            *Powered by NEOVERSE™🌀*`;
+                     *Powered by NEOVERSE™🌀*`;
 
-  await ovl.sendMessage(
-    ms_org,
-    {
-      image: {
-        url:
-          "https://files.catbox.moe/6s72pg.jpg"
-      },
-      caption:
-        caption
-    },
-    {
-      quoted: ms
-    }
-  );
+
+    //==========================================================
+    // 📤 ENVOI
+    //==========================================================
+
+    await ovl.sendMessage(
+        ms_org,
+        {
+            image: {
+                url:
+                    "https://files.catbox.moe/6s72pg.jpg"
+            },
+
+            caption
+        },
+        {
+            quoted: ms
+        }
+    );
 }
+
 
 
 //==============================================================
