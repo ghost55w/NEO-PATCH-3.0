@@ -715,10 +715,6 @@ function demarrerSessionNeoAI(
     return false;
   }
 
-  //============================================================
-  // 🧠 CRÉATION DE LA SESSION
-  //============================================================
-
   neoAISessions.set(
     userJid,
     {
@@ -788,7 +784,7 @@ function sessionNeoAIActive(
 
 
 //==============================================================
-// 🧠 FERMER UNE SESSION NEOAI
+// 🛑 FERMER UNE SESSION NEOAI
 //==============================================================
 
 function fermerSessionNeoAI(
@@ -808,15 +804,7 @@ function fermerSessionNeoAI(
     return false;
   }
 
-  //============================================================
-  // 🔴 DÉSACTIVATION
-  //============================================================
-
   session.active = false;
-
-  //============================================================
-  // 🗑️ SUPPRESSION
-  //============================================================
 
   neoAISessions.delete(
     userJid
@@ -828,6 +816,35 @@ function fermerSessionNeoAI(
   );
 
   return true;
+}
+
+
+//==============================================================
+// 🛑 DÉTECTER UNE COMMANDE D'ARRÊT NEOAI
+//==============================================================
+
+function estCommandeArretNeoAI(
+  texte
+) {
+
+  if (!texte) {
+    return false;
+  }
+
+  const normalise =
+    String(texte)
+      .toLowerCase()
+      .trim();
+
+  return (
+    normalise === "🌀 stop" ||
+    normalise === "🌀 arrête" ||
+    normalise === "🌀 arrete" ||
+    normalise === "🌀 arrêter" ||
+    normalise === "🌀 stop neoai" ||
+    normalise === "🌀 arrête neoai" ||
+    normalise === "🌀 arrete neoai"
+  );
 }
 
 
@@ -870,20 +887,12 @@ function extraireTexteNeoAI(
     ms.message ||
     ms;
 
-  //============================================================
-  // 📝 TEXTE SIMPLE
-  //============================================================
-
   if (
     message.conversation
   ) {
 
     return message.conversation;
   }
-
-  //============================================================
-  // 📝 TEXTE ÉTENDU
-  //============================================================
 
   if (
     message.extendedTextMessage?.text
@@ -892,10 +901,6 @@ function extraireTexteNeoAI(
     return message.extendedTextMessage.text;
   }
 
-  //============================================================
-  // 🖼️ IMAGE
-  //============================================================
-
   if (
     message.imageMessage?.caption
   ) {
@@ -903,20 +908,12 @@ function extraireTexteNeoAI(
     return message.imageMessage.caption;
   }
 
-  //============================================================
-  // 🎥 VIDÉO
-  //============================================================
-
   if (
     message.videoMessage?.caption
   ) {
 
     return message.videoMessage.caption;
   }
-
-  //============================================================
-  // 📄 DOCUMENT
-  //============================================================
 
   if (
     message.documentMessage?.caption
@@ -927,6 +924,7 @@ function extraireTexteNeoAI(
 
   return "";
 }
+  
 
 
 //==============================================================
