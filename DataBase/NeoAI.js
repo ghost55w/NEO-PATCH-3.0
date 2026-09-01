@@ -2622,6 +2622,359 @@ const NEO_COMBAT = {
 
 }; 
 
+==============================================================
+
+const NEO_CONCEPTS = {
+
+    //==========================================================
+    // 🚶 DÉPLACEMENT
+    //==========================================================
+
+    deplacement: {
+
+        description: "Action de changer de position",
+
+        mots: [
+            "marcher",
+            "courir",
+            "avancer",
+            "reculer",
+            "bouger",
+            "se déplacer",
+            "approcher",
+            "s'éloigner",
+            "partir",
+            "arriver"
+        ]
+
+    },
+
+
+    deplacement_rapide: {
+
+        description: "Déplacement effectué rapidement",
+
+        mots: [
+            "courir",
+            "foncer",
+            "sprinter",
+            "se précipiter",
+            "accélérer",
+            "à pleine vitesse",
+            "vitesse maximale",
+            "vmax"
+        ]
+
+    },
+
+
+    deplacement_lent: {
+
+        description: "Déplacement effectué lentement",
+
+        mots: [
+            "marcher",
+            "ralentir",
+            "avancer lentement",
+            "se déplacer doucement"
+        ]
+
+    },
+
+
+    //==========================================================
+    // ⚔️ COMBAT
+    //==========================================================
+
+    attaque: {
+
+        description: "Action visant à attaquer une cible",
+
+        mots: [
+            "attaquer",
+            "frapper",
+            "cogner",
+            "taper",
+            "assaut",
+            "offensive",
+            "agresser"
+        ]
+
+    },
+
+
+    defense: {
+
+        description: "Action visant à se protéger",
+
+        mots: [
+            "défendre",
+            "bloquer",
+            "parer",
+            "esquiver",
+            "éviter",
+            "protéger",
+            "garde"
+        ]
+
+    },
+
+
+    frappe: {
+
+        description: "Action physique portée contre une cible",
+
+        mots: [
+            "frapper",
+            "coup",
+            "frappe",
+            "impact",
+            "taper",
+            "cogner"
+        ]
+
+    },
+
+
+    projection: {
+
+        description: "Action visant à faire tomber ou projeter une cible",
+
+        mots: [
+            "projeter",
+            "jeter",
+            "faire tomber",
+            "projection",
+            "fauchage",
+            "balayage"
+        ]
+
+    },
+
+
+    saisie: {
+
+        description: "Action consistant à saisir ou maintenir une cible",
+
+        mots: [
+            "saisir",
+            "attraper",
+            "agripper",
+            "empoigner",
+            "tenir",
+            "prise"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🍽️ VIE COURANTE
+    //==========================================================
+
+    alimentation: {
+
+        description: "Action liée au fait de manger ou boire",
+
+        mots: [
+            "manger",
+            "boire",
+            "déjeuner",
+            "dîner",
+            "goûter",
+            "se nourrir",
+            "repas"
+        ]
+
+    },
+
+
+    sommeil: {
+
+        description: "Action ou état lié au sommeil",
+
+        mots: [
+            "dormir",
+            "s'endormir",
+            "se réveiller",
+            "sieste",
+            "sommeil"
+        ]
+
+    },
+
+
+    hygiene: {
+
+        description: "Actions liées à l'hygiène",
+
+        mots: [
+            "se laver",
+            "se doucher",
+            "se baigner",
+            "se brosser",
+            "se nettoyer"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🧠 PERCEPTION
+    //==========================================================
+
+    vision: {
+
+        description: "Perception utilisant les yeux",
+
+        mots: [
+            "voir",
+            "regarder",
+            "observer",
+            "fixer",
+            "apercevoir"
+        ]
+
+    },
+
+
+    audition: {
+
+        description: "Perception utilisant l'ouïe",
+
+        mots: [
+            "entendre",
+            "écouter",
+            "écoute",
+            "son",
+            "bruit"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🧭 POSITION / ESPACE
+    //==========================================================
+
+    proximite: {
+
+        description: "Deux éléments sont proches",
+
+        mots: [
+            "près",
+            "proche",
+            "à côté",
+            "à proximité",
+            "close",
+            "near"
+        ]
+
+    },
+
+
+    eloignement: {
+
+        description: "Deux éléments sont éloignés",
+
+        mots: [
+            "loin",
+            "éloigné",
+            "à distance",
+            "away",
+            "far"
+        ]
+
+    },
+
+
+    orientation: {
+
+        description: "Direction ou orientation d'un élément",
+
+        mots: [
+            "gauche",
+            "droite",
+            "devant",
+            "derrière",
+            "haut",
+            "bas",
+            "nord",
+            "sud",
+            "est",
+            "ouest"
+        ]
+
+    },
+
+
+    //==========================================================
+    // ⏱️ TEMPS
+    //==========================================================
+
+    succession: {
+
+        description: "Une action arrive après une autre",
+
+        mots: [
+            "puis",
+            "ensuite",
+            "après",
+            "aussitôt",
+            "dans la foulée"
+        ]
+
+    },
+
+
+    simultaneite: {
+
+        description: "Deux actions ont lieu en même temps",
+
+        mots: [
+            "simultanément",
+            "en même temps",
+            "pendant que",
+            "alors que"
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🔗 RELATIONS
+    //==========================================================
+
+    opposition: {
+
+        description: "Relation d'opposition entre deux éléments",
+
+        mots: [
+            "contre",
+            "face à",
+            "opposé",
+            "adversaire"
+        ]
+
+    },
+
+
+    possession: {
+
+        description: "Relation indiquant qu'une chose appartient à quelqu'un",
+
+        mots: [
+            "à",
+            "de",
+            "possède",
+            "appartient"
+        ]
+
+    }
+
+};
+
+
 //==============================================================
 // 🗂️ INDEX GLOBAL DES DICTIONNAIRES
 //==============================================================
@@ -2634,6 +2987,7 @@ const NEO_COMBAT = {
 const NEO_DICTIONNAIRES = {
 
     NEO_VERBES,
+    NEO_VERBES_SPECIAUX,
     NEO_NOMS,
     NEO_ADJECTIFS,
     NEO_ADVERBES,
@@ -2651,7 +3005,9 @@ const NEO_DICTIONNAIRES = {
     NEO_INTENSITE,
     NEO_VITESSE,
     NEO_RELATIONS, 
-    NEO_COMBAT 
+    NEO_COMBAT, 
+    NEO_CONCEPTS
+
 
 };
 
@@ -3036,24 +3392,33 @@ module.exports = {
     NEOAI_CONFIG,
 
     NEO_VERBES,
+    NEO_VERBES_SPECIAUX,
+
     NEO_NOMS,
     NEO_ADJECTIFS,
     NEO_ADVERBES,
+
     NEO_SYNONYMES,
     NEO_ANTONYMES,
     NEO_CONNECTEURS,
+
     NEO_PREPOSITIONS,
     NEO_PRONOMS,
     NEO_EXPRESSIONS,
+
     NEO_UNITES,
     NEO_TEMPS,
     NEO_DIRECTIONS,
+
     NEO_PARTIES_CORPS,
     NEO_EMOTIONS,
     NEO_INTENSITE,
     NEO_VITESSE,
     NEO_RELATIONS,
-    NEO_COMBAT, 
+
+    NEO_COMBAT,
+
+    NEO_CONCEPTS,
 
     NEO_DICTIONNAIRES,
 
