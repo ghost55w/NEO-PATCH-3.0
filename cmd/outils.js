@@ -6,6 +6,7 @@ const fs = require('fs');
 const FormData = require('form-data');
 const { Bans } = require('../DataBase/ban');
 const { Sudo } = require('../DataBase/sudo');
+const NeoAI = require("../DataBase/NeoAI");
 
 function stylize(text) {
     const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -1078,14 +1079,12 @@ async function analyserNeoAI(text) {
   const motsAnalyses = [];
 
   // Sécurité si NeoAI n'est pas chargé
-  const dictionnaire =
-    (
-      typeof NeoAI !== "undefined" &&
-      NeoAI &&
-      typeof NeoAI === "object"
-    )
-      ? NeoAI
-      : {};
+  const dictionnaire = NeoAI;
+
+console.log(
+  "🧠 [NeoAI] Catégories chargées :",
+  Object.keys(dictionnaire)
+);
 
   for (
     const motOriginal of mots
