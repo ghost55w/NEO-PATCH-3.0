@@ -1253,73 +1253,6 @@ return {
 }
 
 
-
-//==============================================================
-// 🧠🔎 NEOAI — RÉSUMÉ
-//==============================================================
-
-function genererResumeNeoAI(resultat) {
-
-    if (!resultat) {
-        return "Aucune compréhension.";
-    }
-
-    const categories =
-        Array.isArray(resultat.categories)
-            ? resultat.categories
-            : [];
-
-    const motsConnus =
-        Array.isArray(resultat.motsConnus)
-            ? resultat.motsConnus
-            : [];
-
-    const expressions =
-        Array.isArray(resultat.expressions)
-            ? resultat.expressions
-            : [];
-
-    //==========================================================
-    // 🧠 RÉSUMÉ DE BASE
-    //==========================================================
-
-    let resume =
-        `NeoAI a identifié ${motsConnus.length} mot(s) connu(s)`;
-
-    //==========================================================
-    // 📚 CATÉGORIES
-    //==========================================================
-
-    if (categories.length) {
-
-        resume +=
-            ` appartenant aux catégories : ` +
-            `${categories.join(", ")}`;
-    }
-
-    //==========================================================
-    // 🔗 EXPRESSIONS
-    //==========================================================
-
-    if (expressions.length) {
-
-        const expressionsTexte =
-            expressions
-                .map(e => e.expression)
-                .filter(Boolean)
-                .join(", ");
-
-        if (expressionsTexte) {
-
-            resume +=
-                `. Expressions détectées : ` +
-                expressionsTexte;
-        }
-    }
-
-    return resume + ".";
-}
-
 //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
 //==============================================================
@@ -1588,14 +1521,11 @@ async function traiterMessageNeoAI(
     //==========================================================
     // 🖼️ ENVOYER LE RÉSULTAT
     //==========================================================
-
     await envoyerResultatNeoAI(
-      ovl,
-      ms_org,
-      ms,
-      resultat
-    );
-
+  ovl,
+  ms_org,
+  resultat
+);
     console.log(
       "✅ [NeoAI] Analyse terminée pour :",
       userJid
