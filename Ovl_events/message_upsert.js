@@ -23,7 +23,8 @@ const { verifierFiche, messageMatch } = require("../cmd/Bluelockmatch");
 //==============================================================
 
 const {
-    traiterMessageNeoAI
+    traiterMessageNeoAI, 
+    fermerSessionNeoAI
 } = require("../cmd/outils");
 
 function getTextMessage(msg) {
@@ -219,6 +220,42 @@ if (ms.key.fromMe) {
 
 try {
 
+    //==========================================================
+    // 🛑 ARRÊT DIRECT DE LA SESSION NEOAI
+    //==========================================================
+
+    const texteNeoAI =
+        String(texte || "")
+            .toLowerCase()
+            .trim();
+
+    if (
+        texteNeoAI === "🌀 stop" ||
+        texteNeoAI === "🌀 arrête" ||
+        texteNeoAI === "🌀 arrete"
+    ) {
+
+        fermerSessionNeoAI(auteur_Message);
+
+        await ovl.sendMessage(
+            ms_org,
+            {
+                text:
+                    "🌀🧠 NeoAI a fermé la session.\n\n" +
+                    "À bientôt 👋🏻"
+            },
+            {
+                quoted: ms
+            }
+        );
+
+        return;
+    }
+
+    //==========================================================
+    // 🧠 TRAITEMENT NORMAL NEOAI
+    //==========================================================
+
     const neoAIHandled =
         await traiterMessageNeoAI(
             ms,
@@ -226,10 +263,6 @@ try {
             ovl,
             auteur_Message
         );
-
-    //==========================================================
-    // 🧠 NEOAI A TRAITÉ LE MESSAGE
-    //==========================================================
 
     if (neoAIHandled) {
         return;
