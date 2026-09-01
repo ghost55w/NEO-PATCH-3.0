@@ -998,8 +998,9 @@ function extraireTexteNeoAI(
 
 
 //==============================================================
-// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
+// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE V2
 //==============================================================
+
 function analyserNeoAI(text) {
 
     if (typeof text !== "string") {
@@ -1010,7 +1011,7 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // 1️⃣ EXTRACTION DU TEXTE
+    // 1️⃣ TEXTE
     //==========================================================
 
     const texteOriginal = text.trim();
@@ -1027,7 +1028,7 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // 2️⃣ EXTRACTION DES MOTS
+    // 2️⃣ NORMALISATION
     //==========================================================
 
     const texteNormalise =
@@ -1041,23 +1042,31 @@ function analyserNeoAI(text) {
             : texteNormalise.split(/\s+/);
 
     //==========================================================
-    // 3️⃣ RECHERCHE DE CHAQUE MOT DANS NEOAI.JS
+    // 3️⃣ CONNAISSANCE DE CHAQUE MOT
     //==========================================================
 
     const motsAnalyses = [];
 
-    for (const mot of mots) {
+    for (let i = 0; i < mots.length; i++) {
 
-        let connaissance = null;
+        const mot = mots[i];
+
+        let connaissance = {
+            trouve: false,
+            categories: []
+        };
 
         if (
             typeof NeoAI.neoRechercherMot === "function"
         ) {
+
             connaissance =
                 NeoAI.neoRechercherMot(mot);
         }
 
         motsAnalyses.push({
+
+            index: i,
 
             mot,
 
@@ -1071,7 +1080,7 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // 4️⃣ COMPRÉHENSION DU TEXTE
+    // 4️⃣ COMPRÉHENSION
     //==========================================================
 
     const comprehension = {
@@ -1080,24 +1089,37 @@ function analyserNeoAI(text) {
 
         actions: [],
 
-        directions: [],
-
         objets: [],
 
         cibles: [],
+
+        moyens: [],
+
+        partiesCorps: [],
+
+        directions: [],
 
         lieux: [],
 
         temps: [],
 
-        contexte: "general"
+        connecteurs: [],
+
+        contexte: "general",
+
+        enchainement: null
 
     };
 
-    // On parcourt les connaissances trouvées
+    //==========================================================
+    // 5️⃣ IDENTIFIER LES CATÉGORIES
+    //==========================================================
+
     for (const element of motsAnalyses) {
 
-        if (!element.connu) continue;
+        if (!element.connu) {
+            continue;
+        }
 
         for (const categorie of element.categories) {
 
@@ -1106,37 +1128,475 @@ function analyserNeoAI(text) {
                     categorie.categorie || ""
                 ).toLowerCase();
 
-            // Direction
-            if (
-                nom.includes("direction")
-            ) {
+            //..................................................
+            // VERBES
+            //..................................................
 
-                comprehension.directions.push(
-                    element.mot
-                );
-            }
-
-            // Verbe
             if (
                 nom.includes("verbe")
             ) {
 
-                comprehension.actions.push({
-
-                    verbe: element.mot,
-
-                    categories:
-                        element.categories
-
-                });
+                element.estVerbe = true;
             }
 
-            // Temps
+            //..................................................
+            // NOMS
+            //..................................................
+
+            if (
+                nom.includes("nom")
+            ) {
+
+                element.estNom = true;
+            }
+
+            //..................................................
+            // DIRECTIONS
+            //..................................................
+
+            if (
+                nom.includes("direction")
+            ) {
+
+                element.estDirection = true;
+            }
+
+            //..................................................
+            // PARTIES DU CORPS
+            //..................................................
+
+            if (
+                nom.includes("partie_corps") ||
+                nom.includes("parties_corps") ||
+                nom.includes("corps")
+            ) {
+
+                element.estPartieCorps = true;
+            }
+
+            //..................................................
+            // TEMPS
+            //..................................................
+
             if (
                 nom.includes("temps")
             ) {
 
-                comprehension.temps.push(
+                element.estTemps = true;
+            }
+
+            //..................................................
+            // CONNECTEURS
+            //..................................................
+
+            if (
+                nom.includes("connect")
+            ) {
+
+                element.estConnecteur = true;
+            }
+
+            //..................................................
+            // COMBAT
+            //..................................................
+
+            if (
+                nom.includes("combat")
+            ) {
+
+                element.estCombat = true;
+            }
+
+            //..................................................
+            // PRÉPOSITIONS
+            //..................................................
+
+            if (
+                nom.includes("preposition")
+            ) {
+
+                element.estPreposition = true;
+            }
+        }
+    }
+
+    //==========================================================
+    // 6️⃣ CONTEXTE COMBAT
+    //==========================================================
+
+    const motsCombat = motsAnalyses.filter(
+        m => m.estCombat
+    );
+
+    if (motsCombat.length > 0) {
+
+        comprehension.contexte =
+            "combat";
+    }
+
+    //==========================================================
+    // 7️⃣ CONNECTEURS D'ENCHAÎNEMENT
+    //==========================================================
+
+    const connecteursEnchainement = [
+        "puis",
+        "ensuite",
+        "apres",
+        "après",
+        "alors",
+        "et",
+        "ensuite"
+    ];
+
+    for (const element of motsAnalyses) {
+
+        if (
+            connecteursEnchainement.includes(
+                element.mot.toLowerCase()
+            )
+        ) {
+
+            comprehension.connecteurs.push(
+                element.mot
+            );
+        }
+    }
+
+    if (
+        comprehension.connecteurs.length
+    ) {
+
+        comprehension.enchainement =
+            "successif";
+    }
+
+    //==========================================================
+    // 8️⃣ TROUVER LES VERBES
+    //==========================================================
+
+    const verbes =
+        motsAnalyses.filter(
+            m => m.estVerbe
+        );
+
+    //==========================================================
+    // 9️⃣ DÉTERMINER LES ACTIONS PRINCIPALES
+    //==========================================================
+
+    /*
+     * Un verbe placé après :
+     *
+     * - voyant
+     * - voyant ... venir
+     * - pouvant
+     * - voulant
+     * - faisant
+     *
+     * peut être secondaire.
+     *
+     * On privilégie les verbes qui arrivent
+     * après un sujet ou après une rupture
+     * de proposition.
+     */
+
+    const verbesSecondaires = [
+        "voir",
+        "voyant",
+        "venant",
+        "venir",
+        "pouvant",
+        "pouvoir",
+        "voulant",
+        "vouloir",
+        "faisant",
+        "faire",
+        "ayant",
+        "avoir",
+        "étant",
+        "être"
+    ];
+
+    const actionsPrincipales = [];
+
+    for (const verbe of verbes) {
+
+        const mot =
+            String(verbe.mot).toLowerCase();
+
+        if (
+            verbesSecondaires.includes(mot)
+        ) {
+            continue;
+        }
+
+        actionsPrincipales.push(verbe);
+    }
+
+    //==========================================================
+    // 🔟 SUJET PRINCIPAL
+    //==========================================================
+
+    let indexPremiereAction =
+        actionsPrincipales.length
+            ? actionsPrincipales[0].index
+            : -1;
+
+    if (
+        indexPremiereAction > 0
+    ) {
+
+        /*
+         * Le sujet est généralement le groupe
+         * nominal avant la première action principale.
+         *
+         * Exemple :
+         *
+         * Tobirama voyant le coup de poing...
+         *
+         * première vraie action = bloque
+         *
+         * On ne prend donc PAS toute la phrase
+         * jusqu'à "bloque".
+         *
+         * On cherche le premier nom important.
+         */
+
+        const candidatsSujet =
+            motsAnalyses.filter(
+                m =>
+                    m.index < indexPremiereAction &&
+                    !m.estVerbe &&
+                    !m.estPreposition &&
+                    !m.estConnecteur
+            );
+
+        if (
+            candidatsSujet.length
+        ) {
+
+            comprehension.sujet =
+                candidatsSujet
+                    .map(m => m.mot)
+                    .join(" ");
+        }
+    }
+
+    //==========================================================
+    // 1️⃣1️⃣ ACTIONS
+    //==========================================================
+
+    for (
+        let i = 0;
+        i < actionsPrincipales.length;
+        i++
+    ) {
+
+        const action =
+            actionsPrincipales[i];
+
+        comprehension.actions.push({
+
+            ordre: i + 1,
+
+            verbe:
+                action.mot,
+
+            index:
+                action.index,
+
+            objet: null,
+
+            cible: null,
+
+            moyen: null,
+
+            partieCorps: null
+
+        });
+    }
+
+    //==========================================================
+    // 1️⃣2️⃣ ASSOCIATION DES GROUPES APRÈS L'ACTION
+    //==========================================================
+
+    for (
+        let i = 0;
+        i < comprehension.actions.length;
+        i++
+    ) {
+
+        const action =
+            comprehension.actions[i];
+
+        const prochainIndex =
+            comprehension.actions[i + 1]?.index ??
+            motsAnalyses.length;
+
+        const zone =
+            motsAnalyses.filter(
+                m =>
+                    m.index > action.index &&
+                    m.index < prochainIndex
+            );
+
+        //======================================================
+        // OBJETS
+        //======================================================
+
+        const noms =
+            zone.filter(
+                m =>
+                    m.estNom &&
+                    !m.estPartieCorps
+            );
+
+        if (
+            noms.length
+        ) {
+
+            action.objet =
+                noms
+                    .map(m => m.mot)
+                    .join(" ");
+        }
+
+        //======================================================
+        // PARTIES DU CORPS
+        //======================================================
+
+        const corps =
+            zone.filter(
+                m => m.estPartieCorps
+            );
+
+        if (
+            corps.length
+        ) {
+
+            action.partieCorps =
+                corps
+                    .map(m => m.mot)
+                    .join(" ");
+
+            comprehension.partiesCorps.push(
+                action.partieCorps
+            );
+        }
+
+        //======================================================
+        // DIRECTIONS
+        //======================================================
+
+        const directions =
+            zone.filter(
+                m => m.estDirection
+            );
+
+        if (
+            directions.length
+        ) {
+
+            /*
+             * gauche dans :
+             *
+             * paume de main gauche
+             *
+             * n'est pas une direction
+             * de déplacement.
+             */
+
+            if (
+                !action.partieCorps
+            ) {
+
+                action.cible =
+                    directions
+                        .map(m => m.mot)
+                        .join(" ");
+            }
+        }
+    }
+
+    //==========================================================
+    // 1️⃣3️⃣ DÉTECTION DES MOYENS DE DÉFENSE
+    //==========================================================
+
+    for (
+        const action of comprehension.actions
+    ) {
+
+        const index =
+            action.index;
+
+        const prochainIndex =
+            comprehension.actions[
+                action.ordre
+            ]?.index ??
+            motsAnalyses.length;
+
+        const zone =
+            motsAnalyses.filter(
+                m =>
+                    m.index > index &&
+                    m.index < prochainIndex
+            );
+
+        const motsZone =
+            zone.map(m => m.mot);
+
+        const positionAvec =
+            motsZone.indexOf("avec");
+
+        if (
+            positionAvec !== -1
+        ) {
+
+            const apresAvec =
+                motsZone.slice(
+                    positionAvec + 1
+                );
+
+            if (
+                apresAvec.length
+            ) {
+
+                action.moyen =
+                    apresAvec
+                        .join(" ");
+            }
+        }
+    }
+
+    //==========================================================
+    // 1️⃣4️⃣ DIRECTION RÉELLE
+    //==========================================================
+
+    for (const element of motsAnalyses) {
+
+        if (
+            element.estDirection
+        ) {
+
+            const mot =
+                element.mot.toLowerCase();
+
+            /*
+             * gauche / droite / avant / arrière
+             * ne deviennent des directions que
+             * lorsqu'elles sont utilisées seules
+             * dans un contexte de déplacement.
+             */
+
+            if (
+                [
+                    "nord",
+                    "sud",
+                    "est",
+                    "ouest"
+                ].includes(mot)
+            ) {
+
+                comprehension.directions.push(
                     element.mot
                 );
             }
@@ -1144,37 +1604,32 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // 5️⃣ DÉTECTION DU SUJET
+    // 1️⃣5️⃣ CONTEXTE DÉPLACEMENT
     //==========================================================
 
-    const indexAction =
-        motsAnalyses.findIndex(
-            m =>
-                m.categories?.some(
-                    c =>
-                        String(
-                            c.categorie || ""
-                        )
-                        .toLowerCase()
-                        .includes("verbe")
+    const verbesDeplacement = [
+        "aller",
+        "venir",
+        "marcher",
+        "courir",
+        "avancer",
+        "reculer",
+        "partir",
+        "arriver",
+        "se déplacer"
+    ];
+
+    const actionDeplacement =
+        comprehension.actions.some(
+            a =>
+                verbesDeplacement.includes(
+                    a.verbe.toLowerCase()
                 )
         );
 
-    if (indexAction > 0) {
-
-        comprehension.sujet =
-            mots
-                .slice(0, indexAction)
-                .join(" ");
-    }
-
-    //==========================================================
-    // 6️⃣ CONTEXTE
-    //==========================================================
-
     if (
-        comprehension.directions.length > 0 &&
-        comprehension.actions.length > 0
+        actionDeplacement &&
+        comprehension.directions.length
     ) {
 
         comprehension.contexte =
@@ -1182,76 +1637,109 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // 7️⃣ REFORMULATION
+    // 1️⃣6️⃣ REFORMULATION
     //==========================================================
 
-    let reformulation = texte;
+    let reformulation =
+        texte;
+
+    //==========================================================
+    // COMBAT
+    //==========================================================
 
     if (
-        comprehension.sujet &&
-        comprehension.actions.length
+        comprehension.contexte === "combat" ||
+        comprehension.actions.length >= 2
     ) {
 
-        const action =
-            comprehension.actions[0].verbe;
+        const actionsTexte =
+            comprehension.actions
+                .map(action => {
+
+                    let phrase =
+                        action.verbe;
+
+                    if (action.objet) {
+
+                        phrase +=
+                            " " +
+                            action.objet;
+                    }
+
+                    if (action.partieCorps) {
+
+                        phrase +=
+                            " au niveau du " +
+                            action.partieCorps;
+                    }
+
+                    if (action.moyen) {
+
+                        phrase +=
+                            " avec " +
+                            action.moyen;
+                    }
+
+                    return phrase;
+                })
+                .join(" puis ");
 
         if (
-            comprehension.contexte === "deplacement" &&
-            comprehension.directions.length
+            comprehension.sujet &&
+            actionsTexte
         ) {
 
-            const direction =
-                comprehension.directions[0];
-
             reformulation =
-                `${comprehension.sujet} se déplacent en direction du ${direction}.`;
-
-        } else {
-
-            reformulation =
-                `${comprehension.sujet} ${action}.`;
+                `${comprehension.sujet} ${actionsTexte}.`;
         }
     }
 
     //==========================================================
-    // 8️⃣ RÉSULTAT FINAL
+    // 1️⃣7️⃣ RÉSULTAT
     //==========================================================
-return {
 
-    success: true,
+    return {
 
-    texteOriginal,
+        success: true,
 
-    texte,
+        texteOriginal,
 
-    nombreMots: mots.length,
+        texte,
 
-    mots: motsAnalyses,
+        nombreMots:
+            mots.length,
 
-    motsConnus: motsAnalyses
-        .filter(m => m.connu)
-        .map(m => m.mot),
+        mots:
+            motsAnalyses,
 
-    motsInconnus: motsAnalyses
-        .filter(m => !m.connu)
-        .map(m => m.mot),
+        motsConnus:
+            motsAnalyses
+                .filter(m => m.connu)
+                .map(m => m.mot),
 
-    nombreMotsConnus:
-        motsAnalyses.filter(m => m.connu).length,
+        motsInconnus:
+            motsAnalyses
+                .filter(m => !m.connu)
+                .map(m => m.mot),
 
-    nombreMotsInconnus:
-        motsAnalyses.filter(m => !m.connu).length,
+        nombreMotsConnus:
+            motsAnalyses
+                .filter(m => m.connu)
+                .length,
 
-    comprehension,
+        nombreMotsInconnus:
+            motsAnalyses
+                .filter(m => !m.connu)
+                .length,
 
-    reformulation,
+        comprehension,
 
-    dateAnalyse: Date.now()
+        reformulation,
 
-};
-    
-}
-
+        dateAnalyse:
+            Date.now()
+    };
+        }
 
 //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
