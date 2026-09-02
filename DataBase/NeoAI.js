@@ -178,287 +178,750 @@ function neoDecouperPhrases(texte = "") {
 //==============================================================
 // 📚 NEO_VERBES
 //==============================================================
-
 const NEO_VERBES = {
 
-    fr: [
+    fr: {
 
         //======================================================
         // 🧠 Général
         //======================================================
 
-        "être",
-        "avoir",
-        "faire",
-        "aller",
-        "venir",
-        "voir",
-        "regarder",
-        "parler",
-        "dire",
-        "penser",
-        "comprendre",
-        "savoir",
-        "vouloir",
-        "pouvoir",
-        "devoir",
-        "sentir",
-        "entendre",
-        "écouter",
-        "chercher",
-        "trouver",
+        "être": {
+            present: ["suis", "es", "est", "sommes", "êtes", "sont"],
+            imparfait: ["étais", "était", "étions", "étiez", "étaient"],
+            futur: ["serai", "seras", "sera", "serons", "serez", "seront"],
+            conditionnel: ["serais", "serait", "serions", "seriez", "seraient"],
+            subjonctif: ["sois", "soit", "soyons", "soyez", "soient"],
+            participe_present: ["étant"],
+            participe_passe: ["été"]
+        },
 
+        "avoir": {
+            present: ["ai", "as", "a", "avons", "avez", "ont"],
+            imparfait: ["avais", "avait", "avions", "aviez", "avaient"],
+            futur: ["aurai", "auras", "aura", "aurons", "aurez", "auront"],
+            conditionnel: ["aurais", "aurait", "aurions", "auriez", "auraient"],
+            subjonctif: ["aie", "aies", "ait", "ayons", "ayez", "aient"],
+            participe_present: ["ayant"],
+            participe_passe: ["eu", "eue", "eus", "eues"]
+        },
+
+        "faire": {
+            present: ["fais", "fait", "faisons", "faites", "font"],
+            imparfait: ["faisais", "faisait", "faisions", "faisiez", "faisaient"],
+            futur: ["ferai", "feras", "fera", "ferons", "ferez", "feront"],
+            conditionnel: ["ferais", "ferait", "ferions", "feriez", "feraient"],
+            subjonctif: ["fasse", "fasses", "fassions", "fassiez", "fassent"],
+            participe_present: ["faisant"],
+            participe_passe: ["fait", "faite", "faits", "faites"]
+        },
+
+        "aller": {
+            present: ["vais", "vas", "va", "allons", "allez", "vont"],
+            imparfait: ["allais", "allait", "allions", "alliez", "allaient"],
+            futur: ["irai", "iras", "ira", "irons", "irez", "iront"],
+            conditionnel: ["irais", "irait", "irions", "iriez", "iraient"],
+            subjonctif: ["aille", "ailles", "allions", "alliez", "aillent"],
+            participe_present: ["allant"],
+            participe_passe: ["allé", "allée", "allés", "allées"]
+        },
+
+        "venir": {
+            present: ["viens", "vient", "venons", "venez", "viennent"],
+            imparfait: ["venais", "venait", "venions", "veniez", "venaient"],
+            futur: ["viendrai", "viendras", "viendra", "viendrons", "viendrez", "viendront"],
+            conditionnel: ["viendrais", "viendrait", "viendrions", "viendriez", "viendraient"],
+            subjonctif: ["vienne", "viennes", "venions", "veniez", "viennent"],
+            participe_present: ["venant"],
+            participe_passe: ["venu", "venue", "venus", "venues"]
+        },
+
+        "voir": {
+            present: ["vois", "voit", "voyons", "voyez", "voient"],
+            imparfait: ["voyais", "voyait", "voyions", "voyiez", "voyaient"],
+            futur: ["verrai", "verras", "verra", "verrons", "verrez", "verront"],
+            conditionnel: ["verrais", "verrait", "verrions", "verriez", "verraient"],
+            subjonctif: ["voie", "voies", "voyions", "voyiez", "voient"],
+            participe_present: ["voyant"],
+            participe_passe: ["vu", "vue", "vus", "vues"]
+        },
+
+        "regarder": {
+            present: ["regarde", "regardes", "regardons", "regardez", "regardent"],
+            imparfait: ["regardais", "regardait", "regardions", "regardiez", "regardaient"],
+            futur: ["regarderai", "regarderas", "regardera", "regarderons", "regarderez", "regarderont"],
+            conditionnel: ["regarderais", "regarderait", "regarderions", "regarderiez", "regarderaient"],
+            subjonctif: ["regarde", "regardes", "regardions", "regardiez", "regardent"],
+            participe_present: ["regardant"],
+            participe_passe: ["regardé", "regardée", "regardés", "regardées"]
+        },
+
+        "parler": {
+            present: ["parle", "parles", "parlons", "parlez", "parlent"],
+            imparfait: ["parlais", "parlait", "parlions", "parliez", "parlaient"],
+            futur: ["parlerai", "parleras", "parlera", "parlerons", "parlerez", "parleront"],
+            conditionnel: ["parlerais", "parlerait", "parlerions", "parleriez", "parleraient"],
+            subjonctif: ["parle", "parles", "parlions", "parliez", "parlent"],
+            participe_present: ["parlant"],
+            participe_passe: ["parlé", "parlée", "parlés", "parlées"]
+        },
+
+        "dire": {
+            present: ["dis", "dit", "disons", "dites", "disent"],
+            imparfait: ["disais", "disait", "disions", "disiez", "disaient"],
+            futur: ["dirai", "diras", "dira", "dirons", "direz", "diront"],
+            conditionnel: ["dirais", "dirait", "dirions", "diriez", "diraient"],
+            subjonctif: ["dise", "dises", "disions", "disiez", "disent"],
+            participe_present: ["disant"],
+            participe_passe: ["dit", "dite", "dits", "dites"]
+        },
+
+        "penser": {
+            present: ["pense", "penses", "pensons", "pensez", "pensent"],
+            imparfait: ["pensais", "pensait", "pensions", "pensiez", "pensaient"],
+            futur: ["penserai", "penseras", "pensera", "penserons", "penserez", "penseront"],
+            conditionnel: ["penserais", "penserait", "penserions", "penseriez", "penseraient"],
+            subjonctif: ["pense", "penses", "pensions", "pensiez", "pensent"],
+            participe_present: ["pensant"],
+            participe_passe: ["pensé", "pensée", "pensés", "pensées"]
+        },
+
+        "comprendre": {
+            present: ["comprends", "comprend", "comprenons", "comprenez", "comprennent"],
+            imparfait: ["comprenais", "comprenait", "comprenions", "compreniez", "comprenaient"],
+            futur: ["comprendrai", "comprendras", "comprendra", "comprendrons", "comprendrez", "comprendront"],
+            conditionnel: ["comprendrais", "comprendrait", "comprendrions", "comprendriez", "comprendraient"],
+            subjonctif: ["comprenne", "comprennes", "comprenions", "compreniez", "comprennent"],
+            participe_present: ["comprenant"],
+            participe_passe: ["compris", "comprise", "comprises"]
+        },
+
+        "savoir": {
+            present: ["sais", "sait", "savons", "savez", "savent"],
+            imparfait: ["savais", "savait", "savions", "saviez", "savaient"],
+            futur: ["saurai", "sauras", "saura", "saurons", "saurez", "sauront"],
+            conditionnel: ["saurais", "saurait", "saurions", "sauriez", "sauraient"],
+            subjonctif: ["sache", "saches", "sachions", "sachiez", "sachent"],
+            participe_present: ["sachant"],
+            participe_passe: ["su", "sue", "sus", "sues"]
+        },
+
+        "vouloir": {
+            present: ["veux", "veut", "voulons", "voulez", "veulent"],
+            imparfait: ["voulais", "voulait", "voulions", "vouliez", "voulaient"],
+            futur: ["voudrai", "voudras", "voudra", "voudrons", "voudrez", "voudront"],
+            conditionnel: ["voudrais", "voudrait", "voudrions", "voudriez", "voudraient"],
+            subjonctif: ["veuille", "veuilles", "veuillions", "veuilliez", "veuillent"],
+            participe_present: ["voulant"],
+            participe_passe: ["voulu", "voulue", "voulus", "voulues"]
+        },
+
+        "pouvoir": {
+            present: ["peux", "peut", "pouvons", "pouvez", "peuvent"],
+            imparfait: ["pouvais", "pouvait", "pouvions", "pouviez", "pouvaient"],
+            futur: ["pourrai", "pourras", "pourra", "pourrons", "pourrez", "pourront"],
+            conditionnel: ["pourrais", "pourrait", "pourrions", "pourriez", "pourraient"],
+            subjonctif: ["puisse", "puisses", "puissions", "puissiez", "puissent"],
+            participe_present: ["pouvant"],
+            participe_passe: ["pu"]
+        },
+
+        "devoir": {
+            present: ["dois", "doit", "devons", "devez", "doivent"],
+            imparfait: ["devais", "devait", "devions", "deviez", "devaient"],
+            futur: ["devrai", "devras", "devra", "devrons", "devrez", "devront"],
+            conditionnel: ["devrais", "devrait", "devrions", "devriez", "devraient"],
+            subjonctif: ["doive", "doives", "devions", "deviez", "doivent"],
+            participe_present: ["devant"],
+            participe_passe: ["dû", "due", "dus", "dues"]
+        },
+
+        "sentir": {
+            present: ["sens", "sent", "sentons", "sentez", "sentent"],
+            imparfait: ["sentais", "sentait", "sentions", "sentiez", "sentaient"],
+            futur: ["sentirai", "sentiras", "sentira", "sentirons", "sentirez", "sentiront"],
+            conditionnel: ["sentirais", "sentirait", "sentirions", "sentiriez", "sentiraient"],
+            subjonctif: ["sente", "sentes", "sentions", "sentiez", "sentent"],
+            participe_present: ["sentant"],
+            participe_passe: ["senti", "sentie", "sentis", "senties"]
+        },
+
+        "entendre": {
+            present: ["entends", "entend", "entendons", "entendez", "entendent"],
+            imparfait: ["entendais", "entendait", "entendions", "entendiez", "entendaient"],
+            futur: ["entendrai", "entendras", "entendra", "entendrons", "entendrez", "entendront"],
+            conditionnel: ["entendrais", "entendrait", "entendrions", "entendriez", "entendraient"],
+            subjonctif: ["entende", "entendes", "entendions", "entendiez", "entendent"],
+            participe_present: ["entendant"],
+            participe_passe: ["entendu", "entendue", "entendus", "entendues"]
+        },
+
+        "écouter": {
+            present: ["écoute", "écoutes", "écoutons", "écoutez", "écoutent"],
+            imparfait: ["écoutais", "écoutait", "écoutions", "écoutiez", "écoutaient"],
+            futur: ["écouterai", "écouteras", "écoutera", "écouterons", "écouterez", "écouteront"],
+            conditionnel: ["écouterais", "écouterait", "écouterions", "écouteriez", "écouteraient"],
+            subjonctif: ["écoute", "écoutes", "écoutions", "écoutiez", "écoutent"],
+            participe_present: ["écoutant"],
+            participe_passe: ["écouté", "écoutée", "écoutés", "écoutées"]
+        },
+
+        "chercher": {
+            present: ["cherche", "cherches", "cherchons", "cherchez", "cherchent"],
+            imparfait: ["cherchais", "cherchait", "cherchions", "cherchiez", "cherchaient"],
+            futur: ["chercherai", "chercheras", "cherchera", "chercherons", "chercherez", "chercheront"],
+            conditionnel: ["chercherais", "chercherait", "chercherions", "chercheriez", "chercheraient"],
+            subjonctif: ["cherche", "cherches", "cherchions", "cherchiez", "cherchent"],
+            participe_present: ["cherchant"],
+            participe_passe: ["cherché", "cherchée", "cherchés", "cherchées"]
+        },
+
+        "trouver": {
+            present: ["trouve", "trouves", "trouvons", "trouvez", "trouvent"],
+            imparfait: ["trouvais", "trouvait", "trouvions", "trouviez", "trouvaient"],
+            futur: ["trouverai", "trouveras", "trouvera", "trouverons", "trouverez", "trouveront"],
+            conditionnel: ["trouverais", "trouverait", "trouverions", "trouveriez", "trouveraient"],
+            subjonctif: ["trouve", "trouves", "trouvions", "trouviez", "trouvent"],
+            participe_present: ["trouvant"],
+            participe_passe: ["trouvé", "trouvée", "trouvés", "trouvées"]
+        },
 
         //======================================================
         // 🚶 Déplacement
         //======================================================
 
-        "marcher",
-        "courir",
-        "avancer",
-        "reculer",
-        "sauter",
-        "tomber",
-        "voler",
-        "ramper",
-        "grimper",
-        "descendre",
-        "monter",
-        "entrer",
-        "sortir",
-        "arriver",
-        "partir",
-        "revenir",
-        "approcher",
-        "s'éloigner",
-        "tourner",
-        "accélérer",
-        "ralentir",
-        "voyager",
+        "marcher": {
+            present: ["marche", "marches", "marchons", "marchez", "marchent"],
+            imparfait: ["marchais", "marchait", "marchions", "marchiez", "marchaient"],
+            futur: ["marcherai", "marcheras", "marchera", "marcherons", "marcherez", "marcheront"],
+            conditionnel: ["marcherais", "marcherait", "marcherions", "marcheriez", "marcheraient"],
+            subjonctif: ["marche", "marches", "marchions", "marchiez", "marchent"],
+            participe_present: ["marchant"],
+            participe_passe: ["marché", "marchée", "marchés", "marchées"]
+        },
 
+        "courir": {
+            present: ["cours", "court", "courons", "courez", "courent"],
+            imparfait: ["courais", "courait", "courions", "couriez", "couraient"],
+            futur: ["courrai", "courras", "courra", "courrons", "courrez", "courront"],
+            conditionnel: ["courrais", "courrait", "courrions", "courriez", "courraient"],
+            subjonctif: ["coure", "coures", "courions", "couriez", "courent"],
+            participe_present: ["courant"],
+            participe_passe: ["couru", "courue", "courus", "courues"]
+        },
+
+        "avancer": {
+            present: ["avance", "avances", "avançons", "avancez", "avancent"],
+            imparfait: ["avançais", "avançait", "avancions", "avanciez", "avançaient"],
+            futur: ["avancerai", "avanceras", "avancera", "avancerons", "avancerez", "avanceront"],
+            conditionnel: ["avancerais", "avancerait", "avancerions", "avanceriez", "avanceraient"],
+            subjonctif: ["avance", "avances", "avancions", "avanciez", "avancent"],
+            participe_present: ["avançant"],
+            participe_passe: ["avancé", "avancée", "avancés", "avancées"]
+        },
+
+        "reculer": {
+            present: ["recule", "recules", "reculons", "reculez", "reculent"],
+            imparfait: ["reculais", "reculait", "reculions", "reculiez", "reculaient"],
+            futur: ["reculerai", "reculeras", "reculera", "reculerons", "reculerez", "reculeront"],
+            conditionnel: ["reculerais", "reculerait", "reculerions", "reculeriez", "reculeraient"],
+            subjonctif: ["recule", "recules", "reculions", "reculiez", "reculent"],
+            participe_present: ["reculant"],
+            participe_passe: ["reculé", "reculée", "reculés", "reculées"]
+        },
+
+        "sauter": {
+            present: ["saute", "sautes", "sautons", "sautez", "sautent"],
+            imparfait: ["sautais", "sautait", "sautions", "sautiez", "sautaient"],
+            futur: ["sauterai", "sauteras", "sautera", "sauterons", "sauterez", "sauteront"],
+            conditionnel: ["sauterais", "sauterait", "sauterions", "sauteriez", "sauteraient"],
+            subjonctif: ["saute", "sautes", "sautions", "sautiez", "sautent"],
+            participe_present: ["sautant"],
+            participe_passe: ["sauté", "sautée", "sautés", "sautées"]
+        },
+
+        "tomber": {
+            present: ["tombe", "tombes", "tombons", "tombez", "tombent"],
+            imparfait: ["tombais", "tombait", "tombions", "tombiez", "tombaient"],
+            futur: ["tomberai", "tomberas", "tombera", "tomberons", "tomberez", "tomberont"],
+            conditionnel: ["tomberais", "tomberait", "tomberions", "tomberiez", "tomberaient"],
+            subjonctif: ["tombe", "tombes", "tombions", "tombiez", "tombent"],
+            participe_present: ["tombant"],
+            participe_passe: ["tombé", "tombée", "tombés", "tombées"]
+        },
+
+        "voler": {
+            present: ["vole", "voles", "volons", "volez", "volent"],
+            imparfait: ["volais", "volait", "volions", "voliez", "volaient"],
+            futur: ["volerai", "voleras", "volera", "volerons", "volerez", "voleront"],
+            conditionnel: ["volerais", "volerait", "volerions", "voleriez", "voleraient"],
+            subjonctif: ["vole", "voles", "volions", "voliez", "volent"],
+            participe_present: ["volant"],
+            participe_passe: ["volé", "volée", "volés", "volées"]
+        },
+
+        "ramper": {
+            present: ["rampe", "rampes", "rampons", "rampez", "rampent"],
+            imparfait: ["rampais", "rampait", "rampions", "rampiez", "rampaient"],
+            futur: ["ramperai", "ramperas", "rampera", "ramperons", "ramperez", "ramperont"],
+            conditionnel: ["ramperais", "ramperait", "ramperions", "ramperiez", "ramperaient"],
+            subjonctif: ["rampe", "rampes", "rampions", "rampiez", "rampent"],
+            participe_present: ["rampant"],
+            participe_passe: ["rampé", "rampée", "rampés", "rampées"]
+        },
+
+        "grimper": {
+            present: ["grimpe", "grimpes", "grimpons", "grimpez", "grimpent"],
+            imparfait: ["grimpais", "grimpait", "grimpions", "grimpiez", "grimpaient"],
+            futur: ["grimperai", "grimperas", "grimpera", "grimperons", "grimperez", "grimperont"],
+            conditionnel: ["grimperais", "grimperait", "grimperions", "grimperiez", "grimpaient"],
+            subjonctif: ["grimpe", "grimpes", "grimpions", "grimpiez", "grimpent"],
+            participe_present: ["grimpant"],
+            participe_passe: ["grimpé", "grimpée", "grimpés", "grimpées"]
+        },
+
+        "descendre": {
+            present: ["descends", "descend", "descendons", "descendez", "descendent"],
+            imparfait: ["descendais", "descendait", "descendions", "descendiez", "descendaient"],
+            futur: ["descendrai", "descendras", "descendra", "descendrons", "descendrez", "descendront"],
+            conditionnel: ["descendrais", "descendrait", "descendrions", "descendriez", "descendraient"],
+            subjonctif: ["descende", "descendes", "descendions", "descendiez", "descendent"],
+            participe_present: ["descendant"],
+            participe_passe: ["descendu", "descendue", "descendus", "descendues"]
+        },
+
+        "monter": {
+            present: ["monte", "montes", "montons", "montez", "montent"],
+            imparfait: ["montais", "montait", "montions", "montiez", "montaient"],
+            futur: ["monterai", "monteras", "montera", "monterons", "monterez", "monteront"],
+            conditionnel: ["monterais", "monterait", "monterions", "monteriez", "monteraient"],
+            subjonctif: ["monte", "montes", "montions", "montiez", "montent"],
+            participe_present: ["montant"],
+            participe_passe: ["monté", "montée", "montés", "montées"]
+        },
+
+        "entrer": {
+            present: ["entre", "entres", "entrons", "entrez", "entrent"],
+            imparfait: ["entrais", "entrait", "entrions", "entriez", "entraient"],
+            futur: ["entrerai", "entreras", "entrera", "entrerons", "entrerez", "entreront"],
+            conditionnel: ["entrerais", "entrerait", "entrerions", "entreriez", "entreraient"],
+            subjonctif: ["entre", "entres", "entrions", "entriez", "entrent"],
+            participe_present: ["entrant"],
+            participe_passe: ["entré", "entrée", "entrés", "entrées"]
+        },
+
+        "sortir": {
+            present: ["sors", "sort", "sortons", "sortez", "sortent"],
+            imparfait: ["sortais", "sortait", "sortions", "sortiez", "sortaient"],
+            futur: ["sortirai", "sortiras", "sortira", "sortirons", "sortirez", "sortiront"],
+            conditionnel: ["sortirais", "sortirait", "sortirions", "sortiriez", "sortiraient"],
+            subjonctif: ["sorte", "sortes", "sortions", "sortiez", "sortent"],
+            participe_present: ["sortant"],
+            participe_passe: ["sorti", "sortie", "sortis", "sorties"]
+        },
+
+        "arriver": {
+            present: ["arrive", "arrives", "arrivons", "arrivez", "arrivent"],
+            imparfait: ["arrivais", "arrivait", "arrivions", "arriviez", "arrivaient"],
+            futur: ["arriverai", "arriveras", "arrivera", "arriverons", "arriverez", "arriveront"],
+            conditionnel: ["arriverais", "arriverait", "arriverions", "arriveriez", "arriveraient"],
+            subjonctif: ["arrive", "arrives", "arrivions", "arriviez", "arrivent"],
+            participe_present: ["arrivant"],
+            participe_passe: ["arrivé", "arrivée", "arrivés", "arrivées"]
+        },
+
+        "partir": {
+            present: ["pars", "part", "partons", "partez", "partent"],
+            imparfait: ["partais", "partait", "partions", "partiez", "partaient"],
+            futur: ["partirai", "partiras", "partira", "partirons", "partirez", "partiront"],
+            conditionnel: ["partirais", "partirait", "partirions", "partiriez", "partiraient"],
+            subjonctif: ["parte", "partes", "partions", "partiez", "partent"],
+            participe_present: ["partant"],
+            participe_passe: ["parti", "partie", "partis", "parties"]
+        },
+
+        "revenir": {
+            present: ["reviens", "revient", "revenons", "revenez", "reviennent"],
+            imparfait: ["revenais", "revenait", "revenions", "reveniez", "revenaient"],
+            futur: ["reviendrai", "reviendras", "reviendra", "reviendrons", "reviendrez", "reviendront"],
+            conditionnel: ["reviendrais", "reviendrait", "reviendrions", "reviendriez", "reviendraient"],
+            subjonctif: ["revienne", "reviennes", "revenions", "reveniez", "reviennent"],
+            participe_present: ["revenant"],
+            participe_passe: ["revenu", "revenue", "revenus", "revenues"]
+        },
+
+        "approcher": {
+            present: ["approche", "approches", "approchons", "approchez", "approchent"],
+            imparfait: ["approchais", "approchait", "approchions", "approchiez", "approchaient"],
+            futur: ["approcherai", "approcheras", "approchera", "approcherons", "approcherez", "approcheront"],
+            conditionnel: ["approcherais", "approcherait", "approcherions", "approcheriez", "approcheraient"],
+            subjonctif: ["approche", "approches", "approchions", "approchiez", "approchent"],
+            participe_present: ["approchant"],
+            participe_passe: ["approché", "approchée", "approchés", "approchées"]
+        },
+
+        "s'éloigner": {
+            present: ["m'éloigne", "t'éloignes", "s'éloigne", "nous éloignons", "vous éloignez", "s'éloignent"],
+            imparfait: ["m'éloignais", "t'éloignais", "s'éloignait", "nous éloignions", "vous éloigniez", "s'éloignaient"],
+            futur: ["m'éloignerai", "t'éloigneras", "s'éloignera", "nous éloignerons", "vous éloignerez", "s'éloigneront"],
+            conditionnel: ["m'éloignerais", "t'éloignerais", "s'éloignerait", "nous éloignerions", "vous éloigneriez", "s'éloigneraient"],
+            subjonctif: ["m'éloigne", "t'éloignes", "s'éloigne", "nous éloignions", "vous éloigniez", "s'éloignent"],
+            participe_present: ["s'éloignant"],
+            participe_passe: ["éloigné", "éloignée", "éloignés", "éloignées"]
+        },
+
+        "tourner": {
+            present: ["tourne", "tournes", "tournons", "tournez", "tournent"],
+            imparfait: ["tournais", "tournait", "tournions", "tourniez", "tournaient"],
+            futur: ["tournerai", "tourneras", "tournera", "tournerons", "tournerez", "tourneront"],
+            conditionnel: ["tournerais", "tournerait", "tournerions", "tourneriez", "tourneraient"],
+            subjonctif: ["tourne", "tournes", "tournions", "tourniez", "tournent"],
+            participe_present: ["tournant"],
+            participe_passe: ["tourné", "tournée", "tournés", "tournées"]
+        },
+
+        "accélérer": {
+            present: ["accélère", "accélères", "accélérons", "accélérez", "accélèrent"],
+            imparfait: ["accélérais", "accélérait", "accélérions", "accélériez", "accéléraient"],
+            futur: ["accélérerai", "accéléreras", "accélérera", "accélérerons", "accélérerez", "accéléreront"],
+            conditionnel: ["accélérerais", "accélérerait", "accélérerions", "accéléreriez", "accéléreraient"],
+            subjonctif: ["accélère", "accélères", "accélérions", "accélériez", "accélèrent"],
+            participe_present: ["accélérant"],
+            participe_passe: ["accéléré", "accélérée", "accélérés", "accélérées"]
+        },
+
+        "ralentir": {
+            present: ["ralentis", "ralentit", "ralentissons", "ralentissez", "ralentissent"],
+            imparfait: ["ralentissais", "ralentissait", "ralentissions", "ralentissiez", "ralentissaient"],
+            futur: ["ralentirai", "ralentiras", "ralentira", "ralentirons", "ralentirez", "ralentiront"],
+            conditionnel: ["ralentirais", "ralentirait", "ralentirions", "ralentiriez", "ralentiraient"],
+            subjonctif: ["ralentisse", "ralentisses", "ralentissions", "ralentissiez", "ralentissent"],
+            participe_present: ["ralentissant"],
+            participe_passe: ["ralenti", "ralentie", "ralentis", "ralenties"]
+        },
+
+        "voyager": {
+            present: ["voyage", "voyages", "voyageons", "voyagez", "voyagent"],
+            imparfait: ["voyageais", "voyageait", "voyagions", "voyagiez", "voyageaient"],
+            futur: ["voyagerai", "voyageras", "voyagera", "voyagerons", "voyagerez", "voyageront"],
+            conditionnel: ["voyagerais", "voyagerait", "voyagerions", "voyageriez", "voyageraient"],
+            subjonctif: ["voyage", "voyages", "voyagions", "voyagiez", "voyagent"],
+            participe_present: ["voyageant"],
+            participe_passe: ["voyagé", "voyagée", "voyagés", "voyagées"]
+        },
 
         //======================================================
-        // ⚔️ Action / combat
+        // ⚔️ Combat
         //======================================================
 
-        "frapper",
-        "attaquer",
-        "défendre",
-        "esquiver",
-        "bloquer",
-        "toucher",
-        "prendre",
-        "lancer",
-        "attraper",
-        "porter",
-        "pousser",
-        "tirer",
-        "projeter",
-        "saisir",
-        "agripper",
-        "immobiliser",
-        "protéger",
-        "viser",
-        "combattre",
-        "poursuivre",
+        "frapper": {
+            present: ["frappe", "frappes", "frappons", "frappez", "frappent"],
+            imparfait: ["frappais", "frappait", "frappions", "frappiez", "frappaient"],
+            futur: ["frapperai", "frapperas", "frappera", "frapperons", "frapperez", "frapperont"],
+            conditionnel: ["frapperais", "frapperait", "frapperions", "frapperiez", "frapperaient"],
+            subjonctif: ["frappe", "frappes", "frappions", "frappiez", "frappent"],
+            participe_present: ["frappant"],
+            participe_passe: ["frappé", "frappée", "frappés", "frappées"]
+        },
 
+        "attaquer": {
+            present: ["attaque", "attaques", "attaquons", "attaquez", "attaquent"],
+            imparfait: ["attaquais", "attaquait", "attaquions", "attaquiez", "attaquaient"],
+            futur: ["attaquerai", "attaqueras", "attaquera", "attaquerons", "attaquerez", "attaqueront"],
+            conditionnel: ["attaquerais", "attaquerait", "attaquerions", "attaqueriez", "attaqueraient"],
+            subjonctif: ["attaque", "attaques", "attaquions", "attaquiez", "attaquent"],
+            participe_present: ["attaquant"],
+            participe_passe: ["attaqué", "attaquée", "attaqués", "attaquées"]
+        },
+
+        "défendre": {
+            present: ["défends", "défend", "défendons", "défendez", "défendent"],
+            imparfait: ["défendais", "défendait", "défendions", "défendiez", "défendaient"],
+            futur: ["défendrai", "défendras", "défendra", "défendrons", "défendrez", "défendront"],
+            conditionnel: ["défendrais", "défendrait", "défendrions", "défendriez", "défendraient"],
+            subjonctif: ["défende", "défendes", "défendions", "défendiez", "défendent"],
+            participe_present: ["défendant"],
+            participe_passe: ["défendu", "défendue", "défendus", "défendues"]
+        },
+
+        "esquiver": {
+            present: ["esquive", "esquives", "esquivons", "esquivez", "esquivent"],
+            imparfait: ["esquivais", "esquivait", "esquivions", "esquiviez", "esquivaient"],
+            futur: ["esquiverai", "esquiveras", "esquivera", "esquiverons", "esquiverez", "esquiveront"],
+            conditionnel: ["esquiverais", "esquiverait", "esquiverions", "esquiveriez", "esquiveraient"],
+            subjonctif: ["esquive", "esquives", "esquivions", "esquiviez", "esquivent"],
+            participe_present: ["esquivant"],
+            participe_passe: ["esquivé", "esquivée", "esquivés", "esquivées"]
+        },
+
+        "bloquer": {
+            present: ["bloque", "bloques", "bloquons", "bloquez", "bloquent"],
+            imparfait: ["bloquais", "bloquait", "bloquions", "bloquiez", "bloquaient"],
+            futur: ["bloquerai", "bloqueras", "bloquera", "bloquerons", "bloquerez", "bloqueront"],
+            conditionnel: ["bloquerais", "bloquerait", "bloquerions", "bloqueriez", "bloqueraient"],
+            subjonctif: ["bloque", "bloques", "bloquions", "bloquiez", "bloquent"],
+            participe_present: ["bloquant"],
+            participe_passe: ["bloqué", "bloquée", "bloqués", "bloquées"]
+        },
+
+        "toucher": {
+            present: ["touche", "touches", "touchons", "touchez", "touchent"],
+            imparfait: ["touchais", "touchait", "touchions", "touchiez", "touchaient"],
+            futur: ["toucherai", "toucheras", "touchera", "toucherons", "toucherez", "toucheront"],
+            conditionnel: ["toucherais", "toucherait", "toucherions", "toucheriez", "toucheraient"],
+            subjonctif: ["touche", "touches", "touchions", "touchiez", "touchent"],
+            participe_present: ["touchant"],
+            participe_passe: ["touché", "touchée", "touchés", "touchées"]
+        },
+
+        "prendre": {
+            present: ["prends", "prend", "prenons", "prenez", "prennent"],
+            imparfait: ["prenais", "prenait", "prenions", "preniez", "prenaient"],
+            futur: ["prendrai", "prendras", "prendra", "prendrons", "prendrez", "prendront"],
+            conditionnel: ["prendrais", "prendrait", "prendrions", "prendriez", "prendraient"],
+            subjonctif: ["prenne", "prennes", "prenions", "preniez", "prennent"],
+            participe_present: ["prenant"],
+            participe_passe: ["pris", "prise", "prises"]
+        },
+
+        "lancer": {
+            present: ["lance", "lances", "lançons", "lancez", "lancent"],
+            imparfait: ["lançais", "lançait", "lancions", "lanciez", "lançaient"],
+            futur: ["lancerai", "lanceras", "lancera", "lancerons", "lancerez", "lanceront"],
+            conditionnel: ["lancerais", "lancerait", "lancerions", "lanceriez", "lanceraient"],
+            subjonctif: ["lance", "lances", "lancions", "lanciez", "lancent"],
+            participe_present: ["lançant"],
+            participe_passe: ["lancé", "lancée", "lancés", "lancées"]
+        },
+
+        "attraper": {
+            present: ["attrape", "attrapes", "attrapons", "attrapez", "attrapent"],
+            imparfait: ["attrapais", "attrapait", "attrapions", "attrapiez", "attrapaient"],
+            futur: ["attraperai", "attraperas", "attrapera", "attraperons", "attraperez", "attraperont"],
+            conditionnel: ["attraperais", "attraperait", "attraperions", "attraperiez", "attraperaient"],
+            subjonctif: ["attrape", "attrapes", "attrapions", "attrapiez", "attrapent"],
+            participe_present: ["attrapant"],
+            participe_passe: ["attrapé", "attrapée", "attrapés", "attrapées"]
+        },
+
+        "porter": {
+            present: ["porte", "portes", "portons", "portez", "portent"],
+            imparfait: ["portais", "portait", "portions", "portiez", "portaient"],
+            futur: ["porterai", "porteras", "portera", "porterons", "porterez", "porteront"],
+            conditionnel: ["porterais", "porterait", "porterions", "porteriez", "porteraient"],
+            subjonctif: ["porte", "portes", "portions", "portiez", "portent"],
+            participe_present: ["portant"],
+            participe_passe: ["porté", "portée", "portés", "portées"]
+        },
+
+        "pousser": {
+            present: ["pousse", "pousses", "poussons", "poussez", "poussent"],
+            imparfait: ["poussais", "poussait", "poussions", "poussiez", "poussaient"],
+            futur: ["pousserai", "pousseras", "poussera", "pousserons", "pousserez", "pousseront"],
+            conditionnel: ["pousserais", "pousserait", "pousserions", "pousseriez", "pousseraient"],
+            subjonctif: ["pousse", "pousses", "poussions", "poussiez", "poussent"],
+            participe_present: ["poussant"],
+            participe_passe: ["poussé", "poussée", "poussés", "poussées"]
+        },
+
+        "tirer": {
+            present: ["tire", "tires", "tirons", "tirez", "tirent"],
+            imparfait: ["tirais", "tirait", "tirions", "tiriez", "tiraient"],
+            futur: ["tirerai", "tireras", "tirera", "tirerons", "tirerez", "tireront"],
+            conditionnel: ["tirerais", "tirerait", "tirerions", "tireriez", "tireraient"],
+            subjonctif: ["tire", "tires", "tirions", "tiriez", "tirent"],
+            participe_present: ["tirant"],
+            participe_passe: ["tiré", "tirée", "tirés", "tirées"]
+        },
+
+        "projeter": {
+            present: ["projette", "projettes", "projetons", "projetez", "projettent"],
+            imparfait: ["projetais", "projetait", "projetions", "projetiez", "projetaient"],
+            futur: ["projetterai", "projetteras", "projettera", "projetterons", "projetterez", "projetteront"],
+            conditionnel: ["projetterais", "projetterait", "projetterions", "projetteriez", "projetteraient"],
+            subjonctif: ["projette", "projettes", "projetions", "projetiez", "projettent"],
+            participe_present: ["projetant"],
+            participe_passe: ["projeté", "projetée", "projetés", "projetées"]
+        },
+
+        "saisir": {
+            present: ["saisis", "saisit", "saisissons", "saisissez", "saisissent"],
+            imparfait: ["saisissais", "saisissait", "saisissions", "saisissiez", "saisissaient"],
+            futur: ["saisirai", "saisiras", "saisira", "saisirons", "saisirez", "saisiront"],
+            conditionnel: ["saisirais", "saisirait", "saisirions", "saisiriez", "saisiraient"],
+            subjonctif: ["saisisse", "saisisses", "saisissions", "saisissiez", "saisissent"],
+            participe_present: ["saisissant"],
+            participe_passe: ["saisi", "saisie", "saisis", "saisies"]
+        },
+
+        "agripper": {
+            present: ["agrippe", "agrippes", "agrippons", "agrippez", "agrippent"],
+            imparfait: ["agrippais", "agrippait", "agrippions", "agrippiez", "agrippaient"],
+            futur: ["agripperai", "agripperas", "agrippera", "agripperons", "agripperez", "agripperont"],
+            conditionnel: ["agripperais", "agripperait", "agripperions", "agripperiez", "agripperaient"],
+            subjonctif: ["agrippe", "agrippes", "agrippions", "agrippiez", "agrippent"],
+            participe_present: ["agrippant"],
+            participe_passe: ["agrippé", "agrippée", "agrippés", "agrippées"]
+        },
+
+        "immobiliser": {
+            present: ["immobilise", "immobilises", "immobilisons", "immobilisez", "immobilisent"],
+            imparfait: ["immobilisais", "immobilisait", "immobilisions", "immobilisiez", "immobilisaient"],
+            futur: ["immobiliserai", "immobiliseras", "immobilisera", "immobiliserons", "immobiliserez", "immobiliseront"],
+            conditionnel: ["immobiliserais", "immobiliserait", "immobiliserions", "immobiliseriez", "immobiliseraient"],
+            subjonctif: ["immobilise", "immobilises", "immobilisions", "immobilisiez", "immobilisent"],
+            participe_present: ["immobilisant"],
+            participe_passe: ["immobilisé", "immobilisée", "immobilisés", "immobilisées"]
+        },
+
+        "protéger": {
+            present: ["protège", "protèges", "protégeons", "protégez", "protègent"],
+            imparfait: ["protégeais", "protégeait", "protégions", "protégiez", "protégeaient"],
+            futur: ["protégerai", "protégeras", "protégera", "protégerons", "protégerez", "protégeront"],
+            conditionnel: ["protégerais", "protégerait", "protégerions", "protégeriez", "protégeraient"],
+            subjonctif: ["protège", "protèges", "protégions", "protégiez", "protègent"],
+            participe_present: ["protégeant"],
+            participe_passe: ["protégé", "protégée", "protégés", "protégées"]
+        },
+
+        "viser": {
+            present: ["vise", "vises", "visons", "visez", "visent"],
+            imparfait: ["visais", "visait", "visions", "visiez", "visaient"],
+            futur: ["viserai", "viseras", "visera", "viserons", "viserez", "viseront"],
+            conditionnel: ["viserais", "viserait", "viserions", "viseriez", "viseraient"],
+            subjonctif: ["vise", "vises", "visions", "visiez", "visent"],
+            participe_present: ["visant"],
+            participe_passe: ["visé", "visée", "visés", "visées"]
+        },
+
+        "combattre": {
+            present: ["combats", "combat", "combattons", "combattez", "combattent"],
+            imparfait: ["combattais", "combattait", "combattions", "combattiez", "combattaient"],
+            futur: ["combattrai", "combattras", "combattra", "combattrons", "combattrez", "combattront"],
+            conditionnel: ["combattrais", "combattrait", "combattrions", "combattriez", "combattraient"],
+            subjonctif: ["combatte", "combattes", "combattions", "combattiez", "combattent"],
+            participe_present: ["combattant"],
+            participe_passe: ["combattu", "combattue", "combattus", "combattues"]
+        },
+
+        "poursuivre": {
+            present: ["poursuis", "poursuit", "poursuivons", "poursuivez", "poursuivent"],
+            imparfait: ["poursuivais", "poursuivait", "poursuivions", "poursuiviez", "poursuivaient"],
+            futur: ["poursuivrai", "poursuivras", "poursuivra", "poursuivrons", "poursuivrez", "poursuivront"],
+            conditionnel: ["poursuivrais", "poursuivrait", "poursuivrions", "poursuivriez", "poursuivraient"],
+            subjonctif: ["poursuive", "poursuives", "poursuivions", "poursuiviez", "poursuivent"],
+            participe_present: ["poursuivant"],
+            participe_passe: ["poursuivi", "poursuivie", "poursuivis", "poursuivies"]
+        },
 
         //======================================================
         // 🏠 Vie courante
         //======================================================
 
-        "manger",
-        "boire",
-        "dormir",
-        "se réveiller",
-        "se lever",
-        "s'asseoir",
-        "s'allonger",
-        "se laver",
-        "se doucher",
-        "se baigner",
-        "s'habiller",
-        "se déshabiller",
-        "se coiffer",
-        "se brosser",
-        "nettoyer",
-        "cuisiner",
-        "préparer",
-        "servir",
-        "acheter",
-        "vendre",
-        "payer",
-        "coûter",
-        "gagner",
-        "perdre",
-        "travailler",
-        "étudier",
-        "apprendre",
-        "lire",
-        "écrire",
-        "dessiner",
-        "jouer",
-        "chanter",
-        "danser",
-        "rire",
-        "sourire",
-        "pleurer",
-        "aimer",
-        "détester",
-        "préférer",
-        "choisir",
-        "utiliser",
-        "ouvrir",
-        "fermer",
-        "allumer",
-        "éteindre",
-        "attendre",
-        "commencer",
-        "finir",
-        "continuer",
-        "arrêter"
+        "manger": {
+            present: ["mange", "manges", "mangeons", "mangez", "mangent"],
+            imparfait: ["mangeais", "mangeait", "mangions", "mangiez", "mangeaient"],
+            futur: ["mangerai", "mangeras", "mangera", "mangerons", "mangerez", "mangeront"],
+            conditionnel: ["mangerais", "mangerait", "mangerions", "mangeriez", "mangeraient"],
+            subjonctif: ["mange", "manges", "mangions", "mangiez", "mangent"],
+            participe_present: ["mangeant"],
+            participe_passe: ["mangé", "mangée", "mangés", "mangées"]
+        },
 
-    ],
+        "boire": {
+            present: ["bois", "boit", "buvons", "buvez", "boivent"],
+            imparfait: ["buvais", "buvait", "buvions", "buviez", "buvaient"],
+            futur: ["boirai", "boiras", "boira", "boirons", "boirez", "boiront"],
+            conditionnel: ["boirais", "boirait", "boirions", "boiriez", "boiraient"],
+            subjonctif: ["boive", "boives", "buvions", "buviez", "boivent"],
+            participe_present: ["buvant"],
+            participe_passe: ["bu", "bue", "bus", "bues"]
+        },
 
+        "dormir": {
+            present: ["dors", "dort", "dormons", "dormez", "dorment"],
+            imparfait: ["dormais", "dormait", "dormions", "dormiez", "dormaient"],
+            futur: ["dormirai", "dormiras", "dormira", "dormirons", "dormirez", "dormiront"],
+            conditionnel: ["dormirais", "dormirait", "dormirions", "dormiriez", "dormiraient"],
+            subjonctif: ["dorme", "dormes", "dormions", "dormiez", "dorment"],
+            participe_present: ["dormant"],
+            participe_passe: ["dormi"]
+        },
 
-    //==========================================================
-    // 🇬🇧 ANGLAIS
-    //==========================================================
+        "ouvrir": {
+            present: ["ouvre", "ouvres", "ouvrons", "ouvrez", "ouvrent"],
+            imparfait: ["ouvrais", "ouvrait", "ouvrions", "ouvriez", "ouvraient"],
+            futur: ["ouvrirai", "ouvriras", "ouvrira", "ouvrirons", "ouvrirez", "ouvriront"],
+            conditionnel: ["ouvrirais", "ouvrirait", "ouvririons", "ouvririez", "ouvriraient"],
+            subjonctif: ["ouvre", "ouvres", "ouvrions", "ouvriez", "ouvrent"],
+            participe_present: ["ouvrant"],
+            participe_passe: ["ouvert", "ouverte", "ouverts", "ouvertes"]
+        },
 
-    en: [
+        "fermer": {
+            present: ["ferme", "fermes", "fermons", "fermez", "ferment"],
+            imparfait: ["fermais", "fermait", "fermions", "fermiez", "fermaient"],
+            futur: ["fermerai", "fermeras", "fermera", "fermerons", "fermerez", "fermeront"],
+            conditionnel: ["fermerais", "fermerait", "fermerions", "fermeriez", "fermeraient"],
+            subjonctif: ["ferme", "fermes", "fermions", "fermiez", "ferment"],
+            participe_present: ["fermant"],
+            participe_passe: ["fermé", "fermée", "fermés", "fermées"]
+        },
 
-        // 🧠 Général
+        "attendre": {
+            present: ["attends", "attend", "attendons", "attendez", "attendent"],
+            imparfait: ["attendais", "attendait", "attendions", "attendiez", "attendaient"],
+            futur: ["attendrai", "attendras", "attendra", "attendrons", "attendrez", "attendront"],
+            conditionnel: ["attendrais", "attendrait", "attendrions", "attendriez", "attendraient"],
+            subjonctif: ["attende", "attendes", "attendions", "attendiez", "attendent"],
+            participe_present: ["attendant"],
+            participe_passe: ["attendu", "attendue", "attendus", "attendues"]
+        },
 
-        "be",
-        "have",
-        "do",
-        "go",
-        "come",
-        "see",
-        "watch",
-        "speak",
-        "say",
-        "think",
-        "understand",
-        "know",
-        "want",
-        "can",
-        "must",
-        "feel",
-        "hear",
-        "listen",
-        "search",
-        "find",
+        "commencer": {
+            present: ["commence", "commences", "commençons", "commencez", "commencent"],
+            imparfait: ["commençais", "commençait", "commencions", "commenciez", "commençaient"],
+            futur: ["commencerai", "commenceras", "commencera", "commencerons", "commencerez", "commenceront"],
+            conditionnel: ["commencerais", "commencerait", "commencerions", "commenceriez", "commenceraient"],
+            subjonctif: ["commence", "commences", "commencions", "commenciez", "commencent"],
+            participe_present: ["commençant"],
+            participe_passe: ["commencé", "commencée", "commencés", "commencées"]
+        },
 
+        "finir": {
+            present: ["finis", "finit", "finissons", "finissez", "finissent"],
+            imparfait: ["finissais", "finissait", "finissions", "finissiez", "finissaient"],
+            futur: ["finirai", "finiras", "finira", "finirons", "finirez", "finiront"],
+            conditionnel: ["finirais", "finirait", "finirions", "finiriez", "finiraient"],
+            subjonctif: ["finisse", "finisses", "finissions", "finissiez", "finissent"],
+            participe_present: ["finissant"],
+            participe_passe: ["fini", "finie", "finis", "finies"]
+        },
 
-        // 🚶 Déplacement
+        "continuer": {
+            present: ["continue", "continues", "continuons", "continuez", "continuent"],
+            imparfait: ["continuais", "continuait", "continuions", "continuiez", "continuaient"],
+            futur: ["continuerai", "continueras", "continuera", "continuerons", "continuerez", "continueront"],
+            conditionnel: ["continuerais", "continuerait", "continuerions", "continueriez", "continueraient"],
+            subjonctif: ["continue", "continues", "continuions", "continuiez", "continuent"],
+            participe_present: ["continuant"],
+            participe_passe: ["continué", "continuée", "continués", "continuées"]
+        },
 
-        "walk",
-        "run",
-        "move",
-        "advance",
-        "retreat",
-        "jump",
-        "fall",
-        "fly",
-        "crawl",
-        "climb",
-        "descend",
-        "go up",
-        "enter",
-        "exit",
-        "arrive",
-        "leave",
-        "return",
-        "approach",
-        "move away",
-        "turn",
-        "accelerate",
-        "slow",
-        "travel",
-
-
-        // ⚔️ Action / combat
-
-        "hit",
-        "attack",
-        "defend",
-        "dodge",
-        "block",
-        "touch",
-        "take",
-        "throw",
-        "catch",
-        "carry",
-        "push",
-        "pull",
-        "project",
-        "grab",
-        "grip",
-        "immobilize",
-        "protect",
-        "aim",
-        "fight",
-        "pursue",
-
-
-        // 🏠 Vie courante
-
-        "eat",
-        "drink",
-        "sleep",
-        "wake up",
-        "get up",
-        "sit down",
-        "lie down",
-        "wash",
-        "shower",
-        "bathe",
-        "dress",
-        "undress",
-        "comb",
-        "brush",
-        "clean",
-        "cook",
-        "prepare",
-        "serve",
-        "buy",
-        "sell",
-        "pay",
-        "cost",
-        "win",
-        "lose",
-        "work",
-        "study",
-        "learn",
-        "read",
-        "write",
-        "draw",
-        "play",
-        "sing",
-        "dance",
-        "laugh",
-        "smile",
-        "cry",
-        "love",
-        "hate",
-        "prefer",
-        "choose",
-        "use",
-        "open",
-        "close",
-        "turn on",
-        "turn off",
-        "wait",
-        "start",
-        "finish",
-        "continue",
-        "stop"
-
-    ]
-
+        "arrêter": {
+            present: ["arrête", "arrêtes", "arrêtons", "arrêtez", "arrêtent"],
+            imparfait: ["arrêtais", "arrêtait", "arrêtions", "arrêtiez", "arrêtaient"],
+            futur: ["arrêterai", "arrêteras", "arrêtera", "arrêterons", "arrêterez", "arrêteront"],
+            conditionnel: ["arrêterais", "arrêterait", "arrêterions", "arrêteriez", "arrêteraient"],
+            subjonctif: ["arrête", "arrêtes", "arrêtions", "arrêtiez", "arrêtent"],
+            participe_present: ["arrêtant"],
+            participe_passe: ["arrêté", "arrêtée", "arrêtés", "arrêtées"]
+        }
+    }
 };
 
+
+ 
 
 const NEO_VERBES_SPECIAUX = {
     //==========================================================
