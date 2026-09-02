@@ -1061,7 +1061,12 @@ function analyserNeoAI(text) {
             connaissance =
                 NeoAI.neoRechercherMot(mot);
         }
-
+console.log(
+    "🌀 NEOAI MOT :",
+    mot,
+    JSON.stringify(connaissance, null, 2)
+);
+        
         motsAnalyses.push({
 
             index: i,
