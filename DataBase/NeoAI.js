@@ -5126,6 +5126,9 @@ function neoRechercherMot(
 
     const categories = [];
 
+    let verbe = null;
+    let forme = null;
+
 
     for (
         const nomCategorie
@@ -5155,6 +5158,31 @@ function neoRechercherMot(
 
             });
 
+
+            //==================================================
+            // 🧠 IDENTIFICATION GRAMMATICALE DU VERBE
+            //==================================================
+
+            if (
+                nomCategorie === "NEO_VERBES" &&
+                resultat.chemin
+            ) {
+
+                
+                if (
+                    resultat.chemin.length >= 3
+                ) {
+
+                    verbe =
+                        resultat.chemin[1];
+
+                    forme =
+                        resultat.chemin[2];
+
+                }
+
+            }
+
         }
 
     }
@@ -5169,6 +5197,10 @@ function neoRechercherMot(
 
         motNormalise:
             recherche,
+
+        verbe,
+
+        forme,
 
         categories
 
