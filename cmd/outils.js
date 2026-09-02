@@ -1000,6 +1000,9 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
+//==============================================================
+// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
+//==============================================================
 function analyserNeoAI(text) {
 
     if (typeof text !== "string") {
@@ -1027,7 +1030,7 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // 2️⃣ EXTRACTION DES MOTS
+    // 2️⃣ NORMALISATION + TOKENISATION
     //==========================================================
 
     const texteNormalise =
@@ -1041,12 +1044,14 @@ function analyserNeoAI(text) {
             : texteNormalise.split(/\s+/);
 
     //==========================================================
-    // 3️⃣ RECHERCHE DE CHAQUE MOT DANS NEOAI.JS
+    // 3️⃣ ANALYSE DE CHAQUE MOT
     //==========================================================
 
     const motsAnalyses = [];
 
-    for (const mot of mots) {
+    for (let i = 0; i < mots.length; i++) {
+
+        const mot = mots[i];
 
         let connaissance = null;
 
@@ -1059,281 +1064,847 @@ function analyserNeoAI(text) {
 
         motsAnalyses.push({
 
+            index: i,
+
             mot,
 
             connu:
                 connaissance?.trouve === true,
 
             categories:
-                connaissance?.categories || []
+                connaissance?.categories || [],
+
+            // Informations grammaticales venant de NEO_VERBES
+            verbe:
+                connaissance?.verbe || null,
+
+            forme:
+                connaissance?.forme || null
 
         });
     }
 
     //==========================================================
-    // 4️⃣ COMPRÉHENSION DU TEXTE
+    // 4️⃣ OUTILS INTERNES
+    //==========================================================
+
+    const motNormalise = mot =>
+        String(mot || "")
+            .toLowerCase()
+            .replace(/[.,!?;:()]/g, "")
+            .trim();
+
+    const estCategorie = (element, recherche) => {
+
+        return element.categories?.some(
+            categorie =>
+                String(
+                    categorie.categorie || ""
+                )
+                .toLowerCase()
+                .includes(recherche)
+        );
+    };
+
+    const estVerbe = element => {
+
+        return estCategorie(
+            element,
+            "verbe"
+        );
+    };
+
+    const estNom = element => {
+
+        return (
+            estCategorie(element, "nom") ||
+            estCategorie(element, "combat") ||
+            estCategorie(element, "partie")
+        );
+    };
+
+    const estPartieCorps = element => {
+
+        return (
+            estCategorie(element, "corps") ||
+            estCategorie(element, "partie")
+        );
+    };
+
+    //==========================================================
+    // 5️⃣ DÉTECTION DES ACTIONS VERBALES
+    //==========================================================
+
+    const actionsVerbes = [];
+
+    for (let i = 0; i < motsAnalyses.length; i++) {
+
+        const element =
+            motsAnalyses[i];
+
+        if (!element.connu) {
+            continue;
+        }
+
+        if (!estVerbe(element)) {
+            continue;
+        }
+
+        const mot =
+            motNormalise(element.mot);
+
+        const forme =
+            String(
+                element.forme || ""
+            ).toLowerCase();
+
+        // ------------------------------------------------------
+        // Les participes présents décrivent généralement
+        // une circonstance et ne sont pas retenus comme
+        // action principale.
+        //
+        // Exemple :
+        // "Tobirama voyant..."
+        // ------------------------------------------------------
+
+        if (
+            forme === "participe_present"
+        ) {
+            continue;
+        }
+
+        // ------------------------------------------------------
+        // Infinitif utilisé dans une construction secondaire.
+        //
+        // Exemple :
+        // "voyant le coup de poing venir..."
+        //
+        // "venir" n'est pas l'action principale.
+        // ------------------------------------------------------
+
+        if (
+            forme === "infinitif" &&
+            i > 0
+        ) {
+
+            const avant =
+                motsAnalyses
+                    .slice(
+                        Math.max(0, i - 8),
+                        i
+                    )
+                    .map(
+                        e =>
+                            motNormalise(e.mot)
+                    );
+
+            if (
+                avant.includes("voyant") ||
+                avant.includes("voit") ||
+                avant.includes("voyait") ||
+                avant.includes("voir")
+            ) {
+                continue;
+            }
+        }
+
+        actionsVerbes.push({
+            index: i,
+            verbe:
+                element.verbe ||
+                element.mot,
+            forme:
+                element.forme || null,
+            mot:
+                element.mot
+        });
+    }
+
+    //==========================================================
+    // 6️⃣ DÉTECTION DU SUJET
+    //==========================================================
+
+    let sujet = null;
+
+    if (actionsVerbes.length > 0) {
+
+        const premiereAction =
+            actionsVerbes[0].index;
+
+        const avantAction =
+            motsAnalyses.slice(
+                0,
+                premiereAction
+            );
+
+        // ----------------------------------------------
+        // On cherche le premier élément avant l'action
+        // qui ressemble à un nom propre / sujet.
+        // ----------------------------------------------
+
+        for (const element of avantAction) {
+
+            const mot =
+                String(element.mot || "");
+
+            if (!mot) {
+                continue;
+            }
+
+            // On ignore les petits mots grammaticaux
+            const ignore = [
+                "le",
+                "la",
+                "les",
+                "un",
+                "une",
+                "des",
+                "du",
+                "de",
+                "et",
+                "ou",
+                "mais",
+                "puis",
+                "ensuite",
+                "il",
+                "elle",
+                "ils",
+                "elles",
+                "qui",
+                "que",
+                "se",
+                "son",
+                "sa",
+                "ses"
+            ];
+
+            if (
+                ignore.includes(
+                    motNormalise(mot)
+                )
+            ) {
+                continue;
+            }
+
+            // Un nom propre comme Tobirama/Yamato
+            // est généralement le premier élément.
+            sujet = mot;
+            break;
+        }
+    }
+
+    //==========================================================
+    // 7️⃣ DÉTECTION DES ACTIONS COMPLÈTES
+    //==========================================================
+
+    const actions = [];
+
+    for (
+        let a = 0;
+        a < actionsVerbes.length;
+        a++
+    ) {
+
+        const actionVerbe =
+            actionsVerbes[a];
+
+        const debut =
+            actionVerbe.index;
+
+        const fin =
+            actionsVerbes[a + 1]
+                ? actionsVerbes[a + 1].index
+                : motsAnalyses.length;
+
+        const zone =
+            motsAnalyses.slice(
+                debut + 1,
+                fin
+            );
+
+        //======================================================
+        // OBJET
+        //======================================================
+
+        let objet = null;
+
+        const texteZone =
+            zone
+                .map(e => e.mot)
+                .join(" ");
+
+        // ------------------------------------------------------
+        // Combats composés
+        // ------------------------------------------------------
+
+        if (
+            /\bcoup\s+de\s+poing\b/i.test(
+                texteZone
+            )
+        ) {
+
+            objet = "coup de poing";
+
+        } else if (
+            /\bcoup\s+de\s+pied\b/i.test(
+                texteZone
+            )
+        ) {
+
+            objet = "coup de pied";
+
+        } else {
+
+            // --------------------------------------------------
+            // Sinon on prend le premier nom connu après le verbe
+            // --------------------------------------------------
+
+            for (const element of zone) {
+
+                if (
+                    !element.connu
+                ) {
+                    continue;
+                }
+
+                if (
+                    estNom(element) &&
+                    !estPartieCorps(element)
+                ) {
+
+                    const mot =
+                        motNormalise(
+                            element.mot
+                        );
+
+                    if (
+                        mot !== "main" &&
+                        mot !== "paume" &&
+                        mot !== "bras" &&
+                        mot !== "avant-bras"
+                    ) {
+
+                        objet =
+                            element.mot;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        //======================================================
+        // CIBLE
+        //======================================================
+
+        let cible = null;
+
+        // ------------------------------------------------------
+        // "vers la tête de Tobirama"
+        // "au niveau de son abdomen"
+        // ------------------------------------------------------
+
+        for (
+            let i = 0;
+            i < zone.length;
+            i++
+        ) {
+
+            const element =
+                zone[i];
+
+            if (
+                !estPartieCorps(element)
+            ) {
+                continue;
+            }
+
+            const mot =
+                motNormalise(
+                    element.mot
+                );
+
+            // --------------------------------------------------
+            // On ignore les parties du corps utilisées
+            // comme moyen.
+            // --------------------------------------------------
+
+            const avant =
+                zone
+                    .slice(
+                        Math.max(0, i - 4),
+                        i
+                    )
+                    .map(
+                        e =>
+                            motNormalise(e.mot)
+                    );
+
+            if (
+                avant.includes("main") ||
+                avant.includes("paume") ||
+                avant.includes("bras") ||
+                avant.includes("avant-bras")
+            ) {
+                continue;
+            }
+
+            // --------------------------------------------------
+            // La partie du corps devient la cible.
+            // --------------------------------------------------
+
+            cible =
+                element.mot;
+
+            // --------------------------------------------------
+            // Chercher un possesseur :
+            // "tête de Tobirama"
+            // --------------------------------------------------
+
+            if (
+                zone[i + 1] &&
+                motNormalise(
+                    zone[i + 1].mot
+                ) === "de"
+            ) {
+
+                if (
+                    zone[i + 2]
+                ) {
+
+                    cible +=
+                        " de " +
+                        zone[i + 2].mot;
+                }
+            }
+
+            break;
+        }
+
+        //======================================================
+        // MOYEN / INSTRUMENT
+        //======================================================
+
+        let moyen = null;
+
+        const texteAvantCible =
+            cible
+                ? zone
+                    .slice(
+                        0,
+                        zone.findIndex(
+                            e =>
+                                motNormalise(
+                                    e.mot
+                                ) ===
+                                motNormalise(
+                                    cible.split(" ")[0]
+                                )
+                        )
+                    )
+                    .map(e => e.mot)
+                    .join(" ")
+                : texteZone;
+
+        // ------------------------------------------------------
+        // Paume de main gauche
+        // ------------------------------------------------------
+
+        const matchPaume =
+            texteZone.match(
+                /paume(?:\s+de)?(?:\s+main)?\s+(gauche|droite)/i
+            );
+
+        if (matchPaume) {
+
+            moyen =
+                `paume ${matchPaume[1].toLowerCase()}`;
+        }
+
+        // ------------------------------------------------------
+        // Main droite / gauche
+        // ------------------------------------------------------
+
+        if (!moyen) {
+
+            const matchMain =
+                texteZone.match(
+                    /\bmain\s+(gauche|droite)\b/i
+                );
+
+            if (matchMain) {
+
+                moyen =
+                    `main ${matchMain[1].toLowerCase()}`;
+            }
+        }
+
+        // ------------------------------------------------------
+        // Avant-bras droit / gauche
+        // ------------------------------------------------------
+
+        if (!moyen) {
+
+            const matchAvantBras =
+                texteZone.match(
+                    /\bavant[-\s]?bras\s+(gauche|droite)\b/i
+                );
+
+            if (matchAvantBras) {
+
+                moyen =
+                    `avant-bras ${matchAvantBras[1].toLowerCase()}`;
+            }
+        }
+
+        //======================================================
+        // CRÉATION DE L'ACTION
+        //======================================================
+
+        actions.push({
+
+            verbe:
+                actionVerbe.verbe,
+
+            forme:
+                actionVerbe.forme,
+
+            ...(objet
+                ? { objet }
+                : {}),
+
+            ...(cible
+                ? { cible }
+                : {}),
+
+            ...(moyen
+                ? { moyen }
+                : {})
+
+        });
+    }
+
+    //==========================================================
+    // 8️⃣ CONTEXTE
+    //==========================================================
+
+    let contexte = "general";
+
+    const texteBas =
+        texte.toLowerCase();
+
+    const motsCombat = [
+        "frappe",
+        "frapper",
+        "bloque",
+        "bloquer",
+        "attaque",
+        "attaquer",
+        "coup",
+        "poing",
+        "pied",
+        "shuriken",
+        "esquive",
+        "esquiver",
+        "défend",
+        "défendre",
+        "parer",
+        "pare"
+    ];
+
+    if (
+        motsCombat.some(
+            mot =>
+                texteBas.includes(mot)
+        )
+    ) {
+
+        contexte = "combat";
+    }
+
+    //==========================================================
+    // 9️⃣ ENCHAÎNEMENT
+    //==========================================================
+
+    let enchainement = null;
+
+    const succession =
+        [
+            "puis",
+            "ensuite",
+            "après",
+            "dans la foulée",
+            "immédiatement"
+        ];
+
+    if (
+        succession.some(
+            mot =>
+                texteBas.includes(mot)
+        )
+    ) {
+
+        enchainement = "successif";
+    }
+
+    //==========================================================
+    // 🔟 DIRECTIONS
+    //==========================================================
+
+    const directions = [];
+
+    // ----------------------------------------------------------
+    // IMPORTANT :
+    // On ne considère plus automatiquement "gauche", "droite"
+    // ou "vers" comme des déplacements.
+    //
+    // Ils ne seront ajoutés ici que si le contexte indique
+    // réellement un déplacement.
+    // ----------------------------------------------------------
+
+    const verbesDeplacement = [
+        "marcher",
+        "courir",
+        "avancer",
+        "reculer",
+        "sauter",
+        "voler",
+        "ramper",
+        "grimper",
+        "descendre",
+        "monter",
+        "entrer",
+        "sortir",
+        "approcher",
+        "s'éloigner",
+        "tourner",
+        "accélérer",
+        "ralentir"
+    ];
+
+    const contientDeplacement =
+        actions.some(
+            action =>
+                verbesDeplacement.includes(
+                    String(
+                        action.verbe || ""
+                    ).toLowerCase()
+                )
+        );
+
+    if (contientDeplacement) {
+
+        for (const element of motsAnalyses) {
+
+            if (
+                !estCategorie(
+                    element,
+                    "direction"
+                )
+            ) {
+                continue;
+            }
+
+            const mot =
+                motNormalise(
+                    element.mot
+                );
+
+            if (
+                !directions.includes(mot)
+            ) {
+
+                directions.push(mot);
+            }
+        }
+    }
+
+    //==========================================================
+    // 1️⃣1️⃣ OBJETS GÉNÉRAUX
+    //==========================================================
+
+    const objets = [];
+
+    for (const action of actions) {
+
+        if (
+            action.objet &&
+            !objets.includes(
+                action.objet
+            )
+        ) {
+
+            objets.push(
+                action.objet
+            );
+        }
+    }
+
+    //==========================================================
+    // 1️⃣2️⃣ CIBLES GÉNÉRALES
+    //==========================================================
+
+    const cibles = [];
+
+    for (const action of actions) {
+
+        if (
+            action.cible &&
+            !cibles.includes(
+                action.cible
+            )
+        ) {
+
+            cibles.push(
+                action.cible
+            );
+        }
+    }
+
+    //==========================================================
+    // 1️⃣3️⃣ REFORMULATION
+    //==========================================================
+
+    let reformulation =
+        texte;
+
+    if (
+        sujet &&
+        actions.length
+    ) {
+
+        const phrasesActions =
+            actions.map(
+                action => {
+
+                    let phrase =
+                        `${sujet} ${action.verbe}`;
+
+                    if (action.objet) {
+                        phrase +=
+                            ` un ${action.objet}`;
+                    }
+
+                    if (action.cible) {
+
+                        phrase +=
+                            ` à ${action.cible}`;
+                    }
+
+                    if (action.moyen) {
+
+                        phrase +=
+                            ` avec sa ${action.moyen}`;
+                    }
+
+                    return phrase;
+                }
+            );
+
+        if (
+            actions.length > 1 &&
+            enchainement === "successif"
+        ) {
+
+            reformulation =
+                phrasesActions
+                    .join(" puis ")
+                    + ".";
+        } else {
+
+            reformulation =
+                phrasesActions
+                    .join(" et ")
+                    + ".";
+        }
+    }
+
+    //==========================================================
+    // 1️⃣4️⃣ COMPRÉHENSION
     //==========================================================
 
     const comprehension = {
 
-        sujet: null,
+        sujet,
 
-        actions: [],
+        actions,
 
-        directions: [],
+        directions,
 
-        objets: [],
+        objets,
 
-        cibles: [],
+        cibles,
 
         lieux: [],
 
         temps: [],
 
-        contexte: "general"
+        contexte,
+
+        enchainement
 
     };
 
-    // On parcourt les connaissances trouvées
-    for (const element of motsAnalyses) {
-
-        if (!element.connu) continue;
-
-        for (const categorie of element.categories) {
-
-            const nom =
-                String(
-                    categorie.categorie || ""
-                ).toLowerCase();
-
-            // Direction
-            if (
-                nom.includes("direction")
-            ) {
-
-                comprehension.directions.push(
-                    element.mot
-                );
-            }
-
-            // Verbe
-if (
-    nom.includes("verbe")
-) {
-
-    const indexMot =
-        mots.indexOf(element.mot);
-
-    const motAvant =
-        mots
-            .slice(
-                Math.max(0, indexMot - 6),
-                indexMot
-            )
-            .map(m => String(m).toLowerCase());
-
-    if (
-        String(element.mot).toLowerCase() === "venir" &&
-        motAvant.includes("voyant")
-    ) {
-        continue;
-    }
-
-    comprehension.actions.push({
-
-        verbe: element.mot,
-
-        categories:
-            element.categories
-
-    });
-}
-
-            // Temps
-            if (
-                nom.includes("temps")
-            ) {
-
-                comprehension.temps.push(
-                    element.mot
-                );
-            }
-        }
-    }
-
     //==========================================================
-    // 5️⃣ DÉTECTION DU SUJET
+    // 1️⃣5️⃣ RÉSULTAT FINAL
     //==========================================================
 
-let indexActionPrincipale = -1;
+    return {
 
-for (let i = 0; i < motsAnalyses.length; i++) {
+        success: true,
 
-    const mot = String(
-        motsAnalyses[i].mot || ""
-    ).toLowerCase();
+        texteOriginal,
 
-    const estVerbe =
-        motsAnalyses[i].categories?.some(
-            c =>
-                String(
-                    c.categorie || ""
+        texte,
+
+        nombreMots:
+            mots.length,
+
+        mots:
+            motsAnalyses,
+
+        motsConnus:
+            motsAnalyses
+                .filter(
+                    m => m.connu
                 )
-                .toLowerCase()
-                .includes("verbe")
-        );
+                .map(
+                    m => m.mot
+                ),
 
-    if (!estVerbe) continue;
+        motsInconnus:
+            motsAnalyses
+                .filter(
+                    m => !m.connu
+                )
+                .map(
+                    m => m.mot
+                ),
 
-    // ------------------------------------------------------
-    // "venir" après "voyant ... le coup de poing"
-    // n'est pas l'action principale.
-    // ------------------------------------------------------
+        nombreMotsConnus:
+            motsAnalyses
+                .filter(
+                    m => m.connu
+                )
+                .length,
 
-    if (
-        mot === "venir" &&
-        mots
-            .slice(
-                Math.max(0, i - 6),
-                i
-            )
-            .some(
-                m =>
-                    String(m).toLowerCase() === "voyant"
-            )
-    ) {
-        continue;
-    }
+        nombreMotsInconnus:
+            motsAnalyses
+                .filter(
+                    m => !m.connu
+                )
+                .length,
 
-    indexActionPrincipale = i;
-    break;
-}
+        comprehension,
 
+        reformulation,
 
-// ---------------------------------------------------------
-// Détection du sujet
-// ---------------------------------------------------------
+        dateAnalyse:
+            Date.now()
 
-if (indexActionPrincipale > 0) {
+    };
 
-    const avantAction =
-        mots
-            .slice(
-                0,
-                indexActionPrincipale
-            );
-
-    const indexIl =
-        avantAction.findIndex(
-            m =>
-                String(m).toLowerCase() === "il"
-        );
-
-    if (indexIl > 0) {
-
-        const candidat =
-            avantAction
-                .slice(0, indexIl)
-                .join(" ")
-                .trim();
-
-        if (candidat) {
-            comprehension.sujet = candidat;
-        }
-
-    } else {
-
-        comprehension.sujet =
-            avantAction
-                .join(" ")
-                .trim();
-    }
-}
-
-    //==========================================================
-    // 6️⃣ CONTEXTE
-    //==========================================================
-
-    if (
-        comprehension.directions.length > 0 &&
-        comprehension.actions.length > 0
-    ) {
-
-        comprehension.contexte =
-            "deplacement";
-    }
-
-    //==========================================================
-    // 7️⃣ REFORMULATION
-    //==========================================================
-
-    let reformulation = texte;
-
-    if (
-        comprehension.sujet &&
-        comprehension.actions.length
-    ) {
-
-        const action =
-            comprehension.actions[0].verbe;
-
-        if (
-            comprehension.contexte === "deplacement" &&
-            comprehension.directions.length
-        ) {
-
-            const direction =
-                comprehension.directions[0];
-
-            reformulation =
-                `${comprehension.sujet} se déplacent en direction du ${direction}.`;
-
-        } else {
-
-            reformulation =
-                `${comprehension.sujet} ${action}.`;
-        }
-    }
-
-    //==========================================================
-    // 8️⃣ RÉSULTAT FINAL
-    //==========================================================
-return {
-
-    success: true,
-
-    texteOriginal,
-
-    texte,
-
-    nombreMots: mots.length,
-
-    mots: motsAnalyses,
-
-    motsConnus: motsAnalyses
-        .filter(m => m.connu)
-        .map(m => m.mot),
-
-    motsInconnus: motsAnalyses
-        .filter(m => !m.connu)
-        .map(m => m.mot),
-
-    nombreMotsConnus:
-        motsAnalyses.filter(m => m.connu).length,
-
-    nombreMotsInconnus:
-        motsAnalyses.filter(m => !m.connu).length,
-
-    comprehension,
-
-    reformulation,
-
-    dateAnalyse: Date.now()
-
-};
-    
-}
-
+       }
 
 //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
