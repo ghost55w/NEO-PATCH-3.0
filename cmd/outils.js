@@ -1117,19 +1117,37 @@ function analyserNeoAI(text) {
             }
 
             // Verbe
-            if (
-                nom.includes("verbe")
-            ) {
+if (
+    nom.includes("verbe")
+) {
 
-                comprehension.actions.push({
+    const indexMot =
+        mots.indexOf(element.mot);
 
-                    verbe: element.mot,
+    const motAvant =
+        mots
+            .slice(
+                Math.max(0, indexMot - 6),
+                indexMot
+            )
+            .map(m => String(m).toLowerCase());
 
-                    categories:
-                        element.categories
+    if (
+        String(element.mot).toLowerCase() === "venir" &&
+        motAvant.includes("voyant")
+    ) {
+        continue;
+    }
 
-                });
-            }
+    comprehension.actions.push({
+
+        verbe: element.mot,
+
+        categories:
+            element.categories
+
+    });
+}
 
             // Temps
             if (
@@ -1147,26 +1165,90 @@ function analyserNeoAI(text) {
     // 5️⃣ DÉTECTION DU SUJET
     //==========================================================
 
-    const indexAction =
-        motsAnalyses.findIndex(
-            m =>
-                m.categories?.some(
-                    c =>
-                        String(
-                            c.categorie || ""
-                        )
-                        .toLowerCase()
-                        .includes("verbe")
+let indexActionPrincipale = -1;
+
+for (let i = 0; i < motsAnalyses.length; i++) {
+
+    const mot = String(
+        motsAnalyses[i].mot || ""
+    ).toLowerCase();
+
+    const estVerbe =
+        motsAnalyses[i].categories?.some(
+            c =>
+                String(
+                    c.categorie || ""
                 )
+                .toLowerCase()
+                .includes("verbe")
         );
 
-    if (indexAction > 0) {
+    if (!estVerbe) continue;
+
+    // ------------------------------------------------------
+    // "venir" après "voyant ... le coup de poing"
+    // n'est pas l'action principale.
+    // ------------------------------------------------------
+
+    if (
+        mot === "venir" &&
+        mots
+            .slice(
+                Math.max(0, i - 6),
+                i
+            )
+            .some(
+                m =>
+                    String(m).toLowerCase() === "voyant"
+            )
+    ) {
+        continue;
+    }
+
+    indexActionPrincipale = i;
+    break;
+}
+
+
+// ---------------------------------------------------------
+// Détection du sujet
+// ---------------------------------------------------------
+
+if (indexActionPrincipale > 0) {
+
+    const avantAction =
+        mots
+            .slice(
+                0,
+                indexActionPrincipale
+            );
+
+    const indexIl =
+        avantAction.findIndex(
+            m =>
+                String(m).toLowerCase() === "il"
+        );
+
+    if (indexIl > 0) {
+
+        const candidat =
+            avantAction
+                .slice(0, indexIl)
+                .join(" ")
+                .trim();
+
+        if (candidat) {
+            comprehension.sujet = candidat;
+        }
+
+    } else {
 
         comprehension.sujet =
-            mots
-                .slice(0, indexAction)
-                .join(" ");
+            avantAction
+                .join(" ")
+                .trim();
     }
+}
 
     //==========================================================
     // 6️⃣ CONTEXTE
