@@ -1000,802 +1000,618 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE V2
 //==============================================================
+//==============================================================
+// 🧠 NEO AI — ANALYSEUR SÉMANTIQUE
+//==============================================================
 
-function analyserNeoAI(text) {
+async function analyserNeoAI(texte) {
 
-    if (typeof text !== "string") {
+    const texteOriginal = String(texte || "")
+        .trim();
+
+    if (!texteOriginal) {
+
         return {
-            success: false,
-            erreur: "Texte invalide."
+            texte: "",
+            comprehension: {
+                sujet: "",
+                actions: [],
+                directions: [],
+                objets: [],
+                cibles: [],
+                lieux: [],
+                temps: []
+            },
+            reformulation: ""
         };
     }
 
-    //==========================================================
-    // 1️⃣ TEXTE
-    //==========================================================
 
-    const texteOriginal = text.trim();
+    //----------------------------------------------------------
+    // Nettoyage du préfixe 🌀:
+    //----------------------------------------------------------
 
-    const texte = texteOriginal
+    const texteAnalyse = texteOriginal
         .replace(/^🌀\s*:\s*/i, "")
         .trim();
 
-    if (!texte) {
-        return {
-            success: false,
-            erreur: "Texte vide."
-        };
-    }
 
-    //==========================================================
-    // 2️⃣ NORMALISATION
-    //==========================================================
+    //----------------------------------------------------------
+    // Tokenisation sémantique
+    //----------------------------------------------------------
 
-    const texteNormalise =
-        typeof NeoAI.neoNormaliserTexte === "function"
-            ? NeoAI.neoNormaliserTexte(texte)
-            : texte;
+    const tokens =
+        NeoAI.neoTokeniserSemantique(
+            texteAnalyse
+        );
 
-    const mots =
-        typeof NeoAI.neoTokeniser === "function"
-            ? NeoAI.neoTokeniser(texteNormalise)
-            : texteNormalise.split(/\s+/);
 
-    //==========================================================
-    // 3️⃣ CONNAISSANCE DE CHAQUE MOT
-    //==========================================================
-
-    const motsAnalyses = [];
-
-    for (let i = 0; i < mots.length; i++) {
-
-        const mot = mots[i];
-
-        let connaissance = {
-            trouve: false,
-            categories: []
-        };
-
-        if (
-            typeof NeoAI.neoRechercherMot === "function"
-        ) {
-
-            connaissance =
-                NeoAI.neoRechercherMot(mot);
-        }
-
-        motsAnalyses.push({
-
-            index: i,
-
-            mot,
-
-            connu:
-                connaissance?.trouve === true,
-
-            categories:
-                connaissance?.categories || []
-
-        });
-    }
-
-    //==========================================================
-    // 4️⃣ COMPRÉHENSION
-    //==========================================================
+    //----------------------------------------------------------
+    // Résultat
+    //----------------------------------------------------------
 
     const comprehension = {
 
-        sujet: null,
+        sujet: "",
 
         actions: [],
+
+        directions: [],
 
         objets: [],
 
         cibles: [],
 
-        moyens: [],
-
-        partiesCorps: [],
-
-        directions: [],
-
         lieux: [],
 
         temps: [],
 
-        connecteurs: [],
+        relations: [],
 
-        contexte: "general",
-
-        enchainement: null
-
+        contexte: ""
     };
 
-    //==========================================================
-    // 5️⃣ IDENTIFIER LES CATÉGORIES
-    //==========================================================
 
-    for (const element of motsAnalyses) {
+    //----------------------------------------------------------
+    // Détection du contexte
+    //----------------------------------------------------------
 
-        if (!element.connu) {
-            continue;
-        }
+    const conceptsCombat =
+        NeoAI.neoExtraireConceptsCombat(
+            tokens
+        );
 
-        for (const categorie of element.categories) {
-
-            const nom =
-                String(
-                    categorie.categorie || ""
-                ).toLowerCase();
-
-            //..................................................
-            // VERBES
-            //..................................................
-
-            if (
-                nom.includes("verbe")
-            ) {
-
-                element.estVerbe = true;
-            }
-
-            //..................................................
-            // NOMS
-            //..................................................
-
-            if (
-                nom.includes("nom")
-            ) {
-
-                element.estNom = true;
-            }
-
-            //..................................................
-            // DIRECTIONS
-            //..................................................
-
-            if (
-                nom.includes("direction")
-            ) {
-
-                element.estDirection = true;
-            }
-
-            //..................................................
-            // PARTIES DU CORPS
-            //..................................................
-
-            if (
-                nom.includes("partie_corps") ||
-                nom.includes("parties_corps") ||
-                nom.includes("corps")
-            ) {
-
-                element.estPartieCorps = true;
-            }
-
-            //..................................................
-            // TEMPS
-            //..................................................
-
-            if (
-                nom.includes("temps")
-            ) {
-
-                element.estTemps = true;
-            }
-
-            //..................................................
-            // CONNECTEURS
-            //..................................................
-
-            if (
-                nom.includes("connect")
-            ) {
-
-                element.estConnecteur = true;
-            }
-
-            //..................................................
-            // COMBAT
-            //..................................................
-
-            if (
-                nom.includes("combat")
-            ) {
-
-                element.estCombat = true;
-            }
-
-            //..................................................
-            // PRÉPOSITIONS
-            //..................................................
-
-            if (
-                nom.includes("preposition")
-            ) {
-
-                element.estPreposition = true;
-            }
-        }
-    }
-
-    //==========================================================
-    // 6️⃣ CONTEXTE COMBAT
-    //==========================================================
-
-    const motsCombat = motsAnalyses.filter(
-        m => m.estCombat
-    );
-
-    if (motsCombat.length > 0) {
+    if (conceptsCombat.length) {
 
         comprehension.contexte =
             "combat";
     }
 
-    //==========================================================
-    // 7️⃣ CONNECTEURS D'ENCHAÎNEMENT
-    //==========================================================
 
-    const connecteursEnchainement = [
-        "puis",
-        "ensuite",
-        "apres",
-        "après",
-        "alors",
-        "et",
-        "ensuite"
-    ];
+    //----------------------------------------------------------
+    // Détection du sujet
+    //
+    // Priorité :
+    // 1. nom propre au début
+    // 2. groupe nominal avant la première action
+    //----------------------------------------------------------
 
-    for (const element of motsAnalyses) {
+    let indexPremiereAction = -1;
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        const roles = tokens[i].roles || [];
 
         if (
-            connecteursEnchainement.includes(
-                element.mot.toLowerCase()
-            )
+            roles.includes("action_combat") ||
+            roles.includes("verbe")
         ) {
-
-            comprehension.connecteurs.push(
-                element.mot
-            );
+            indexPremiereAction = i;
+            break;
         }
     }
 
-    if (
-        comprehension.connecteurs.length
-    ) {
 
-        comprehension.enchainement =
-            "successif";
+    //----------------------------------------------------------
+    // Sujet simple
+    //----------------------------------------------------------
+
+    if (indexPremiereAction > 0) {
+
+        const avantAction =
+            tokens.slice(
+                0,
+                indexPremiereAction
+            );
+
+        //------------------------------------------------------
+        // Cherche un nom propre
+        //------------------------------------------------------
+
+        const nomPropre =
+            avantAction.find(token => {
+
+                const original =
+                    texteAnalyse
+                        .split(/\s+/)
+                        .find(
+                            x =>
+                                x.toLowerCase()
+                                .replace(/[.,!?]/g, "") ===
+                                token.texte
+                        );
+
+                return (
+                    original &&
+                    /^[A-ZÀ-ÖØ-Ý]/.test(original)
+                );
+            });
+
+        if (nomPropre) {
+
+            comprehension.sujet =
+                nomPropre.texte;
+        }
+
+        //------------------------------------------------------
+        // Sinon groupe avant action
+        //------------------------------------------------------
+
+        if (!comprehension.sujet) {
+
+            const groupe =
+                avantAction
+                    .map(x => x.texte)
+                    .filter(
+                        x =>
+                            ![
+                                "le",
+                                "la",
+                                "les",
+                                "un",
+                                "une",
+                                "des"
+                            ].includes(x)
+                    )
+                    .join(" ");
+
+            if (groupe) {
+                comprehension.sujet =
+                    groupe;
+            }
+        }
     }
 
-    //==========================================================
-    // 8️⃣ TROUVER LES VERBES
-    //==========================================================
 
-    const verbes =
-        motsAnalyses.filter(
-            m => m.estVerbe
-        );
+    //----------------------------------------------------------
+    // Détection des actions
+    //----------------------------------------------------------
 
-    //==========================================================
-    // 9️⃣ DÉTERMINER LES ACTIONS PRINCIPALES
-    //==========================================================
+    for (let i = 0; i < tokens.length; i++) {
 
-    /*
-     * Un verbe placé après :
-     *
-     * - voyant
-     * - voyant ... venir
-     * - pouvant
-     * - voulant
-     * - faisant
-     *
-     * peut être secondaire.
-     *
-     * On privilégie les verbes qui arrivent
-     * après un sujet ou après une rupture
-     * de proposition.
-     */
+        const token = tokens[i];
 
-    const verbesSecondaires = [
-        "voir",
-        "voyant",
-        "venant",
-        "venir",
-        "pouvant",
-        "pouvoir",
-        "voulant",
-        "vouloir",
-        "faisant",
-        "faire",
-        "ayant",
-        "avoir",
-        "étant",
-        "être"
-    ];
+        const roles =
+            token.roles || [];
 
-    const actionsPrincipales = [];
 
-    for (const verbe of verbes) {
-
-        const mot =
-            String(verbe.mot).toLowerCase();
+        //------------------------------------------------------
+        // Action de combat
+        //------------------------------------------------------
 
         if (
-            verbesSecondaires.includes(mot)
+            roles.includes("action_combat")
         ) {
+
+            let verbe = token.texte;
+
+            //--------------------------------------------------
+            // Si c'est un concept nominal :
+            //
+            // "coup de poing"
+            // "coup de pied"
+            //--------------------------------------------------
+
+            if (
+                token.expression &&
+                !roles.includes("verbe")
+            ) {
+
+                comprehension.actions.push({
+
+                    verbe:
+                        token.texte,
+
+                    type:
+                        "combat",
+
+                    concept:
+                        "action_combat"
+                });
+
+                continue;
+            }
+
+
+            //--------------------------------------------------
+            // Verbe d'action
+            //--------------------------------------------------
+
+            comprehension.actions.push({
+
+                verbe,
+
+                type:
+                    "combat",
+
+                concept:
+                    conceptsCombat.join(", ")
+            });
+
             continue;
         }
 
-        actionsPrincipales.push(verbe);
+
+        //------------------------------------------------------
+        // Déplacement
+        //------------------------------------------------------
+
+        if (
+            roles.includes("verbe") &&
+            (
+                token.texte.includes("voyag") ||
+                token.texte.includes("déplac") ||
+                token.texte.includes("march") ||
+                token.texte.includes("cour") ||
+                token.texte.includes("avanc") ||
+                token.texte.includes("recul")
+            )
+        ) {
+
+            comprehension.actions.push({
+
+                verbe:
+                    token.texte,
+
+                type:
+                    "déplacement"
+            });
+        }
     }
 
-    //==========================================================
-    // 🔟 SUJET PRINCIPAL
-    //==========================================================
 
-    let indexPremiereAction =
-        actionsPrincipales.length
-            ? actionsPrincipales[0].index
-            : -1;
+    //----------------------------------------------------------
+    // Directions
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            token.roles?.includes("direction")
+        ) {
+
+            const valeur =
+                token.texte;
+
+            // "vers" n'est pas une direction en soi.
+            if (
+                valeur !== "vers" &&
+                !comprehension.directions.includes(
+                    valeur
+                )
+            ) {
+                comprehension.directions.push(
+                    valeur
+                );
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // Relations
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            token.roles?.includes("relation")
+        ) {
+
+            comprehension.relations.push({
+                relation:
+                    token.texte
+            });
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // Parties du corps
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            token.roles?.includes("corps")
+        ) {
+
+            comprehension.cibles.push(
+                token.texte
+            );
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // Objets de combat
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            token.roles?.includes("combat") &&
+            (
+                token.texte.includes(
+                    "coup de poing"
+                ) ||
+                token.texte.includes(
+                    "coup de pied"
+                ) ||
+                token.texte.includes(
+                    "poing"
+                ) ||
+                token.texte.includes(
+                    "kick"
+                )
+            )
+        ) {
+
+            if (
+                !comprehension.objets.includes(
+                    token.texte
+                )
+            ) {
+
+                comprehension.objets.push(
+                    token.texte
+                );
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // Résumé
+    //----------------------------------------------------------
+
+    let reformulation = texteAnalyse;
+
+
+    //----------------------------------------------------------
+    // Déplacement
+    //----------------------------------------------------------
 
     if (
-        indexPremiereAction > 0
-    ) {
-
-        /*
-         * Le sujet est généralement le groupe
-         * nominal avant la première action principale.
-         *
-         * Exemple :
-         *
-         * Tobirama voyant le coup de poing...
-         *
-         * première vraie action = bloque
-         *
-         * On ne prend donc PAS toute la phrase
-         * jusqu'à "bloque".
-         *
-         * On cherche le premier nom important.
-         */
-
-        const candidatsSujet =
-            motsAnalyses.filter(
-                m =>
-                    m.index < indexPremiereAction &&
-                    !m.estVerbe &&
-                    !m.estPreposition &&
-                    !m.estConnecteur
-            );
-
-        if (
-            candidatsSujet.length
-        ) {
-
-            comprehension.sujet =
-                candidatsSujet
-                    .map(m => m.mot)
-                    .join(" ");
-        }
-    }
-
-    //==========================================================
-    // 1️⃣1️⃣ ACTIONS
-    //==========================================================
-
-    for (
-        let i = 0;
-        i < actionsPrincipales.length;
-        i++
-    ) {
-
-        const action =
-            actionsPrincipales[i];
-
-        comprehension.actions.push({
-
-            ordre: i + 1,
-
-            verbe:
-                action.mot,
-
-            index:
-                action.index,
-
-            objet: null,
-
-            cible: null,
-
-            moyen: null,
-
-            partieCorps: null
-
-        });
-    }
-
-    //==========================================================
-    // 1️⃣2️⃣ ASSOCIATION DES GROUPES APRÈS L'ACTION
-    //==========================================================
-
-    for (
-        let i = 0;
-        i < comprehension.actions.length;
-        i++
-    ) {
-
-        const action =
-            comprehension.actions[i];
-
-        const prochainIndex =
-            comprehension.actions[i + 1]?.index ??
-            motsAnalyses.length;
-
-        const zone =
-            motsAnalyses.filter(
-                m =>
-                    m.index > action.index &&
-                    m.index < prochainIndex
-            );
-
-        //======================================================
-        // OBJETS
-        //======================================================
-
-        const noms =
-            zone.filter(
-                m =>
-                    m.estNom &&
-                    !m.estPartieCorps
-            );
-
-        if (
-            noms.length
-        ) {
-
-            action.objet =
-                noms
-                    .map(m => m.mot)
-                    .join(" ");
-        }
-
-        //======================================================
-        // PARTIES DU CORPS
-        //======================================================
-
-        const corps =
-            zone.filter(
-                m => m.estPartieCorps
-            );
-
-        if (
-            corps.length
-        ) {
-
-            action.partieCorps =
-                corps
-                    .map(m => m.mot)
-                    .join(" ");
-
-            comprehension.partiesCorps.push(
-                action.partieCorps
-            );
-        }
-
-        //======================================================
-        // DIRECTIONS
-        //======================================================
-
-        const directions =
-            zone.filter(
-                m => m.estDirection
-            );
-
-        if (
-            directions.length
-        ) {
-
-            /*
-             * gauche dans :
-             *
-             * paume de main gauche
-             *
-             * n'est pas une direction
-             * de déplacement.
-             */
-
-            if (
-                !action.partieCorps
-            ) {
-
-                action.cible =
-                    directions
-                        .map(m => m.mot)
-                        .join(" ");
-            }
-        }
-    }
-
-    //==========================================================
-    // 1️⃣3️⃣ DÉTECTION DES MOYENS DE DÉFENSE
-    //==========================================================
-
-    for (
-        const action of comprehension.actions
-    ) {
-
-        const index =
-            action.index;
-
-        const prochainIndex =
-            comprehension.actions[
-                action.ordre
-            ]?.index ??
-            motsAnalyses.length;
-
-        const zone =
-            motsAnalyses.filter(
-                m =>
-                    m.index > index &&
-                    m.index < prochainIndex
-            );
-
-        const motsZone =
-            zone.map(m => m.mot);
-
-        const positionAvec =
-            motsZone.indexOf("avec");
-
-        if (
-            positionAvec !== -1
-        ) {
-
-            const apresAvec =
-                motsZone.slice(
-                    positionAvec + 1
-                );
-
-            if (
-                apresAvec.length
-            ) {
-
-                action.moyen =
-                    apresAvec
-                        .join(" ");
-            }
-        }
-    }
-
-    //==========================================================
-    // 1️⃣4️⃣ DIRECTION RÉELLE
-    //==========================================================
-
-    for (const element of motsAnalyses) {
-
-        if (
-            element.estDirection
-        ) {
-
-            const mot =
-                element.mot.toLowerCase();
-
-            /*
-             * gauche / droite / avant / arrière
-             * ne deviennent des directions que
-             * lorsqu'elles sont utilisées seules
-             * dans un contexte de déplacement.
-             */
-
-            if (
-                [
-                    "nord",
-                    "sud",
-                    "est",
-                    "ouest"
-                ].includes(mot)
-            ) {
-
-                comprehension.directions.push(
-                    element.mot
-                );
-            }
-        }
-    }
-
-    //==========================================================
-    // 1️⃣5️⃣ CONTEXTE DÉPLACEMENT
-    //==========================================================
-
-    const verbesDeplacement = [
-        "aller",
-        "venir",
-        "marcher",
-        "courir",
-        "avancer",
-        "reculer",
-        "partir",
-        "arriver",
-        "se déplacer"
-    ];
-
-    const actionDeplacement =
         comprehension.actions.some(
             a =>
-                verbesDeplacement.includes(
-                    a.verbe.toLowerCase()
-                )
-        );
-
-    if (
-        actionDeplacement &&
-        comprehension.directions.length
+                a.type === "déplacement"
+        )
     ) {
 
-        comprehension.contexte =
-            "deplacement";
-    }
+        const sujet =
+            comprehension.sujet ||
+            "Le sujet";
 
-    //==========================================================
-    // 1️⃣6️⃣ REFORMULATION
-    //==========================================================
+        const direction =
+            comprehension.directions[0];
 
-    let reformulation =
-        texte;
-
-    //==========================================================
-    // COMBAT
-    //==========================================================
-
-    if (
-        comprehension.contexte === "combat" ||
-        comprehension.actions.length >= 2
-    ) {
-
-        const actionsTexte =
-            comprehension.actions
-                .map(action => {
-
-                    let phrase =
-                        action.verbe;
-
-                    if (action.objet) {
-
-                        phrase +=
-                            " " +
-                            action.objet;
-                    }
-
-                    if (action.partieCorps) {
-
-                        phrase +=
-                            " au niveau du " +
-                            action.partieCorps;
-                    }
-
-                    if (action.moyen) {
-
-                        phrase +=
-                            " avec " +
-                            action.moyen;
-                    }
-
-                    return phrase;
-                })
-                .join(" puis ");
-
-        if (
-            comprehension.sujet &&
-            actionsTexte
-        ) {
+        if (direction) {
 
             reformulation =
-                `${comprehension.sujet} ${actionsTexte}.`;
+                `${sujet} se déplace vers ${direction}.`;
         }
     }
 
-    //==========================================================
-    // 1️⃣7️⃣ RÉSULTAT
-    //==========================================================
+
+    //----------------------------------------------------------
+    // Combat
+    //----------------------------------------------------------
+
+    else if (
+        comprehension.contexte ===
+        "combat"
+    ) {
+
+        const sujet =
+            comprehension.sujet ||
+            "Le combattant";
+
+        if (
+            comprehension.actions.length
+        ) {
+
+            const phrases =
+                comprehension.actions
+                    .map(action => {
+
+                        if (
+                            action.verbe
+                                .toLowerCase()
+                                .includes(
+                                    "coup de poing"
+                                )
+                        ) {
+
+                            return `${sujet} porte un coup de poing`;
+                        }
+
+                        if (
+                            action.verbe
+                                .toLowerCase()
+                                .includes(
+                                    "coup de pied"
+                                )
+                        ) {
+
+                            return `${sujet} porte un coup de pied`;
+                        }
+
+                        return `${sujet} ${action.verbe}`;
+                    });
+
+            reformulation =
+                phrases.join(" puis ") + ".";
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // Fallback
+    //----------------------------------------------------------
+
+    if (!reformulation) {
+
+        reformulation =
+            texteAnalyse;
+    }
+
+
+    //----------------------------------------------------------
+    // Retour
+    //----------------------------------------------------------
 
     return {
 
-        success: true,
-
-        texteOriginal,
-
-        texte,
-
-        nombreMots:
-            mots.length,
-
-        mots:
-            motsAnalyses,
-
-        motsConnus:
-            motsAnalyses
-                .filter(m => m.connu)
-                .map(m => m.mot),
-
-        motsInconnus:
-            motsAnalyses
-                .filter(m => !m.connu)
-                .map(m => m.mot),
-
-        nombreMotsConnus:
-            motsAnalyses
-                .filter(m => m.connu)
-                .length,
-
-        nombreMotsInconnus:
-            motsAnalyses
-                .filter(m => !m.connu)
-                .length,
+        texte:
+            texteOriginal,
 
         comprehension,
 
         reformulation,
 
-        dateAnalyse:
-            Date.now()
+        tokens
     };
-        }
+}
 
+                          
 //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
-//==============================================================
+//===========================================================
+async function envoyerResultatNeoAI(
+    ovl,
+    chatJid,
+    resultat
+) {
 
-async function envoyerResultatNeoAI(ovl, chatJid, resultat) {
-
-    const c = resultat.comprehension;
+    const c =
+        resultat.comprehension || {};
 
     let comprehension = "";
 
+
+    //----------------------------------------------------------
+    // Sujet
+    //----------------------------------------------------------
+
     if (c.sujet) {
-        comprehension += `• Sujet : ${c.sujet}\n`;
+
+        comprehension +=
+            `• Sujet : ${c.sujet}\n`;
     }
 
-    if (c.actions.length) {
-        comprehension += `• Action : ${
-            c.actions
-                .map(a => a.verbe)
-                .join(", ")
-        }\n`;
+
+    //----------------------------------------------------------
+    // Actions
+    //----------------------------------------------------------
+
+    if (
+        Array.isArray(c.actions) &&
+        c.actions.length
+    ) {
+
+        comprehension +=
+            `• Action : ${
+                c.actions
+                    .map(a => a.verbe)
+                    .join(", ")
+            }\n`;
     }
 
-    if (c.directions.length) {
-        comprehension += `• Direction : ${
-            c.directions.join(", ")
-        }\n`;
+
+    //----------------------------------------------------------
+    // Direction
+    //----------------------------------------------------------
+
+    if (
+        Array.isArray(c.directions) &&
+        c.directions.length
+    ) {
+
+        comprehension +=
+            `• Direction : ${
+                c.directions.join(", ")
+            }\n`;
     }
 
-    if (c.objets.length) {
-        comprehension += `• Objet : ${
-            c.objets.join(", ")
-        }\n`;
+
+    //----------------------------------------------------------
+    // Objets
+    //----------------------------------------------------------
+
+    if (
+        Array.isArray(c.objets) &&
+        c.objets.length
+    ) {
+
+        comprehension +=
+            `• Objet : ${
+                c.objets.join(", ")
+            }\n`;
     }
 
-    if (c.cibles.length) {
-        comprehension += `• Cible : ${
-            c.cibles.join(", ")
-        }\n`;
+
+    //----------------------------------------------------------
+    // Cibles
+    //----------------------------------------------------------
+
+    if (
+        Array.isArray(c.cibles) &&
+        c.cibles.length
+    ) {
+
+        comprehension +=
+            `• Cible : ${
+                c.cibles.join(", ")
+            }\n`;
     }
 
-    if (c.lieux.length) {
-        comprehension += `• Lieu : ${
-            c.lieux.join(", ")
-        }\n`;
+
+    //----------------------------------------------------------
+    // Contexte
+    //----------------------------------------------------------
+
+    if (c.contexte) {
+
+        comprehension +=
+            `• Contexte : ${c.contexte}\n`;
     }
 
-    if (c.temps.length) {
-        comprehension += `• Temps : ${
-            c.temps.join(", ")
-        }\n`;
-    }
+
+    //----------------------------------------------------------
+    // Fallback
+    //----------------------------------------------------------
 
     if (!comprehension) {
-        comprehension = "• Compréhension insuffisante";
+
+        comprehension =
+            "• Compréhension insuffisante";
     }
+
+
+    //----------------------------------------------------------
+    // Message
+    //----------------------------------------------------------
 
     const message = `
 🌀🧠 *NeoAI*
@@ -1814,6 +1630,7 @@ ${resultat.reformulation}
                      *Powered by NEOVERSE™🌀*
 `;
 
+
     await ovl.sendMessage(
         chatJid,
         {
@@ -1821,6 +1638,7 @@ ${resultat.reformulation}
         }
     );
 }
+
 
 
 //==============================================================
