@@ -4897,6 +4897,368 @@ function neoConnaitMot(
 
 }
 
+//==============================================================
+// 🧠 NEO AI — MOTEUR SÉMANTIQUE
+//==============================================================
+
+// Cache des recherches pour éviter de parcourir toute la base
+// à chaque mot / expression.
+const NEO_CACHE_RECHERCHE = new Map();
+
+
+//--------------------------------------------------------------
+// Normalisation spéciale pour les expressions
+//--------------------------------------------------------------
+
+function neoNormaliserExpression(texte) {
+    return String(texte || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[’‘]/g, "'")
+        .replace(/[-‐-‒–—]/g, " ")
+        .replace(/\s+/g, " ");
+}
+
+
+//--------------------------------------------------------------
+// Recherche d'une expression complète
+//--------------------------------------------------------------
+
+function neoRechercherExpression(expression) {
+
+    const recherche = neoNormaliserExpression(expression);
+
+    if (!recherche || !recherche.includes(" ")) {
+        return {
+            trouve: false,
+            expression,
+            categories: []
+        };
+    }
+
+    const cacheKey = `expr:${recherche}`;
+
+    if (NEO_CACHE_RECHERCHE.has(cacheKey)) {
+        return NEO_CACHE_RECHERCHE.get(cacheKey);
+    }
+
+    const categories = [];
+
+    for (const [nomCategorie, dictionnaire] of Object.entries(NEO_DICTIONNAIRES)) {
+
+        const resultat = neoChercherMotDansCategorie(
+            recherche,
+            dictionnaire
+        );
+
+        if (resultat.trouve) {
+            categories.push({
+                categorie: nomCategorie,
+                chemin: resultat.chemin
+            });
+        }
+    }
+
+    const resultatFinal = {
+        trouve: categories.length > 0,
+        expression,
+        expressionNormalisee: recherche,
+        categories
+    };
+
+    NEO_CACHE_RECHERCHE.set(cacheKey, resultatFinal);
+
+    return resultatFinal;
+}
+
+
+//--------------------------------------------------------------
+// Détermine le rôle sémantique d'un résultat de recherche
+//--------------------------------------------------------------
+
+function neoDeterminerRoles(categories = []) {
+
+    const roles = new Set();
+
+    for (const element of categories) {
+
+        const categorie = String(
+            element.categorie || ""
+        ).toUpperCase();
+
+        const chemin = Array.isArray(element.chemin)
+            ? element.chemin.map(x =>
+                String(x).toLowerCase()
+            )
+            : [];
+
+        //------------------------------------------------------
+        // Verbes
+        //------------------------------------------------------
+
+        if (
+            categorie === "NEO_VERBES" ||
+            categorie === "NEO_VERBES_SPECIAUX"
+        ) {
+            roles.add("verbe");
+        }
+
+        //------------------------------------------------------
+        // Corps
+        //------------------------------------------------------
+
+        if (categorie === "NEO_PARTIES_CORPS") {
+            roles.add("corps");
+        }
+
+        //------------------------------------------------------
+        // Directions
+        //------------------------------------------------------
+
+        if (categorie === "NEO_DIRECTIONS") {
+            roles.add("direction");
+        }
+
+        //------------------------------------------------------
+        // Prépositions / relations
+        //------------------------------------------------------
+
+        if (categorie === "NEO_PREPOSITIONS") {
+            roles.add("preposition");
+            roles.add("relation");
+        }
+
+        //------------------------------------------------------
+        // Connecteurs
+        //------------------------------------------------------
+
+        if (categorie === "NEO_CONNECTEURS") {
+            roles.add("connecteur");
+        }
+
+        //------------------------------------------------------
+        // Temps
+        //------------------------------------------------------
+
+        if (categorie === "NEO_TEMPS") {
+            roles.add("temps");
+        }
+
+        //------------------------------------------------------
+        // Combat
+        //------------------------------------------------------
+
+        if (categorie === "NEO_COMBAT") {
+
+            roles.add("combat");
+
+            const conceptsAction = [
+                "attaques",
+                "attaque",
+                "frappes",
+                "frappe",
+                "coups_de_poing",
+                "coups_de_pied",
+                "coup_de_poing",
+                "coup_de_pied",
+                "projection",
+                "saisie",
+                "immobilisation",
+                "defense",
+                "blocage",
+                "parade",
+                "esquive",
+                "contre_attaque",
+                "impact"
+            ];
+
+            if (
+                chemin.some(x =>
+                    conceptsAction.includes(x)
+                )
+            ) {
+                roles.add("action_combat");
+            }
+
+            if (
+                chemin.includes("cible")
+            ) {
+                roles.add("cible");
+            }
+        }
+    }
+
+    return [...roles];
+}
+
+
+//--------------------------------------------------------------
+// Analyse sémantique d'un mot
+//--------------------------------------------------------------
+
+function neoAnalyserMot(mot) {
+
+    const resultat = neoRechercherMot(mot);
+
+    if (!resultat || !resultat.trouve) {
+
+        return {
+            mot,
+            connu: false,
+            roles: [],
+            categories: []
+        };
+    }
+
+    return {
+        mot,
+        connu: true,
+        roles: neoDeterminerRoles(resultat.categories),
+        categories: resultat.categories
+    };
+}
+
+
+//--------------------------------------------------------------
+// Tokenisation intelligente
+//
+// Cherche d'abord les expressions longues :
+// "coup de poing"
+// "coup de pied"
+// etc.
+//
+// Puis descend progressivement jusqu'au mot simple.
+//--------------------------------------------------------------
+
+function neoTokeniserSemantique(texte) {
+
+    const normalise = neoNormaliserExpression(texte);
+
+    if (!normalise) return [];
+
+    const mots = normalise.split(/\s+/);
+
+    const tokens = [];
+
+    let i = 0;
+
+    while (i < mots.length) {
+
+        let trouveExpression = null;
+
+        // Maximum 6 mots dans une expression.
+        const max = Math.min(6, mots.length - i);
+
+        for (let longueur = max; longueur >= 2; longueur--) {
+
+            const morceaux = mots.slice(
+                i,
+                i + longueur
+            );
+
+            const expression = morceaux.join(" ");
+
+            const resultat =
+                neoRechercherExpression(expression);
+
+            if (resultat.trouve) {
+
+                trouveExpression = {
+                    texte: morceaux.join(" "),
+                    debut: i,
+                    fin: i + longueur - 1,
+                    connu: true,
+                    expression: true,
+                    categories: resultat.categories,
+                    roles: neoDeterminerRoles(
+                        resultat.categories
+                    )
+                };
+
+                break;
+            }
+        }
+
+        //------------------------------------------------------
+        // Expression trouvée
+        //------------------------------------------------------
+
+        if (trouveExpression) {
+
+            tokens.push(trouveExpression);
+
+            i = trouveExpression.fin + 1;
+
+            continue;
+        }
+
+        //------------------------------------------------------
+        // Mot simple
+        //------------------------------------------------------
+
+        const mot = mots[i];
+
+        const analyse = neoAnalyserMot(mot);
+
+        tokens.push({
+            texte: mot,
+            debut: i,
+            fin: i,
+            connu: analyse.connu,
+            expression: false,
+            categories: analyse.categories,
+            roles: analyse.roles
+        });
+
+        i++;
+    }
+
+    return tokens;
+}
+
+
+//--------------------------------------------------------------
+// Retourne les concepts de combat détectés
+//--------------------------------------------------------------
+
+function neoExtraireConceptsCombat(tokens = []) {
+
+    const concepts = [];
+
+    for (const token of tokens) {
+
+        if (!token.roles?.includes("combat")) {
+            continue;
+        }
+
+        for (const categorie of token.categories || []) {
+
+            if (
+                categorie.categorie !== "NEO_COMBAT"
+            ) {
+                continue;
+            }
+
+            const chemin = categorie.chemin || [];
+
+            const concept = chemin.find(
+                x =>
+                    typeof x === "string" &&
+                    x !== "mots"
+            );
+
+            if (
+                concept &&
+                !concepts.includes(concept)
+            ) {
+                concepts.push(concept);
+            }
+        }
+    }
+
+    return concepts;
+}
+
 
 //==============================================================
 // 📤 EXPORTS
@@ -4924,32 +5286,29 @@ module.exports = {
     NEO_UNITES,
     NEO_TEMPS,
     NEO_DIRECTIONS,
-
     NEO_PARTIES_CORPS,
     NEO_EMOTIONS,
     NEO_INTENSITE,
     NEO_VITESSE,
     NEO_RELATIONS,
-
     NEO_COMBAT,
-
     NEO_CONCEPTS,
-
     NEO_DICTIONNAIRES,
-
     neoNormaliserTexte,
     neoMinuscule,
     neoSansAccents,
     neoTokeniser,
     neoDecouperPhrases,
-
     neoChercherMotDansCategorie,
     neoRechercherMot,
     neoRechercherTexte,
-
     neoTrouverSynonymes,
     neoTrouverAntonymes,
-
-    neoConnaitMot
-
+    neoConnaitMot, 
+// 🧠 Nouveau moteur sémantique
+    neoRechercherExpression,
+    neoDeterminerRoles,
+    neoAnalyserMot,
+    neoTokeniserSemantique,
+    neoExtraireConceptsCombat
 };
