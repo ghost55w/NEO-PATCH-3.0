@@ -2583,7 +2583,33 @@ ovlcmd(
     },
 
     async (ms_org, ovl, cmd_options) => {
+//======================================================
+// 🔐 SÉCURITÉ SUDO
+//======================================================
+const senderJid =
+    ms_org?.key?.participant ||
+    ms_org?.key?.remoteJid ||
+    "";
 
+const estSudo =
+    Sudo.includes(senderJid);
+
+if (!estSudo) {
+
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text:
+                "❌ *Accès refusé.*\n\n" +
+                "🧠🌀 *NeoAI Learn* est réservé aux Sudo."
+        },
+        {
+            quoted: ms
+        }
+    );
+
+    return;
+}
         const {
             repondre,
             msg_Repondu,
@@ -2812,7 +2838,6 @@ for (
         //======================================================
         // RECHERCHE DE NEO_LEARN
         //======================================================
-
         const indexLearn =
             contenu.indexOf(
                 "const NEO_LEARN"
@@ -3067,7 +3092,6 @@ for (
         //======================================================
         // 📚 AUCUN NOUVEAU MOT
         //======================================================
-
         if (!nouveauxMots.length) {
 
             return ovl.sendMessage(
@@ -3093,7 +3117,6 @@ for (
         //======================================================
         // 📝 LISTE DES NOUVEAUX MOTS
         //======================================================
-
         const liste =
             nouveauxMots
                 .map(
