@@ -1556,200 +1556,376 @@ function analyserNeoAI(text) {
                 contexteObjet;
         }
 
-        //======================================================
-// CIBLE
+        
+//======================================================
+// 🎯 CIBLE
 //======================================================
 
 let cible = null;
 
 //======================================================
-// 🎯 1. CIBLES EXPLICITES
-//======================================================
-//
-// Priorité :
-// vers X
-// visant X
-// au niveau de X
-// dans X
-// sur X
-// contre X
-//
-// On cherche UNIQUEMENT dans "zone"
-// de l'action actuelle.
+// 🧠 OUTIL — DÉTECTER SI UNE PARTIE DU CORPS EST
+// UTILISÉE COMME MOYEN
 //======================================================
 
-const expressionsCible = [
-    "vers",
-    "visant",
-    "au niveau de",
-    "dans",
-    "sur",
-    "contre"
-];
-
-for (let i = 0; i < zone.length; i++) {
-
-    const element =
-        zone[i];
-
-    if (
-        !estPartieCorps(element)
-    ) {
-        continue;
-    }
-
-    const mot =
-        motNormalise(
-            element.mot
-        );
-
-    // --------------------------------------------------
-    // 🚫 "pied" dans "coup de pied"
-    // --------------------------------------------------
-
-    if (
-        mot === "pied" &&
-        i >= 2 &&
-        motNormalise(
-            zone[i - 1]?.mot
-        ) === "de" &&
-        motNormalise(
-            zone[i - 2]?.mot
-        ) === "coup"
-    ) {
-        continue;
-    }
-
-    // --------------------------------------------------
-    // Vérifier si cette partie du corps est précédée
-    // d'une construction explicite de cible.
-    // --------------------------------------------------
+const estMoyenCorporel = (
+    zone,
+    index
+) => {
 
     const avant =
         zone
             .slice(
-                Math.max(0, i - 4),
-                i
+                Math.max(0, index - 5),
+                index
             )
             .map(
                 e =>
                     motNormalise(e.mot)
             );
 
-    const texteAvant =
-        avant.join(" ");
-
-    let cibleExplicite = false;
-
-    // vers X
-    if (
-        texteAvant.endsWith("vers")
-    ) {
-        cibleExplicite = true;
-    }
-
-    // visant X
-    if (
-        texteAvant.endsWith("visant")
-    ) {
-        cibleExplicite = true;
-    }
-
-    // au niveau de X
-    if (
-        texteAvant.endsWith("au niveau de")
-    ) {
-        cibleExplicite = true;
-    }
-
-    // dans X
-    if (
-        texteAvant.endsWith("dans")
-    ) {
-        cibleExplicite = true;
-    }
-
-    // sur X
-    if (
-        texteAvant.endsWith("sur")
-    ) {
-        cibleExplicite = true;
-    }
-
-    // contre X
-    if (
-        texteAvant.endsWith("contre")
-    ) {
-        cibleExplicite = true;
-    }
-
-    // --------------------------------------------------
-    // 🚫 Partie du corps utilisée comme MOYEN
-    //
-    // main gauche
-    // paume gauche
-    // avant-bras droit
-    // --------------------------------------------------
-
-    if (
+    return (
         avant.includes("main") ||
         avant.includes("paume") ||
         avant.includes("bras") ||
-        avant.includes("avant-bras")
+        avant.includes("avant-bras") ||
+        avant.includes("poing")
+    );
+};
+
+//======================================================
+// 🧠 OUTIL — EXTRAIRE UNE CIBLE APRÈS UNE EXPRESSION
+//======================================================
+
+const trouverCibleApres =
+    (
+        zone,
+        indexDebut
+    ) => {
+
+        for (
+            let j = indexDebut + 1;
+            j < zone.length;
+            j++
+        ) {
+
+            const element =
+                zone[j];
+
+            if (
+                !estPartieCorps(element)
+            ) {
+                continue;
+            }
+
+            const mot =
+                motNormalise(
+                    element.mot
+                );
+
+            // ----------------------------------------------
+            // "pied" dans "coup de pied"
+            // ----------------------------------------------
+
+            if (
+                mot === "pied" &&
+                j >= 2 &&
+                motNormalise(
+                    zone[j - 1]?.mot
+                ) === "de" &&
+                motNormalise(
+                    zone[j - 2]?.mot
+                ) === "coup"
+            ) {
+                continue;
+            }
+
+            // ----------------------------------------------
+            // Cette partie du corps est utilisée comme moyen
+            // ----------------------------------------------
+
+            if (
+                estMoyenCorporel(
+                    zone,
+                    j
+                )
+            ) {
+                continue;
+            }
+
+            let resultat =
+                element.mot;
+
+            // ----------------------------------------------
+            // "tête de Tobirama"
+            // ----------------------------------------------
+
+            if (
+                zone[j + 1] &&
+                motNormalise(
+                    zone[j + 1].mot
+                ) === "de"
+            ) {
+
+                if (
+                    zone[j + 2]
+                ) {
+
+                    resultat +=
+                        " de " +
+                        zone[j + 2].mot;
+                }
+            }
+
+            return resultat;
+        }
+
+        return null;
+    };
+
+//======================================================
+// 🎯 1. EXPRESSIONS EXPLICITES DE CIBLE
+//======================================================
+//
+// Ces structures ont priorité.
+//
+// "vise son visage"
+// "vers son visage"
+// "dans son visage"
+// "sur son abdomen"
+// "contre son abdomen"
+// "au niveau de son abdomen"
+// "visant son abdomen"
+//======================================================
+
+const expressionsCible = [
+    "visant",
+    "vers",
+    "dans",
+    "sur",
+    "contre"
+];
+
+for (
+    let i = 0;
+    i < zone.length;
+    i++
+) {
+
+    const mot =
+        motNormalise(
+            zone[i]?.mot
+        );
+
+    // ----------------------------------------------
+    // "visant X"
+    // ----------------------------------------------
+
+    if (
+        mot === "visant"
     ) {
 
-        // Exception :
-        // si cette partie du corps est elle-même
-        // précédée par une construction explicite,
-        // elle peut être une vraie cible.
-        if (
-            !cibleExplicite
-        ) {
-            continue;
+        const resultat =
+            trouverCibleApres(
+                zone,
+                i
+            );
+
+        if (resultat) {
+
+            cible =
+                resultat;
+
+            break;
         }
     }
 
-    // --------------------------------------------------
-    // 🎯 CIBLE TROUVÉE
-    // --------------------------------------------------
-
-    cible =
-        element.mot;
-
-    // --------------------------------------------------
-    // "tête de Tobirama"
-    // --------------------------------------------------
+    // ----------------------------------------------
+    // "vers X"
+    // ----------------------------------------------
 
     if (
-        zone[i + 1] &&
+        mot === "vers"
+    ) {
+
+        const resultat =
+            trouverCibleApres(
+                zone,
+                i
+            );
+
+        if (resultat) {
+
+            cible =
+                resultat;
+
+            break;
+        }
+    }
+
+    // ----------------------------------------------
+    // "dans X"
+    // ----------------------------------------------
+
+    if (
+        mot === "dans"
+    ) {
+
+        const resultat =
+            trouverCibleApres(
+                zone,
+                i
+            );
+
+        if (resultat) {
+
+            cible =
+                resultat;
+
+            break;
+        }
+    }
+
+    // ----------------------------------------------
+    // "sur X"
+    // ----------------------------------------------
+
+    if (
+        mot === "sur"
+    ) {
+
+        const resultat =
+            trouverCibleApres(
+                zone,
+                i
+            );
+
+        if (resultat) {
+
+            cible =
+                resultat;
+
+            break;
+        }
+    }
+
+    // ----------------------------------------------
+    // "contre X"
+    // ----------------------------------------------
+
+    if (
+        mot === "contre"
+    ) {
+
+        const resultat =
+            trouverCibleApres(
+                zone,
+                i
+            );
+
+        if (resultat) {
+
+            cible =
+                resultat;
+
+            break;
+        }
+    }
+
+    //==================================================
+    // 🎯 "au niveau de X"
+    //==================================================
+
+    if (
+        mot === "au" &&
         motNormalise(
-            zone[i + 1].mot
+            zone[i + 1]?.mot
+        ) === "niveau" &&
+        motNormalise(
+            zone[i + 2]?.mot
         ) === "de"
     ) {
 
-        if (
-            zone[i + 2]
-        ) {
+        const resultat =
+            trouverCibleApres(
+                zone,
+                i + 2
+            );
 
-            cible +=
-                " de " +
-                zone[i + 2].mot;
+        if (resultat) {
+
+            cible =
+                resultat;
+
+            break;
         }
     }
-
-    break;
 }
 
+//======================================================
+// 🎯 2. STRUCTURE PARTICULIÈRE DE COMBAT
+//======================================================
+if (
+    !cible
+) {
+
+    for (
+        let i = 0;
+        i < zone.length;
+        i++
+    ) {
+
+        const mot =
+            motNormalise(
+                zone[i]?.mot
+            );
+
+        // ----------------------------------------------
+        // "au niveau de"
+        // ----------------------------------------------
+
+        if (
+            mot === "au" &&
+            motNormalise(
+                zone[i + 1]?.mot
+            ) === "niveau" &&
+            motNormalise(
+                zone[i + 2]?.mot
+            ) === "de"
+        ) {
+
+            const resultat =
+                trouverCibleApres(
+                    zone,
+                    i + 2
+                );
+
+            if (resultat) {
+
+                cible =
+                    resultat;
+
+                break;
+            }
+        }
+    }
+}
 
 //======================================================
-// 🎯 2. FALLBACK
+// 🎯 3. FALLBACK
 //======================================================
 //
-// Si aucune construction explicite n'a été trouvée,
-// on conserve TON ancien système.
+// On conserve le comportement précédent pour les
+// phrases qui ne possèdent pas d'expression explicite.
 //
-// C'est important pour ne pas casser les analyses
-// qui fonctionnaient déjà.
+// Exemple :
+//
+// "bloque le coup de poing au visage"
+//
+// → visage
+//
+// Mais une partie du corps utilisée comme moyen
+// n'est jamais considérée comme cible.
 //======================================================
 
 if (
@@ -1776,9 +1952,9 @@ if (
                 element.mot
             );
 
-        // --------------------------------------------------
-        // 🚫 "pied" dans "coup de pied"
-        // --------------------------------------------------
+        // ----------------------------------------------
+        // "pied" de "coup de pied"
+        // ----------------------------------------------
 
         if (
             mot === "pied" &&
@@ -1793,36 +1969,29 @@ if (
             continue;
         }
 
-        const avant =
-            zone
-                .slice(
-                    Math.max(0, i - 4),
-                    i
-                )
-                .map(
-                    e =>
-                        motNormalise(e.mot)
-                );
-
-        // --------------------------------------------------
-        // 🚫 Parties utilisées comme moyen
-        // --------------------------------------------------
+        // ----------------------------------------------
+        // 🚫 MOYEN CORPOREL
+        // ----------------------------------------------
 
         if (
-            avant.includes("main") ||
-            avant.includes("paume") ||
-            avant.includes("bras") ||
-            avant.includes("avant-bras")
+            estMoyenCorporel(
+                zone,
+                i
+            )
         ) {
             continue;
         }
 
+        // ----------------------------------------------
+        // 🎯 CIBLE
+        // ----------------------------------------------
+
         cible =
             element.mot;
 
-        // --------------------------------------------------
+        // ----------------------------------------------
         // "tête de Tobirama"
-        // --------------------------------------------------
+        // ----------------------------------------------
 
         if (
             zone[i + 1] &&
@@ -1845,9 +2014,8 @@ if (
     }
 }
 
-
 //======================================================
-// 🎯 3. CIBLE DÉTECTÉE AVANT L'ACTION
+// 🎯 4. CIBLE DÉCRITE AVANT L'ACTION
 //======================================================
 
 if (
@@ -1857,7 +2025,8 @@ if (
 
     cible =
         contexteCible;
-}          
+}
+
        
 
         //======================================================
