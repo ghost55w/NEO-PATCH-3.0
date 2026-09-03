@@ -9361,9 +9361,18 @@ function neoConstruireStructure(
 
 module.exports = {
 
+    //==========================================================
+    // 🧠 CONFIGURATION
+    //==========================================================
+
     NEOAI_CONFIG,
 
+    //==========================================================
+    // 📚 BASE LINGUISTIQUE
+    //==========================================================
+
     NEO_VERBES,
+    NEO_MODELES,
     NEO_VERBES_SPECIAUX,
 
     NEO_NOMS,
@@ -9377,7 +9386,7 @@ module.exports = {
     NEO_PREPOSITIONS,
     NEO_PRONOMS,
     NEO_EXPRESSIONS,
-    NEO_LEARN, 
+    NEO_LEARN,
 
     NEO_UNITES,
     NEO_TEMPS,
@@ -9390,25 +9399,36 @@ module.exports = {
     NEO_COMBAT,
     NEO_CONCEPTS,
     NEO_DICTIONNAIRES,
+
+    //==========================================================
+    // 🔤 OUTILS LINGUISTIQUES
+    //==========================================================
+
     neoNormaliserTexte,
     neoMinuscule,
     neoSansAccents,
     neoTokeniser,
     neoDecouperPhrases,
+
     neoChercherMotDansCategorie,
     neoRechercherMot,
     neoRechercherTexte,
+
     neoTrouverSynonymes,
     neoTrouverAntonymes,
-    neoConnaitMot, 
-// 🧠 Nouveau moteur sémantique
+    neoConnaitMot,
+
+    //==========================================================
+    // 🧠 MOTEUR SÉMANTIQUE
+    //==========================================================
+
     neoRechercherExpression,
     neoDeterminerRoles,
     neoAnalyserMot,
     neoTokeniserSemantique,
-    neoExtraireConceptsCombat, 
+    neoExtraireConceptsCombat,
 
-//==========================================================
+    //==========================================================
     // 🧠 GRAMMAIRE FRANÇAISE
     //==========================================================
 
@@ -9419,6 +9439,37 @@ module.exports = {
     neoAnalyserGroupeGrammatical,
     neoAnalyserStructureGrammaticale,
     neoPrioriteRoleGrammatical,
-    neoConstruireStructure
+
+    //==========================================================
+    // 🧠 NEOAI — ANALYSE STRUCTURELLE
+    //==========================================================
+
+    neoNormaliserValeur,
+    neoRecupererVerbes,
+    neoTrouverCategorieVerbe,
+    neoTrouverVerbe,
+
+    neoDetecterManiere,
+    neoDetecterDirection,
+    neoDetecterLieu,
+    neoDetecterDistance,
+    neoDetecterSujet,
+    neoDetecterObjet,
+
+    neoConstruireStructure,
+    neoComparerStructure,
+
+    //==========================================================
+    // 📝 NEOAI — RÉSUMÉ
+    //==========================================================
+
+    neoConstruireResume,
+    neoResumer: neoConstruireResume,
+
+    //==========================================================
+    // 🔎 ANALYSE STRUCTURELLE COMPLÈTE
+    //==========================================================
+
+    neoAnalyserStructure
 
 };
