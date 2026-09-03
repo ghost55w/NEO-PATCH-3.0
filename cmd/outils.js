@@ -999,6 +999,9 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
+//==============================================================
+// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
+//==============================================================
 function analyserNeoAI(text) {
 
     if (typeof text !== "string") {
@@ -1054,6 +1057,7 @@ function analyserNeoAI(text) {
         if (
             typeof NeoAI.neoRechercherMot === "function"
         ) {
+
             connaissance =
                 NeoAI.neoRechercherMot(mot);
         }
@@ -1061,7 +1065,11 @@ function analyserNeoAI(text) {
         console.log(
             "🌀 NEOAI MOT :",
             mot,
-            JSON.stringify(connaissance, null, 2)
+            JSON.stringify(
+                connaissance,
+                null,
+                2
+            )
         );
 
         motsAnalyses.push({
@@ -1092,8 +1100,17 @@ function analyserNeoAI(text) {
     const motNormalise = mot =>
         String(mot || "")
             .toLowerCase()
-            .replace(/[.,!?;:()]/g, "")
+            .replace(/[.,!?;:()[\]{}]/g, "")
             .trim();
+
+
+    const sansAccents = texte =>
+        String(texte || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+
 
     const estCategorie = (
         element,
@@ -1104,21 +1121,26 @@ function analyserNeoAI(text) {
             return false;
         }
 
-        return element.categories?.some(
-            categorie => {
+        return (
+            element.categories?.some(
+                categorie => {
 
-                const nomCategorie =
-                    String(
-                        categorie?.categorie || ""
-                    )
-                    .toLowerCase();
+                    const nomCategorie =
+                        String(
+                            categorie?.categorie ||
+                            ""
+                        ).toLowerCase();
 
-                return nomCategorie.includes(
-                    String(recherche).toLowerCase()
-                );
-            }
+                    return nomCategorie.includes(
+                        String(
+                            recherche
+                        ).toLowerCase()
+                    );
+                }
+            ) || false
         );
     };
+
 
     const estVerbe = element =>
         estCategorie(
@@ -1126,21 +1148,32 @@ function analyserNeoAI(text) {
             "verbe"
         );
 
+
     const estNom = element =>
         (
-            estCategorie(element, "nom") ||
-            estCategorie(element, "combat")
+            estCategorie(
+                element,
+                "nom"
+            ) ||
+            estCategorie(
+                element,
+                "combat"
+            )
         );
+
 
     const estPartieCorps = element =>
         (
-            estCategorie(element, "corps") ||
-            estCategorie(element, "partie")
+            estCategorie(
+                element,
+                "corps"
+            ) ||
+            estCategorie(
+                element,
+                "partie"
+            )
         );
 
-    //==========================================================
-    // 🧠 CATÉGORIES LINGUISTIQUES
-    //==========================================================
 
     const estDeterminant = element =>
         estCategorie(
@@ -1148,24 +1181,43 @@ function analyserNeoAI(text) {
             "determinant"
         );
 
+
     const estPronom = element =>
         estCategorie(
             element,
             "pronom"
         );
 
+
     const estConnecteur = element =>
         (
-            estCategorie(element, "connecteur") ||
-            estCategorie(element, "liaison")
+            estCategorie(
+                element,
+                "connecteur"
+            ) ||
+            estCategorie(
+                element,
+                "liaison"
+            )
         );
+
 
     const estSuccession = element =>
         (
-            estCategorie(element, "succession") ||
-            estCategorie(element, "enchaînement") ||
-            estCategorie(element, "enchainement")
+            estCategorie(
+                element,
+                "succession"
+            ) ||
+            estCategorie(
+                element,
+                "enchaînement"
+            ) ||
+            estCategorie(
+                element,
+                "enchainement"
+            )
         );
+
 
     const estDirection = element =>
         estCategorie(
@@ -1173,11 +1225,961 @@ function analyserNeoAI(text) {
             "direction"
         );
 
+
     const estDeplacement = element =>
         (
-            estCategorie(element, "deplacement") ||
-            estCategorie(element, "déplacement")
+            estCategorie(
+                element,
+                "deplacement"
+            ) ||
+            estCategorie(
+                element,
+                "déplacement"
+            )
         );
+
+
+    //==========================================================
+    // 🧠 OUTILS GRAMMATICAUX
+    //==========================================================
+
+    const trouverRelation =
+        expression => {
+
+            const texteRelation =
+                sansAccents(
+                    expression
+                );
+
+            if (!texteRelation) {
+                return null;
+            }
+
+            //==================================================
+            // On utilise directement le moteur grammatical
+            // présent dans NeoAI.js.
+            //==================================================
+
+            if (
+                typeof NeoAI.neoTrouverRelationGrammaticale ===
+                "function"
+            ) {
+
+                const resultat =
+                    NeoAI.neoTrouverRelationGrammaticale(
+                        expression
+                    );
+
+                if (resultat) {
+                    return resultat;
+                }
+            }
+
+
+            //==================================================
+            // Fallback local minimal.
+            //
+            // Ce n'est PAS un dictionnaire de vocabulaire.
+            // Ce sont uniquement des marqueurs grammaticaux.
+            //==================================================
+
+            const relations = [
+
+                {
+                    expression: "au niveau de",
+                    role: "CIBLE"
+                },
+
+                {
+                    expression: "en direction de",
+                    role: "CIBLE"
+                },
+
+                {
+                    expression: "à l'aide de",
+                    role: "MOYEN"
+                },
+
+                {
+                    expression: "au moyen de",
+                    role: "MOYEN"
+                },
+
+                {
+                    expression: "en utilisant",
+                    role: "MOYEN"
+                },
+
+                {
+                    expression: "en plaçant",
+                    role: "MOYEN"
+                },
+
+                {
+                    expression: "en prenant",
+                    role: "MOYEN"
+                },
+
+                {
+                    expression: "face à",
+                    role: "CIBLE"
+                },
+
+                {
+                    expression: "vers",
+                    role: "CIBLE"
+                },
+
+                {
+                    expression: "avec",
+                    role: "MOYEN"
+                },
+
+                {
+                    expression: "pour",
+                    role: "CCB"
+                },
+
+                {
+                    expression: "afin de",
+                    role: "CCB"
+                },
+
+                {
+                    expression: "sans",
+                    role: "CCM"
+                },
+
+                {
+                    expression: "dans",
+                    role: "CCL"
+                },
+
+                {
+                    expression: "sur",
+                    role: "CCL"
+                },
+
+                {
+                    expression: "sous",
+                    role: "CCL"
+                }
+
+            ];
+
+            relations.sort(
+                (a, b) =>
+                    b.expression.length -
+                    a.expression.length
+            );
+
+            for (
+                const relation
+                of relations
+            ) {
+
+                if (
+                    texteRelation ===
+                    sansAccents(
+                        relation.expression
+                    )
+                ) {
+
+                    return {
+                        expression:
+                            relation.expression,
+
+                        role:
+                            relation.role
+                    };
+                }
+            }
+
+            return null;
+        };
+
+
+    //==========================================================
+    // 🧠 RELATION SUR PLUSIEURS MOTS
+    //==========================================================
+
+    const trouverRelationDansZone =
+        (
+            zone,
+            index
+        ) => {
+
+            const maximum = 5;
+
+            for (
+                let longueur = maximum;
+                longueur >= 1;
+                longueur--
+            ) {
+
+                const morceaux =
+                    zone.slice(
+                        index,
+                        index + longueur
+                    );
+
+                if (
+                    morceaux.length !==
+                    longueur
+                ) {
+                    continue;
+                }
+
+                const expression =
+                    morceaux
+                        .map(
+                            element =>
+                                element.mot
+                        )
+                        .join(" ");
+
+                const relation =
+                    trouverRelation(
+                        expression
+                    );
+
+                if (relation) {
+
+                    return {
+
+                        ...relation,
+
+                        debut:
+                            index,
+
+                        fin:
+                            index +
+                            longueur -
+                            1,
+
+                        longueur
+                    };
+                }
+            }
+
+            return null;
+        };
+
+
+    //==========================================================
+    // 🧠 DÉTERMINER SI UN GROUPE EST UN DÉTERMINANT
+    //==========================================================
+
+    const estMotGrammatical =
+        element => {
+
+            return (
+                estDeterminant(element) ||
+                estPronom(element) ||
+                estConnecteur(element)
+            );
+        };
+
+
+    //==========================================================
+    // 🧠 EXTRAIRE UN GROUPE NOMINAL
+    //==========================================================
+    //
+    // Exemple :
+    //
+    // "son visage"
+    // "la paume de main gauche"
+    // "son avant bras droit"
+    // "le coup de poing"
+    //
+    //==========================================================
+
+    const extraireGroupeNominal =
+        (
+            zone,
+            index,
+            options = {}
+        ) => {
+
+            const {
+
+                accepterCorps = true,
+
+                accepterNom = true,
+
+                continuerApresNom = true
+
+            } = options;
+
+            let resultat = [];
+
+            let i = index;
+
+            let aTrouveNom = false;
+
+
+            while (
+                i < zone.length
+            ) {
+
+                const element =
+                    zone[i];
+
+                if (!element) {
+                    break;
+                }
+
+
+                //================================================
+                // Déterminants / pronoms possessifs
+                //================================================
+
+                if (
+                    estDeterminant(element) ||
+                    estPronom(element)
+                ) {
+
+                    resultat.push(
+                        element.mot
+                    );
+
+                    i++;
+
+                    continue;
+                }
+
+
+                //================================================
+                // Nom
+                //================================================
+
+                if (
+                    accepterNom &&
+                    estNom(element)
+                ) {
+
+                    resultat.push(
+                        element.mot
+                    );
+
+                    aTrouveNom = true;
+
+                    i++;
+
+                    continue;
+                }
+
+
+                //================================================
+                // Partie du corps
+                //================================================
+
+                if (
+                    accepterCorps &&
+                    estPartieCorps(element)
+                ) {
+
+                    resultat.push(
+                        element.mot
+                    );
+
+                    aTrouveNom = true;
+
+                    i++;
+
+                    continue;
+                }
+
+
+                //================================================
+                // Préposition "de"
+                //
+                // Exemple :
+                //
+                // coup DE poing
+                // paume DE main
+                // avant-bras DE...
+                //================================================
+
+                const mot =
+                    motNormalise(
+                        element.mot
+                    );
+
+                if (
+                    mot === "de" ||
+                    mot === "du" ||
+                    mot === "des"
+                ) {
+
+                    if (
+                        !continuerApresNom ||
+                        !aTrouveNom
+                    ) {
+
+                        break;
+                    }
+
+                    resultat.push(
+                        element.mot
+                    );
+
+                    i++;
+
+                    continue;
+                }
+
+
+                //================================================
+                // Adjectif / côté / direction
+                //
+                // Si NeoAI.js connaît le mot, on peut continuer
+                // le groupe nominal.
+                //================================================
+
+                if (
+                    element.connu &&
+                    !estVerbe(element) &&
+                    !estConnecteur(element)
+                ) {
+
+                    if (
+                        aTrouveNom
+                    ) {
+
+                        resultat.push(
+                            element.mot
+                        );
+
+                        i++;
+
+                        continue;
+                    }
+                }
+
+
+                break;
+            }
+
+
+            if (
+                !resultat.length
+            ) {
+
+                return null;
+            }
+
+
+            return {
+
+                texte:
+                    resultat.join(" "),
+
+                fin:
+                    i - 1
+
+            };
+        };
+
+
+    //==========================================================
+    // 🧠 EXTRAIRE LE GROUPE APRÈS UNE RELATION
+    //==========================================================
+
+    const extraireGroupeApresRelation =
+        (
+            zone,
+            relation
+        ) => {
+
+            const debut =
+                relation.fin + 1;
+
+            if (
+                debut >= zone.length
+            ) {
+
+                return null;
+            }
+
+
+            const groupe =
+                extraireGroupeNominal(
+                    zone,
+                    debut,
+                    {
+                        accepterCorps: true,
+                        accepterNom: true,
+                        continuerApresNom: true
+                    }
+                );
+
+
+            if (!groupe) {
+                return null;
+            }
+
+
+            return {
+
+                texte:
+                    groupe.texte,
+
+                debut,
+
+                fin:
+                    groupe.fin,
+
+                role:
+                    relation.role,
+
+                relation:
+                    relation.expression
+
+            };
+        };
+
+
+    //==========================================================
+    // 🧠 TROUVER UNE CIBLE DANS UNE ZONE
+    //==========================================================
+
+    const extraireCible =
+        zone => {
+
+            if (
+                !zone?.length
+            ) {
+                return null;
+            }
+
+
+            for (
+                let i = 0;
+                i < zone.length;
+                i++
+            ) {
+
+                const relation =
+                    trouverRelationDansZone(
+                        zone,
+                        i
+                    );
+
+                if (!relation) {
+                    continue;
+                }
+
+
+                if (
+                    relation.role !==
+                    "CIBLE"
+                ) {
+
+                    continue;
+                }
+
+
+                const groupe =
+                    extraireGroupeApresRelation(
+                        zone,
+                        relation
+                    );
+
+
+                if (
+                    groupe
+                ) {
+
+                    return groupe;
+                }
+            }
+
+
+            return null;
+        };
+
+
+    //==========================================================
+    // 🖐️ TROUVER LE MOYEN
+    //==========================================================
+
+    const extraireMoyen =
+        zone => {
+
+            if (
+                !zone?.length
+            ) {
+                return null;
+            }
+
+
+            for (
+                let i = 0;
+                i < zone.length;
+                i++
+            ) {
+
+                const relation =
+                    trouverRelationDansZone(
+                        zone,
+                        i
+                    );
+
+                if (!relation) {
+                    continue;
+                }
+
+
+                if (
+                    relation.role !==
+                    "MOYEN"
+                ) {
+
+                    continue;
+                }
+
+
+                const groupe =
+                    extraireGroupeApresRelation(
+                        zone,
+                        relation
+                    );
+
+
+                if (
+                    groupe
+                ) {
+
+                    return groupe;
+                }
+            }
+
+
+            return null;
+        };
+
+
+    //==========================================================
+    // 🧠 FALLBACK CIBLE
+    //==========================================================
+    //
+    // IMPORTANT :
+    //
+    // On NE considère plus automatiquement la première partie
+    // du corps comme une cible.
+    //
+    // Une cible sans relation explicite est seulement acceptée
+    // si elle est clairement indépendante d'un groupe MOYEN.
+    //
+    //==========================================================
+
+    const trouverCibleFallback =
+        zone => {
+
+            if (
+                !zone?.length
+            ) {
+                return null;
+            }
+
+
+            for (
+                let i = 0;
+                i < zone.length;
+                i++
+            ) {
+
+                const element =
+                    zone[i];
+
+                if (
+                    !estPartieCorps(element)
+                ) {
+
+                    continue;
+                }
+
+
+                //================================================
+                // Si cette partie du corps est précédée par
+                // "avec", "en plaçant", etc., elle est MOYEN.
+                //================================================
+
+                let relationAvant = null;
+
+
+                for (
+                    let longueur = 5;
+                    longueur >= 1;
+                    longueur--
+                ) {
+
+                    const debut =
+                        Math.max(
+                            0,
+                            i - longueur
+                        );
+
+                    const morceaux =
+                        zone.slice(
+                            debut,
+                            i
+                        );
+
+                    const expression =
+                        morceaux
+                            .map(
+                                e =>
+                                    e.mot
+                            )
+                            .join(" ");
+
+
+                    const relation =
+                        trouverRelation(
+                            expression
+                        );
+
+
+                    if (
+                        relation
+                    ) {
+
+                        relationAvant =
+                            relation;
+
+                        break;
+                    }
+                }
+
+
+                if (
+                    relationAvant?.role ===
+                    "MOYEN"
+                ) {
+
+                    continue;
+                }
+
+
+                const groupe =
+                    extraireGroupeNominal(
+                        zone,
+                        i,
+                        {
+                            accepterCorps: true,
+                            accepterNom: false,
+                            continuerApresNom: true
+                        }
+                    );
+
+
+                if (
+                    groupe
+                ) {
+
+                    return {
+
+                        texte:
+                            groupe.texte,
+
+                        debut:
+                            i,
+
+                        fin:
+                            groupe.fin,
+
+                        role:
+                            "CIBLE",
+
+                        relation:
+                            null,
+
+                        fallback: true
+
+                    };
+                }
+            }
+
+
+            return null;
+        };
+
+
+    //==========================================================
+    // 🖐️ FALLBACK MOYEN
+    //==========================================================
+    //
+    // Si une partie du corps apparaît après une construction
+    // verbale comme "en plaçant", elle devient automatiquement
+    // un MOYEN.
+    //
+    //==========================================================
+
+    const trouverMoyenFallback =
+        zone => {
+
+            if (
+                !zone?.length
+            ) {
+                return null;
+            }
+
+
+            for (
+                let i = 0;
+                i < zone.length;
+                i++
+            ) {
+
+                const relation =
+                    trouverRelationDansZone(
+                        zone,
+                        i
+                    );
+
+                if (
+                    relation?.role !==
+                    "MOYEN"
+                ) {
+
+                    continue;
+                }
+
+
+                const groupe =
+                    extraireGroupeApresRelation(
+                        zone,
+                        relation
+                    );
+
+
+                if (
+                    groupe
+                ) {
+
+                    return groupe;
+                }
+            }
+
+
+            return null;
+        };
+
+
+    //==========================================================
+    // 🧠 EXTRAIRE L'OBJET
+    //==========================================================
+    //
+    // On ignore :
+    // - les marqueurs grammaticaux
+    // - les cibles
+    // - les moyens
+    // - les parties du corps isolées
+    //
+    //==========================================================
+
+    const extraireObjet =
+        zone => {
+
+            if (
+                !zone?.length
+            ) {
+                return null;
+            }
+
+
+            for (
+                let i = 0;
+                i < zone.length;
+                i++
+            ) {
+
+                const element =
+                    zone[i];
+
+                if (!element.connu) {
+                    continue;
+                }
+
+
+                if (
+                    estDeterminant(element) ||
+                    estPronom(element) ||
+                    estConnecteur(element)
+                ) {
+
+                    continue;
+                }
+
+
+                //================================================
+                // Si on arrive sur une relation grammaticale,
+                // son groupe n'est pas l'objet direct.
+                //================================================
+
+                const relation =
+                    trouverRelationDansZone(
+                        zone,
+                        i
+                    );
+
+                if (
+                    relation
+                ) {
+
+                    i =
+                        relation.fin;
+
+                    continue;
+                }
+
+
+                if (
+                    !estNom(element)
+                ) {
+
+                    continue;
+                }
+
+
+                //================================================
+                // Une partie du corps seule n'est pas un objet.
+                //================================================
+
+                if (
+                    estPartieCorps(element)
+                ) {
+
+                    continue;
+                }
+
+
+                const groupe =
+                    extraireGroupeNominal(
+                        zone,
+                        i,
+                        {
+                            accepterCorps: false,
+                            accepterNom: true,
+                            continuerApresNom: true
+                        }
+                    );
+
+
+                if (
+                    groupe
+                ) {
+
+                    return groupe;
+                }
+            }
+
+
+            return null;
+        };
+
 
     //==========================================================
     // 5️⃣ DÉTECTION DES ACTIONS VERBALES
@@ -1194,63 +2196,76 @@ function analyserNeoAI(text) {
         const element =
             motsAnalyses[i];
 
+
         if (!element.connu) {
             continue;
         }
 
+
         if (!estVerbe(element)) {
             continue;
         }
+
 
         const forme =
             String(
                 element.forme || ""
             ).toLowerCase();
 
+
         //======================================================
         // PARTICIPE PRÉSENT
         //======================================================
 
         if (
-            forme === "participe_present"
+            forme ===
+            "participe_present"
         ) {
+
             continue;
         }
 
+
         //======================================================
         // INFINITIF SUBORDONNÉ
-        //
-        // On ne cherche plus "voyant", "voit", etc.
-        // On utilise directement la forme linguistique
-        // fournie par NeoAI.js.
         //======================================================
 
         if (
-            forme === "infinitif" &&
+            forme ===
+            "infinitif" &&
             i > 0
         ) {
 
             const avant =
                 motsAnalyses.slice(
-                    Math.max(0, i - 8),
+                    Math.max(
+                        0,
+                        i - 8
+                    ),
                     i
                 );
+
 
             const precedeParParticipePresent =
                 avant.some(
                     elementAvant =>
                         String(
-                            elementAvant.forme || ""
+                            elementAvant.forme ||
+                            ""
                         ).toLowerCase()
-                        === "participe_present"
+                        ===
+                        "participe_present"
                 );
+
 
             if (
                 precedeParParticipePresent
             ) {
+
                 continue;
             }
         }
+
 
         actionsVerbes.push({
 
@@ -1261,18 +2276,22 @@ function analyserNeoAI(text) {
                 element.mot,
 
             forme:
-                element.forme || null,
+                element.forme ||
+                null,
 
             mot:
                 element.mot
+
         });
     }
+
 
     //==========================================================
     // 6️⃣ SUJET
     //==========================================================
 
     let sujet = null;
+
 
     if (
         actionsVerbes.length > 0
@@ -1281,11 +2300,13 @@ function analyserNeoAI(text) {
         const premiereAction =
             actionsVerbes[0].index;
 
+
         const avantAction =
             motsAnalyses.slice(
                 0,
                 premiereAction
             );
+
 
         for (
             const element
@@ -1294,32 +2315,41 @@ function analyserNeoAI(text) {
 
             const mot =
                 String(
-                    element.mot || ""
+                    element.mot ||
+                    ""
                 );
+
 
             if (!mot) {
                 continue;
             }
 
-            //==================================================
-            // On laisse NeoAI.js identifier les mots
-            // grammaticaux au lieu d'une liste.
-            //==================================================
 
             if (
-                estDeterminant(element) ||
-                estPronom(element) ||
-                estConnecteur(element)
+                estMotGrammatical(
+                    element
+                )
             ) {
+
                 continue;
             }
 
+
+            if (
+                estVerbe(element)
+            ) {
+
+                continue;
+            }
+
+
             sujet =
-                mot;
+                element.mot;
 
             break;
         }
     }
+
 
     //==========================================================
     // 🧠 6️⃣ BIS — DÉTECTION DE "ÊTRE"
@@ -1328,6 +2358,7 @@ function analyserNeoAI(text) {
     let etat = null;
     let attribut = null;
 
+
     const estVerbeEtre =
         element => {
 
@@ -1335,16 +2366,19 @@ function analyserNeoAI(text) {
                 return false;
             }
 
+
             const verbe =
                 motNormalise(
                     element.verbe
                 );
+
 
             return (
                 verbe === "être" ||
                 verbe === "etre"
             );
         };
+
 
     const actionEtre =
         actionsVerbes.find(
@@ -1356,6 +2390,7 @@ function analyserNeoAI(text) {
                 )
         );
 
+
     if (
         actionEtre
     ) {
@@ -1363,9 +2398,6 @@ function analyserNeoAI(text) {
         const indexEtre =
             actionEtre.index;
 
-        //======================================================
-        // 🔎 RECHERCHE DE L'ATTRIBUT / ÉTAT
-        //======================================================
 
         for (
             let i = indexEtre + 1;
@@ -1376,40 +2408,35 @@ function analyserNeoAI(text) {
             const element =
                 motsAnalyses[i];
 
+
+            if (
+                estMotGrammatical(
+                    element
+                )
+            ) {
+
+                continue;
+            }
+
+
+            if (
+                estVerbe(element)
+            ) {
+
+                break;
+            }
+
+
             const mot =
                 motNormalise(
                     element.mot
                 );
 
+
             if (!mot) {
                 continue;
             }
 
-            //==================================================
-            // Déterminants / pronoms / connecteurs
-            //==================================================
-
-            if (
-                estDeterminant(element) ||
-                estPronom(element) ||
-                estConnecteur(element)
-            ) {
-                continue;
-            }
-
-            //==================================================
-            // Un nouveau verbe = fin de l'attribut
-            //==================================================
-
-            if (
-                estVerbe(element)
-            ) {
-                break;
-            }
-
-            //==================================================
-            // 🎯 ATTRIBUT TROUVÉ
-            //==================================================
 
             attribut =
                 element.mot;
@@ -1418,9 +2445,6 @@ function analyserNeoAI(text) {
         }
     }
 
-    //==========================================================
-    // 🧠 ENREGISTRER L'ÉTAT
-    //==========================================================
 
     if (
         actionEtre &&
@@ -1429,15 +2453,16 @@ function analyserNeoAI(text) {
 
         etat = {
 
-            verbe: "être",
+            verbe:
+                "être",
 
-            sujet:
-                sujet,
+            sujet,
 
-            attribut:
-                attribut
+            attribut
+
         };
     }
+
 
     //==========================================================
     // 7️⃣ CONTEXTE AVANT LA PREMIÈRE ACTION
@@ -1446,6 +2471,7 @@ function analyserNeoAI(text) {
     let contexteObjet = null;
     let contexteCible = null;
 
+
     if (
         actionsVerbes.length > 0
     ) {
@@ -1453,124 +2479,59 @@ function analyserNeoAI(text) {
         const premierIndex =
             actionsVerbes[0].index;
 
+
         const avantAction =
             motsAnalyses.slice(
                 0,
                 premierIndex
             );
 
-        //======================================================
-        // 🧠 OBJET DE CONTEXTE
-        //
-        // On cherche directement les éléments appartenant
-        // au domaine combat dans NeoAI.js.
-        //======================================================
 
-        for (
-            let i = 0;
-            i < avantAction.length;
-            i++
+        //------------------------------------------------------
+        // Objet de contexte
+        //------------------------------------------------------
+
+        const objetContexte =
+            extraireObjet(
+                avantAction
+            );
+
+
+        if (
+            objetContexte
         ) {
-
-            const element =
-                avantAction[i];
-
-            if (
-                !estNom(element)
-            ) {
-                continue;
-            }
-
-            if (
-                estPartieCorps(element)
-            ) {
-                continue;
-            }
 
             contexteObjet =
-                element.mot;
-
-            break;
+                objetContexte.texte;
         }
 
-        //======================================================
-        // 🎯 CIBLE DE CONTEXTE
-        //======================================================
 
-        for (
-            let i = 0;
-            i < avantAction.length;
-            i++
+        //------------------------------------------------------
+        // Cible de contexte
+        //------------------------------------------------------
+
+        const cibleContexte =
+            extraireCible(
+                avantAction
+            );
+
+
+        if (
+            cibleContexte
         ) {
 
-            const element =
-                avantAction[i];
-
-            if (
-                !estPartieCorps(element)
-            ) {
-                continue;
-            }
-
-            //==================================================
-            // Si la partie du corps est précédée d'une autre
-            // partie du corps, elle appartient probablement
-            // à la description du moyen.
-            //==================================================
-
-            const avant =
-                avantAction.slice(
-                    Math.max(0, i - 4),
-                    i
-                );
-
-            const possedePartieCorpsAvant =
-                avant.some(
-                    elementAvant =>
-                        estPartieCorps(
-                            elementAvant
-                        )
-                );
-
-            if (
-                possedePartieCorpsAvant
-            ) {
-                continue;
-            }
-
             contexteCible =
-                element.mot;
-
-            //==================================================
-            // "tête de Tobirama"
-            //==================================================
-
-            if (
-                avantAction[i + 1] &&
-                motNormalise(
-                    avantAction[i + 1].mot
-                ) === "de"
-            ) {
-
-                if (
-                    avantAction[i + 2]
-                ) {
-
-                    contexteCible +=
-                        " de " +
-                        avantAction[i + 2].mot;
-                }
-            }
-
-            break;
+                cibleContexte.texte;
         }
     }
+
 
     //==========================================================
     // 8️⃣ ACTIONS COMPLÈTES
     //==========================================================
 
     const actions = [];
+
 
     for (
         let a = 0;
@@ -1581,30 +2542,36 @@ function analyserNeoAI(text) {
         const actionVerbe =
             actionsVerbes[a];
 
-        //======================================================
-        // 🧠 "ÊTRE" = ÉTAT, PAS ACTION
-        //======================================================
 
         const elementVerbe =
             motsAnalyses[
                 actionVerbe.index
             ];
 
+
+        //======================================================
+        // ÊTRE = ÉTAT
+        //======================================================
+
         if (
             estVerbeEtre(
                 elementVerbe
             )
         ) {
+
             continue;
         }
 
+
         const debut =
             actionVerbe.index;
+
 
         const fin =
             actionsVerbes[a + 1]
                 ? actionsVerbes[a + 1].index
                 : motsAnalyses.length;
+
 
         const zone =
             motsAnalyses.slice(
@@ -1612,85 +2579,87 @@ function analyserNeoAI(text) {
                 fin
             );
 
+
         //======================================================
-        // OBJET
+        // 🧠 ANALYSE DES RELATIONS DE LA ZONE
+        //======================================================
+
+        const groupesGrammaticaux = [];
+
+        for (
+            let i = 0;
+            i < zone.length;
+            i++
+        ) {
+
+            const relation =
+                trouverRelationDansZone(
+                    zone,
+                    i
+                );
+
+
+            if (!relation) {
+                continue;
+            }
+
+
+            const groupe =
+                extraireGroupeApresRelation(
+                    zone,
+                    relation
+                );
+
+
+            if (
+                !groupe
+            ) {
+
+                continue;
+            }
+
+
+            groupesGrammaticaux.push(
+                groupe
+            );
+
+
+            //================================================
+            // On saute le groupe déjà analysé
+            //================================================
+
+            i =
+                Math.max(
+                    i,
+                    groupe.fin
+                );
+        }
+
+
+        //======================================================
+        // 🧠 OBJET
         //======================================================
 
         let objet = null;
 
-        for (
-            const element
-            of zone
-        ) {
 
-            if (!element.connu) {
-                continue;
-            }
+        const groupeObjet =
+            extraireObjet(
+                zone
+            );
 
-            if (
-                !estNom(element)
-            ) {
-                continue;
-            }
-
-            if (
-                estPartieCorps(element)
-            ) {
-                continue;
-            }
-
-            if (
-                estDeterminant(element) ||
-                estPronom(element) ||
-                estConnecteur(element)
-            ) {
-                continue;
-            }
-
-            objet =
-                element.mot;
-
-            break;
-        }
-
-        //======================================================
-        // RÉFÉRENCE À L'OBJET PRÉCÉDENT
-        //======================================================
 
         if (
-            contexteObjet &&
-            !objet
+            groupeObjet
         ) {
 
-            // Recherche d'un nom générique déjà connu
-            // dans NeoAI.js.
-            for (
-                const element
-                of zone
-            ) {
-
-                if (
-                    !estNom(element)
-                ) {
-                    continue;
-                }
-
-                if (
-                    estPartieCorps(element)
-                ) {
-                    continue;
-                }
-
-                objet =
-                    contexteObjet;
-
-                break;
-            }
+            objet =
+                groupeObjet.texte;
         }
 
+
         //======================================================
-        // Si aucun objet n'a été trouvé,
-        // on reprend directement le contexte.
+        // 🔁 REPRISE DU CONTEXTE
         //======================================================
 
         if (
@@ -1701,6 +2670,7 @@ function analyserNeoAI(text) {
             objet =
                 contexteObjet;
         }
+
 
         //======================================================
         // 🎯 CIBLE
@@ -1708,186 +2678,48 @@ function analyserNeoAI(text) {
 
         let cible = null;
 
-        //======================================================
-        // 🧠 OUTIL — EXTRAIRE UNE CIBLE
-        //======================================================
 
-        const trouverCibleApres =
-            (
-                zone,
-                indexDebut
-            ) => {
+        const groupeCible =
+            groupesGrammaticaux.find(
+                groupe =>
+                    groupe.role ===
+                    "CIBLE"
+            );
 
-                for (
-                    let j = indexDebut + 1;
-                    j < zone.length;
-                    j++
-                ) {
 
-                    const element =
-                        zone[j];
-
-                    if (
-                        !estPartieCorps(element)
-                    ) {
-                        continue;
-                    }
-
-                    let resultat =
-                        element.mot;
-
-                    //==================================================
-                    // "tête de Tobirama"
-                    //==================================================
-
-                    if (
-                        zone[j + 1] &&
-                        motNormalise(
-                            zone[j + 1].mot
-                        ) === "de"
-                    ) {
-
-                        if (
-                            zone[j + 2]
-                        ) {
-
-                            resultat +=
-                                " de " +
-                                zone[j + 2].mot;
-                        }
-                    }
-
-                    return resultat;
-                }
-
-                return null;
-            };
-
-        //======================================================
-        // 🎯 RECHERCHE DES RELATIONS DE CIBLE
-        //======================================================
-
-        for (
-            let i = 0;
-            i < zone.length;
-            i++
+        if (
+            groupeCible
         ) {
 
-            const element =
-                zone[i];
-
-            //==================================================
-            // NeoAI.js indique que ce mot introduit une cible
-            //==================================================
-
-            const estMarqueurCible =
-                estCategorie(
-                    element,
-                    "cible"
-                ) ||
-                estCategorie(
-                    element,
-                    "relation_cible"
-                );
-
-            if (
-                !estMarqueurCible
-            ) {
-                continue;
-            }
-
-            const resultat =
-                trouverCibleApres(
-                    zone,
-                    i
-                );
-
-            if (resultat) {
-
-                cible =
-                    resultat;
-
-                break;
-            }
+            cible =
+                groupeCible.texte;
         }
 
+
         //======================================================
-        // 🎯 FALLBACK : PREMIÈRE PARTIE DU CORPS PERTINENTE
+        // 🎯 FALLBACK CIBLE
         //======================================================
 
         if (!cible) {
 
-            for (
-                let i = 0;
-                i < zone.length;
-                i++
+            const cibleFallback =
+                trouverCibleFallback(
+                    zone
+                );
+
+
+            if (
+                cibleFallback
             ) {
 
-                const element =
-                    zone[i];
-
-                if (
-                    !estPartieCorps(element)
-                ) {
-                    continue;
-                }
-
-                //================================================
-                // Si une partie du corps précédente existe dans
-                // la même petite zone, cette partie appartient
-                // généralement au moyen décrit.
-                //================================================
-
-                const avant =
-                    zone.slice(
-                        Math.max(0, i - 4),
-                        i
-                    );
-
-                const partieAvant =
-                    avant.some(
-                        elementAvant =>
-                            estPartieCorps(
-                                elementAvant
-                            )
-                    );
-
-                if (
-                    partieAvant
-                ) {
-                    continue;
-                }
-
                 cible =
-                    element.mot;
-
-                //================================================
-                // "tête de Tobirama"
-                //================================================
-
-                if (
-                    zone[i + 1] &&
-                    motNormalise(
-                        zone[i + 1].mot
-                    ) === "de"
-                ) {
-
-                    if (
-                        zone[i + 2]
-                    ) {
-
-                        cible +=
-                            " de " +
-                            zone[i + 2].mot;
-                    }
-                }
-
-                break;
+                    cibleFallback.texte;
             }
         }
 
+
         //======================================================
-        // 🎯 CIBLE DÉCRITE AVANT L'ACTION
+        // 🔁 CONTEXTE CIBLE
         //======================================================
 
         if (
@@ -1899,164 +2731,153 @@ function analyserNeoAI(text) {
                 contexteCible;
         }
 
+
         //======================================================
-        // 🖐️ MOYEN / INSTRUMENT
+        // 🖐️ MOYEN
         //======================================================
 
         let moyen = null;
 
-        //======================================================
-        // RECHERCHE DU MOYEN CORPOREL
-        //
-        // On prend la première partie du corps rencontrée
-        // dans la zone de l'action.
-        //
-        // Aucune liste de vocabulaire.
-        //======================================================
 
-        for (
-            let i = 0;
-            i < zone.length;
-            i++
+        const groupeMoyen =
+            groupesGrammaticaux.find(
+                groupe =>
+                    groupe.role ===
+                    "MOYEN"
+            );
+
+
+        if (
+            groupeMoyen
         ) {
-
-            const element =
-                zone[i];
-
-            if (
-                !estPartieCorps(element)
-            ) {
-                continue;
-            }
-
-            let partie =
-                motNormalise(
-                    element.mot
-                );
-
-            //==================================================
-            // Expression corporelle composée connue par
-            // NeoAI.js : on essaie de récupérer le prochain
-            // élément appartenant lui aussi à "corps".
-            //==================================================
-
-            const suivant =
-                zone[i + 1];
-
-            if (
-                suivant &&
-                estPartieCorps(suivant)
-            ) {
-
-                const partieSuivante =
-                    motNormalise(
-                        suivant.mot
-                    );
-
-                // Recherche de l'expression dans NeoAI.js
-                // si cette fonction existe.
-                if (
-                    typeof NeoAI.neoRechercherMot ===
-                    "function"
-                ) {
-
-                    const expression =
-                        NeoAI.neoRechercherMot(
-                            `${partie}-${partieSuivante}`
-                        );
-
-                    if (
-                        expression?.trouve === true
-                    ) {
-
-                        partie =
-                            `${partie}-${partieSuivante}`;
-
-                        i++;
-                    }
-                }
-            }
-
-            //==================================================
-            // Chercher une indication latérale connue
-            // par NeoAI.js.
-            //==================================================
-
-            if (
-                zone[i + 1]
-            ) {
-
-                const suivantCote =
-                    zone[i + 1];
-
-                const categorieCote =
-                    suivantCote.categories?.some(
-                        categorie => {
-
-                            const nom =
-                                String(
-                                    categorie?.categorie ||
-                                    ""
-                                ).toLowerCase();
-
-                            return (
-                                nom.includes("côté") ||
-                                nom.includes("cote") ||
-                                nom.includes("direction")
-                            );
-                        }
-                    );
-
-                if (
-                    categorieCote
-                ) {
-
-                    moyen =
-                        `${partie} ${motNormalise(
-                            suivantCote.mot
-                        )}`;
-
-                    break;
-                }
-            }
 
             moyen =
-                partie;
-
-            break;
+                groupeMoyen.texte;
         }
 
+
         //======================================================
-        // CONTEXTE OBJET
+        // 🖐️ FALLBACK MOYEN
         //======================================================
+
+        if (!moyen) {
+
+            const moyenFallback =
+                trouverMoyenFallback(
+                    zone
+                );
+
+
+            if (
+                moyenFallback
+            ) {
+
+                moyen =
+                    moyenFallback.texte;
+            }
+        }
+
+
+        //======================================================
+        // 🧠 STRUCTURE GRAMMATICALE DE L'ACTION
+        //======================================================
+
+        const rolesAction = [
+            "S",
+            "V"
+        ];
+
+
+        if (objet) {
+            rolesAction.push("O");
+        }
+
+
+        if (cible) {
+            rolesAction.push("CIBLE");
+        }
+
+
+        if (moyen) {
+            rolesAction.push("MOYEN");
+        }
+
+
+        let structureGrammaticale = null;
+
 
         if (
-            !objet &&
-            contexteObjet
+            typeof NeoAI.neoTrouverStructureGrammaticale ===
+            "function"
         ) {
 
-            objet =
-                contexteObjet;
+            structureGrammaticale =
+                NeoAI.neoTrouverStructureGrammaticale(
+                    rolesAction
+                );
         }
 
+
         //======================================================
-        // CONTEXTE CIBLE
+        // 🧠 RÔLES DÉTAILLÉS
         //======================================================
 
-        if (
-            !cible &&
-            contexteCible
-        ) {
+        const roles = {
 
-            cible =
-                contexteCible;
-        }
+            S: sujet,
+
+            V:
+                actionVerbe.verbe,
+
+            ...(objet
+                ? {
+                    O: objet
+                }
+                : {}),
+
+            ...(cible
+                ? {
+                    CIBLE: cible
+                }
+                : {}),
+
+            ...(moyen
+                ? {
+                    MOYEN: moyen
+                }
+                : {})
+
+        };
+
+
+        //======================================================
+        // 🧠 GROUPES GRAMMATICAUX
+        //======================================================
+
+        const groupes =
+            groupesGrammaticaux.map(
+                groupe => ({
+
+                    texte:
+                        groupe.texte,
+
+                    role:
+                        groupe.role,
+
+                    relation:
+                        groupe.relation
+
+                })
+            );
+
 
         //======================================================
         // CRÉATION DE L'ACTION
         //======================================================
 
         actions.push({
+
+            sujet,
 
             verbe:
                 actionVerbe.verbe,
@@ -2068,28 +2889,46 @@ function analyserNeoAI(text) {
                 actionVerbe.forme,
 
             ...(objet
-                ? { objet }
+                ? {
+                    objet
+                }
                 : {}),
 
             ...(cible
-                ? { cible }
+                ? {
+                    cible
+                }
                 : {}),
 
             ...(moyen
-                ? { moyen }
-                : {})
+                ? {
+                    moyen
+                }
+                : {}),
+
+            roles,
+
+            groupes,
+
+            structure:
+                structureGrammaticale?.structure ||
+                rolesAction.join("+"),
+
+            confianceGrammaticale:
+                structureGrammaticale?.score ??
+                1
+
         });
     }
+
 
     //==========================================================
     // 9️⃣ CONTEXTE
     //==========================================================
 
-    let contexte = "general";
+    let contexte =
+        "general";
 
-    //==========================================================
-    // 🧠 Le domaine est maintenant déterminé par NeoAI.js.
-    //==========================================================
 
     const contientCombat =
         motsAnalyses.some(
@@ -2100,6 +2939,7 @@ function analyserNeoAI(text) {
                 )
         );
 
+
     if (
         contientCombat
     ) {
@@ -2108,17 +2948,22 @@ function analyserNeoAI(text) {
             "combat";
     }
 
+
     //==========================================================
     // 🔟 ENCHAÎNEMENT
     //==========================================================
 
     let enchainement = null;
 
+
     const contientSuccession =
         motsAnalyses.some(
             element =>
-                estSuccession(element)
+                estSuccession(
+                    element
+                )
         );
+
 
     if (
         contientSuccession
@@ -2128,17 +2973,22 @@ function analyserNeoAI(text) {
             "successif";
     }
 
+
     //==========================================================
     // 1️⃣1️⃣ DIRECTIONS
     //==========================================================
 
     const directions = [];
 
+
     const contientDeplacement =
         motsAnalyses.some(
             element =>
-                estDeplacement(element)
+                estDeplacement(
+                    element
+                )
         );
+
 
     if (
         contientDeplacement
@@ -2150,18 +3000,25 @@ function analyserNeoAI(text) {
         ) {
 
             if (
-                !estDirection(element)
+                !estDirection(
+                    element
+                )
             ) {
+
                 continue;
             }
+
 
             const mot =
                 motNormalise(
                     element.mot
                 );
 
+
             if (
-                !directions.includes(mot)
+                !directions.includes(
+                    mot
+                )
             ) {
 
                 directions.push(
@@ -2171,11 +3028,13 @@ function analyserNeoAI(text) {
         }
     }
 
+
     //==========================================================
     // 1️⃣2️⃣ OBJETS GÉNÉRAUX
     //==========================================================
 
     const objets = [];
+
 
     for (
         const action
@@ -2195,11 +3054,13 @@ function analyserNeoAI(text) {
         }
     }
 
+
     //==========================================================
     // 1️⃣3️⃣ CIBLES GÉNÉRALES
     //==========================================================
 
     const cibles = [];
+
 
     for (
         const action
@@ -2219,12 +3080,14 @@ function analyserNeoAI(text) {
         }
     }
 
+
     //==========================================================
     // 1️⃣4️⃣ REFORMULATION
     //==========================================================
 
     let reformulation =
         texte;
+
 
     //==========================================================
     // 🧠 CAS : ÉTAT
@@ -2239,6 +3102,7 @@ function analyserNeoAI(text) {
         reformulation =
             `${etat.sujet} est ${etat.attribut}.`;
     }
+
 
     //==========================================================
     // ⚔️ CAS : ACTIONS
@@ -2257,7 +3121,9 @@ function analyserNeoAI(text) {
                         action.mot ||
                         action.verbe;
 
+
                     let phrase = "";
+
 
                     if (
                         index === 0
@@ -2267,7 +3133,8 @@ function analyserNeoAI(text) {
                             `${sujet} ${verbe}`;
 
                     } else if (
-                        enchainement === "successif"
+                        enchainement ===
+                        "successif"
                     ) {
 
                         phrase =
@@ -2278,6 +3145,7 @@ function analyserNeoAI(text) {
                         phrase =
                             `${sujet} ${verbe}`;
                     }
+
 
                     //==================================================
                     // OBJET
@@ -2290,6 +3158,7 @@ function analyserNeoAI(text) {
                         phrase +=
                             ` un ${action.objet}`;
                     }
+
 
                     //==================================================
                     // CIBLE
@@ -2304,12 +3173,20 @@ function analyserNeoAI(text) {
                                 action.cible
                             );
 
-                        // On conserve ici la logique existante.
+
                         if (
-                            !cibleNormalisee.includes("son ") &&
-                            !cibleNormalisee.includes("sa ") &&
-                            !cibleNormalisee.includes("ses ") &&
-                            !cibleNormalisee.includes(" de ")
+                            !cibleNormalisee.includes(
+                                "son "
+                            ) &&
+                            !cibleNormalisee.includes(
+                                "sa "
+                            ) &&
+                            !cibleNormalisee.includes(
+                                "ses "
+                            ) &&
+                            !cibleNormalisee.includes(
+                                " de "
+                            )
                         ) {
 
                             phrase +=
@@ -2321,6 +3198,7 @@ function analyserNeoAI(text) {
                                 ` visant ${action.cible}`;
                         }
                     }
+
 
                     //==================================================
                     // MOYEN
@@ -2335,40 +3213,76 @@ function analyserNeoAI(text) {
                                 action.moyen
                             );
 
-                        // On conserve le comportement existant.
-                        const possessif =
-                            moyenNormalise.startsWith(
-                                "avant-bras"
-                            )
-                                ? "son"
-                                : "sa";
 
-                        phrase +=
-                            ` avec ${possessif} ${action.moyen}`;
+                        const dejaPossessif =
+                            moyenNormalise.startsWith(
+                                "sa "
+                            ) ||
+                            moyenNormalise.startsWith(
+                                "son "
+                            ) ||
+                            moyenNormalise.startsWith(
+                                "ses "
+                            );
+
+
+                        if (
+                            dejaPossessif
+                        ) {
+
+                            phrase +=
+                                ` avec ${action.moyen}`;
+
+                        } else {
+
+                            const possessif =
+                                moyenNormalise.startsWith(
+                                    "avant-bras"
+                                ) ||
+                                moyenNormalise.startsWith(
+                                    "bras"
+                                ) ||
+                                moyenNormalise.startsWith(
+                                    "poing"
+                                ) ||
+                                moyenNormalise.startsWith(
+                                    "pied"
+                                )
+                                    ? "son"
+                                    : "sa";
+
+
+                            phrase +=
+                                ` avec ${possessif} ${action.moyen}`;
+                        }
                     }
+
 
                     return phrase;
                 }
             );
 
+
         if (
             actions.length > 1 &&
-            enchainement === "successif"
+            enchainement ===
+            "successif"
         ) {
 
             reformulation =
-                phrasesActions
-                    .join(" puis ")
-                    + ".";
+                phrasesActions.join(
+                    " puis "
+                ) + ".";
 
         } else {
 
             reformulation =
-                phrasesActions
-                    .join(" et ")
-                    + ".";
+                phrasesActions.join(
+                    " et "
+                ) + ".";
         }
     }
+
 
     //==========================================================
     // 1️⃣5️⃣ COMPRÉHENSION
@@ -2394,8 +3308,31 @@ function analyserNeoAI(text) {
 
         contexte,
 
-        enchainement
+        enchainement,
+
+        //======================================================
+        // 🧠 STRUCTURES GRAMMATICALES DÉTECTÉES
+        //======================================================
+
+        structures:
+            actions.map(
+                action => ({
+                    structure:
+                        action.structure,
+
+                    roles:
+                        action.roles,
+
+                    groupes:
+                        action.groupes,
+
+                    confiance:
+                        action.confianceGrammaticale
+                })
+            )
+
     };
+
 
     //==========================================================
     // 1️⃣6️⃣ RÉSULTAT FINAL
@@ -2453,6 +3390,7 @@ function analyserNeoAI(text) {
 
         dateAnalyse:
             Date.now()
+
     };
 }
  
