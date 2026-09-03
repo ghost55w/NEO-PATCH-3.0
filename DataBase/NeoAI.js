@@ -175,6 +175,19 @@ function neoDecouperPhrases(texte = "") {
 }
 
 //==============================================================
+// 📚🌀 NEO LEARNING SKILLS OPEN SOURCE 2.5
+//==============================================================
+const NEO_LEARN = {
+
+    fr: [
+        "mot1",
+        "mot2",
+        "mot3"
+    ]
+
+};
+
+//==============================================================
 // 📚 NEO_VERBES
 //==============================================================
 const NEO_VERBES = {
@@ -5945,6 +5958,7 @@ module.exports = {
     NEO_PREPOSITIONS,
     NEO_PRONOMS,
     NEO_EXPRESSIONS,
+    NEO_LEARN, 
 
     NEO_UNITES,
     NEO_TEMPS,
