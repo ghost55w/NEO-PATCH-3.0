@@ -1270,26 +1270,135 @@ function analyserNeoAI(text) {
             break;
         }
     }
+    //==========================================================
+    // 🧠 6️⃣ BIS — DÉTECTION DE "ÊTRE"
+    //==========================================================
+        let etat = null;
+    let attribut = null;
 
+    const estVerbeEtre =
+        element => {
+
+            if (!element) {
+                return false;
+            }
+
+            const verbe =
+                motNormalise(
+                    element.verbe
+                );
+
+            const mot =
+                motNormalise(
+                    element.mot
+                );
+
+            return (
+                verbe === "être" ||
+                verbe === "etre" ||
+                mot === "être" ||
+                mot === "etre"
+            );
+        };
+
+    const actionEtre =
+        actionsVerbes.find(
+            action =>
+                estVerbeEtre(
+                    motsAnalyses[
+                        action.index
+                    ]
+                )
+        );
+
+    if (
+        actionEtre
+    ) {
+
+        const indexEtre =
+            actionEtre.index;
+
+        //======================================================
+        // 🔎 RECHERCHE DE L'ATTRIBUT / ÉTAT
+        //======================================================
+
+        for (
+            let i = indexEtre + 1;
+            i < motsAnalyses.length;
+            i++
+        ) {
+
+            const element =
+                motsAnalyses[i];
+
+            const mot =
+                motNormalise(
+                    element.mot
+                );
+
+            if (!mot) {
+                continue;
+            }
+
+            // Déterminants
+            if (
+                [
+                    "le",
+                    "la",
+                    "les",
+                    "un",
+                    "une",
+                    "des",
+                    "du",
+                    "de",
+                    "ce",
+                    "cet",
+                    "cette",
+                    "ces"
+                ].includes(mot)
+            ) {
+                continue;
+            }
+
+            // Un nouveau verbe = fin de l'attribut
+            if (
+                estVerbe(element)
+            ) {
+                break;
+            }
+
+            //==================================================
+            // 🎯 ATTRIBUT TROUVÉ
+            //==================================================
+
+            attribut = element.mot;
+
+            break;
+        }
+    }
+        //==========================================================
+    // 🧠 ENREGISTRER L'ÉTAT
+    //==========================================================
+
+    if (
+        actionEtre &&
+        attribut
+    ) {
+
+        etat = {
+
+            verbe: "être",
+
+            sujet:
+                sujet,
+
+            attribut:
+                attribut
+        };
+    }
     //==========================================================
     // 7️⃣ CONTEXTE AVANT LA PREMIÈRE ACTION
     //==========================================================
-
-    /*
-     * Ici on conserve les informations décrites avant
-     * l'action principale.
-     *
-     * Exemple :
-     *
-     * Tobirama voyant
-     * [le coup de poing]
-     * [venir vers son visage]
-     * il bloque le coup
-     *
-     * Le coup de poing et le visage sont donc conservés
-     * comme contexte de l'action "bloquer".
-     */
-
     let contexteObjet = null;
     let contexteCible = null;
 
@@ -1420,7 +1529,24 @@ function analyserNeoAI(text) {
 
         const actionVerbe =
             actionsVerbes[a];
+        //==================================================
+        // 🧠 "ÊTRE" = ÉTAT, PAS ACTION
+        //==================================================
 
+        const elementVerbe =
+            motsAnalyses[
+                actionVerbe.index
+            ];
+
+        if (
+            estVerbeEtre(
+                elementVerbe
+            )
+        ) {
+
+            continue;
+        }
+        
         const debut =
             actionVerbe.index;
 
@@ -1567,7 +1693,6 @@ let cible = null;
 // 🧠 OUTIL — DÉTECTER SI UNE PARTIE DU CORPS EST
 // UTILISÉE COMME MOYEN
 //======================================================
-
 const estMoyenCorporel = (
     zone,
     index
@@ -1596,7 +1721,6 @@ const estMoyenCorporel = (
 //======================================================
 // 🧠 OUTIL — EXTRAIRE UNE CIBLE APRÈS UNE EXPRESSION
 //======================================================
-
 const trouverCibleApres =
     (
         zone,
@@ -1686,18 +1810,6 @@ const trouverCibleApres =
 //======================================================
 // 🎯 1. EXPRESSIONS EXPLICITES DE CIBLE
 //======================================================
-//
-// Ces structures ont priorité.
-//
-// "vise son visage"
-// "vers son visage"
-// "dans son visage"
-// "sur son abdomen"
-// "contre son abdomen"
-// "au niveau de son abdomen"
-// "visant son abdomen"
-//======================================================
-
 const expressionsCible = [
     "visant",
     "vers",
@@ -2297,11 +2409,28 @@ if (
     //==========================================================
     // 1️⃣4️⃣ REFORMULATION
     //==========================================================
-
     let reformulation =
         texte;
 
+    //==========================================================
+    // 🧠 CAS : ÉTAT
+    //==========================================================
+
     if (
+        etat &&
+        etat.sujet &&
+        etat.attribut
+    ) {
+
+        reformulation =
+            `${etat.sujet} est ${etat.attribut}.`;
+    }
+
+    //==========================================================
+    // ⚔️ CAS : ACTIONS
+    //==========================================================
+
+    else if (
         sujet &&
         actions.length
     ) {
@@ -2310,31 +2439,18 @@ if (
             actions.map(
                 (action, index) => {
 
-                    // --------------------------------------------------
-                    // On utilise le mot réellement écrit dans le texte
-                    // pour conserver la bonne conjugaison.
-                    //
-                    // "bloque" au lieu de "bloquer"
-                    // --------------------------------------------------
-
                     const verbe =
                         action.mot ||
                         action.verbe;
 
                     let phrase = "";
 
-                    // --------------------------------------------------
-                    // Première action
-                    // --------------------------------------------------
-
-                    if (index === 0) {
+                    if (
+                        index === 0
+                    ) {
 
                         phrase =
                             `${sujet} ${verbe}`;
-
-                    // --------------------------------------------------
-                    // Actions suivantes dans un enchaînement
-                    // --------------------------------------------------
 
                     } else if (
                         enchainement === "successif"
@@ -2349,21 +2465,25 @@ if (
                             `${sujet} ${verbe}`;
                     }
 
-                    // --------------------------------------------------
+                    //==================================================
                     // OBJET
-                    // --------------------------------------------------
+                    //==================================================
 
-                    if (action.objet) {
+                    if (
+                        action.objet
+                    ) {
 
                         phrase +=
                             ` un ${action.objet}`;
                     }
 
-                    // --------------------------------------------------
+                    //==================================================
                     // CIBLE
-                    // --------------------------------------------------
+                    //==================================================
 
-                    if (action.cible) {
+                    if (
+                        action.cible
+                    ) {
 
                         const cibleNormalisee =
                             motNormalise(
@@ -2387,19 +2507,19 @@ if (
                         }
                     }
 
-                    // --------------------------------------------------
+                    //==================================================
                     // MOYEN
-                    // --------------------------------------------------
+                    //==================================================
 
-                    if (action.moyen) {
+                    if (
+                        action.moyen
+                    ) {
 
                         const moyenNormalise =
                             motNormalise(
                                 action.moyen
                             );
 
-                        // "avant-bras" → son
-                        // "paume" / "main" → sa
                         const possessif =
                             moyenNormalise.startsWith(
                                 "avant-bras"
@@ -2414,10 +2534,6 @@ if (
                     return phrase;
                 }
             );
-
-        // ----------------------------------------------------------
-        // Enchaînement successif
-        // ----------------------------------------------------------
 
         if (
             actions.length > 1 &&
@@ -2437,17 +2553,17 @@ if (
                     + ".";
         }
     }
-
-
+  
     //==========================================================
     // 1️⃣5️⃣ COMPRÉHENSION
     //==========================================================
-
     const comprehension = {
 
         sujet,
 
         actions,
+
+        etat,
 
         directions,
 
@@ -2463,6 +2579,7 @@ if (
 
         enchainement
     };
+    
 
     //==========================================================
     // 1️⃣6️⃣ RÉSULTAT FINAL
@@ -2548,6 +2665,17 @@ async function envoyerResultatNeoAI(
 
         comprehension +=
             `• Sujet : ${c.sujet}\n`;
+    }
+        //==========================================================
+    // 🧠 ÉTAT
+    //==========================================================
+
+    if (
+        c.etat?.attribut
+    ) {
+
+        comprehension +=
+            `• État : ${c.etat.attribut}\n`;
     }
 
     //==========================================================
