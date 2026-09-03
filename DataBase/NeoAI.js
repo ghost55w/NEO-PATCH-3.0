@@ -2883,6 +2883,1076 @@ const NEO_VERBES_SPECIAUX = {
 };
 
 //==============================================================
+// 🧠 NEOAI — MOTEUR DE STRUCTURE LINGUISTIQUE
+//==============================================================
+
+
+//==============================================================
+// NORMALISATION LOCALE
+//==============================================================
+
+function neoNormaliserValeur(value) {
+
+    return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+
+
+//==============================================================
+// RÉCUPÉRATION DES VERBES
+//
+// Compatible avec :
+//
+// NEO_VERBES.fr
+//
+// ou
+//
+// NEO_VERBES_FORMES.fr
+//==============================================================
+
+function neoRecupererVerbes() {
+
+    const resultat = {};
+
+    const sources = [
+        typeof NEO_VERBES !== "undefined"
+            ? NEO_VERBES
+            : null,
+
+        typeof NEO_VERBES_FORMES !== "undefined"
+            ? NEO_VERBES_FORMES
+            : null
+    ];
+
+    for (const source of sources) {
+
+        if (!source) continue;
+
+        const fr = source.fr || source;
+
+        if (!fr || typeof fr !== "object") {
+            continue;
+        }
+
+        // Cas :
+        // fr.general
+        // fr.deplacement
+        // fr.combat
+        // fr.vie_courante
+
+        const categories = [
+            "general",
+            "deplacement",
+            "combat",
+            "vie_courante"
+        ];
+
+        let trouveCategorie = false;
+
+        for (const categorie of categories) {
+
+            if (
+                fr[categorie] &&
+                typeof fr[categorie] === "object"
+            ) {
+
+                trouveCategorie = true;
+
+                for (const verbe of Object.keys(
+                    fr[categorie]
+                )) {
+
+                    if (!resultat[verbe]) {
+                        resultat[verbe] = {
+                            categorie,
+                            donnees:
+                                fr[categorie][verbe]
+                        };
+                    }
+                }
+            }
+        }
+
+        // Cas ancien :
+        // fr = {
+        //   aller: ...,
+        //   courir: ...
+        // }
+
+        if (!trouveCategorie) {
+
+            for (const verbe of Object.keys(fr)) {
+
+                if (!resultat[verbe]) {
+
+                    resultat[verbe] = {
+
+                        categorie:
+                            neoTrouverCategorieVerbe(
+                                verbe
+                            ),
+
+                        donnees:
+                            fr[verbe]
+                    };
+                }
+            }
+        }
+    }
+
+    return resultat;
+}
+
+
+//==============================================================
+// CATÉGORIE D'UN VERBE
+//==============================================================
+
+function neoTrouverCategorieVerbe(verbe) {
+
+    const categories = [
+        "general",
+        "deplacement",
+        "combat",
+        "vie_courante"
+    ];
+
+    if (
+        typeof NEO_MODELES !== "undefined" &&
+        NEO_MODELES.fr
+    ) {
+
+        for (const categorie of categories) {
+
+            if (
+                NEO_MODELES.fr[categorie] &&
+                NEO_MODELES.fr[categorie][verbe]
+            ) {
+                return categorie;
+            }
+        }
+    }
+
+    return "general";
+}
+
+
+//==============================================================
+// RECHERCHE D'UN VERBE À PARTIR D'UNE FORME CONJUGUÉE
+//==============================================================
+
+function neoTrouverVerbe(tokens) {
+
+    const verbes = neoRecupererVerbes();
+
+    const formesTrouvees = [];
+
+    for (const [verbe, info] of Object.entries(verbes)) {
+
+        const donnees = info.donnees;
+
+        if (!donnees || typeof donnees !== "object") {
+            continue;
+        }
+
+        // Infinitif lui-même
+        if (
+            tokens.some(
+                token =>
+                    neoNormaliserValeur(token) ===
+                    neoNormaliserValeur(verbe)
+            )
+        ) {
+
+            formesTrouvees.push({
+
+                verbe,
+
+                categorie:
+                    info.categorie,
+
+                forme: verbe,
+
+                temps: "infinitif"
+            });
+        }
+
+        for (const [temps, formes] of Object.entries(
+            donnees
+        )) {
+
+            if (!Array.isArray(formes)) {
+                continue;
+            }
+
+            for (const forme of formes) {
+
+                const formeNorm =
+                    neoNormaliserValeur(forme);
+
+                const index =
+                    tokens.findIndex(
+                        token =>
+                            neoNormaliserValeur(token) ===
+                            formeNorm
+                    );
+
+                if (index !== -1) {
+
+                    formesTrouvees.push({
+
+                        verbe,
+
+                        categorie:
+                            info.categorie,
+
+                        forme,
+
+                        temps,
+
+                        index
+                    });
+                }
+            }
+        }
+    }
+
+    if (!formesTrouvees.length) {
+        return null;
+    }
+
+    // On privilégie la forme la plus proche
+    // d'un vrai verbe conjugué.
+    const prioriteTemps = {
+        present: 1,
+        imparfait: 2,
+        futur: 3,
+        conditionnel: 4,
+        subjonctif: 5,
+        participe_passe: 6,
+        participe_present: 7,
+        infinitif: 8
+    };
+
+    formesTrouvees.sort(
+        (a, b) =>
+            (prioriteTemps[a.temps] || 99) -
+            (prioriteTemps[b.temps] || 99)
+    );
+
+    return formesTrouvees[0];
+}
+
+
+//==============================================================
+// MOTS-CLÉS LINGUISTIQUES
+//==============================================================
+
+const NEO_MOTS_MANIERES = [
+
+    "rapidement",
+    "lentement",
+    "violemment",
+    "brutalement",
+    "doucement",
+    "fortement",
+    "faiblement",
+    "calmement",
+    "soudainement",
+    "discretement",
+    "silencieusement",
+    "rapidement",
+    "directement",
+    "franchement",
+    "fermement",
+    "agressivement",
+    "prudemment",
+    "facilement",
+    "difficilement"
+];
+
+
+const NEO_MOTS_DIRECTION = [
+
+    "vers",
+    "dans",
+    "sur",
+    "sous",
+    "devant",
+    "derriere",
+    "derrière",
+    "gauche",
+    "droite",
+    "avant",
+    "arriere",
+    "arrière",
+    "haut",
+    "bas",
+    "loin",
+    "pres",
+    "près"
+];
+
+
+const NEO_MOTS_LIEU = [
+
+    "ici",
+    "la",
+    "là",
+    "dehors",
+    "dedans",
+    "dessus",
+    "dessous",
+    "devant",
+    "derriere",
+    "derrière"
+];
+
+
+const NEO_MOTS_CONNECTEURS = [
+
+    "puis",
+    "ensuite",
+    "avant",
+    "apres",
+    "après",
+    "sans",
+    "pour"
+];
+
+
+//==============================================================
+// DÉTECTION D'UNE MANIÈRE
+//==============================================================
+
+function neoDetecterManiere(tokens) {
+
+    for (const token of tokens) {
+
+        if (
+            NEO_MOTS_MANIERES.includes(
+                neoNormaliserValeur(token)
+            )
+        ) {
+
+            return token;
+        }
+    }
+
+    return null;
+}
+
+
+//==============================================================
+// DÉTECTION DIRECTION
+//==============================================================
+
+function neoDetecterDirection(tokens) {
+
+    for (
+        let i = 0;
+        i < tokens.length;
+        i++
+    ) {
+
+        const token =
+            neoNormaliserValeur(tokens[i]);
+
+        if (
+            NEO_MOTS_DIRECTION.includes(token)
+        ) {
+
+            return tokens
+                .slice(i)
+                .join(" ");
+        }
+    }
+
+    return null;
+}
+
+
+//==============================================================
+// DÉTECTION LIEU
+//==============================================================
+
+function neoDetecterLieu(tokens) {
+
+    for (const token of tokens) {
+
+        if (
+            NEO_MOTS_LIEU.includes(
+                neoNormaliserValeur(token)
+            )
+        ) {
+
+            return token;
+        }
+    }
+
+    return null;
+}
+
+
+//==============================================================
+// DÉTECTION DISTANCE
+//==============================================================
+
+function neoDetecterDistance(tokens) {
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        const mot =
+            neoNormaliserValeur(tokens[i]);
+
+        if (
+            /^\d+(?:[.,]\d+)?$/.test(mot) &&
+            tokens[i + 1]
+        ) {
+
+            const unite =
+                neoNormaliserValeur(
+                    tokens[i + 1]
+                );
+
+            if (
+                [
+                    "m",
+                    "metre",
+                    "metres",
+                    "cm",
+                    "centimetre",
+                    "centimetres",
+                    "km",
+                    "kilometre",
+                    "kilometres"
+                ].includes(unite)
+            ) {
+
+                return tokens
+                    .slice(i, i + 2)
+                    .join(" ");
+            }
+        }
+    }
+
+    return null;
+}
+
+
+//==============================================================
+// DÉTECTION DU SUJET
+//==============================================================
+
+function neoDetecterSujet(
+    tokens,
+    indexVerbe
+) {
+
+    if (indexVerbe <= 0) {
+        return null;
+    }
+
+    const sujet =
+        tokens
+            .slice(0, indexVerbe)
+            .join(" ")
+            .trim();
+
+    return sujet || null;
+}
+
+
+//==============================================================
+// DÉTECTION DE L'OBJET
+//==============================================================
+
+function neoDetecterObjet(
+    tokens,
+    indexVerbe,
+    indexManiere,
+    indexDirection
+) {
+
+    let debut =
+        indexVerbe + 1;
+
+    if (debut >= tokens.length) {
+        return null;
+    }
+
+    // On retire la manière du groupe nominal.
+    if (
+        indexManiere !== -1 &&
+        indexManiere >= debut
+    ) {
+
+        const avantManiere =
+            tokens
+                .slice(debut, indexManiere)
+                .join(" ")
+                .trim();
+
+        if (avantManiere) {
+            return avantManiere;
+        }
+
+        debut =
+            indexManiere + 1;
+    }
+
+    // Une direction commence ici :
+    // elle ne fait pas partie de l'objet.
+    if (
+        indexDirection !== -1 &&
+        indexDirection >= debut
+    ) {
+
+        const avantDirection =
+            tokens
+                .slice(debut, indexDirection)
+                .join(" ")
+                .trim();
+
+        return avantDirection || null;
+    }
+
+    const objet =
+        tokens
+            .slice(debut)
+            .join(" ")
+            .trim();
+
+    return objet || null;
+}
+
+
+//==============================================================
+// DÉTECTION DE LA STRUCTURE
+//==============================================================
+
+function neoConstruireStructure(
+    texte,
+    tokens
+) {
+
+    const resultat = {
+
+        verbe: null,
+
+        temps: null,
+
+        categorie: null,
+
+        sujet: null,
+
+        objet: null,
+
+        cible: null,
+
+        maniere: null,
+
+        direction: null,
+
+        lieu: null,
+
+        distance: null,
+
+        structure: []
+    };
+
+
+    //==========================================================
+    // VERBE
+    //==========================================================
+
+    const verbeInfo =
+        neoTrouverVerbe(tokens);
+
+    if (!verbeInfo) {
+        return resultat;
+    }
+
+    resultat.verbe =
+        verbeInfo.verbe;
+
+    resultat.temps =
+        verbeInfo.temps;
+
+    resultat.categorie =
+        verbeInfo.categorie;
+
+
+    //==========================================================
+    // INDEX DU VERBE
+    //==========================================================
+
+    const indexVerbe =
+        verbeInfo.index !== undefined
+            ? verbeInfo.index
+            : tokens.findIndex(
+                token =>
+                    neoNormaliserValeur(token) ===
+                    neoNormaliserValeur(
+                        verbeInfo.forme
+                    )
+            );
+
+
+    //==========================================================
+    // SUJET
+    //==========================================================
+
+    resultat.sujet =
+        neoDetecterSujet(
+            tokens,
+            indexVerbe
+        );
+
+
+    //==========================================================
+    // MANIÈRE
+    //==========================================================
+
+    resultat.maniere =
+        neoDetecterManiere(tokens);
+
+    const indexManiere =
+        resultat.maniere
+            ? tokens.findIndex(
+                token =>
+                    neoNormaliserValeur(token) ===
+                    neoNormaliserValeur(
+                        resultat.maniere
+                    )
+            )
+            : -1;
+
+
+    //==========================================================
+    // DIRECTION
+    //==========================================================
+
+    resultat.direction =
+        neoDetecterDirection(tokens);
+
+    const indexDirection =
+        resultat.direction
+            ? tokens.findIndex(
+                token =>
+                    NEO_MOTS_DIRECTION.includes(
+                        neoNormaliserValeur(token)
+                    )
+            )
+            : -1;
+
+
+    //==========================================================
+    // LIEU
+    //==========================================================
+
+    resultat.lieu =
+        neoDetecterLieu(tokens);
+
+
+    //==========================================================
+    // DISTANCE
+    //==========================================================
+
+    resultat.distance =
+        neoDetecterDistance(tokens);
+
+
+    //==========================================================
+    // OBJET
+    //==========================================================
+
+    const verbeSimple =
+        resultat.verbe;
+
+    const modelesVerbe =
+        NEO_MODELES?.fr?.[
+            resultat.categorie
+        ]?.[
+            verbeSimple
+        ] || [];
+
+
+    const utiliseObjet =
+        modelesVerbe.some(
+            modele =>
+                String(modele)
+                    .includes("O")
+        );
+
+
+    if (utiliseObjet) {
+
+        resultat.objet =
+            neoDetecterObjet(
+                tokens,
+                indexVerbe,
+                indexManiere,
+                indexDirection
+            );
+    }
+
+
+    //==========================================================
+    // CIBLE
+    //==========================================================
+
+    if (
+        modelesVerbe.some(
+            modele =>
+                String(modele)
+                    .includes("CC_CIBLE")
+        )
+    ) {
+
+        if (resultat.objet) {
+
+            resultat.cible =
+                resultat.objet;
+
+            resultat.objet =
+                null;
+        }
+    }
+
+
+    //==========================================================
+    // CONSTRUCTION DE LA STRUCTURE
+    //==========================================================
+
+    const structure = [
+        "S",
+        "V"
+    ];
+
+
+    // MANIÈRE
+    if (resultat.maniere) {
+
+        structure.push(
+            "MANIERE"
+        );
+    }
+
+
+    // OBJET
+    if (resultat.objet) {
+
+        structure.push(
+            "O"
+        );
+    }
+
+
+    // CIBLE
+    if (resultat.cible) {
+
+        structure.push(
+            "CC_CIBLE"
+        );
+    }
+
+
+    // DISTANCE
+    if (resultat.distance) {
+
+        structure.push(
+            "CC_DISTANCE"
+        );
+    }
+
+
+    // DIRECTION
+    if (resultat.direction) {
+
+        structure.push(
+            "CC_DIRECTION"
+        );
+    }
+
+
+    // LIEU
+    if (resultat.lieu) {
+
+        structure.push(
+            "CC_LIEU"
+        );
+    }
+
+
+    resultat.structure =
+        structure;
+
+
+    return resultat;
+}
+
+
+//==============================================================
+// COMPARAISON DE STRUCTURES
+//==============================================================
+//
+// Exemple:
+//
+// S + V + MANIERE + CC_DIRECTION
+//
+// contre:
+//
+// S + V + MANIERE + CC_DIRECTION
+//
+// = 100 %
+//
+// S + V + CC_DIRECTION
+//
+// contre:
+//
+// S + V + MANIERE + CC_DIRECTION
+//
+// = 75 %
+//==============================================================
+
+function neoComparerStructure(
+    structure,
+    modele
+) {
+
+    if (
+        !Array.isArray(structure) ||
+        !Array.isArray(modele) ||
+        !structure.length ||
+        !modele.length
+    ) {
+        return 0;
+    }
+
+
+    //==========================================================
+    // COMPARAISON POSITIONNELLE
+    //==========================================================
+
+    const longueur =
+        Math.max(
+            structure.length,
+            modele.length
+        );
+
+    let correspondances = 0;
+
+    for (
+        let i = 0;
+        i < longueur;
+        i++
+    ) {
+
+        if (
+            structure[i] &&
+            modele[i] &&
+            structure[i] === modele[i]
+        ) {
+
+            correspondances++;
+        }
+    }
+
+
+    return Math.round(
+        (correspondances / longueur) * 100
+    );
+}
+
+
+//==============================================================
+// RÉSUMÉ LOCAL
+//==============================================================
+
+function neoConstruireResume(
+    analyse
+) {
+
+    const morceaux = [];
+
+
+    if (analyse.sujet) {
+
+        morceaux.push(
+            analyse.sujet
+        );
+    }
+
+
+    if (analyse.verbe) {
+
+        morceaux.push(
+            analyse.verbe
+        );
+    }
+
+
+    if (analyse.objet) {
+
+        morceaux.push(
+            analyse.objet
+        );
+    }
+
+
+    if (analyse.cible) {
+
+        morceaux.push(
+            "vers " +
+            analyse.cible
+        );
+    }
+
+
+    if (analyse.direction) {
+
+        if (
+            !morceaux.some(
+                x =>
+                    String(x)
+                        .includes(
+                            analyse.direction
+                        )
+            )
+        ) {
+
+            morceaux.push(
+                analyse.direction
+            );
+        }
+    }
+
+
+    if (analyse.maniere) {
+
+        morceaux.push(
+            analyse.maniere
+        );
+    }
+
+
+    if (analyse.distance) {
+
+        morceaux.push(
+            analyse.distance
+        );
+    }
+
+
+    if (analyse.lieu) {
+
+        morceaux.push(
+            analyse.lieu
+        );
+    }
+
+
+    return morceaux
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+
+//==============================================================
+// ANALYSE COMPLÈTE DE STRUCTURE
+//==============================================================
+
+function neoAnalyserStructure(text) {
+
+    const texteNormalise =
+        typeof neoNormaliserTexte === "function"
+            ? neoNormaliserTexte(text)
+            : text;
+
+    const tokens =
+        typeof neoTokeniser === "function"
+            ? neoTokeniser(texteNormalise)
+            : String(texteNormalise)
+                .split(/\s+/)
+                .filter(Boolean);
+
+
+    return neoConstruireStructure(
+        text,
+        tokens
+    );
+}
+//==============================================================
+// CONSTRUIRE RÉSUMÉ 
+//==============================================================
+function neoConstruireResume(analyse) {
+
+    const morceaux = [];
+
+    // Sujet
+    if (analyse.sujet) {
+        morceaux.push(analyse.sujet);
+    }
+
+    // Forme réelle du verbe
+    if (analyse.formeVerbe) {
+        morceaux.push(analyse.formeVerbe);
+    } else if (analyse.verbe) {
+        morceaux.push(analyse.verbe);
+    }
+
+    // Objet
+    if (analyse.objet) {
+        morceaux.push(analyse.objet);
+    }
+
+    // Cible
+    if (analyse.cible) {
+        morceaux.push("vers " + analyse.cible);
+    }
+
+    // Direction
+    if (analyse.direction) {
+
+        const direction = String(analyse.direction);
+
+        if (
+            !morceaux.some(
+                morceau =>
+                    String(morceau).includes(direction)
+            )
+        ) {
+            morceaux.push(direction);
+        }
+    }
+
+    // Manière
+    if (analyse.maniere) {
+        morceaux.push(analyse.maniere);
+    }
+
+    // Distance
+    if (analyse.distance) {
+        morceaux.push(analyse.distance);
+    }
+
+    // Lieu
+    if (analyse.lieu) {
+        morceaux.push(analyse.lieu);
+    }
+
+    return morceaux
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+//==============================================================
 // 📚 NEO_NOMS
 //==============================================================
 
