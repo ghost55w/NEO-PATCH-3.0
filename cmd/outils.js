@@ -2661,78 +2661,88 @@ ovlcmd(
                 );
 
         //======================================================
-        // 🔎 ANALYSE
-        //======================================================
+// 🔎 ANALYSE
+//======================================================
 
-        const messageAnalyse =
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        "🔎 *Analyse des mots.*"
-                },
-                {
-                    quoted: ms
-                }
-            );
+const animationsAnalyse = [
+    "🔎 *Analyse des mots.*",
+    "🔎 *Analyse des mots..*",
+    "🔎 *Analyse des mots...*"
+];
 
-        const animationsAnalyse = [
-            "🔎 *Analyse des mots.*",
-            "🔎 *Analyse des mots..*",
-            "🔎 *Analyse des mots...*"
-        ];
-
-        for (
-            let i = 1;
-            i < animationsAnalyse.length;
-            i++
-        ) {
-
-            await attendre(1600);
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        animationsAnalyse[i]
-                },
-                {
-                    quoted: ms
-                }
-            );
-
+const messageAnalyse =
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text:
+                animationsAnalyse[0]
+        },
+        {
+            quoted: ms
         }
+    );
 
-        //======================================================
-        // 📚 APPRENTISSAGE
-        //======================================================
+for (
+    let i = 1;
+    i < animationsAnalyse.length;
+    i++
+) {
 
-        const animationsLearn = [
-            "📚 🧠 *Apprentissage des mots.*",
-            "📚 🧠 *Apprentissage des mots..*",
-            "📚 🧠 *Apprentissage des mots...*"
-        ];
+    await attendre(1600);
 
-        for (
-            let i = 0;
-            i < animationsLearn.length;
-            i++
-        ) {
-
-            await attendre(1600);
-
-            await ovl.sendMessage(
-                ms_org,
-                {
-                    text:
-                        animationsLearn[i]
-                },
-                {
-                    quoted: ms
-                }
-            );
-
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text:
+                animationsAnalyse[i],
+            edit:
+                messageAnalyse.key
         }
+    );
+
+}
+
+//======================================================
+// 📚 APPRENTISSAGE
+//======================================================
+
+const animationsLearn = [
+    "📚 🧠 *Apprentissage des mots.*",
+    "📚 🧠 *Apprentissage des mots..*",
+    "📚 🧠 *Apprentissage des mots...*"
+];
+
+const messageLearn =
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text:
+                animationsLearn[0]
+        },
+        {
+            quoted: ms
+        }
+    );
+
+for (
+    let i = 1;
+    i < animationsLearn.length;
+    i++
+) {
+
+    await attendre(1600);
+
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text:
+                animationsLearn[i],
+            edit:
+                messageLearn.key
+        }
+    );
+
+}
 
         //======================================================
         // TOKENISATION
