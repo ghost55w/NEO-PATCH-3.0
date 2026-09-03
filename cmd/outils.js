@@ -2127,164 +2127,119 @@ if (
 }
 
        
-
-        //======================================================
+//======================================================
 // 🖐️ MOYEN / INSTRUMENT
 //======================================================
 
 let moyen = null;
 
 //======================================================
-// 🧠 NORMALISER LES MOTS DE LA ZONE
+// 🧠 DÉTECTION D'UNE PARTIE DU CORPS
 //======================================================
 
-const motsZone =
-    zone.map(
-        element =>
-            motNormalise(element.mot)
-    );
+const estPartieCorpsZone =
+    element => {
+
+        if (!element) {
+            return false;
+        }
+
+        return estPartieCorps(element);
+    };
 
 //======================================================
-// 🖐️ PAUME
+// 🔎 RECHERCHE DU MOYEN
 //======================================================
 //
-// Reconnaît :
-// "paume gauche"
-// "paume droite"
-// "paume de main gauche"
-// "paume de main droite"
+// NeoAI.js fournit déjà les connaissances.
+// Ici on ne crée aucune liste de vocabulaire.
+//
+// Exemples automatiquement reconnus si présents
+// dans NeoAI.js :
+//
+// paume gauche
+// avant-bras droit
+// coude gauche
+// genou droit
+// poing droit
+// pied gauche
+// etc.
 //
 
 for (
     let i = 0;
-    i < motsZone.length;
+    i < zone.length;
     i++
 ) {
 
+    const element =
+        zone[i];
+
     if (
-        motsZone[i] !== "paume"
+        !estPartieCorpsZone(element)
     ) {
         continue;
     }
 
-    let cote = null;
+    let partie =
+        motNormalise(
+            element.mot
+        );
 
-    // paume gauche / droite
+    //==============================================
+    // Partie composée : avant + bras
+    //==============================================
+
     if (
-        motsZone[i + 1] === "gauche" ||
-        motsZone[i + 1] === "droite"
-    ) {
-
-        cote =
-            motsZone[i + 1];
-    }
-
-    // paume de main gauche / droite
-    else if (
-        motsZone[i + 1] === "de" &&
-        motsZone[i + 2] === "main" &&
-        (
-            motsZone[i + 3] === "gauche" ||
-            motsZone[i + 3] === "droite"
+        partie === "avant" &&
+        zone[i + 1] &&
+        motNormalise(
+            zone[i + 1].mot
+        ) === "bras" &&
+        estPartieCorpsZone(
+            zone[i + 1]
         )
     ) {
 
-        cote =
-            motsZone[i + 3];
+        partie =
+            "avant-bras";
+
+        i++;
     }
 
-    if (cote) {
+    //==============================================
+    // Chercher gauche / droite
+    //==============================================
+
+    const suivant =
+        zone[i + 1];
+
+    const motSuivant =
+        motNormalise(
+            suivant?.mot
+        );
+
+    if (
+        motSuivant === "gauche" ||
+        motSuivant === "droite"
+    ) {
 
         moyen =
-            `paume ${cote}`;
+            `${partie} ${motSuivant}`;
 
         break;
     }
+
+    //==============================================
+    // Partie du corps sans côté
+    //==============================================
+
+    moyen =
+        partie;
+
+    break;
 }
-
-//======================================================
-// 🦾 AVANT-BRAS
-//======================================================
-
-if (!moyen) {
-
-    for (
-        let i = 0;
-        i < motsZone.length;
-        i++
-    ) {
-
-        // "avant-bras droit"
-        if (
-            motsZone[i] === "avant-bras" &&
-            (
-                motsZone[i + 1] === "gauche" ||
-                motsZone[i + 1] === "droite"
-            )
-        ) {
-
-            moyen =
-                `avant-bras ${motsZone[i + 1]}`;
-
-            break;
-        }
-
-        // "avant bras droit"
-        if (
-            motsZone[i] === "avant" &&
-            motsZone[i + 1] === "bras" &&
-            (
-                motsZone[i + 2] === "gauche" ||
-                motsZone[i + 2] === "droite"
-            )
-        ) {
-
-            moyen =
-                `avant-bras ${motsZone[i + 2]}`;
-
-            break;
-        }
-    }
-}
-
-//======================================================
-// ✋ MAIN
-//======================================================
-//
-// Reconnaît :
-// "main gauche"
-// "main droite"
-//
-// On le fait après avant-bras pour éviter
-// qu'un avant-bras soit interprété comme une simple main.
-//
-
-if (!moyen) {
-
-    for (
-        let i = 0;
-        i < motsZone.length;
-        i++
-    ) {
-
-        if (
-            motsZone[i] !== "main"
-        ) {
-            continue;
-        }
-
-        if (
-            motsZone[i + 1] === "gauche" ||
-            motsZone[i + 1] === "droite"
-        ) {
-
-            moyen =
-                `main ${motsZone[i + 1]}`;
-
-            break;
-        }
-    }
-}
+        
 
         //======================================================
         // SI L'ACTION EST "BLOQUER"
