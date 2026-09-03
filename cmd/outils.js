@@ -1503,6 +1503,8 @@ function analyserNeoAI(text) {
                         continue;
                     }
 
+                    // Ces mots servent à décrire le moyen
+                    // et ne doivent pas devenir des objets.
                     if (
                         mot !== "main" &&
                         mot !== "paume" &&
@@ -1529,6 +1531,23 @@ function analyserNeoAI(text) {
         // ------------------------------------------------------
 
         if (
+            contexteObjet &&
+            motNormalise(objet) === "coup" &&
+            /\ble\s+coup\b/i.test(
+                texteZone
+            )
+        ) {
+
+            objet =
+                contexteObjet;
+        }
+
+        // ------------------------------------------------------
+        // Si aucun objet n'a encore été trouvé,
+        // on reprend directement le contexte.
+        // ------------------------------------------------------
+
+        if (
             !objet &&
             contexteObjet &&
             /\ble\s+coup\b/i.test(
@@ -1540,7 +1559,7 @@ function analyserNeoAI(text) {
                 contexteObjet;
         }
 
-        //======================================================
+      //======================================================
         // CIBLE
         //======================================================
 
@@ -1566,6 +1585,28 @@ function analyserNeoAI(text) {
                     element.mot
                 );
 
+            // --------------------------------------------------
+            // 🚫 "pied" dans "coup de pied"
+            //
+            // Ici "pied" fait partie du nom de l'objet
+            // "coup de pied", ce n'est PAS la cible.
+            // On continue donc la recherche pour trouver
+            // la véritable cible, par exemple "abdomen".
+            // --------------------------------------------------
+
+            if (
+                mot === "pied" &&
+                i >= 2 &&
+                motNormalise(
+                    zone[i - 1]?.mot
+                ) === "de" &&
+                motNormalise(
+                    zone[i - 2]?.mot
+                ) === "coup"
+            ) {
+                continue;
+            }
+
             const avant =
                 zone
                     .slice(
@@ -1576,6 +1617,14 @@ function analyserNeoAI(text) {
                         e =>
                             motNormalise(e.mot)
                     );
+
+            // --------------------------------------------------
+            // 🚫 Parties du corps utilisées comme moyen
+            //
+            // "main gauche"
+            // "paume gauche"
+            // "avant-bras droit"
+            // --------------------------------------------------
 
             if (
                 avant.includes("main") ||
@@ -1588,6 +1637,10 @@ function analyserNeoAI(text) {
 
             cible =
                 element.mot;
+
+            // --------------------------------------------------
+            // "tête de Tobirama"
+            // --------------------------------------------------
 
             if (
                 zone[i + 1] &&
@@ -1621,7 +1674,8 @@ function analyserNeoAI(text) {
 
             cible =
                 contexteCible;
-        }
+        }  
+       
 
         //======================================================
         // MOYEN / INSTRUMENT
@@ -1687,14 +1741,21 @@ function analyserNeoAI(text) {
             cible = contexteCible;
         }
 
-        //======================================================
+       //======================================================
         // CRÉATION DE L'ACTION
         //======================================================
 
         actions.push({
 
+            // Forme normalisée utilisée par NeoAI
+            // Exemple : "bloquer"
             verbe:
                 actionVerbe.verbe,
+
+            // Forme réellement écrite dans le pavé
+            // Exemple : "bloque"
+            mot:
+                actionVerbe.mot,
 
             forme:
                 actionVerbe.forme,
@@ -1710,8 +1771,7 @@ function analyserNeoAI(text) {
             ...(moyen
                 ? { moyen }
                 : {})
-        });
-    }
+        }); 
 
     //==========================================================
     // 9️⃣ CONTEXTE
@@ -1894,10 +1954,50 @@ function analyserNeoAI(text) {
 
         const phrasesActions =
             actions.map(
-                action => {
+                (action, index) => {
 
-                    let phrase =
-                        `${sujet} ${action.verbe}`;
+                    // --------------------------------------------------
+                    // On utilise le mot réellement écrit dans le texte
+                    // pour conserver la bonne conjugaison.
+                    //
+                    // "bloque" au lieu de "bloquer"
+                    // --------------------------------------------------
+
+                    const verbe =
+                        action.mot ||
+                        action.verbe;
+
+                    let phrase = "";
+
+                    // --------------------------------------------------
+                    // Première action
+                    // --------------------------------------------------
+
+                    if (index === 0) {
+
+                        phrase =
+                            `${sujet} ${verbe}`;
+
+                    // --------------------------------------------------
+                    // Actions suivantes dans un enchaînement
+                    // --------------------------------------------------
+
+                    } else if (
+                        enchainement === "successif"
+                    ) {
+
+                        phrase =
+                            `${verbe}`;
+
+                    } else {
+
+                        phrase =
+                            `${sujet} ${verbe}`;
+                    }
+
+                    // --------------------------------------------------
+                    // OBJET
+                    // --------------------------------------------------
 
                     if (action.objet) {
 
@@ -1905,21 +2005,65 @@ function analyserNeoAI(text) {
                             ` un ${action.objet}`;
                     }
 
+                    // --------------------------------------------------
+                    // CIBLE
+                    // --------------------------------------------------
+
                     if (action.cible) {
 
-                        phrase +=
-                            ` visant ${action.cible}`;
+                        const cibleNormalisee =
+                            motNormalise(
+                                action.cible
+                            );
+
+                        if (
+                            !cibleNormalisee.includes("son ") &&
+                            !cibleNormalisee.includes("sa ") &&
+                            !cibleNormalisee.includes("ses ") &&
+                            !cibleNormalisee.includes(" de ")
+                        ) {
+
+                            phrase +=
+                                ` visant son ${action.cible}`;
+
+                        } else {
+
+                            phrase +=
+                                ` visant ${action.cible}`;
+                        }
                     }
+
+                    // --------------------------------------------------
+                    // MOYEN
+                    // --------------------------------------------------
 
                     if (action.moyen) {
 
+                        const moyenNormalise =
+                            motNormalise(
+                                action.moyen
+                            );
+
+                        // "avant-bras" → son
+                        // "paume" / "main" → sa
+                        const possessif =
+                            moyenNormalise.startsWith(
+                                "avant-bras"
+                            )
+                                ? "son"
+                                : "sa";
+
                         phrase +=
-                            ` avec sa ${action.moyen}`;
+                            ` avec ${possessif} ${action.moyen}`;
                     }
 
                     return phrase;
                 }
             );
+
+        // ----------------------------------------------------------
+        // Enchaînement successif
+        // ----------------------------------------------------------
 
         if (
             actions.length > 1 &&
@@ -1930,6 +2074,7 @@ function analyserNeoAI(text) {
                 phrasesActions
                     .join(" puis ")
                     + ".";
+
         } else {
 
             reformulation =
@@ -1938,6 +2083,7 @@ function analyserNeoAI(text) {
                     + ".";
         }
     }
+
 
     //==========================================================
     // 1️⃣5️⃣ COMPRÉHENSION
