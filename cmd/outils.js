@@ -2026,19 +2026,6 @@ if (
 //======================================================
 // 🎯 3. FALLBACK
 //======================================================
-//
-// On conserve le comportement précédent pour les
-// phrases qui ne possèdent pas d'expression explicite.
-//
-// Exemple :
-//
-// "bloque le coup de poing au visage"
-//
-// → visage
-//
-// Mais une partie du corps utilisée comme moyen
-// n'est jamais considérée comme cible.
-//======================================================
 
 if (
     !cible
@@ -2142,49 +2129,162 @@ if (
        
 
         //======================================================
-        // MOYEN / INSTRUMENT
-        //======================================================
+// 🖐️ MOYEN / INSTRUMENT
+//======================================================
 
-        let moyen = null;
+let moyen = null;
 
-        const matchPaume =
-            texteZone.match(
-                /paume(?:\s+de)?(?:\s+main)?\s+(gauche|droite)/i
-            );
+//======================================================
+// 🧠 NORMALISER LES MOTS DE LA ZONE
+//======================================================
 
-        if (matchPaume) {
+const motsZone =
+    zone.map(
+        element =>
+            motNormalise(element.mot)
+    );
+
+//======================================================
+// 🖐️ PAUME
+//======================================================
+//
+// Reconnaît :
+// "paume gauche"
+// "paume droite"
+// "paume de main gauche"
+// "paume de main droite"
+//
+
+for (
+    let i = 0;
+    i < motsZone.length;
+    i++
+) {
+
+    if (
+        motsZone[i] !== "paume"
+    ) {
+        continue;
+    }
+
+    let cote = null;
+
+    // paume gauche / droite
+    if (
+        motsZone[i + 1] === "gauche" ||
+        motsZone[i + 1] === "droite"
+    ) {
+
+        cote =
+            motsZone[i + 1];
+    }
+
+    // paume de main gauche / droite
+    else if (
+        motsZone[i + 1] === "de" &&
+        motsZone[i + 2] === "main" &&
+        (
+            motsZone[i + 3] === "gauche" ||
+            motsZone[i + 3] === "droite"
+        )
+    ) {
+
+        cote =
+            motsZone[i + 3];
+    }
+
+    if (cote) {
+
+        moyen =
+            `paume ${cote}`;
+
+        break;
+    }
+}
+
+//======================================================
+// 🦾 AVANT-BRAS
+//======================================================
+
+if (!moyen) {
+
+    for (
+        let i = 0;
+        i < motsZone.length;
+        i++
+    ) {
+
+        // "avant-bras droit"
+        if (
+            motsZone[i] === "avant-bras" &&
+            (
+                motsZone[i + 1] === "gauche" ||
+                motsZone[i + 1] === "droite"
+            )
+        ) {
 
             moyen =
-                `paume ${matchPaume[1].toLowerCase()}`;
+                `avant-bras ${motsZone[i + 1]}`;
+
+            break;
         }
 
-        if (!moyen) {
+        // "avant bras droit"
+        if (
+            motsZone[i] === "avant" &&
+            motsZone[i + 1] === "bras" &&
+            (
+                motsZone[i + 2] === "gauche" ||
+                motsZone[i + 2] === "droite"
+            )
+        ) {
 
-            const matchMain =
-                texteZone.match(
-                    /\bmain\s+(gauche|droite)\b/i
-                );
+            moyen =
+                `avant-bras ${motsZone[i + 2]}`;
 
-            if (matchMain) {
+            break;
+        }
+    }
+}
 
-                moyen =
-                    `main ${matchMain[1].toLowerCase()}`;
-            }
+//======================================================
+// ✋ MAIN
+//======================================================
+//
+// Reconnaît :
+// "main gauche"
+// "main droite"
+//
+// On le fait après avant-bras pour éviter
+// qu'un avant-bras soit interprété comme une simple main.
+//
+
+if (!moyen) {
+
+    for (
+        let i = 0;
+        i < motsZone.length;
+        i++
+    ) {
+
+        if (
+            motsZone[i] !== "main"
+        ) {
+            continue;
         }
 
-        if (!moyen) {
+        if (
+            motsZone[i + 1] === "gauche" ||
+            motsZone[i + 1] === "droite"
+        ) {
 
-            const matchAvantBras =
-                texteZone.match(
-                    /\bavant[-\s]?bras\s+(gauche|droite)\b/i
-                );
+            moyen =
+                `main ${motsZone[i + 1]}`;
 
-            if (matchAvantBras) {
-
-                moyen =
-                    `avant-bras ${matchAvantBras[1].toLowerCase()}`;
-            }
+            break;
         }
+    }
+}
 
         //======================================================
         // SI L'ACTION EST "BLOQUER"
