@@ -188,6 +188,1171 @@ const NEO_LEARN = {
 };
 
 //==============================================================
+// 🧠 NEO_MODELES
+//==============================================================
+// 📚 Modèles de structures linguistiques
+// 🇫🇷 Français
+//==============================================================
+
+const NEO_MODELES = {
+
+    fr: {
+
+        //======================================================
+        // 🧠 Général
+        //======================================================
+
+        general: {
+
+            //==================================================
+            // ➡️ ALLER
+            //==================================================
+
+            "aller": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + POUR + V",
+                "S + V + PUIS + V"
+            ],
+
+            //==================================================
+            // 📦 AVOIR
+            //==================================================
+
+            "avoir": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU + CC_TEMPS",
+                "S + V + CC_TEMPS",
+                "S + V + CC_LIEU",
+                "S + V + O + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🔎 CHERCHER
+            //==================================================
+
+            "chercher": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU + CC_TEMPS",
+                "S + V + O + CC_DIRECTION",
+                "S + V + POUR + V",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V"
+            ],
+
+            //==================================================
+            // 🧠 COMPRENDRE
+            //==================================================
+
+            "comprendre": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_LIEU",
+                "S + V + QUE + PROPOSITION",
+                "S + V + POURQUOI + PROPOSITION",
+                "S + V + COMMENT + PROPOSITION",
+                "S + V + PUIS + V",
+                "S + V + SANS + V"
+            ],
+
+            //==================================================
+            // ⚠️ DEVOIR
+            //==================================================
+
+            "devoir": [
+                "S + V",
+                "S + V + V",
+                "S + V + V + O",
+                "S + V + V + CC_LIEU",
+                "S + V + V + CC_DIRECTION",
+                "S + V + V + MANIERE",
+                "S + V + V + O + CC_LIEU",
+                "S + V + V + O + MANIERE",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V"
+            ],
+
+            //==================================================
+            // 💬 DIRE
+            //==================================================
+
+            "dire": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_LIEU",
+                "S + V + O + MANIERE",
+                "S + V + QUE + PROPOSITION",
+                "S + V + À + PERSONNE",
+                "S + V + À + PERSONNE + O",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 👂 ÉCOUTER
+            //==================================================
+
+            "écouter": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_DIRECTION",
+                "S + V + O + MANIERE + CC_LIEU",
+                "S + V + POUR + V",
+                "S + V + PUIS + V",
+                "S + V + SANS + V"
+            ],
+
+            //==================================================
+            // 👂 ENTENDRE
+            //==================================================
+
+            "entendre": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + QUE + PROPOSITION",
+                "S + V + O + PUIS + V",
+                "S + V + POUR + V",
+                "S + V + SANS + V",
+                "S + V + AVANT_DE + V"
+            ],
+
+            //==================================================
+            // 👤 ÊTRE
+            //==================================================
+
+            "être": [
+                "S + V",
+                "S + V + ATTRIBUT",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + MANIERE",
+                "S + V + ATTRIBUT + CC_LIEU",
+                "S + V + ATTRIBUT + CC_TEMPS",
+                "S + V + ATTRIBUT + MANIERE",
+                "S + V + POUR + V",
+                "S + V + PUIS + V"
+            ],
+
+            //==================================================
+            // 🔨 FAIRE
+            //==================================================
+
+            "faire": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_DIRECTION",
+                "S + V + O + MANIERE + CC_LIEU",
+                "S + V + POUR + V",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V"
+            ],
+
+            //==================================================
+            // 🗣️ PARLER
+            //==================================================
+
+            "parler": [
+                "S + V",
+                "S + V + À + PERSONNE",
+                "S + V + DE + O",
+                "S + V + À + PERSONNE + DE + O",
+                "S + V + MANIERE",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + À + PERSONNE + MANIERE",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 💭 PENSER
+            //==================================================
+
+            "penser": [
+                "S + V",
+                "S + V + À + O",
+                "S + V + DE + O",
+                "S + V + QUE + PROPOSITION",
+                "S + V + MANIERE",
+                "S + V + CC_TEMPS",
+                "S + V + CC_LIEU",
+                "S + V + À + O + MANIERE",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // ⚡ POUVOIR
+            //==================================================
+
+            "pouvoir": [
+                "S + V",
+                "S + V + V",
+                "S + V + V + O",
+                "S + V + V + CC_DIRECTION",
+                "S + V + V + CC_LIEU",
+                "S + V + V + MANIERE",
+                "S + V + V + O + CC_LIEU",
+                "S + V + V + O + MANIERE",
+                "S + V + PUIS + V",
+                "S + V + SANS + V"
+            ],
+
+            //==================================================
+            // 👁️ REGARDER
+            //==================================================
+
+            "regarder": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_DIRECTION",
+                "S + V + O + MANIERE + CC_LIEU",
+                "S + V + POUR + V",
+                "S + V + PUIS + V",
+                "S + V + SANS + V"
+            ],
+
+            //==================================================
+            // 🧠 SAVOIR
+            //==================================================
+
+            "savoir": [
+                "S + V",
+                "S + V + O",
+                "S + V + QUE + PROPOSITION",
+                "S + V + COMMENT + PROPOSITION",
+                "S + V + QUAND + PROPOSITION",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_LIEU",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 👃 SENTIR
+            //==================================================
+
+            "sentir": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_DISTANCE",
+                "S + V + O + MANIERE + CC_LIEU",
+                "S + V + QUE + PROPOSITION",
+                "S + V + PUIS + V",
+                "S + V + SANS + V"
+            ],
+
+            //==================================================
+            // 🔎 TROUVER
+            //==================================================
+
+            "trouver": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_DISTANCE",
+                "S + V + O + MANIERE + CC_LIEU",
+                "S + V + QUE + PROPOSITION",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 👤 VENIR
+            //==================================================
+
+            "venir": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + POUR + V",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V"
+            ],
+
+            //==================================================
+            // 👁️ VOIR
+            //==================================================
+
+            "voir": [
+                "S + V",
+                "S + V + O",
+                "S + V + O + MANIERE",
+                "S + V + O + CC_LIEU",
+                "S + V + O + CC_TEMPS",
+                "S + V + O + CC_DISTANCE",
+                "S + V + QUE + PROPOSITION",
+                "S + V + O + PUIS + V",
+                "S + V + POUR + V",
+                "S + V + SANS + V"
+            ],
+
+            //==================================================
+            // 🎯 VOULOIR
+            //==================================================
+
+            "vouloir": [
+                "S + V",
+                "S + V + V",
+                "S + V + V + O",
+                "S + V + V + CC_DIRECTION",
+                "S + V + V + CC_LIEU",
+                "S + V + V + MANIERE",
+                "S + V + V + O + CC_LIEU",
+                "S + V + V + O + MANIERE",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ]
+
+        }
+    }
+};
+
+        //======================================================
+        // 🚶 Déplacement
+        //======================================================
+
+        deplacement: {
+
+            //==================================================
+            // ⚡ ACCÉLÉRER
+            //==================================================
+
+            "accélérer": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // ➡️ ALLER
+            //==================================================
+
+            "aller": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 👣 APPROCHER
+            //==================================================
+
+            "approcher": [
+                "S + V",
+                "S + V + O",
+                "S + V + CC_CIBLE",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_CIBLE",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_CIBLE",
+                "S + V + CC_LIEU",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 📍 ARRIVER
+            //==================================================
+
+            "arriver": [
+                "S + V",
+                "S + V + CC_LIEU",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_LIEU",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🚶 AVANCER
+            //==================================================
+
+            "avancer": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🏃 COURIR
+            //==================================================
+
+            "courir": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_CIBLE",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // ⬇️ DESCENDRE
+            //==================================================
+
+            "descendre": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🚪 ENTRER
+            //==================================================
+
+            "entrer": [
+                "S + V",
+                "S + V + CC_LIEU",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_LIEU",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🧗 GRIMPER
+            //==================================================
+
+            "grimper": [
+                "S + V",
+                "S + V + CC_LIEU",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🚶 MARCHER
+            //==================================================
+
+            "marcher": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // ⬆️ MONTER
+            //==================================================
+
+            "monter": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🚪 PARTIR
+            //==================================================
+
+            "partir": [
+                "S + V",
+                "S + V + CC_LIEU",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🐍 RAMPER
+            //==================================================
+
+            "ramper": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🐢 RALENTIR
+            //==================================================
+
+            "ralentir": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🔙 RECULER
+            //==================================================
+
+            "reculer": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🔄 REVENIR
+            //==================================================
+
+            "revenir": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // ↔️ S'ÉLOIGNER
+            //==================================================
+
+            "s'éloigner": [
+                "S + V",
+                "S + V + CC_CIBLE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_CIBLE",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_CIBLE",
+                "S + V + CC_LIEU",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🦘 SAUTER
+            //==================================================
+
+            "sauter": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🚪 SORTIR
+            //==================================================
+
+            "sortir": [
+                "S + V",
+                "S + V + CC_LIEU",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 💥 TOMBER
+            //==================================================
+
+            "tomber": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + MANIERE + CC_LIEU",
+                "S + V + PUIS + V",
+                "S + V + APRES + V",
+                "S + V + AVANT_DE + V"
+            ],
+
+            //==================================================
+            // 🔄 TOURNER
+            //==================================================
+
+            "tourner": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + AVANT_DE + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🪽 VOLER
+            //==================================================
+
+            "voler": [
+                "S + V",
+                "S + V + MANIERE",
+                "S + V + CC_DIRECTION",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ],
+
+            //==================================================
+            // 🌍 VOYAGER
+            //==================================================
+
+            "voyager": [
+                "S + V",
+                "S + V + CC_DIRECTION",
+                "S + V + CC_LIEU",
+                "S + V + MANIERE",
+                "S + V + MANIERE + CC_DIRECTION",
+                "S + V + CC_DISTANCE",
+                "S + V + CC_DISTANCE + CC_DIRECTION",
+                "S + V + CC_TEMPS",
+                "S + V + PUIS + V",
+                "S + V + POUR + V"
+            ]
+        },
+
+//======================================================
+// ⚔️ Combat
+//======================================================
+
+combat: {
+
+    "agripper": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DIRECTION",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "attaquer": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DIRECTION",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "attraper": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_DISTANCE",
+        "S + V + O + CC_LIEU",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "bloquer": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DIRECTION",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "combattre": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "défendre": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DIRECTION",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "esquiver": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + CC_DIRECTION",
+        "S + V + CC_DISTANCE",
+        "S + V + MANIERE + CC_DIRECTION",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "frapper": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_DISTANCE",
+        "S + V + O + CC_LIEU",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "immobiliser": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "lancer": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_DIRECTION",
+        "S + V + O + CC_DISTANCE",
+        "S + V + O + CC_CIBLE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_DIRECTION",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "porter": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "poursuivre": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + CC_DIRECTION",
+        "S + V + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "pousser": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_DIRECTION",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "prendre": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "projeter": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_DIRECTION",
+        "S + V + O + CC_DISTANCE",
+        "S + V + O + CC_CIBLE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_DIRECTION",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "protéger": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DIRECTION",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "saisir": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_DISTANCE",
+        "S + V + O + CC_LIEU",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "tirer": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_DIRECTION",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "toucher": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ],
+
+    "viser": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_CIBLE",
+        "S + V + O + CC_DIRECTION",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE + CC_CIBLE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V"
+    ]
+
+},
+
+//======================================================
+// 🏠 Vie courante
+//======================================================
+
+vie_courante: {
+
+    "arrêter": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + CC_LIEU",
+        "S + V + CC_TEMPS",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "attendre": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + CC_LIEU",
+        "S + V + CC_TEMPS",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "boire": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "commencer": [
+        "S + V",
+        "S + V + O",
+        "S + V + V",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V",
+        "S + V + PUIS + V",
+        "S + V + SANS + V"
+    ],
+
+    "continuer": [
+        "S + V",
+        "S + V + O",
+        "S + V + V",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + MANIERE",
+        "S + V + POUR + V",
+        "S + V + PUIS + V",
+        "S + V + SANS + V"
+    ],
+
+    "dormir": [
+        "S + V",
+        "S + V + MANIERE",
+        "S + V + CC_LIEU",
+        "S + V + CC_TEMPS",
+        "S + V + MANIERE + CC_LIEU",
+        "S + V + MANIERE + CC_TEMPS",
+        "S + V + CC_LIEU + CC_TEMPS",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "fermer": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + O + CC_DIRECTION",
+        "S + V + MANIERE + O",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "finir": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + MANIERE",
+        "S + V + CC_TEMPS",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "manger": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + O + CC_DISTANCE",
+        "S + V + MANIERE + O",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ],
+
+    "ouvrir": [
+        "S + V",
+        "S + V + O",
+        "S + V + O + MANIERE",
+        "S + V + O + CC_LIEU",
+        "S + V + O + CC_TEMPS",
+        "S + V + O + CC_DIRECTION",
+        "S + V + MANIERE + O",
+        "S + V + PUIS + V",
+        "S + V + POUR + V",
+        "S + V + AVANT_DE + V"
+    ]
+}
+} 
+
+//==============================================================
 // 📚 NEO_VERBES
 //==============================================================
 const NEO_VERBES = {
