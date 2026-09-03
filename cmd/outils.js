@@ -996,7 +996,6 @@ function extraireTexteNeoAI(
   return "";
 }
 
-
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
@@ -1096,20 +1095,36 @@ function analyserNeoAI(text) {
             .replace(/[.,!?;:()]/g, "")
             .trim();
 
-    const estCategorie = (element, recherche) => {
+    const estCategorie = (
+        element,
+        recherche
+    ) => {
+
+        if (!element) {
+            return false;
+        }
 
         return element.categories?.some(
-            categorie =>
-                String(
-                    categorie.categorie || ""
-                )
-                .toLowerCase()
-                .includes(recherche)
+            categorie => {
+
+                const nomCategorie =
+                    String(
+                        categorie?.categorie || ""
+                    )
+                    .toLowerCase();
+
+                return nomCategorie.includes(
+                    String(recherche).toLowerCase()
+                );
+            }
         );
     };
 
     const estVerbe = element =>
-        estCategorie(element, "verbe");
+        estCategorie(
+            element,
+            "verbe"
+        );
 
     const estNom = element =>
         (
@@ -1124,12 +1139,57 @@ function analyserNeoAI(text) {
         );
 
     //==========================================================
+    // 🧠 CATÉGORIES LINGUISTIQUES
+    //==========================================================
+
+    const estDeterminant = element =>
+        estCategorie(
+            element,
+            "determinant"
+        );
+
+    const estPronom = element =>
+        estCategorie(
+            element,
+            "pronom"
+        );
+
+    const estConnecteur = element =>
+        (
+            estCategorie(element, "connecteur") ||
+            estCategorie(element, "liaison")
+        );
+
+    const estSuccession = element =>
+        (
+            estCategorie(element, "succession") ||
+            estCategorie(element, "enchaînement") ||
+            estCategorie(element, "enchainement")
+        );
+
+    const estDirection = element =>
+        estCategorie(
+            element,
+            "direction"
+        );
+
+    const estDeplacement = element =>
+        (
+            estCategorie(element, "deplacement") ||
+            estCategorie(element, "déplacement")
+        );
+
+    //==========================================================
     // 5️⃣ DÉTECTION DES ACTIONS VERBALES
     //==========================================================
 
     const actionsVerbes = [];
 
-    for (let i = 0; i < motsAnalyses.length; i++) {
+    for (
+        let i = 0;
+        i < motsAnalyses.length;
+        i++
+    ) {
 
         const element =
             motsAnalyses[i];
@@ -1147,10 +1207,9 @@ function analyserNeoAI(text) {
                 element.forme || ""
             ).toLowerCase();
 
-        // ------------------------------------------------------
+        //======================================================
         // PARTICIPE PRÉSENT
-        // "voyant"
-        // ------------------------------------------------------
+        //======================================================
 
         if (
             forme === "participe_present"
@@ -1158,10 +1217,13 @@ function analyserNeoAI(text) {
             continue;
         }
 
-        // ------------------------------------------------------
+        //======================================================
         // INFINITIF SUBORDONNÉ
-        // "voyant le coup de poing venir..."
-        // ------------------------------------------------------
+        //
+        // On ne cherche plus "voyant", "voit", etc.
+        // On utilise directement la forme linguistique
+        // fournie par NeoAI.js.
+        //======================================================
 
         if (
             forme === "infinitif" &&
@@ -1169,21 +1231,22 @@ function analyserNeoAI(text) {
         ) {
 
             const avant =
-                motsAnalyses
-                    .slice(
-                        Math.max(0, i - 8),
-                        i
-                    )
-                    .map(
-                        e =>
-                            motNormalise(e.mot)
-                    );
+                motsAnalyses.slice(
+                    Math.max(0, i - 8),
+                    i
+                );
+
+            const precedeParParticipePresent =
+                avant.some(
+                    elementAvant =>
+                        String(
+                            elementAvant.forme || ""
+                        ).toLowerCase()
+                        === "participe_present"
+                );
 
             if (
-                avant.includes("voyant") ||
-                avant.includes("voit") ||
-                avant.includes("voyait") ||
-                avant.includes("voir")
+                precedeParParticipePresent
             ) {
                 continue;
             }
@@ -1211,7 +1274,9 @@ function analyserNeoAI(text) {
 
     let sujet = null;
 
-    if (actionsVerbes.length > 0) {
+    if (
+        actionsVerbes.length > 0
+    ) {
 
         const premiereAction =
             actionsVerbes[0].index;
@@ -1222,58 +1287,45 @@ function analyserNeoAI(text) {
                 premiereAction
             );
 
-        const ignore = [
-            "le",
-            "la",
-            "les",
-            "un",
-            "une",
-            "des",
-            "du",
-            "de",
-            "et",
-            "ou",
-            "mais",
-            "puis",
-            "ensuite",
-            "après",
-            "il",
-            "elle",
-            "ils",
-            "elles",
-            "qui",
-            "que",
-            "se",
-            "son",
-            "sa",
-            "ses"
-        ];
-
-        for (const element of avantAction) {
+        for (
+            const element
+            of avantAction
+        ) {
 
             const mot =
-                String(element.mot || "");
+                String(
+                    element.mot || ""
+                );
 
             if (!mot) {
                 continue;
             }
 
+            //==================================================
+            // On laisse NeoAI.js identifier les mots
+            // grammaticaux au lieu d'une liste.
+            //==================================================
+
             if (
-                ignore.includes(
-                    motNormalise(mot)
-                )
+                estDeterminant(element) ||
+                estPronom(element) ||
+                estConnecteur(element)
             ) {
                 continue;
             }
 
-            sujet = mot;
+            sujet =
+                mot;
+
             break;
         }
     }
+
     //==========================================================
     // 🧠 6️⃣ BIS — DÉTECTION DE "ÊTRE"
     //==========================================================
-        let etat = null;
+
+    let etat = null;
     let attribut = null;
 
     const estVerbeEtre =
@@ -1288,16 +1340,9 @@ function analyserNeoAI(text) {
                     element.verbe
                 );
 
-            const mot =
-                motNormalise(
-                    element.mot
-                );
-
             return (
                 verbe === "être" ||
-                verbe === "etre" ||
-                mot === "être" ||
-                mot === "etre"
+                verbe === "etre"
             );
         };
 
@@ -1340,27 +1385,22 @@ function analyserNeoAI(text) {
                 continue;
             }
 
-            // Déterminants
+            //==================================================
+            // Déterminants / pronoms / connecteurs
+            //==================================================
+
             if (
-                [
-                    "le",
-                    "la",
-                    "les",
-                    "un",
-                    "une",
-                    "des",
-                    "du",
-                    "de",
-                    "ce",
-                    "cet",
-                    "cette",
-                    "ces"
-                ].includes(mot)
+                estDeterminant(element) ||
+                estPronom(element) ||
+                estConnecteur(element)
             ) {
                 continue;
             }
 
+            //==================================================
             // Un nouveau verbe = fin de l'attribut
+            //==================================================
+
             if (
                 estVerbe(element)
             ) {
@@ -1371,12 +1411,14 @@ function analyserNeoAI(text) {
             // 🎯 ATTRIBUT TROUVÉ
             //==================================================
 
-            attribut = element.mot;
+            attribut =
+                element.mot;
 
             break;
         }
     }
-        //==========================================================
+
+    //==========================================================
     // 🧠 ENREGISTRER L'ÉTAT
     //==========================================================
 
@@ -1396,57 +1438,64 @@ function analyserNeoAI(text) {
                 attribut
         };
     }
+
     //==========================================================
     // 7️⃣ CONTEXTE AVANT LA PREMIÈRE ACTION
     //==========================================================
+
     let contexteObjet = null;
     let contexteCible = null;
 
-    if (actionsVerbes.length > 0) {
+    if (
+        actionsVerbes.length > 0
+    ) {
 
         const premierIndex =
             actionsVerbes[0].index;
 
         const avantAction =
-            motsAnalyses
-                .slice(0, premierIndex);
+            motsAnalyses.slice(
+                0,
+                premierIndex
+            );
 
-        const texteAvantAction =
-            avantAction
-                .map(e => e.mot)
-                .join(" ");
+        //======================================================
+        // 🧠 OBJET DE CONTEXTE
+        //
+        // On cherche directement les éléments appartenant
+        // au domaine combat dans NeoAI.js.
+        //======================================================
 
-        // ------------------------------------------------------
-        // COUP DE POING
-        // ------------------------------------------------------
-
-        if (
-            /\bcoup\s+de\s+poing\b/i.test(
-                texteAvantAction
-            )
+        for (
+            let i = 0;
+            i < avantAction.length;
+            i++
         ) {
 
+            const element =
+                avantAction[i];
+
+            if (
+                !estNom(element)
+            ) {
+                continue;
+            }
+
+            if (
+                estPartieCorps(element)
+            ) {
+                continue;
+            }
+
             contexteObjet =
-                "coup de poing";
+                element.mot;
+
+            break;
         }
 
-        // ------------------------------------------------------
-        // COUP DE PIED
-        // ------------------------------------------------------
-
-        else if (
-            /\bcoup\s+de\s+pied\b/i.test(
-                texteAvantAction
-            )
-        ) {
-
-            contexteObjet =
-                "coup de pied";
-        }
-
-        // ------------------------------------------------------
-        // CIBLE : visage / tête / abdomen...
-        // ------------------------------------------------------
+        //======================================================
+        // 🎯 CIBLE DE CONTEXTE
+        //======================================================
 
         for (
             let i = 0;
@@ -1463,29 +1512,28 @@ function analyserNeoAI(text) {
                 continue;
             }
 
-            const mot =
-                motNormalise(
-                    element.mot
+            //==================================================
+            // Si la partie du corps est précédée d'une autre
+            // partie du corps, elle appartient probablement
+            // à la description du moyen.
+            //==================================================
+
+            const avant =
+                avantAction.slice(
+                    Math.max(0, i - 4),
+                    i
                 );
 
-            // "main gauche", "paume gauche",
-            // "avant-bras droit" ne sont pas des cibles.
-            const avant =
-                avantAction
-                    .slice(
-                        Math.max(0, i - 4),
-                        i
-                    )
-                    .map(
-                        e =>
-                            motNormalise(e.mot)
-                    );
+            const possedePartieCorpsAvant =
+                avant.some(
+                    elementAvant =>
+                        estPartieCorps(
+                            elementAvant
+                        )
+                );
 
             if (
-                avant.includes("main") ||
-                avant.includes("paume") ||
-                avant.includes("bras") ||
-                avant.includes("avant-bras")
+                possedePartieCorpsAvant
             ) {
                 continue;
             }
@@ -1493,7 +1541,10 @@ function analyserNeoAI(text) {
             contexteCible =
                 element.mot;
 
+            //==================================================
             // "tête de Tobirama"
+            //==================================================
+
             if (
                 avantAction[i + 1] &&
                 motNormalise(
@@ -1529,9 +1580,10 @@ function analyserNeoAI(text) {
 
         const actionVerbe =
             actionsVerbes[a];
-        //==================================================
+
+        //======================================================
         // 🧠 "ÊTRE" = ÉTAT, PAS ACTION
-        //==================================================
+        //======================================================
 
         const elementVerbe =
             motsAnalyses[
@@ -1543,10 +1595,9 @@ function analyserNeoAI(text) {
                 elementVerbe
             )
         ) {
-
             continue;
         }
-        
+
         const debut =
             actionVerbe.index;
 
@@ -1561,455 +1612,194 @@ function analyserNeoAI(text) {
                 fin
             );
 
-        const texteZone =
-            zone
-                .map(e => e.mot)
-                .join(" ");
-
         //======================================================
         // OBJET
         //======================================================
 
         let objet = null;
 
-        // ------------------------------------------------------
-        // Objet explicite après le verbe
-        // ------------------------------------------------------
+        for (
+            const element
+            of zone
+        ) {
+
+            if (!element.connu) {
+                continue;
+            }
+
+            if (
+                !estNom(element)
+            ) {
+                continue;
+            }
+
+            if (
+                estPartieCorps(element)
+            ) {
+                continue;
+            }
+
+            if (
+                estDeterminant(element) ||
+                estPronom(element) ||
+                estConnecteur(element)
+            ) {
+                continue;
+            }
+
+            objet =
+                element.mot;
+
+            break;
+        }
+
+        //======================================================
+        // RÉFÉRENCE À L'OBJET PRÉCÉDENT
+        //======================================================
 
         if (
-            /\bcoup\s+de\s+poing\b/i.test(
-                texteZone
-            )
+            contexteObjet &&
+            !objet
         ) {
 
-            objet = "coup de poing";
+            // Recherche d'un nom générique déjà connu
+            // dans NeoAI.js.
+            for (
+                const element
+                of zone
+            ) {
 
-        } else if (
-            /\bcoup\s+de\s+pied\b/i.test(
-                texteZone
-            )
-        ) {
-
-            objet = "coup de pied";
-
-        } else {
-
-            for (const element of zone) {
-
-                if (!element.connu) {
+                if (
+                    !estNom(element)
+                ) {
                     continue;
                 }
 
                 if (
-                    estNom(element) &&
-                    !estPartieCorps(element)
+                    estPartieCorps(element)
+                ) {
+                    continue;
+                }
+
+                objet =
+                    contexteObjet;
+
+                break;
+            }
+        }
+
+        //======================================================
+        // Si aucun objet n'a été trouvé,
+        // on reprend directement le contexte.
+        //======================================================
+
+        if (
+            !objet &&
+            contexteObjet
+        ) {
+
+            objet =
+                contexteObjet;
+        }
+
+        //======================================================
+        // 🎯 CIBLE
+        //======================================================
+
+        let cible = null;
+
+        //======================================================
+        // 🧠 OUTIL — EXTRAIRE UNE CIBLE
+        //======================================================
+
+        const trouverCibleApres =
+            (
+                zone,
+                indexDebut
+            ) => {
+
+                for (
+                    let j = indexDebut + 1;
+                    j < zone.length;
+                    j++
                 ) {
 
-                    const mot =
-                        motNormalise(
-                            element.mot
-                        );
+                    const element =
+                        zone[j];
 
-                    // Petits mots / déterminants
                     if (
-                        [
-                            "le",
-                            "la",
-                            "les",
-                            "un",
-                            "une",
-                            "des",
-                            "du",
-                            "de"
-                        ].includes(mot)
+                        !estPartieCorps(element)
                     ) {
                         continue;
                     }
 
-                    // Ces mots servent à décrire le moyen
-                    // et ne doivent pas devenir des objets.
+                    let resultat =
+                        element.mot;
+
+                    //==================================================
+                    // "tête de Tobirama"
+                    //==================================================
+
                     if (
-                        mot !== "main" &&
-                        mot !== "paume" &&
-                        mot !== "bras" &&
-                        mot !== "avant-bras"
+                        zone[j + 1] &&
+                        motNormalise(
+                            zone[j + 1].mot
+                        ) === "de"
                     ) {
 
-                        objet =
-                            element.mot;
+                        if (
+                            zone[j + 2]
+                        ) {
 
-                        break;
+                            resultat +=
+                                " de " +
+                                zone[j + 2].mot;
+                        }
                     }
+
+                    return resultat;
                 }
-            }
-        }
 
-        // ------------------------------------------------------
-        // RÉFÉRENCE :
-        //
-        // "le coup"
-        //
-        // Si le coup a déjà été décrit comme
-        // "coup de poing", on conserve le sens complet.
-        // ------------------------------------------------------
+                return null;
+            };
 
-        if (
-            contexteObjet &&
-            motNormalise(objet) === "coup" &&
-            /\ble\s+coup\b/i.test(
-                texteZone
-            )
-        ) {
-
-            objet =
-                contexteObjet;
-        }
-
-        // ------------------------------------------------------
-        // Si aucun objet n'a encore été trouvé,
-        // on reprend directement le contexte.
-        // ------------------------------------------------------
-
-        if (
-            !objet &&
-            contexteObjet &&
-            /\ble\s+coup\b/i.test(
-                texteZone
-            )
-        ) {
-
-            objet =
-                contexteObjet;
-        }
-
-        
-//======================================================
-// 🎯 CIBLE
-//======================================================
-
-let cible = null;
-
-//======================================================
-// 🧠 OUTIL — DÉTECTER SI UNE PARTIE DU CORPS EST
-// UTILISÉE COMME MOYEN
-//======================================================
-const estMoyenCorporel = (
-    zone,
-    index
-) => {
-
-    const avant =
-        zone
-            .slice(
-                Math.max(0, index - 5),
-                index
-            )
-            .map(
-                e =>
-                    motNormalise(e.mot)
-            );
-
-    return (
-        avant.includes("main") ||
-        avant.includes("paume") ||
-        avant.includes("bras") ||
-        avant.includes("avant-bras") ||
-        avant.includes("poing")
-    );
-};
-
-//======================================================
-// 🧠 OUTIL — EXTRAIRE UNE CIBLE APRÈS UNE EXPRESSION
-//======================================================
-const trouverCibleApres =
-    (
-        zone,
-        indexDebut
-    ) => {
+        //======================================================
+        // 🎯 RECHERCHE DES RELATIONS DE CIBLE
+        //======================================================
 
         for (
-            let j = indexDebut + 1;
-            j < zone.length;
-            j++
+            let i = 0;
+            i < zone.length;
+            i++
         ) {
 
             const element =
-                zone[j];
+                zone[i];
 
-            if (
-                !estPartieCorps(element)
-            ) {
-                continue;
-            }
+            //==================================================
+            // NeoAI.js indique que ce mot introduit une cible
+            //==================================================
 
-            const mot =
-                motNormalise(
-                    element.mot
+            const estMarqueurCible =
+                estCategorie(
+                    element,
+                    "cible"
+                ) ||
+                estCategorie(
+                    element,
+                    "relation_cible"
                 );
 
-            // ----------------------------------------------
-            // "pied" dans "coup de pied"
-            // ----------------------------------------------
-
             if (
-                mot === "pied" &&
-                j >= 2 &&
-                motNormalise(
-                    zone[j - 1]?.mot
-                ) === "de" &&
-                motNormalise(
-                    zone[j - 2]?.mot
-                ) === "coup"
+                !estMarqueurCible
             ) {
                 continue;
             }
-
-            // ----------------------------------------------
-            // Cette partie du corps est utilisée comme moyen
-            // ----------------------------------------------
-
-            if (
-                estMoyenCorporel(
-                    zone,
-                    j
-                )
-            ) {
-                continue;
-            }
-
-            let resultat =
-                element.mot;
-
-            // ----------------------------------------------
-            // "tête de Tobirama"
-            // ----------------------------------------------
-
-            if (
-                zone[j + 1] &&
-                motNormalise(
-                    zone[j + 1].mot
-                ) === "de"
-            ) {
-
-                if (
-                    zone[j + 2]
-                ) {
-
-                    resultat +=
-                        " de " +
-                        zone[j + 2].mot;
-                }
-            }
-
-            return resultat;
-        }
-
-        return null;
-    };
-
-//======================================================
-// 🎯 1. EXPRESSIONS EXPLICITES DE CIBLE
-//======================================================
-const expressionsCible = [
-    "visant",
-    "vers",
-    "dans",
-    "sur",
-    "contre"
-];
-
-for (
-    let i = 0;
-    i < zone.length;
-    i++
-) {
-
-    const mot =
-        motNormalise(
-            zone[i]?.mot
-        );
-
-    // ----------------------------------------------
-    // "visant X"
-    // ----------------------------------------------
-
-    if (
-        mot === "visant"
-    ) {
-
-        const resultat =
-            trouverCibleApres(
-                zone,
-                i
-            );
-
-        if (resultat) {
-
-            cible =
-                resultat;
-
-            break;
-        }
-    }
-
-    // ----------------------------------------------
-    // "vers X"
-    // ----------------------------------------------
-
-    if (
-        mot === "vers"
-    ) {
-
-        const resultat =
-            trouverCibleApres(
-                zone,
-                i
-            );
-
-        if (resultat) {
-
-            cible =
-                resultat;
-
-            break;
-        }
-    }
-
-    // ----------------------------------------------
-    // "dans X"
-    // ----------------------------------------------
-
-    if (
-        mot === "dans"
-    ) {
-
-        const resultat =
-            trouverCibleApres(
-                zone,
-                i
-            );
-
-        if (resultat) {
-
-            cible =
-                resultat;
-
-            break;
-        }
-    }
-
-    // ----------------------------------------------
-    // "sur X"
-    // ----------------------------------------------
-
-    if (
-        mot === "sur"
-    ) {
-
-        const resultat =
-            trouverCibleApres(
-                zone,
-                i
-            );
-
-        if (resultat) {
-
-            cible =
-                resultat;
-
-            break;
-        }
-    }
-
-    // ----------------------------------------------
-    // "contre X"
-    // ----------------------------------------------
-
-    if (
-        mot === "contre"
-    ) {
-
-        const resultat =
-            trouverCibleApres(
-                zone,
-                i
-            );
-
-        if (resultat) {
-
-            cible =
-                resultat;
-
-            break;
-        }
-    }
-
-    //==================================================
-    // 🎯 "au niveau de X"
-    //==================================================
-
-    if (
-        mot === "au" &&
-        motNormalise(
-            zone[i + 1]?.mot
-        ) === "niveau" &&
-        motNormalise(
-            zone[i + 2]?.mot
-        ) === "de"
-    ) {
-
-        const resultat =
-            trouverCibleApres(
-                zone,
-                i + 2
-            );
-
-        if (resultat) {
-
-            cible =
-                resultat;
-
-            break;
-        }
-    }
-}
-
-//======================================================
-// 🎯 2. STRUCTURE PARTICULIÈRE DE COMBAT
-//======================================================
-if (
-    !cible
-) {
-
-    for (
-        let i = 0;
-        i < zone.length;
-        i++
-    ) {
-
-        const mot =
-            motNormalise(
-                zone[i]?.mot
-            );
-
-        // ----------------------------------------------
-        // "au niveau de"
-        // ----------------------------------------------
-
-        if (
-            mot === "au" &&
-            motNormalise(
-                zone[i + 1]?.mot
-            ) === "niveau" &&
-            motNormalise(
-                zone[i + 2]?.mot
-            ) === "de"
-        ) {
 
             const resultat =
                 trouverCibleApres(
                     zone,
-                    i + 2
+                    i
                 );
 
             if (resultat) {
@@ -2020,259 +1810,257 @@ if (
                 break;
             }
         }
-    }
-}
 
-//======================================================
-// 🎯 3. FALLBACK
-//======================================================
+        //======================================================
+        // 🎯 FALLBACK : PREMIÈRE PARTIE DU CORPS PERTINENTE
+        //======================================================
 
-if (
-    !cible
-) {
+        if (!cible) {
 
-    for (
-        let i = 0;
-        i < zone.length;
-        i++
-    ) {
-
-        const element =
-            zone[i];
-
-        if (
-            !estPartieCorps(element)
-        ) {
-            continue;
-        }
-
-        const mot =
-            motNormalise(
-                element.mot
-            );
-
-        // ----------------------------------------------
-        // "pied" de "coup de pied"
-        // ----------------------------------------------
-
-        if (
-            mot === "pied" &&
-            i >= 2 &&
-            motNormalise(
-                zone[i - 1]?.mot
-            ) === "de" &&
-            motNormalise(
-                zone[i - 2]?.mot
-            ) === "coup"
-        ) {
-            continue;
-        }
-
-        // ----------------------------------------------
-        // 🚫 MOYEN CORPOREL
-        // ----------------------------------------------
-
-        if (
-            estMoyenCorporel(
-                zone,
-                i
-            )
-        ) {
-            continue;
-        }
-
-        // ----------------------------------------------
-        // 🎯 CIBLE
-        // ----------------------------------------------
-
-        cible =
-            element.mot;
-
-        // ----------------------------------------------
-        // "tête de Tobirama"
-        // ----------------------------------------------
-
-        if (
-            zone[i + 1] &&
-            motNormalise(
-                zone[i + 1].mot
-            ) === "de"
-        ) {
-
-            if (
-                zone[i + 2]
+            for (
+                let i = 0;
+                i < zone.length;
+                i++
             ) {
 
-                cible +=
-                    " de " +
-                    zone[i + 2].mot;
+                const element =
+                    zone[i];
+
+                if (
+                    !estPartieCorps(element)
+                ) {
+                    continue;
+                }
+
+                //================================================
+                // Si une partie du corps précédente existe dans
+                // la même petite zone, cette partie appartient
+                // généralement au moyen décrit.
+                //================================================
+
+                const avant =
+                    zone.slice(
+                        Math.max(0, i - 4),
+                        i
+                    );
+
+                const partieAvant =
+                    avant.some(
+                        elementAvant =>
+                            estPartieCorps(
+                                elementAvant
+                            )
+                    );
+
+                if (
+                    partieAvant
+                ) {
+                    continue;
+                }
+
+                cible =
+                    element.mot;
+
+                //================================================
+                // "tête de Tobirama"
+                //================================================
+
+                if (
+                    zone[i + 1] &&
+                    motNormalise(
+                        zone[i + 1].mot
+                    ) === "de"
+                ) {
+
+                    if (
+                        zone[i + 2]
+                    ) {
+
+                        cible +=
+                            " de " +
+                            zone[i + 2].mot;
+                    }
+                }
+
+                break;
             }
         }
 
-        break;
-    }
-}
+        //======================================================
+        // 🎯 CIBLE DÉCRITE AVANT L'ACTION
+        //======================================================
 
-//======================================================
-// 🎯 4. CIBLE DÉCRITE AVANT L'ACTION
-//======================================================
+        if (
+            !cible &&
+            contexteCible
+        ) {
 
-if (
-    !cible &&
-    contexteCible
-) {
-
-    cible =
-        contexteCible;
-}
-
-       
-//======================================================
-// 🖐️ MOYEN / INSTRUMENT
-//======================================================
-
-let moyen = null;
-
-//======================================================
-// 🧠 DÉTECTION D'UNE PARTIE DU CORPS
-//======================================================
-
-const estPartieCorpsZone =
-    element => {
-
-        if (!element) {
-            return false;
+            cible =
+                contexteCible;
         }
 
-        return estPartieCorps(element);
-    };
+        //======================================================
+        // 🖐️ MOYEN / INSTRUMENT
+        //======================================================
 
-//======================================================
-// 🔎 RECHERCHE DU MOYEN
-//======================================================
-//
-// NeoAI.js fournit déjà les connaissances.
-// Ici on ne crée aucune liste de vocabulaire.
-//
-// Exemples automatiquement reconnus si présents
-// dans NeoAI.js :
-//
-// paume gauche
-// avant-bras droit
-// coude gauche
-// genou droit
-// poing droit
-// pied gauche
-// etc.
-//
-
-for (
-    let i = 0;
-    i < zone.length;
-    i++
-) {
-
-    const element =
-        zone[i];
-
-    if (
-        !estPartieCorpsZone(element)
-    ) {
-        continue;
-    }
-
-    let partie =
-        motNormalise(
-            element.mot
-        );
-
-    //==============================================
-    // Partie composée : avant + bras
-    //==============================================
-
-    if (
-        partie === "avant" &&
-        zone[i + 1] &&
-        motNormalise(
-            zone[i + 1].mot
-        ) === "bras" &&
-        estPartieCorpsZone(
-            zone[i + 1]
-        )
-    ) {
-
-        partie =
-            "avant-bras";
-
-        i++;
-    }
-
-    //==============================================
-    // Chercher gauche / droite
-    //==============================================
-
-    const suivant =
-        zone[i + 1];
-
-    const motSuivant =
-        motNormalise(
-            suivant?.mot
-        );
-
-    if (
-        motSuivant === "gauche" ||
-        motSuivant === "droite"
-    ) {
-
-        moyen =
-            `${partie} ${motSuivant}`;
-
-        break;
-    }
-
-    //==============================================
-    // Partie du corps sans côté
-    //==============================================
-
-    moyen =
-        partie;
-
-    break;
-}
-        
+        let moyen = null;
 
         //======================================================
-        // SI L'ACTION EST "BLOQUER"
-        // ET QUE L'OBJET/CIBLE ÉTAIENT DÉCRITS AVANT
+        // RECHERCHE DU MOYEN CORPOREL
+        //
+        // On prend la première partie du corps rencontrée
+        // dans la zone de l'action.
+        //
+        // Aucune liste de vocabulaire.
+        //======================================================
+
+        for (
+            let i = 0;
+            i < zone.length;
+            i++
+        ) {
+
+            const element =
+                zone[i];
+
+            if (
+                !estPartieCorps(element)
+            ) {
+                continue;
+            }
+
+            let partie =
+                motNormalise(
+                    element.mot
+                );
+
+            //==================================================
+            // Expression corporelle composée connue par
+            // NeoAI.js : on essaie de récupérer le prochain
+            // élément appartenant lui aussi à "corps".
+            //==================================================
+
+            const suivant =
+                zone[i + 1];
+
+            if (
+                suivant &&
+                estPartieCorps(suivant)
+            ) {
+
+                const partieSuivante =
+                    motNormalise(
+                        suivant.mot
+                    );
+
+                // Recherche de l'expression dans NeoAI.js
+                // si cette fonction existe.
+                if (
+                    typeof NeoAI.neoRechercherMot ===
+                    "function"
+                ) {
+
+                    const expression =
+                        NeoAI.neoRechercherMot(
+                            `${partie}-${partieSuivante}`
+                        );
+
+                    if (
+                        expression?.trouve === true
+                    ) {
+
+                        partie =
+                            `${partie}-${partieSuivante}`;
+
+                        i++;
+                    }
+                }
+            }
+
+            //==================================================
+            // Chercher une indication latérale connue
+            // par NeoAI.js.
+            //==================================================
+
+            if (
+                zone[i + 1]
+            ) {
+
+                const suivantCote =
+                    zone[i + 1];
+
+                const categorieCote =
+                    suivantCote.categories?.some(
+                        categorie => {
+
+                            const nom =
+                                String(
+                                    categorie?.categorie ||
+                                    ""
+                                ).toLowerCase();
+
+                            return (
+                                nom.includes("côté") ||
+                                nom.includes("cote") ||
+                                nom.includes("direction")
+                            );
+                        }
+                    );
+
+                if (
+                    categorieCote
+                ) {
+
+                    moyen =
+                        `${partie} ${motNormalise(
+                            suivantCote.mot
+                        )}`;
+
+                    break;
+                }
+            }
+
+            moyen =
+                partie;
+
+            break;
+        }
+
+        //======================================================
+        // CONTEXTE OBJET
         //======================================================
 
         if (
             !objet &&
             contexteObjet
         ) {
-            objet = contexteObjet;
+
+            objet =
+                contexteObjet;
         }
+
+        //======================================================
+        // CONTEXTE CIBLE
+        //======================================================
 
         if (
             !cible &&
             contexteCible
         ) {
-            cible = contexteCible;
+
+            cible =
+                contexteCible;
         }
 
-       //======================================================
+        //======================================================
         // CRÉATION DE L'ACTION
         //======================================================
 
         actions.push({
 
-            // Forme normalisée utilisée par NeoAI
-            // Exemple : "bloquer"
             verbe:
                 actionVerbe.verbe,
 
-            // Forme réellement écrite dans le pavé
-            // Exemple : "bloque"
             mot:
                 actionVerbe.mot,
 
@@ -2290,9 +2078,8 @@ for (
             ...(moyen
                 ? { moyen }
                 : {})
-        }); 
-    } 
-
+        });
+    }
 
     //==========================================================
     // 9️⃣ CONTEXTE
@@ -2300,36 +2087,25 @@ for (
 
     let contexte = "general";
 
-    const texteBas =
-        texte.toLowerCase();
+    //==========================================================
+    // 🧠 Le domaine est maintenant déterminé par NeoAI.js.
+    //==========================================================
 
-    const motsCombat = [
-        "frappe",
-        "frapper",
-        "bloque",
-        "bloquer",
-        "attaque",
-        "attaquer",
-        "coup",
-        "poing",
-        "pied",
-        "shuriken",
-        "esquive",
-        "esquiver",
-        "défend",
-        "défendre",
-        "parer",
-        "pare"
-    ];
+    const contientCombat =
+        motsAnalyses.some(
+            element =>
+                estCategorie(
+                    element,
+                    "combat"
+                )
+        );
 
     if (
-        motsCombat.some(
-            mot =>
-                texteBas.includes(mot)
-        )
+        contientCombat
     ) {
 
-        contexte = "combat";
+        contexte =
+            "combat";
     }
 
     //==========================================================
@@ -2338,22 +2114,18 @@ for (
 
     let enchainement = null;
 
-    const succession = [
-        "puis",
-        "ensuite",
-        "après",
-        "dans la foulée",
-        "immédiatement"
-    ];
+    const contientSuccession =
+        motsAnalyses.some(
+            element =>
+                estSuccession(element)
+        );
 
     if (
-        succession.some(
-            mot =>
-                texteBas.includes(mot)
-        )
+        contientSuccession
     ) {
 
-        enchainement = "successif";
+        enchainement =
+            "successif";
     }
 
     //==========================================================
@@ -2362,45 +2134,23 @@ for (
 
     const directions = [];
 
-    const verbesDeplacement = [
-        "marcher",
-        "courir",
-        "avancer",
-        "reculer",
-        "sauter",
-        "voler",
-        "ramper",
-        "grimper",
-        "descendre",
-        "monter",
-        "entrer",
-        "sortir",
-        "approcher",
-        "s'éloigner",
-        "tourner",
-        "accélérer",
-        "ralentir"
-    ];
-
     const contientDeplacement =
-        actions.some(
-            action =>
-                verbesDeplacement.includes(
-                    String(
-                        action.verbe || ""
-                    ).toLowerCase()
-                )
+        motsAnalyses.some(
+            element =>
+                estDeplacement(element)
         );
 
-    if (contientDeplacement) {
+    if (
+        contientDeplacement
+    ) {
 
-        for (const element of motsAnalyses) {
+        for (
+            const element
+            of motsAnalyses
+        ) {
 
             if (
-                !estCategorie(
-                    element,
-                    "direction"
-                )
+                !estDirection(element)
             ) {
                 continue;
             }
@@ -2414,7 +2164,9 @@ for (
                 !directions.includes(mot)
             ) {
 
-                directions.push(mot);
+                directions.push(
+                    mot
+                );
             }
         }
     }
@@ -2425,7 +2177,10 @@ for (
 
     const objets = [];
 
-    for (const action of actions) {
+    for (
+        const action
+        of actions
+    ) {
 
         if (
             action.objet &&
@@ -2446,7 +2201,10 @@ for (
 
     const cibles = [];
 
-    for (const action of actions) {
+    for (
+        const action
+        of actions
+    ) {
 
         if (
             action.cible &&
@@ -2464,6 +2222,7 @@ for (
     //==========================================================
     // 1️⃣4️⃣ REFORMULATION
     //==========================================================
+
     let reformulation =
         texte;
 
@@ -2545,6 +2304,7 @@ for (
                                 action.cible
                             );
 
+                        // On conserve ici la logique existante.
                         if (
                             !cibleNormalisee.includes("son ") &&
                             !cibleNormalisee.includes("sa ") &&
@@ -2575,6 +2335,7 @@ for (
                                 action.moyen
                             );
 
+                        // On conserve le comportement existant.
                         const possessif =
                             moyenNormalise.startsWith(
                                 "avant-bras"
@@ -2608,10 +2369,11 @@ for (
                     + ".";
         }
     }
-  
+
     //==========================================================
     // 1️⃣5️⃣ COMPRÉHENSION
     //==========================================================
+
     const comprehension = {
 
         sujet,
@@ -2634,7 +2396,6 @@ for (
 
         enchainement
     };
-    
 
     //==========================================================
     // 1️⃣6️⃣ RÉSULTAT FINAL
@@ -2694,13 +2455,11 @@ for (
             Date.now()
     };
 }
-                    
-                                    
-
+ 
+                                   
 //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
 //==============================================================
-
 async function envoyerResultatNeoAI(
     ovl,
     chatJid,
