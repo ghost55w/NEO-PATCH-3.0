@@ -3041,252 +3041,418 @@ for (
         //======================================================
         // RECHERCHE DE NEO_LEARN
         //======================================================
-        const indexLearn =
-            contenu.indexOf(
-                "const NEO_LEARN"
-            );
-
-        if (indexLearn === -1) {
-
-            return repondre(
-                "❌ La catégorie NEO_LEARN est introuvable dans NeoAI.js."
-            );
-
-        }
-
-        const indexFr =
-            contenu.indexOf(
-                "fr:",
-                indexLearn
-            );
-
-        if (indexFr === -1) {
-
-            return repondre(
-                "❌ La section française de NEO_LEARN est introuvable."
-            );
-
-        }
-
-        const debutTableau =
-            contenu.indexOf(
-                "[",
-                indexFr
-            );
-
-        if (debutTableau === -1) {
-
-            return repondre(
-                "❌ Impossible de trouver la liste NEO_LEARN."
-            );
-
-        }
-
-        const finTableau =
-            contenu.indexOf(
-                "]",
-                debutTableau
-            );
-
-        if (finTableau === -1) {
-
-            return repondre(
-                "❌ Impossible de lire la liste NEO_LEARN."
-            );
-
-        }
-
         //======================================================
-        // MOTS DÉJÀ APPRIS
-        //======================================================
-        const blocLearn =
-            contenu.slice(
-                debutTableau + 1,
-                finTableau
-            );
+// 🧠 RECHERCHE ET MODIFICATION DE NEO_LEARN
+//======================================================
 
-        const motsDejaAppris =
-            new Map();
+const indexLearn =
+    contenu.indexOf("const NEO_LEARN");
 
-        const regexMots =
-            /"([^"]+)"/g;
+if (indexLearn === -1) {
 
-        let match;
+    console.error(
+        "❌ [NeoLearn] const NEO_LEARN introuvable."
+    );
 
-        while (
-            (match = regexMots.exec(blocLearn))
-        ) {
+    return repondre(
+        "❌ La catégorie NEO_LEARN est introuvable dans NeoAI.js."
+    );
+}
 
-            motsDejaAppris.set(
-                normaliser(match[1]),
-                match[1]
-            );
+//======================================================
+// 🇫🇷 RECHERCHE DU TABLEAU FR
+//======================================================
 
-        }
+const indexFr =
+    contenu.indexOf(
+        "fr:",
+        indexLearn
+    );
 
-        //======================================================
-        // DÉTECTION DES MOTS INCONNUS
-        //======================================================
-        const nouveauxMots = [];
-        const dejaDetectes = new Set();
+if (indexFr === -1) {
 
-        for (const mot of mots) {
+    console.error(
+        "❌ [NeoLearn] fr: introuvable."
+    );
 
-            const motNormalise =
-                normaliser(mot);
+    return repondre(
+        "❌ La section française de NEO_LEARN est introuvable."
+    );
+}
 
-            if (!motNormalise) {
-                continue;
-            }
+const debutTableau =
+    contenu.indexOf(
+        "[",
+        indexFr
+    );
 
-            // Évite les doublons du texte
-            if (
-                dejaDetectes.has(
-                    motNormalise
-                )
-            ) {
-                continue;
-            }
+if (debutTableau === -1) {
 
-            dejaDetectes.add(
-                motNormalise
-            );
+    console.error(
+        "❌ [NeoLearn] [ introuvable."
+    );
 
-            // Déjà dans NEO_LEARN
-            if (
-                motsDejaAppris.has(
-                    motNormalise
-                )
-            ) {
-                continue;
-            }
+    return repondre(
+        "❌ Impossible de trouver la liste NEO_LEARN."
+    );
+}
 
-            // Recherche dans toutes les bases NeoAI
-            let connaissance = null;
+const finTableau =
+    contenu.indexOf(
+        "]",
+        debutTableau
+    );
 
-            try {
+if (finTableau === -1) {
 
-                connaissance =
-                    NeoAI.neoRechercherMot(
-                        mot
-                    );
+    console.error(
+        "❌ [NeoLearn] ] introuvable."
+    );
 
-            } catch (error) {
+    return repondre(
+        "❌ Impossible de fermer la liste NEO_LEARN."
+    );
+}
 
-                console.error(
-                    "⚠️ [NeoLearn] Erreur recherche :",
-                    error
-                );
+//======================================================
+// 📚 MOTS DÉJÀ PRÉSENTS
+//======================================================
 
-            }
+const blocLearn =
+    contenu.slice(
+        debutTableau + 1,
+        finTableau
+    );
 
-            if (
-                connaissance?.trouve
-            ) {
-                continue;
-            }
+const motsDejaAppris =
+    new Map();
 
-            nouveauxMots.push(
+const regexMots =
+    /["']([^"']+)["']/g;
+
+let match;
+
+while (
+    (match = regexMots.exec(blocLearn))
+) {
+
+    const motOriginal =
+        match[1];
+
+    const motNormalise =
+        normaliser(motOriginal);
+
+    if (
+        motNormalise &&
+        !motsDejaAppris.has(motNormalise)
+    ) {
+
+        motsDejaAppris.set(
+            motNormalise,
+            motOriginal
+        );
+    }
+}
+
+console.log(
+    "📚 [NeoLearn] Mots déjà présents :",
+    motsDejaAppris.size
+);
+
+//======================================================
+// 🔎 DÉTECTION DES MOTS INCONNUS
+//======================================================
+
+const nouveauxMots = [];
+
+const dejaDetectes =
+    new Set();
+
+for (
+    const mot of mots
+) {
+
+    const motNormalise =
+        normaliser(mot);
+
+    if (!motNormalise) {
+        continue;
+    }
+
+    //==================================================
+    // 🚫 DOUBLON DANS LE TEXTE
+    //==================================================
+
+    if (
+        dejaDetectes.has(
+            motNormalise
+        )
+    ) {
+        continue;
+    }
+
+    dejaDetectes.add(
+        motNormalise
+    );
+
+    //==================================================
+    // 📚 DÉJÀ DANS NEO_LEARN
+    //==================================================
+
+    if (
+        motsDejaAppris.has(
+            motNormalise
+        )
+    ) {
+
+        console.log(
+            "📚 [NeoLearn] Déjà appris :",
+            mot
+        );
+
+        continue;
+    }
+
+    //==================================================
+    // 🧠 RECHERCHE DANS NEOAI
+    //==================================================
+
+    let connaissance = null;
+
+    try {
+
+        connaissance =
+            NeoAI.neoRechercherMot(
                 mot
             );
 
+    } catch (error) {
+
+        console.error(
+            "⚠️ [NeoLearn] Erreur recherche :",
+            error
+        );
+    }
+
+    //==================================================
+    // ✅ MOT DÉJÀ CONNU PAR NEOAI
+    //==================================================
+
+    if (
+        connaissance?.trouve === true
+    ) {
+
+        console.log(
+            "🧠 [NeoLearn] Mot déjà connu par NeoAI :",
+            mot
+        );
+
+        continue;
+    }
+
+    //==================================================
+    // 🆕 NOUVEAU MOT
+    //==================================================
+
+    console.log(
+        "🆕 [NeoLearn] Nouveau mot détecté :",
+        mot
+    );
+
+    nouveauxMots.push(
+        mot
+    );
+}
+
+//======================================================
+// 📚 FUSION
+//======================================================
+
+const tousLesMots = [
+    ...motsDejaAppris.values(),
+    ...nouveauxMots
+];
+
+//======================================================
+// 🚫 SUPPRESSION DES DOUBLONS
+//======================================================
+
+const motsUniques =
+    new Map();
+
+for (
+    const mot of tousLesMots
+) {
+
+    const normalise =
+        normaliser(mot);
+
+    if (
+        !normalise
+    ) {
+        continue;
+    }
+
+    if (
+        !motsUniques.has(normalise)
+    ) {
+
+        motsUniques.set(
+            normalise,
+            mot
+        );
+    }
+}
+
+//======================================================
+// 🔤 TRI ALPHABÉTIQUE
+//======================================================
+
+const listeTriee =
+    [
+        ...motsUniques.values()
+    ]
+    .sort(
+        (a, b) =>
+            normaliser(a).localeCompare(
+                normaliser(b),
+                "fr",
+                {
+                    sensitivity: "base"
+                }
+            )
+    );
+
+//======================================================
+// 📝 NOUVEAU CONTENU DU TABLEAU
+//======================================================
+
+const nouvelleListe =
+    listeTriee
+        .map(
+            mot =>
+                `\n        "${mot}",`
+        )
+        .join("");
+
+//======================================================
+// 🔄 REMPLACEMENT EXACT DU TABLEAU FR
+//======================================================
+
+const nouveauContenu =
+    contenu.slice(
+        0,
+        debutTableau + 1
+    ) +
+    nouvelleListe +
+    "\n    " +
+    contenu.slice(
+        finTableau
+    );
+
+//======================================================
+// 📝 VÉRIFICATION AVANT ÉCRITURE
+//======================================================
+
+console.log(
+    "📚 [NeoLearn] Total après apprentissage :",
+    listeTriee.length
+);
+
+console.log(
+    "🆕 [NeoLearn] Nouveaux mots :",
+    nouveauxMots
+);
+
+console.log(
+    "📁 [NeoLearn] Fichier :",
+    cheminNeoAI
+);
+
+//======================================================
+// 💾 SAUVEGARDE RÉELLE
+//======================================================
+
+try {
+
+    fs.writeFileSync(
+        cheminNeoAI,
+        nouveauContenu,
+        {
+            encoding: "utf8",
+            flag: "w"
         }
+    );
 
-        //======================================================
-        // TRI ALPHABÉTIQUE
-        //======================================================
-        const tousLesMots =
-            [
-                ...motsDejaAppris.values(),
-                ...nouveauxMots
-            ];
+    console.log(
+        "✅ [NeoLearn] NeoAI.js modifié avec succès."
+    );
 
-        const motsUniques =
-            new Map();
+} catch (error) {
 
-        for (
-            const mot of tousLesMots
-        ) {
+    console.error(
+        "❌ [NeoLearn] Écriture NeoAI.js :",
+        error
+    );
 
-            const normalise =
-                normaliser(mot);
+    return repondre(
+        "❌ Impossible d'enregistrer les nouveaux mots."
+    );
+}
 
-            if (
-                !motsUniques.has(
-                    normalise
-                )
-            ) {
+//======================================================
+// 🔎 VÉRIFICATION PHYSIQUE DU FICHIER
+//======================================================
 
-                motsUniques.set(
-                    normalise,
-                    mot
-                );
+try {
 
-            }
+    const verification =
+        fs.readFileSync(
+            cheminNeoAI,
+            "utf8"
+        );
 
-        }
+    const verificationFr =
+        verification.indexOf(
+            "fr:",
+            verification.indexOf(
+                "const NEO_LEARN"
+            )
+        );
 
-        const listeTriee =
-            [
-                ...motsUniques.values()
-            ]
-            .sort(
-                (a, b) =>
-                    normaliser(a).localeCompare(
-                        normaliser(b),
-                        "fr",
-                        {
-                            sensitivity: "base"
-                        }
-                    )
-            );
+    const verificationDebut =
+        verification.indexOf(
+            "[",
+            verificationFr
+        );
 
-        //======================================================
-        // RECONSTRUCTION DE NEO_LEARN
-        //======================================================
-        const nouvelleListe =
-            listeTriee
-                .map(
-                    mot =>
-                        `\n        "${mot}",`
-                )
-                .join("");
+    const verificationFin =
+        verification.indexOf(
+            "]",
+            verificationDebut
+        );
 
-        contenu =
-            contenu.slice(
-                0,
-                debutTableau + 1
-            ) +
-            nouvelleListe +
-            "\n    " +
-            contenu.slice(
-                finTableau
-            );
+    const verificationBloc =
+        verification.slice(
+            verificationDebut,
+            verificationFin + 1
+        );
 
-        //======================================================
-        // SAUVEGARDE
-        //======================================================
+    console.log(
+        "🔎 [NeoLearn] NEO_LEARN.fr après écriture :"
+    );
 
-        try {
+    console.log(
+        verificationBloc
+    );
 
-            fs.writeFileSync(
-                cheminNeoAI,
-                contenu,
-                "utf8"
-            );
+} catch (error) {
 
-        } catch (error) {
-
-            console.error(
-                "❌ [NeoLearn] Écriture NeoAI.js :",
-                error
-            );
-
-            return repondre(
-                "❌ Impossible d'enregistrer les nouveaux mots."
-            );
-
-        }
+    console.error(
+        "⚠️ [NeoLearn] Vérification impossible :",
+        error
+    );
+}                
 
         //======================================================
         // 📚 AUCUN NOUVEAU MOT
