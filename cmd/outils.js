@@ -999,9 +999,6 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
- //==============================================================
-// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
-//==============================================================
 
 function analyserNeoAI(text) {
 
@@ -1012,11 +1009,21 @@ function analyserNeoAI(text) {
         };
     }
 
-    const texteOriginal = text.trim();
+    //==========================================================
+    // 📝 TEXTE ORIGINAL
+    //==========================================================
 
-    const texte = texteOriginal
-        .replace(/^🌀\s*:\s*/i, "")
-        .trim();
+    const texteOriginal =
+        text.trim();
+
+    //==========================================================
+    // 🌀 RETIRER LE PRÉFIXE NEOAI
+    //==========================================================
+
+    const texte =
+        texteOriginal
+            .replace(/^🌀\s*:\s*/i, "")
+            .trim();
 
     if (!texte) {
         return {
@@ -1026,7 +1033,7 @@ function analyserNeoAI(text) {
     }
 
     //==========================================================
-    // ANALYSE LINGUISTIQUE LOCALE
+    // 🧠 ANALYSE LINGUISTIQUE LOCALE
     //==========================================================
 
     const analyse =
@@ -1034,114 +1041,304 @@ function analyserNeoAI(text) {
             ? NeoAI.neoAnalyserStructure(texte)
             : null;
 
+    //==========================================================
+    // ❌ AUCUN VERBE
+    //==========================================================
+
     if (!analyse || !analyse.verbe) {
 
         return {
             success: true,
+
             reconnu: false,
+
             score: 0,
+
             texteOriginal,
+
             texte,
+
             resume: null,
-            erreur: "Aucun verbe reconnu."
+
+            erreur:
+                "Aucun verbe reconnu."
         };
     }
 
     //==========================================================
-    // MODÈLES
+    // 🧠 VERBE NORMALISÉ
+    //
+    // Exemple :
+    //
+    // avance
+    // avançait
+    // avancera
+    // a avancé
+    // va avancer
+    //
+    // deviennent tous :
+    //
+    // avancer
+    //==========================================================
+
+    const verbe =
+        analyse.verbe;
+
+    //==========================================================
+    // 📝 FORME RÉELLE DU VERBE
+    //
+    // C'est cette valeur qui doit apparaître
+    // dans le résumé.
+    //
+    // Exemple :
+    //
+    // verbe      = avancer
+    // formeVerbe = avance
+    //==========================================================
+
+    const formeVerbe =
+        analyse.formeVerbe ||
+        analyse.verbeSurface ||
+        analyse.forme ||
+        analyse.verbe;
+
+    //==========================================================
+    // 📚 CATÉGORIE
+    //==========================================================
+
+    const categorie =
+        analyse.categorie ||
+        "general";
+
+    //==========================================================
+    // 📖 RÉCUPÉRER LES MODÈLES
     //==========================================================
 
     const modeles =
         NeoAI.NEO_MODELES?.fr?.[
-            analyse.categorie
+            categorie
         ]?.[
-            analyse.verbe
+            verbe
         ];
 
-    if (!Array.isArray(modeles) || !modeles.length) {
+    //==========================================================
+    // ❌ AUCUN MODÈLE
+    //==========================================================
+
+    if (
+        !Array.isArray(modeles) ||
+        !modeles.length
+    ) {
 
         return {
+
             success: true,
+
             reconnu: false,
+
             score: 0,
+
             texteOriginal,
+
             texte,
-            ...analyse,
+
+            verbe,
+
+            formeVerbe,
+
+            temps:
+                analyse.temps || null,
+
+            categorie,
+
+            sujet:
+                analyse.sujet || null,
+
+            objet:
+                analyse.objet || null,
+
+            cible:
+                analyse.cible || null,
+
+            maniere:
+                analyse.maniere || null,
+
+            direction:
+                analyse.direction || null,
+
+            lieu:
+                analyse.lieu || null,
+
+            distance:
+                analyse.distance || null,
+
+            structure:
+                Array.isArray(analyse.structure)
+                    ? analyse.structure
+                    : [],
+
             modele: null,
+
             resume: null,
-            erreur: "Aucun modèle disponible."
+
+            erreur:
+                "Aucun modèle disponible pour ce verbe."
         };
     }
 
     //==========================================================
-    // STRUCTURE
+    // 🧱 STRUCTURE DÉTECTÉE
     //==========================================================
 
     const structure =
         Array.isArray(analyse.structure)
             ? analyse.structure
-            : String(analyse.structure || "")
+            : String(
+                analyse.structure || ""
+              )
                 .split("+")
-                .map(x => x.trim())
+                .map(
+                    x => x.trim()
+                )
                 .filter(Boolean);
 
     //==========================================================
-    // COMPARAISON DES STRUCTURES
+    // 🔎 COMPARAISON DES MODÈLES
     //==========================================================
 
-    let meilleurModele = null;
-    let meilleurScore = 0;
+    let meilleurModele =
+        null;
 
-    for (const modele of modeles) {
+    let meilleurScore =
+        0;
 
-        const cible = String(modele)
-            .split("+")
-            .map(x => x.trim())
-            .filter(Boolean);
+    for (
+        const modele of modeles
+    ) {
 
-        const score =
-            NeoAI.neoComparerStructure(
-                structure,
-                cible
-            );
+        const cible =
+            String(modele)
+                .split("+")
+                .map(
+                    x => x.trim()
+                )
+                .filter(Boolean);
 
-        if (score > meilleurScore) {
+        //======================================================
+        // 🧠 COMPARATEUR LOCAL
+        //======================================================
 
-            meilleurScore = score;
-            meilleurModele = modele;
+        let score = 0;
+
+        if (
+            typeof NeoAI.neoComparerStructure === "function"
+        ) {
+
+            score =
+                NeoAI.neoComparerStructure(
+                    structure,
+                    cible
+                );
+
+        }
+
+        //======================================================
+        // 🏆 MEILLEUR MODÈLE
+        //======================================================
+
+        if (
+            score > meilleurScore
+        ) {
+
+            meilleurScore =
+                score;
+
+            meilleurModele =
+                modele;
         }
     }
 
     //==========================================================
-    // SEUIL
+    // 🎯 SEUIL DE COMPRÉHENSION
     //==========================================================
 
-    const reconnu = meilleurScore >= 50;
+    const reconnu =
+        meilleurScore >= 50;
 
     //==========================================================
-    // RÉSUMÉ
+    // 💡 RÉSUMÉ
     //==========================================================
 
-    let resume = null;
+    let resume =
+        null;
 
     if (reconnu) {
+
+        const analyseResume = {
+
+            ...analyse,
+
+            // Verbe normalisé
+            verbe,
+
+            // Forme réellement utilisée dans la phrase
+            formeVerbe,
+
+            // Sécurité pour le résumé
+            sujet:
+                analyse.sujet || null,
+
+            objet:
+                analyse.objet || null,
+
+            cible:
+                analyse.cible || null,
+
+            maniere:
+                analyse.maniere || null,
+
+            direction:
+                analyse.direction || null,
+
+            lieu:
+                analyse.lieu || null,
+
+            distance:
+                analyse.distance || null
+        };
+
+        //======================================================
+        // 🧠 NEO RESUMER
+        //======================================================
 
         if (
             typeof NeoAI.neoResumer === "function"
         ) {
 
-            resume = NeoAI.neoResumer(analyse);
+            resume =
+                NeoAI.neoResumer(
+                    analyseResume
+                );
 
-        } else {
+        }
 
-            resume = NeoAI.neoConstruireResume(
-                analyse
-            );
+        //======================================================
+        // 🔄 FALLBACK
+        //======================================================
+
+        else if (
+            typeof NeoAI.neoConstruireResume === "function"
+        ) {
+
+            resume =
+                NeoAI.neoConstruireResume(
+                    analyseResume
+                );
         }
     }
 
     //==========================================================
-    // RÉSULTAT
+    // 📦 RÉSULTAT FINAL
     //==========================================================
 
     return {
@@ -1150,48 +1347,111 @@ function analyserNeoAI(text) {
 
         reconnu,
 
-        score: meilleurScore,
+        score:
+            meilleurScore,
 
         texteOriginal,
 
         texte,
 
-        verbe: analyse.verbe,
+        //======================================================
+        // 🧠 VERBE NORMALISÉ
+        //======================================================
 
-        temps: analyse.temps,
+        verbe,
 
-        categorie: analyse.categorie,
+        //======================================================
+        // 📝 FORME RÉELLE DU VERBE
+        //======================================================
 
-        sujet: analyse.sujet,
+        formeVerbe,
 
-        objet: analyse.objet,
+        //======================================================
+        // ⏱️ TEMPS
+        //======================================================
 
-        cible: analyse.cible,
+        temps:
+            analyse.temps || null,
 
-        maniere: analyse.maniere,
+        //======================================================
+        // 📚 CATÉGORIE
+        //======================================================
 
-        direction: analyse.direction,
+        categorie,
 
-        lieu: analyse.lieu,
+        //======================================================
+        // 🧍 SUJET
+        //======================================================
 
-        distance: analyse.distance,
+        sujet:
+            analyse.sujet || null,
+
+        //======================================================
+        // 🎯 OBJET
+        //======================================================
+
+        objet:
+            analyse.objet || null,
+
+        //======================================================
+        // 🎯 CIBLE
+        //======================================================
+
+        cible:
+            analyse.cible || null,
+
+        //======================================================
+        // 🌀 MANIÈRE
+        //======================================================
+
+        maniere:
+            analyse.maniere || null,
+
+        //======================================================
+        // 🧭 DIRECTION
+        //======================================================
+
+        direction:
+            analyse.direction || null,
+
+        //======================================================
+        // 📍 LIEU
+        //======================================================
+
+        lieu:
+            analyse.lieu || null,
+
+        //======================================================
+        // 📏 DISTANCE
+        //======================================================
+
+        distance:
+            analyse.distance || null,
+
+        //======================================================
+        // 🧱 STRUCTURE
+        //======================================================
 
         structure,
 
-        modele: meilleurModele,
+        //======================================================
+        // 📚 MODÈLE
+        //======================================================
+
+        modele:
+            meilleurModele,
+
+        //======================================================
+        // 💡 RÉSUMÉ
+        //======================================================
 
         resume
     };
-}                                                                           
-                                        
-                                                                               
-//==============================================================
-// 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
-//==============================================================
+}
+
  //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
 //==============================================================
-
 async function envoyerResultatNeoAI(
     ovl,
     chatJid,
