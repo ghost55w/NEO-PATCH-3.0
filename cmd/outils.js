@@ -1061,12 +1061,13 @@ function analyserNeoAI(text) {
             connaissance =
                 NeoAI.neoRechercherMot(mot);
         }
-console.log(
-    "🌀 NEOAI MOT :",
-    mot,
-    JSON.stringify(connaissance, null, 2)
-);
-        
+
+        console.log(
+            "🌀 NEOAI MOT :",
+            mot,
+            JSON.stringify(connaissance, null, 2)
+        );
+
         motsAnalyses.push({
 
             index: i,
@@ -1079,7 +1080,6 @@ console.log(
             categories:
                 connaissance?.categories || [],
 
-            // Informations grammaticales venant de NEO_VERBES
             verbe:
                 connaissance?.verbe || null,
 
@@ -1111,30 +1111,20 @@ console.log(
         );
     };
 
-    const estVerbe = element => {
+    const estVerbe = element =>
+        estCategorie(element, "verbe");
 
-        return estCategorie(
-            element,
-            "verbe"
-        );
-    };
-
-    const estNom = element => {
-
-        return (
+    const estNom = element =>
+        (
             estCategorie(element, "nom") ||
-            estCategorie(element, "combat") ||
-            estCategorie(element, "partie")
+            estCategorie(element, "combat")
         );
-    };
 
-    const estPartieCorps = element => {
-
-        return (
+    const estPartieCorps = element =>
+        (
             estCategorie(element, "corps") ||
             estCategorie(element, "partie")
         );
-    };
 
     //==========================================================
     // 5️⃣ DÉTECTION DES ACTIONS VERBALES
@@ -1155,21 +1145,14 @@ console.log(
             continue;
         }
 
-        const mot =
-            motNormalise(element.mot);
-
         const forme =
             String(
                 element.forme || ""
             ).toLowerCase();
 
         // ------------------------------------------------------
-        // Les participes présents décrivent généralement
-        // une circonstance et ne sont pas retenus comme
-        // action principale.
-        //
-        // Exemple :
-        // "Tobirama voyant..."
+        // PARTICIPE PRÉSENT
+        // "voyant"
         // ------------------------------------------------------
 
         if (
@@ -1179,12 +1162,8 @@ console.log(
         }
 
         // ------------------------------------------------------
-        // Infinitif utilisé dans une construction secondaire.
-        //
-        // Exemple :
+        // INFINITIF SUBORDONNÉ
         // "voyant le coup de poing venir..."
-        //
-        // "venir" n'est pas l'action principale.
         // ------------------------------------------------------
 
         if (
@@ -1214,19 +1193,23 @@ console.log(
         }
 
         actionsVerbes.push({
+
             index: i,
+
             verbe:
                 element.verbe ||
                 element.mot,
+
             forme:
                 element.forme || null,
+
             mot:
                 element.mot
         });
     }
 
     //==========================================================
-    // 6️⃣ DÉTECTION DU SUJET
+    // 6️⃣ SUJET
     //==========================================================
 
     let sujet = null;
@@ -1242,10 +1225,32 @@ console.log(
                 premiereAction
             );
 
-        // ----------------------------------------------
-        // On cherche le premier élément avant l'action
-        // qui ressemble à un nom propre / sujet.
-        // ----------------------------------------------
+        const ignore = [
+            "le",
+            "la",
+            "les",
+            "un",
+            "une",
+            "des",
+            "du",
+            "de",
+            "et",
+            "ou",
+            "mais",
+            "puis",
+            "ensuite",
+            "après",
+            "il",
+            "elle",
+            "ils",
+            "elles",
+            "qui",
+            "que",
+            "se",
+            "son",
+            "sa",
+            "ses"
+        ];
 
         for (const element of avantAction) {
 
@@ -1256,33 +1261,6 @@ console.log(
                 continue;
             }
 
-            // On ignore les petits mots grammaticaux
-            const ignore = [
-                "le",
-                "la",
-                "les",
-                "un",
-                "une",
-                "des",
-                "du",
-                "de",
-                "et",
-                "ou",
-                "mais",
-                "puis",
-                "ensuite",
-                "il",
-                "elle",
-                "ils",
-                "elles",
-                "qui",
-                "que",
-                "se",
-                "son",
-                "sa",
-                "ses"
-            ];
-
             if (
                 ignore.includes(
                     motNormalise(mot)
@@ -1291,15 +1269,148 @@ console.log(
                 continue;
             }
 
-            // Un nom propre comme Tobirama/Yamato
-            // est généralement le premier élément.
             sujet = mot;
             break;
         }
     }
 
     //==========================================================
-    // 7️⃣ DÉTECTION DES ACTIONS COMPLÈTES
+    // 7️⃣ CONTEXTE AVANT LA PREMIÈRE ACTION
+    //==========================================================
+
+    /*
+     * Ici on conserve les informations décrites avant
+     * l'action principale.
+     *
+     * Exemple :
+     *
+     * Tobirama voyant
+     * [le coup de poing]
+     * [venir vers son visage]
+     * il bloque le coup
+     *
+     * Le coup de poing et le visage sont donc conservés
+     * comme contexte de l'action "bloquer".
+     */
+
+    let contexteObjet = null;
+    let contexteCible = null;
+
+    if (actionsVerbes.length > 0) {
+
+        const premierIndex =
+            actionsVerbes[0].index;
+
+        const avantAction =
+            motsAnalyses
+                .slice(0, premierIndex);
+
+        const texteAvantAction =
+            avantAction
+                .map(e => e.mot)
+                .join(" ");
+
+        // ------------------------------------------------------
+        // COUP DE POING
+        // ------------------------------------------------------
+
+        if (
+            /\bcoup\s+de\s+poing\b/i.test(
+                texteAvantAction
+            )
+        ) {
+
+            contexteObjet =
+                "coup de poing";
+        }
+
+        // ------------------------------------------------------
+        // COUP DE PIED
+        // ------------------------------------------------------
+
+        else if (
+            /\bcoup\s+de\s+pied\b/i.test(
+                texteAvantAction
+            )
+        ) {
+
+            contexteObjet =
+                "coup de pied";
+        }
+
+        // ------------------------------------------------------
+        // CIBLE : visage / tête / abdomen...
+        // ------------------------------------------------------
+
+        for (
+            let i = 0;
+            i < avantAction.length;
+            i++
+        ) {
+
+            const element =
+                avantAction[i];
+
+            if (
+                !estPartieCorps(element)
+            ) {
+                continue;
+            }
+
+            const mot =
+                motNormalise(
+                    element.mot
+                );
+
+            // "main gauche", "paume gauche",
+            // "avant-bras droit" ne sont pas des cibles.
+            const avant =
+                avantAction
+                    .slice(
+                        Math.max(0, i - 4),
+                        i
+                    )
+                    .map(
+                        e =>
+                            motNormalise(e.mot)
+                    );
+
+            if (
+                avant.includes("main") ||
+                avant.includes("paume") ||
+                avant.includes("bras") ||
+                avant.includes("avant-bras")
+            ) {
+                continue;
+            }
+
+            contexteCible =
+                element.mot;
+
+            // "tête de Tobirama"
+            if (
+                avantAction[i + 1] &&
+                motNormalise(
+                    avantAction[i + 1].mot
+                ) === "de"
+            ) {
+
+                if (
+                    avantAction[i + 2]
+                ) {
+
+                    contexteCible +=
+                        " de " +
+                        avantAction[i + 2].mot;
+                }
+            }
+
+            break;
+        }
+    }
+
+    //==========================================================
+    // 8️⃣ ACTIONS COMPLÈTES
     //==========================================================
 
     const actions = [];
@@ -1327,19 +1438,19 @@ console.log(
                 fin
             );
 
+        const texteZone =
+            zone
+                .map(e => e.mot)
+                .join(" ");
+
         //======================================================
         // OBJET
         //======================================================
 
         let objet = null;
 
-        const texteZone =
-            zone
-                .map(e => e.mot)
-                .join(" ");
-
         // ------------------------------------------------------
-        // Combats composés
+        // Objet explicite après le verbe
         // ------------------------------------------------------
 
         if (
@@ -1360,15 +1471,9 @@ console.log(
 
         } else {
 
-            // --------------------------------------------------
-            // Sinon on prend le premier nom connu après le verbe
-            // --------------------------------------------------
-
             for (const element of zone) {
 
-                if (
-                    !element.connu
-                ) {
+                if (!element.connu) {
                     continue;
                 }
 
@@ -1381,6 +1486,22 @@ console.log(
                         motNormalise(
                             element.mot
                         );
+
+                    // Petits mots / déterminants
+                    if (
+                        [
+                            "le",
+                            "la",
+                            "les",
+                            "un",
+                            "une",
+                            "des",
+                            "du",
+                            "de"
+                        ].includes(mot)
+                    ) {
+                        continue;
+                    }
 
                     if (
                         mot !== "main" &&
@@ -1398,16 +1519,32 @@ console.log(
             }
         }
 
+        // ------------------------------------------------------
+        // RÉFÉRENCE :
+        //
+        // "le coup"
+        //
+        // Si le coup a déjà été décrit comme
+        // "coup de poing", on conserve le sens complet.
+        // ------------------------------------------------------
+
+        if (
+            !objet &&
+            contexteObjet &&
+            /\ble\s+coup\b/i.test(
+                texteZone
+            )
+        ) {
+
+            objet =
+                contexteObjet;
+        }
+
         //======================================================
         // CIBLE
         //======================================================
 
         let cible = null;
-
-        // ------------------------------------------------------
-        // "vers la tête de Tobirama"
-        // "au niveau de son abdomen"
-        // ------------------------------------------------------
 
         for (
             let i = 0;
@@ -1429,11 +1566,6 @@ console.log(
                     element.mot
                 );
 
-            // --------------------------------------------------
-            // On ignore les parties du corps utilisées
-            // comme moyen.
-            // --------------------------------------------------
-
             const avant =
                 zone
                     .slice(
@@ -1454,17 +1586,8 @@ console.log(
                 continue;
             }
 
-            // --------------------------------------------------
-            // La partie du corps devient la cible.
-            // --------------------------------------------------
-
             cible =
                 element.mot;
-
-            // --------------------------------------------------
-            // Chercher un possesseur :
-            // "tête de Tobirama"
-            // --------------------------------------------------
 
             if (
                 zone[i + 1] &&
@@ -1486,34 +1609,25 @@ console.log(
             break;
         }
 
+        // ------------------------------------------------------
+        // Si la cible était décrite avant l'action,
+        // on la récupère.
+        // ------------------------------------------------------
+
+        if (
+            !cible &&
+            contexteCible
+        ) {
+
+            cible =
+                contexteCible;
+        }
+
         //======================================================
         // MOYEN / INSTRUMENT
         //======================================================
 
         let moyen = null;
-
-        const texteAvantCible =
-            cible
-                ? zone
-                    .slice(
-                        0,
-                        zone.findIndex(
-                            e =>
-                                motNormalise(
-                                    e.mot
-                                ) ===
-                                motNormalise(
-                                    cible.split(" ")[0]
-                                )
-                        )
-                    )
-                    .map(e => e.mot)
-                    .join(" ")
-                : texteZone;
-
-        // ------------------------------------------------------
-        // Paume de main gauche
-        // ------------------------------------------------------
 
         const matchPaume =
             texteZone.match(
@@ -1525,10 +1639,6 @@ console.log(
             moyen =
                 `paume ${matchPaume[1].toLowerCase()}`;
         }
-
-        // ------------------------------------------------------
-        // Main droite / gauche
-        // ------------------------------------------------------
 
         if (!moyen) {
 
@@ -1544,10 +1654,6 @@ console.log(
             }
         }
 
-        // ------------------------------------------------------
-        // Avant-bras droit / gauche
-        // ------------------------------------------------------
-
         if (!moyen) {
 
             const matchAvantBras =
@@ -1560,6 +1666,25 @@ console.log(
                 moyen =
                     `avant-bras ${matchAvantBras[1].toLowerCase()}`;
             }
+        }
+
+        //======================================================
+        // SI L'ACTION EST "BLOQUER"
+        // ET QUE L'OBJET/CIBLE ÉTAIENT DÉCRITS AVANT
+        //======================================================
+
+        if (
+            !objet &&
+            contexteObjet
+        ) {
+            objet = contexteObjet;
+        }
+
+        if (
+            !cible &&
+            contexteCible
+        ) {
+            cible = contexteCible;
         }
 
         //======================================================
@@ -1585,12 +1710,11 @@ console.log(
             ...(moyen
                 ? { moyen }
                 : {})
-
         });
     }
 
     //==========================================================
-    // 8️⃣ CONTEXTE
+    // 9️⃣ CONTEXTE
     //==========================================================
 
     let contexte = "general";
@@ -1628,19 +1752,18 @@ console.log(
     }
 
     //==========================================================
-    // 9️⃣ ENCHAÎNEMENT
+    // 🔟 ENCHAÎNEMENT
     //==========================================================
 
     let enchainement = null;
 
-    const succession =
-        [
-            "puis",
-            "ensuite",
-            "après",
-            "dans la foulée",
-            "immédiatement"
-        ];
+    const succession = [
+        "puis",
+        "ensuite",
+        "après",
+        "dans la foulée",
+        "immédiatement"
+    ];
 
     if (
         succession.some(
@@ -1653,19 +1776,10 @@ console.log(
     }
 
     //==========================================================
-    // 🔟 DIRECTIONS
+    // 1️⃣1️⃣ DIRECTIONS
     //==========================================================
 
     const directions = [];
-
-    // ----------------------------------------------------------
-    // IMPORTANT :
-    // On ne considère plus automatiquement "gauche", "droite"
-    // ou "vers" comme des déplacements.
-    //
-    // Ils ne seront ajoutés ici que si le contexte indique
-    // réellement un déplacement.
-    // ----------------------------------------------------------
 
     const verbesDeplacement = [
         "marcher",
@@ -1725,7 +1839,7 @@ console.log(
     }
 
     //==========================================================
-    // 1️⃣1️⃣ OBJETS GÉNÉRAUX
+    // 1️⃣2️⃣ OBJETS GÉNÉRAUX
     //==========================================================
 
     const objets = [];
@@ -1746,7 +1860,7 @@ console.log(
     }
 
     //==========================================================
-    // 1️⃣2️⃣ CIBLES GÉNÉRALES
+    // 1️⃣3️⃣ CIBLES GÉNÉRALES
     //==========================================================
 
     const cibles = [];
@@ -1767,7 +1881,7 @@ console.log(
     }
 
     //==========================================================
-    // 1️⃣3️⃣ REFORMULATION
+    // 1️⃣4️⃣ REFORMULATION
     //==========================================================
 
     let reformulation =
@@ -1786,6 +1900,7 @@ console.log(
                         `${sujet} ${action.verbe}`;
 
                     if (action.objet) {
+
                         phrase +=
                             ` un ${action.objet}`;
                     }
@@ -1793,7 +1908,7 @@ console.log(
                     if (action.cible) {
 
                         phrase +=
-                            ` à ${action.cible}`;
+                            ` visant ${action.cible}`;
                     }
 
                     if (action.moyen) {
@@ -1825,7 +1940,7 @@ console.log(
     }
 
     //==========================================================
-    // 1️⃣4️⃣ COMPRÉHENSION
+    // 1️⃣5️⃣ COMPRÉHENSION
     //==========================================================
 
     const comprehension = {
@@ -1847,11 +1962,10 @@ console.log(
         contexte,
 
         enchainement
-
     };
 
     //==========================================================
-    // 1️⃣5️⃣ RÉSULTAT FINAL
+    // 1️⃣6️⃣ RÉSULTAT FINAL
     //==========================================================
 
     return {
@@ -1906,66 +2020,139 @@ console.log(
 
         dateAnalyse:
             Date.now()
-
     };
-
-       }
+}
+                    
+                                    
 
 //==============================================================
 // 🧠 NEO AI — AFFICHAGE DU RÉSULTAT
 //==============================================================
 
-async function envoyerResultatNeoAI(ovl, chatJid, resultat) {
+async function envoyerResultatNeoAI(
+    ovl,
+    chatJid,
+    resultat
+) {
 
-    const c = resultat.comprehension;
+    const c =
+        resultat.comprehension;
 
     let comprehension = "";
 
+    //==========================================================
+    // SUJET
+    //==========================================================
+
     if (c.sujet) {
-        comprehension += `• Sujet : ${c.sujet}\n`;
+
+        comprehension +=
+            `• Sujet : ${c.sujet}\n`;
     }
+
+    //==========================================================
+    // ACTIONS
+    //==========================================================
 
     if (c.actions.length) {
-        comprehension += `• Action : ${
-            c.actions
-                .map(a => a.verbe)
-                .join(", ")
-        }\n`;
+
+        for (
+            const action
+            of c.actions
+        ) {
+
+            comprehension +=
+                `• Action : ${action.verbe}\n`;
+
+            if (action.objet) {
+
+                comprehension +=
+                    `• Objet : ${action.objet}\n`;
+            }
+
+            if (action.cible) {
+
+                comprehension +=
+                    `• Cible : ${action.cible}\n`;
+            }
+
+            if (action.moyen) {
+
+                comprehension +=
+                    `• Moyen : ${action.moyen}\n`;
+            }
+        }
     }
+
+    //==========================================================
+    // DIRECTIONS
+    //==========================================================
 
     if (c.directions.length) {
-        comprehension += `• Direction : ${
-            c.directions.join(", ")
-        }\n`;
+
+        comprehension +=
+            `• Direction : ${
+                c.directions.join(", ")
+            }\n`;
     }
 
-    if (c.objets.length) {
-        comprehension += `• Objet : ${
-            c.objets.join(", ")
-        }\n`;
-    }
-
-    if (c.cibles.length) {
-        comprehension += `• Cible : ${
-            c.cibles.join(", ")
-        }\n`;
-    }
+    //==========================================================
+    // LIEUX
+    //==========================================================
 
     if (c.lieux.length) {
-        comprehension += `• Lieu : ${
-            c.lieux.join(", ")
-        }\n`;
+
+        comprehension +=
+            `• Lieu : ${
+                c.lieux.join(", ")
+            }\n`;
     }
+
+    //==========================================================
+    // TEMPS
+    //==========================================================
 
     if (c.temps.length) {
-        comprehension += `• Temps : ${
-            c.temps.join(", ")
-        }\n`;
+
+        comprehension +=
+            `• Temps : ${
+                c.temps.join(", ")
+            }\n`;
     }
 
-    if (!comprehension) {
-        comprehension = "• Compréhension insuffisante";
+    //==========================================================
+    // CONTEXTE
+    //==========================================================
+
+    if (c.contexte) {
+
+        comprehension +=
+            `• Contexte : ${c.contexte}\n`;
     }
+
+    //==========================================================
+    // ENCHAÎNEMENT
+    //==========================================================
+
+    if (c.enchainement) {
+
+        comprehension +=
+            `• Enchaînement : ${c.enchainement}\n`;
+    }
+
+    //==========================================================
+    // FALLBACK
+    //==========================================================
+
+    if (!comprehension) {
+
+        comprehension =
+            "• Compréhension insuffisante";
+    }
+
+    //==========================================================
+    // MESSAGE
+    //==========================================================
 
     const message = `
 🌀🧠 *NeoAI*
@@ -1976,7 +2163,6 @@ ${resultat.texte}
 
 📚 *Compréhension :*
 ${comprehension}
-
 💡 *Résumé :*
 ${resultat.reformulation}
 
