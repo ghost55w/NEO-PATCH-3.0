@@ -5935,6 +5935,1190 @@ function neoExtraireConceptsCombat(tokens = []) {
     return concepts;
 }
 
+//==============================================================
+// 🧠 NEO AI — GRAMMAIRE FRANÇAISE
+//==============================================================
+//
+// RÔLE :
+// - Décrire les structures grammaticales
+// - Identifier les rôles syntaxiques
+// - Identifier les relations sémantiques
+// - Relier les groupes de mots
+// - Permettre au moteur d'analyse de comprendre
+//   la fonction d'un groupe dans une phrase
+//
+// IMPORTANT :
+// Ce bloc ne contient PAS le vocabulaire.
+// Il contient uniquement la grammaire.
+// Le vocabulaire reste dans NeoAI.js.
+//==============================================================
+
+const NEO_GRAMMAIRE_FR = {
+
+    //==========================================================
+    // 🔤 RÔLES GRAMMATICAUX
+    //==========================================================
+
+    roles: {
+
+        S: {
+            nom: "Sujet",
+            description: "Entité qui réalise ou subit l'action."
+        },
+
+        V: {
+            nom: "Verbe",
+            description: "Action, état ou événement."
+        },
+
+        O: {
+            nom: "Objet",
+            description: "Objet direct de l'action."
+        },
+
+        OI: {
+            nom: "Objet indirect",
+            description: "Complément introduit indirectement."
+        },
+
+        CIBLE: {
+            nom: "Cible",
+            description: "Entité ou zone visée par l'action."
+        },
+
+        MOYEN: {
+            nom: "Moyen",
+            description: "Instrument, partie du corps ou méthode utilisée."
+        },
+
+        CCL: {
+            nom: "Lieu",
+            description: "Lieu ou zone où se déroule l'action."
+        },
+
+        CCT: {
+            nom: "Temps",
+            description: "Moment ou durée de l'action."
+        },
+
+        CCM: {
+            nom: "Manière",
+            description: "Façon dont l'action est réalisée."
+        },
+
+        CCA: {
+            nom: "Cause",
+            description: "Cause de l'action."
+        },
+
+        CCB: {
+            nom: "But",
+            description: "But recherché par l'action."
+        },
+
+        CCS: {
+            nom: "Condition",
+            description: "Condition nécessaire à l'action."
+        },
+
+        COORD: {
+            nom: "Coordination",
+            description: "Relie deux éléments ou propositions."
+        },
+
+        SUB: {
+            nom: "Subordination",
+            description: "Introduit une proposition dépendante."
+        },
+
+        REL: {
+            nom: "Relative",
+            description: "Proposition relative."
+        },
+
+        NEG: {
+            nom: "Négation",
+            description: "Marque la négation."
+        },
+
+        INT: {
+            nom: "Interrogation",
+            description: "Structure interrogative."
+        },
+
+        IMP: {
+            nom: "Impératif",
+            description: "Ordre ou instruction."
+        }
+
+    },
+
+
+    //==========================================================
+    // 🧩 STRUCTURES DE PHRASES
+    //==========================================================
+
+    structures: {
+
+        "S+V": {
+            roles: ["S", "V"]
+        },
+
+        "S+V+O": {
+            roles: ["S", "V", "O"]
+        },
+
+        "S+V+OI": {
+            roles: ["S", "V", "OI"]
+        },
+
+        "S+V+O+OI": {
+            roles: ["S", "V", "O", "OI"]
+        },
+
+        "S+V+CIBLE": {
+            roles: ["S", "V", "CIBLE"]
+        },
+
+        "S+V+O+CIBLE": {
+            roles: ["S", "V", "O", "CIBLE"]
+        },
+
+        "S+V+MOYEN": {
+            roles: ["S", "V", "MOYEN"]
+        },
+
+        "S+V+O+MOYEN": {
+            roles: ["S", "V", "O", "MOYEN"]
+        },
+
+        "S+V+CIBLE+MOYEN": {
+            roles: ["S", "V", "CIBLE", "MOYEN"]
+        },
+
+        "S+V+O+CIBLE+MOYEN": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN"]
+        },
+
+        "S+V+CCL": {
+            roles: ["S", "V", "CCL"]
+        },
+
+        "S+V+O+CCL": {
+            roles: ["S", "V", "O", "CCL"]
+        },
+
+        "S+V+CCT": {
+            roles: ["S", "V", "CCT"]
+        },
+
+        "S+V+O+CCT": {
+            roles: ["S", "V", "O", "CCT"]
+        },
+
+        "S+V+CCM": {
+            roles: ["S", "V", "CCM"]
+        },
+
+        "S+V+O+CCM": {
+            roles: ["S", "V", "O", "CCM"]
+        },
+
+        "S+V+CCA": {
+            roles: ["S", "V", "CCA"]
+        },
+
+        "S+V+O+CCA": {
+            roles: ["S", "V", "O", "CCA"]
+        },
+
+        "S+V+CCB": {
+            roles: ["S", "V", "CCB"]
+        },
+
+        "S+V+O+CCB": {
+            roles: ["S", "V", "O", "CCB"]
+        },
+
+        "S+V+CCS": {
+            roles: ["S", "V", "CCS"]
+        },
+
+        "S+V+O+CCS": {
+            roles: ["S", "V", "O", "CCS"]
+        },
+
+        "S+V+O+CCM+CCL": {
+            roles: ["S", "V", "O", "CCM", "CCL"]
+        },
+
+        "S+V+O+CCL+CCT": {
+            roles: ["S", "V", "O", "CCL", "CCT"]
+        },
+
+        "S+V+O+CCM+CCT": {
+            roles: ["S", "V", "O", "CCM", "CCT"]
+        },
+
+        "S+V+O+CCM+CCL+CCT": {
+            roles: ["S", "V", "O", "CCM", "CCL", "CCT"]
+        },
+
+        "S+V+COORD+V": {
+            roles: ["S", "V", "COORD", "V"]
+        },
+
+        "S+V+O+COORD+V": {
+            roles: ["S", "V", "O", "COORD", "V"]
+        },
+
+        "S+V+O+COORD+V+O": {
+            roles: ["S", "V", "O", "COORD", "V", "O"]
+        },
+
+        "S+V+O+SUB": {
+            roles: ["S", "V", "O", "SUB"]
+        },
+
+        "S+V+SUB": {
+            roles: ["S", "V", "SUB"]
+        },
+
+        "SUB+S+V": {
+            roles: ["SUB", "S", "V"]
+        },
+
+        "SUB+S+V+O": {
+            roles: ["SUB", "S", "V", "O"]
+        },
+
+        "S+V+REL": {
+            roles: ["S", "V", "REL"]
+        },
+
+        "S+V+O+REL": {
+            roles: ["S", "V", "O", "REL"]
+        },
+
+        "S+NEG+V": {
+            roles: ["S", "NEG", "V"]
+        },
+
+        "S+NEG+V+O": {
+            roles: ["S", "NEG", "V", "O"]
+        },
+
+        "S+NEG+V+O+CIBLE": {
+            roles: ["S", "NEG", "V", "O", "CIBLE"]
+        },
+
+        "S+AUX+V": {
+            roles: ["S", "AUX", "V"]
+        },
+
+        "S+AUX+V+O": {
+            roles: ["S", "AUX", "V", "O"]
+        },
+
+        "S+AUX+V+O+CIBLE": {
+            roles: ["S", "AUX", "V", "O", "CIBLE"]
+        },
+
+        "S+V+INF": {
+            roles: ["S", "V", "V"]
+        },
+
+        "S+V+O+INF": {
+            roles: ["S", "V", "O", "V"]
+        },
+
+        "S+V+INF+O": {
+            roles: ["S", "V", "V", "O"]
+        },
+
+        "S+V+INF+O+CIBLE": {
+            roles: ["S", "V", "V", "O", "CIBLE"]
+        },
+
+        "S+V+O+INF+O": {
+            roles: ["S", "V", "O", "V", "O"]
+        },
+
+        "S+V+O+INF+MOYEN": {
+            roles: ["S", "V", "O", "V", "MOYEN"]
+        },
+
+        "S+V+O+INF+CIBLE": {
+            roles: ["S", "V", "O", "V", "CIBLE"]
+        },
+
+        "S+V+O+CIBLE+CCM": {
+            roles: ["S", "V", "O", "CIBLE", "CCM"]
+        },
+
+        "S+V+O+CIBLE+CCL": {
+            roles: ["S", "V", "O", "CIBLE", "CCL"]
+        },
+
+        "S+V+O+CIBLE+CCT": {
+            roles: ["S", "V", "O", "CIBLE", "CCT"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCM": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCM"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCL": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCL"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCT": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCT"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCM+CCL": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCM", "CCL"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCM+CCT": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCM", "CCT"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCL+CCT": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCL", "CCT"]
+        },
+
+        "S+V+O+CIBLE+MOYEN+CCM+CCL+CCT": {
+            roles: ["S", "V", "O", "CIBLE", "MOYEN", "CCM", "CCL", "CCT"]
+        },
+
+        "IMP+V": {
+            roles: ["IMP", "V"]
+        },
+
+        "IMP+V+O": {
+            roles: ["IMP", "V", "O"]
+        },
+
+        "IMP+V+O+CIBLE": {
+            roles: ["IMP", "V", "O", "CIBLE"]
+        },
+
+        "INT+S+V": {
+            roles: ["INT", "S", "V"]
+        },
+
+        "INT+S+V+O": {
+            roles: ["INT", "S", "V", "O"]
+        },
+
+        "INT+S+V+O+CIBLE": {
+            roles: ["INT", "S", "V", "O", "CIBLE"]
+        },
+
+        "S+V+O+COORD+S+V+O": {
+            roles: ["S", "V", "O", "COORD", "S", "V", "O"]
+        },
+
+        "S+V+O+COORD+S+V+O+CIBLE": {
+            roles: ["S", "V", "O", "COORD", "S", "V", "O", "CIBLE"]
+        },
+
+        "S+V+O+COORD+S+V+O+MOYEN": {
+            roles: ["S", "V", "O", "COORD", "S", "V", "O", "MOYEN"]
+        }
+
+    },
+
+
+    //==========================================================
+    // 🔗 RELATIONS GRAMMATICALES / SÉMANTIQUES
+    //==========================================================
+
+    relations: {
+
+        CIBLE: [
+
+            "vers",
+            "vers le",
+            "vers la",
+            "vers les",
+            "vers un",
+            "vers une",
+            "vers son",
+            "vers sa",
+            "vers ses",
+
+            "en direction de",
+            "face à",
+            "contre",
+            "sur",
+            "dans",
+
+            "au niveau de",
+            "au dessus de",
+            "au-dessous de",
+            "au dessous de",
+
+            "devant",
+            "derrière",
+            "entre",
+            "autour de"
+
+        ],
+
+        MOYEN: [
+
+            "avec",
+            "avec sa",
+            "avec son",
+            "avec ses",
+
+            "en utilisant",
+            "en utilisant sa",
+            "en utilisant son",
+            "en utilisant ses",
+
+            "à l'aide de",
+            "au moyen de",
+
+            "en plaçant",
+            "en plaçant sa",
+            "en plaçant son",
+            "en plaçant ses",
+
+            "en prenant",
+            "en prenant sa",
+            "en prenant son",
+            "en prenant ses"
+
+        ],
+
+        CCL: [
+
+            "dans",
+            "sur",
+            "sous",
+            "devant",
+            "derrière",
+            "près de",
+            "loin de",
+            "à côté de",
+            "au-dessus de",
+            "au-dessous de",
+            "entre",
+            "autour de"
+
+        ],
+
+        CCT: [
+
+            "avant",
+            "après",
+            "pendant",
+            "depuis",
+            "jusqu'à",
+            "dès",
+            "lorsque",
+            "quand",
+            "alors que",
+            "au moment où"
+
+        ],
+
+        CCM: [
+
+            "avec",
+            "sans",
+            "rapidement",
+            "lentement",
+            "brusquement",
+            "doucement",
+            "violemment",
+            "prudemment",
+            "silencieusement",
+            "en faisant",
+            "de manière",
+            "de façon"
+
+        ],
+
+        CCA: [
+
+            "parce que",
+            "car",
+            "puisque",
+            "à cause de",
+            "en raison de",
+            "grâce à"
+
+        ],
+
+        CCB: [
+
+            "pour",
+            "afin de",
+            "afin que",
+            "dans le but de",
+            "de façon à",
+            "de manière à"
+
+        ],
+
+        CCS: [
+
+            "si",
+            "à condition que",
+            "à moins que",
+            "dans le cas où"
+        ],
+
+        COORD: [
+
+            "et",
+            "ou",
+            "mais",
+            "donc",
+            "or",
+            "ni",
+            "car",
+            "puis",
+            "ensuite"
+
+        ]
+
+    },
+
+
+    //==========================================================
+    // 🧠 CONSTRUCTIONS IMPORTANTES
+    //==========================================================
+
+    constructions: {
+
+        "en plaçant": {
+            role: "MOYEN"
+        },
+
+        "en utilisant": {
+            role: "MOYEN"
+        },
+
+        "à l'aide de": {
+            role: "MOYEN"
+        },
+
+        "au moyen de": {
+            role: "MOYEN"
+        },
+
+        "en prenant": {
+            role: "MOYEN"
+        },
+
+        "au niveau de": {
+            role: "CIBLE"
+        },
+
+        "en direction de": {
+            role: "CIBLE"
+        },
+
+        "vers": {
+            role: "CIBLE"
+        },
+
+        "face à": {
+            role: "CIBLE"
+        },
+
+        "contre": {
+            role: "CIBLE"
+        },
+
+        "pour": {
+            role: "CCB"
+        },
+
+        "afin de": {
+            role: "CCB"
+        },
+
+        "sans": {
+            role: "CCM"
+        }
+
+    }
+
+};
+
+
+//==============================================================
+// 🔎 NORMALISATION D'UNE STRUCTURE
+//==============================================================
+
+function neoNormaliserRole(role = "") {
+
+    return String(role || "")
+        .trim()
+        .toUpperCase();
+
+}
+
+
+//==============================================================
+// 🧠 TROUVER UNE STRUCTURE GRAMMATICALE
+//==============================================================
+
+function neoTrouverStructureGrammaticale(
+    roles = []
+) {
+
+    if (!Array.isArray(roles) || !roles.length) {
+
+        return null;
+
+    }
+
+    const normalises =
+        roles.map(
+            neoNormaliserRole
+        );
+
+    const cle =
+        normalises.join("+");
+
+
+    //----------------------------------------------------------
+    // Correspondance exacte
+    //----------------------------------------------------------
+
+    if (
+        NEO_GRAMMAIRE_FR.structures[cle]
+    ) {
+
+        return {
+
+            structure: cle,
+
+            roles:
+                NEO_GRAMMAIRE_FR
+                    .structures[cle]
+                    .roles,
+
+            score: 1,
+
+            exact: true
+
+        };
+
+    }
+
+
+    //----------------------------------------------------------
+    // Recherche de la structure la plus proche
+    //----------------------------------------------------------
+
+    let meilleure = null;
+
+    let meilleurScore = 0;
+
+
+    for (
+        const [nom, structure]
+        of Object.entries(
+            NEO_GRAMMAIRE_FR.structures
+        )
+    ) {
+
+        const attendu =
+            structure.roles || [];
+
+
+        let correspondances = 0;
+
+        const longueur =
+            Math.max(
+                attendu.length,
+                normalises.length
+            );
+
+
+        for (
+            let i = 0;
+            i < normalises.length;
+            i++
+        ) {
+
+            if (
+                attendu[i] &&
+                attendu[i] === normalises[i]
+            ) {
+
+                correspondances++;
+
+            }
+
+        }
+
+
+        const score =
+            longueur > 0
+                ? correspondances / longueur
+                : 0;
+
+
+        if (
+            score > meilleurScore
+        ) {
+
+            meilleurScore =
+                score;
+
+            meilleure = {
+
+                structure: nom,
+
+                roles: attendu,
+
+                score,
+
+                exact: false
+
+            };
+
+        }
+
+    }
+
+
+    return meilleure;
+
+}
+
+
+//==============================================================
+// 🔗 TROUVER LE TYPE D'UNE RELATION
+//==============================================================
+
+function neoTrouverRelationGrammaticale(
+    expression = ""
+) {
+
+    const recherche =
+        neoSansAccents(
+            expression
+        );
+
+
+    if (!recherche) {
+
+        return null;
+
+    }
+
+
+    //----------------------------------------------------------
+    // Constructions prioritaires
+    //----------------------------------------------------------
+
+    for (
+        const [construction, config]
+        of Object.entries(
+            NEO_GRAMMAIRE_FR.constructions
+        )
+    ) {
+
+        if (
+            recherche ===
+            neoSansAccents(
+                construction
+            )
+        ) {
+
+            return {
+
+                expression: construction,
+
+                role: config.role,
+
+                priorite: true
+
+            };
+
+        }
+
+    }
+
+
+    //----------------------------------------------------------
+    // Relations
+    //----------------------------------------------------------
+
+    for (
+        const [role, expressions]
+        of Object.entries(
+            NEO_GRAMMAIRE_FR.relations
+        )
+    ) {
+
+        for (
+            const relation
+            of expressions
+        ) {
+
+            if (
+                recherche ===
+                neoSansAccents(
+                    relation
+                )
+            ) {
+
+                return {
+
+                    expression: relation,
+
+                    role,
+
+                    priorite: false
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+//==============================================================
+// 🧩 DÉTERMINER LE RÔLE D'UN GROUPE
+//==============================================================
+//
+// Exemple :
+//
+// "vers son visage"
+//      ↓
+// CIBLE
+//
+// "en plaçant sa paume"
+//      ↓
+// MOYEN
+//
+// "au niveau de son abdomen"
+//      ↓
+// CIBLE
+//==============================================================
+
+function neoAnalyserGroupeGrammatical(
+    groupe = ""
+) {
+
+    const texte =
+        neoNormaliserExpression(
+            groupe
+        );
+
+
+    if (!texte) {
+
+        return {
+
+            groupe,
+
+            role: null,
+
+            relation: null
+
+        };
+
+    }
+
+
+    //----------------------------------------------------------
+    // Relations longues en premier
+    //----------------------------------------------------------
+
+    const relationsTriees = [
+
+        ...Object.entries(
+            NEO_GRAMMAIRE_FR.constructions
+        ),
+
+        ...Object.entries(
+            NEO_GRAMMAIRE_FR.relations
+        )
+            .map(
+                ([role, expressions]) =>
+                    expressions.map(
+                        expression => [
+                            expression,
+                            { role }
+                        ]
+                    )
+            )
+            .flat()
+
+    ];
+
+
+    relationsTriees.sort(
+        (a, b) =>
+            String(b[0]).length -
+            String(a[0]).length
+    );
+
+
+    //----------------------------------------------------------
+    // Recherche de la relation
+    //----------------------------------------------------------
+
+    for (
+        const [expression, config]
+        of relationsTriees
+    ) {
+
+        const relationNormalisee =
+            neoSansAccents(
+                expression
+            );
+
+
+        if (
+            neoSansAccents(
+                texte
+            ).startsWith(
+                relationNormalisee
+            )
+        ) {
+
+            return {
+
+                groupe: texte,
+
+                role:
+                    config.role,
+
+                relation:
+                    expression,
+
+                contenu:
+                    texte
+                        .slice(
+                            expression.length
+                        )
+                        .trim()
+
+            };
+
+        }
+
+    }
+
+
+    return {
+
+        groupe: texte,
+
+        role: null,
+
+        relation: null,
+
+        contenu: texte
+
+    };
+
+}
+
+
+//==============================================================
+// 🧠 ANALYSER UNE SÉQUENCE GRAMMATICALE
+//==============================================================
+
+function neoAnalyserStructureGrammaticale(
+    elements = []
+) {
+
+    if (
+        !Array.isArray(elements) ||
+        !elements.length
+    ) {
+
+        return {
+
+            roles: [],
+
+            structure: null,
+
+            confiance: 0
+
+        };
+
+    }
+
+
+    const roles =
+        elements
+            .map(
+                element =>
+                    element?.role ||
+                    element?.type ||
+                    null
+            )
+            .filter(Boolean);
+
+
+    const structure =
+        neoTrouverStructureGrammaticale(
+            roles
+        );
+
+
+    return {
+
+        roles,
+
+        structure:
+            structure?.structure ||
+            null,
+
+        confiance:
+            structure?.score ||
+            0,
+
+        detail:
+            structure
+
+    };
+
+}
+
+
+//==============================================================
+// 🛡️ PRIORITÉ SÉMANTIQUE
+//==============================================================
+//
+// Une partie du corps n'est PAS automatiquement une cible.
+//
+// Exemple :
+//
+// "paume de main gauche"
+//       → MOYEN
+//
+// "vers son visage"
+//       → CIBLE
+//
+// "avant-bras droit"
+//       → MOYEN si introduit par
+//          "avec", "en plaçant", etc.
+//
+//==============================================================
+
+function neoPrioriteRoleGrammatical(
+    groupe = "",
+    rolePropose = null
+) {
+
+    const analyse =
+        neoAnalyserGroupeGrammatical(
+            groupe
+        );
+
+
+    //----------------------------------------------------------
+    // Une relation explicite gagne toujours
+    //----------------------------------------------------------
+
+    if (
+        analyse.role
+    ) {
+
+        return {
+
+            role:
+                analyse.role,
+
+            confiance: 1,
+
+            relation:
+                analyse.relation,
+
+            contenu:
+                analyse.contenu
+
+        };
+
+    }
+
+
+    //----------------------------------------------------------
+    // Aucun indicateur grammatical
+    //----------------------------------------------------------
+
+    return {
+
+        role:
+            rolePropose,
+
+        confiance:
+            rolePropose
+                ? 0.5
+                : 0,
+
+        relation: null,
+
+        contenu:
+            analyse.contenu
+
+    };
+
+}
+
+
+//==============================================================
+// 📊 EXTRAIRE LES RÔLES D'UNE PHRASE
+//==============================================================
+
+function neoConstruireStructure(
+    elements = []
+) {
+
+    if (
+        !Array.isArray(elements)
+    ) {
+
+        return null;
+
+    }
+
+
+    const structure =
+        neoAnalyserStructureGrammaticale(
+            elements
+        );
+
+
+    return {
+
+        elements,
+
+        roles:
+            structure.roles,
+
+        structure:
+            structure.structure,
+
+        confiance:
+            structure.confiance
+
+    };
+
+}
 
 //==============================================================
 // 📤 EXPORTS
@@ -5987,5 +7171,19 @@ module.exports = {
     neoDeterminerRoles,
     neoAnalyserMot,
     neoTokeniserSemantique,
-    neoExtraireConceptsCombat
+    neoExtraireConceptsCombat, 
+
+//==========================================================
+    // 🧠 GRAMMAIRE FRANÇAISE
+    //==========================================================
+
+    NEO_GRAMMAIRE_FR,
+
+    neoTrouverStructureGrammaticale,
+    neoTrouverRelationGrammaticale,
+    neoAnalyserGroupeGrammatical,
+    neoAnalyserStructureGrammaticale,
+    neoPrioriteRoleGrammatical,
+    neoConstruireStructure
+
 };
