@@ -2770,14 +2770,30 @@ ovlcmd(
 // 🔐 SÉCURITÉ SUDO
 //======================================================
 const senderJid =
-    ms_org?.key?.participant ||
-    ms_org?.key?.remoteJid ||
+    cmd_options.auteur_Message ||
+    ms?.key?.participant ||
+    ms?.participant ||
+    ms?.key?.remoteJid ||
     "";
 
+const senderNormalise =
+    String(senderJid)
+        .trim()
+        .replace(/^lid:/i, "");
+
 const estSudo =
-    Sudo.includes(senderJid);
+    await Sudo.findOne({
+        where: {
+            id: senderNormalise
+        }
+    });
 
 if (!estSudo) {
+
+    console.log(
+        "🔐 [NeoLearn] Accès refusé pour :",
+        senderNormalise
+    );
 
     await ovl.sendMessage(
         ms_org,
@@ -2793,6 +2809,11 @@ if (!estSudo) {
 
     return;
 }
+
+console.log(
+    "✅ [NeoLearn] Sudo autorisé :",
+    senderNormalise
+);
         const {
             repondre,
             msg_Repondu,
@@ -2989,7 +3010,6 @@ for (
         //======================================================
         // LECTURE DE NEOAI.JS
         //======================================================
-
         const cheminNeoAI =
             require.resolve(
                 "../DataBase/NeoAI"
@@ -3079,7 +3099,6 @@ for (
         //======================================================
         // MOTS DÉJÀ APPRIS
         //======================================================
-
         const blocLearn =
             contenu.slice(
                 debutTableau + 1,
@@ -3108,7 +3127,6 @@ for (
         //======================================================
         // DÉTECTION DES MOTS INCONNUS
         //======================================================
-
         const nouveauxMots = [];
         const dejaDetectes = new Set();
 
@@ -3177,7 +3195,6 @@ for (
         //======================================================
         // TRI ALPHABÉTIQUE
         //======================================================
-
         const tousLesMots =
             [
                 ...motsDejaAppris.values(),
@@ -3227,7 +3244,6 @@ for (
         //======================================================
         // RECONSTRUCTION DE NEO_LEARN
         //======================================================
-
         const nouvelleListe =
             listeTriee
                 .map(
