@@ -1000,9 +1000,6 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
 //==============================================================
-//==============================================================
-// 🌀🧠 NEOAI — ANALYSEUR LINGUISTIQUE
-//==============================================================
 function analyserNeoAI(text) {
 
     if (typeof text !== "string") {
@@ -1559,122 +1556,326 @@ function analyserNeoAI(text) {
                 contexteObjet;
         }
 
-      //======================================================
-        // CIBLE
-        //======================================================
+      //==========================================================
+// 🎯 CIBLE — DÉTECTION INTELLIGENTE
+//==========================================================
 
-        let cible = null;
+let cible = null;
 
-        for (
-            let i = 0;
-            i < zone.length;
-            i++
-        ) {
+//----------------------------------------------------------
+// TEXTE DE LA ZONE DE CETTE ACTION UNIQUEMENT
+//----------------------------------------------------------
 
-            const element =
-                zone[i];
+const texteCible = texteZone || "";
 
-            if (
-                !estPartieCorps(element)
-            ) {
-                continue;
-            }
+//----------------------------------------------------------
+// LISTE DES PARTIES DU CORPS
+//----------------------------------------------------------
 
-            const mot =
-                motNormalise(
-                    element.mot
-                );
+const partiesCorps =
+    "tête|visage|cou|nuque|épaule|bras|avant[- ]bras|main|paume|poitrine|torse|abdomen|ventre|dos|hanche|fesse|jambe|cuisse|genou|mollet|cheville|pied";
 
-            // --------------------------------------------------
-            // 🚫 "pied" dans "coup de pied"
-            //
-            // Ici "pied" fait partie du nom de l'objet
-            // "coup de pied", ce n'est PAS la cible.
-            // On continue donc la recherche pour trouver
-            // la véritable cible, par exemple "abdomen".
-            // --------------------------------------------------
 
-            if (
-                mot === "pied" &&
-                i >= 2 &&
-                motNormalise(
-                    zone[i - 1]?.mot
-                ) === "de" &&
-                motNormalise(
-                    zone[i - 2]?.mot
-                ) === "coup"
-            ) {
-                continue;
-            }
+//==========================================================
+// 1️⃣ CIBLE EXPLICITE : « vers X »
+//==========================================================
 
-            const avant =
-                zone
-                    .slice(
-                        Math.max(0, i - 4),
-                        i
-                    )
-                    .map(
-                        e =>
-                            motNormalise(e.mot)
-                    );
+let matchCible = texteCible.match(
+    new RegExp(
+        "\\bvers\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+        partiesCorps +
+        ")\\b",
+        "i"
+    )
+);
 
-            // --------------------------------------------------
-            // 🚫 Parties du corps utilisées comme moyen
-            //
-            // "main gauche"
-            // "paume gauche"
-            // "avant-bras droit"
-            // --------------------------------------------------
+if (matchCible) {
+    cible = matchCible[1];
+}
 
-            if (
-                avant.includes("main") ||
-                avant.includes("paume") ||
-                avant.includes("bras") ||
-                avant.includes("avant-bras")
-            ) {
-                continue;
-            }
 
-            cible =
-                element.mot;
+//==========================================================
+// 2️⃣ CIBLE EXPLICITE : « visant X »
+//==========================================================
 
-            // --------------------------------------------------
-            // "tête de Tobirama"
-            // --------------------------------------------------
+if (!cible) {
 
-            if (
-                zone[i + 1] &&
-                motNormalise(
-                    zone[i + 1].mot
-                ) === "de"
-            ) {
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\bvisant\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
 
-                if (
-                    zone[i + 2]
-                ) {
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
 
-                    cible +=
-                        " de " +
-                        zone[i + 2].mot;
-                }
-            }
 
-            break;
-        }
+//==========================================================
+// 3️⃣ CIBLE EXPLICITE : « au niveau de X »
+//==========================================================
 
-        // ------------------------------------------------------
-        // Si la cible était décrite avant l'action,
-        // on la récupère.
-        // ------------------------------------------------------
+if (!cible) {
+
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\bau\\s+niveau\\s+de\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
+
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
+
+
+//==========================================================
+// 4️⃣ CIBLE EXPLICITE : « dans X »
+//==========================================================
+
+if (!cible) {
+
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\bdans\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
+
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
+
+
+//==========================================================
+// 5️⃣ CIBLE EXPLICITE : « sur X »
+//==========================================================
+
+if (!cible) {
+
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\bsur\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
+
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
+
+
+//==========================================================
+// 6️⃣ CIBLE EXPLICITE : « contre X »
+//==========================================================
+
+if (!cible) {
+
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\bcontre\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
+
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
+
+
+//==========================================================
+// 7️⃣ CIBLE EXPLICITE : « frappant X »
+//==========================================================
+
+if (!cible) {
+
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\b(?:frappant|frappe|frapper|touchant|touche|toucher)\\s+" +
+            "(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
+
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
+
+
+//==========================================================
+// 8️⃣ CIBLE EXPLICITE : « en direction de X »
+//==========================================================
+
+if (!cible) {
+
+    matchCible = texteCible.match(
+        new RegExp(
+            "\\ben\\s+direction\\s+de\\s+(?:son|sa|le|la|les|un|une|mon|ma|ton|ta)?\\s*(" +
+            partiesCorps +
+            ")\\b",
+            "i"
+        )
+    );
+
+    if (matchCible) {
+        cible = matchCible[1];
+    }
+}
+
+
+//==========================================================
+// 9️⃣ CIBLE GÉNÉRIQUE
+//==========================================================
+//
+// On ne prend une partie du corps comme cible que si elle
+// n'est PAS déjà utilisée comme moyen.
+//
+// Exemple :
+// « avec son avant-bras droit ... abdomen »
+//
+// ❌ bras
+// ❌ avant-bras
+// ✅ abdomen
+//
+//==========================================================
+
+if (!cible) {
+
+    for (let z = 0; z < zones.length; z++) {
+
+        const zone = zones[z];
+
+        if (!zone) continue;
+
+        const mot = zone.mot || zone;
+
+        if (!mot) continue;
+
+        const motNormalise = String(mot)
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        //--------------------------------------------------
+        // Ne jamais prendre « bras » dans « avant-bras »
+        //--------------------------------------------------
 
         if (
-            !cible &&
-            contexteCible
+            motNormalise === "bras" &&
+            texteCible.includes("avant-bras")
         ) {
+            continue;
+        }
 
-            cible =
-                contexteCible;
-        }  
+        //--------------------------------------------------
+        // Ne pas prendre « pied » lorsqu'il appartient
+        // à « coup de pied »
+        //--------------------------------------------------
+
+        if (
+            motNormalise === "pied" &&
+            /\bcoup\s+de\s+pied\b/i.test(texteCible)
+        ) {
+            continue;
+        }
+
+        //--------------------------------------------------
+        // Ne pas prendre une partie du corps déjà utilisée
+        // comme moyen
+        //--------------------------------------------------
+
+        if (
+            moyen &&
+            String(moyen)
+                .toLowerCase()
+                .includes(motNormalise)
+        ) {
+            continue;
+        }
+
+        //--------------------------------------------------
+        // Vérification que le mot est réellement présent
+        //--------------------------------------------------
+
+        const regexMot = new RegExp(
+            "\\b" +
+            motNormalise.replace("-", "[- ]") +
+            "\\b",
+            "i"
+        );
+
+        if (!regexMot.test(texteCible)) {
+            continue;
+        }
+
+        //--------------------------------------------------
+        // Vérifier qu'il ne s'agit pas simplement du moyen
+        //--------------------------------------------------
+
+        const positionMot =
+            texteCible.toLowerCase().indexOf(
+                motNormalise.replace("-", " ")
+            );
+
+        const contexteAvant =
+            positionMot >= 0
+                ? texteCible
+                    .substring(
+                        Math.max(0, positionMot - 30),
+                        positionMot
+                    )
+                    .toLowerCase()
+                : "";
+
+        if (
+            /\b(main|paume|bras|avant[- ]bras)\s*(gauche|droite)?\s*$/
+                .test(contexteAvant)
+        ) {
+            continue;
+        }
+
+        //--------------------------------------------------
+        // CIBLE TROUVÉE
+        //--------------------------------------------------
+
+        cible = mot;
+
+        break;
+    }
+}
+
+
+//==========================================================
+// 🔟 NETTOYAGE DE LA CIBLE
+//==========================================================
+
+if (cible) {
+
+    cible = String(cible)
+        .replace(/[-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+}
        
 
         //======================================================
