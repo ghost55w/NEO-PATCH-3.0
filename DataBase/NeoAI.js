@@ -155,6 +155,37 @@ const NEO_LEARN = {
 
 };
 
+//==============================================================
+// ⚔️ NEO AI — MODÈLES DE COMBAT
+//==============================================================
+
+const NEO_COMBAT_MODELS = {
+
+    deplacement: [
+        // 50 modèles
+    ],
+
+    attaque: [
+        // 50 modèles
+    ],
+
+    esquive: [
+        // 50 modèles
+    ],
+
+    contre: [
+        // 50 modèles
+    ],
+
+    parade: [
+        // 50 modèles
+    ],
+
+    saisie: [
+        // 50 modèles
+    ]
+};
+
 
 //==============================================================
 // 📚 VERBES
