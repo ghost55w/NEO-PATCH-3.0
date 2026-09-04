@@ -2116,120 +2116,510 @@ const NEO_MODELES_PHRASES = {
 
     fr: {
 
-        //========================================================
-        // 🚶 DÉPLACEMENT
-        //========================================================
+ //==============================================================
+// 🚶 DÉPLACEMENT
+//==============================================================
 
-        deplacement: [
+deplacement: [
 
-            {
-                phrase: "le lion court",
-                structure: "S + V"
-            },
+    //========================================================
+    // 🔹 DÉPLACEMENT SIMPLE
+    //========================================================
 
-            {
-                phrase: "le lion court vers la chèvre",
-                structure: "S + V + CIBLE"
-            },
+    {
+        phrase: "le lion court",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion court rapidement",
-                structure: "S + V + MANIERE"
-            },
+    {
+        phrase: "le lion marche",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion court rapidement vers la chèvre",
-                structure: "S + V + MANIERE + CIBLE"
-            },
+    {
+        phrase: "le lion avance",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion fonce vers Maki",
-                structure: "S + V + CIBLE"
-            },
+    {
+        phrase: "le lion recule",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion fonce vers l'avant",
-                structure: "S + V + DIRECTION"
-            },
+    {
+        phrase: "le lion part",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion fonce vers la gauche",
-                structure: "S + V + DIRECTION"
-            },
+    {
+        phrase: "le lion arrive",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion fonce vers la droite",
-                structure: "S + V + DIRECTION"
-            },
+    {
+        phrase: "le lion se déplace",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion avance vers la ville",
-                structure: "S + V + LIEU"
-            },
+    {
+        phrase: "le lion se dirige",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le lion va au marché",
-                structure: "S + V + LIEU"
-            },
+    {
+        phrase: "le lion approche",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le voyageur avance vers la ville",
-                structure: "S + V + LIEU"
-            },
+    {
+        phrase: "le lion s'éloigne",
+        structure: "S + V"
+    },
 
-            {
-                phrase: "le voyageur avance rapidement vers la ville",
-                structure: "S + V + MANIERE + LIEU"
-            },
+    //========================================================
+    // 🎯 DÉPLACEMENT VERS UNE CIBLE
+    //========================================================
 
-            {
-                phrase: "le joueur recule",
-                structure: "S + V"
-            },
+    {
+        phrase: "le lion court vers la chèvre",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le joueur recule rapidement",
-                structure: "S + V + MANIERE"
-            },
+    {
+        phrase: "le lion fonce vers Maki",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage se dirige vers la porte",
-                structure: "S + V + LIEU"
-            },
+    {
+        phrase: "le lion avance vers son adversaire",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage marche dans la ville",
-                structure: "S + V + LIEU"
-            },
+    {
+        phrase: "le lion marche vers la cible",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage court sur dix mètres",
-                structure: "S + V + CC_DISTANCE"
-            },
+    {
+        phrase: "le lion se dirige vers son adversaire",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage court sur dix mètres vers la cible",
-                structure: "S + V + CC_DISTANCE + CIBLE"
-            },
+    {
+        phrase: "le lion approche de la cible",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage arrive rapidement vers la cible",
-                structure: "S + V + MANIERE + CIBLE"
-            },
+    {
+        phrase: "le lion fonce sur son adversaire",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage avance puis court",
-                structure: "S + V + PUIS + V"
-            },
+    {
+        phrase: "le lion court en direction de la cible",
+        structure: "S + V + CIBLE"
+    },
 
-            {
-                phrase: "le personnage part pour rejoindre la ville",
-                structure: "S + V + POUR + V"
-            }
+    {
+        phrase: "le lion se rapproche de son adversaire",
+        structure: "S + V + CIBLE"
+    },
 
-        ],
+    {
+        phrase: "le lion s'éloigne de son adversaire",
+        structure: "S + V + CIBLE"
+    },
 
+    //========================================================
+    // 🧭 DIRECTIONS
+    //========================================================
 
+    {
+        phrase: "le lion fonce vers l'avant",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion fonce vers l'arrière",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion fonce vers la gauche",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion fonce vers la droite",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion avance vers l'avant",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion recule vers l'arrière",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion se déplace vers la gauche",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion se déplace vers la droite",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion tourne vers la gauche",
+        structure: "S + V + DIRECTION"
+    },
+
+    {
+        phrase: "le lion tourne vers la droite",
+        structure: "S + V + DIRECTION"
+    },
+
+    //========================================================
+    // 📍 DÉPLACEMENT VERS UN LIEU
+    //========================================================
+
+    {
+        phrase: "le lion avance vers la ville",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le lion va au marché",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le voyageur avance vers la ville",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le personnage se dirige vers la porte",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le personnage marche dans la ville",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le personnage entre dans la maison",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le personnage sort de la maison",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le voyageur arrive à la gare",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le joueur retourne au stade",
+        structure: "S + V + LIEU"
+    },
+
+    {
+        phrase: "le combattant se rend dans l'arène",
+        structure: "S + V + LIEU"
+    },
+
+    //========================================================
+    // ⚡ MANIÈRE
+    //========================================================
+
+    {
+        phrase: "le lion court rapidement",
+        structure: "S + V + MANIERE"
+    },
+
+    {
+        phrase: "le joueur recule rapidement",
+        structure: "S + V + MANIERE"
+    },
+
+    {
+        phrase: "le lion avance lentement",
+        structure: "S + V + MANIERE"
+    },
+
+    {
+        phrase: "le personnage marche calmement",
+        structure: "S + V + MANIERE"
+    },
+
+    {
+        phrase: "le personnage court brutalement",
+        structure: "S + V + MANIERE"
+    },
+
+    {
+        phrase: "le combattant avance prudemment",
+        structure: "S + V + MANIERE"
+    },
+
+    {
+        phrase: "le joueur recule rapidement",
+        structure: "S + V + MANIERE"
+    },
+
+    //========================================================
+    // ⚡ MANIÈRE + CIBLE
+    //========================================================
+
+    {
+        phrase: "le lion court rapidement vers la chèvre",
+        structure: "S + V + MANIERE + CIBLE"
+    },
+
+    {
+        phrase: "le lion fonce brutalement vers son adversaire",
+        structure: "S + V + MANIERE + CIBLE"
+    },
+
+    {
+        phrase: "le combattant avance rapidement vers la cible",
+        structure: "S + V + MANIERE + CIBLE"
+    },
+
+    {
+        phrase: "le joueur recule rapidement face à son adversaire",
+        structure: "S + V + MANIERE + CIBLE"
+    },
+
+    {
+        phrase: "le personnage se dirige calmement vers la porte",
+        structure: "S + V + MANIERE + CIBLE"
+    },
+
+    //========================================================
+    // 📍 MANIÈRE + LIEU
+    //========================================================
+
+    {
+        phrase: "le voyageur avance rapidement vers la ville",
+        structure: "S + V + MANIERE + LIEU"
+    },
+
+    {
+        phrase: "le personnage marche lentement dans la ville",
+        structure: "S + V + MANIERE + LIEU"
+    },
+
+    {
+        phrase: "le joueur court rapidement vers le stade",
+        structure: "S + V + MANIERE + LIEU"
+    },
+
+    {
+        phrase: "le combattant se dirige prudemment vers l'arène",
+        structure: "S + V + MANIERE + LIEU"
+    },
+
+    //========================================================
+    // 📏 DISTANCE
+    //========================================================
+
+    {
+        phrase: "le personnage court sur dix mètres",
+        structure: "S + V + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le personnage avance de cinq mètres",
+        structure: "S + V + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le joueur recule de trois mètres",
+        structure: "S + V + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le combattant fonce sur cinq mètres",
+        structure: "S + V + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le personnage se déplace sur dix mètres",
+        structure: "S + V + CC_DISTANCE"
+    },
+
+    //========================================================
+    // 📏 DISTANCE + CIBLE
+    //========================================================
+
+    {
+        phrase: "le personnage court sur dix mètres vers la cible",
+        structure: "S + V + CC_DISTANCE + CIBLE"
+    },
+
+    {
+        phrase: "le combattant avance de cinq mètres vers son adversaire",
+        structure: "S + V + CC_DISTANCE + CIBLE"
+    },
+
+    {
+        phrase: "le joueur recule de trois mètres face à son adversaire",
+        structure: "S + V + CC_DISTANCE + CIBLE"
+    },
+
+    {
+        phrase: "le lion fonce sur dix mètres vers la cible",
+        structure: "S + V + CC_DISTANCE + CIBLE"
+    },
+
+    //========================================================
+    // 📏 MANIÈRE + DISTANCE
+    //========================================================
+
+    {
+        phrase: "le personnage court rapidement sur dix mètres",
+        structure: "S + V + MANIERE + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le combattant avance lentement de cinq mètres",
+        structure: "S + V + MANIERE + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le joueur recule rapidement de trois mètres",
+        structure: "S + V + MANIERE + CC_DISTANCE"
+    },
+
+    //========================================================
+    // 🔗 ENCHAÎNEMENT
+    //========================================================
+
+    {
+        phrase: "le personnage avance puis court",
+        structure: "S + V + PUIS + V"
+    },
+
+    {
+        phrase: "le personnage marche puis accélère",
+        structure: "S + V + PUIS + V"
+    },
+
+    {
+        phrase: "le personnage court puis s'arrête",
+        structure: "S + V + PUIS + V"
+    },
+
+    {
+        phrase: "le personnage avance puis recule",
+        structure: "S + V + PUIS + V"
+    },
+
+    {
+        phrase: "le personnage court puis tourne",
+        structure: "S + V + PUIS + V"
+    },
+
+    {
+        phrase: "le personnage avance puis court vers la cible",
+        structure: "S + V + PUIS + V + CIBLE"
+    },
+
+    {
+        phrase: "le personnage court puis frappe son adversaire",
+        structure: "S + V + PUIS + V + O"
+    },
+
+    //========================================================
+    // 🎯 ACTION + BUT
+    //========================================================
+
+    {
+        phrase: "le personnage part pour rejoindre la ville",
+        structure: "S + V + POUR + V"
+    },
+
+    {
+        phrase: "le joueur court pour rejoindre son adversaire",
+        structure: "S + V + POUR + V"
+    },
+
+    {
+        phrase: "le combattant avance pour atteindre la cible",
+        structure: "S + V + POUR + V"
+    },
+
+    {
+        phrase: "le voyageur marche pour rejoindre la gare",
+        structure: "S + V + POUR + V"
+    },
+
+    //========================================================
+    // ⏱️ TEMPS
+    //========================================================
+
+    {
+        phrase: "le personnage court maintenant",
+        structure: "S + V + CC_TEMPS"
+    },
+
+    {
+        phrase: "le personnage avance ensuite",
+        structure: "S + V + CC_TEMPS"
+    },
+
+    {
+        phrase: "le joueur recule immédiatement",
+        structure: "S + V + CC_TEMPS"
+    },
+
+    {
+        phrase: "le combattant avance après le signal",
+        structure: "S + V + CC_TEMPS"
+    },
+
+    //========================================================
+    // 🌀 STRUCTURES COMBINÉES
+    //========================================================
+
+    {
+        phrase: "le personnage court rapidement vers la cible sur dix mètres",
+        structure: "S + V + MANIERE + CIBLE + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le combattant avance rapidement vers son adversaire de cinq mètres",
+        structure: "S + V + MANIERE + CIBLE + CC_DISTANCE"
+    },
+
+    {
+        phrase: "le joueur recule rapidement vers la gauche",
+        structure: "S + V + MANIERE + DIRECTION"
+    },
+
+    {
+        phrase: "le joueur avance rapidement vers la droite",
+        structure: "S + V + MANIERE + DIRECTION"
+    },
+
+    {
+        phrase: "le personnage court rapidement vers la ville",
+        structure: "S + V + MANIERE + LIEU"
+    }
+
+],
+            
         //========================================================
         // ⚔️ COMBAT
         //========================================================
