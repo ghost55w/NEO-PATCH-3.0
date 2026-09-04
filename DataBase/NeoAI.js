@@ -2159,250 +2159,390 @@ const NEO_MOTS_NEUTRES = new Set([
 // La structure vient du modèle correspondant.
 //
 //==============================================================
+//==============================================================
+// 🧠 NEO AI — COMPARAISON STRUCTURELLE DES PHRASES
+//==============================================================
 
-function neoComparerPhrase(
-    phraseUtilisateur = "",
-    phraseModele = ""
-) {
-
-    const a =
-        neoTokeniser(
-            phraseUtilisateur
-        );
-
-    const b =
-        neoTokeniser(
-            phraseModele
-        );
+function neoComparerPhrase(phraseUtilisateur, phraseModele) {
 
     if (
-        !a.length ||
-        !b.length
+        !phraseUtilisateur ||
+        !phraseModele ||
+        typeof phraseUtilisateur !== "string" ||
+        typeof phraseModele !== "string"
     ) {
-
-        return 0;
-
+        return {
+            score: 0,
+            structure: null
+        };
     }
 
-    const utilises =
-        new Set();
+    const texte = neoNormaliserTexte(phraseUtilisateur);
+    const modele = neoNormaliserTexte(phraseModele);
+
+    const tokensTexte = neoTokeniser(texte);
+    const tokensModele = neoTokeniser(modele);
+
+    if (!tokensTexte.length || !tokensModele.length) {
+        return {
+            score: 0,
+            structure: null
+        };
+    }
+
+    //==========================================================
+    // 🔎 Recherche du verbe principal
+    //==========================================================
+
+    let indexVerbe = -1;
+    let verbeUtilisateur = null;
+
+    for (let i = 0; i < tokensTexte.length; i++) {
+
+        const resultat =
+            neoTrouverVerbe(tokensTexte[i]);
+
+        if (resultat) {
+            indexVerbe = i;
+            verbeUtilisateur = resultat;
+            break;
+        }
+    }
+
+    //==========================================================
+    // 🔎 Détection du sujet
+    //==========================================================
+
+    let sujet = [];
+
+    if (indexVerbe > 0) {
+        sujet = tokensTexte.slice(0, indexVerbe);
+    }
+
+    //==========================================================
+    // 🔎 Détection du complément après le verbe
+    //==========================================================
+
+    const apresVerbe =
+        indexVerbe >= 0
+            ? tokensTexte.slice(indexVerbe + 1)
+            : [];
+
+    // Mots qui introduisent généralement une cible / objet
+    const introducteursObjet = [
+        "sur",
+        "vers",
+        "a",
+        "à",
+        "au",
+        "aux",
+        "dans",
+        "contre",
+        "envers",
+        "pour"
+    ];
+
+    let objet = [];
+
+    if (apresVerbe.length) {
+
+        let indexIntroducteur = -1;
+
+        for (let i = 0; i < apresVerbe.length; i++) {
+
+            if (
+                introducteursObjet.includes(
+                    apresVerbe[i]
+                )
+            ) {
+                indexIntroducteur = i;
+                break;
+            }
+        }
+
+        if (indexIntroducteur >= 0) {
+
+            objet =
+                apresVerbe.slice(
+                    indexIntroducteur + 1
+                );
+
+        } else {
+
+            // S'il existe des mots après le verbe
+            // et qu'ils ne correspondent pas à une
+            // indication de manière/temps/distance,
+            // on considère le groupe comme objet/cible.
+
+            const motsManiere = [
+                "rapidement",
+                "lentement",
+                "vite",
+                "doucement",
+                "brutalement",
+                "fortement",
+                "silencieusement",
+                "discrètement"
+            ];
+
+            const motsTemps = [
+                "maintenant",
+                "ensuite",
+                "avant",
+                "après",
+                "demain",
+                "hier",
+                "aujourd'hui"
+            ];
+
+            const motsDistance = [
+                "metre",
+                "metres",
+                "m",
+                "centimetre",
+                "centimetres",
+                "cm"
+            ];
+
+            const premier =
+                apresVerbe[0];
+
+            if (
+                !motsManiere.includes(premier) &&
+                !motsTemps.includes(premier) &&
+                !motsDistance.includes(premier)
+            ) {
+                objet = apresVerbe;
+            }
+        }
+    }
+
+    //==========================================================
+    // 📐 Détection de la structure
+    //==========================================================
+
+    let structure = "S + V";
+
+    if (objet.length) {
+        structure = "S + V + O";
+    }
+
+    //==========================================================
+    // 📊 Calcul de similarité
+    //==========================================================
+
+    let correspondances = 0;
+    let total = tokensModele.length;
+
+    for (const motModele of tokensModele) {
+
+        if (
+            tokensTexte.includes(motModele)
+        ) {
+            correspondances++;
+            continue;
+        }
+
+        const verbeModele =
+            neoTrouverVerbe(motModele);
+
+        if (
+            verbeModele &&
+            verbeUtilisateur
+        ) {
+
+            if (
+                verbeModele.lemme ===
+                verbeUtilisateur.lemme
+            ) {
+                correspondances++;
+            }
+        }
+    }
 
     let score = 0;
 
-    for (
-        const motA
-        of a
-    ) {
-
-        let meilleur = -1;
-
-        //------------------------------------------------------
-        // Correspondance exacte
-        //------------------------------------------------------
-
-        for (
-            let i = 0;
-            i < b.length;
-            i++
-        ) {
-
-            if (
-                utilises.has(i)
-            ) {
-                continue;
-            }
-
-            if (
-                motA === b[i]
-            ) {
-
-                meilleur = i;
-                break;
-
-            }
-
-        }
-
-        //------------------------------------------------------
-        // Correspondance par lemme verbal
-        //------------------------------------------------------
-
-        if (
-            meilleur === -1
-        ) {
-
-            const verbeA =
-                neoTrouverVerbe(motA);
-
-            if (verbeA) {
-
-                for (
-                    let i = 0;
-                    i < b.length;
-                    i++
-                ) {
-
-                    if (
-                        utilises.has(i)
-                    ) {
-                        continue;
-                    }
-
-                    const verbeB =
-                        neoTrouverVerbe(b[i]);
-
-                    if (
-                        verbeB &&
-                        verbeA.lemme ===
-                        verbeB.lemme
-                    ) {
-
-                        meilleur = i;
-                        break;
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        //------------------------------------------------------
-        // Correspondance trouvée
-        //------------------------------------------------------
-
-        if (
-            meilleur !== -1
-        ) {
-
-            utilises.add(
-                meilleur
+    if (total > 0) {
+        score =
+            Math.round(
+                (correspondances / total) * 100
             );
-
-            score++;
-
-        }
-
     }
 
-    return Math.round(
-        (
-            score /
-            Math.max(
-                a.length,
-                b.length
-            )
-        ) * 100
-    );
+    //==========================================================
+    // 📐 Bonus structurel
+    //==========================================================
 
+    const structureModele =
+        detecterStructureModele(tokensModele);
+
+    if (
+        structureModele &&
+        structure === structureModele
+    ) {
+        score += 20;
+    }
+
+    if (score > 100) {
+        score = 100;
+    }
+
+    return {
+        score,
+        structure,
+        structureModele,
+        verbe: verbeUtilisateur,
+        sujet,
+        objet
+    };
 }
 
+//==============================================================
+// 📐 NEO AI — STRUCTURE D'UN MODÈLE
+//==============================================================
+
+function detecterStructureModele(tokens) {
+
+    if (
+        !Array.isArray(tokens) ||
+        !tokens.length
+    ) {
+        return null;
+    }
+
+    let indexVerbe = -1;
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        if (neoTrouverVerbe(tokens[i])) {
+            indexVerbe = i;
+            break;
+        }
+    }
+
+    if (indexVerbe < 0) {
+        return null;
+    }
+
+    const apresVerbe =
+        tokens.slice(indexVerbe + 1);
+
+    if (!apresVerbe.length) {
+        return "S + V";
+    }
+
+    const introducteursObjet = [
+        "sur",
+        "vers",
+        "a",
+        "à",
+        "au",
+        "aux",
+        "dans",
+        "contre",
+        "envers",
+        "pour"
+    ];
+
+    if (
+        apresVerbe.some(
+            mot =>
+                introducteursObjet.includes(mot)
+        )
+    ) {
+        return "S + V + O";
+    }
+
+    return "S + V + O";
+}
 
 //==============================================================
-// 🔎 CHERCHER LE MEILLEUR MODÈLE
+// 🧠 NEO AI — MEILLEUR MODÈLE
 //==============================================================
-
 function neoTrouverMeilleurModele(
-    texte = "",
-    categorie = null
+    texte,
+    categorie
 ) {
 
-    const texteNormalise =
-        neoNormaliserTexte(texte);
-
-    if (!texteNormalise) {
-
+    if (
+        !texte ||
+        !categorie ||
+        !NEO_MODELES_PHRASES.fr[categorie]
+    ) {
         return {
             trouve: false,
             score: 0,
             modele: null,
             structure: null,
-            categorie: null
+            categorie
         };
-
     }
 
-    const categories =
+    const modeles =
+        NEO_MODELES_PHRASES.fr[categorie];
+
+    let meilleur = {
+        trouve: false,
+        score: 0,
+        modele: null,
+        structure: null,
         categorie
-            ? [categorie]
-            : Object.keys(
-                NEO_MODELES_PHRASES.fr
-            );
+    };
 
-    let meilleur = null;
-
-    for (
-        const nomCategorie
-        of categories
-    ) {
-
-        const modeles =
-            NEO_MODELES_PHRASES
-                ?.fr
-                ?.[
-                    nomCategorie
-                ];
+    for (const modele of modeles) {
 
         if (
-            !Array.isArray(modeles)
+            !modele ||
+            !modele.phrase
         ) {
             continue;
         }
 
-        for (
-            const modele
-            of modeles
+        const comparaison =
+            neoComparerPhrase(
+                texte,
+                modele.phrase
+            );
+
+        if (
+            comparaison.score >
+            meilleur.score
         ) {
 
-            const score =
-                neoComparerPhrase(
-                    texteNormalise,
-                    modele.phrase
-                );
+            meilleur = {
+                trouve:
+                    comparaison.score >=
+                    NEOAI_CONFIG.seuilSimilarite,
 
-            if (
-                !meilleur ||
-                score > meilleur.score
-            ) {
+                score:
+                    comparaison.score,
 
-                meilleur = {
+                modele:
+                    modele.phrase,
 
-                    trouve:
-                        score >=
-                        NEOAI_CONFIG.seuilSimilarite,
+                structure:
+                    comparaison.structure ||
+                    modele.structure ||
+                    null,
 
-                    score,
+                categorie,
 
-                    modele:
-                        modele.phrase,
+                structureModele:
+                    comparaison.structureModele || null,
 
-                    structure:
-                        modele.structure,
+                verbe:
+                    comparaison.verbe || null,
 
-                    categorie:
-                        nomCategorie
+                sujet:
+                    comparaison.sujet || [],
 
-                };
-
-            }
-
+                objet:
+                    comparaison.objet || []
+            };
         }
-
     }
 
-    return (
-        meilleur || {
-
-            trouve: false,
-            score: 0,
-            modele: null,
-            structure: null,
-            categorie: null
-
-        }
-    );
-
+    return meilleur;
 }
 
 
