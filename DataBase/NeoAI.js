@@ -2114,29 +2114,52 @@ function neoConnaitMot(mot = "") {
 // lorsqu'ils sont importants pour la structure.
 //
 //==============================================================
+//==============================================================
+// 🔎 NEO AI — MOTEUR DE STRUCTURE ET COMPARAISON
+//==============================================================
+
+//==============================================================
+// 🔎 MOTS GRAMMATICAUX NEUTRES
+//==============================================================
 
 const NEO_MOTS_NEUTRES = new Set([
 
     "le",
     "la",
     "les",
+
     "un",
     "une",
     "des",
+
     "du",
     "de",
     "d",
+
     "au",
     "aux",
+
     "son",
     "sa",
     "ses",
+
     "mon",
     "ma",
     "mes",
+
     "ton",
     "ta",
     "tes",
+
+    "notre",
+    "nos",
+
+    "votre",
+    "vos",
+
+    "leur",
+    "leurs",
+
     "ce",
     "cet",
     "cette",
@@ -2146,24 +2169,1191 @@ const NEO_MOTS_NEUTRES = new Set([
 
 
 //==============================================================
-// 🔎 COMPARAISON SIMPLE DE PHRASES
-//==============================================================
-//
-// Cette fonction ne fait PAS d'analyse grammaticale complexe.
-//
-// Elle compare :
-// - les mots
-// - les verbes connus
-// - les mots communs
-//
-// La structure vient du modèle correspondant.
-//
-//==============================================================
-//==============================================================
-// 🧠 NEO AI — COMPARAISON STRUCTURELLE DES PHRASES
+// 🧭 DIRECTIONS
 //==============================================================
 
-function neoComparerPhrase(phraseUtilisateur, phraseModele) {
+const NEO_DIRECTIONS_FR = new Set([
+
+    "gauche",
+    "droite",
+
+    "avant",
+    "arriere",
+
+    "devant",
+    "derriere",
+
+    "haut",
+    "bas",
+
+    "nord",
+    "sud",
+    "est",
+    "ouest",
+
+    "centre",
+    "milieu",
+
+    "interieur",
+    "exterieur",
+
+    "dessus",
+    "dessous"
+
+]);
+
+
+//==============================================================
+// 🔎 MOTS DE MANIÈRE
+//==============================================================
+
+const NEO_MANIERES_FR = new Set([
+
+    "rapidement",
+    "lentement",
+    "vite",
+    "doucement",
+    "brutalement",
+    "violemment",
+    "calmement",
+    "directement",
+    "precisement",
+    "fortement",
+    "faiblement",
+    "soudainement",
+    "immediatement",
+    "progressivement",
+    "silencieusement",
+    "prudemment",
+    "discretement"
+
+]);
+
+
+//==============================================================
+// ⏱️ MOTS DE TEMPS
+//==============================================================
+
+const NEO_TEMPS_FR = new Set([
+
+    "maintenant",
+    "ensuite",
+    "avant",
+    "apres",
+    "demain",
+    "hier",
+    "aujourd'hui",
+    "maintenant",
+    "bientot",
+    "tard",
+    "tot"
+
+]);
+
+
+//==============================================================
+// 📏 UNITÉS DE DISTANCE
+//==============================================================
+
+const NEO_UNITES_DISTANCE_FR = new Set([
+
+    "metre",
+    "metres",
+    "m",
+
+    "centimetre",
+    "centimetres",
+    "cm",
+
+    "kilometre",
+    "kilometres",
+    "km"
+
+]);
+
+
+//==============================================================
+// 🧹 NORMALISER UN MOT
+//==============================================================
+
+function neoNormaliserMot(mot = "") {
+
+    return neoSansAccents(
+        String(mot)
+            .toLowerCase()
+            .replace(/[.,!?;:()[\]{}"'«»]/g, "")
+            .trim()
+    );
+
+}
+
+
+//==============================================================
+// 🟦 EST-CE UN ADJECTIF ?
+//==============================================================
+
+function neoEstAdjectif(mot = "") {
+
+    const recherche =
+        neoNormaliserMot(mot);
+
+    if (!recherche) {
+        return false;
+    }
+
+    const adjectifs =
+        NEO_ADJECTIFS?.fr || [];
+
+    return adjectifs.some(
+        adjectif =>
+            neoNormaliserMot(adjectif) ===
+            recherche
+    );
+
+}
+
+
+//==============================================================
+// 🟦 EST-CE UN ADVERBE ?
+//==============================================================
+
+function neoEstAdverbe(mot = "") {
+
+    const recherche =
+        neoNormaliserMot(mot);
+
+    if (!recherche) {
+        return false;
+    }
+
+    const adverbes =
+        NEO_ADVERBES?.fr || [];
+
+    return (
+        adverbes.some(
+            adverbe =>
+                neoNormaliserMot(adverbe) ===
+                recherche
+        ) ||
+        NEO_MANIERES_FR.has(recherche)
+    );
+
+}
+
+
+//==============================================================
+// 🧭 EST-CE UNE DIRECTION ?
+//==============================================================
+
+function neoEstDirection(mot = "") {
+
+    return NEO_DIRECTIONS_FR.has(
+        neoNormaliserMot(mot)
+    );
+
+}
+
+
+//==============================================================
+// 👤 EST-CE UNE PERSONNE ?
+//==============================================================
+
+function neoEstPersonne(mot = "") {
+
+    const recherche =
+        neoNormaliserMot(mot);
+
+    if (!recherche) {
+        return false;
+    }
+
+    const personnes =
+        NEO_NOMS?.fr?.personnes || [];
+
+    return personnes.some(
+        personne =>
+            neoNormaliserMot(personne) ===
+            recherche
+    );
+
+}
+
+
+//==============================================================
+// 🐺 EST-CE UN ANIMAL ?
+//==============================================================
+
+function neoEstAnimal(mot = "") {
+
+    const recherche =
+        neoNormaliserMot(mot);
+
+    if (!recherche) {
+        return false;
+    }
+
+    const animaux =
+        NEO_NOMS?.fr?.animaux || [];
+
+    return animaux.some(
+        animal =>
+            neoNormaliserMot(animal) ===
+            recherche
+    );
+
+}
+
+
+//==============================================================
+// 📦 EST-CE UN OBJET ?
+//==============================================================
+
+function neoEstObjet(mot = "") {
+
+    const recherche =
+        neoNormaliserMot(mot);
+
+    if (!recherche) {
+        return false;
+    }
+
+    const objets =
+        NEO_NOMS?.fr?.objets || [];
+
+    return objets.some(
+        objet =>
+            neoNormaliserMot(objet) ===
+            recherche
+    );
+
+}
+
+
+//==============================================================
+// 📍 EST-CE UN LIEU ?
+//==============================================================
+
+function neoEstLieu(mot = "") {
+
+    const recherche =
+        neoNormaliserMot(mot);
+
+    if (!recherche) {
+        return false;
+    }
+
+    const lieux =
+        NEO_NOMS?.fr?.lieux || [];
+
+    return lieux.some(
+        lieu =>
+            neoNormaliserMot(lieu) ===
+            recherche
+    );
+
+}
+
+
+//==============================================================
+// 🧠 EST-CE UN NOM CONNU ?
+//==============================================================
+
+function neoEstNom(mot = "") {
+
+    return (
+        neoEstPersonne(mot) ||
+        neoEstAnimal(mot) ||
+        neoEstObjet(mot) ||
+        neoEstLieu(mot)
+    );
+
+}
+
+
+//==============================================================
+// 🧹 RETIRER LES MOTS GRAMMATICAUX
+//==============================================================
+
+function neoRetirerDeterminants(
+    mots = []
+) {
+
+    return mots.filter(
+        mot =>
+            !NEO_MOTS_NEUTRES.has(
+                neoNormaliserMot(mot)
+            )
+    );
+
+}
+
+
+//==============================================================
+// 🧠 IDENTIFIER LE TYPE D'UN COMPLÉMENT
+//==============================================================
+//
+// Priorité :
+//
+// DIRECTION
+// LIEU
+// CIBLE
+// OBJET
+//
+// Exemple :
+//
+// vers la gauche
+// → DIRECTION
+//
+// vers Maki
+// → CIBLE
+//
+// au marché
+// → LIEU
+//
+// un coup de poing
+// → O
+//
+//==============================================================
+
+function neoIdentifierComplement(
+    mots = [],
+    preposition = null
+) {
+
+    const utiles =
+        neoRetirerDeterminants(
+            mots
+        );
+
+    if (!utiles.length) {
+        return null;
+    }
+
+
+    //==========================================================
+    // 🧭 DIRECTION
+    //==========================================================
+
+    if (
+        utiles.some(
+            mot =>
+                neoEstDirection(mot)
+        )
+    ) {
+
+        return "DIRECTION";
+
+    }
+
+
+    //==========================================================
+    // 📍 LIEU
+    //==========================================================
+
+    if (
+        utiles.some(
+            mot =>
+                neoEstLieu(mot)
+        )
+    ) {
+
+        return "LIEU";
+
+    }
+
+
+    //==========================================================
+    // 👤 PERSONNE
+    //==========================================================
+
+    if (
+        utiles.some(
+            mot =>
+                neoEstPersonne(mot)
+        )
+    ) {
+
+        return "CIBLE";
+
+    }
+
+
+    //==========================================================
+    // 🐺 ANIMAL
+    //==========================================================
+
+    if (
+        utiles.some(
+            mot =>
+                neoEstAnimal(mot)
+        )
+    ) {
+
+        return "CIBLE";
+
+    }
+
+
+    //==========================================================
+    // 📦 OBJET
+    //==========================================================
+
+    if (
+        utiles.some(
+            mot =>
+                neoEstObjet(mot)
+        )
+    ) {
+
+        return "O";
+
+    }
+
+
+    //==========================================================
+    // 🎯 NOM PROPRE / CIBLE APRÈS "VERS"
+    //==========================================================
+    //
+    // Exemple :
+    //
+    // vers Maki
+    // vers Tobirama
+    // vers Neo
+    //
+    // Même si le nom propre n'est pas encore
+    // enregistré dans NEO_NOMS, "vers" permet
+    // d'identifier une cible potentielle.
+    //
+    //==========================================================
+
+    if (
+        preposition === "vers"
+    ) {
+
+        return "CIBLE";
+
+    }
+
+
+    //==========================================================
+    // 📦 FALLBACK
+    //==========================================================
+
+    return "O";
+
+}
+
+
+//==============================================================
+// 📏 DÉTECTER UNE DISTANCE
+//==============================================================
+
+function neoContientDistance(
+    mots = []
+) {
+
+    return mots.some(
+        mot =>
+            NEO_UNITES_DISTANCE_FR.has(
+                neoNormaliserMot(mot)
+            )
+    );
+
+}
+
+
+//==============================================================
+// ⏱️ DÉTECTER UN INDICATEUR TEMPOREL
+//==============================================================
+
+function neoContientTemps(
+    mots = []
+) {
+
+    return mots.some(
+        mot =>
+            NEO_TEMPS_FR.has(
+                neoNormaliserMot(mot)
+            )
+    );
+
+}
+
+
+//==============================================================
+// 🧠 ANALYSE STRUCTURELLE
+//==============================================================
+//
+// Cette fonction détermine réellement la structure
+// de la phrase utilisateur.
+//
+// Exemples :
+//
+// le lion court
+// → S + V
+//
+// le lion est grand
+// → S + V + A
+//
+// le lion court rapidement
+// → S + V + MANIERE
+//
+// le lion fonce vers Maki
+// → S + V + CIBLE
+//
+// le lion fonce vers la gauche
+// → S + V + DIRECTION
+//
+// le lion va au marché
+// → S + V + LIEU
+//
+// Tobirama bloque un coup de poing
+// → S + V + O
+//
+//==============================================================
+
+function neoAnalyserStructure(
+    phrase = ""
+) {
+
+    if (
+        !phrase ||
+        typeof phrase !== "string"
+    ) {
+
+        return {
+
+            structure: null,
+            sujet: [],
+            verbe: null,
+            complement: [],
+            typeComplement: null
+
+        };
+
+    }
+
+
+    const texte =
+        neoNormaliserTexte(
+            phrase
+        );
+
+    const tokens =
+        neoTokeniser(
+            texte
+        );
+
+
+    if (!tokens.length) {
+
+        return {
+
+            structure: null,
+            sujet: [],
+            verbe: null,
+            complement: [],
+            typeComplement: null
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 🔎 TROUVER LE VERBE PRINCIPAL
+    //==========================================================
+
+    let indexVerbe = -1;
+    let verbe = null;
+
+    for (
+        let i = 0;
+        i < tokens.length;
+        i++
+    ) {
+
+        const resultat =
+            neoTrouverVerbe(
+                tokens[i]
+            );
+
+        if (resultat) {
+
+            indexVerbe = i;
+            verbe = resultat;
+
+            break;
+
+        }
+
+    }
+
+
+    //==========================================================
+    // ❌ PAS DE VERBE
+    //==========================================================
+
+    if (indexVerbe < 0) {
+
+        return {
+
+            structure: null,
+            sujet: tokens,
+            verbe: null,
+            complement: [],
+            typeComplement: null
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 👤 SUJET
+    //==========================================================
+
+    const sujet =
+        tokens.slice(
+            0,
+            indexVerbe
+        );
+
+
+    //==========================================================
+    // ➡️ APRÈS LE VERBE
+    //==========================================================
+
+    const apresVerbe =
+        tokens.slice(
+            indexVerbe + 1
+        );
+
+
+    //==========================================================
+    // 🟢 S + V
+    //==========================================================
+
+    if (!apresVerbe.length) {
+
+        return {
+
+            structure: "S + V",
+            sujet,
+            verbe,
+            complement: [],
+            typeComplement: null
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 🟦 S + V + A
+    //==========================================================
+
+    const indexAdjectif =
+        apresVerbe.findIndex(
+            mot =>
+                neoEstAdjectif(mot)
+        );
+
+    if (
+        indexAdjectif >= 0
+    ) {
+
+        return {
+
+            structure:
+                "S + V + A",
+
+            sujet,
+
+            verbe,
+
+            complement:
+                apresVerbe,
+
+            typeComplement:
+                "ADJECTIF"
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 🟦 S + V + MANIERE
+    //==========================================================
+
+    const indexManiere =
+        apresVerbe.findIndex(
+            mot =>
+                neoEstAdverbe(mot)
+        );
+
+
+    //==========================================================
+    // 🧭 RECHERCHE DE PRÉPOSITION
+    //==========================================================
+
+    const introducteurs = [
+
+        "a",
+        "au",
+        "aux",
+
+        "dans",
+        "en",
+
+        "sur",
+        "sous",
+
+        "vers",
+
+        "contre",
+        "envers",
+
+        "pour",
+
+        "avec"
+
+    ];
+
+
+    let indexPreposition = -1;
+    let preposition = null;
+
+
+    for (
+        let i = 0;
+        i < apresVerbe.length;
+        i++
+    ) {
+
+        const mot =
+            neoNormaliserMot(
+                apresVerbe[i]
+            );
+
+        if (
+            introducteurs.includes(
+                mot
+            )
+        ) {
+
+            indexPreposition = i;
+            preposition = mot;
+
+            break;
+
+        }
+
+    }
+
+
+    //==========================================================
+    // 🧠 COMPLÉMENT APRÈS PRÉPOSITION
+    //==========================================================
+
+    let complement = apresVerbe;
+
+
+    if (
+        indexPreposition >= 0
+    ) {
+
+        complement =
+            apresVerbe.slice(
+                indexPreposition + 1
+            );
+
+    }
+
+
+    //==========================================================
+    // 🧭 TYPE DU COMPLÉMENT
+    //==========================================================
+
+    const typeComplement =
+        neoIdentifierComplement(
+            complement,
+            preposition
+        );
+
+
+    //==========================================================
+    // 📏 DISTANCE
+    //==========================================================
+
+    if (
+        neoContientDistance(
+            apresVerbe
+        )
+    ) {
+
+        if (
+            indexManiere >= 0 &&
+            indexPreposition >= 0
+        ) {
+
+            return {
+
+                structure:
+                    "S + V + MANIERE + CC_DISTANCE",
+
+                sujet,
+                verbe,
+                complement:
+                    apresVerbe,
+                typeComplement:
+                    "DISTANCE"
+
+            };
+
+        }
+
+
+        return {
+
+            structure:
+                "S + V + CC_DISTANCE",
+
+            sujet,
+            verbe,
+            complement:
+                apresVerbe,
+            typeComplement:
+                "DISTANCE"
+
+        };
+
+    }
+
+
+    //==========================================================
+    // ⏱️ TEMPS
+    //==========================================================
+
+    if (
+        neoContientTemps(
+            apresVerbe
+        )
+    ) {
+
+        return {
+
+            structure:
+                "S + V + CC_TEMPS",
+
+            sujet,
+            verbe,
+            complement:
+                apresVerbe,
+            typeComplement:
+                "TEMPS"
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 🧠 MANIÈRE + COMPLÉMENT
+    //==========================================================
+
+    if (
+        indexManiere >= 0 &&
+        indexPreposition >= 0
+    ) {
+
+        if (
+            typeComplement ===
+            "DIRECTION"
+        ) {
+
+            return {
+
+                structure:
+                    "S + V + MANIERE + DIRECTION",
+
+                sujet,
+                verbe,
+                complement:
+                    apresVerbe,
+                typeComplement
+
+            };
+
+        }
+
+
+        if (
+            typeComplement ===
+            "LIEU"
+        ) {
+
+            return {
+
+                structure:
+                    "S + V + MANIERE + LIEU",
+
+                sujet,
+                verbe,
+                complement:
+                    apresVerbe,
+                typeComplement
+
+            };
+
+        }
+
+
+        if (
+            typeComplement ===
+            "CIBLE"
+        ) {
+
+            return {
+
+                structure:
+                    "S + V + MANIERE + CIBLE",
+
+                sujet,
+                verbe,
+                complement:
+                    apresVerbe,
+                typeComplement
+
+            };
+
+        }
+
+
+        return {
+
+            structure:
+                "S + V + MANIERE + O",
+
+            sujet,
+            verbe,
+            complement:
+                apresVerbe,
+            typeComplement:
+                "O"
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 🧠 MANIÈRE SEULE
+    //==========================================================
+
+    if (
+        indexManiere >= 0 &&
+        apresVerbe.length === 1
+    ) {
+
+        return {
+
+            structure:
+                "S + V + MANIERE",
+
+            sujet,
+            verbe,
+            complement:
+                apresVerbe,
+            typeComplement:
+                "MANIERE"
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 🧭 DIRECTION
+    //==========================================================
+
+    if (
+        typeComplement ===
+        "DIRECTION"
+    ) {
+
+        return {
+
+            structure:
+                "S + V + DIRECTION",
+
+            sujet,
+            verbe,
+            complement,
+            typeComplement
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 📍 LIEU
+    //==========================================================
+
+    if (
+        typeComplement ===
+        "LIEU"
+    ) {
+
+        return {
+
+            structure:
+                "S + V + LIEU",
+
+            sujet,
+            verbe,
+            complement,
+            typeComplement
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 👤 CIBLE
+    //==========================================================
+
+    if (
+        typeComplement ===
+        "CIBLE"
+    ) {
+
+        return {
+
+            structure:
+                "S + V + CIBLE",
+
+            sujet,
+            verbe,
+            complement,
+            typeComplement
+
+        };
+
+    }
+
+
+    //==========================================================
+    // 📦 OBJET
+    //==========================================================
+
+    return {
+
+        structure:
+            "S + V + O",
+
+        sujet,
+        verbe,
+        complement,
+        typeComplement:
+            "O"
+
+    };
+
+}
+
+
+//==============================================================
+// 📐 STRUCTURE D'UN MODÈLE
+//==============================================================
+//
+// On utilise d'abord la structure déclarée dans
+// NEO_MODELES_PHRASES.
+//
+// Si elle n'existe pas, on analyse automatiquement
+// la phrase du modèle.
+//
+//==============================================================
+
+function detecterStructureModele(
+    modele
+) {
+
+    if (
+        !modele
+    ) {
+
+        return null;
+
+    }
+
+
+    //==========================================================
+    // 🟢 MODÈLE OBJET
+    //==========================================================
+
+    if (
+        typeof modele === "object" &&
+        modele.structure
+    ) {
+
+        return modele.structure;
+
+    }
+
+
+    //==========================================================
+    // 📝 MODÈLE TEXTE
+    //==========================================================
+
+    if (
+        typeof modele === "string"
+    ) {
+
+        return neoAnalyserStructure(
+            modele
+        ).structure;
+
+    }
+
+
+    return null;
+
+}
+
+
+//==============================================================
+// 🧠 COMPARAISON DES PHRASES
+//==============================================================
+//
+// IMPORTANT :
+//
+// La structure est prioritaire.
+//
+// Si :
+//
+// utilisateur = S + V + A
+// modèle     = S + V + MANIERE
+//
+// → score = 0
+//
+// Cela empêche :
+//
+// "le lion est grand"
+//
+// de matcher avec :
+//
+// "le lion court rapidement"
+//
+//==============================================================
+
+function neoComparerPhrase(
+    phraseUtilisateur,
+    phraseModele
+) {
 
     if (
         !phraseUtilisateur ||
@@ -2171,294 +3361,374 @@ function neoComparerPhrase(phraseUtilisateur, phraseModele) {
         typeof phraseUtilisateur !== "string" ||
         typeof phraseModele !== "string"
     ) {
+
         return {
+
             score: 0,
-            structure: null
+            structure: null,
+            structureModele: null
+
         };
+
     }
 
-    const texte = neoNormaliserTexte(phraseUtilisateur);
-    const modele = neoNormaliserTexte(phraseModele);
 
-    const tokensTexte = neoTokeniser(texte);
-    const tokensModele = neoTokeniser(modele);
+    //==========================================================
+    // 🧠 ANALYSE UTILISATEUR
+    //==========================================================
 
-    if (!tokensTexte.length || !tokensModele.length) {
+    const analyseUtilisateur =
+        neoAnalyserStructure(
+            phraseUtilisateur
+        );
+
+
+    //==========================================================
+    // 🧠 ANALYSE MODÈLE
+    //==========================================================
+
+    const analyseModele =
+        neoAnalyserStructure(
+            phraseModele
+        );
+
+
+    const structureUtilisateur =
+        analyseUtilisateur.structure;
+
+    const structureModele =
+        analyseModele.structure;
+
+
+    //==========================================================
+    // ❌ STRUCTURES DIFFÉRENTES
+    //==========================================================
+
+    if (
+        structureUtilisateur &&
+        structureModele &&
+        structureUtilisateur !==
+        structureModele
+    ) {
+
         return {
+
             score: 0,
-            structure: null
+
+            structure:
+                structureUtilisateur,
+
+            structureModele,
+
+            verbe:
+                analyseUtilisateur.verbe,
+
+            sujet:
+                analyseUtilisateur.sujet,
+
+            objet:
+                analyseUtilisateur.complement
+
         };
+
     }
 
+
     //==========================================================
-    // 🔎 Recherche du verbe principal
+    // 🔤 TOKENS
     //==========================================================
 
-    let indexVerbe = -1;
-    let verbeUtilisateur = null;
+    const tokensUtilisateur =
+        neoTokeniser(
+            neoNormaliserTexte(
+                phraseUtilisateur
+            )
+        );
 
-    for (let i = 0; i < tokensTexte.length; i++) {
 
-        const resultat =
-            neoTrouverVerbe(tokensTexte[i]);
+    const tokensModele =
+        neoTokeniser(
+            neoNormaliserTexte(
+                phraseModele
+            )
+        );
 
-        if (resultat) {
-            indexVerbe = i;
-            verbeUtilisateur = resultat;
-            break;
-        }
+
+    if (
+        !tokensUtilisateur.length ||
+        !tokensModele.length
+    ) {
+
+        return {
+
+            score: 0,
+
+            structure:
+                structureUtilisateur,
+
+            structureModele
+
+        };
+
     }
 
-    //==========================================================
-    // 🔎 Détection du sujet
-    //==========================================================
-
-    let sujet = [];
-
-    if (indexVerbe > 0) {
-        sujet = tokensTexte.slice(0, indexVerbe);
-    }
 
     //==========================================================
-    // 🔎 Détection du complément après le verbe
+    // 🔎 MOTS SIGNIFICATIFS
     //==========================================================
 
-    const apresVerbe =
-        indexVerbe >= 0
-            ? tokensTexte.slice(indexVerbe + 1)
-            : [];
-
-    // Mots qui introduisent généralement une cible / objet
-    const introducteursObjet = [
-        "sur",
-        "vers",
-        "a",
-        "à",
-        "au",
-        "aux",
-        "dans",
-        "contre",
-        "envers",
-        "pour"
-    ];
-
-    let objet = [];
-
-    if (apresVerbe.length) {
-
-        let indexIntroducteur = -1;
-
-        for (let i = 0; i < apresVerbe.length; i++) {
-
-            if (
-                introducteursObjet.includes(
-                    apresVerbe[i]
+    const tokensSignificatifs =
+        tokensModele.filter(
+            mot =>
+                !NEO_MOTS_NEUTRES.has(
+                    neoNormaliserMot(mot)
                 )
-            ) {
-                indexIntroducteur = i;
-                break;
-            }
-        }
+        );
 
-        if (indexIntroducteur >= 0) {
 
-            objet =
-                apresVerbe.slice(
-                    indexIntroducteur + 1
-                );
+    // Si le modèle ne contient aucun mot significatif,
+    // on utilise tous ses tokens.
 
-        } else {
+    const motsAComparer =
+        tokensSignificatifs.length
+            ? tokensSignificatifs
+            : tokensModele;
 
-            // S'il existe des mots après le verbe
-            // et qu'ils ne correspondent pas à une
-            // indication de manière/temps/distance,
-            // on considère le groupe comme objet/cible.
-
-            const motsManiere = [
-                "rapidement",
-                "lentement",
-                "vite",
-                "doucement",
-                "brutalement",
-                "fortement",
-                "silencieusement",
-                "discrètement"
-            ];
-
-            const motsTemps = [
-                "maintenant",
-                "ensuite",
-                "avant",
-                "après",
-                "demain",
-                "hier",
-                "aujourd'hui"
-            ];
-
-            const motsDistance = [
-                "metre",
-                "metres",
-                "m",
-                "centimetre",
-                "centimetres",
-                "cm"
-            ];
-
-            const premier =
-                apresVerbe[0];
-
-            if (
-                !motsManiere.includes(premier) &&
-                !motsTemps.includes(premier) &&
-                !motsDistance.includes(premier)
-            ) {
-                objet = apresVerbe;
-            }
-        }
-    }
-
-    //==========================================================
-    // 📐 Détection de la structure
-    //==========================================================
-
-    let structure = "S + V";
-
-    if (objet.length) {
-        structure = "S + V + O";
-    }
-
-    //==========================================================
-    // 📊 Calcul de similarité
-    //==========================================================
 
     let correspondances = 0;
-    let total = tokensModele.length;
 
-    for (const motModele of tokensModele) {
 
-        if (
-            tokensTexte.includes(motModele)
-        ) {
+    //==========================================================
+    // 🔎 COMPARAISON LEXICALE
+    //==========================================================
+
+    for (
+        const motModele of motsAComparer
+    ) {
+
+        const normaliseModele =
+            neoNormaliserMot(
+                motModele
+            );
+
+
+        //======================================================
+        // 🟢 MOT EXACT
+        //======================================================
+
+        const motExact =
+            tokensUtilisateur.some(
+                motUtilisateur =>
+                    neoNormaliserMot(
+                        motUtilisateur
+                    ) ===
+                    normaliseModele
+            );
+
+
+        if (motExact) {
+
             correspondances++;
+
             continue;
+
         }
+
+
+        //======================================================
+        // 🧠 MÊME VERBE
+        //======================================================
 
         const verbeModele =
-            neoTrouverVerbe(motModele);
+            neoTrouverVerbe(
+                motModele
+            );
+
 
         if (
-            verbeModele &&
-            verbeUtilisateur
+            verbeModele
         ) {
 
-            if (
-                verbeModele.lemme ===
-                verbeUtilisateur.lemme
-            ) {
+            const memeVerbe =
+                tokensUtilisateur.some(
+                    motUtilisateur => {
+
+                        const verbeUtilisateur =
+                            neoTrouverVerbe(
+                                motUtilisateur
+                            );
+
+                        return (
+                            verbeUtilisateur &&
+                            verbeUtilisateur.lemme ===
+                            verbeModele.lemme
+                        );
+
+                    }
+                );
+
+
+            if (memeVerbe) {
+
                 correspondances++;
+
+                continue;
+
             }
+
         }
+
+
+        //======================================================
+        // 🟦 ADJECTIF
+        //======================================================
+
+        if (
+            neoEstAdjectif(
+                motModele
+            )
+        ) {
+
+            const utilisateurPossedeAdjectif =
+                tokensUtilisateur.some(
+                    mot =>
+                        neoEstAdjectif(mot)
+                );
+
+
+            if (
+                utilisateurPossedeAdjectif
+            ) {
+
+                correspondances++;
+
+                continue;
+
+            }
+
+        }
+
+
+        //======================================================
+        // 🟦 ADVERBE
+        //======================================================
+
+        if (
+            neoEstAdverbe(
+                motModele
+            )
+        ) {
+
+            const utilisateurPossedeAdverbe =
+                tokensUtilisateur.some(
+                    mot =>
+                        neoEstAdverbe(mot)
+                );
+
+
+            if (
+                utilisateurPossedeAdverbe
+            ) {
+
+                correspondances++;
+
+                continue;
+
+            }
+
+        }
+
     }
+
+
+    //==========================================================
+    // 📊 SCORE LEXICAL
+    //==========================================================
 
     let score = 0;
 
-    if (total > 0) {
+
+    if (
+        motsAComparer.length
+    ) {
+
         score =
             Math.round(
-                (correspondances / total) * 100
+                (
+                    correspondances /
+                    motsAComparer.length
+                ) * 100
             );
+
     }
 
-    //==========================================================
-    // 📐 Bonus structurel
-    //==========================================================
 
-    const structureModele =
-        detecterStructureModele(tokensModele);
+    //==========================================================
+    // 📐 BONUS STRUCTURE
+    //==========================================================
 
     if (
+        structureUtilisateur &&
         structureModele &&
-        structure === structureModele
+        structureUtilisateur ===
+        structureModele
     ) {
+
         score += 20;
+
     }
 
-    if (score > 100) {
+
+    //==========================================================
+    // 🔒 LIMITER À 100
+    //==========================================================
+
+    if (
+        score > 100
+    ) {
+
         score = 100;
+
     }
+
 
     return {
+
         score,
-        structure,
+
+        structure:
+            structureUtilisateur,
+
         structureModele,
-        verbe: verbeUtilisateur,
-        sujet,
-        objet
+
+        verbe:
+            analyseUtilisateur.verbe,
+
+        sujet:
+            analyseUtilisateur.sujet,
+
+        objet:
+            analyseUtilisateur.complement,
+
+        typeComplement:
+            analyseUtilisateur.typeComplement
+
     };
+
 }
 
-//==============================================================
-// 📐 NEO AI — STRUCTURE D'UN MODÈLE
-//==============================================================
-
-function detecterStructureModele(tokens) {
-
-    if (
-        !Array.isArray(tokens) ||
-        !tokens.length
-    ) {
-        return null;
-    }
-
-    let indexVerbe = -1;
-
-    for (let i = 0; i < tokens.length; i++) {
-
-        if (neoTrouverVerbe(tokens[i])) {
-            indexVerbe = i;
-            break;
-        }
-    }
-
-    if (indexVerbe < 0) {
-        return null;
-    }
-
-    const apresVerbe =
-        tokens.slice(indexVerbe + 1);
-
-    if (!apresVerbe.length) {
-        return "S + V";
-    }
-
-    const introducteursObjet = [
-        "sur",
-        "vers",
-        "a",
-        "à",
-        "au",
-        "aux",
-        "dans",
-        "contre",
-        "envers",
-        "pour"
-    ];
-
-    if (
-        apresVerbe.some(
-            mot =>
-                introducteursObjet.includes(mot)
-        )
-    ) {
-        return "S + V + O";
-    }
-
-    return "S + V + O";
-}
 
 //==============================================================
-// 🧠 NEO AI — MEILLEUR MODÈLE
+// 🧠 MEILLEUR MODÈLE
 //==============================================================
+//
+// 1. Analyse la structure du texte.
+// 2. Ignore tous les modèles incompatibles.
+// 3. Compare uniquement les modèles de même structure.
+// 4. Sélectionne le meilleur score.
+//
+//==============================================================
+
 function neoTrouverMeilleurModele(
     texte,
     categorie
@@ -2467,36 +3737,128 @@ function neoTrouverMeilleurModele(
     if (
         !texte ||
         !categorie ||
-        !NEO_MODELES_PHRASES.fr[categorie]
+        !NEO_MODELES_PHRASES?.fr?.[categorie]
     ) {
+
         return {
+
             trouve: false,
+
             score: 0,
+
             modele: null,
+
             structure: null,
+
             categorie
+
         };
+
     }
 
+
     const modeles =
-        NEO_MODELES_PHRASES.fr[categorie];
+        NEO_MODELES_PHRASES
+            .fr[
+                categorie
+            ];
+
+
+    //==========================================================
+    // 🧠 STRUCTURE UTILISATEUR
+    //==========================================================
+
+    const analyseUtilisateur =
+        neoAnalyserStructure(
+            texte
+        );
+
+
+    const structureUtilisateur =
+        analyseUtilisateur.structure;
+
 
     let meilleur = {
+
         trouve: false,
+
         score: 0,
+
         modele: null,
-        structure: null,
-        categorie
+
+        structure:
+            structureUtilisateur,
+
+        categorie,
+
+        structureModele: null,
+
+        verbe:
+            analyseUtilisateur.verbe ||
+            null,
+
+        sujet:
+            analyseUtilisateur.sujet ||
+            [],
+
+        objet:
+            analyseUtilisateur.complement ||
+            [],
+
+        typeComplement:
+            analyseUtilisateur.typeComplement ||
+            null
+
     };
 
-    for (const modele of modeles) {
+
+    //==========================================================
+    // 🔎 PARCOURS DES MODÈLES
+    //==========================================================
+
+    for (
+        const modele of modeles
+    ) {
 
         if (
             !modele ||
             !modele.phrase
         ) {
+
             continue;
+
         }
+
+
+        //======================================================
+        // 📐 STRUCTURE DU MODÈLE
+        //======================================================
+
+        const structureModele =
+            detecterStructureModele(
+                modele
+            );
+
+
+        //======================================================
+        // ❌ STRUCTURE INCOMPATIBLE
+        //======================================================
+
+        if (
+            structureUtilisateur &&
+            structureModele &&
+            structureUtilisateur !==
+            structureModele
+        ) {
+
+            continue;
+
+        }
+
+
+        //======================================================
+        // 📊 COMPARAISON
+        //======================================================
 
         const comparaison =
             neoComparerPhrase(
@@ -2504,12 +3866,18 @@ function neoTrouverMeilleurModele(
                 modele.phrase
             );
 
+
+        //======================================================
+        // 🏆 MEILLEUR SCORE
+        //======================================================
+
         if (
             comparaison.score >
             meilleur.score
         ) {
 
             meilleur = {
+
                 trouve:
                     comparaison.score >=
                     NEOAI_CONFIG.seuilSimilarite,
@@ -2521,28 +3889,45 @@ function neoTrouverMeilleurModele(
                     modele.phrase,
 
                 structure:
-                    comparaison.structure ||
-                    modele.structure ||
+                    structureUtilisateur ||
+                    structureModele ||
                     null,
 
                 categorie,
 
                 structureModele:
-                    comparaison.structureModele || null,
+                    structureModele ||
+                    null,
 
                 verbe:
-                    comparaison.verbe || null,
+                    comparaison.verbe ||
+                    analyseUtilisateur.verbe ||
+                    null,
 
                 sujet:
-                    comparaison.sujet || [],
+                    comparaison.sujet ||
+                    analyseUtilisateur.sujet ||
+                    [],
 
                 objet:
-                    comparaison.objet || []
+                    comparaison.objet ||
+                    analyseUtilisateur.complement ||
+                    [],
+
+                typeComplement:
+                    comparaison.typeComplement ||
+                    analyseUtilisateur.typeComplement ||
+                    null
+
             };
+
         }
+
     }
 
+
     return meilleur;
+
 }
 
 
@@ -2558,9 +3943,14 @@ function neoListerModeles(
         !categorie
     ) {
 
-        return NEO_MODELES_PHRASES.fr;
+        return (
+            NEO_MODELES_PHRASES
+                ?.fr ||
+            {}
+        );
 
     }
+
 
     return (
         NEO_MODELES_PHRASES
@@ -2580,7 +3970,7 @@ function neoListerModeles(
 function neoListerVerbes() {
 
     return Object.keys(
-        NEO_VERBES.fr || {}
+        NEO_VERBES?.fr || {}
     );
 
 }
@@ -2593,7 +3983,7 @@ function neoListerVerbes() {
 function neoListerCategories() {
 
     return Object.keys(
-        NEO_MODELES_PHRASES.fr || {}
+        NEO_MODELES_PHRASES?.fr || {}
     );
 
 }
@@ -2646,10 +4036,7 @@ module.exports = {
 
     NEO_MODELES_PHRASES,
 
-
-    // Alias temporaire pour compatibilité
-    // avec l'ancien nom utilisé ailleurs.
-
+    // Alias compatibilité
     NEO_MODELES:
         NEO_MODELES_PHRASES,
 
@@ -2683,12 +4070,42 @@ module.exports = {
 
 
     //==========================================================
+    // 🧠 ANALYSE
+    //==========================================================
+
+    neoAnalyserStructure,
+
+    detecterStructureModele,
+
+
+    //==========================================================
     // 🔎 COMPARAISON
     //==========================================================
 
     neoComparerPhrase,
 
     neoTrouverMeilleurModele,
+
+
+    //==========================================================
+    // 🧠 CLASSIFICATION
+    //==========================================================
+
+    neoEstAdjectif,
+
+    neoEstAdverbe,
+
+    neoEstDirection,
+
+    neoEstPersonne,
+
+    neoEstAnimal,
+
+    neoEstObjet,
+
+    neoEstLieu,
+
+    neoEstNom,
 
 
     //==========================================================
@@ -2702,3 +4119,7 @@ module.exports = {
     neoListerCategories
 
 };
+        
+        
+
+
