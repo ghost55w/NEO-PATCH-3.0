@@ -1477,27 +1477,26 @@ async function traiterMessageNeoAI(
         texte
       );
 
-    //==========================================================
-    // ❌ ERREUR
-    //==========================================================
+//==========================================================
+// ❌ ERREUR
+//==========================================================
 
-    if (!resultat?.success) {
+if (!resultat) {
 
-      await ovl.sendMessage(
+    await ovl.sendMessage(
         ms_org,
         {
-          text:
-            resultat?.message ||
-            "❌ NeoAI n'a pas pu analyser ce texte."
+            text:
+                "❌ NeoAI n'a pas pu analyser ce texte."
         },
         {
-          quoted: ms
+            quoted: ms
         }
-      );
+    );
 
-      return true;
-    }
-
+    return true;
+}
+      
     //==========================================================
     // 📊 COMPTEUR
     //==========================================================
