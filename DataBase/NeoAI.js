@@ -1401,7 +1401,6 @@ const NEO_FORMULES = {
 // peuvent tous occuper S.
 //
 //==============================================================
-
 const NEO_MODELES_PHRASES = {
 
     fr: {
@@ -1419,7 +1418,7 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le lion court vers la chèvre",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + CIBLE"
             },
 
             {
@@ -1429,17 +1428,47 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le lion court rapidement vers la chèvre",
-                structure: "S + V + MANIERE + CC_DIRECTION"
+                structure: "S + V + MANIERE + CIBLE"
+            },
+
+            {
+                phrase: "le lion fonce vers Maki",
+                structure: "S + V + CIBLE"
+            },
+
+            {
+                phrase: "le lion fonce vers l'avant",
+                structure: "S + V + DIRECTION"
+            },
+
+            {
+                phrase: "le lion fonce vers la gauche",
+                structure: "S + V + DIRECTION"
+            },
+
+            {
+                phrase: "le lion fonce vers la droite",
+                structure: "S + V + DIRECTION"
+            },
+
+            {
+                phrase: "le lion avance vers la ville",
+                structure: "S + V + LIEU"
+            },
+
+            {
+                phrase: "le lion va au marché",
+                structure: "S + V + LIEU"
             },
 
             {
                 phrase: "le voyageur avance vers la ville",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + LIEU"
             },
 
             {
                 phrase: "le voyageur avance rapidement vers la ville",
-                structure: "S + V + MANIERE + CC_DIRECTION"
+                structure: "S + V + MANIERE + LIEU"
             },
 
             {
@@ -1454,12 +1483,12 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le personnage se dirige vers la porte",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + LIEU"
             },
 
             {
                 phrase: "le personnage marche dans la ville",
-                structure: "S + V + CC_LIEU"
+                structure: "S + V + LIEU"
             },
 
             {
@@ -1469,12 +1498,12 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le personnage court sur dix mètres vers la cible",
-                structure: "S + V + CC_DISTANCE + CC_DIRECTION"
+                structure: "S + V + CC_DISTANCE + CIBLE"
             },
 
             {
                 phrase: "le personnage arrive rapidement vers la cible",
-                structure: "S + V + MANIERE + CC_DIRECTION"
+                structure: "S + V + MANIERE + CIBLE"
             },
 
             {
@@ -1563,27 +1592,27 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le combattant frappe vers le visage",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + CIBLE"
             },
 
             {
                 phrase: "le combattant frappe rapidement vers le visage",
-                structure: "S + V + MANIERE + CC_DIRECTION"
+                structure: "S + V + MANIERE + CIBLE"
+            },
+
+            {
+                phrase: "le combattant avance vers son adversaire",
+                structure: "S + V + CIBLE"
+            },
+
+            {
+                phrase: "le combattant avance rapidement vers son adversaire",
+                structure: "S + V + MANIERE + CIBLE"
             },
 
             {
                 phrase: "le combattant attaque puis frappe son adversaire",
                 structure: "S + V + PUIS + V"
-            },
-
-            {
-                phrase: "le combattant avance vers son adversaire",
-                structure: "S + V + CC_DIRECTION"
-            },
-
-            {
-                phrase: "le combattant avance rapidement vers son adversaire",
-                structure: "S + V + MANIERE + CC_DIRECTION"
             }
 
         ],
@@ -1612,7 +1641,7 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le joueur conduit le ballon vers le but",
-                structure: "S + V + O + CC_DIRECTION"
+                structure: "S + V + O + LIEU"
             },
 
             {
@@ -1632,7 +1661,7 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le joueur passe le ballon vers son coéquipier",
-                structure: "S + V + O + CC_DIRECTION"
+                structure: "S + V + O + CIBLE"
             },
 
             {
@@ -1642,17 +1671,17 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le joueur tire vers le but",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + LIEU"
             },
 
             {
                 phrase: "le joueur tire rapidement vers le but",
-                structure: "S + V + MANIERE + CC_DIRECTION"
+                structure: "S + V + MANIERE + LIEU"
             },
 
             {
                 phrase: "le joueur centre vers la surface",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + LIEU"
             },
 
             {
@@ -1681,17 +1710,17 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le voyageur part vers la ville",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + LIEU"
             },
 
             {
                 phrase: "le voyageur part rapidement vers la ville",
-                structure: "S + V + MANIERE + CC_DIRECTION"
+                structure: "S + V + MANIERE + LIEU"
             },
 
             {
                 phrase: "le voyageur arrive à la gare",
-                structure: "S + V + CC_LIEU"
+                structure: "S + V + LIEU"
             },
 
             {
@@ -1721,7 +1750,7 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "le voyageur se dirige vers l'aéroport",
-                structure: "S + V + CC_DIRECTION"
+                structure: "S + V + LIEU"
             }
 
         ],
@@ -1765,12 +1794,12 @@ const NEO_MODELES_PHRASES = {
 
             {
                 phrase: "l'enfant court dans la maison",
-                structure: "S + V + CC_LIEU"
+                structure: "S + V + LIEU"
             },
 
             {
                 phrase: "la personne marche dans la rue",
-                structure: "S + V + CC_LIEU"
+                structure: "S + V + LIEU"
             },
 
             {
@@ -1786,6 +1815,36 @@ const NEO_MODELES_PHRASES = {
             {
                 phrase: "l'enfant joue rapidement",
                 structure: "S + V + MANIERE"
+            },
+
+            {
+                phrase: "le lion est grand",
+                structure: "S + V + A"
+            },
+
+            {
+                phrase: "le combattant est fort",
+                structure: "S + V + A"
+            },
+
+            {
+                phrase: "le joueur est rapide",
+                structure: "S + V + A"
+            },
+
+            {
+                phrase: "le personnage est agile",
+                structure: "S + V + A"
+            },
+
+            {
+                phrase: "la cible est proche",
+                structure: "S + V + A"
+            },
+
+            {
+                phrase: "l'adversaire est dangereux",
+                structure: "S + V + A"
             }
 
         ],
@@ -1832,7 +1891,7 @@ const NEO_MODELES_PHRASES = {
     }
 
 };
-
+                                            
 
 //==============================================================
 // 🔎 RECHERCHE D'UN VERBE
