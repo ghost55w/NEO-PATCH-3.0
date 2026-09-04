@@ -2993,6 +2993,793 @@ deplacement: [
 
 };
                                             
+//==============================================================
+// 🧠 NEO CONTEXTES SÉMANTIQUES
+//==============================================================
+//
+// Le contexte ne dépend pas d'une phrase exacte.
+// Il décrit CE QUE FAIT l'action et quels rôles elle accepte.
+//
+// Exemple :
+//
+// "Maki frappe Tobirama au visage"
+// "Tobirama reçoit un coup au visage de Maki"
+// "Maki assène violemment un coup dans le visage de Tobirama"
+//
+// peuvent appartenir au même contexte :
+//
+// action = attaque_physique
+// cible = Tobirama
+// partieCorps = visage
+// manière = violemment
+//
+//==============================================================
+
+const NEO_CONTEXTES = {
+
+    //----------------------------------------------------------
+    // 🏃 DÉPLACEMENT
+    //----------------------------------------------------------
+
+    deplacement: {
+
+        avancer: {
+            famille: "deplacement",
+            action: "avancer",
+
+            verbes: [
+                "avancer",
+                "progresser",
+                "marcher",
+                "aller",
+                "continuer",
+                "se déplacer"
+            ],
+
+            expressions: [
+                "faire un pas",
+                "faire des pas",
+                "se mettre en mouvement"
+            ],
+
+            objets: [],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        },
+
+        courir: {
+            famille: "deplacement",
+            action: "courir",
+
+            verbes: [
+                "courir",
+                "foncer",
+                "sprinter",
+                "galoper",
+                "se précipiter"
+            ],
+
+            expressions: [
+                "partir en courant",
+                "prendre sa course",
+                "se lancer en courant"
+            ],
+
+            objets: [],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        },
+
+        reculer: {
+            famille: "deplacement",
+            action: "reculer",
+
+            verbes: [
+                "reculer",
+                "s'éloigner",
+                "retourner",
+                "se retirer"
+            ],
+
+            expressions: [
+                "faire un pas en arrière",
+                "faire plusieurs pas en arrière"
+            ],
+
+            objets: [],
+
+            cible: false,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        },
+
+        approcher: {
+            famille: "deplacement",
+            action: "approcher",
+
+            verbes: [
+                "approcher",
+                "s'approcher",
+                "avancer",
+                "se rapprocher",
+                "venir"
+            ],
+
+            expressions: [
+                "réduire la distance",
+                "se rapprocher de"
+            ],
+
+            objets: [],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        },
+
+        tourner: {
+            famille: "deplacement",
+            action: "rotation",
+
+            verbes: [
+                "tourner",
+                "pivoter",
+                "se retourner",
+                "changer de direction"
+            ],
+
+            expressions: [
+                "faire demi-tour",
+                "effectuer une rotation"
+            ],
+
+            objets: [],
+
+            cible: false,
+            lieu: false,
+            direction: true,
+            distance: false,
+            temps: true,
+            maniere: true
+        }
+    },
+
+
+    //----------------------------------------------------------
+    // 🥊 COMBAT
+    //----------------------------------------------------------
+
+    combat: {
+
+        frapper: {
+            famille: "attaque_physique",
+            action: "frapper",
+
+            verbes: [
+                "frapper",
+                "asséner",
+                "porter",
+                "donner",
+                "infliger",
+                "atteindre",
+                "toucher"
+            ],
+
+            expressions: [
+                "donner un coup",
+                "porter un coup",
+                "asséner un coup",
+                "porter une frappe",
+                "donner une frappe"
+            ],
+
+            objets: [
+                "coup",
+                "frappe",
+                "attaque",
+                "poing",
+                "pied"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: true,
+            distance: true,
+            temps: true
+        },
+
+        attaquer: {
+            famille: "attaque_physique",
+            action: "attaquer",
+
+            verbes: [
+                "attaquer",
+                "agresser",
+                "assaillir",
+                "charger",
+                "assaut"
+            ],
+
+            expressions: [
+                "lancer une attaque",
+                "porter une attaque",
+                "lancer un assaut"
+            ],
+
+            objets: [
+                "attaque",
+                "assaut"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: true,
+            distance: true,
+            temps: true
+        },
+
+        bloquer: {
+            famille: "defense",
+            action: "bloquer",
+
+            verbes: [
+                "bloquer",
+                "parer",
+                "intercepter",
+                "stopper",
+                "arrêter"
+            ],
+
+            expressions: [
+                "faire barrage",
+                "parer une attaque"
+            ],
+
+            objets: [
+                "attaque",
+                "coup",
+                "frappe"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: true,
+            distance: true,
+            temps: true
+        },
+
+        esquiver: {
+            famille: "defense",
+            action: "esquiver",
+
+            verbes: [
+                "esquiver",
+                "éviter",
+                "détourner"
+            ],
+
+            expressions: [
+                "se décaler",
+                "se dérober",
+                "se déplacer pour éviter"
+            ],
+
+            objets: [
+                "attaque",
+                "coup",
+                "frappe"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: true,
+            distance: true,
+            temps: true
+        },
+
+        saisir: {
+            famille: "contact",
+            action: "saisir",
+
+            verbes: [
+                "saisir",
+                "attraper",
+                "empoigner",
+                "agripper",
+                "prendre"
+            ],
+
+            expressions: [
+                "prendre par",
+                "attraper par",
+                "empoigner par"
+            ],
+
+            objets: [
+                "bras",
+                "main",
+                "poignet",
+                "vêtement"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: false,
+            distance: true,
+            temps: true
+        },
+
+        pousser: {
+            famille: "contact",
+            action: "pousser",
+
+            verbes: [
+                "pousser",
+                "repousser",
+                "bousculer"
+            ],
+
+            expressions: [
+                "donner une poussée",
+                "repousser violemment"
+            ],
+
+            objets: [
+                "coup",
+                "corps"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: true,
+            distance: true,
+            temps: true
+        },
+
+        projeter: {
+            famille: "projection",
+            action: "projeter",
+
+            verbes: [
+                "projeter",
+                "jeter",
+                "lancer",
+                "envoyer",
+                "expédier"
+            ],
+
+            expressions: [
+                "faire tomber",
+                "envoyer au sol",
+                "projeter au sol"
+            ],
+
+            objets: [
+                "corps",
+                "adversaire"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            maniere: true,
+            direction: true,
+            distance: true,
+            temps: true
+        }
+    },
+
+
+    //----------------------------------------------------------
+    // ⚽ FOOTBALL
+    //----------------------------------------------------------
+
+    football: {
+
+        passe: {
+            famille: "football",
+            action: "passe",
+
+            verbes: [
+                "passer",
+                "transmettre",
+                "donner",
+                "envoyer"
+            ],
+
+            expressions: [
+                "faire une passe",
+                "adresser une passe",
+                "transmettre le ballon"
+            ],
+
+            objets: [
+                "ballon",
+                "passe"
+            ],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            maniere: true
+        },
+
+        tir: {
+            famille: "football",
+            action: "tir",
+
+            verbes: [
+                "tirer",
+                "frapper",
+                "shooter"
+            ],
+
+            expressions: [
+                "tirer au but",
+                "prendre sa chance",
+                "décocher une frappe"
+            ],
+
+            objets: [
+                "ballon",
+                "tir",
+                "frappe",
+                "but"
+            ],
+
+            cible: true,
+            partieCorps: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            maniere: true
+        },
+
+        dribble: {
+            famille: "football",
+            action: "dribbler",
+
+            verbes: [
+                "dribbler",
+                "éliminer",
+                "déborder",
+                "feinter"
+            ],
+
+            expressions: [
+                "passer un adversaire",
+                "prendre de vitesse",
+                "faire une feinte"
+            ],
+
+            objets: [
+                "ballon",
+                "adversaire"
+            ],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            maniere: true
+        },
+
+        controle: {
+            famille: "football",
+            action: "controle",
+
+            verbes: [
+                "contrôler",
+                "contrôle",
+                "maîtriser",
+                "récupérer"
+            ],
+
+            expressions: [
+                "prendre le contrôle",
+                "amortir le ballon",
+                "contrôler le ballon"
+            ],
+
+            objets: [
+                "ballon"
+            ],
+
+            cible: false,
+            lieu: true,
+            direction: true,
+            distance: true,
+            maniere: true
+        }
+    },
+
+
+    //----------------------------------------------------------
+    // ✈️ VOYAGE
+    //----------------------------------------------------------
+
+    voyage: {
+
+        partir: {
+            famille: "voyage",
+            action: "partir",
+
+            verbes: [
+                "partir",
+                "quitter",
+                "s'en aller",
+                "voyager"
+            ],
+
+            expressions: [
+                "prendre le départ",
+                "prendre la route"
+            ],
+
+            objets: [
+                "ville",
+                "pays",
+                "destination"
+            ],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        },
+
+        arriver: {
+            famille: "voyage",
+            action: "arriver",
+
+            verbes: [
+                "arriver",
+                "atteindre",
+                "parvenir",
+                "rejoindre"
+            ],
+
+            expressions: [
+                "atteindre sa destination",
+                "parvenir à destination"
+            ],
+
+            objets: [
+                "destination",
+                "gare",
+                "aéroport",
+                "hôtel"
+            ],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        },
+
+        conduire: {
+            famille: "transport",
+            action: "conduire",
+
+            verbes: [
+                "conduire",
+                "piloter",
+                "rouler"
+            ],
+
+            expressions: [
+                "prendre le volant",
+                "prendre la route"
+            ],
+
+            objets: [
+                "voiture",
+                "moto",
+                "véhicule",
+                "avion",
+                "bateau"
+            ],
+
+            cible: true,
+            lieu: true,
+            direction: true,
+            distance: true,
+            temps: true,
+            maniere: true
+        }
+    },
+
+
+    //----------------------------------------------------------
+    // 🏠 VIE COURANTE
+    //----------------------------------------------------------
+
+    vie_courante: {
+
+        prendre: {
+            famille: "interaction_objet",
+            action: "prendre",
+
+            verbes: [
+                "prendre",
+                "saisir",
+                "attraper",
+                "récupérer"
+            ],
+
+            expressions: [
+                "mettre la main sur",
+                "se saisir de"
+            ],
+
+            objets: [
+                "objet",
+                "livre",
+                "clé",
+                "téléphone",
+                "sac"
+            ],
+
+            cible: true,
+            lieu: true,
+            maniere: true,
+            temps: true
+        },
+
+        poser: {
+            famille: "interaction_objet",
+            action: "poser",
+
+            verbes: [
+                "poser",
+                "déposer",
+                "placer",
+                "mettre"
+            ],
+
+            expressions: [
+                "mettre sur",
+                "déposer sur"
+            ],
+
+            objets: [
+                "objet",
+                "livre",
+                "sac",
+                "clé",
+                "téléphone"
+            ],
+
+            cible: false,
+            lieu: true,
+            maniere: true,
+            temps: true
+        },
+
+        regarder: {
+            famille: "perception",
+            action: "regarder",
+
+            verbes: [
+                "regarder",
+                "observer",
+                "contempler",
+                "examiner",
+                "fixer"
+            ],
+
+            expressions: [
+                "porter son regard sur",
+                "jeter un regard sur"
+            ],
+
+            objets: [
+                "personne",
+                "objet",
+                "lieu"
+            ],
+
+            cible: true,
+            lieu: true,
+            maniere: true,
+            temps: true
+        }
+    },
+
+
+    //----------------------------------------------------------
+    // 🗣️ COMMUNICATION
+    //----------------------------------------------------------
+
+    communication: {
+
+        parler: {
+            famille: "communication",
+            action: "parler",
+
+            verbes: [
+                "parler",
+                "discuter",
+                "s'exprimer",
+                "communiquer"
+            ],
+
+            expressions: [
+                "prendre la parole",
+                "adresser la parole"
+            ],
+
+            objets: [
+                "message",
+                "question",
+                "réponse"
+            ],
+
+            cible: true,
+            lieu: true,
+            maniere: true,
+            temps: true
+        },
+
+        dire: {
+            famille: "communication",
+            action: "dire",
+
+            verbes: [
+                "dire",
+                "annoncer",
+                "déclarer",
+                "répondre",
+                "expliquer",
+                "préciser"
+            ],
+
+            expressions: [
+                "donner une réponse",
+                "faire une annonce",
+                "donner une explication"
+            ],
+
+            objets: [
+                "message",
+                "réponse",
+                "question",
+                "information"
+            ],
+
+            cible: true,
+            lieu: false,
+            maniere: true,
+            temps: true
+        }
+    }
+};
 
 //==============================================================
 // 🔎 RECHERCHE D'UN VERBE
