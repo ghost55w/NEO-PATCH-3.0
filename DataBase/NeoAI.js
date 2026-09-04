@@ -1892,67 +1892,203 @@ const NEO_PRONOMS = {
 // Elles servent à identifier les structures des modèles.
 //
 //==============================================================
+//==============================================================
+// 🧩 FORMULES GRAMMATICALES / STRUCTURES
+//==============================================================
 
 const NEO_FORMULES = {
 
     fr: [
 
-        "S + V",
+        //==========================================================
+        // 🔹 STRUCTURES DE BASE
+        //==========================================================
 
+        "S + V",
         "S + V + O",
+        "S + V + A",
+        "S + V + ADV",
+
+        //==========================================================
+        // 🧭 DIRECTION / DÉPLACEMENT
+        //==========================================================
 
         "S + V + CC_DIRECTION",
-
         "S + V + CC_LIEU",
-
+        "S + V + CC_DISTANCE",
         "S + V + CC_TEMPS",
 
-        "S + V + CC_DISTANCE",
-
-        "S + V + MANIERE",
-
         "S + V + MANIERE + CC_DIRECTION",
+        "S + V + MANIERE + CC_LIEU",
+        "S + V + MANIERE + CC_DISTANCE",
 
-        "S + V + MANIERE + O",
+        "S + V + CC_DIRECTION + CC_DISTANCE",
+        "S + V + CC_DIRECTION + CC_TEMPS",
+        "S + V + CC_LIEU + CC_TEMPS",
 
-        "S + V + O + MANIERE",
+        "S + V + MANIERE + CC_DIRECTION + CC_DISTANCE",
+        "S + V + MANIERE + CC_DIRECTION + CC_TEMPS",
 
+        //==========================================================
+        // 🎯 CIBLE / INTERACTION
+        //==========================================================
+
+        "S + V + CC_CIBLE",
         "S + V + O + CC_CIBLE",
-
         "S + V + O + CC_LIEU",
-
         "S + V + O + CC_TEMPS",
-
         "S + V + O + CC_DISTANCE",
 
+        "S + V + MANIERE + CC_CIBLE",
+        "S + V + MANIERE + O",
+        "S + V + O + MANIERE",
+
+        "S + V + MANIERE + O + CC_CIBLE",
         "S + V + O + MANIERE + CC_CIBLE",
 
+        "S + V + MANIERE + O + CC_DIRECTION",
         "S + V + O + MANIERE + CC_DIRECTION",
 
-        "S + V + POUR + V",
+        "S + V + O + CC_CIBLE + CC_LIEU",
+        "S + V + O + CC_CIBLE + CC_TEMPS",
+        "S + V + O + CC_CIBLE + CC_DISTANCE",
+
+        //==========================================================
+        // 🥊 COMBAT / PARTIES DU CORPS
+        //==========================================================
+
+        "S + V + O + PARTIE_CORPS",
+        "S + V + CC_CIBLE + PARTIE_CORPS",
+
+        "S + V + O + PARTIE_CORPS + CC_CIBLE",
+        "S + V + O + CC_CIBLE + PARTIE_CORPS",
+
+        "S + V + MANIERE + O + PARTIE_CORPS",
+        "S + V + MANIERE + O + PARTIE_CORPS + CC_CIBLE",
+
+        "S + V + O + MANIERE + PARTIE_CORPS",
+        "S + V + O + MANIERE + PARTIE_CORPS + CC_CIBLE",
+
+        "S + V + CC_CIBLE + MANIERE + PARTIE_CORPS",
+
+        //==========================================================
+        // ⚔️ ACTION + MOYEN / INSTRUMENT
+        //==========================================================
+
+        "S + V + O + CC_MOYEN",
+        "S + V + MANIERE + O + CC_MOYEN",
+        "S + V + O + PARTIE_CORPS + CC_MOYEN",
+
+        //==========================================================
+        // ⏱️ TEMPS / DURÉE
+        //==========================================================
+
+        "S + V + CC_TEMPS + O",
+        "S + V + CC_TEMPS + CC_DIRECTION",
+        "S + V + CC_TEMPS + CC_LIEU",
+
+        "S + V + O + CC_TEMPS + CC_DISTANCE",
+        "S + V + MANIERE + CC_TEMPS",
+
+        //==========================================================
+        // 🔗 ENCHAÎNEMENTS D'ACTIONS
+        //==========================================================
 
         "S + V + PUIS + V",
+        "S + V + PUIS + V + O",
+        "S + V + PUIS + V + CC_DIRECTION",
+        "S + V + PUIS + V + CC_LIEU",
+        "S + V + PUIS + V + MANIERE",
+
+        "S + V + O + PUIS + V",
+        "S + V + O + PUIS + V + O",
+        "S + V + O + PUIS + V + CC_CIBLE",
+
+        "S + V + MANIERE + PUIS + V",
+        "S + V + MANIERE + O + PUIS + V",
+
+        //==========================================================
+        // 🎯 BUT / INTENTION
+        //==========================================================
+
+        "S + V + POUR + V",
+        "S + V + POUR + V + O",
+        "S + V + O + POUR + V",
+        "S + V + CC_DIRECTION + POUR + V",
+
+        "S + V + AFIN_DE + V",
+        "S + V + AFIN_DE + V + O",
+
+        //==========================================================
+        // 🚫 NÉGATION / ABSENCE D'ACTION
+        //==========================================================
+
+        "S + SANS + V",
+        "S + V + SANS + V",
+        "S + V + O + SANS + V",
+
+        //==========================================================
+        // ⏮️ ANTÉRIORITÉ
+        //==========================================================
 
         "S + V + AVANT_DE + V",
+        "S + V + AVANT_DE + V + O",
+        "S + V + O + AVANT_DE + V",
 
-        "S + V + SANS + V",
+        //==========================================================
+        // 🔄 DOUBLE ACTION
+        //==========================================================
 
         "S + V + V",
-
         "S + V + V + O",
-
         "S + V + V + CC_DIRECTION",
-
         "S + V + V + CC_LIEU",
-
+        "S + V + V + CC_CIBLE",
         "S + V + V + MANIERE",
+        "S + V + V + O + CC_CIBLE",
 
-        "S + V + O + PUIS + V"
+        //==========================================================
+        // 🧠 ÉTAT / DESCRIPTION
+        //==========================================================
+
+        "S + V + A",
+        "S + V + A + CC_LIEU",
+        "S + V + A + CC_TEMPS",
+        "S + V + MANIERE + A",
+
+        //==========================================================
+        // 📍 POSITION / LOCALISATION
+        //==========================================================
+
+        "S + V + CC_LIEU",
+        "S + V + CC_LIEU + CC_DIRECTION",
+        "S + V + CC_LIEU + CC_TEMPS",
+
+        //==========================================================
+        // 📏 DISTANCE / MESURE
+        //==========================================================
+
+        "S + V + CC_DISTANCE",
+        "S + V + O + CC_DISTANCE",
+        "S + V + CC_CIBLE + CC_DISTANCE",
+        "S + V + MANIERE + CC_DISTANCE",
+
+        //==========================================================
+        // 🔀 STRUCTURES COMPLEXES
+        //==========================================================
+
+        "S + V + O + MANIERE + CC_CIBLE + CC_LIEU",
+        "S + V + MANIERE + O + CC_CIBLE + CC_LIEU",
+        "S + V + O + PARTIE_CORPS + CC_CIBLE + CC_TEMPS",
+        "S + V + MANIERE + O + PARTIE_CORPS + CC_CIBLE + CC_TEMPS",
+
+        "S + V + CC_DIRECTION + PUIS + V + O",
+        "S + V + O + PUIS + V + O + CC_CIBLE",
+        "S + V + MANIERE + PUIS + V + O + CC_CIBLE"
 
     ]
 
 };
-
 
 //==============================================================
 // 📝 MODÈLES DE PHRASES
