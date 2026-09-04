@@ -3782,6 +3782,483 @@ const NEO_CONTEXTES = {
 };
 
 //==============================================================
+// 🔎 RECHERCHE DU CONTEXTE D'ACTION
+//==============================================================
+
+function neoTrouverContexteAction(texte) {
+
+    const normalise = neoNormaliserTexte(texte);
+
+    let meilleur = null;
+    let meilleurScore = 0;
+
+    for (const [categorie, actions] of Object.entries(NEO_CONTEXTES)) {
+
+        for (const [nomAction, contexte] of Object.entries(actions)) {
+
+            let score = 0;
+
+            // Verbes
+            for (const verbe of contexte.verbes || []) {
+                const v = neoNormaliserTexte(verbe);
+
+                if (
+                    normalise.includes(v)
+                ) {
+                    score += 40;
+                }
+            }
+
+            // Expressions multi-mots
+            for (const expression of contexte.expressions || []) {
+
+                const e = neoNormaliserTexte(expression);
+
+                if (
+                    normalise.includes(e)
+                ) {
+                    score += 60;
+                }
+            }
+
+            // Objets / mots d'action
+            for (const objet of contexte.objets || []) {
+
+                const o = neoNormaliserTexte(objet);
+
+                if (
+                    normalise.includes(o)
+                ) {
+                    score += 10;
+                }
+            }
+
+            if (score > meilleurScore) {
+
+                meilleurScore = score;
+
+                meilleur = {
+                    categorie,
+                    action: nomAction,
+                    famille: contexte.famille,
+                    contexte,
+                    score: Math.min(score, 100)
+                };
+            }
+        }
+    }
+
+    return meilleur;
+}
+
+//==============================================================
+// 🧠 EXTRACTION DES RÔLES SÉMANTIQUES
+//==============================================================
+
+function neoEstPartieCorps(mot) {
+
+    const normalise = neoNormaliserTexte(mot);
+
+    const corps = NEO_NOMS?.fr?.corps || [];
+
+    return corps.some(
+        x => neoNormaliserTexte(x) === normalise
+    );
+}
+
+
+//--------------------------------------------------------------
+// 🎯 DÉTECTION D'UNE CIBLE
+//--------------------------------------------------------------
+
+function neoEstCibleContextuelle(mot) {
+
+    const normalise = neoNormaliserTexte(mot);
+
+    // Personnes connues
+    const personnes =
+        NEO_NOMS?.fr?.personnes || [];
+
+    if (
+        personnes.some(
+            x => neoNormaliserTexte(x) === normalise
+        )
+    ) {
+        return true;
+    }
+
+    // Une cible peut aussi être un nom propre inconnu.
+    //
+    // Exemple :
+    // Maki
+    // Tobirama
+    // Isagi
+    // Neo
+    //
+    // On ne les ajoute PAS à la base.
+    //
+    if (
+        /^[A-ZÀ-Ý][a-zà-ÿ]+$/.test(mot)
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+
+//--------------------------------------------------------------
+// 🧩 EXTRACTION DU CONTEXTE
+//--------------------------------------------------------------
+
+function neoExtraireContexte(texte) {
+
+    const tokens = neoTokeniser(texte);
+
+    const contexteAction =
+        neoTrouverContexteAction(texte);
+
+    const resultat = {
+
+        categorie:
+            contexteAction?.categorie || null,
+
+        action:
+            contexteAction?.action || null,
+
+        famille:
+            contexteAction?.famille || null,
+
+        sujet: null,
+
+        cible: null,
+
+        partieCorps: null,
+
+        objet: null,
+
+        maniere: [],
+
+        direction: null,
+
+        lieu: null,
+
+        distance: null,
+
+        temps: null,
+
+        connecteurs: [],
+
+        tokens
+    };
+
+
+    //----------------------------------------------------------
+    // 🔗 CONNECTEURS
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            NEO_CONNECTEURS?.fr?.includes?.(token)
+        ) {
+            resultat.connecteurs.push(token);
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧍 PARTIES DU CORPS
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            neoEstPartieCorps(token)
+        ) {
+            resultat.partieCorps = token;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 CIBLE
+    //----------------------------------------------------------
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        const token = tokens[i];
+
+        if (
+            neoEstCibleContextuelle(token)
+        ) {
+
+            // On évite de prendre automatiquement
+            // le premier nom comme cible.
+            if (i > 0) {
+                resultat.cible = token;
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧭 DIRECTIONS
+    //----------------------------------------------------------
+
+    const directions = [
+        "avant",
+        "arrière",
+        "arriere",
+        "gauche",
+        "droite",
+        "haut",
+        "bas",
+        "devant",
+        "derrière",
+        "derriere"
+    ];
+
+    for (const token of tokens) {
+
+        if (
+            directions.includes(token)
+        ) {
+            resultat.direction = token;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 📏 DISTANCE
+    //----------------------------------------------------------
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        if (
+            /^\d+(?:[.,]\d+)?$/.test(tokens[i])
+        ) {
+
+            const unite = tokens[i + 1];
+
+            if (
+                [
+                    "m",
+                    "mètre",
+                    "metre",
+                    "mètres",
+                    "metres",
+                    "km",
+                    "kilomètre",
+                    "kilometre"
+                ].includes(unite)
+            ) {
+
+                resultat.distance = {
+                    valeur: Number(
+                        tokens[i].replace(",", ".")
+                    ),
+                    unite
+                };
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 📍 LIEUX
+    //----------------------------------------------------------
+
+    const lieux =
+        NEO_NOMS?.fr?.lieux || [];
+
+    for (const lieu of lieux) {
+
+        if (
+            tokens.includes(
+                neoNormaliserTexte(lieu)
+            )
+        ) {
+            resultat.lieu = lieu;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧍 SUJET
+    //----------------------------------------------------------
+
+    if (tokens.length > 0) {
+
+        // Le sujet est généralement placé
+        // avant l'action principale.
+        //
+        // On prend le premier groupe nominal
+        // avant l'action détectée.
+
+        const indexAction =
+            contexteAction
+                ? neoTrouverIndexAction(
+                    tokens,
+                    contexteAction
+                )
+                : -1;
+
+        if (indexAction > 0) {
+
+            resultat.sujet =
+                tokens
+                    .slice(0, indexAction)
+                    .join(" ");
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 MANIÈRE
+    //----------------------------------------------------------
+
+    const adverbes =
+        NEO_ADVERBES?.fr || [];
+
+    for (const token of tokens) {
+
+        if (
+            adverbes.some(
+                x =>
+                    neoNormaliserTexte(x) === token
+            )
+        ) {
+            resultat.maniere.push(token);
+        }
+    }
+
+
+    return resultat;
+}
+
+//==============================================================
+// 🔎 TROUVER L'INDEX DE L'ACTION
+//==============================================================
+
+function neoTrouverIndexAction(tokens, contexteAction) {
+
+    if (!contexteAction) {
+        return -1;
+    }
+
+    const contexte =
+        contexteAction.contexte;
+
+    //----------------------------------------------------------
+    // Expressions multi-mots prioritaires
+    //----------------------------------------------------------
+
+    for (const expression of contexte.expressions || []) {
+
+        const morceaux =
+            neoTokeniser(expression);
+
+        for (
+            let i = 0;
+            i <= tokens.length - morceaux.length;
+            i++
+        ) {
+
+            const segment =
+                tokens.slice(
+                    i,
+                    i + morceaux.length
+                );
+
+            if (
+                segment.join(" ") ===
+                morceaux.join(" ")
+            ) {
+                return i;
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // Verbe simple
+    //----------------------------------------------------------
+
+    for (let i = 0; i < tokens.length; i++) {
+
+        for (const verbe of contexte.verbes || []) {
+
+            if (
+                tokens[i] ===
+                neoNormaliserTexte(verbe)
+            ) {
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+//==============================================================
+// 🧬 SIGNATURE SÉMANTIQUE
+//==============================================================
+
+function neoConstruireSignature(contexte) {
+
+    if (!contexte) {
+        return "";
+    }
+
+    const signature = [];
+
+    if (contexte.sujet) {
+        signature.push("S");
+    }
+
+    if (contexte.action) {
+        signature.push(
+            `ACTION:${contexte.action}`
+        );
+    }
+
+    if (contexte.objet) {
+        signature.push("O");
+    }
+
+    if (contexte.cible) {
+        signature.push("CIBLE");
+    }
+
+    if (contexte.partieCorps) {
+        signature.push("PARTIE_CORPS");
+    }
+
+    if (contexte.maniere?.length) {
+        signature.push("MANIERE");
+    }
+
+    if (contexte.direction) {
+        signature.push("DIRECTION");
+    }
+
+    if (contexte.lieu) {
+        signature.push("LIEU");
+    }
+
+    if (contexte.distance) {
+        signature.push("DISTANCE");
+    }
+
+    if (contexte.temps) {
+        signature.push("TEMPS");
+    }
+
+    return signature.join(" + ");
+}
+
+//==============================================================
 // 🔎 RECHERCHE D'UN VERBE
 //==============================================================
 
