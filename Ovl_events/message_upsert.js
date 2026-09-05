@@ -9,8 +9,8 @@ const getJid = require("./cache_jid");
 const {
     verifierJoueursMatch,
     verifierCardsMatch,
-    analysePaveAvecGemini,
-    envoyerResultatPaveGemini,
+    analysePaveAvecNeoAI,
+    envoyerResultatPaveNeoAI,
     duelsEnCours,
     matchAttente,
     lancerTimerTour
@@ -619,93 +619,87 @@ async function message_upsert(m, ovl) {
                                 "🌀🎮 :"
                             );
 
-                        //================================================
-                        // 🤖 ANALYSE
-                        //================================================
+  //================================================
+// 🤖 ANALYSE PAVÉ AVEC NEOAI
+//================================================
 
-                        if (estPaveJeu) {
+if (estPaveJeu) {
 
-                            console.log(
-                                "🌀 PAVÉ DÉTECTÉ"
-                            );
+    console.log(
+        "🌀 PAVÉ DÉTECTÉ"
+    );
 
-                            console.log(
-                                "👤 Auteur :",
-                                auteur_Message
-                            );
+    console.log(
+        "👤 Auteur :",
+        auteur_Message
+    );
 
-                            const resultatGemini =
-                                await analysePaveAvecGemini(
-                                    texte,
-                                    {
-                                        user:
-                                            auteur_Message,
+    const resultatNeoAI =
+        await analysePaveAvecNeoAI(
+            texte,
+            {
+                user:
+                    auteur_Message,
 
-                                        joueur:
-                                            joueur,
+                joueur:
+                    joueur,
 
-                                        match:
-                                            match
-                                    }
-                                );
-
-                            if (
-                                !resultatGemini
-                                    ?.paveDetecte
-                            ) {
-
-                                console.log(
-                                    "❌ Gemini : aucun pavé détecté"
-                                );
-
-                            } else {
-
-                                console.log(
-                                    "🤖 GEMINI — PAVÉ DÉTECTÉ"
-                                );
-
-                                console.log(
-                                    "🌀 Actions :",
-                                    resultatGemini.nombreActions
-                                );
-
-                                console.log(
-                                    "📊 Note :",
-                                    resultatGemini.note
-                                );
-
-                                console.log(
-                                    "⚖️ Verdict :",
-                                    resultatGemini.verdict
-                                );
-
-                                console.log(
-                                    "➡️ Joueur suivant :",
-                                    resultatGemini.joueurSuivant
-                                );
-
-                                await envoyerResultatPaveGemini(
-                                    ovl,
-                                    ms_org,
-                                    resultatGemini,
-                                    match
-                                );
-
-                                lancerTimerTour(
-                                    match,
-                                    ms_org,
-                                    ovl
-                                );
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
+                match:
+                    match
             }
+        );
+
+    if (
+        !resultatNeoAI?.paveDetecte
+    ) {
+
+        console.log(
+            "❌ NeoAI : aucun pavé détecté"
+        );
+
+    } else {
+
+        console.log(
+            "🧠 NEOAI — PAVÉ DÉTECTÉ"
+        );
+
+        console.log(
+            "🌀 Actions :",
+            resultatNeoAI.nombreActions
+        );
+
+        console.log(
+            "📊 Note :",
+            resultatNeoAI.note
+        );
+
+        console.log(
+            "⚖️ Verdict :",
+            resultatNeoAI.verdict
+        );
+
+        console.log(
+            "➡️ Joueur suivant :",
+            resultatNeoAI.joueurSuivant
+        );
+
+        await envoyerResultatPaveNeoAI(
+            ovl,
+            ms_org,
+            resultatNeoAI,
+            match
+        );
+
+        lancerTimerTour(
+            match,
+            ms_org,
+            ovl
+        );
+
+    }
+
+}
+                        
 
             //======================================================
             // 📄 BLUELOCK — FICHE
