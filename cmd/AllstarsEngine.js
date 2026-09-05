@@ -1,93 +1,9 @@
-const axios = require("axios");
-const { ovlcmd } = require("../lib/ovlcmd");
 
-const {
-    getData,
-    setfiche,
-    getAllFiches
-} = require("../DataBase/allstars_divs_fiches");
-
-const { AllStarsDivsFiche } = require("../DataBase/allstars_divs_fiches");
-
-const { cards } = require("../DataBase/cards");
-const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
-const config = require("../set");
 
 //================================================
-// 🤖 APPEL GEMINI
+// 🧠 ANALYSE PAVÉ AVEC NEOAI🌀🧠 
 //================================================
-
-async function appelerGemini(prompt) {
-
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-        throw new Error(
-            "❌ GEMINI_API_KEY n'est pas configurée sur Render"
-        );
-    }
-
-    const url =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-        apiKey;
-
-    try {
-
-        const response = await axios.post(
-            url,
-            {
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: prompt
-                            }
-                        ]
-                    }
-                ],
-                generationConfig: {
-                    temperature: 0,
-                    responseMimeType: "application/json"
-                }
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        const texte =
-            response.data
-                ?.candidates?.[0]
-                ?.content?.parts?.[0]
-                ?.text;
-
-        if (!texte) {
-            throw new Error(
-                "❌ Gemini n'a renvoyé aucune réponse"
-            );
-        }
-
-        return JSON.parse(texte);
-
-    } catch (error) {
-
-        console.error(
-            "❌ ERREUR GEMINI :",
-            error.response?.data ||
-            error.message
-        );
-
-        throw error;
-    }
-}
-
-//================================================
-// 🤖 ANALYSE PAVÉ AVEC GEMINI
-//================================================
-
-async function analysePaveAvecGemini(message, contexteMatch = {}) {
+async function analysePaveAvecNeoAI(message, contexteMatch = {}) {
 
     try {
 
@@ -104,11 +20,13 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
                   "";
 
         if (!texte) {
+
             return {
                 ok: false,
                 paveDetecte: false,
                 erreur: "Message vide"
             };
+
         }
 
 
@@ -168,7 +86,8 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
                 ok: false,
                 paveDetecte: true,
                 user,
-                erreur: "Marqueur 🌀🎮: introuvable"
+                erreur:
+                    "Marqueur 🌀🎮: introuvable"
             };
 
         }
@@ -190,302 +109,175 @@ async function analysePaveAvecGemini(message, contexteMatch = {}) {
                 ok: false,
                 paveDetecte: true,
                 user,
-                erreur: "Aucune action trouvée après 🌀🎮:"
+                erreur:
+                    "Aucune action trouvée après 🌀🎮:"
             };
 
         }
 
 
         //================================================
-        // 5️⃣ CONTEXTE SAFE POUR GEMINI
-        //================================================
-        // ⚠️ IMPORTANT :
-        // On ne donne PAS directement match à JSON.stringify()
-        // car match peut contenir des Timeout/cycles.
-
-        const contexteGemini = {
-
-            user: contexteMatch?.user || user || null,
-
-            joueur: contexteMatch?.joueur
-                ? {
-                    jid: contexteMatch.joueur.jid || null,
-                    nom: contexteMatch.joueur.nom || null,
-                    name: contexteMatch.joueur.name || null
-                }
-                : null,
-
-            match: contexteMatch?.match
-                ? {
-                    id: contexteMatch.match.id || null,
-                    etat: contexteMatch.match.etat || null,
-
-                    // joueur dont c'est actuellement le tour
-                    joueurTour:
-                        contexteMatch.match.joueurTour || null,
-
-                    // informations simples sur les joueurs
-                    joueurs:
-                        Array.isArray(contexteMatch.match.joueurs)
-                            ? contexteMatch.match.joueurs.map(j => ({
-                                jid: j?.jid || null,
-                                nom: j?.nom || j?.name || null
-                            }))
-                            : []
-                }
-                : null
-        };
-
-
-        //================================================
-        // 6️⃣ PROMPT GEMINI
+        // 5️⃣ 🧠 ANALYSE NEOAI
         //================================================
 
-        const prompt = `
-
-TU ES L'ARBITRE OFFICIEL DU JEU JUMP BATTLE ARENA.
-
-Tu dois analyser exclusivement le pavé d'action fourni.
-
-NE DOIS JAMAIS INVENTER une information absente du pavé.
-
-================================================
-RÈGLES GÉNÉRALES
-================================================
-
-1. Le pavé doit contenir des actions de combat.
-
-2. Tu dois identifier et compter les actions
-   réellement effectuées par le joueur.
-
-3. Un pavé peut contenir au maximum 4 actions.
-
-4. Si le pavé contient plus de 4 actions :
-   - le pavé est REFUSÉ ;
-   - indique clairement que la limite de 4 actions
-     est dépassée.
-
-5. Analyse les actions dans leur ordre chronologique.
-
-6. Vérifie la cohérence entre les actions.
-
-7. Une action dont les informations obligatoires
-   sont absentes doit être refusée.
-
-8. Tu dois respecter strictement les règles techniques
-   fournies par le système de combat.
-
-================================================
-RÈGLES DE VITESSE
-================================================
-
-Bronze = 6 m/s
-Argent = 8 m/s
-Or = 10 m/s
-
-Un joueur ne peut pas parcourir plus de 10 mètres
-sans action intermédiaire.
-
-================================================
-RÈGLES DES FRAPPES
-================================================
-
-Pour une frappe de poing :
-
-- le membre utilisé doit être identifiable ;
-- la zone visée doit être identifiable.
-
-Pour une frappe de pied :
-
-- le pied utilisé doit être identifiable ;
-- la surface utilisée doit être identifiable ;
-- la zone visée doit être identifiable.
-
-Si une information obligatoire manque,
-la frappe est invalide.
-
-================================================
-MISSION
-================================================
-
-Tu dois :
-
-1. compter les actions ;
-2. vérifier que le nombre est <= 4 ;
-3. identifier chaque action ;
-4. analyser chaque action ;
-5. vérifier les règles ;
-6. déterminer si le pavé est valide ;
-7. attribuer une note sur 10 ;
-8. produire un résumé narratif court des actions validées ;
-9. déterminer le joueur suivant à partir du contexte du match ;
-10. si le pavé est invalide, expliquer précisément pourquoi.
-
-================================================
-CONTEXTE DU MATCH
-================================================
-
-${JSON.stringify(contexteGemini, null, 2)}
-
-================================================
-PAVÉ À ANALYSER
-================================================
-
-${actionsTexte}
-
-================================================
-FORMAT DE RÉPONSE OBLIGATOIRE
-================================================
-
-Réponds UNIQUEMENT avec un JSON valide.
-
-{
-    "paveValide": true,
-    "nombreActions": 0,
-    "actions": [
-        {
-            "ordre": 1,
-            "acteur": "",
-            "cible": "",
-            "type": "",
-            "description": "",
-            "valide": true,
-            "raison": ""
-        }
-    ],
-    "note": 0,
-    "verdict": "",
-    "resume": "",
-    "joueurSuivant": {
-        "nom": "",
-        "jid": ""
-    },
-    "consequences": {
-        "touche": false,
-        "contre": false,
-        "mauvaisContre": false,
-        "degats": 0,
-        "effets": []
-    },
-    "erreurs": []
-}
-
-RÈGLE IMPORTANTE :
-
-Ne retourne aucun Markdown.
-Ne retourne aucun texte avant ou après le JSON.
-`;
+        console.log(
+            "🧠 NEOAI — Analyse du pavé :",
+            actionsTexte
+        );
 
 
-        //================================================
-// 7️⃣ APPEL GEMINI
-//================================================
-
-const apiKey =
-    process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-
-    throw new Error(
-        "GEMINI_API_KEY manquante dans Render"
-    );
-
-}
+        const analyse =
+            await analyserNeoAI(actionsTexte);
 
 
-const url =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
-    apiKey;
-
-
-const response =
-    await axios.post(
-        url,
-        {
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: prompt
-                        }
-                    ]
-                }
-            ],
-
-            generationConfig: {
-                responseMimeType: "application/json"
-            }
-        },
-        {
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            timeout: 30000
-        }
-    );
-
-        //================================================
-        // 8️⃣ EXTRACTION RÉPONSE
-        //================================================
-
-        let resultatTexte =
-            response
-                ?.data
-                ?.candidates?.[0]
-                ?.content
-                ?.parts?.[0]
-                ?.text;
-
-
-        if (!resultatTexte) {
-
-            throw new Error(
-                "Gemini n'a retourné aucune réponse"
-            );
-
-        }
-
-
-        resultatTexte =
-            resultatTexte
-                .replace(/^```json\s*/i, "")
-                .replace(/^```\s*/i, "")
-                .replace(/\s*```$/i, "")
-                .trim();
-
-
-        //================================================
-        // 9️⃣ PARSE JSON
-        //================================================
-
-        let resultat;
-
-        try {
-
-            resultat =
-                JSON.parse(resultatTexte);
-
-        } catch (e) {
-
-            console.error(
-                "❌ JSON GEMINI INVALIDE :",
-                resultatTexte
-            );
+        if (!analyse) {
 
             return {
                 ok: false,
                 paveDetecte: true,
                 user,
                 actionsTexte,
-                erreur: "Réponse Gemini invalide"
+                erreur:
+                    "NeoAI n'a retourné aucun résultat"
             };
 
         }
 
 
+        console.log(
+            "🧠 NEOAI — Résultat :",
+            JSON.stringify(
+                analyse,
+                null,
+                2
+            )
+        );
+
+
         //================================================
-        // 🔟 RETOUR FINAL
+        // 6️⃣ VALIDATION
+        //================================================
+
+        const score =
+            Number(analyse.score) || 0;
+
+
+        const valide =
+            analyse.trouve === true &&
+            score >= 70;
+
+
+        //================================================
+        // 7️⃣ CONSTRUCTION DE L'ACTION
+        //================================================
+
+        const slots =
+            analyse.slots || {};
+
+
+        const action = {
+
+            ordre: 1,
+
+            acteur:
+                slots.SUJET ||
+                "",
+
+            cible:
+                slots.CIBLE ||
+                "",
+
+            type:
+                slots.ACTION ||
+                "",
+
+            description:
+                analyse.resume ||
+                actionsTexte,
+
+            valide,
+
+            raison:
+                valide
+                    ? "Action comprise et validée par NeoAI."
+                    : (
+                        analyse.requisManquants?.length
+                            ? `Informations manquantes : ${analyse.requisManquants.join(", ")}`
+                            : "Similarité insuffisante."
+                    )
+
+        };
+
+
+        //================================================
+        // 8️⃣ JOUEUR SUIVANT
+        //================================================
+
+        let joueurSuivant = {
+            nom: "",
+            jid: ""
+        };
+
+
+        const joueurs =
+            Array.isArray(
+                contexteMatch?.match?.joueurs
+            )
+                ? contexteMatch.match.joueurs
+                : [];
+
+
+        const joueurActuel =
+            contexteMatch?.match?.joueurTour ||
+            user ||
+            null;
+
+
+        if (joueurs.length > 0) {
+
+            const indexActuel =
+                joueurs.findIndex(
+                    j =>
+                        j?.jid === joueurActuel
+                );
+
+
+            if (indexActuel !== -1) {
+
+                const indexSuivant =
+                    (indexActuel + 1) %
+                    joueurs.length;
+
+
+                const suivant =
+                    joueurs[indexSuivant];
+
+
+                if (suivant) {
+
+                    joueurSuivant = {
+
+                        nom:
+                            suivant.nom ||
+                            suivant.name ||
+                            suivant.pseudo ||
+                            "",
+
+                        jid:
+                            suivant.jid ||
+                            ""
+
+                    };
+
+                }
+
+            }
+
+        }
+
+
+        //================================================
+        // 9️⃣ RETOUR FINAL
         //================================================
 
         return {
@@ -498,7 +290,83 @@ const response =
 
             actionsTexte,
 
-            ...resultat
+            paveValide: valide,
+
+            nombreActions: 1,
+
+            actions: [
+                action
+            ],
+
+            note:
+                Math.round(score / 10),
+
+            verdict:
+                valide
+                    ? "Pavé compris et validé par NeoAI."
+                    : (
+                        analyse.requisManquants?.length
+                            ? `Pavé refusé : informations manquantes (${analyse.requisManquants.join(", ")}).`
+                            : "Pavé refusé : similarité insuffisante."
+                    ),
+
+            resume:
+                analyse.resume ||
+                actionsTexte,
+
+            joueurSuivant,
+
+            consequences: {
+
+                touche: false,
+                contre: false,
+                mauvaisContre: false,
+                degats: 0,
+                effets: []
+
+            },
+
+            erreurs:
+                valide
+                    ? []
+                    : [
+                        analyse.comprehension ||
+                        "NeoAI n'a pas pu valider le pavé."
+                    ],
+
+            //================================================
+            // 🧠 DONNÉES NATIVES NEOAI
+            //================================================
+
+            neoAI: {
+
+                score,
+
+                categorie:
+                    analyse.categorie,
+
+                famille:
+                    analyse.famille,
+
+                modele:
+                    analyse.modele,
+
+                structure:
+                    analyse.structure,
+
+                slots:
+                    analyse.slots,
+
+                comprehension:
+                    analyse.comprehension,
+
+                resume:
+                    analyse.resume,
+
+                requisManquants:
+                    analyse.requisManquants || []
+
+            }
 
         };
 
@@ -506,22 +374,20 @@ const response =
     } catch (error) {
 
         console.error(
-            "❌ ERREUR analysePaveAvecGemini :",
-            error?.response?.data ||
-            error?.message ||
+            "❌ ERREUR ANALYSE PAVÉ NEOAI :",
             error
         );
+
 
         return {
 
             ok: false,
 
-            paveDetecte: false,
+            paveDetecte: true,
 
             erreur:
-                error?.response?.data?.error?.message ||
                 error?.message ||
-                "Erreur inconnue Gemini"
+                "Erreur inconnue NeoAI"
 
         };
 
@@ -531,10 +397,10 @@ const response =
 
 
 //================================================
-// 🎮 RENDU VISUEL DU PAVÉ GEMINI
+// 🎮 RENDU VISUEL DU PAVÉ NEOAI🌀🧠 
 //================================================
 
-async function envoyerResultatPaveGemini(
+async function envoyerResultatPaveNeoAI(
     ovl,
     chat,
     resultat,
@@ -543,9 +409,17 @@ async function envoyerResultatPaveGemini(
 
     try {
 
-        if (!resultat?.ok || !resultat?.paveDetecte) {
-            console.log("❌ Aucun résultat de pavé à afficher");
+        if (
+            !resultat?.ok ||
+            !resultat?.paveDetecte
+        ) {
+
+            console.log(
+                "❌ Aucun résultat de pavé à afficher"
+            );
+
             return;
+
         }
 
 
@@ -592,6 +466,7 @@ ${erreurs}
             );
 
             return;
+
         }
 
 
@@ -599,7 +474,7 @@ ${erreurs}
         // ✅ ACTIONS VALIDÉES
         //================================================
 
-        let resume =
+        const resume =
             resultat.resume ||
             "Actions validées.";
 
@@ -623,11 +498,6 @@ ${erreurs}
         let prochainNom =
             joueurSuivant.nom || null;
 
-
-        //================================================
-        // 🔎 SI GEMINI N'A PAS DONNÉ LE NOM
-        // ON LE RÉCUPÈRE DANS LE MATCH
-        //================================================
 
         if (
             !prochainNom &&
@@ -655,23 +525,23 @@ ${erreurs}
         }
 
 
-        //================================================
-        // 🔎 AUTRE FORMAT POSSIBLE
-        //================================================
-
         if (
             !prochainNom &&
             prochainJid &&
             match.players
         ) {
 
-            for (const equipe of Object.values(match.players)) {
+            for (
+                const equipe of
+                Object.values(match.players)
+            ) {
 
                 const joueur =
                     equipe?.find?.(
                         j =>
                             j?.jid === prochainJid
                     );
+
 
                 if (joueur) {
 
@@ -690,14 +560,11 @@ ${erreurs}
         }
 
 
-        //================================================
-        // 👤 NOM DE SECOURS
-        //================================================
-
         if (!prochainNom) {
 
             prochainNom =
-                prochainJid || "Joueur suivant";
+                prochainJid ||
+                "Joueur suivant";
 
         }
 
@@ -717,7 +584,7 @@ ${erreurs}
 📊 *Note du pavé :* ${note}/10 ⭐
 
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆*joueur suivant:*
+🔆 *joueur suivant:*
 ➡️ @${prochainNom} *NEXT!!* 🔥
 
 ╰───────────────────
@@ -728,16 +595,18 @@ ${erreurs}
             chat,
             {
                 text: texte,
+
                 mentions:
                     prochainJid
                         ? [prochainJid]
                         : []
+
             }
         );
 
 
         console.log(
-            "🎮 RENDU PAVÉ ENVOYÉ"
+            "🎮 RENDU PAVÉ NEOAI ENVOYÉ"
         );
 
         console.log(
@@ -766,6 +635,7 @@ ${erreurs}
             match.joueurActuel =
                 prochainJid;
 
+
             console.log(
                 "🔄 TOUR TRANSFÉRÉ À :",
                 prochainJid
@@ -791,17 +661,17 @@ ${erreurs}
 
         }
 
-
     } catch (error) {
 
         console.error(
-            "❌ ERREUR RENDU PAVÉ GEMINI :",
+            "❌ ERREUR RENDU PAVÉ NEOAI :",
             error
         );
 
     }
 
-            }
+}
+                                       
 
 //-------- UTILITAIRES
 const formatNumber = n => {
