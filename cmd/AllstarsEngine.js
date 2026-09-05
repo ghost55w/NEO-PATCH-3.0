@@ -1,22 +1,20 @@
 const axios = require("axios");
 const { ovlcmd } = require("../lib/ovlcmd");
 
-const { analyserNeoAI } = require("./outils");
-
 const {
     getData,
     setfiche,
     getAllFiches
 } = require("../DataBase/allstars_divs_fiches");
 
-const {
-    AllStarsDivsFiche
-} = require("../DataBase/allstars_divs_fiches");
+const { AllStarsDivsFiche } = require("../DataBase/allstars_divs_fiches");
 
 const { cards } = require("../DataBase/cards");
 const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
 
+// 🧠 NeoAI
+const { analyserNeoAI } = require("./outils");
 
 //================================================
 // 🧠 ANALYSE PAVÉ AVEC NEOAI🌀🧠 
