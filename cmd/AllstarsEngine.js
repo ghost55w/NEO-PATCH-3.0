@@ -3565,14 +3565,13 @@ ${nomsJoueurs}
                  🌀🔆`
     });
 });
-               
-module.exports = {
+       module.exports = {
     verifierJoueursMatch,
     verifierCardsMatch,
-    analysePaveAvecGemini,
-    envoyerResultatPaveGemini,
+    analysePaveAvecNeoAI,
+    envoyerResultatPaveNeoAI,
     lancerMatchAllStars,
     duelsEnCours,
     matchAttente,
     lancerTimerTour
-};
+};        
