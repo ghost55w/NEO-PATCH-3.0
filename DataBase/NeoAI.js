@@ -4779,7 +4779,7 @@ function neoExtraireCible(texte) {
 function neoExtraireSujet(texte) {
 
     const texteNormalise =
-        motNormalise(texte);
+    neoNormaliserTexte(texte);
 
     //==========================================================
     // 🚫 FORMULES D'INTRODUCTION À IGNORER
