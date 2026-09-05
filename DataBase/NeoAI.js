@@ -1510,6 +1510,785 @@ const NEO_COMBAT_MODELS = {
 };
 
                             
+//==============================================================
+// 🧠 NEO AI — ANALYSEUR SÉMANTIQUE COMBAT
+//==============================================================
+
+const NEO_COMBAT_MANIERES = {
+    courir: [
+        "court",
+        "courir",
+        "en courant",
+        "fonce",
+        "foncer",
+        "en fonçant"
+    ],
+
+    marcher: [
+        "marche",
+        "marcher",
+        "en marchant"
+    ],
+
+    ramper: [
+        "rampe",
+        "ramper",
+        "en rampant"
+    ],
+
+    glisser: [
+        "glisse",
+        "glisser",
+        "en glissant"
+    ],
+
+    sauter: [
+        "saute",
+        "sauter",
+        "en sautant",
+        "bondit",
+        "bondir",
+        "en bondissant"
+    ],
+
+    voler: [
+        "vole",
+        "voler",
+        "en volant"
+    ]
+};
+
+
+const NEO_COMBAT_VITESSES = {
+    vmax: [
+        "vmax",
+        "pleine vitesse",
+        "vitesse maximale",
+        "à pleine vitesse",
+        "au maximum de sa vitesse",
+        "à vitesse maximale"
+    ],
+
+    rapide: [
+        "rapidement",
+        "très vite",
+        "à grande vitesse"
+    ],
+
+    lent: [
+        "lentement",
+        "à faible vitesse"
+    ]
+};
+
+
+const NEO_COMBAT_FAMILLES = {
+
+    circulaire: [
+        "circulaire",
+        "contourne",
+        "contourner",
+        "autour de",
+        "tourne autour",
+        "en cercle"
+    ],
+
+    diagonal: [
+        "diagonale",
+        "diagonalement",
+        "en diagonale"
+    ],
+
+    lateral: [
+        "latéral",
+        "latérale",
+        "latéralement",
+        "sur le côté"
+    ],
+
+    arriere: [
+        "recule",
+        "reculer",
+        "en arrière",
+        "vers l'arrière",
+        "vers l arriere"
+    ],
+
+    aerien: [
+        "dans les airs",
+        "dans l'air",
+        "en l'air",
+        "aérien",
+        "aérienne",
+        "s'élève",
+        "s'eleve"
+    ],
+
+    saut_bond: [
+        "saute",
+        "sauter",
+        "bondit",
+        "bondir",
+        "bond"
+    ]
+};
+
+
+function neoTrouverCorrespondance(texte, dictionnaire) {
+
+    const t = neoNormaliserTexte(texte);
+
+    for (const [valeur, variantes] of Object.entries(dictionnaire)) {
+
+        for (const variante of variantes) {
+
+            const v = neoNormaliserTexte(variante);
+
+            if (t.includes(v)) {
+                return valeur;
+            }
+        }
+    }
+
+    return null;
+}
+
+
+function neoExtraireDistance(texte) {
+
+    const match = texte.match(
+        /(?:sur|de|pendant|parcours?|avance(?:r)?|recule(?:r)?)?\s*(\d+(?:[.,]\d+)?)\s*(mètres?|m|cm|centimètres?)/i
+    );
+
+    if (!match) return null;
+
+    return {
+        valeur: Number(match[1].replace(",", ".")),
+        unite: match[2].toLowerCase().startsWith("cm")
+            ? "cm"
+            : "m"
+    };
+}
+
+
+function neoExtraireCourbe(texte) {
+
+    const match = texte.match(
+        /courbe\s*(?:de)?\s*(\d+(?:[.,]\d+)?)\s*(mètres?|m|cm|centimètres?)/i
+    );
+
+    if (!match) return null;
+
+    return {
+        valeur: Number(match[1].replace(",", ".")),
+        unite: match[2].toLowerCase().startsWith("cm")
+            ? "cm"
+            : "m"
+    };
+}
+
+
+function neoExtraireHauteur(texte) {
+
+    const match = texte.match(
+        /(?:hauteur|haut|s'élève|s eleve|monte)\s*(?:de|à|a)?\s*(\d+(?:[.,]\d+)?)\s*(mètres?|m|cm|centimètres?)/i
+    );
+
+    if (!match) return null;
+
+    return {
+        valeur: Number(match[1].replace(",", ".")),
+        unite: match[2].toLowerCase().startsWith("cm")
+            ? "cm"
+            : "m"
+    };
+}
+
+
+function neoExtraireCote(texte) {
+
+    const t = neoNormaliserTexte(texte);
+
+    if (
+        t.includes("par la droite") ||
+        t.includes("sur la droite") ||
+        t.includes("cote droit") ||
+        t.includes("cote droite")
+    ) {
+        return "droite";
+    }
+
+    if (
+        t.includes("par la gauche") ||
+        t.includes("sur la gauche") ||
+        t.includes("cote gauche")
+    ) {
+        return "gauche";
+    }
+
+    return null;
+}
+
+
+function neoExtraireDirection(texte) {
+
+    const t = neoNormaliserTexte(texte);
+
+    const match = t.match(
+        /\bvers\s+(?:la\s+)?(gauche|droite|avant|arriere|l'arriere|haut|le haut|le bas)\b/i
+    );
+
+    if (match) {
+        return match[1]
+            .replace("l'arriere", "arrière")
+            .replace("le haut", "haut")
+            .replace("le bas", "bas");
+    }
+
+    return null;
+}
+
+
+function neoExtraireCible(texte) {
+
+    /*
+     * On cherche principalement ce qui suit :
+     * vers X
+     * autour de X
+     * par rapport à X
+     * contre X
+     */
+
+    const match = texte.match(
+        /\b(?:vers|autour de|contre|sur|devant|derrière|aupres de|aupres)\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)/i
+    );
+
+    if (!match) return null;
+
+    return match[1];
+}
+
+
+function neoExtraireSujet(texte) {
+
+    /*
+     * Le sujet est généralement le premier nom propre.
+     * Exemple :
+     * Maki se déplace...
+     * Tobirama court...
+     */
+
+    const match = texte.match(
+        /^\s*([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)\b/
+    );
+
+    return match ? match[1] : null;
+}
+
+
+function neoDeterminerFamille(texte, maniere) {
+
+    const t = neoNormaliserTexte(texte);
+
+    for (const [famille, variantes] of Object.entries(NEO_COMBAT_FAMILLES)) {
+
+        for (const variante of variantes) {
+
+            if (t.includes(neoNormaliserTexte(variante))) {
+                return famille;
+            }
+        }
+    }
+
+    /*
+     * Si rien n'est explicitement indiqué,
+     * un déplacement vers une cible est considéré
+     * comme frontal.
+     */
+
+    if (
+        maniere &&
+        (
+            t.includes("vers ") ||
+            t.includes("avance") ||
+            t.includes("fonce") ||
+            t.includes("court")
+        )
+    ) {
+        return "frontal";
+    }
+
+    return null;
+}
+
+
+function neoDeterminerTrajectoire(famille, texte) {
+
+    const t = neoNormaliserTexte(texte);
+
+    if (t.includes("circulaire") || t.includes("autour de")) {
+        return "circulaire";
+    }
+
+    if (t.includes("diagonale")) {
+        return "diagonale";
+    }
+
+    if (
+        t.includes("latéral") ||
+        t.includes("lateral") ||
+        t.includes("sur le côté") ||
+        t.includes("sur le cote")
+    ) {
+        return "latérale";
+    }
+
+    if (
+        t.includes("en arrière") ||
+        t.includes("en arriere") ||
+        t.includes("recule")
+    ) {
+        return "arrière";
+    }
+
+    if (
+        famille === "aerien" ||
+        famille === "saut_bond"
+    ) {
+        return "aérienne";
+    }
+
+    if (famille === "frontal") {
+        return "directe";
+    }
+
+    return null;
+}
+
+
+function neoAnalyserStructureCombat(texte) {
+
+    const sujet = neoExtraireSujet(texte);
+    const cible = neoExtraireCible(texte);
+
+    const maniere = neoTrouverCorrespondance(
+        texte,
+        NEO_COMBAT_MANIERES
+    );
+
+    const vitesse = neoTrouverCorrespondance(
+        texte,
+        NEO_COMBAT_VITESSES
+    );
+
+    const famille = neoDeterminerFamille(
+        texte,
+        maniere
+    );
+
+    const trajectoire = neoDeterminerTrajectoire(
+        famille,
+        texte
+    );
+
+    const cote = neoExtraireCote(texte);
+    const direction = neoExtraireDirection(texte);
+    const distance = neoExtraireDistance(texte);
+    const courbe = neoExtraireCourbe(texte);
+    const hauteur = neoExtraireHauteur(texte);
+
+    /*
+     * Pour les déplacements :
+     * l'action sémantique est TOUJOURS
+     * "se déplacer".
+     *
+     * La manière précise comment.
+     */
+
+    let action = null;
+
+    if (
+        maniere ||
+        famille ||
+        direction ||
+        trajectoire
+    ) {
+        action = "se déplacer";
+    }
+
+    const slots = {
+        SUJET: sujet,
+        ACTION: action,
+        MANIERE: maniere,
+        CIBLE: cible,
+        TRAJECTOIRE: trajectoire,
+        COTE: cote,
+        COURBE: courbe,
+        DIRECTION: direction,
+        VITESSE: vitesse,
+        DISTANCE: distance,
+        HAUTEUR: hauteur
+    };
+
+    /*
+     * Nettoyage des valeurs absentes.
+     */
+
+    for (const key of Object.keys(slots)) {
+        if (
+            slots[key] === null ||
+            slots[key] === undefined
+        ) {
+            delete slots[key];
+        }
+    }
+
+    return {
+        famille,
+        slots
+    };
+}
+
+
+function neoComparerModeleCombat(analyse, modele) {
+
+    const slots = analyse.slots || {};
+    const requis = modele.requis || [];
+    const structure = modele.structure || [];
+
+    let score = 0;
+    let total = 0;
+
+    /*
+     * Les éléments obligatoires ont un poids très fort.
+     */
+
+    for (const champ of requis) {
+
+        total += 4;
+
+        if (slots[champ]) {
+            score += 4;
+        }
+    }
+
+    /*
+     * Les éléments optionnels apportent des points.
+     */
+
+    for (const champ of structure) {
+
+        if (requis.includes(champ)) {
+            continue;
+        }
+
+        total += 1;
+
+        if (slots[champ]) {
+            score += 1;
+        }
+    }
+
+    /*
+     * Bonus : cohérence famille / trajectoire.
+     */
+
+    if (
+        analyse.famille === "circulaire" &&
+        structure.includes("COTE")
+    ) {
+        score += 1;
+        total += 1;
+    }
+
+    if (
+        analyse.famille === "circulaire" &&
+        structure.includes("COURBE")
+    ) {
+        score += 1;
+        total += 1;
+    }
+
+    /*
+     * Si un champ requis manque,
+     * le modèle ne doit jamais être considéré
+     * comme parfaitement validé.
+     */
+
+    const requisManquants = requis.filter(
+        champ => !slots[champ]
+    );
+
+    let pourcentage = total > 0
+        ? Math.round((score / total) * 100)
+        : 0;
+
+    if (requisManquants.length > 0) {
+        pourcentage = Math.min(
+            pourcentage,
+            69
+        );
+    }
+
+    return {
+        score: pourcentage,
+        requisManquants
+    };
+}
+
+
+function neoTrouverMeilleurModeleCombat(analyse) {
+
+    let meilleurs = [];
+
+    for (
+        const [categorie, familles]
+        of Object.entries(NEO_COMBAT_MODELS)
+    ) {
+
+        for (
+            const [famille, modeles]
+            of Object.entries(familles)
+        ) {
+
+            if (!Array.isArray(modeles)) continue;
+
+            for (const modele of modeles) {
+
+                const comparaison =
+                    neoComparerModeleCombat(
+                        analyse,
+                        modele
+                    );
+
+                meilleurs.push({
+                    categorie,
+                    famille,
+                    modele,
+                    score: comparaison.score,
+                    requisManquants:
+                        comparaison.requisManquants
+                });
+            }
+        }
+    }
+
+    meilleurs.sort(
+        (a, b) => b.score - a.score
+    );
+
+    return meilleurs[0] || null;
+}
+
+
+function neoGenererComprehensionCombat(analyse) {
+
+    const slots = analyse.slots || {};
+
+    const lignes = [];
+
+    const labels = {
+        SUJET: "Sujet",
+        ACTION: "Action",
+        MANIERE: "Manière",
+        CIBLE: "Cible",
+        TRAJECTOIRE: "Trajectoire",
+        COTE: "Côté",
+        COURBE: "Courbe",
+        DIRECTION: "Direction",
+        VITESSE: "Vitesse",
+        DISTANCE: "Distance",
+        HAUTEUR: "Hauteur"
+    };
+
+    for (const [cle, label] of Object.entries(labels)) {
+
+        if (!slots[cle]) continue;
+
+        let valeur = slots[cle];
+
+        if (
+            typeof valeur === "object" &&
+            valeur.valeur !== undefined
+        ) {
+            valeur =
+                `${valeur.valeur} ${valeur.unite}`;
+        }
+
+        lignes.push(
+            `${label} : ${valeur}`
+        );
+    }
+
+    return lignes.join("\n");
+}
+
+
+function neoGenererResumeCombat(analyse) {
+
+    const s = analyse.slots || {};
+
+    const sujet = s.SUJET || "Le combattant";
+    const action = s.ACTION || "se déplace";
+    const maniere = s.MANIERE;
+    const cible = s.CIBLE;
+
+    let phrase = sujet;
+
+    /*
+     * Manière
+     */
+
+    if (maniere === "courir") {
+        phrase += " se déplace en courant";
+    }
+
+    else if (maniere === "marcher") {
+        phrase += " se déplace en marchant";
+    }
+
+    else if (maniere === "ramper") {
+        phrase += " se déplace en rampant";
+    }
+
+    else if (maniere === "glisser") {
+        phrase += " se déplace en glissant";
+    }
+
+    else if (maniere === "sauter") {
+        phrase += " effectue un saut";
+    }
+
+    else if (maniere === "voler") {
+        phrase += " se déplace dans les airs";
+    }
+
+    else {
+        phrase += ` ${action}`;
+    }
+
+    /*
+     * Cible
+     */
+
+    if (cible) {
+
+        if (analyse.famille === "circulaire") {
+            phrase += ` autour de ${cible}`;
+        } else {
+            phrase += ` vers ${cible}`;
+        }
+    }
+
+    /*
+     * Côté
+     */
+
+    if (s.COTE) {
+        phrase += ` par la ${s.COTE}`;
+    }
+
+    /*
+     * Trajectoire / courbe
+     */
+
+    if (s.COURBE) {
+
+        phrase +=
+            ` en suivant une courbe de ${s.COURBE.valeur} ${s.COURBE.unite}`;
+    }
+
+    /*
+     * Direction
+     */
+
+    if (s.DIRECTION) {
+        phrase += ` vers ${s.DIRECTION}`;
+    }
+
+    /*
+     * Vitesse
+     */
+
+    if (s.VITESSE === "vmax") {
+        phrase += " à pleine vitesse";
+    }
+
+    else if (s.VITESSE) {
+        phrase += ` à ${s.VITESSE} vitesse`;
+    }
+
+    /*
+     * Distance
+     */
+
+    if (s.DISTANCE) {
+
+        phrase +=
+            ` sur une distance de ${s.DISTANCE.valeur} ${s.DISTANCE.unite}`;
+    }
+
+    /*
+     * Hauteur
+     */
+
+    if (s.HAUTEUR) {
+
+        phrase +=
+            ` à ${s.HAUTEUR.valeur} ${s.HAUTEUR.unite} de hauteur`;
+    }
+
+    return phrase + ".";
+}
+
+
+function neoAnalyserCombat(texte) {
+
+    const analyse =
+        neoAnalyserStructureCombat(texte);
+
+    const meilleur =
+        neoTrouverMeilleurModeleCombat(analyse);
+
+    if (!meilleur) {
+        return {
+            trouve: false,
+            score: 0,
+            famille: null,
+            modele: null,
+            structure: [],
+            slots: analyse.slots,
+            comprehension: neoGenererComprehensionCombat(analyse),
+            resume: neoGenererResumeCombat(analyse)
+        };
+    }
+
+    return {
+        trouve: meilleur.score >= 70,
+
+        score: meilleur.score,
+
+        categorie: meilleur.categorie,
+
+        famille: meilleur.famille,
+
+        modele: meilleur.modele.id,
+
+        structure: meilleur.modele.structure,
+
+        slots: analyse.slots,
+
+        requisManquants:
+            meilleur.requisManquants,
+
+        comprehension:
+            neoGenererComprehensionCombat(analyse),
+
+        resume:
+            neoGenererResumeCombat(analyse)
+    };
+}
+
 
         
 //==============================================================
@@ -7787,19 +8566,12 @@ module.exports = {
     //==========================================================
 
     NEO_VERBES,
-
     NEO_NOMS,
-
     NEO_ADJECTIFS,
-
     NEO_ADVERBES,
-
     NEO_PREPOSITIONS,
-
     NEO_CONNECTEURS,
-
     NEO_PRONOMS,
-
     NEO_LEARN,
 
 
@@ -7820,19 +8592,17 @@ module.exports = {
     NEO_MODELES:
         NEO_MODELES_PHRASES,
 
+    NEO_COMBAT_MODELS,
+
 
     //==========================================================
     // 🧹 OUTILS
     //==========================================================
 
     neoNormaliserTexte,
-
     neoMinuscule,
-
     neoSansAccents,
-
     neoTokeniser,
-
     neoDecouperPhrases,
 
 
@@ -7841,11 +8611,8 @@ module.exports = {
     //==========================================================
 
     neoTrouverVerbe,
-
     neoRechercherMot,
-
     neoRechercherTexte,
-
     neoConnaitMot,
 
 
@@ -7854,8 +8621,13 @@ module.exports = {
     //==========================================================
 
     neoAnalyserStructure,
-
     detecterStructureModele,
+
+    // Analyse sémantique combat
+    neoAnalyserCombat,
+    neoAnalyserStructureCombat,
+    neoGenererComprehensionCombat,
+    neoGenererResumeCombat,
 
 
     //==========================================================
@@ -7863,7 +8635,6 @@ module.exports = {
     //==========================================================
 
     neoComparerPhrase,
-
     neoTrouverMeilleurModele,
 
 
@@ -7872,19 +8643,12 @@ module.exports = {
     //==========================================================
 
     neoEstAdjectif,
-
     neoEstAdverbe,
-
     neoEstDirection,
-
     neoEstPersonne,
-
     neoEstAnimal,
-
     neoEstObjet,
-
     neoEstLieu,
-
     neoEstNom,
 
 
@@ -7893,13 +8657,7 @@ module.exports = {
     //==========================================================
 
     neoListerModeles,
-
     neoListerVerbes,
-
     neoListerCategories
 
 };
-        
-        
-
-
