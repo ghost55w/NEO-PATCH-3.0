@@ -1768,21 +1768,136 @@ function neoExtraireCible(texte) {
     return match[1];
 }
 
-
+    //==========================================================
+    // 👤 EXTRAIRE SUJET
+    //==========================================================
 function neoExtraireSujet(texte) {
 
-    /*
-     * Le sujet est généralement le premier nom propre.
-     * Exemple :
-     * Maki se déplace...
-     * Tobirama court...
-     */
+    const texteNormalise =
+        motNormalise(texte);
 
-    const match = texte.match(
-        /^\s*([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)\b/
-    );
+    //==========================================================
+    // 🚫 FORMULES D'INTRODUCTION À IGNORER
+    //==========================================================
 
-    return match ? match[1] : null;
+    const introductions = [
+        "début du combat",
+        "debut du combat",
+        "début du duel",
+        "debut du duel",
+        "début de combat",
+        "debut de combat",
+        "commence le combat",
+        "commence le duel",
+        "début",
+        "debut"
+    ];
+
+    let texteAction = texteNormalise;
+
+    for (const intro of introductions) {
+
+        if (
+            texteAction.startsWith(intro)
+        ) {
+
+            texteAction =
+                texteAction
+                    .slice(intro.length)
+                    .trim();
+
+            break;
+        }
+    }
+
+    //==========================================================
+    // 👤 RECHERCHE DU VÉRITABLE SUJET
+    //==========================================================
+
+    const verbesAction = [
+        "court",
+        "courir",
+        "fonce",
+        "foncer",
+        "avance",
+        "avancer",
+        "recule",
+        "reculer",
+        "marche",
+        "marcher",
+        "se deplace",
+        "se déplacer",
+        "se déplace",
+        "saute",
+        "sauter",
+        "bondit",
+        "bondir",
+        "rampe",
+        "ramper",
+        "contourne",
+        "contourner",
+        "tourne",
+        "tourner",
+        "frappe",
+        "frapper",
+        "attaque",
+        "attaquer",
+        "saisit",
+        "saisir",
+        "esquive",
+        "esquiver",
+        "bloque",
+        "bloquer",
+        "pare",
+        "parer"
+    ];
+
+    //==========================================================
+    // 🔎 CHERCHER LE MOT JUSTE AVANT LE VERBE D'ACTION
+    //==========================================================
+
+    for (const verbe of verbesAction) {
+
+        const regex = new RegExp(
+            `\\b([a-zàâäçéèêëîïôöùûüÿñæœ0-9_-]+)\\s+${verbe}\\b`,
+            "i"
+        );
+
+        const match =
+            texteAction.match(regex);
+
+        if (match) {
+
+            return match[1]
+                .trim();
+        }
+    }
+
+    //==========================================================
+    // 🔎 CAS « X se déplace »
+    //==========================================================
+
+    const matchSeDeplace =
+        texteAction.match(
+            /\b([a-zàâäçéèêëîïôöùûüÿñæœ0-9_-]+)\s+se\s+(?:déplace|deplace)\b/i
+        );
+
+    if (matchSeDeplace) {
+
+        return matchSeDeplace[1]
+            .trim();
+    }
+
+    //==========================================================
+    // 🔎 FALLBACK
+    //==========================================================
+
+    const premierMot =
+        texteAction
+            .split(/\s+/)
+            .filter(Boolean)[0];
+
+    return premierMot || null;
 }
 
 
