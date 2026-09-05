@@ -577,157 +577,163 @@ async function message_upsert(m, ovl) {
                 auteur_Message
             );
 
-            //======================================================
-            // 🥊 ANALYSE PAVÉ ALL STARS
-            //======================================================
+          //======================================================
+// 🥊 ANALYSE PAVÉ ALL STARS
+//======================================================
 
-            const matchId =
-                matchAttente[ms_org];
+const matchId =
+    matchAttente[ms_org];
 
-            if (matchId) {
+if (matchId) {
 
-                const match =
-                    duelsEnCours[matchId];
-
-                if (
-                    match &&
-                    match.etat === "in_match"
-                ) {
-
-                    //================================================
-                    // 👤 VÉRIFIER JOUEUR
-                    //================================================
-
-                    const joueur =
-                        match.joueurs?.find(
-                            j =>
-                                j.jid ===
-                                auteur_Message
-                        );
-
-                    if (joueur) {
-
-                        //================================================
-                        // 🌀 DÉTECTION PAVÉ
-                        //================================================
-
-                        const estPaveJeu =
-                            texte.includes(
-                                "🌀🎮:"
-                            ) ||
-                            texte.includes(
-                                "🌀🎮 :"
-                            );
-
-  //================================================
-// 🤖 ANALYSE PAVÉ AVEC NEOAI
-//================================================
-
-if (estPaveJeu) {
-
-    console.log(
-        "🌀 PAVÉ DÉTECTÉ"
-    );
-
-    console.log(
-        "👤 Auteur :",
-        auteur_Message
-    );
-
-    const resultatNeoAI =
-        await analysePaveAvecNeoAI(
-            texte,
-            {
-                user:
-                    auteur_Message,
-
-                joueur:
-                    joueur,
-
-                match:
-                    match
-            }
-        );
+    const match =
+        duelsEnCours[matchId];
 
     if (
-        !resultatNeoAI?.paveDetecte
+        match &&
+        match.etat === "in_match"
     ) {
 
-        console.log(
-            "❌ NeoAI : aucun pavé détecté"
-        );
+        //================================================
+        // 👤 VÉRIFIER JOUEUR
+        //================================================
 
-    } else {
+        const joueur =
+            match.joueurs?.find(
+                j =>
+                    j.jid ===
+                    auteur_Message
+            );
 
-        console.log(
-            "🧠 NEOAI — PAVÉ DÉTECTÉ"
-        );
+        if (joueur) {
 
-        console.log(
-            "🌀 Actions :",
-            resultatNeoAI.nombreActions
-        );
+            //================================================
+            // 🌀 DÉTECTION PAVÉ
+            //================================================
 
-        console.log(
-            "📊 Note :",
-            resultatNeoAI.note
-        );
+            const estPaveJeu =
+                texte.includes(
+                    "🌀🎮:"
+                ) ||
+                texte.includes(
+                    "🌀🎮 :"
+                );
 
-        console.log(
-            "⚖️ Verdict :",
-            resultatNeoAI.verdict
-        );
+            //================================================
+            // 🧠 ANALYSE PAVÉ AVEC NEOAI
+            //================================================
 
-        console.log(
-            "➡️ Joueur suivant :",
-            resultatNeoAI.joueurSuivant
-        );
+            if (estPaveJeu) {
 
-        await envoyerResultatPaveNeoAI(
-            ovl,
-            ms_org,
-            resultatNeoAI,
-            match
-        );
+                console.log(
+                    "🌀 PAVÉ DÉTECTÉ"
+                );
 
-        lancerTimerTour(
-            match,
-            ms_org,
-            ovl
-        );
+                console.log(
+                    "👤 Auteur :",
+                    auteur_Message
+                );
+
+                const resultatNeoAI =
+                    await analysePaveAvecNeoAI(
+                        texte,
+                        {
+                            user:
+                                auteur_Message,
+
+                            joueur:
+                                joueur,
+
+                            match:
+                                match
+                        }
+                    );
+
+                if (
+                    !resultatNeoAI?.paveDetecte
+                ) {
+
+                    console.log(
+                        "❌ NeoAI : aucun pavé détecté"
+                    );
+
+                } else {
+
+                    console.log(
+                        "🧠 NEOAI — PAVÉ DÉTECTÉ"
+                    );
+
+                    console.log(
+                        "🌀 Actions :",
+                        resultatNeoAI.nombreActions
+                    );
+
+                    console.log(
+                        "📊 Note :",
+                        resultatNeoAI.note
+                    );
+
+                    console.log(
+                        "⚖️ Verdict :",
+                        resultatNeoAI.verdict
+                    );
+
+                    console.log(
+                        "➡️ Joueur suivant :",
+                        resultatNeoAI.joueurSuivant
+                    );
+
+                    await envoyerResultatPaveNeoAI(
+                        ovl,
+                        ms_org,
+                        resultatNeoAI,
+                        match
+                    );
+
+                    lancerTimerTour(
+                        match,
+                        ms_org,
+                        ovl
+                    );
+
+                }
+
+            }
+
+        }
 
     }
 
 }
-                        
 
-            //======================================================
-            // 📄 BLUELOCK — FICHE
-            //======================================================
+//======================================================
+// 📄 BLUELOCK — FICHE
+//======================================================
 
-            await verifierFiche(
-                texte,
-                ms_org,
-                ovl
-            );
+await verifierFiche(
+    texte,
+    ms_org,
+    ovl
+);
 
-            //======================================================
-            // ⚽ BLUELOCK — MATCH
-            //======================================================
+//======================================================
+// ⚽ BLUELOCK — MATCH
+//======================================================
 
-            await messageMatch(
-                ms,
-                ovl
-            );
+await messageMatch(
+    ms,
+    ovl
+);
 
-        } catch (err) {
+} catch (err) {
 
-            console.log(
-                "❌ Erreur système match :",
-                err
-            );
+    console.log(
+        "❌ Erreur système match :",
+        err
+    );
 
-        }
+}  
+                
 
         //==========================================================
         // 🚫 BAN
