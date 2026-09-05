@@ -1496,12 +1496,3017 @@ const NEO_COMBAT_MODELS = {
         ]
     },
 
+attaque: {
 
-    //==========================================================
-    // ⚔️ FUTURES CATÉGORIES
-    //==========================================================
+    mains: {
 
-    attaque: [],
+        // =========================================================
+        // 1. COUP DIRECT
+        // =========================================================
+
+        coup_direct: [
+
+            {
+                id: "ATT_MD_001",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de poing direct à Tobirama."
+            },
+
+            {
+                id: "ATT_MD_002",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un coup de poing direct."
+            },
+
+            {
+                id: "ATT_MD_003",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato décoche un direct vers Tobirama."
+            },
+
+            {
+                id: "ATT_MD_004",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie son poing droit directement sur Tobirama."
+            },
+
+            {
+                id: "ATT_MD_005",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato projette un poing droit en ligne directe vers Tobirama."
+            },
+
+            {
+                id: "ATT_MD_006",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un jab en direction de Tobirama."
+            },
+
+            {
+                id: "ATT_MD_007",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato assène un straight à Tobirama."
+            },
+
+            {
+                id: "ATT_MD_008",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tend le poing et frappe Tobirama en ligne droite."
+            },
+
+            {
+                id: "ATT_MD_009",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe frontalement Tobirama avec son poing."
+            },
+
+            {
+                id: "ATT_MD_010",
+                modele: "coup_direct",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un coup direct contre Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 2. CROCHET GAUCHE
+        // =========================================================
+
+        crochet_gauche: [
+
+            {
+                id: "ATT_CG_001",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un crochet gauche."
+            },
+
+            {
+                id: "ATT_CG_002",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato décoche un crochet du gauche sur Tobirama."
+            },
+
+            {
+                id: "ATT_CG_003",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie son poing gauche en crochet vers Tobirama."
+            },
+
+            {
+                id: "ATT_CG_004",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato balance un hook gauche contre Tobirama."
+            },
+
+            {
+                id: "ATT_CG_005",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un crochet avec sa main gauche vers Tobirama."
+            },
+
+            {
+                id: "ATT_CG_006",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato arme son gauche puis frappe Tobirama en crochet."
+            },
+
+            {
+                id: "ATT_CG_007",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un hook du gauche sur Tobirama."
+            },
+
+            {
+                id: "ATT_CG_008",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec son poing gauche en mouvement circulaire."
+            },
+
+            {
+                id: "ATT_CG_009",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait partir son crochet gauche directement vers Tobirama."
+            },
+
+            {
+                id: "ATT_CG_010",
+                modele: "crochet_gauche",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "gauche",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un crochet gauche à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 3. CROCHET DROIT
+        // =========================================================
+
+        crochet_droit: [
+
+            {
+                id: "ATT_CD_001",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un crochet droit."
+            },
+
+            {
+                id: "ATT_CD_002",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato décoche un crochet du droit sur Tobirama."
+            },
+
+            {
+                id: "ATT_CD_003",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie son poing droit en crochet vers Tobirama."
+            },
+
+            {
+                id: "ATT_CD_004",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato balance un hook droit contre Tobirama."
+            },
+
+            {
+                id: "ATT_CD_005",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un crochet avec sa main droite vers Tobirama."
+            },
+
+            {
+                id: "ATT_CD_006",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato arme son droit puis frappe Tobirama en crochet."
+            },
+
+            {
+                id: "ATT_CD_007",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un hook du droit sur Tobirama."
+            },
+
+            {
+                id: "ATT_CD_008",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec son poing droit en mouvement circulaire."
+            },
+
+            {
+                id: "ATT_CD_009",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait partir son crochet droit directement vers Tobirama."
+            },
+
+            {
+                id: "ATT_CD_010",
+                modele: "crochet_droit",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MAIN: "droite",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un crochet droit à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 4. UPPERCUT
+        // =========================================================
+
+        uppercut: [
+
+            {
+                id: "ATT_UP_001",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un uppercut."
+            },
+
+            {
+                id: "ATT_UP_002",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie un uppercut vers Tobirama."
+            },
+
+            {
+                id: "ATT_UP_003",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de poing remontant à Tobirama."
+            },
+
+            {
+                id: "ATT_UP_004",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato remonte son poing sous Tobirama."
+            },
+
+            {
+                id: "ATT_UP_005",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance son poing vers le haut contre Tobirama."
+            },
+
+            {
+                id: "ATT_UP_006",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec un coup ascendant."
+            },
+
+            {
+                id: "ATT_UP_007",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un uppercut sur Tobirama."
+            },
+
+            {
+                id: "ATT_UP_008",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato remonte violemment son poing vers Tobirama."
+            },
+
+            {
+                id: "ATT_UP_009",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato assène un uppercut à Tobirama."
+            },
+
+            {
+                id: "ATT_UP_010",
+                modele: "uppercut",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato projette un coup ascendant contre Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 5. UPPERCUT SAUTÉ
+        // =========================================================
+
+        uppercut_saute: [
+
+            {
+                id: "ATT_US_001",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato saute et frappe Tobirama d'un uppercut."
+            },
+
+            {
+                id: "ATT_US_002",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato bondit en envoyant un uppercut vers Tobirama."
+            },
+
+            {
+                id: "ATT_US_003",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato prend appui, saute et remonte son poing vers Tobirama."
+            },
+
+            {
+                id: "ATT_US_004",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato bondit vers Tobirama avec un coup remontant."
+            },
+
+            {
+                id: "ATT_US_005",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato saute en direction de Tobirama et lance un uppercut."
+            },
+
+            {
+                id: "ATT_US_006",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato s'élève du sol et frappe Tobirama par-dessous."
+            },
+
+            {
+                id: "ATT_US_007",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato exécute un uppercut sauté contre Tobirama."
+            },
+
+            {
+                id: "ATT_US_008",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato bondit et projette son poing vers Tobirama."
+            },
+
+            {
+                id: "ATT_US_009",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato saute devant Tobirama et lui assène un uppercut."
+            },
+
+            {
+                id: "ATT_US_010",
+                modele: "uppercut_saute",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato décolle et remonte son poing sous Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 6. BACKFIST
+        // =========================================================
+
+        backfist: [
+
+            {
+                id: "ATT_BF_001",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un backfist."
+            },
+
+            {
+                id: "ATT_BF_002",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec le dos du poing."
+            },
+
+            {
+                id: "ATT_BF_003",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un coup en revers vers Tobirama."
+            },
+
+            {
+                id: "ATT_BF_004",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato balance le dos de son poing contre Tobirama."
+            },
+
+            {
+                id: "ATT_BF_005",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato assène un revers du poing à Tobirama."
+            },
+
+            {
+                id: "ATT_BF_006",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "diagonale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait partir un revers diagonal vers Tobirama."
+            },
+
+            {
+                id: "ATT_BF_007",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama du revers de la main."
+            },
+
+            {
+                id: "ATT_BF_008",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato rabat son poing sur Tobirama avec le dos de la main."
+            },
+
+            {
+                id: "ATT_BF_009",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un coup de revers sur Tobirama."
+            },
+
+            {
+                id: "ATT_BF_010",
+                modele: "backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un backfist directement à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 7. SPINNING BACKFIST
+        // =========================================================
+
+        spinning_backfist: [
+
+            {
+                id: "ATT_SBF_001",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pivote et frappe Tobirama d'un spinning backfist."
+            },
+
+            {
+                id: "ATT_SBF_002",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne sur lui-même puis frappe Tobirama du revers."
+            },
+
+            {
+                id: "ATT_SBF_003",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato effectue une rotation avant d'envoyer son revers sur Tobirama."
+            },
+
+            {
+                id: "ATT_SBF_004",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne puis balance un spinning backfist vers Tobirama."
+            },
+
+            {
+                id: "ATT_SBF_005",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne à 360 degrés et frappe Tobirama du dos du poing."
+            },
+
+            {
+                id: "ATT_SBF_006",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pivote rapidement et envoie son revers contre Tobirama."
+            },
+
+            {
+                id: "ATT_SBF_007",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un revers tournoyant sur Tobirama."
+            },
+
+            {
+                id: "ATT_SBF_008",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato effectue un tour et frappe Tobirama avec le dos du poing."
+            },
+
+            {
+                id: "ATT_SBF_009",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "180"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne sur son axe puis percute Tobirama avec son revers."
+            },
+
+            {
+                id: "ATT_SBF_010",
+                modele: "spinning_backfist",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato accomplit une rotation complète avant de frapper Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 8. HAMMER DESCENDANT
+        // =========================================================
+
+        hammer_descendant: [
+
+            {
+                id: "ATT_HD_001",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un coup marteau descendant."
+            },
+
+            {
+                id: "ATT_HD_002",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat son poing comme un marteau sur Tobirama."
+            },
+
+            {
+                id: "ATT_HD_003",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie un hammer descendant sur Tobirama."
+            },
+
+            {
+                id: "ATT_HD_004",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato écrase Tobirama avec un coup de marteau."
+            },
+
+            {
+                id: "ATT_HD_005",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait tomber son poing en marteau vers Tobirama."
+            },
+
+            {
+                id: "ATT_HD_006",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un marteau descendant à Tobirama."
+            },
+
+            {
+                id: "ATT_HD_007",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat violemment le tranchant de son poing sur Tobirama."
+            },
+
+            {
+                id: "ATT_HD_008",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama verticalement avec un hammer fist."
+            },
+
+            {
+                id: "ATT_HD_009",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato laisse tomber son poing en marteau sur Tobirama."
+            },
+
+            {
+                id: "ATT_HD_010",
+                modele: "hammer_descendant",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato assène un coup de marteau du haut vers Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 9. HAMMER LATERAL
+        // =========================================================
+
+        hammer_lateral: [
+
+            {
+                id: "ATT_HL_001",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un marteau latéral."
+            },
+
+            {
+                id: "ATT_HL_002",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato balance un coup de marteau latéralement sur Tobirama."
+            },
+
+            {
+                id: "ATT_HL_003",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec un hammer fist latéral."
+            },
+
+            {
+                id: "ATT_HL_004",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie son poing en marteau vers le côté de Tobirama."
+            },
+
+            {
+                id: "ATT_HL_005",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un hammer latéral contre Tobirama."
+            },
+
+            {
+                id: "ATT_HL_006",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait partir son marteau de côté vers Tobirama."
+            },
+
+            {
+                id: "ATT_HL_007",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup marteau latéral à Tobirama."
+            },
+
+            {
+                id: "ATT_HL_008",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe latéralement Tobirama avec son poing en marteau."
+            },
+
+            {
+                id: "ATT_HL_009",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato projette un marteau de côté contre Tobirama."
+            },
+
+            {
+                id: "ATT_HL_010",
+                modele: "hammer_lateral",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec le tranchant de son poing latéralement."
+            }
+        ],
+
+        // =========================================================
+        // 10. REVERSE HAMMER
+        // =========================================================
+
+        reverse_hammer: [
+
+            {
+                id: "ATT_RH_001",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un reverse hammer."
+            },
+
+            {
+                id: "ATT_RH_002",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un marteau en revers à Tobirama."
+            },
+
+            {
+                id: "ATT_RH_003",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance son poing en reverse hammer vers Tobirama."
+            },
+
+            {
+                id: "ATT_RH_004",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "diagonale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec un marteau en revers diagonal."
+            },
+
+            {
+                id: "ATT_RH_005",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato rabat le dos de son poing contre Tobirama."
+            },
+
+            {
+                id: "ATT_RH_006",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait passer son poing en revers sur Tobirama."
+            },
+
+            {
+                id: "ATT_RH_007",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un reverse hammer contre Tobirama."
+            },
+
+            {
+                id: "ATT_RH_008",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec le dos du poing en revers."
+            },
+
+            {
+                id: "ATT_RH_009",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "diagonale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie un coup marteau diagonal en revers vers Tobirama."
+            },
+
+            {
+                id: "ATT_RH_010",
+                modele: "reverse_hammer",
+                famille: "mains",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "poing",
+                    TRAJECTOIRE: "horizontale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un marteau en revers directement à Tobirama."
+            }
+        ]
+    },
+
+    pieds: {
+
+        // =========================================================
+        // 11. FRONT KICK
+        // =========================================================
+
+        front_kick: [
+
+            {
+                id: "ATT_FK_001",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un front kick."
+            },
+
+            {
+                id: "ATT_FK_002",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied frontal à Tobirama."
+            },
+
+            {
+                id: "ATT_FK_003",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pousse son pied directement vers Tobirama."
+            },
+
+            {
+                id: "ATT_FK_004",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato projette un coup de pied direct sur Tobirama."
+            },
+
+            {
+                id: "ATT_FK_005",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tend la jambe et frappe Tobirama frontalement."
+            },
+
+            {
+                id: "ATT_FK_006",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie sa jambe droite directement vers Tobirama."
+            },
+
+            {
+                id: "ATT_FK_007",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un front kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_FK_008",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec un coup de pied avant."
+            },
+
+            {
+                id: "ATT_FK_009",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato enfonce son pied vers Tobirama en ligne droite."
+            },
+
+            {
+                id: "ATT_FK_010",
+                modele: "front_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de pied frontal à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 12. ROUNDHOUSE KICK
+        // =========================================================
+
+        roundhouse_kick: [
+
+            {
+                id: "ATT_RK_001",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un roundhouse kick."
+            },
+
+            {
+                id: "ATT_RK_002",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied circulaire à Tobirama."
+            },
+
+            {
+                id: "ATT_RK_003",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait tourner sa jambe vers Tobirama."
+            },
+
+            {
+                id: "ATT_RK_004",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un coup de pied circulaire contre Tobirama."
+            },
+
+            {
+                id: "ATT_RK_005",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato balaie Tobirama avec son tibia en mouvement circulaire."
+            },
+
+            {
+                id: "ATT_RK_006",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait partir son pied en rotation vers Tobirama."
+            },
+
+            {
+                id: "ATT_RK_007",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un roundhouse sur Tobirama."
+            },
+
+            {
+                id: "ATT_RK_008",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec un coup de pied tournant."
+            },
+
+            {
+                id: "ATT_RK_009",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait pivoter sa jambe et frappe Tobirama."
+            },
+
+            {
+                id: "ATT_RK_010",
+                modele: "roundhouse_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "circulaire"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup circulaire de la jambe à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 13. SIDE KICK
+        // =========================================================
+
+        side_kick: [
+
+            {
+                id: "ATT_SK_001",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un side kick."
+            },
+
+            {
+                id: "ATT_SK_002",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied latéral à Tobirama."
+            },
+
+            {
+                id: "ATT_SK_003",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato projette sa jambe de côté vers Tobirama."
+            },
+
+            {
+                id: "ATT_SK_004",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie un side kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_SK_005",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec le tranchant du pied."
+            },
+
+            {
+                id: "ATT_SK_006",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pousse son pied latéralement vers Tobirama."
+            },
+
+            {
+                id: "ATT_SK_007",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un coup de pied latéral sur Tobirama."
+            },
+
+            {
+                id: "ATT_SK_008",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tend sa jambe sur le côté et frappe Tobirama."
+            },
+
+            {
+                id: "ATT_SK_009",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato enfonce son side kick dans la direction de Tobirama."
+            },
+
+            {
+                id: "ATT_SK_010",
+                modele: "side_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de pied latéral à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 14. BACK KICK
+        // =========================================================
+
+        back_kick: [
+
+            {
+                id: "ATT_BK_001",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato se retourne et frappe Tobirama d'un back kick."
+            },
+
+            {
+                id: "ATT_BK_002",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied arrière à Tobirama."
+            },
+
+            {
+                id: "ATT_BK_003",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pivote et projette son talon vers Tobirama."
+            },
+
+            {
+                id: "ATT_BK_004",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un back kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_BK_005",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne le dos et frappe Tobirama avec son talon."
+            },
+
+            {
+                id: "ATT_BK_006",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pousse sa jambe derrière lui vers Tobirama."
+            },
+
+            {
+                id: "ATT_BK_007",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato effectue un coup de pied arrière sur Tobirama."
+            },
+
+            {
+                id: "ATT_BK_008",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pivote sur son axe et envoie son talon vers Tobirama."
+            },
+
+            {
+                id: "ATT_BK_009",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama derrière lui avec un back kick."
+            },
+
+            {
+                id: "ATT_BK_010",
+                modele: "back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: true
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de pied arrière retourné à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 15. HOOK KICK
+        // =========================================================
+
+        hook_kick: [
+
+            {
+                id: "ATT_HK_001",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un hook kick."
+            },
+
+            {
+                id: "ATT_HK_002",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied en crochet à Tobirama."
+            },
+
+            {
+                id: "ATT_HK_003",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato ramène son talon en crochet vers Tobirama."
+            },
+
+            {
+                id: "ATT_HK_004",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un hook kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_HK_005",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait passer son pied autour de Tobirama puis ramène le talon."
+            },
+
+            {
+                id: "ATT_HK_006",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato replie sa jambe en crochet vers Tobirama."
+            },
+
+            {
+                id: "ATT_HK_007",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un coup de pied crocheté sur Tobirama."
+            },
+
+            {
+                id: "ATT_HK_008",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec son talon en mouvement de crochet."
+            },
+
+            {
+                id: "ATT_HK_009",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato ramène son pied derrière lui pour frapper Tobirama."
+            },
+
+            {
+                id: "ATT_HK_010",
+                modele: "hook_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "crochet"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un hook kick au visage de Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 16. AXE KICK
+        // =========================================================
+
+        axe_kick: [
+
+            {
+                id: "ATT_AK_001",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un axe kick."
+            },
+
+            {
+                id: "ATT_AK_002",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied descendant à Tobirama."
+            },
+
+            {
+                id: "ATT_AK_003",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lève sa jambe puis l'abat vers Tobirama."
+            },
+
+            {
+                id: "ATT_AK_004",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un axe kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_AK_005",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait tomber son talon sur Tobirama."
+            },
+
+            {
+                id: "ATT_AK_006",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat son pied depuis le haut vers Tobirama."
+            },
+
+            {
+                id: "ATT_AK_007",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un coup de pied en axe sur Tobirama."
+            },
+
+            {
+                id: "ATT_AK_008",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato élève sa jambe avant de la rabattre sur Tobirama."
+            },
+
+            {
+                id: "ATT_AK_009",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fait chuter son pied sur Tobirama."
+            },
+
+            {
+                id: "ATT_AK_010",
+                modele: "axe_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "descendante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de pied descendant à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 17. SPINNING BACK KICK
+        // =========================================================
+
+        spinning_back_kick: [
+
+            {
+                id: "ATT_SBK_001",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne et frappe Tobirama d'un spinning back kick."
+            },
+
+            {
+                id: "ATT_SBK_002",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pivote à 360 degrés et envoie son talon vers Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_003",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato effectue une rotation complète avant de frapper Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_004",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un coup de pied arrière tournoyant sur Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_005",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne sur lui-même puis projette son talon vers Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_006",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato pivote et frappe Tobirama avec un spinning back kick."
+            },
+
+            {
+                id: "ATT_SBK_007",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato accomplit un tour complet avant d'expulser son pied vers Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_008",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato tourne rapidement et plante son talon dans la direction de Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_009",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un spinning back kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_SBK_010",
+                modele: "spinning_back_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "ROTATION", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "arrière",
+                    ROTATION: "360"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de pied arrière tourné à Tobirama."
+            }
+        ],
+
+        // =========================================================
+        // 18. LOW KICK
+        // =========================================================
+
+        low_kick: [
+
+            {
+                id: "ATT_LK_001",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un low kick."
+            },
+
+            {
+                id: "ATT_LK_002",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato donne un coup de pied bas à Tobirama."
+            },
+
+            {
+                id: "ATT_LK_003",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE", "ZONE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe la jambe de Tobirama avec un low kick."
+            },
+
+            {
+                id: "ATT_LK_004",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato balance son tibia contre la jambe de Tobirama."
+            },
+
+            {
+                id: "ATT_LK_005",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un low kick vers Tobirama."
+            },
+
+            {
+                id: "ATT_LK_006",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama au niveau de la cuisse."
+            },
+
+            {
+                id: "ATT_LK_007",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato abat un coup de pied bas sur Tobirama."
+            },
+
+            {
+                id: "ATT_LK_008",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato fouette la jambe de Tobirama avec son tibia."
+            },
+
+            {
+                id: "ATT_LK_009",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup bas directement à Tobirama."
+            },
+
+            {
+                id: "ATT_LK_010",
+                modele: "low_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato attaque la cuisse de Tobirama avec un low kick."
+            }
+        ],
+
+        // =========================================================
+        // 19. KNEE STRIKE
+        // =========================================================
+
+        knee_strike: [
+
+            {
+                id: "ATT_KS_001",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama d'un coup de genou."
+            },
+
+            {
+                id: "ATT_KS_002",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato envoie son genou vers Tobirama."
+            },
+
+            {
+                id: "ATT_KS_003",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato remonte son genou contre Tobirama."
+            },
+
+            {
+                id: "ATT_KS_004",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un knee strike à Tobirama."
+            },
+
+            {
+                id: "ATT_KS_005",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato frappe Tobirama avec son genou."
+            },
+
+            {
+                id: "ATT_KS_006",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato projette son genou vers le corps de Tobirama."
+            },
+
+            {
+                id: "ATT_KS_007",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato déclenche un coup de genou contre Tobirama."
+            },
+
+            {
+                id: "ATT_KS_008",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato remonte brutalement son genou vers Tobirama."
+            },
+
+            {
+                id: "ATT_KS_009",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato assène un genou à Tobirama."
+            },
+
+            {
+                id: "ATT_KS_010",
+                modele: "knee_strike",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "genou",
+                    TRAJECTOIRE: "montante"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato percute Tobirama avec son genou."
+            }
+        ],
+
+        // =========================================================
+        // 20. FLYING KICK
+        // =========================================================
+
+        flying_kick: [
+
+            {
+                id: "ATT_FLY_001",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato saute et frappe Tobirama d'un flying kick."
+            },
+
+            {
+                id: "ATT_FLY_002",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato bondit vers Tobirama avec un coup de pied sauté."
+            },
+
+            {
+                id: "ATT_FLY_003",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato décolle du sol et projette son pied vers Tobirama."
+            },
+
+            {
+                id: "ATT_FLY_004",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato lance un flying kick contre Tobirama."
+            },
+
+            {
+                id: "ATT_FLY_005",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato saute en direction de Tobirama et frappe avec son pied."
+            },
+
+            {
+                id: "ATT_FLY_006",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "latérale"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato bondit de côté et frappe Tobirama avec un flying kick."
+            },
+
+            {
+                id: "ATT_FLY_007",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato s'élance dans les airs et frappe Tobirama du pied."
+            },
+
+            {
+                id: "ATT_FLY_008",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato attaque Tobirama en plein saut avec son pied."
+            },
+
+            {
+                id: "ATT_FLY_009",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato prend son impulsion et percute Tobirama avec son pied."
+            },
+
+            {
+                id: "ATT_FLY_010",
+                modele: "flying_kick",
+                famille: "pieds",
+                structure: ["SUJET", "ACTION", "TYPE", "MOUVEMENT", "CIBLE"],
+                slots: {
+                    ACTION: "frapper",
+                    TYPE: "pied",
+                    MOUVEMENT: "saut",
+                    TRAJECTOIRE: "directe"
+                },
+                requis: ["SUJET", "ACTION", "CIBLE"],
+                phrase: "Yamato porte un coup de pied sauté à Tobirama."
+            }
+        ]
+    },
+
+    autres: {}
+},
+    
     esquive: [],
     contre: [],
     parade: [],
