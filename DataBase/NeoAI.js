@@ -1801,19 +1801,53 @@ function neoExtraireCote(texte) {
 
     const t = neoNormaliserTexte(texte);
 
+    /*
+     * CÔTÉ DROIT
+     */
     if (
         t.includes("par la droite") ||
+        t.includes("par droite") ||
         t.includes("sur la droite") ||
+        t.includes("sur droite") ||
         t.includes("cote droit") ||
-        t.includes("cote droite")
+        t.includes("cote droite") ||
+        t.includes("du cote droit") ||
+        t.includes("du cote droite") ||
+        t.includes("sur son cote droit") ||
+        t.includes("sur son cote droite") ||
+        t.includes("son cote droit") ||
+        t.includes("son cote droite") ||
+        t.includes("cote droit de") ||
+        t.includes("cote droite de") ||
+        t.includes("profil droit") ||
+        t.includes("de profil droit") ||
+        t.includes("sur le profil droit") ||
+        t.includes("sur son profil droit") ||
+        t.includes("son profil droit") ||
+        t.includes("profil droit de")
     ) {
         return "droite";
     }
 
+    /*
+     * CÔTÉ GAUCHE
+     */
     if (
         t.includes("par la gauche") ||
+        t.includes("par gauche") ||
         t.includes("sur la gauche") ||
-        t.includes("cote gauche")
+        t.includes("sur gauche") ||
+        t.includes("cote gauche") ||
+        t.includes("du cote gauche") ||
+        t.includes("sur son cote gauche") ||
+        t.includes("son cote gauche") ||
+        t.includes("cote gauche de") ||
+        t.includes("profil gauche") ||
+        t.includes("de profil gauche") ||
+        t.includes("sur le profil gauche") ||
+        t.includes("sur son profil gauche") ||
+        t.includes("son profil gauche") ||
+        t.includes("profil gauche de")
     ) {
         return "gauche";
     }
@@ -1844,15 +1878,32 @@ function neoExtraireDirection(texte) {
 function neoExtraireCible(texte) {
 
     /*
-     * On cherche principalement ce qui suit :
+     * Priorité aux verbes qui introduisent directement
+     * une cible.
+     *
+     * Exemple :
+     * contourne Maki
+     * attaque Maki
+     * poursuit Maki
+     */
+    const matchVerbe = texte.match(
+        /\b(?:contourne|contourner|contournant|attaque|attaquer|poursuit|poursuivre|suit|suivre)\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)/i
+    );
+
+    if (matchVerbe) {
+        return matchVerbe[1];
+    }
+
+    /*
+     * Formes classiques :
      * vers X
      * autour de X
-     * par rapport à X
      * contre X
+     * devant X
+     * derrière X
      */
-
     const match = texte.match(
-        /\b(?:vers|autour de|contre|sur|devant|derrière|aupres de|aupres)\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)/i
+        /\b(?:vers|autour de|contre|devant|derrière|aupres de|aupres)\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)/i
     );
 
     if (!match) return null;
