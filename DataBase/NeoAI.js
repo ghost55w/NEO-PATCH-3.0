@@ -504,1152 +504,1575 @@ const NEO_COMBAT_MODELS = {
         ]
     }, 
 
-        //======================================================
-        // 🔄 2. DÉPLACEMENTS CIRCULAIRES
-        //======================================================
+        
+//======================================================
+// 🔄 2. DÉPLACEMENTS CIRCULAIRES
+//======================================================
 
-        circulaire: [
+circulaire: [
 
-            {
-                id: "DEP_C_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Se déplacer autour d'une cible par un côté"
-            },
-
-            {
-                id: "DEP_C_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire avec courbe"
-            },
-
-            {
-                id: "DEP_C_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Déplacement circulaire avec vitesse"
-            },
-
-            {
-                id: "DEP_C_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire complet"
-            },
-
-            {
-                id: "DEP_C_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE"
-                ],
-                description: "Déplacement suivant une trajectoire circulaire"
-            },
-
-            {
-                id: "DEP_C_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Déplacement circulaire sur une distance donnée"
-            },
-
-            {
-                id: "DEP_C_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COURBE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COURBE"
-                ],
-                description: "Déplacement courbé autour d'une cible"
-            },
-
-            {
-                id: "DEP_C_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire détaillé"
-            },
-
-            {
-                id: "DEP_C_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Déplacement circulaire avec détails supplémentaires"
-            },
-
-            {
-                id: "DEP_C_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire complet avec paramètres"
-            }
+    {
+        id: "DEP_C_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE"
         ],
-
-
-        //======================================================
-        // ↔️ 3. DÉPLACEMENTS LATÉRAUX
-        //======================================================
-
-        lateral: [
-
-            {
-                id: "DEP_L_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral simple"
-            },
-
-            {
-                id: "DEP_L_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral vers une cible"
-            },
-
-            {
-                id: "DEP_L_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral avec vitesse"
-            },
-
-            {
-                id: "DEP_L_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral sur une distance"
-            },
-
-            {
-                id: "DEP_L_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral complet"
-            },
-
-            {
-                id: "DEP_L_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral vers une cible"
-            },
-
-            {
-                id: "DEP_L_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral avec précision"
-            },
-
-            {
-                id: "DEP_L_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral avec détails"
-            },
-
-            {
-                id: "DEP_L_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral rapide"
-            },
-
-            {
-                id: "DEP_L_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "DISTANCE",
-                    "VITESSE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral complet"
-            }
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE"
         ],
+        description: "Se déplacer autour d'une cible par un côté",
 
-
-        //======================================================
-        // ↗️ 4. DÉPLACEMENTS DIAGONAUX
-        //======================================================
-
-        diagonal: [
-
-            {
-                id: "DEP_D_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal simple"
-            },
-
-            {
-                id: "DEP_D_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal vers une cible"
-            },
-
-            {
-                id: "DEP_D_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ANGLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal avec angle"
-            },
-
-            {
-                id: "DEP_D_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal sur une distance"
-            },
-
-            {
-                id: "DEP_D_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal avec vitesse"
-            },
-
-            {
-                id: "DEP_D_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ANGLE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal rapide avec angle"
-            },
-
-            {
-                id: "DEP_D_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "ANGLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal précis"
-            },
-
-            {
-                id: "DEP_D_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal complet"
-            },
-
-            {
-                id: "DEP_D_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal avec détails"
-            },
-
-            {
-                id: "DEP_D_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ANGLE",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal complet avec paramètres"
-            }
-        ],
-
-
-        //======================================================
-        // 🔙 5. DÉPLACEMENTS EN ARRIÈRE
-        //======================================================
-
-        arriere: [
-
-            {
-                id: "DEP_A_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul simple"
-            },
-
-            {
-                id: "DEP_A_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul sur une distance"
-            },
-
-            {
-                id: "DEP_A_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul avec vitesse"
-            },
-
-            {
-                id: "DEP_A_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Recul dans une direction"
-            },
-
-            {
-                id: "DEP_A_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE"
-                ],
-                description: "Recul par rapport à une cible"
-            },
-
-            {
-                id: "DEP_A_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Recul rapide"
-            },
-
-            {
-                id: "DEP_A_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul avec distance et vitesse"
-            },
-
-            {
-                id: "DEP_A_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Recul détaillé"
-            },
-
-            {
-                id: "DEP_A_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul rapide par rapport à une cible"
-            },
-
-            {
-                id: "DEP_A_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul complet"
-            }
-        ],
-
-
-        //======================================================
-        // 🪽 6. DÉPLACEMENTS AÉRIENS
-        //======================================================
-
-        aerien: [
-
-            {
-                id: "DEP_AE_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien à une hauteur donnée"
-            },
-
-            {
-                id: "DEP_AE_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien dirigé"
-            },
-
-            {
-                id: "DEP_AE_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien vers une cible"
-            },
-
-            {
-                id: "DEP_AE_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien sur une distance"
-            },
-
-            {
-                id: "DEP_AE_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien suivant une trajectoire"
-            },
-
-            {
-                id: "DEP_AE_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien rapide"
-            },
-
-            {
-                id: "DEP_AE_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien vers une cible sur une distance"
-            },
-
-            {
-                id: "DEP_AE_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "DIRECTION",
-                    "HAUTEUR",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien complet"
-            },
-
-            {
-                id: "DEP_AE_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien avec détails"
-            },
-
-            {
-                id: "DEP_AE_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "DISTANCE",
-                    "HAUTEUR",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien complet avec paramètres"
-            }
-        ],
-
-
-        //======================================================
-        // 🦘 7. SAUTS / BONDS
-        //======================================================
-
-        saut_bond: [
-
-            {
-                id: "DEP_SB_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                description: "Saut vertical simple"
-            },
-
-            {
-                id: "DEP_SB_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Saut dirigé"
-            },
-
-            {
-                id: "DEP_SB_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                description: "Bond avec distance et hauteur"
-            },
-
-            {
-                id: "DEP_SB_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                description: "Bond vers une cible"
-            },
-
-            {
-                id: "DEP_SB_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Saut dans une direction"
-            },
-
-            {
-                id: "DEP_SB_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Saut suivant une trajectoire"
-            },
-
-            {
-                id: "DEP_SB_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Saut rapide"
-            },
-
-            {
-                id: "DEP_SB_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Bond dirigé vers une cible"
-            },
-
-            {
-                id: "DEP_SB_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "ANGLE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Saut avec trajectoire et angle"
-            },
-
-            {
-                id: "DEP_SB_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "DISTANCE",
-                    "HAUTEUR",
-                    "ANGLE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                description: "Saut ou bond complet"
-            }
+        resumes: [
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE}.",
+            "{SUJET} contourne {CIBLE} en passant par la {COTE}.",
+            "{SUJET} se dirige autour de {CIBLE} par le côté {COTE}.",
+            "{SUJET} se déplace sur le côté {COTE} de {CIBLE}."
         ]
     },
+
+    {
+        id: "DEP_C_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE"
+        ],
+        description: "Déplacement circulaire avec courbe",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE} en suivant une courbe de {COURBE}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} en formant une courbe de {COURBE}.",
+            "{SUJET} décrit une courbe de {COURBE} autour de {CIBLE} par la {COTE}.",
+            "{SUJET} se déplace en arc autour de {CIBLE} sur la {COTE}, avec une courbe de {COURBE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE"
+        ],
+        description: "Déplacement circulaire avec vitesse",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE} à {VITESSE}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} à {VITESSE}.",
+            "{SUJET} progresse autour de {CIBLE} par le côté {COTE} à {VITESSE}.",
+            "{SUJET} effectue un déplacement circulaire autour de {CIBLE} à {VITESSE}, par la {COTE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE"
+        ],
+        description: "Déplacement circulaire complet",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE}, en suivant une courbe de {COURBE} à {VITESSE}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} en formant une courbe de {COURBE} à {VITESSE}.",
+            "{SUJET} décrit une courbe de {COURBE} autour de {CIBLE} par la {COTE} à {VITESSE}.",
+            "{SUJET} progresse autour de {CIBLE} sur la {COTE}, en suivant une courbe de {COURBE} à {VITESSE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE"
+        ],
+        description: "Déplacement suivant une trajectoire circulaire",
+
+        resumes: [
+            "{SUJET} se déplace autour de {CIBLE} en suivant une trajectoire {TRAJECTOIRE}.",
+            "{SUJET} contourne {CIBLE} selon une trajectoire {TRAJECTOIRE}.",
+            "{SUJET} progresse autour de {CIBLE} en suivant une trajectoire {TRAJECTOIRE}.",
+            "{SUJET} effectue un déplacement autour de {CIBLE} suivant une trajectoire {TRAJECTOIRE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE"
+        ],
+        description: "Déplacement circulaire sur une distance donnée",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE} sur une distance de {DISTANCE}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} en parcourant {DISTANCE}.",
+            "{SUJET} progresse autour de {CIBLE} sur la {COTE} sur une distance de {DISTANCE}.",
+            "{SUJET} effectue un déplacement circulaire autour de {CIBLE} sur {DISTANCE}, par la {COTE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE"
+        ],
+        description: "Déplacement courbé autour d'une cible",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} en suivant une courbe de {COURBE} sur {DISTANCE}.",
+            "{SUJET} se déplace autour de {CIBLE} en formant une courbe de {COURBE} sur une distance de {DISTANCE}.",
+            "{SUJET} décrit une courbe de {COURBE} autour de {CIBLE} en parcourant {DISTANCE}.",
+            "{SUJET} progresse autour de {CIBLE} selon une courbe de {COURBE} sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE",
+            "DISTANCE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE"
+        ],
+        description: "Déplacement circulaire détaillé",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE}, en suivant une courbe de {COURBE} sur {DISTANCE} à {VITESSE}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} en parcourant {DISTANCE} à {VITESSE}, suivant une courbe de {COURBE}.",
+            "{SUJET} décrit une courbe de {COURBE} autour de {CIBLE} par la {COTE}, sur {DISTANCE} à {VITESSE}.",
+            "{SUJET} progresse autour de {CIBLE} sur la {COTE}, en suivant une courbe de {COURBE} à {VITESSE} sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_C_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE"
+        ],
+        description: "Déplacement circulaire avec détails supplémentaires",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE} {EXTRAS}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} {EXTRAS}.",
+            "{SUJET} progresse autour de {CIBLE} sur la {COTE} {EXTRAS}.",
+            "{SUJET} effectue un déplacement circulaire autour de {CIBLE} par la {COTE} {EXTRAS}."
+        ]
+    },
+
+    {
+        id: "DEP_C_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE",
+            "VITESSE",
+            "DISTANCE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COTE",
+            "COURBE"
+        ],
+        description: "Déplacement circulaire complet avec paramètres",
+
+        resumes: [
+            "{SUJET} contourne {CIBLE} par la {COTE}, en suivant une courbe de {COURBE} à {VITESSE} sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} se déplace autour de {CIBLE} par la {COTE} à {VITESSE}, en parcourant {DISTANCE} selon une courbe de {COURBE} {EXTRAS}.",
+            "{SUJET} décrit une courbe de {COURBE} autour de {CIBLE} par la {COTE}, à {VITESSE} sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} progresse autour de {CIBLE} sur la {COTE}, en suivant une courbe de {COURBE} à {VITESSE} sur {DISTANCE} {EXTRAS}."
+        ]
+    }
+],
+        
+//======================================================
+// ↔️ 3. DÉPLACEMENTS LATÉRAUX
+//======================================================
+
+lateral: [
+
+    {
+        id: "DEP_L_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral simple",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION}.",
+            "{SUJET} avance sur le côté vers {DIRECTION}.",
+            "{SUJET} se déplace sur le côté en direction de {DIRECTION}.",
+            "{SUJET} progresse latéralement vers {DIRECTION}."
+        ]
+    },
+
+    {
+        id: "DEP_L_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral vers une cible",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION}, en direction de {CIBLE}.",
+            "{SUJET} avance sur le côté vers {CIBLE}, par la {DIRECTION}.",
+            "{SUJET} progresse latéralement en direction de {CIBLE}.",
+            "{SUJET} se décale vers {DIRECTION} pour se rapprocher de {CIBLE}."
+        ]
+    },
+
+    {
+        id: "DEP_L_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral avec vitesse",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION} à {VITESSE}.",
+            "{SUJET} avance rapidement sur le côté vers {DIRECTION}.",
+            "{SUJET} progresse latéralement vers {DIRECTION} à {VITESSE}.",
+            "{SUJET} se décale vers {DIRECTION} à une vitesse de {VITESSE}."
+        ]
+    },
+
+    {
+        id: "DEP_L_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral sur une distance",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION} sur {DISTANCE}.",
+            "{SUJET} avance sur le côté en parcourant {DISTANCE} vers {DIRECTION}.",
+            "{SUJET} progresse latéralement sur une distance de {DISTANCE}.",
+            "{SUJET} se décale de {DISTANCE} vers {DIRECTION}."
+        ]
+    },
+
+    {
+        id: "DEP_L_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral complet",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION} à {VITESSE}, sur {DISTANCE}, en direction de {CIBLE}.",
+            "{SUJET} progresse sur le côté vers {CIBLE} à {VITESSE}, en parcourant {DISTANCE}.",
+            "{SUJET} se décale vers {DIRECTION} à {VITESSE} sur une distance de {DISTANCE}, vers {CIBLE}.",
+            "{SUJET} avance latéralement vers {CIBLE} à {VITESSE} sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_L_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral vers une cible",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION} en direction de {CIBLE} sur {DISTANCE}.",
+            "{SUJET} avance sur le côté vers {CIBLE} en parcourant {DISTANCE}.",
+            "{SUJET} progresse latéralement vers {CIBLE} sur une distance de {DISTANCE}.",
+            "{SUJET} se décale vers {DIRECTION} pour rejoindre {CIBLE} sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_L_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral avec précision",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION} à {VITESSE} {EXTRAS}.",
+            "{SUJET} progresse sur le côté vers {DIRECTION} à {VITESSE} {EXTRAS}.",
+            "{SUJET} se décale vers {DIRECTION} à {VITESSE} {EXTRAS}.",
+            "{SUJET} avance latéralement vers {DIRECTION} à {VITESSE} {EXTRAS}."
+        ]
+    },
+
+    {
+        id: "DEP_L_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral avec détails",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION}, en direction de {CIBLE} {EXTRAS}.",
+            "{SUJET} avance sur le côté vers {CIBLE} par {DIRECTION} {EXTRAS}.",
+            "{SUJET} progresse latéralement vers {CIBLE} {EXTRAS}.",
+            "{SUJET} se décale vers {DIRECTION} pour se rapprocher de {CIBLE} {EXTRAS}."
+        ]
+    },
+
+    {
+        id: "DEP_L_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral rapide",
+
+        resumes: [
+            "{SUJET} se déplace rapidement vers {DIRECTION} sur {DISTANCE}.",
+            "{SUJET} se décale rapidement vers {DIRECTION} à {VITESSE}.",
+            "{SUJET} progresse sur le côté vers {DIRECTION} à {VITESSE}, sur {DISTANCE}.",
+            "{SUJET} avance latéralement à {VITESSE} vers {DIRECTION} sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_L_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "DISTANCE",
+            "VITESSE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement latéral complet",
+
+        resumes: [
+            "{SUJET} se déplace latéralement vers {DIRECTION} à {VITESSE}, sur {DISTANCE}, en direction de {CIBLE} {EXTRAS}.",
+            "{SUJET} progresse sur le côté vers {CIBLE} à {VITESSE}, en parcourant {DISTANCE} {EXTRAS}.",
+            "{SUJET} se décale vers {DIRECTION} à {VITESSE} sur {DISTANCE}, en direction de {CIBLE} {EXTRAS}.",
+            "{SUJET} avance latéralement vers {CIBLE} à {VITESSE} sur {DISTANCE} {EXTRAS}."
+        ]
+    }
+],
+            
+
+//======================================================
+// ↗️ 4. DÉPLACEMENTS DIAGONAUX
+//======================================================
+
+diagonal: [
+
+    {
+        id: "DEP_D_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal simple",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION}.",
+            "{SUJET} progresse diagonalement vers {DIRECTION}.",
+            "{SUJET} avance en diagonale dans la direction {DIRECTION}.",
+            "{SUJET} se dirige en diagonale vers {DIRECTION}."
+        ]
+    },
+
+    {
+        id: "DEP_D_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal vers une cible",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION}, en direction de {CIBLE}.",
+            "{SUJET} progresse diagonalement vers {CIBLE} par {DIRECTION}.",
+            "{SUJET} avance en diagonale dans la direction de {CIBLE}.",
+            "{SUJET} se dirige vers {CIBLE} en suivant une trajectoire diagonale."
+        ]
+    },
+
+    {
+        id: "DEP_D_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal avec angle",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION} avec un angle de {ANGLE}.",
+            "{SUJET} progresse vers {DIRECTION} en suivant un angle de {ANGLE}.",
+            "{SUJET} avance diagonalement selon un angle de {ANGLE}.",
+            "{SUJET} se dirige vers {DIRECTION} en adoptant un angle de {ANGLE}."
+        ]
+    },
+
+    {
+        id: "DEP_D_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal sur une distance",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION} sur {DISTANCE}, en direction de {CIBLE}.",
+            "{SUJET} progresse diagonalement vers {CIBLE} sur une distance de {DISTANCE}.",
+            "{SUJET} avance en diagonale vers {CIBLE} en parcourant {DISTANCE}.",
+            "{SUJET} se dirige vers {CIBLE} par une trajectoire diagonale de {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_D_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal avec vitesse",
+
+        resumes: [
+            "{SUJET} se déplace rapidement en diagonale vers {DIRECTION}, à {VITESSE}.",
+            "{SUJET} progresse en diagonale vers {DIRECTION} à {VITESSE}.",
+            "{SUJET} avance diagonalement vers {DIRECTION} à une vitesse de {VITESSE}.",
+            "{SUJET} se dirige vers {DIRECTION} en diagonale à {VITESSE}."
+        ]
+    },
+
+    {
+        id: "DEP_D_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal rapide avec angle",
+
+        resumes: [
+            "{SUJET} se déplace rapidement en diagonale vers {DIRECTION} avec un angle de {ANGLE}.",
+            "{SUJET} progresse vers {DIRECTION} à {VITESSE}, en suivant un angle de {ANGLE}.",
+            "{SUJET} avance diagonalement à {VITESSE} selon un angle de {ANGLE}.",
+            "{SUJET} se dirige vers {DIRECTION} à {VITESSE} avec une trajectoire inclinée de {ANGLE}."
+        ]
+    },
+
+    {
+        id: "DEP_D_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "ANGLE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal précis",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION}, en direction de {CIBLE}, sur {DISTANCE} avec un angle de {ANGLE}.",
+            "{SUJET} progresse vers {CIBLE} par une trajectoire diagonale de {ANGLE} sur {DISTANCE}.",
+            "{SUJET} avance diagonalement vers {CIBLE} selon un angle de {ANGLE}, en parcourant {DISTANCE}.",
+            "{SUJET} se dirige vers {CIBLE} en diagonale, avec un angle de {ANGLE} sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_D_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal complet",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION} à {VITESSE}, sur {DISTANCE}, en direction de {CIBLE}.",
+            "{SUJET} progresse diagonalement vers {CIBLE} à {VITESSE}, en parcourant {DISTANCE}.",
+            "{SUJET} avance vers {CIBLE} par une trajectoire diagonale à {VITESSE} sur {DISTANCE}.",
+            "{SUJET} se dirige en diagonale vers {CIBLE} à {VITESSE}, sur une distance de {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_D_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal avec détails",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION} {EXTRAS}.",
+            "{SUJET} progresse diagonalement vers {DIRECTION} {EXTRAS}.",
+            "{SUJET} avance en diagonale dans la direction {DIRECTION} {EXTRAS}.",
+            "{SUJET} se dirige vers {DIRECTION} par une trajectoire diagonale {EXTRAS}."
+        ]
+    },
+
+    {
+        id: "DEP_D_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Déplacement diagonal complet avec paramètres",
+
+        resumes: [
+            "{SUJET} se déplace en diagonale vers {DIRECTION}, avec un angle de {ANGLE}, à {VITESSE}, sur {DISTANCE}, en direction de {CIBLE} {EXTRAS}.",
+            "{SUJET} progresse diagonalement vers {CIBLE} à {VITESSE}, selon un angle de {ANGLE}, en parcourant {DISTANCE} {EXTRAS}.",
+            "{SUJET} avance vers {CIBLE} par une trajectoire diagonale de {ANGLE}, à {VITESSE}, sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} se dirige en diagonale vers {CIBLE} à {VITESSE}, avec un angle de {ANGLE}, sur {DISTANCE} {EXTRAS}."
+        ]
+    }
+
+],
+            
+
+//======================================================
+// 🔙 5. DÉPLACEMENTS EN ARRIÈRE
+//======================================================
+
+arriere: [
+
+    {
+        id: "DEP_A_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+        description: "Recul simple",
+
+        resumes: [
+            "{SUJET} recule.",
+            "{SUJET} effectue un mouvement vers l'arrière.",
+            "{SUJET} se déplace en arrière.",
+            "{SUJET} prend du recul."
+        ]
+    },
+
+    {
+        id: "DEP_A_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+        description: "Recul sur une distance",
+
+        resumes: [
+            "{SUJET} recule de {DISTANCE}.",
+            "{SUJET} se déplace vers l'arrière sur {DISTANCE}.",
+            "{SUJET} prend du recul sur une distance de {DISTANCE}.",
+            "{SUJET} se retire en arrière sur {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_A_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+        description: "Recul avec vitesse",
+
+        resumes: [
+            "{SUJET} recule à {VITESSE}.",
+            "{SUJET} se déplace vers l'arrière à {VITESSE}.",
+            "{SUJET} prend du recul à une vitesse de {VITESSE}.",
+            "{SUJET} se retire rapidement vers l'arrière à {VITESSE}."
+        ]
+    },
+
+    {
+        id: "DEP_A_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Recul dans une direction",
+
+        resumes: [
+            "{SUJET} recule vers {DIRECTION}.",
+            "{SUJET} se déplace en arrière dans la direction {DIRECTION}.",
+            "{SUJET} prend du recul vers {DIRECTION}.",
+            "{SUJET} se retire vers {DIRECTION} en reculant."
+        ]
+    },
+
+    {
+        id: "DEP_A_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DISTANCE"
+        ],
+        description: "Recul par rapport à une cible",
+
+        resumes: [
+            "{SUJET} recule de {DISTANCE} par rapport à {CIBLE}.",
+            "{SUJET} se déplace vers l'arrière pour s'éloigner de {CIBLE} sur {DISTANCE}.",
+            "{SUJET} prend du recul par rapport à {CIBLE} sur une distance de {DISTANCE}.",
+            "{SUJET} se retire de {CIBLE} en reculant de {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_A_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Recul rapide",
+
+        resumes: [
+            "{SUJET} recule rapidement vers {DIRECTION} à {VITESSE}.",
+            "{SUJET} se déplace vivement vers l'arrière en direction de {DIRECTION}.",
+            "{SUJET} prend rapidement du recul vers {DIRECTION}.",
+            "{SUJET} se retire vers {DIRECTION} à {VITESSE}."
+        ]
+    },
+
+    {
+        id: "DEP_A_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DISTANCE",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+        description: "Recul avec distance et vitesse",
+
+        resumes: [
+            "{SUJET} recule de {DISTANCE} à {VITESSE}.",
+            "{SUJET} se déplace vers l'arrière sur {DISTANCE} à {VITESSE}.",
+            "{SUJET} prend du recul sur {DISTANCE} à une vitesse de {VITESSE}.",
+            "{SUJET} se retire rapidement en parcourant {DISTANCE} à {VITESSE}."
+        ]
+    },
+
+    {
+        id: "DEP_A_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+        description: "Recul détaillé",
+
+        resumes: [
+            "{SUJET} recule vers {DIRECTION} sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} se déplace en arrière vers {DIRECTION} sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} prend du recul en direction de {DIRECTION} sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} se retire vers {DIRECTION} en parcourant {DISTANCE} {EXTRAS}."
+        ]
+    },
+
+    {
+        id: "DEP_A_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+        description: "Recul rapide par rapport à une cible",
+
+        resumes: [
+            "{SUJET} recule rapidement de {CIBLE} sur {DISTANCE} à {VITESSE}.",
+            "{SUJET} s'éloigne de {CIBLE} en reculant à {VITESSE} sur {DISTANCE}.",
+            "{SUJET} prend rapidement du recul par rapport à {CIBLE} sur {DISTANCE}.",
+            "{SUJET} se retire de {CIBLE} à {VITESSE}, en parcourant {DISTANCE}."
+        ]
+    },
+
+    {
+        id: "DEP_A_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+        description: "Recul complet",
+
+        resumes: [
+            "{SUJET} recule vers {DIRECTION} en s'éloignant de {CIBLE}, à {VITESSE}, sur {DISTANCE} {EXTRAS}.",
+            "{SUJET} se déplace vers l'arrière en direction de {DIRECTION}, à {VITESSE}, sur {DISTANCE} par rapport à {CIBLE} {EXTRAS}.",
+            "{SUJET} prend du recul par rapport à {CIBLE} vers {DIRECTION}, à {VITESSE}, en parcourant {DISTANCE} {EXTRAS}.",
+            "{SUJET} se retire vers {DIRECTION} à {VITESSE}, en s'éloignant de {CIBLE} sur {DISTANCE} {EXTRAS}."
+        ]
+    }
+
+],
+           
+     //======================================================
+// 🪽 6. DÉPLACEMENTS AÉRIENS
+//======================================================
+
+aerien: [
+
+    {
+        id: "DEP_AE_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien à une hauteur donnée",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs à {HAUTEUR}.",
+            "{SUJET} évolue dans les airs à une hauteur de {HAUTEUR}.",
+            "{SUJET} se déplace en hauteur à {HAUTEUR}.",
+            "{SUJET} prend de la hauteur et se déplace à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien dirigé",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {DIRECTION} à {HAUTEUR}.",
+            "{SUJET} évolue en altitude dans la direction {DIRECTION}, à {HAUTEUR}.",
+            "{SUJET} progresse dans les airs vers {DIRECTION} en maintenant une hauteur de {HAUTEUR}.",
+            "{SUJET} se dirige dans les airs vers {DIRECTION} à une hauteur de {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien vers une cible",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {CIBLE} à {HAUTEUR}.",
+            "{SUJET} progresse en altitude en direction de {CIBLE}, à {HAUTEUR}.",
+            "{SUJET} vole vers {CIBLE} tout en maintenant une hauteur de {HAUTEUR}.",
+            "{SUJET} évolue dans les airs vers {CIBLE} à une hauteur de {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien sur une distance",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {DIRECTION} sur {DISTANCE}, à {HAUTEUR}.",
+            "{SUJET} progresse en altitude vers {DIRECTION} sur une distance de {DISTANCE}.",
+            "{SUJET} évolue dans les airs sur {DISTANCE} vers {DIRECTION}, à {HAUTEUR}.",
+            "{SUJET} parcourt {DISTANCE} dans les airs en direction de {DIRECTION}, à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien suivant une trajectoire",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs en suivant une trajectoire {TRAJECTOIRE} à {HAUTEUR}.",
+            "{SUJET} évolue à {HAUTEUR} selon une trajectoire {TRAJECTOIRE}.",
+            "{SUJET} progresse dans les airs en adoptant une trajectoire {TRAJECTOIRE}, à {HAUTEUR}.",
+            "{SUJET} suit une trajectoire {TRAJECTOIRE} dans les airs à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien rapide",
+
+        resumes: [
+            "{SUJET} se déplace rapidement dans les airs vers {DIRECTION}, à {VITESSE} et à {HAUTEUR}.",
+            "{SUJET} fonce dans les airs vers {DIRECTION} à {VITESSE}, en maintenant {HAUTEUR}.",
+            "{SUJET} progresse rapidement en altitude vers {DIRECTION}, à {VITESSE}.",
+            "{SUJET} traverse les airs vers {DIRECTION} à {VITESSE}, à une hauteur de {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien vers une cible sur une distance",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {CIBLE} sur {DISTANCE}, à {HAUTEUR}.",
+            "{SUJET} progresse en altitude vers {CIBLE} en parcourant {DISTANCE}.",
+            "{SUJET} évolue dans les airs sur {DISTANCE} en direction de {CIBLE}, à {HAUTEUR}.",
+            "{SUJET} parcourt {DISTANCE} dans les airs pour rejoindre {CIBLE}, à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "HAUTEUR",
+            "VITESSE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien complet",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {DIRECTION} à {VITESSE}, en suivant une trajectoire {TRAJECTOIRE} à {HAUTEUR}.",
+            "{SUJET} progresse à {VITESSE} vers {DIRECTION}, selon une trajectoire {TRAJECTOIRE}, à {HAUTEUR}.",
+            "{SUJET} évolue dans les airs à {HAUTEUR} vers {DIRECTION}, à {VITESSE}, en suivant une trajectoire {TRAJECTOIRE}.",
+            "{SUJET} traverse les airs vers {DIRECTION} à {VITESSE}, en adoptant une trajectoire {TRAJECTOIRE} à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien avec détails",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {CIBLE}, en suivant une trajectoire {TRAJECTOIRE} à {HAUTEUR} {EXTRAS}.",
+            "{SUJET} progresse vers {CIBLE} dans les airs selon une trajectoire {TRAJECTOIRE}, à {HAUTEUR} {EXTRAS}.",
+            "{SUJET} évolue en altitude vers {CIBLE} à {HAUTEUR}, en suivant une trajectoire {TRAJECTOIRE} {EXTRAS}.",
+            "{SUJET} se dirige vers {CIBLE} dans les airs, avec une trajectoire {TRAJECTOIRE} à {HAUTEUR} {EXTRAS}."
+        ]
+    },
+
+    {
+        id: "DEP_AE_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "VITESSE",
+            "DISTANCE",
+            "HAUTEUR",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
+        description: "Déplacement aérien complet avec paramètres",
+
+        resumes: [
+            "{SUJET} se déplace dans les airs vers {CIBLE} en direction de {DIRECTION}, à {VITESSE}, sur {DISTANCE}, selon une trajectoire {TRAJECTOIRE} à {HAUTEUR} {EXTRAS}.",
+            "{SUJET} progresse dans les airs vers {CIBLE} à {VITESSE}, en suivant {TRAJECTOIRE} vers {DIRECTION} sur {DISTANCE}, à {HAUTEUR} {EXTRAS}.",
+            "{SUJET} évolue vers {CIBLE} selon une trajectoire {TRAJECTOIRE}, à {VITESSE}, en parcourant {DISTANCE} vers {DIRECTION} à {HAUTEUR} {EXTRAS}.",
+            "{SUJET} traverse les airs en direction de {CIBLE}, à {VITESSE}, sur {DISTANCE}, en suivant une trajectoire {TRAJECTOIRE} à {HAUTEUR} {EXTRAS}."
+        ]
+    }
+
+],   
+
+        
+//======================================================
+// 🦘 7. SAUTS / BONDS
+//======================================================
+
+saut_bond: [
+
+    {
+        id: "DEP_SB_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+        description: "Saut vertical simple",
+
+        resumes: [
+            "{SUJET} effectue un saut vertical jusqu'à {HAUTEUR}.",
+            "{SUJET} bondit verticalement à une hauteur de {HAUTEUR}.",
+            "{SUJET} s'élève brusquement jusqu'à {HAUTEUR}.",
+            "{SUJET} réalise un bond vertical atteignant {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        description: "Saut dirigé",
+
+        resumes: [
+            "{SUJET} saute vers {DIRECTION} jusqu'à {HAUTEUR}.",
+            "{SUJET} bondit dans la direction {DIRECTION} en atteignant {HAUTEUR}.",
+            "{SUJET} effectue un saut dirigé vers {DIRECTION}, à {HAUTEUR}.",
+            "{SUJET} s'élance vers {DIRECTION} en prenant de la hauteur jusqu'à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        description: "Bond avec distance et hauteur",
+
+        resumes: [
+            "{SUJET} bondit sur {DISTANCE} en atteignant {HAUTEUR}.",
+            "{SUJET} effectue un saut couvrant {DISTANCE} à une hauteur de {HAUTEUR}.",
+            "{SUJET} s'élance sur {DISTANCE} tout en montant jusqu'à {HAUTEUR}.",
+            "{SUJET} réalise un bond de {DISTANCE} avec une hauteur de {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        description: "Bond vers une cible",
+
+        resumes: [
+            "{SUJET} bondit vers {CIBLE} sur {DISTANCE}, à {HAUTEUR}.",
+            "{SUJET} effectue un saut en direction de {CIBLE} sur {DISTANCE}, en atteignant {HAUTEUR}.",
+            "{SUJET} s'élance vers {CIBLE} en parcourant {DISTANCE} à {HAUTEUR}.",
+            "{SUJET} réalise un bond vers {CIBLE} couvrant {DISTANCE} à une hauteur de {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        description: "Saut dans une direction",
+
+        resumes: [
+            "{SUJET} saute vers {DIRECTION} sur {DISTANCE}, en atteignant {HAUTEUR}.",
+            "{SUJET} bondit dans la direction {DIRECTION} sur {DISTANCE}, à {HAUTEUR}.",
+            "{SUJET} s'élance vers {DIRECTION} en parcourant {DISTANCE} jusqu'à {HAUTEUR}.",
+            "{SUJET} effectue un saut vers {DIRECTION}, couvrant {DISTANCE} à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR"
+        ],
+        description: "Saut suivant une trajectoire",
+
+        resumes: [
+            "{SUJET} effectue un saut en suivant une trajectoire {TRAJECTOIRE} jusqu'à {HAUTEUR}.",
+            "{SUJET} bondit selon une trajectoire {TRAJECTOIRE}, à {HAUTEUR}.",
+            "{SUJET} s'élance en suivant une trajectoire {TRAJECTOIRE} pour atteindre {HAUTEUR}.",
+            "{SUJET} réalise un saut suivant une trajectoire {TRAJECTOIRE} à une hauteur de {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR"
+        ],
+        description: "Saut rapide",
+
+        resumes: [
+            "{SUJET} bondit rapidement vers {DIRECTION} jusqu'à {HAUTEUR}.",
+            "{SUJET} effectue un saut rapide vers {DIRECTION} à {VITESSE}, en atteignant {HAUTEUR}.",
+            "{SUJET} s'élance à {VITESSE} vers {DIRECTION} et prend de la hauteur jusqu'à {HAUTEUR}.",
+            "{SUJET} jaillit vers {DIRECTION} à {VITESSE}, atteignant {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DIRECTION",
+            "DISTANCE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
+        description: "Bond dirigé vers une cible",
+
+        resumes: [
+            "{SUJET} bondit vers {CIBLE} par {DIRECTION}, sur {DISTANCE}, à {HAUTEUR}.",
+            "{SUJET} effectue un saut dirigé vers {CIBLE} en passant par {DIRECTION}, sur {DISTANCE}.",
+            "{SUJET} s'élance vers {CIBLE} dans la direction {DIRECTION}, en parcourant {DISTANCE} à {HAUTEUR}.",
+            "{SUJET} réalise un bond vers {CIBLE} à travers {DIRECTION}, sur {DISTANCE}, jusqu'à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "ANGLE",
+            "HAUTEUR"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR"
+        ],
+        description: "Saut avec trajectoire et angle",
+
+        resumes: [
+            "{SUJET} effectue un saut selon une trajectoire {TRAJECTOIRE} avec un angle de {ANGLE}, jusqu'à {HAUTEUR}.",
+            "{SUJET} bondit en suivant une trajectoire {TRAJECTOIRE} inclinée à {ANGLE}, à {HAUTEUR}.",
+            "{SUJET} s'élance selon une trajectoire {TRAJECTOIRE} avec un angle de {ANGLE} pour atteindre {HAUTEUR}.",
+            "{SUJET} réalise un bond suivant {TRAJECTOIRE} avec une inclinaison de {ANGLE}, jusqu'à {HAUTEUR}."
+        ]
+    },
+
+    {
+        id: "DEP_SB_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "VITESSE",
+            "DISTANCE",
+            "HAUTEUR",
+            "ANGLE",
+            "EXTRAS"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+        description: "Saut ou bond complet",
+
+        resumes: [
+            "{SUJET} bondit vers {CIBLE} à {VITESSE}, en suivant une trajectoire {TRAJECTOIRE} vers {DIRECTION}, sur {DISTANCE}, jusqu'à {HAUTEUR}, avec un angle de {ANGLE} {EXTRAS}.",
+            "{SUJET} effectue un saut vers {CIBLE} à {VITESSE}, selon une trajectoire {TRAJECTOIRE} et une direction {DIRECTION}, en parcourant {DISTANCE} à {HAUTEUR} avec un angle de {ANGLE} {EXTRAS}.",
+            "{SUJET} s'élance vers {CIBLE} dans la direction {DIRECTION}, à {VITESSE}, en suivant {TRAJECTOIRE} sur {DISTANCE}, jusqu'à {HAUTEUR}, avec une inclinaison de {ANGLE} {EXTRAS}.",
+            "{SUJET} réalise un bond complet vers {CIBLE} à {VITESSE}, suivant une trajectoire {TRAJECTOIRE} vers {DIRECTION}, sur {DISTANCE}, à {HAUTEUR} avec un angle de {ANGLE} {EXTRAS}."
+        ]
+    }
+
+], 
+            
 
 attaque: {
 
