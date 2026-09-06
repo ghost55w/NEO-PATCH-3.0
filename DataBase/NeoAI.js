@@ -2095,7 +2095,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato porte un coup de poing direct à Tobirama."
+                phrase: "Yamato porte un coup de poing direct à Tobirama.",
+
+                resumes: [
+                    "{SUJET} porte un coup de poing direct à {CIBLE}.",
+                    "{SUJET} frappe {CIBLE} d'un coup de poing direct.",
+                    "{SUJET} assène directement un coup de poing à {CIBLE}.",
+                    "{SUJET} décoche un coup de poing direct vers {CIBLE}."
+                ]
             },
 
             {
@@ -2109,7 +2116,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato frappe Tobirama d'un coup de poing direct."
+                phrase: "Yamato frappe Tobirama d'un coup de poing direct.",
+
+                resumes: [
+                    "{SUJET} frappe {CIBLE} d'un coup de poing direct.",
+                    "{SUJET} assène un coup de poing direct à {CIBLE}.",
+                    "{SUJET} atteint {CIBLE} avec un coup de poing direct.",
+                    "{SUJET} envoie directement son poing sur {CIBLE}."
+                ]
             },
 
             {
@@ -2123,7 +2137,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato décoche un direct vers Tobirama."
+                phrase: "Yamato décoche un direct vers Tobirama.",
+
+                resumes: [
+                    "{SUJET} décoche un direct vers {CIBLE}.",
+                    "{SUJET} lance un coup direct en direction de {CIBLE}.",
+                    "{SUJET} projette un direct vers {CIBLE}.",
+                    "{SUJET} envoie un coup de poing direct en direction de {CIBLE}."
+                ]
             },
 
             {
@@ -2137,7 +2158,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato envoie son poing droit directement sur Tobirama."
+                phrase: "Yamato envoie son poing droit directement sur Tobirama.",
+
+                resumes: [
+                    "{SUJET} envoie directement son poing droit sur {CIBLE}.",
+                    "{SUJET} projette son poing droit en ligne directe vers {CIBLE}.",
+                    "{SUJET} frappe {CIBLE} avec son poing droit.",
+                    "{SUJET} lance son poing droit directement vers {CIBLE}."
+                ]
             },
 
             {
@@ -2151,7 +2179,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato projette un poing droit en ligne directe vers Tobirama."
+                phrase: "Yamato projette un poing droit en ligne directe vers Tobirama.",
+
+                resumes: [
+                    "{SUJET} projette son poing droit en ligne directe vers {CIBLE}.",
+                    "{SUJET} lance un coup de poing droit directement vers {CIBLE}.",
+                    "{SUJET} tend son poing droit vers {CIBLE} dans un mouvement direct.",
+                    "{SUJET} envoie son poing droit en trajectoire directe vers {CIBLE}."
+                ]
             },
 
             {
@@ -2165,7 +2200,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato lance un jab en direction de Tobirama."
+                phrase: "Yamato lance un jab en direction de Tobirama.",
+
+                resumes: [
+                    "{SUJET} lance un jab en direction de {CIBLE}.",
+                    "{SUJET} décoche un jab vers {CIBLE}.",
+                    "{SUJET} envoie un jab directement vers {CIBLE}.",
+                    "{SUJET} porte un jab en direction de {CIBLE}."
+                ]
             },
 
             {
@@ -2179,7 +2221,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato assène un straight à Tobirama."
+                phrase: "Yamato assène un straight à Tobirama.",
+
+                resumes: [
+                    "{SUJET} assène un straight à {CIBLE}.",
+                    "{SUJET} décoche un straight vers {CIBLE}.",
+                    "{SUJET} frappe {CIBLE} avec un straight direct.",
+                    "{SUJET} envoie un straight directement sur {CIBLE}."
+                ]
             },
 
             {
@@ -2193,7 +2242,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato tend le poing et frappe Tobirama en ligne droite."
+                phrase: "Yamato tend le poing et frappe Tobirama en ligne droite.",
+
+                resumes: [
+                    "{SUJET} tend le poing et frappe {CIBLE} en ligne droite.",
+                    "{SUJET} étend son poing directement vers {CIBLE}.",
+                    "{SUJET} projette son poing en ligne droite sur {CIBLE}.",
+                    "{SUJET} frappe {CIBLE} en envoyant son poing directement vers lui."
+                ]
             },
 
             {
@@ -2207,7 +2263,14 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato frappe frontalement Tobirama avec son poing."
+                phrase: "Yamato frappe frontalement Tobirama avec son poing.",
+
+                resumes: [
+                    "{SUJET} frappe frontalement {CIBLE} avec son poing.",
+                    "{SUJET} porte un coup de poing frontal à {CIBLE}.",
+                    "{SUJET} attaque {CIBLE} directement avec son poing.",
+                    "{SUJET} assène un coup de poing frontal en direction de {CIBLE}."
+                ]
             },
 
             {
@@ -2221,324 +2284,475 @@ attaque: {
                     TRAJECTOIRE: "directe"
                 },
                 requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato abat un coup direct contre Tobirama."
+                phrase: "Yamato abat un coup direct contre Tobirama.",
+
+                resumes: [
+                    "{SUJET} abat un coup direct contre {CIBLE}.",
+                    "{SUJET} porte un coup direct à {CIBLE}.",
+                    "{SUJET} assène un coup direct en direction de {CIBLE}.",
+                    "{SUJET} frappe {CIBLE} avec un coup de poing direct."
+                ]
             }
+
         ],
 
+           // =========================================================
+// 2. CROCHET GAUCHE
+// =========================================================
+
+crochet_gauche: [
+
+    {
+        id: "ATT_CG_001",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato frappe Tobirama d'un crochet gauche.",
+
+        resumes: [
+            "{SUJET} frappe {CIBLE} d'un crochet gauche.",
+            "{SUJET} assène un crochet gauche à {CIBLE}.",
+            "{SUJET} porte un crochet du gauche en direction de {CIBLE}.",
+            "{SUJET} attaque {CIBLE} avec un crochet de la main gauche."
+        ]
+    },
+
+    {
+        id: "ATT_CG_002",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato décoche un crochet du gauche sur Tobirama.",
+
+        resumes: [
+            "{SUJET} décoche un crochet du gauche sur {CIBLE}.",
+            "{SUJET} lance un crochet gauche vers {CIBLE}.",
+            "{SUJET} envoie son crochet gauche en direction de {CIBLE}.",
+            "{SUJET} projette un crochet du gauche vers {CIBLE}."
+        ]
+    },
+
+    {
+        id: "ATT_CG_003",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato envoie son poing gauche en crochet vers Tobirama.",
+
+        resumes: [
+            "{SUJET} envoie son poing gauche en crochet vers {CIBLE}.",
+            "{SUJET} projette son poing gauche en direction de {CIBLE}.",
+            "{SUJET} lance un crochet de la main gauche vers {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec son poing gauche en crochet."
+        ]
+    },
+
+    {
+        id: "ATT_CG_004",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato balance un hook gauche contre Tobirama.",
+
+        resumes: [
+            "{SUJET} balance un hook gauche contre {CIBLE}.",
+            "{SUJET} envoie un hook du gauche vers {CIBLE}.",
+            "{SUJET} porte un hook gauche en direction de {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec un hook de la main gauche."
+        ]
+    },
+
+    {
+        id: "ATT_CG_005",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato lance un crochet avec sa main gauche vers Tobirama.",
+
+        resumes: [
+            "{SUJET} lance un crochet avec sa main gauche vers {CIBLE}.",
+            "{SUJET} projette sa main gauche en crochet vers {CIBLE}.",
+            "{SUJET} décoche un crochet gauche en direction de {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec un crochet de sa main gauche."
+        ]
+    },
+
+    {
+        id: "ATT_CG_006",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato arme son gauche puis frappe Tobirama en crochet.",
+
+        resumes: [
+            "{SUJET} arme son gauche puis frappe {CIBLE} en crochet.",
+            "{SUJET} prépare son poing gauche avant d'asséner un crochet à {CIBLE}.",
+            "{SUJET} arme son poing gauche et porte un crochet vers {CIBLE}.",
+            "{SUJET} prépare son crochet gauche avant de frapper {CIBLE}."
+        ]
+    },
+
+    {
+        id: "ATT_CG_007",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato abat un hook du gauche sur Tobirama.",
+
+        resumes: [
+            "{SUJET} abat un hook du gauche sur {CIBLE}.",
+            "{SUJET} rabat son poing gauche en crochet sur {CIBLE}.",
+            "{SUJET} assène un hook gauche à {CIBLE}.",
+            "{SUJET} frappe {CIBLE} d'un puissant crochet du gauche."
+        ]
+    },
+
+    {
+        id: "ATT_CG_008",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato frappe Tobirama avec son poing gauche en mouvement circulaire.",
+
+        resumes: [
+            "{SUJET} frappe {CIBLE} avec son poing gauche dans un mouvement circulaire.",
+            "{SUJET} fait pivoter son poing gauche pour atteindre {CIBLE}.",
+            "{SUJET} porte un coup circulaire du gauche à {CIBLE}.",
+            "{SUJET} frappe {CIBLE} en faisant passer son poing gauche en arc de cercle."
+        ]
+    },
+
+    {
+        id: "ATT_CG_009",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato fait partir son crochet gauche directement vers Tobirama.",
+
+        resumes: [
+            "{SUJET} fait partir son crochet gauche directement vers {CIBLE}.",
+            "{SUJET} déclenche son crochet gauche en direction de {CIBLE}.",
+            "{SUJET} lance rapidement son crochet du gauche vers {CIBLE}.",
+            "{SUJET} projette son crochet gauche directement sur {CIBLE}."
+        ]
+    },
+
+    {
+        id: "ATT_CG_010",
+        modele: "crochet_gauche",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "gauche",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato porte un crochet gauche à Tobirama.",
+
+        resumes: [
+            "{SUJET} porte un crochet gauche à {CIBLE}.",
+            "{SUJET} assène un crochet du gauche à {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec un crochet gauche.",
+            "{SUJET} décoche un crochet gauche en direction de {CIBLE}."
+        ]
+    }
+
+],   
+        
         // =========================================================
-        // 2. CROCHET GAUCHE
-        // =========================================================
+// 3. CROCHET DROIT
+// =========================================================
 
-        crochet_gauche: [
+crochet_droit: [
 
-            {
-                id: "ATT_CG_001",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato frappe Tobirama d'un crochet gauche."
-            },
+    {
+        id: "ATT_CD_001",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato frappe Tobirama d'un crochet droit.",
 
-            {
-                id: "ATT_CG_002",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato décoche un crochet du gauche sur Tobirama."
-            },
+        resumes: [
+            "{SUJET} frappe {CIBLE} d'un crochet droit.",
+            "{SUJET} assène un crochet droit à {CIBLE}.",
+            "{SUJET} porte un crochet du droit en direction de {CIBLE}.",
+            "{SUJET} attaque {CIBLE} avec un crochet de la main droite."
+        ]
+    },
 
-            {
-                id: "ATT_CG_003",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato envoie son poing gauche en crochet vers Tobirama."
-            },
+    {
+        id: "ATT_CD_002",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato décoche un crochet du droit sur Tobirama.",
 
-            {
-                id: "ATT_CG_004",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato balance un hook gauche contre Tobirama."
-            },
+        resumes: [
+            "{SUJET} décoche un crochet du droit sur {CIBLE}.",
+            "{SUJET} lance un crochet droit vers {CIBLE}.",
+            "{SUJET} envoie son crochet droit en direction de {CIBLE}.",
+            "{SUJET} projette un crochet du droit vers {CIBLE}."
+        ]
+    },
 
-            {
-                id: "ATT_CG_005",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato lance un crochet avec sa main gauche vers Tobirama."
-            },
+    {
+        id: "ATT_CD_003",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato envoie son poing droit en crochet vers Tobirama.",
 
-            {
-                id: "ATT_CG_006",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato arme son gauche puis frappe Tobirama en crochet."
-            },
+        resumes: [
+            "{SUJET} envoie son poing droit en crochet vers {CIBLE}.",
+            "{SUJET} projette son poing droit en direction de {CIBLE}.",
+            "{SUJET} lance un crochet de la main droite vers {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec son poing droit en crochet."
+        ]
+    },
 
-            {
-                id: "ATT_CG_007",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato abat un hook du gauche sur Tobirama."
-            },
+    {
+        id: "ATT_CD_004",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato balance un hook droit contre Tobirama.",
 
-            {
-                id: "ATT_CG_008",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato frappe Tobirama avec son poing gauche en mouvement circulaire."
-            },
+        resumes: [
+            "{SUJET} balance un hook droit contre {CIBLE}.",
+            "{SUJET} envoie un hook du droit vers {CIBLE}.",
+            "{SUJET} porte un hook droit en direction de {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec un hook de la main droite."
+        ]
+    },
 
-            {
-                id: "ATT_CG_009",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato fait partir son crochet gauche directement vers Tobirama."
-            },
+    {
+        id: "ATT_CD_005",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato lance un crochet avec sa main droite vers Tobirama.",
 
-            {
-                id: "ATT_CG_010",
-                modele: "crochet_gauche",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "gauche",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato porte un crochet gauche à Tobirama."
-            }
-        ],
+        resumes: [
+            "{SUJET} lance un crochet avec sa main droite vers {CIBLE}.",
+            "{SUJET} projette sa main droite en crochet vers {CIBLE}.",
+            "{SUJET} décoche un crochet droit en direction de {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec un crochet de sa main droite."
+        ]
+    },
 
-        // =========================================================
-        // 3. CROCHET DROIT
-        // =========================================================
+    {
+        id: "ATT_CD_006",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato arme son droit puis frappe Tobirama en crochet.",
 
-        crochet_droit: [
+        resumes: [
+            "{SUJET} arme son droit puis frappe {CIBLE} en crochet.",
+            "{SUJET} prépare son poing droit avant d'asséner un crochet à {CIBLE}.",
+            "{SUJET} arme son poing droit et porte un crochet vers {CIBLE}.",
+            "{SUJET} prépare son crochet droit avant de frapper {CIBLE}."
+        ]
+    },
 
-            {
-                id: "ATT_CD_001",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato frappe Tobirama d'un crochet droit."
-            },
+    {
+        id: "ATT_CD_007",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato abat un hook du droit sur Tobirama.",
 
-            {
-                id: "ATT_CD_002",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato décoche un crochet du droit sur Tobirama."
-            },
+        resumes: [
+            "{SUJET} abat un hook du droit sur {CIBLE}.",
+            "{SUJET} rabat son poing droit en crochet sur {CIBLE}.",
+            "{SUJET} assène un hook droit à {CIBLE}.",
+            "{SUJET} frappe {CIBLE} d'un puissant crochet du droit."
+        ]
+    },
 
-            {
-                id: "ATT_CD_003",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato envoie son poing droit en crochet vers Tobirama."
-            },
+    {
+        id: "ATT_CD_008",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato frappe Tobirama avec son poing droit en mouvement circulaire.",
 
-            {
-                id: "ATT_CD_004",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato balance un hook droit contre Tobirama."
-            },
+        resumes: [
+            "{SUJET} frappe {CIBLE} avec son poing droit dans un mouvement circulaire.",
+            "{SUJET} fait pivoter son poing droit pour atteindre {CIBLE}.",
+            "{SUJET} porte un coup circulaire du droit à {CIBLE}.",
+            "{SUJET} frappe {CIBLE} en faisant passer son poing droit en arc de cercle."
+        ]
+    },
 
-            {
-                id: "ATT_CD_005",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato lance un crochet avec sa main droite vers Tobirama."
-            },
+    {
+        id: "ATT_CD_009",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato fait partir son crochet droit directement vers Tobirama.",
 
-            {
-                id: "ATT_CD_006",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato arme son droit puis frappe Tobirama en crochet."
-            },
+        resumes: [
+            "{SUJET} fait partir son crochet droit directement vers {CIBLE}.",
+            "{SUJET} déclenche son crochet droit en direction de {CIBLE}.",
+            "{SUJET} lance rapidement son crochet du droit vers {CIBLE}.",
+            "{SUJET} projette son crochet droit directement sur {CIBLE}."
+        ]
+    },
 
-            {
-                id: "ATT_CD_007",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato abat un hook du droit sur Tobirama."
-            },
+    {
+        id: "ATT_CD_010",
+        modele: "crochet_droit",
+        famille: "mains",
+        structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
+        slots: {
+            ACTION: "frapper",
+            TYPE: "poing",
+            MAIN: "droite",
+            TRAJECTOIRE: "circulaire"
+        },
+        requis: ["SUJET", "ACTION", "CIBLE"],
+        phrase: "Yamato porte un crochet droit à Tobirama.",
 
-            {
-                id: "ATT_CD_008",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato frappe Tobirama avec son poing droit en mouvement circulaire."
-            },
+        resumes: [
+            "{SUJET} porte un crochet droit à {CIBLE}.",
+            "{SUJET} assène un crochet du droit à {CIBLE}.",
+            "{SUJET} frappe {CIBLE} avec un crochet droit.",
+            "{SUJET} décoche un crochet droit en direction de {CIBLE}."
+        ]
+    }
 
-            {
-                id: "ATT_CD_009",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato fait partir son crochet droit directement vers Tobirama."
-            },
+],
 
-            {
-                id: "ATT_CD_010",
-                modele: "crochet_droit",
-                famille: "mains",
-                structure: ["SUJET", "ACTION", "TYPE", "MAIN", "CIBLE"],
-                slots: {
-                    ACTION: "frapper",
-                    TYPE: "poing",
-                    MAIN: "droite",
-                    TRAJECTOIRE: "circulaire"
-                },
-                requis: ["SUJET", "ACTION", "CIBLE"],
-                phrase: "Yamato porte un crochet droit à Tobirama."
-            }
-        ],
-
+            
         // =========================================================
         // 4. UPPERCUT
         // =========================================================
