@@ -1690,18 +1690,74 @@ function neoExtraireCourbe(texte) {
 
 function neoExtraireHauteur(texte) {
 
-    const match = texte.match(
-        /(?:hauteur|haut|s'élève|s eleve|monte)\s*(?:de|à|a)?\s*(\d+(?:[.,]\d+)?)\s*(mètres?|m|cm|centimètres?)/i
+    /*
+     * Formes :
+     * 5m
+     * 5mh
+     * 5cm
+     * 5cmh
+     * 5km
+     * 5kmh
+     */
+    const matchColle = texte.match(
+        /(?:monte|montant|s'élève|s eleve|hauteur|haut)\s*(?:à|a|de)?\s*(\d+(?:[.,]\d+)?)\s*(kmh?|cmh?|mh?|km|cm|m)\b/i
     );
 
-    if (!match) return null;
+    if (matchColle) {
 
-    return {
-        valeur: Number(match[1].replace(",", ".")),
-        unite: match[2].toLowerCase().startsWith("cm")
-            ? "cm"
-            : "m"
-    };
+        const uniteBrute = matchColle[2]
+            .toLowerCase()
+            .replace(/h$/, "");
+
+        return {
+            valeur: Number(
+                matchColle[1].replace(",", ".")
+            ),
+            unite: uniteBrute
+        };
+    }
+
+    /*
+     * Formes :
+     * 5 mètres de hauteur
+     * 5 m de hauteur
+     * 5 centimètres de hauteur
+     * 5 cm de haut
+     * 5 kilomètres de hauteur
+     */
+    const matchInverse = texte.match(
+        /(\d+(?:[.,]\d+)?)\s*(kilomètres?|km|centimètres?|cm|mètres?|m)\s*(?:de\s+)?(?:hauteur|haut)\b/i
+    );
+
+    if (matchInverse) {
+
+        const uniteBrute = matchInverse[2]
+            .toLowerCase();
+
+        let unite = "m";
+
+        if (
+            uniteBrute === "cm" ||
+            uniteBrute.startsWith("centim")
+        ) {
+            unite = "cm";
+        }
+        else if (
+            uniteBrute === "km" ||
+            uniteBrute.startsWith("kilom")
+        ) {
+            unite = "km";
+        }
+
+        return {
+            valeur: Number(
+                matchInverse[1].replace(",", ".")
+            ),
+            unite
+        };
+    }
+
+    return null;
 }
 
 
