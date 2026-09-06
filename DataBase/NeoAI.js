@@ -5632,122 +5632,195 @@ function neoGenererComprehensionCombat(analyse) {
     return lignes.join("\n");
 }
 
-
+//* =====================================================
+     // GÉNÉRATION DU RESUME 
+     //* =====================================================
 function neoGenererResumeCombat(analyse) {
 
     const s = analyse.slots || {};
 
     const sujet = s.SUJET || "Le combattant";
-    const action = s.ACTION || "se déplace";
-    const maniere = s.MANIERE;
-    const cible = s.CIBLE;
-
-    let phrase = sujet;
+    const cible = s.CIBLE || "";
+    const categorie = analyse.categorie || "";
+    const modele = analyse.modele || "";
+    const famille = analyse.famille || "";
 
     /*
-     * Manière
+     * =====================================================
+     * RECHERCHE DES REFORMULATIONS
+     * =====================================================
      */
 
-    if (maniere === "courir") {
-        phrase += " se déplace en courant";
-    }
+    let reformulations = null;
 
-    else if (maniere === "marcher") {
-        phrase += " se déplace en marchant";
-    }
+    /*
+     * 1. Recherche par catégorie + modèle
+     */
 
-    else if (maniere === "ramper") {
-        phrase += " se déplace en rampant";
-    }
-
-    else if (maniere === "glisser") {
-        phrase += " se déplace en glissant";
-    }
-
-    else if (maniere === "sauter") {
-        phrase += " effectue un saut";
-    }
-
-    else if (maniere === "voler") {
-        phrase += " se déplace dans les airs";
-    }
-
-    else {
-        phrase += ` ${action}`;
+    if (
+        typeof NEO_COMBAT_RESUMES !== "undefined" &&
+        NEO_COMBAT_RESUMES[categorie] &&
+        NEO_COMBAT_RESUMES[categorie][modele]
+    ) {
+        reformulations =
+            NEO_COMBAT_RESUMES[categorie][modele];
     }
 
     /*
-     * Cible
+     * 2. Recherche par catégorie + famille
      */
 
-    if (cible) {
+    if (
+        !reformulations &&
+        typeof NEO_COMBAT_RESUMES !== "undefined" &&
+        NEO_COMBAT_RESUMES[categorie] &&
+        NEO_COMBAT_RESUMES[categorie][famille]
+    ) {
+        reformulations =
+            NEO_COMBAT_RESUMES[categorie][famille];
+    }
 
-        if (analyse.famille === "circulaire") {
-            phrase += ` autour de ${cible}`;
-        } else {
+    /*
+     * 3. Recherche générique par catégorie
+     */
+
+    if (
+        !reformulations &&
+        typeof NEO_COMBAT_RESUMES !== "undefined" &&
+        NEO_COMBAT_RESUMES[categorie] &&
+        Array.isArray(NEO_COMBAT_RESUMES[categorie].default)
+    ) {
+        reformulations =
+            NEO_COMBAT_RESUMES[categorie].default;
+    }
+
+
+    /*
+     * =====================================================
+     * AUCUNE REFORMULATION
+     * =====================================================
+     */
+
+    if (
+        !reformulations ||
+        !Array.isArray(reformulations) ||
+        reformulations.length === 0
+    ) {
+
+        /*
+         * Fallback minimal.
+         * Le moteur ne plante jamais même si aucun
+         * modèle de reformulation n'a encore été ajouté.
+         */
+
+        const action =
+            s.ACTION ||
+            "effectue une action";
+
+        let phrase =
+            `${sujet} ${action}`;
+
+        if (cible) {
             phrase += ` vers ${cible}`;
         }
+
+        return phrase + ".";
     }
+
 
     /*
-     * Côté
+     * =====================================================
+     * CHOIX ALÉATOIRE
+     * =====================================================
      */
 
-    if (s.COTE) {
-        phrase += ` par la ${s.COTE}`;
-    }
+    const modelePhrase =
+        reformulations[
+            Math.floor(
+                Math.random() * reformulations.length
+            )
+        ];
+
 
     /*
-     * Trajectoire / courbe
+     * =====================================================
+     * REMPLACEMENT DES VARIABLES
+     * =====================================================
      */
 
-    if (s.COURBE) {
+    const valeurs = {
+        SUJET: sujet,
+        ACTION: s.ACTION || "",
+        MANIERE: s.MANIERE || "",
+        CIBLE: cible,
+        TYPE: s.TYPE || "",
+        TRAJECTOIRE: s.TRAJECTOIRE || "",
+        MOUVEMENT: s.MOUVEMENT || "",
+        VITESSE: s.VITESSE || "",
+        COTE: s.COTE || "",
+        DIRECTION: s.DIRECTION || "",
+        DISTANCE: s.DISTANCE
+            ? `${s.DISTANCE.valeur} ${s.DISTANCE.unite}`
+            : "",
+        HAUTEUR: s.HAUTEUR
+            ? `${s.HAUTEUR.valeur} ${s.HAUTEUR.unite}`
+            : "",
+        PARTIE:
+            s.PARTIE ||
+            s.PARTIE_DU_CORPS ||
+            ""
+    };
 
-        phrase +=
-            ` en suivant une courbe de ${s.COURBE.valeur} ${s.COURBE.unite}`;
-    }
+
+    let phrase = modelePhrase;
 
     /*
-     * Direction
+     * Remplace :
+     * {SUJET}
+     * {ACTION}
+     * {CIBLE}
+     * etc.
      */
 
-    if (s.DIRECTION) {
-        phrase += ` vers ${s.DIRECTION}`;
-    }
+    phrase = phrase.replace(
+        /\{([A-Z_]+)\}/g,
+        (match, cle) => {
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    valeurs,
+                    cle
+                )
+            ) {
+                return valeurs[cle];
+            }
+
+            return match;
+        }
+    );
+
 
     /*
-     * Vitesse
+     * Nettoyage
      */
 
-    if (s.VITESSE === "vmax") {
-        phrase += " à pleine vitesse";
-    }
+    phrase = phrase
+        .replace(/\s+/g, " ")
+        .replace(/\s+([,.!?])/g, "$1")
+        .trim();
 
-    else if (s.VITESSE) {
-        phrase += ` à ${s.VITESSE} vitesse`;
-    }
 
     /*
-     * Distance
+     * Ponctuation finale
      */
 
-    if (s.DISTANCE) {
-
-        phrase +=
-            ` sur une distance de ${s.DISTANCE.valeur} ${s.DISTANCE.unite}`;
+    if (
+        !/[.!?]$/.test(phrase)
+    ) {
+        phrase += ".";
     }
 
-    /*
-     * Hauteur
-     */
-
-    if (s.HAUTEUR) {
-
-        phrase +=
-            ` à ${s.HAUTEUR.valeur} ${s.HAUTEUR.unite} de hauteur`;
-    }
-
-    return phrase + ".";
+    return phrase;
 }
 
 
