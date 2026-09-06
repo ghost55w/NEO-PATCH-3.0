@@ -1656,17 +1656,53 @@ function neoTrouverCorrespondance(texte, dictionnaire) {
 
 function neoExtraireDistance(texte) {
 
-    const match = texte.match(
-        /(?:sur|de|pendant|parcours?|avance(?:r)?|recule(?:r)?)?\s*(\d+(?:[.,]\d+)?)\s*(mètres?|m|cm|centimètres?)/i
+    /*
+     * On retire d'abord les valeurs explicitement
+     * associées à une hauteur.
+     *
+     * Exemples :
+     * 5m de hauteur
+     * 5m mètres de hauteur
+     * 5 mètres de hauteur
+     * 5mh
+     * 5cmh
+     * 5kmh
+     */
+    let texteSansHauteur = texte.replace(
+        /(?:monte|montant|s'élève|s eleve)\s*(?:à|a|de)?\s*\d+(?:[.,]\d+)?\s*(?:kmh?|cmh?|mh?|km|cm|mètres?|m)\b\s*(?:mètres?|centimètres?|kilomètres?)?\s*(?:de\s+)?hauteur\b/gi,
+        " "
+    );
+
+    texteSansHauteur = texteSansHauteur.replace(
+        /\d+(?:[.,]\d+)?\s*(?:kmh?|cmh?|mh?|km|cm|mètres?|m)\b\s*(?:de\s+)?hauteur\b/gi,
+        " "
+    );
+
+    /*
+     * Recherche de la distance.
+     */
+    const match = texteSansHauteur.match(
+        /(?:sur|de|pendant|parcours?|parcourant|avance(?:r)?|recule(?:r)|distance)?\s*(\d+(?:[.,]\d+)?)\s*(km|cm|mètres?|m)\b(?:\s*(?:de\s+)?distance)?/i
     );
 
     if (!match) return null;
 
+    const uniteBrute = match[2].toLowerCase();
+
+    let unite = "m";
+
+    if (uniteBrute === "cm") {
+        unite = "cm";
+    }
+    else if (uniteBrute === "km") {
+        unite = "km";
+    }
+
     return {
-        valeur: Number(match[1].replace(",", ".")),
-        unite: match[2].toLowerCase().startsWith("cm")
-            ? "cm"
-            : "m"
+        valeur: Number(
+            match[1].replace(",", ".")
+        ),
+        unite
     };
 }
 
