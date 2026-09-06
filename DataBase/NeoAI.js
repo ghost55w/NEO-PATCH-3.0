@@ -2091,9 +2091,27 @@ function neoTrouverMeilleurModeleCombat(analyse) {
         of Object.entries(NEO_COMBAT_MODELS)
     ) {
 
+        /*
+         * Si une famille a déjà été déterminée,
+         * on ne compare que les modèles de cette famille.
+         *
+         * Exemple :
+         * "saute" → saut_bond
+         * "fonce" → frontal
+         * "diagonale" → diagonal
+         */
+        const famillesAAnalyser =
+            analyse?.famille &&
+            familles?.[analyse.famille]
+                ? {
+                    [analyse.famille]:
+                        familles[analyse.famille]
+                }
+                : familles;
+
         for (
             const [famille, modeles]
-            of Object.entries(familles)
+            of Object.entries(famillesAAnalyser)
         ) {
 
             if (!Array.isArray(modeles)) continue;
