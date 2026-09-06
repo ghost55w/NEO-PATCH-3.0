@@ -1821,10 +1821,18 @@ function neoDeterminerFamille(texte, maniere) {
     return null;
 }
 
-
 function neoDeterminerTrajectoire(famille, texte) {
 
     const t = neoNormaliserTexte(texte);
+
+    if (
+        t.includes("zig zag") ||
+        t.includes("zigzag") ||
+        t.includes("en zig zag") ||
+        t.includes("en zigzag")
+    ) {
+        return "zigzag";
+    }
 
     if (t.includes("circulaire") || t.includes("autour de")) {
         return "circulaire";
