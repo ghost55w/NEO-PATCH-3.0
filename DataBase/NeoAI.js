@@ -1790,18 +1790,55 @@ function neoDeterminerFamille(texte, maniere) {
 
     const t = neoNormaliserTexte(texte);
 
-    for (const [famille, variantes] of Object.entries(NEO_COMBAT_FAMILLES)) {
+    /*
+     * PRIORITÉ 1 :
+     * Saut / bond.
+     *
+     * Dès qu'un mouvement de saut ou de bond
+     * est explicitement présent dans le pavé,
+     * on utilise la famille saut_bond.
+     */
+
+    if (
+        t.includes("saute") ||
+        t.includes("sauter") ||
+        t.includes("saut") ||
+        t.includes("en sautant") ||
+        t.includes("bondit") ||
+        t.includes("bondir") ||
+        t.includes("bond") ||
+        t.includes("fait un bond") ||
+        t.includes("fait bond")
+    ) {
+        return "saut_bond";
+    }
+
+    /*
+     * PRIORITÉ 2 :
+     * Familles explicitement indiquées
+     * dans NEO_COMBAT_FAMILLES.
+     */
+
+    for (
+        const [famille, variantes]
+        of Object.entries(NEO_COMBAT_FAMILLES)
+    ) {
 
         for (const variante of variantes) {
 
-            if (t.includes(neoNormaliserTexte(variante))) {
+            if (
+                t.includes(
+                    neoNormaliserTexte(variante)
+                )
+            ) {
                 return famille;
             }
         }
     }
 
     /*
-     * Si rien n'est explicitement indiqué,
+     * PRIORITÉ 3 :
+     * Si aucun mouvement particulier n'est indiqué,
      * un déplacement vers une cible est considéré
      * comme frontal.
      */
