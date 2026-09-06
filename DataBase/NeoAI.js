@@ -184,7 +184,14 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Se déplacer frontalement vers une cible en marchant"
+                description: "Se déplacer frontalement vers une cible en marchant",
+
+                resumes: [
+                    "{SUJET} marche vers {CIBLE}.",
+                    "{SUJET} avance en marchant vers {CIBLE}.",
+                    "{SUJET} se dirige vers {CIBLE} à pied.",
+                    "{SUJET} progresse vers {CIBLE} en marchant."
+                ]
             },
 
             {
@@ -200,7 +207,14 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Se déplacer frontalement vers une cible en courant"
+                description: "Se déplacer frontalement vers une cible en courant",
+
+                resumes: [
+                    "{SUJET} court vers {CIBLE}.",
+                    "{SUJET} se dirige vers {CIBLE} en courant.",
+                    "{SUJET} avance rapidement vers {CIBLE} en courant.",
+                    "{SUJET} fonce vers {CIBLE}."
+                ]
             },
 
             {
@@ -218,7 +232,14 @@ const NEO_COMBAT_MODELS = {
                     "CIBLE",
                     "VITESSE"
                 ],
-                description: "Courir frontalement vers une cible avec une vitesse précisée"
+                description: "Courir frontalement vers une cible avec une vitesse précisée",
+
+                resumes: [
+                    "{SUJET} court vers {CIBLE} à {VITESSE}.",
+                    "{SUJET} fonce vers {CIBLE} à {VITESSE}.",
+                    "{SUJET} se dirige vers {CIBLE} en courant à {VITESSE}.",
+                    "{SUJET} progresse vers {CIBLE} à une vitesse de {VITESSE}."
+                ]
             },
 
             {
@@ -236,7 +257,14 @@ const NEO_COMBAT_MODELS = {
                     "CIBLE",
                     "DISTANCE"
                 ],
-                description: "Se déplacer frontalement sur une distance donnée"
+                description: "Se déplacer frontalement sur une distance donnée",
+
+                resumes: [
+                    "{SUJET} avance vers {CIBLE} sur une distance de {DISTANCE}.",
+                    "{SUJET} se déplace vers {CIBLE} sur {DISTANCE}.",
+                    "{SUJET} progresse vers {CIBLE} en parcourant {DISTANCE}.",
+                    "{SUJET} se dirige vers {CIBLE} sur une distance de {DISTANCE}."
+                ]
             },
 
             {
@@ -254,7 +282,14 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Déplacement frontal avec vitesse et distance"
+                description: "Déplacement frontal avec vitesse et distance",
+
+                resumes: [
+                    "{SUJET} avance vers {CIBLE} à {VITESSE} sur {DISTANCE}.",
+                    "{SUJET} se dirige vers {CIBLE} à {VITESSE} sur une distance de {DISTANCE}.",
+                    "{SUJET} progresse vers {CIBLE} à une vitesse de {VITESSE} sur {DISTANCE}.",
+                    "{SUJET} parcourt {DISTANCE} en direction de {CIBLE} à {VITESSE}."
+                ]
             },
 
             {
@@ -272,7 +307,14 @@ const NEO_COMBAT_MODELS = {
                     "DIRECTION",
                     "CIBLE"
                 ],
-                description: "Déplacement frontal vers une direction précise"
+                description: "Déplacement frontal vers une direction précise",
+
+                resumes: [
+                    "{SUJET} avance vers {CIBLE} en direction de {DIRECTION}.",
+                    "{SUJET} se dirige vers {CIBLE} par la direction {DIRECTION}.",
+                    "{SUJET} progresse vers {CIBLE} en suivant la direction {DIRECTION}.",
+                    "{SUJET} avance dans la direction {DIRECTION} vers {CIBLE}."
+                ]
             },
 
             {
@@ -290,7 +332,14 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Déplacement frontal rapide vers une cible"
+                description: "Déplacement frontal rapide vers une cible",
+
+                resumes: [
+                    "{SUJET} fonce vers {CIBLE} à {VITESSE}.",
+                    "{SUJET} avance rapidement vers {CIBLE} à {VITESSE}.",
+                    "{SUJET} se précipite vers {CIBLE} à {VITESSE}.",
+                    "{SUJET} progresse rapidement en direction de {CIBLE}."
+                ]
             },
 
             {
@@ -307,7 +356,14 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Déplacement frontal avec détails supplémentaires"
+                description: "Déplacement frontal avec détails supplémentaires",
+
+                resumes: [
+                    "{SUJET} avance vers {CIBLE} {EXTRAS}.",
+                    "{SUJET} se dirige vers {CIBLE} {EXTRAS}.",
+                    "{SUJET} progresse vers {CIBLE} {EXTRAS}.",
+                    "{SUJET} se déplace vers {CIBLE} {EXTRAS}."
+                ]
             },
 
             {
@@ -325,7 +381,14 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Déplacement frontal dirigé vers une cible"
+                description: "Déplacement frontal dirigé vers une cible",
+
+                resumes: [
+                    "{SUJET} avance vers {CIBLE} en suivant la direction {DIRECTION}.",
+                    "{SUJET} se dirige vers {CIBLE} sur {DISTANCE} en suivant {DIRECTION}.",
+                    "{SUJET} progresse vers {CIBLE} dans la direction {DIRECTION} sur {DISTANCE}.",
+                    "{SUJET} parcourt {DISTANCE} vers {CIBLE} en suivant {DIRECTION}."
+                ]
             },
 
             {
@@ -344,10 +407,102 @@ const NEO_COMBAT_MODELS = {
                     "MANIERE",
                     "CIBLE"
                 ],
-                description: "Déplacement frontal complet"
-            }
-        ],
+                description: "Déplacement frontal complet",
 
+                resumes: [
+                    "{SUJET} avance vers {CIBLE} à {VITESSE} sur {DISTANCE} {EXTRAS}.",
+                    "{SUJET} se dirige vers {CIBLE} à {VITESSE} en parcourant {DISTANCE} {EXTRAS}.",
+                    "{SUJET} progresse vers {CIBLE} à {VITESSE} sur {DISTANCE} {EXTRAS}.",
+                    "{SUJET} se déplace vers {CIBLE} à {VITESSE} sur une distance de {DISTANCE} {EXTRAS}."
+                ]
+            },
+
+            //==================================================
+            // 🚶 2. MARCHE NORMALE
+            //==================================================
+
+            {
+                id: "DEP_F_011",
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "CIBLE"
+                ],
+                requis: [
+                    "ACTION",
+                    "MANIERE",
+                    "CIBLE"
+                ],
+                description: "Marcher frontalement vers une cible à allure normale",
+
+                resumes: [
+                    "{SUJET} marche vers {CIBLE}.",
+                    "{SUJET} avance tranquillement vers {CIBLE}.",
+                    "{SUJET} se dirige vers {CIBLE} en marchant.",
+                    "{SUJET} progresse vers {CIBLE} à pied."
+                ]
+            },
+
+            //==================================================
+            // 🐢 3. MARCHE LENTE
+            //==================================================
+
+            {
+                id: "DEP_F_012",
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "VITESSE",
+                    "CIBLE"
+                ],
+                requis: [
+                    "ACTION",
+                    "MANIERE",
+                    "VITESSE",
+                    "CIBLE"
+                ],
+                description: "Marcher frontalement vers une cible à allure lente",
+
+                resumes: [
+                    "{SUJET} marche lentement vers {CIBLE}.",
+                    "{SUJET} avance doucement vers {CIBLE}.",
+                    "{SUJET} progresse lentement en direction de {CIBLE}.",
+                    "{SUJET} se dirige calmement vers {CIBLE} à pied."
+                ]
+            },
+
+            //==================================================
+            // 🚶‍♂️💨 4. MARCHE RAPIDE
+            //==================================================
+
+            {
+                id: "DEP_F_013",
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "VITESSE",
+                    "CIBLE"
+                ],
+                requis: [
+                    "ACTION",
+                    "MANIERE",
+                    "VITESSE",
+                    "CIBLE"
+                ],
+                description: "Marcher frontalement vers une cible à allure rapide",
+
+                resumes: [
+                    "{SUJET} marche rapidement vers {CIBLE}.",
+                    "{SUJET} avance d'un pas rapide vers {CIBLE}.",
+                    "{SUJET} progresse rapidement en direction de {CIBLE}.",
+                    "{SUJET} se dirige vers {CIBLE} à vive allure."
+                ]
+            }
+        ]
+    }, 
 
         //======================================================
         // 🔄 2. DÉPLACEMENTS CIRCULAIRES
