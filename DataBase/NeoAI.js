@@ -160,6 +160,9 @@ const NEO_LEARN = {
 // ⚔️ NEO AI — MODÈLES DE COMBAT
 // 🏃 DÉPLACEMENTS — MODÈLES STRUCTURELS
 //==============================================================
+const NEO_COMBAT_MODELS = {
+
+    deplacement: {
 //======================================================
 // 🏃 1. DÉPLACEMENTS FRONTAUX
 //======================================================
