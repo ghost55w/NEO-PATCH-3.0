@@ -2121,48 +2121,183 @@ function neoDeterminerTrajectoire(famille, texte) {
 
 function neoAnalyserStructureCombat(texte) {
 
-    const sujet = neoExtraireSujet(texte);
-    const cible = neoExtraireCible(texte);
+    const sujet =
+        neoExtraireSujet(texte);
 
-    const maniere = neoTrouverCorrespondance(
-        texte,
-        NEO_COMBAT_MANIERES
-    );
-
-    const vitesse = neoTrouverCorrespondance(
-        texte,
-        NEO_COMBAT_VITESSES
-    );
-
-    const famille = neoDeterminerFamille(
-        texte,
-        maniere
-    );
-
-    const trajectoire = neoDeterminerTrajectoire(
-        famille,
-        texte
-    );
-
-    const cote = neoExtraireCote(texte);
-    const direction = neoExtraireDirection(texte);
-    const distance = neoExtraireDistance(texte);
-    const courbe = neoExtraireCourbe(texte);
-    const hauteur = neoExtraireHauteur(texte);
+    const cible =
+        neoExtraireCible(texte);
 
     /*
-     * Détection des actions de combat
-     * à partir du dictionnaire existant.
+     * ======================================================
+     * ⚔️ ACTION COMBAT
+     * ======================================================
      */
 
     const actionCombat =
         neoTrouverCorrespondance(
             texte,
-            NEO_VERBES
+            NEO_VERBES.fr
         );
 
     /*
-     * Détermination de l'action sémantique.
+     * ======================================================
+     * 🏃 MANIÈRE DE DÉPLACEMENT
+     * ======================================================
+     */
+
+    const maniereDeplacement =
+        neoTrouverCorrespondance(
+            texte,
+            NEO_COMBAT_MANIERES
+        );
+
+    /*
+     * ======================================================
+     * ⚔️ MANIÈRE D'ATTAQUE
+     * ======================================================
+     *
+     * Pour l'instant on utilise les expressions
+     * présentes dans les modèles d'attaque.
+     *
+     * On ne crée PAS de nouveau dictionnaire.
+     */
+
+    let maniereAttaque = null;
+
+    if (
+        actionCombat === "frapper" ||
+        actionCombat === "attaquer"
+    ) {
+
+        const t =
+            neoNormaliserTexte(texte);
+
+        /*
+         * Attaques physiques
+         */
+
+        if (
+            t.includes("coup de poing") ||
+            t.includes("poing")
+        ) {
+            maniereAttaque = "poing";
+        }
+
+        else if (
+            t.includes("coup de pied") ||
+            t.includes("pied")
+        ) {
+            maniereAttaque = "pied";
+        }
+
+        else if (
+            t.includes("coup de coude") ||
+            t.includes("coude")
+        ) {
+            maniereAttaque = "coude";
+        }
+
+        else if (
+            t.includes("coup de tête") ||
+            t.includes("coup de tete") ||
+            t.includes("tête") ||
+            t.includes("tete")
+        ) {
+            maniereAttaque = "tête";
+        }
+
+        /*
+         * Attaques armées
+         */
+
+        else if (
+            t.includes("katana") ||
+            t.includes("épée") ||
+            t.includes("epee") ||
+            t.includes("sabre") ||
+            t.includes("couteau") ||
+            t.includes("lame") ||
+            t.includes("bâton") ||
+            t.includes("baton") ||
+            t.includes("nunchaku")
+        ) {
+            maniereAttaque = "arme";
+        }
+
+        /*
+         * Formes d'attaque générales
+         */
+
+        else if (
+            t.includes("coup") ||
+            t.includes("frappe") ||
+            t.includes("attaque")
+        ) {
+            maniereAttaque = "frappe";
+        }
+    }
+
+    /*
+     * ======================================================
+     * ⚡ VITESSE
+     * ======================================================
+     */
+
+    const vitesse =
+        neoTrouverCorrespondance(
+            texte,
+            NEO_COMBAT_VITESSES
+        );
+
+    /*
+     * ======================================================
+     * 🧭 FAMILLE DE DÉPLACEMENT
+     * ======================================================
+     */
+
+    const famille =
+        neoDeterminerFamille(
+            texte,
+            maniereDeplacement
+        );
+
+    /*
+     * ======================================================
+     * 🧭 TRAJECTOIRE
+     * ======================================================
+     */
+
+    const trajectoire =
+        neoDeterminerTrajectoire(
+            famille,
+            texte
+        );
+
+    /*
+     * ======================================================
+     * 📐 PARAMÈTRES
+     * ======================================================
+     */
+
+    const cote =
+        neoExtraireCote(texte);
+
+    const direction =
+        neoExtraireDirection(texte);
+
+    const distance =
+        neoExtraireDistance(texte);
+
+    const courbe =
+        neoExtraireCourbe(texte);
+
+    const hauteur =
+        neoExtraireHauteur(texte);
+
+    /*
+     * ======================================================
+     * 🎯 ACTION FINALE
+     * ======================================================
      */
 
     let action = null;
@@ -2170,18 +2305,25 @@ function neoAnalyserStructureCombat(texte) {
     /*
      * ⚔️ ATTAQUE
      */
-    if (actionCombat === "frapper") {
+
+    if (
+        (
+            actionCombat === "frapper" ||
+            actionCombat === "attaquer"
+        ) &&
+        maniereAttaque
+    ) {
         action = "frapper";
     }
 
     /*
      * 🏃 DÉPLACEMENT
      *
-     * On conserve exactement
-     * la logique existante.
+     * On conserve la logique existante.
      */
+
     else if (
-        maniere ||
+        maniereDeplacement ||
         famille ||
         direction ||
         trajectoire
@@ -2189,25 +2331,57 @@ function neoAnalyserStructureCombat(texte) {
         action = "se déplacer";
     }
 
+    /*
+     * ======================================================
+     * 📦 SLOTS
+     * ======================================================
+     */
+
     const slots = {
+
         SUJET: sujet,
+
         ACTION: action,
-        MANIERE: maniere,
+
+        MANIERE:
+            action === "frapper"
+                ? maniereAttaque
+                : maniereDeplacement,
+
         CIBLE: cible,
-        TRAJECTOIRE: trajectoire,
-        COTE: cote,
-        COURBE: courbe,
-        DIRECTION: direction,
-        VITESSE: vitesse,
-        DISTANCE: distance,
-        HAUTEUR: hauteur
+
+        TRAJECTOIRE:
+            trajectoire,
+
+        COTE:
+            cote,
+
+        COURBE:
+            courbe,
+
+        DIRECTION:
+            direction,
+
+        VITESSE:
+            vitesse,
+
+        DISTANCE:
+            distance,
+
+        HAUTEUR:
+            hauteur
     };
 
     /*
-     * Nettoyage des valeurs absentes.
+     * ======================================================
+     * 🧹 NETTOYAGE
+     * ======================================================
      */
 
-    for (const key of Object.keys(slots)) {
+    for (
+        const key
+        of Object.keys(slots)
+    ) {
 
         if (
             slots[key] === null ||
@@ -2222,7 +2396,6 @@ function neoAnalyserStructureCombat(texte) {
         slots
     };
 }
-
 
 function neoComparerModeleCombat(analyse, modele) {
 
