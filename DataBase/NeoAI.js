@@ -4987,88 +4987,198 @@ function neoDeterminerTrajectoire(famille, texte) {
 
 
 function neoAnalyserStructureCombat(texte) {
+    const sujet =
+        neoExtraireSujet(texte);
 
-    const sujet = neoExtraireSujet(texte);
-    const cible = neoExtraireCible(texte);
+    const cible =
+        neoExtraireCible(texte);
 
-    const maniere = neoTrouverCorrespondance(
-        texte,
-        NEO_COMBAT_MANIERES
-    );
 
-    const vitesse = neoTrouverCorrespondance(
-        texte,
-        NEO_COMBAT_VITESSES
-    );
+    //==========================================================
+    // 🔎 VERBE PRINCIPAL
+    //==========================================================
 
-    const famille = neoDeterminerFamille(
-        texte,
-        maniere
-    );
+    const tokens =
+        neoTokeniser(texte);
 
-    const trajectoire = neoDeterminerTrajectoire(
-        famille,
-        texte
-    );
+    let verbe = null;
+    let indexVerbe = -1;
 
-    const cote = neoExtraireCote(texte);
-    const direction = neoExtraireDirection(texte);
-    const distance = neoExtraireDistance(texte);
-    const courbe = neoExtraireCourbe(texte);
-    const hauteur = neoExtraireHauteur(texte);
-
-    /*
-     * Pour les déplacements :
-     * l'action sémantique est TOUJOURS
-     * "se déplacer".
-     *
-     * La manière précise comment.
-     */
-
-    let action = null;
-
-    if (
-        maniere ||
-        famille ||
-        direction ||
-        trajectoire
+    for (
+        let i = 0;
+        i < tokens.length;
+        i++
     ) {
-        action = "se déplacer";
+
+        const resultat =
+            neoTrouverVerbe(
+                tokens[i]
+            );
+
+        if (resultat) {
+
+            verbe = resultat;
+            indexVerbe = i;
+
+            break;
+        }
     }
 
+
+    //==========================================================
+    // 🏃 MANIÈRE
+    //==========================================================
+
+    const maniere =
+        neoTrouverCorrespondance(
+            texte,
+            NEO_COMBAT_MANIERES
+        );
+
+
+    //==========================================================
+    // ⚡ VITESSE
+    //==========================================================
+
+    const vitesse =
+        neoTrouverCorrespondance(
+            texte,
+            NEO_COMBAT_VITESSES
+        );
+
+
+    //==========================================================
+    // 🧭 FAMILLE
+    //==========================================================
+
+    const famille =
+        neoDeterminerFamille(
+            texte,
+            maniere
+        );
+
+
+    //==========================================================
+    // 🎯 TRAJECTOIRE
+    //==========================================================
+
+    const trajectoire =
+        neoDeterminerTrajectoire(
+            famille,
+            texte
+        );
+
+
+    //==========================================================
+    // 📐 INFORMATIONS COMPLÉMENTAIRES
+    //==========================================================
+
+    const cote =
+        neoExtraireCote(texte);
+
+    const direction =
+        neoExtraireDirection(texte);
+
+    const distance =
+        neoExtraireDistance(texte);
+
+    const courbe =
+        neoExtraireCourbe(texte);
+
+    const hauteur =
+        neoExtraireHauteur(texte);
+
+
+    //==========================================================
+    // 🧠 ACTION
+    //==========================================================
+
+    const action =
+        verbe?.lemme ||
+        null;
+
+
+    //==========================================================
+    // 🏷️ CATÉGORIE
+    //==========================================================
+
+    const categorie =
+        neoDeterminerCategorieCombat(
+            verbe
+        );
+
+
+    //==========================================================
+    // 📦 SLOTS
+    //==========================================================
+
     const slots = {
+
         SUJET: sujet,
+
         ACTION: action,
+
         MANIERE: maniere,
+
         CIBLE: cible,
+
         TRAJECTOIRE: trajectoire,
+
         COTE: cote,
+
         COURBE: courbe,
+
         DIRECTION: direction,
+
         VITESSE: vitesse,
+
         DISTANCE: distance,
+
         HAUTEUR: hauteur
+
     };
 
-    /*
-     * Nettoyage des valeurs absentes.
-     */
 
-    for (const key of Object.keys(slots)) {
+    //==========================================================
+    // 🧹 NETTOYAGE
+    //==========================================================
+
+    for (
+        const key
+        of Object.keys(slots)
+    ) {
+
         if (
             slots[key] === null ||
             slots[key] === undefined
         ) {
+
             delete slots[key];
+
         }
+
     }
 
+
+    //==========================================================
+    // 📤 RÉSULTAT
+    //==========================================================
+
     return {
+
+        verbe,
+
+        indexVerbe,
+
+        categorie,
+
         famille,
+
         slots
+
     };
 }
-
+    
 
 function neoComparerModeleCombat(analyse, modele) {
 
@@ -5156,24 +5266,237 @@ function neoComparerModeleCombat(analyse, modele) {
     };
 }
 
+//==============================================================
+// 🧭 DÉTERMINER LA CATÉGORIE COMBAT DEPUIS LE VERBE
+//==============================================================
+//
+// Le verbe est la première source de routage.
+// Aucun tableau manuel de mots n'est utilisé.
+//
+// Exemple :
+// "frappe" → frapper → attaque
+// "fonce"  → foncer  → deplacement
+//
+//==============================================================
+
+function neoDeterminerCategorieCombat(verbe) {
+
+    if (!verbe) return null;
+
+    const lemme =
+        typeof verbe === "string"
+            ? verbe
+            : verbe.lemme;
+
+    if (!lemme) return null;
+
+    const lemmeNormalise =
+        neoSansAccents(lemme);
+
+    let meilleureCategorie = null;
+    let meilleurScore = 0;
+
+
+    //==========================================================
+    // 🔎 PARCOURS RÉCURSIF DES MODÈLES
+    //==========================================================
+
+    function parcourir(noeud, categorie) {
+
+        if (Array.isArray(noeud)) {
+
+            for (const modele of noeud) {
+
+                if (!modele) continue;
+
+                const slots =
+                    modele.slots || {};
+
+
+                //================================================
+                // ⚔️ ACTION DIRECTE
+                //================================================
+
+                if (slots.ACTION) {
+
+                    const action =
+                        neoSansAccents(
+                            slots.ACTION
+                        );
+
+                    if (
+                        action ===
+                        lemmeNormalise
+                    ) {
+
+                        return 100;
+
+                    }
+                }
+
+
+                //================================================
+                // 🏃 MANIÈRE DE DÉPLACEMENT
+                //================================================
+
+                if (slots.MANIERE) {
+
+                    const maniere =
+                        neoSansAccents(
+                            slots.MANIERE
+                        );
+
+                    if (
+                        maniere ===
+                        lemmeNormalise
+                    ) {
+
+                        return 100;
+
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+
+        if (
+            !noeud ||
+            typeof noeud !== "object"
+        ) {
+
+            return 0;
+
+        }
+
+
+        let score = 0;
+
+        for (
+            const valeur
+            of Object.values(noeud)
+        ) {
+
+            score = Math.max(
+                score,
+                parcourir(
+                    valeur,
+                    categorie
+                )
+            );
+
+            if (score === 100) {
+                break;
+            }
+        }
+
+        return score;
+    }
+
+
+    //==========================================================
+    // 🔎 TEST DE CHAQUE CATÉGORIE
+    //==========================================================
+
+    for (
+        const [categorie, branche]
+        of Object.entries(
+            NEO_COMBAT_MODELS
+        )
+    ) {
+
+        const score =
+            parcourir(
+                branche,
+                categorie
+            );
+
+        if (
+            score >
+            meilleurScore
+        ) {
+
+            meilleurScore = score;
+            meilleureCategorie =
+                categorie;
+
+        }
+    }
+
+
+    return meilleureCategorie;
+}
+
+//==============================================================
+// 🧠 MEILLEUR MODÈLE COMBAT
+//==============================================================
+//
+// 1. Utilise la catégorie déterminée par le verbe.
+// 2. N'examine QUE cette branche.
+// 3. Parcourt automatiquement toutes les sous-branches.
+// 4. Compare les modèles compatibles.
+// 5. Retourne le meilleur.
+//
+// Aucun traitement spécifique à attaque/esquive/parade/etc.
+// n'est nécessaire.
+//
+//==============================================================
 
 function neoTrouverMeilleurModeleCombat(analyse) {
 
-    let meilleurs = [];
-
-    for (
-        const [categorie, familles]
-        of Object.entries(NEO_COMBAT_MODELS)
+    if (
+        !analyse ||
+        !analyse.categorie
     ) {
 
-        for (
-            const [famille, modeles]
-            of Object.entries(familles)
-        ) {
+        return null;
 
-            if (!Array.isArray(modeles)) continue;
+    }
 
-            for (const modele of modeles) {
+
+    const categorie =
+        analyse.categorie;
+
+
+    const branche =
+        NEO_COMBAT_MODELS[
+            categorie
+        ];
+
+
+    if (!branche) {
+
+        return null;
+
+    }
+
+
+    const meilleurs = [];
+
+
+    //==========================================================
+    // 🔎 PARCOURS RÉCURSIF
+    //==========================================================
+
+    function parcourir(
+        noeud,
+        chemin = []
+    ) {
+
+        //======================================================
+        // 📚 LISTE DE MODÈLES
+        //======================================================
+
+        if (Array.isArray(noeud)) {
+
+            for (
+                const modele
+                of noeud
+            ) {
+
+                if (!modele) continue;
+
 
                 const comparaison =
                     neoComparerModeleCombat(
@@ -5181,25 +5504,91 @@ function neoTrouverMeilleurModeleCombat(analyse) {
                         modele
                     );
 
+
                 meilleurs.push({
+
                     categorie,
-                    famille,
+
+                    famille:
+                        chemin[
+                            chemin.length - 1
+                        ] || null,
+
+                    chemin,
+
                     modele,
-                    score: comparaison.score,
+
+                    score:
+                        comparaison.score,
+
                     requisManquants:
                         comparaison.requisManquants
+
                 });
+
             }
+
+            return;
+        }
+
+
+        //======================================================
+        // 📦 OBJET / SOUS-BRANCHE
+        //======================================================
+
+        if (
+            !noeud ||
+            typeof noeud !== "object"
+        ) {
+
+            return;
+
+        }
+
+
+        for (
+            const [
+                cle,
+                valeur
+            ]
+            of Object.entries(noeud)
+        ) {
+
+            parcourir(
+                valeur,
+                [
+                    ...chemin,
+                    cle
+                ]
+            );
+
         }
     }
 
+
+    //==========================================================
+    // 🚀 LANCEMENT
+    //==========================================================
+
+    parcourir(branche);
+
+
+    //==========================================================
+    // 🏆 TRI
+    //==========================================================
+
     meilleurs.sort(
-        (a, b) => b.score - a.score
+        (a, b) =>
+            b.score -
+            a.score
     );
 
-    return meilleurs[0] || null;
-}
 
+    return (
+        meilleurs[0] ||
+        null
+    );
+}
 
 function neoGenererComprehensionCombat(analyse) {
 
@@ -5365,10 +5754,39 @@ function neoGenererResumeCombat(analyse) {
 function neoAnalyserCombat(texte) {
 
     const analyse =
-        neoAnalyserStructureCombat(texte);
+    neoAnalyserStructureCombat(texte);
 
-    const meilleur =
-        neoTrouverMeilleurModeleCombat(analyse);
+
+//==========================================================
+// 🧭 ROUTAGE PAR VERBE
+//==========================================================
+
+const verbe =
+    analyse.verbe ||
+    null;
+
+const categorie =
+    neoDeterminerCategorieCombat(
+        verbe
+    );
+
+
+//==========================================================
+// 🏷️ CATÉGORIE
+//==========================================================
+
+analyse.categorie =
+    categorie;
+
+
+//==========================================================
+// 🧠 RECHERCHE DU MODÈLE
+//==========================================================
+
+const meilleur =
+    neoTrouverMeilleurModeleCombat(
+        analyse
+    );
 
     if (!meilleur) {
         return {
