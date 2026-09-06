@@ -1092,9 +1092,9 @@ function analyserNeoAI(
     // 🥊 SI UN MODÈLE COMBAT EST TROUVÉ
     //==========================================================
     if (
-        combat &&
-        combat.score > 0
-    ) {
+    combat &&
+    combat.categorie
+) {
 
         //======================================================
         // 🔎 VERBE
