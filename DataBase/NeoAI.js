@@ -2151,16 +2151,36 @@ function neoAnalyserStructureCombat(texte) {
     const hauteur = neoExtraireHauteur(texte);
 
     /*
-     * Pour les déplacements :
-     * l'action sémantique est TOUJOURS
-     * "se déplacer".
-     *
-     * La manière précise comment.
+     * Détection des actions de combat
+     * à partir du dictionnaire existant.
+     */
+
+    const actionCombat =
+        neoTrouverCorrespondance(
+            texte,
+            NEO_VERBES
+        );
+
+    /*
+     * Détermination de l'action sémantique.
      */
 
     let action = null;
 
-    if (
+    /*
+     * ⚔️ ATTAQUE
+     */
+    if (actionCombat === "frapper") {
+        action = "frapper";
+    }
+
+    /*
+     * 🏃 DÉPLACEMENT
+     *
+     * On conserve exactement
+     * la logique existante.
+     */
+    else if (
         maniere ||
         famille ||
         direction ||
@@ -2188,6 +2208,7 @@ function neoAnalyserStructureCombat(texte) {
      */
 
     for (const key of Object.keys(slots)) {
+
         if (
             slots[key] === null ||
             slots[key] === undefined
