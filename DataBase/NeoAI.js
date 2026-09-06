@@ -594,774 +594,580 @@ lateral: [
 
 ],   
 
+//======================================================
+// ↗️ 4. DÉPLACEMENTS DIAGONAUX
+//======================================================
 
-        //======================================================
-        // ↗️ 4. DÉPLACEMENTS DIAGONAUX
-        //======================================================
+diagonal: [
 
-        diagonal: [
+    {
+        id: "DEP_D_001",
 
-            {
-                id: "DEP_D_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal simple"
-            },
-
-            {
-                id: "DEP_D_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal vers une cible"
-            },
-
-            {
-                id: "DEP_D_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ANGLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal avec angle"
-            },
-
-            {
-                id: "DEP_D_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal sur une distance"
-            },
-
-            {
-                id: "DEP_D_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal avec vitesse"
-            },
-
-            {
-                id: "DEP_D_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ANGLE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal rapide avec angle"
-            },
-
-            {
-                id: "DEP_D_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "ANGLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal précis"
-            },
-
-            {
-                id: "DEP_D_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal complet"
-            },
-
-            {
-                id: "DEP_D_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal avec détails"
-            },
-
-            {
-                id: "DEP_D_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ANGLE",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement diagonal complet avec paramètres"
-            }
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
         ],
 
-
-        //======================================================
-        // 🔙 5. DÉPLACEMENTS EN ARRIÈRE
-        //======================================================
-
-        arriere: [
-
-            {
-                id: "DEP_A_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul simple"
-            },
-
-            {
-                id: "DEP_A_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul sur une distance"
-            },
-
-            {
-                id: "DEP_A_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul avec vitesse"
-            },
-
-            {
-                id: "DEP_A_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Recul dans une direction"
-            },
-
-            {
-                id: "DEP_A_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE"
-                ],
-                description: "Recul par rapport à une cible"
-            },
-
-            {
-                id: "DEP_A_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Recul rapide"
-            },
-
-            {
-                id: "DEP_A_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul avec distance et vitesse"
-            },
-
-            {
-                id: "DEP_A_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Recul détaillé"
-            },
-
-            {
-                id: "DEP_A_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul rapide par rapport à une cible"
-            },
-
-            {
-                id: "DEP_A_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE"
-                ],
-                description: "Recul complet"
-            }
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
         ],
 
+        description:
+            "Déplacement diagonal simple dans une direction précise.",
 
-        //======================================================
-        // 🪽 6. DÉPLACEMENTS AÉRIENS
-        //======================================================
-
-        aerien: [
-
-            {
-                id: "DEP_AE_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien à une hauteur donnée"
-            },
-
-            {
-                id: "DEP_AE_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien dirigé"
-            },
-
-            {
-                id: "DEP_AE_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien vers une cible"
-            },
-
-            {
-                id: "DEP_AE_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien sur une distance"
-            },
-
-            {
-                id: "DEP_AE_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien suivant une trajectoire"
-            },
-
-            {
-                id: "DEP_AE_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien rapide"
-            },
-
-            {
-                id: "DEP_AE_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien vers une cible sur une distance"
-            },
-
-            {
-                id: "DEP_AE_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "DIRECTION",
-                    "HAUTEUR",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien complet"
-            },
-
-            {
-                id: "DEP_AE_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien avec détails"
-            },
-
-            {
-                id: "DEP_AE_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "DISTANCE",
-                    "HAUTEUR",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Déplacement aérien complet avec paramètres"
-            }
-        ],
-
-
-        //======================================================
-        // 🦘 7. SAUTS / BONDS
-        //======================================================
-
-        saut_bond: [
-
-            {
-                id: "DEP_SB_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                description: "Saut vertical simple"
-            },
-
-            {
-                id: "DEP_SB_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Saut dirigé"
-            },
-
-            {
-                id: "DEP_SB_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                description: "Bond avec distance et hauteur"
-            },
-
-            {
-                id: "DEP_SB_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                description: "Bond vers une cible"
-            },
-
-            {
-                id: "DEP_SB_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Saut dans une direction"
-            },
-
-            {
-                id: "DEP_SB_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Saut suivant une trajectoire"
-            },
-
-            {
-                id: "DEP_SB_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "HAUTEUR"
-                ],
-                description: "Saut rapide"
-            },
-
-            {
-                id: "DEP_SB_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "HAUTEUR"
-                ],
-                description: "Bond dirigé vers une cible"
-            },
-
-            {
-                id: "DEP_SB_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "ANGLE",
-                    "HAUTEUR"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "TRAJECTOIRE",
-                    "HAUTEUR"
-                ],
-                description: "Saut avec trajectoire et angle"
-            },
-
-            {
-                id: "DEP_SB_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "DISTANCE",
-                    "HAUTEUR",
-                    "ANGLE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "HAUTEUR"
-                ],
-                description: "Saut ou bond complet"
-            }
-        ]
+        exemple:
+            "Naruto se déplace en diagonale vers l'avant gauche."
     },
 
+    {
+        id: "DEP_D_002",
 
-    //==========================================================
-    // ⚔️ FUTURES CATÉGORIES
-    //==========================================================
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
 
-    attaque: [],
-    esquive: [],
-    contre: [],
-    parade: [],
-    saisie: []
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
 
-};
+        description:
+            "Déplacement diagonal dans une direction précise vers une cible.",
+
+        exemple:
+            "Naruto fonce en diagonale vers l'avant droit en direction de Maki."
+    },
+
+    {
+        id: "DEP_D_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement diagonal avec angle et distance déterminés jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto avance en diagonale à 45 degrés sur 6 mètres pour arriver à 2 mètres de Maki."
+    },
+
+    {
+        id: "DEP_D_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement diagonal à une vitesse donnée vers une cible jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto fonce en diagonale à vitesse maximale vers Maki pour finir à 2 mètres d'elle."
+    },
+
+    {
+        id: "DEP_D_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE",
+            "CIBLE",
+            "DISTANCE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "ANGLE",
+            "CIBLE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement diagonal complet avec direction, angle, cible, distance, vitesse et position finale.",
+
+        exemple:
+            "Naruto fonce à vitesse maximale en diagonale à 45 degrés vers Maki sur 8 mètres pour arriver à 1 mètre sur son côté droit."
+    }
+
+],
+                
+        //======================================================
+// 🔙 5. DÉPLACEMENTS EN ARRIÈRE
+//======================================================
+
+arriere: [
+
+    {
+        id: "DEP_A_001",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE"
+        ],
+
+        description:
+            "Recul simple sans paramètre supplémentaire.",
+
+        exemple:
+            "Naruto recule rapidement."
+    },
+
+    {
+        id: "DEP_A_002",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        description:
+            "Recul dans une direction déterminée sur une distance précise.",
+
+        exemple:
+            "Naruto recule vers l'arrière gauche sur 5 mètres."
+    },
+
+    {
+        id: "DEP_A_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Recul par rapport à une cible sur une distance déterminée jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto recule de Maki sur 5 mètres pour arriver à 8 mètres d'elle."
+    },
+
+    {
+        id: "DEP_A_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Recul rapide dans une direction précise jusqu'à une position finale déterminée.",
+
+        exemple:
+            "Naruto recule à vitesse maximale vers l'arrière droit pour finir à 6 mètres de Maki."
+    },
+
+    {
+        id: "DEP_A_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "DISTANCE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Recul complet avec direction, cible, distance, vitesse et position finale.",
+
+        exemple:
+            "Naruto recule à vitesse maximale vers l'arrière gauche par rapport à Maki sur 8 mètres pour finir à 10 mètres d'elle."
+    }
+
+],
+
+        //======================================================
+// 🪽 6. DÉPLACEMENTS AÉRIENS
+//======================================================
+
+aerien: [
+
+    {
+        id: "DEP_AE_001",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+
+        description:
+            "Déplacement aérien à une hauteur déterminée.",
+
+        exemple:
+            "Naruto saute et s'élève à 5 mètres de hauteur."
+    },
+
+    {
+        id: "DEP_AE_002",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement aérien dans une direction précise jusqu'à une position finale déterminée.",
+
+        exemple:
+            "Naruto saute vers l'avant à 5 mètres de hauteur pour arriver à 3 mètres de Maki."
+    },
+
+    {
+        id: "DEP_AE_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement aérien vers une cible sur une distance déterminée jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto bondit vers Maki à 5 mètres de hauteur sur 8 mètres pour arriver à 2 mètres d'elle."
+    },
+
+    {
+        id: "DEP_AE_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "VITESSE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement aérien suivant une trajectoire précise avec direction et vitesse jusqu'à une position finale.",
+
+        exemple:
+            "Naruto s'élève à vitesse maximale en suivant une trajectoire courbe vers l'avant à 6 mètres de hauteur pour finir derrière Maki."
+    },
+
+    {
+        id: "DEP_AE_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "DISTANCE",
+            "VITESSE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement aérien complet avec cible, trajectoire, direction, distance, vitesse, hauteur et position finale.",
+
+        exemple:
+            "Naruto bondit à vitesse maximale vers Maki en suivant une trajectoire courbe sur 10 mètres à 5 mètres de hauteur pour finir sur son profil droit."
+    }
+
+],                    
+
+//======================================================
+// 🦘 7. SAUTS / BONDS
+//======================================================
+
+saut_bond: [
+
+    {
+        id: "DEP_SB_001",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR"
+        ],
+
+        description:
+            "Saut ou bond simple avec une hauteur déterminée.",
+
+        exemple:
+            "Naruto saute et s'élève à 5 mètres de hauteur."
+    },
+
+    {
+        id: "DEP_SB_002",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Saut dirigé dans une direction précise jusqu'à une position finale déterminée.",
+
+        exemple:
+            "Naruto saute vers l'avant à 5 mètres de hauteur pour arriver à 3 mètres de Maki."
+    },
+
+    {
+        id: "DEP_SB_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DISTANCE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DISTANCE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Bond avec distance parcourue et hauteur déterminées jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto bondit sur 8 mètres à 5 mètres de hauteur pour arriver à 2 mètres de Maki."
+    },
+
+    {
+        id: "DEP_SB_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DIRECTION",
+            "DISTANCE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Bond dirigé vers une cible avec distance et hauteur déterminées jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto bondit vers Maki dans sa direction sur 8 mètres à 5 mètres de hauteur pour arriver à 2 mètres d'elle."
+    },
+
+    {
+        id: "DEP_SB_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "DISTANCE",
+            "VITESSE",
+            "HAUTEUR",
+            "ANGLE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Saut ou bond complet avec cible, trajectoire, direction, distance, vitesse, hauteur, angle et position finale.",
+
+        exemple:
+            "Naruto bondit à vitesse maximale vers Maki en suivant une trajectoire courbe à 45 degrés sur 10 mètres, à 5 mètres de hauteur, pour finir sur son profil droit."
+    }
+
+]                        
 
                             
 //==============================================================
