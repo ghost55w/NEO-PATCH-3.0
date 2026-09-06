@@ -1172,7 +1172,401 @@ saut_bond: [
     // ⚔️ FUTURES CATÉGORIES
     //==========================================================
 
-    attaque: [],
+//==========================================================
+// ⚔️ ATTAQUES
+//==========================================================
+
+attaque: [
+
+    {
+        id: "ATT_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque simple portée contre une cible.",
+        exemple:
+            "Naruto frappe Maki avec un coup de poing direct."
+    },
+
+    {
+        id: "ATT_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "PARTIE_CORPS",
+            "COTE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque ciblée avec une partie du corps et éventuellement un côté déterminé.",
+        exemple:
+            "Naruto frappe Maki du poing droit au visage."
+    },
+
+    {
+        id: "ATT_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "PARTIE_CORPS",
+            "FIN_TRAJET"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque portée depuis une distance déterminée avec une partie du corps et une position finale précises.",
+        exemple:
+            "Naruto frappe Maki d'un coup de pied à 2 mètres de distance pour finir au niveau de sa cuisse."
+    },
+
+    {
+        id: "ATT_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DIRECTION",
+            "ANGLE",
+            "PARTIE_CORPS",
+            "COTE"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque dirigée avec une direction, un angle et une partie du corps déterminés.",
+        exemple:
+            "Naruto frappe Maki avec un coup de pied circulaire venant de la droite à 45 degrés vers son visage."
+    },
+
+    {
+        id: "ATT_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "VITESSE",
+            "DISTANCE",
+            "ANGLE",
+            "PARTIE_CORPS",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque complète avec trajectoire, direction, vitesse, distance, angle, côté et position finale.",
+        exemple:
+            "Naruto frappe Maki à vitesse maximale avec un coup de pied circulaire venant de la droite à 45 degrés sur 2 mètres vers son visage pour finir au niveau de sa tempe."
+    },
+
+    //======================================================
+    // 🗡️ ATTAQUES AVEC ARMES
+    //======================================================
+
+    {
+        id: "ATT_A_001",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque simple avec une arme contre une cible.",
+        exemple:
+            "Naruto frappe Maki avec son katana."
+    },
+
+    {
+        id: "ATT_A_002",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque avec une arme suivant une trajectoire déterminée.",
+        exemple:
+            "Naruto frappe Maki avec son katana en effectuant une découpe descendante."
+    },
+
+    {
+        id: "ATT_A_003",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque armée avec une trajectoire et une direction précises.",
+        exemple:
+            "Naruto frappe Maki avec son katana en effectuant une découpe latérale vers la droite."
+    },
+
+    {
+        id: "ATT_A_004",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "ANGLE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque armée avec trajectoire, direction, angle et zone d'impact déterminés.",
+        exemple:
+            "Naruto frappe Maki avec son katana en effectuant une découpe diagonale à 45 degrés vers son épaule."
+    },
+
+    {
+        id: "ATT_A_005",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "VITESSE",
+            "DISTANCE",
+            "ANGLE",
+            "CIBLE",
+            "PARTIE_CORPS",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque armée complète avec trajectoire, direction, vitesse, distance, angle et zone d'impact.",
+        exemple:
+            "Naruto frappe Maki à vitesse maximale avec son katana en effectuant une découpe diagonale descendante à 45 degrés sur 2 mètres depuis la droite vers son épaule gauche."
+    },
+
+    //======================================================
+    // 🗡️ ESTOC / PIQUE
+    //======================================================
+
+    {
+        id: "ATT_A_006",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque d'estoc avec une arme dirigée vers l'avant.",
+        exemple:
+            "Naruto pique Maki avec son katana en ligne directe."
+    },
+
+    {
+        id: "ATT_A_007",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Estoc dirigé vers une partie précise du corps.",
+        exemple:
+            "Naruto pique frontalement Maki avec son katana en visant son abdomen."
+    },
+
+    //======================================================
+    // 🥋 ARMES CONTONDANTES
+    //======================================================
+
+    {
+        id: "ATT_A_008",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque avec une arme contondante suivant une trajectoire précise.",
+        exemple:
+            "Naruto frappe Maki avec son bâton dans une trajectoire latérale."
+    },
+
+    //======================================================
+    // ⛓️ ARMES FLEXIBLES
+    //======================================================
+
+    {
+        id: "ATT_A_009",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE"
+        ],
+        description:
+            "Attaque avec une arme flexible ou articulée suivant une trajectoire déterminée.",
+        exemple:
+            "Naruto frappe Maki avec son nunchaku dans une trajectoire circulaire."
+    },
+
+    //======================================================
+    // ⚔️ ATTAQUE ARMÉE COMPLÈTE
+    //======================================================
+
+    {
+        id: "ATT_A_010",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "DIRECTION",
+            "VITESSE",
+            "DISTANCE",
+            "ANGLE",
+            "CIBLE",
+            "PARTIE_CORPS",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+        requis: [
+            "ACTION",
+            "ARME",
+            "MANIERE",
+            "TRAJECTOIRE",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+        description:
+            "Attaque armée complète intégrant tous les paramètres disponibles.",
+        exemple:
+            "Naruto frappe Maki à vitesse maximale avec son katana en effectuant une découpe descendante depuis la droite à 45 degrés sur 3 mètres vers son épaule gauche."
+    }
+
+],
     esquive: [],
     contre: [],
     parade: [],
