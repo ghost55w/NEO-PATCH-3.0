@@ -1165,9 +1165,20 @@ saut_bond: [
 
         exemple:
             "Naruto bondit à vitesse maximale vers Maki en suivant une trajectoire courbe à 45 degrés sur 10 mètres, à 5 mètres de hauteur, pour finir sur son profil droit."
-    }
+            }
+        ]
+    },
+    //==========================================================
+    // ⚔️ FUTURES CATÉGORIES
+    //==========================================================
 
-]                        
+    attaque: [],
+    esquive: [],
+    contre: [],
+    parade: [],
+    saisie: []
+
+};
 
                             
 //==============================================================
