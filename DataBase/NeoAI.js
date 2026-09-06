@@ -453,191 +453,146 @@ circulaire: [
     }
 
 ],
-                    
-        //======================================================
-        // ↔️ 3. DÉPLACEMENTS LATÉRAUX
-        //======================================================
 
-        lateral: [
+        
+//======================================================
+// ↔️ 3. DÉPLACEMENTS LATÉRAUX
+//======================================================
 
-            {
-                id: "DEP_L_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral simple"
-            },
+lateral: [
 
-            {
-                id: "DEP_L_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral vers une cible"
-            },
+    {
+        id: "DEP_L_001",
 
-            {
-                id: "DEP_L_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral avec vitesse"
-            },
-
-            {
-                id: "DEP_L_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral sur une distance"
-            },
-
-            {
-                id: "DEP_L_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral complet"
-            },
-
-            {
-                id: "DEP_L_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral vers une cible"
-            },
-
-            {
-                id: "DEP_L_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "VITESSE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral avec précision"
-            },
-
-            {
-                id: "DEP_L_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral avec détails"
-            },
-
-            {
-                id: "DEP_L_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral rapide"
-            },
-
-            {
-                id: "DEP_L_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE",
-                    "DISTANCE",
-                    "VITESSE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION"
-                ],
-                description: "Déplacement latéral complet"
-            }
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
         ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+
+        description:
+            "Déplacement latéral simple dans une direction précise.",
+
+        exemple:
+            "Naruto se déplace latéralement vers la gauche."
+    },
+
+    {
+        id: "DEP_L_002",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION"
+        ],
+
+        description:
+            "Déplacement latéral dans une direction précise vers une cible.",
+
+        exemple:
+            "Naruto se déplace latéralement vers la droite en direction de Maki."
+    },
+
+    {
+        id: "DEP_L_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement latéral sur une distance déterminée jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto se déplace latéralement vers la gauche sur 5 mètres pour arriver à 2 mètres de Maki."
+    },
+
+    {
+        id: "DEP_L_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement latéral à une vitesse donnée vers une cible jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto se déplace latéralement à vitesse maximale vers la droite pour finir à côté de Maki."
+    },
+
+    {
+        id: "DEP_L_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "DISTANCE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement latéral complet avec direction, cible, distance, vitesse et position finale.",
+
+        exemple:
+            "Naruto se déplace latéralement à vitesse maximale vers la gauche sur 6 mètres pour arriver à 2 mètres sur le côté de Maki."
+    }
+
+],   
 
 
         //======================================================
