@@ -160,401 +160,297 @@ const NEO_LEARN = {
 // ⚔️ NEO AI — MODÈLES DE COMBAT
 // 🏃 DÉPLACEMENTS — MODÈLES STRUCTURELS
 //==============================================================
+//======================================================
+// 🏃 1. DÉPLACEMENTS FRONTAUX
+//======================================================
 
-const NEO_COMBAT_MODELS = {
+frontal: [
 
-    deplacement: {
+    {
+        id: "DEP_F_001",
 
-        //======================================================
-        // 🏃 1. DÉPLACEMENTS FRONTAUX
-        //======================================================
-
-        frontal: [
-
-            {
-                id: "DEP_F_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Se déplacer frontalement vers une cible en marchant"
-            },
-
-            {
-                id: "DEP_F_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Se déplacer frontalement vers une cible en courant"
-            },
-
-            {
-                id: "DEP_F_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "VITESSE"
-                ],
-                description: "Courir frontalement vers une cible avec une vitesse précisée"
-            },
-
-            {
-                id: "DEP_F_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE"
-                ],
-                description: "Se déplacer frontalement sur une distance donnée"
-            },
-
-            {
-                id: "DEP_F_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Déplacement frontal avec vitesse et distance"
-            },
-
-            {
-                id: "DEP_F_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "DIRECTION",
-                    "CIBLE"
-                ],
-                description: "Déplacement frontal vers une direction précise"
-            },
-
-            {
-                id: "DEP_F_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Déplacement frontal rapide vers une cible"
-            },
-
-            {
-                id: "DEP_F_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Déplacement frontal avec détails supplémentaires"
-            },
-
-            {
-                id: "DEP_F_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "DIRECTION",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Déplacement frontal dirigé vers une cible"
-            },
-
-            {
-                id: "DEP_F_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE"
-                ],
-                description: "Déplacement frontal complet"
-            }
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
         ],
 
-
-        //======================================================
-        // 🔄 2. DÉPLACEMENTS CIRCULAIRES
-        //======================================================
-
-        circulaire: [
-
-            {
-                id: "DEP_C_001",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Se déplacer autour d'une cible par un côté"
-            },
-
-            {
-                id: "DEP_C_002",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire avec courbe"
-            },
-
-            {
-                id: "DEP_C_003",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Déplacement circulaire avec vitesse"
-            },
-
-            {
-                id: "DEP_C_004",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire complet"
-            },
-
-            {
-                id: "DEP_C_005",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "TRAJECTOIRE"
-                ],
-                description: "Déplacement suivant une trajectoire circulaire"
-            },
-
-            {
-                id: "DEP_C_006",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Déplacement circulaire sur une distance donnée"
-            },
-
-            {
-                id: "DEP_C_007",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COURBE",
-                    "DISTANCE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COURBE"
-                ],
-                description: "Déplacement courbé autour d'une cible"
-            },
-
-            {
-                id: "DEP_C_008",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE",
-                    "DISTANCE",
-                    "VITESSE"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire détaillé"
-            },
-
-            {
-                id: "DEP_C_009",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE"
-                ],
-                description: "Déplacement circulaire avec détails supplémentaires"
-            },
-
-            {
-                id: "DEP_C_010",
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE",
-                    "VITESSE",
-                    "DISTANCE",
-                    "EXTRAS"
-                ],
-                requis: [
-                    "ACTION",
-                    "MANIERE",
-                    "CIBLE",
-                    "COTE",
-                    "COURBE"
-                ],
-                description: "Déplacement circulaire complet avec paramètres"
-            }
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
         ],
 
+        description:
+            "Se déplacer frontalement vers une cible.",
 
+        exemple:
+            "Naruto avance en courant vers Maki."
+    },
+
+    {
+        id: "DEP_F_002",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        description:
+            "Se déplacer frontalement vers une cible en suivant une direction précise.",
+
+        exemple:
+            "Naruto fonce en courant vers Maki en direction de l'avant."
+    },
+
+    {
+        id: "DEP_F_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Se déplacer frontalement sur une distance déterminée jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto court vers Maki sur 8 mètres pour arriver à 2 mètres d'elle."
+    },
+
+    {
+        id: "DEP_F_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Se déplacer frontalement à une vitesse donnée jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto fonce vers Maki à vitesse maximale pour finir à 2 mètres d'elle."
+    },
+
+    {
+        id: "DEP_F_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "DISTANCE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "DIRECTION",
+            "CIBLE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Déplacement frontal complet avec direction, distance, vitesse et position finale.",
+
+        exemple:
+            "Naruto fonce à vitesse maximale vers Maki sur 10 mètres dans sa direction pour arriver à 1 mètre d'elle."
+    }
+],
+            
+//======================================================
+// 🔄 2. DÉPLACEMENTS CIRCULAIRES
+//======================================================
+
+circulaire: [
+
+    {
+        id: "DEP_C_001",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Course circulaire autour d'une cible avec une longueur de courbe et une fin de trajet précises.",
+
+        exemple:
+            "Naruto fait une course circulaire autour de Maki sur une courbe de 2 mètres pour arriver à 3 mètres d'elle."
+    },
+
+    {
+        id: "DEP_C_002",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Course circulaire autour d'une cible avec une courbe et un côté déterminé jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto fait une course circulaire autour de Maki avec une courbe de 2 mètres pour arriver sur son côté gauche."
+    },
+
+    {
+        id: "DEP_C_003",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Course circulaire avec une courbe et une vitesse déterminées jusqu'à une position finale précise.",
+
+        exemple:
+            "Naruto fait une course circulaire à vitesse maximale autour de Maki sur une courbe de 2 mètres pour finir à 3 mètres d'elle."
+    },
+
+    {
+        id: "DEP_C_004",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "COTE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Course circulaire avec courbe, côté, vitesse et position finale déterminés.",
+
+        exemple:
+            "Naruto fait une course circulaire à vitesse maximale autour de Maki sur une courbe de 2 mètres pour finir sur son côté gauche."
+    },
+
+    {
+        id: "DEP_C_005",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "COTE",
+            "DISTANCE",
+            "VITESSE",
+            "FIN_TRAJET"
+        ],
+
+        requis: [
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "COURBE",
+            "COTE",
+            "FIN_TRAJET"
+        ],
+
+        description:
+            "Course circulaire complète avec courbe, côté, distance parcourue, vitesse et position finale.",
+
+        exemple:
+            "Naruto fait une course circulaire à vitesse maximale autour de Maki sur 8 mètres avec une courbe de 2 mètres pour arriver à 2 mètres sur son profil droit."
+    }
+
+],
+                    
         //======================================================
         // ↔️ 3. DÉPLACEMENTS LATÉRAUX
         //======================================================
