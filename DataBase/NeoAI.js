@@ -2216,34 +2216,9 @@ function neoAnalyserStructureCombat(texte) {
      *
      * Aucun nouveau tableau.
      */
-
-    let maniereCombat = null;
-
-    if (
-        contexte?.categorie === "combat" &&
-        contexte?.contexte
-    ) {
-
-        const objets =
-            contexte.contexte.objets || [];
-
-        const t =
-            neoNormaliserTexte(texte);
-
-        for (const objet of objets) {
-
-            if (
-                t.includes(
-                    neoNormaliserTexte(objet)
-                )
-            ) {
-
-                maniereCombat = objet;
-                break;
-            }
-        }
-    }
-
+const maniereCombat =
+    contexte?.objet || null;
+    
     /*
      * ======================================================
      * ⚡ VITESSE
@@ -6562,10 +6537,10 @@ function neoEstCibleContextuelle(mot) {
 //--------------------------------------------------------------
 // 🧩 EXTRACTION DU CONTEXTE
 //--------------------------------------------------------------
-
 function neoExtraireContexte(texte) {
 
-    const tokens = neoTokeniser(texte);
+    const tokens =
+        neoTokeniser(texte);
 
     const contexteAction =
         neoTrouverContexteAction(texte);
@@ -6581,28 +6556,313 @@ function neoExtraireContexte(texte) {
         famille:
             contexteAction?.famille || null,
 
-        sujet: null,
+        sujet:
+            null,
 
-        cible: null,
+        cible:
+            null,
 
-        partieCorps: null,
+        partieCorps:
+            null,
 
-        objet: null,
+        objet:
+            null,
 
-        maniere: [],
+        maniere:
+            [],
 
-        direction: null,
+        direction:
+            null,
 
-        lieu: null,
+        lieu:
+            null,
 
-        distance: null,
+        distance:
+            null,
 
-        temps: null,
+        temps:
+            null,
 
-        connecteurs: [],
+        connecteurs:
+            [],
 
         tokens
     };
+
+
+    //----------------------------------------------------------
+    // 🔗 CONNECTEURS
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            NEO_CONNECTEURS?.fr?.includes?.(token)
+        ) {
+
+            resultat.connecteurs.push(token);
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧍 PARTIES DU CORPS
+    //----------------------------------------------------------
+
+    for (const token of tokens) {
+
+        if (
+            neoEstPartieCorps(token)
+        ) {
+
+            resultat.partieCorps =
+                token;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 OBJET / MANIÈRE D'ACTION
+    //----------------------------------------------------------
+
+    if (
+        contexteAction?.contexte
+    ) {
+
+        const objets =
+            contexteAction.contexte.objets || [];
+
+        /*
+         * On cherche le mot reconnu dans le contexte.
+         *
+         * On privilégie le mot le plus précis
+         * plutôt que "coup" lorsqu'on trouve
+         * "poing", "pied", etc.
+         */
+
+        let meilleurObjet =
+            null;
+
+        for (const objet of objets) {
+
+            const objetNormalise =
+                neoNormaliserTexte(objet);
+
+            if (
+                tokens.includes(
+                    objetNormalise
+                )
+            ) {
+
+                if (
+                    !meilleurObjet ||
+                    objetNormalise.length >
+                    neoNormaliserTexte(
+                        meilleurObjet
+                    ).length
+                ) {
+
+                    meilleurObjet =
+                        objet;
+                }
+            }
+        }
+
+        resultat.objet =
+            meilleurObjet;
+    }
+
+
+    //----------------------------------------------------------
+    // 🎯 CIBLE
+    //----------------------------------------------------------
+
+    for (
+        let i = 0;
+        i < tokens.length;
+        i++
+    ) {
+
+        const token =
+            tokens[i];
+
+        if (
+            neoEstCibleContextuelle(token)
+        ) {
+
+            /*
+             * On évite de prendre automatiquement
+             * le premier nom comme cible.
+             */
+
+            if (i > 0) {
+
+                resultat.cible =
+                    token;
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧭 DIRECTIONS
+    //----------------------------------------------------------
+
+    const directions = [
+
+        "avant",
+        "arrière",
+        "arriere",
+        "gauche",
+        "droite",
+        "haut",
+        "bas",
+        "devant",
+        "derrière",
+        "derriere"
+    ];
+
+    for (const token of tokens) {
+
+        if (
+            directions.includes(token)
+        ) {
+
+            resultat.direction =
+                token;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 📏 DISTANCE
+    //----------------------------------------------------------
+
+    for (
+        let i = 0;
+        i < tokens.length;
+        i++
+    ) {
+
+        if (
+            /^\d+(?:[.,]\d+)?$/.test(
+                tokens[i]
+            )
+        ) {
+
+            const unite =
+                tokens[i + 1];
+
+            if (
+                [
+                    "m",
+                    "mètre",
+                    "metre",
+                    "mètres",
+                    "metres",
+                    "km",
+                    "kilomètre",
+                    "kilometre"
+                ].includes(unite)
+            ) {
+
+                resultat.distance = {
+
+                    valeur:
+                        Number(
+                            tokens[i]
+                                .replace(
+                                    ",",
+                                    "."
+                                )
+                        ),
+
+                    unite
+                };
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 📍 LIEUX
+    //----------------------------------------------------------
+
+    const lieux =
+        NEO_NOMS?.fr?.lieux || [];
+
+    for (const lieu of lieux) {
+
+        if (
+            tokens.includes(
+                neoNormaliserTexte(lieu)
+            )
+        ) {
+
+            resultat.lieu =
+                lieu;
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 🧍 SUJET
+    //----------------------------------------------------------
+
+    if (
+        tokens.length > 0
+    ) {
+
+        const indexAction =
+            contexteAction
+                ? neoTrouverIndexAction(
+                    tokens,
+                    contexteAction
+                )
+                : -1;
+
+        if (
+            indexAction > 0
+        ) {
+
+            resultat.sujet =
+                tokens
+                    .slice(
+                        0,
+                        indexAction
+                    )
+                    .join(" ");
+        }
+    }
+
+
+    //----------------------------------------------------------
+    // 💨 MANIÈRE
+    //----------------------------------------------------------
+
+    const adverbes =
+        NEO_ADVERBES?.fr || [];
+
+    for (const token of tokens) {
+
+        if (
+            adverbes.some(
+                x =>
+                    neoNormaliserTexte(x) ===
+                    token
+            )
+        ) {
+
+            resultat.maniere.push(
+                token
+            );
+        }
+    }
+
+
+    return resultat;
+}
+
 
 
     //----------------------------------------------------------
