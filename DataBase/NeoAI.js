@@ -6863,22 +6863,6 @@ function neoExtraireContexte(texte) {
     return resultat;
 }
 
-
-
-    //----------------------------------------------------------
-    // 🔗 CONNECTEURS
-    //----------------------------------------------------------
-
-    for (const token of tokens) {
-
-        if (
-            NEO_CONNECTEURS?.fr?.includes?.(token)
-        ) {
-            resultat.connecteurs.push(token);
-        }
-    }
-
-
     //----------------------------------------------------------
     // 🧍 PARTIES DU CORPS
     //----------------------------------------------------------
