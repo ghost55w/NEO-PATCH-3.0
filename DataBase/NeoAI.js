@@ -2118,31 +2118,78 @@ function neoDeterminerTrajectoire(famille, texte) {
     return null;
 }
 
-
 function neoAnalyserStructureCombat(texte) {
+
+    /*
+     * ======================================================
+     * 🧠 CONTEXTE SÉMANTIQUE EXISTANT
+     * ======================================================
+     */
+
+    const contexte =
+        neoExtraireContexte(texte);
+
+    /*
+     * ======================================================
+     * 👤 SUJET
+     * ======================================================
+     */
 
     const sujet =
         neoExtraireSujet(texte);
 
-    const cible =
-        neoExtraireCible(texte);
-
     /*
      * ======================================================
-     * ⚔️ ACTION COMBAT
+     * 🎯 CIBLE
+     *
+     * On garde l'ancien extracteur en priorité.
+     * Le contexte sémantique sert de secours.
+     * Cela permet notamment :
+     *
+     * Naruto frappe Maki
+     * → CIBLE = Maki
      * ======================================================
      */
 
+    const cible =
+        neoExtraireCible(texte) ||
+        contexte?.cible ||
+        null;
+
+    /*
+     * ======================================================
+     * ⚔️ ACTION
+     * ======================================================
+     *
+     * Le contexte combat devient prioritaire.
+     *
+     * Exemple :
+     *
+     * frapper → frapper
+     * attaquer → attaquer
+     * esquiver → esquiver
+     * saisir → saisir
+     * pousser → pousser
+     *
+     * On ne crée aucune logique spécifique
+     * pour chaque catégorie.
+     */
+
     const actionCombat =
-        neoTrouverCorrespondance(
-            texte,
-            NEO_VERBES.fr
-        );
+        contexte?.categorie === "combat"
+            ? contexte.action
+            : neoTrouverCorrespondance(
+                texte,
+                NEO_VERBES.fr
+            );
 
     /*
      * ======================================================
      * 🏃 MANIÈRE DE DÉPLACEMENT
      * ======================================================
+     *
+     * Cette partie reste exactement basée
+     * sur le dictionnaire existant.
      */
 
     const maniereDeplacement =
@@ -2153,87 +2200,47 @@ function neoAnalyserStructureCombat(texte) {
 
     /*
      * ======================================================
-     * ⚔️ MANIÈRE D'ATTAQUE
+     * ⚔️ MANIÈRE COMBAT
      * ======================================================
      *
-     * Pour l'instant on utilise les expressions
-     * présentes dans les modèles d'attaque.
+     * On utilise le contexte sémantique existant.
      *
-     * On ne crée PAS de nouveau dictionnaire.
+     * Exemple :
+     *
+     * "coup de poing"
+     * → objets du contexte frapper
+     * → poing
+     *
+     * "coup de pied"
+     * → pied
+     *
+     * Aucun nouveau tableau.
      */
 
-    let maniereAttaque = null;
+    let maniereCombat = null;
 
     if (
-        actionCombat === "frapper" ||
-        actionCombat === "attaquer"
+        contexte?.categorie === "combat" &&
+        contexte?.contexte
     ) {
+
+        const objets =
+            contexte.contexte.objets || [];
 
         const t =
             neoNormaliserTexte(texte);
 
-        /*
-         * Attaques physiques
-         */
+        for (const objet of objets) {
 
-        if (
-            t.includes("coup de poing") ||
-            t.includes("poing")
-        ) {
-            maniereAttaque = "poing";
-        }
+            if (
+                t.includes(
+                    neoNormaliserTexte(objet)
+                )
+            ) {
 
-        else if (
-            t.includes("coup de pied") ||
-            t.includes("pied")
-        ) {
-            maniereAttaque = "pied";
-        }
-
-        else if (
-            t.includes("coup de coude") ||
-            t.includes("coude")
-        ) {
-            maniereAttaque = "coude";
-        }
-
-        else if (
-            t.includes("coup de tête") ||
-            t.includes("coup de tete") ||
-            t.includes("tête") ||
-            t.includes("tete")
-        ) {
-            maniereAttaque = "tête";
-        }
-
-        /*
-         * Attaques armées
-         */
-
-        else if (
-            t.includes("katana") ||
-            t.includes("épée") ||
-            t.includes("epee") ||
-            t.includes("sabre") ||
-            t.includes("couteau") ||
-            t.includes("lame") ||
-            t.includes("bâton") ||
-            t.includes("baton") ||
-            t.includes("nunchaku")
-        ) {
-            maniereAttaque = "arme";
-        }
-
-        /*
-         * Formes d'attaque générales
-         */
-
-        else if (
-            t.includes("coup") ||
-            t.includes("frappe") ||
-            t.includes("attaque")
-        ) {
-            maniereAttaque = "frappe";
+                maniereCombat = objet;
+                break;
+            }
         }
     }
 
@@ -2253,29 +2260,40 @@ function neoAnalyserStructureCombat(texte) {
      * ======================================================
      * 🧭 FAMILLE DE DÉPLACEMENT
      * ======================================================
+     *
+     * IMPORTANT :
+     * Une attaque ne doit pas être forcée dans
+     * une famille de déplacement.
      */
 
     const famille =
-        neoDeterminerFamille(
-            texte,
-            maniereDeplacement
-        );
+        contexte?.categorie === "combat"
+            ? null
+            : neoDeterminerFamille(
+                texte,
+                maniereDeplacement
+            );
 
     /*
      * ======================================================
      * 🧭 TRAJECTOIRE
      * ======================================================
+     *
+     * La trajectoire actuelle reste celle
+     * du moteur de déplacement.
      */
 
     const trajectoire =
-        neoDeterminerTrajectoire(
-            famille,
-            texte
-        );
+        contexte?.categorie === "combat"
+            ? null
+            : neoDeterminerTrajectoire(
+                famille,
+                texte
+            );
 
     /*
      * ======================================================
-     * 📐 PARAMÈTRES
+     * 📐 PARAMÈTRES GÉNÉRIQUES
      * ======================================================
      */
 
@@ -2296,6 +2314,30 @@ function neoAnalyserStructureCombat(texte) {
 
     /*
      * ======================================================
+     * 🧍 PARTIE DU CORPS
+     * ======================================================
+     *
+     * On réutilise directement
+     * neoExtraireContexte().
+     *
+     * Exemple :
+     *
+     * "au visage"
+     * → visage
+     *
+     * "à la tempe"
+     * → tempe
+     *
+     * "vers l'abdomen"
+     * → abdomen
+     */
+
+    const partieCorps =
+        contexte?.partieCorps ||
+        null;
+
+    /*
+     * ======================================================
      * 🎯 ACTION FINALE
      * ======================================================
      */
@@ -2303,23 +2345,22 @@ function neoAnalyserStructureCombat(texte) {
     let action = null;
 
     /*
-     * ⚔️ ATTAQUE
+     * ⚔️ COMBAT
      */
 
     if (
-        (
-            actionCombat === "frapper" ||
-            actionCombat === "attaquer"
-        ) &&
-        maniereAttaque
+        contexte?.categorie === "combat" &&
+        contexte?.action
     ) {
-        action = "frapper";
+
+        action =
+            contexte.action;
     }
 
     /*
      * 🏃 DÉPLACEMENT
      *
-     * On conserve la logique existante.
+     * Logique existante conservée.
      */
 
     else if (
@@ -2328,7 +2369,9 @@ function neoAnalyserStructureCombat(texte) {
         direction ||
         trajectoire
     ) {
-        action = "se déplacer";
+
+        action =
+            "se déplacer";
     }
 
     /*
@@ -2339,16 +2382,19 @@ function neoAnalyserStructureCombat(texte) {
 
     const slots = {
 
-        SUJET: sujet,
+        SUJET:
+            sujet,
 
-        ACTION: action,
+        ACTION:
+            action,
 
         MANIERE:
-            action === "frapper"
-                ? maniereAttaque
+            contexte?.categorie === "combat"
+                ? maniereCombat
                 : maniereDeplacement,
 
-        CIBLE: cible,
+        CIBLE:
+            cible,
 
         TRAJECTOIRE:
             trajectoire,
@@ -2369,7 +2415,10 @@ function neoAnalyserStructureCombat(texte) {
             distance,
 
         HAUTEUR:
-            hauteur
+            hauteur,
+
+        PARTIE_CORPS:
+            partieCorps
     };
 
     /*
@@ -2387,12 +2436,15 @@ function neoAnalyserStructureCombat(texte) {
             slots[key] === null ||
             slots[key] === undefined
         ) {
+
             delete slots[key];
         }
     }
 
     return {
+
         famille,
+
         slots
     };
 }
