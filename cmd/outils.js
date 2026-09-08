@@ -996,13 +996,10 @@ function extraireTexteNeoAI(
   return "";
 }
 
+//==============================================================
+// 🧠🌀 NEO AI — ANALYSEUR LINGUISTIQUE UNIQUE
+//==============================================================
 
-//==============================================================
-// 🧠🌀 NEO AI — ANALYSEUR LINGUISTIQUE
-//==============================================================
-//==============================================================
-// 🧠🌀 NEO AI — ANALYSEUR LINGUISTIQUE
-//==============================================================
 function analyserNeoAI(
     texte,
     categorie = null
@@ -1027,12 +1024,10 @@ function analyserNeoAI(
             requisManquants: [],
             motsConnus: [],
             motsInconnus: [],
-            comprehension:
-                "Aucun texte à analyser.",
+            comprehension: "Aucun texte à analyser.",
             resume: ""
         };
     }
-
 
     //==========================================================
     // 🧹 NETTOYAGE
@@ -1042,7 +1037,6 @@ function analyserNeoAI(
         texte
             .replace(/^🌀\s*:\s*/i, "")
             .trim();
-
 
     if (!textePropre) {
         return {
@@ -1056,41 +1050,37 @@ function analyserNeoAI(
             requisManquants: [],
             motsConnus: [],
             motsInconnus: [],
-            comprehension:
-                "Aucun texte à analyser.",
+            comprehension: "Aucun texte à analyser.",
             resume: ""
         };
     }
 
-
-    //==========================================================
-    // 🧠 NEO AI
-    //==========================================================
-    //
-    // Toute l'intelligence est maintenant dans NeoAI.js.
-    //
-    // outils.js ne :
-    //
-    // ❌ cherche plus les catégories
-    // ❌ cherche plus les familles
-    // ❌ cherche plus les anciens modèles
-    // ❌ cherche plus les verbes
-    // ❌ compare plus les phrases
-    //
-    // Il demande simplement à NeoAI :
-    //
-    // "Analyse cette phrase."
-    //
-    //==========================================================
-
     try {
 
+        //======================================================
+        // 🧠 NORMALISATION
+        //======================================================
+
+        const texteNormalise =
+            typeof NeoAI.neoNormaliserTexte === "function"
+                ? NeoAI.neoNormaliserTexte(textePropre)
+                : textePropre
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/\s+/g, " ")
+                    .trim();
+
+        //======================================================
+        // 🥊 1 — DÉTECTION DE L'ACTION
+        //======================================================
+
         if (
-            typeof NeoAI.neoAnalyser !== "function"
+            typeof NeoAI.neoTrouverAction !== "function"
         ) {
 
             console.error(
-                "❌ NeoAI.neoAnalyser() est introuvable dans DataBase/NeoAI.js"
+                "❌ [NeoAI] neoTrouverAction() introuvable."
             );
 
             return {
@@ -1105,181 +1095,591 @@ function analyserNeoAI(
                 motsConnus: [],
                 motsInconnus: [],
                 comprehension:
-                    "Le moteur NeoAI n'est pas disponible.",
+                    "Le détecteur d'action NeoAI est indisponible.",
                 resume: textePropre
             };
         }
 
-
-        //======================================================
-        // 🔎 ANALYSE UNIQUE
-        //======================================================
-
-        const resultat =
-            NeoAI.neoAnalyser(
-                textePropre
+        const actionResultat =
+            NeoAI.neoTrouverAction(
+                texteNormalise
             );
 
+        //======================================================
+        // 🔎 RÉCUPÉRATION DE L'ACTION
+        //======================================================
+
+        let action = null;
+        let motAction = null;
+        let scoreAction = 0;
+
+        if (
+            typeof actionResultat === "string"
+        ) {
+
+            action =
+                actionResultat;
+
+        } else if (
+            actionResultat &&
+            typeof actionResultat === "object"
+        ) {
+
+            action =
+                actionResultat.action ||
+                null;
+
+            motAction =
+                actionResultat.motReconnu ||
+                actionResultat.mot ||
+                null;
+
+            scoreAction =
+                typeof actionResultat.score === "number"
+                    ? actionResultat.score
+                    : 0;
+        }
+
+        if (!action) {
+
+            return {
+                trouve: false,
+                score: 0,
+                texte: textePropre,
+                action: null,
+                modele: null,
+                structure: [],
+                slots: {},
+                requisManquants: [],
+                motsConnus: [],
+                motsInconnus: [],
+                comprehension:
+                    "Aucune action reconnue dans cette phrase.",
+                resume: textePropre
+            };
+        }
 
         //======================================================
-        // 🛡️ SÉCURITÉ
+        // 🧠 2 — EXTRACTION DES SLOTS
+        //======================================================
+
+        let slots = {};
+
+        if (
+            typeof NeoAI.neoExtraireSlots === "function"
+        ) {
+
+            try {
+
+                const resultatSlots =
+                    NeoAI.neoExtraireSlots(
+                        textePropre,
+                        action
+                    );
+
+                if (
+                    resultatSlots &&
+                    typeof resultatSlots === "object"
+                ) {
+
+                    slots =
+                        resultatSlots;
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "⚠️ [NeoAI] Extraction des slots :",
+                    error
+                );
+            }
+        }
+
+        //======================================================
+        // 🥊 GARANTIR L'ACTION
+        //======================================================
+
+        if (!slots.ACTION) {
+            slots.ACTION = action;
+        }
+
+        //======================================================
+        // 👤 MOT D'ACTION
         //======================================================
 
         if (
-            !resultat ||
-            typeof resultat !== "object"
+            motAction &&
+            !slots.MOT_ACTION
         ) {
 
-            return {
-                trouve: false,
-                score: 0,
-                texte: textePropre,
-                action: null,
-                modele: null,
-                structure: [],
-                slots: {},
-                requisManquants: [],
-                motsConnus: [],
-                motsInconnus: [],
-                comprehension:
-                    "NeoAI n'a retourné aucun résultat.",
-                resume: textePropre
-            };
+            slots.MOT_ACTION =
+                motAction;
         }
 
+        //======================================================
+        // 📚 3 — RECHERCHE DES MODÈLES
+        //======================================================
+
+        let meilleurModele = null;
+
+        if (
+            typeof NeoAI.neoTrouverMeilleurModele === "function"
+        ) {
+
+            try {
+
+                meilleurModele =
+                    NeoAI.neoTrouverMeilleurModele(
+                        textePropre,
+                        action,
+                        slots
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    "⚠️ [NeoAI] Recherche du meilleur modèle :",
+                    error
+                );
+            }
+        }
 
         //======================================================
-        // 📦 RÉSULTAT NORMALISÉ
+        // 🔎 4 — COMPARAISON DU MODÈLE
+        //======================================================
+
+        let scoreModele = 0;
+        let requisManquants = [];
+        let structure = [];
+
+        if (
+            meilleurModele &&
+            typeof meilleurModele === "object"
+        ) {
+
+            if (
+                typeof meilleurModele.score === "number"
+            ) {
+
+                scoreModele =
+                    meilleurModele.score;
+            }
+
+            if (
+                Array.isArray(
+                    meilleurModele.requisManquants
+                )
+            ) {
+
+                requisManquants =
+                    meilleurModele.requisManquants;
+            }
+
+            if (
+                Array.isArray(
+                    meilleurModele.structure
+                )
+            ) {
+
+                structure =
+                    meilleurModele.structure;
+            }
+
+        } else if (
+            meilleurModele
+        ) {
+
+            structure =
+                Array.isArray(
+                    meilleurModele.structure
+                )
+                    ? meilleurModele.structure
+                    : [];
+        }
+
+        //======================================================
+        // 🧠 COMPARAISON DIRECTE SI DISPONIBLE
+        //======================================================
+
+        if (
+            meilleurModele &&
+            typeof NeoAI.neoComparerModele === "function"
+        ) {
+
+            try {
+
+                const comparaison =
+                    NeoAI.neoComparerModele(
+                        textePropre,
+                        meilleurModele,
+                        slots,
+                        action
+                    );
+
+                if (
+                    comparaison &&
+                    typeof comparaison === "object"
+                ) {
+
+                    if (
+                        typeof comparaison.score === "number"
+                    ) {
+
+                        scoreModele =
+                            comparaison.score;
+                    }
+
+                    if (
+                        Array.isArray(
+                            comparaison.requisManquants
+                        )
+                    ) {
+
+                        requisManquants =
+                            comparaison.requisManquants;
+                    }
+
+                    if (
+                        Array.isArray(
+                            comparaison.structure
+                        )
+                    ) {
+
+                        structure =
+                            comparaison.structure;
+                    }
+                }
+
+                if (
+                    typeof comparaison === "number"
+                ) {
+
+                    scoreModele =
+                        comparaison;
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "⚠️ [NeoAI] Comparaison modèle :",
+                    error
+                );
+            }
+        }
+
+        //======================================================
+        // 📊 SCORE FINAL
+        //======================================================
+
+        let score =
+            scoreModele ||
+            scoreAction ||
+            0;
+
+        score =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(score)
+                )
+            );
+
+        //======================================================
+        // 📐 STRUCTURE DE SECOURS
+        //======================================================
+
+        if (
+            !structure.length &&
+            slots &&
+            typeof slots === "object"
+        ) {
+
+            structure =
+                Object.keys(slots)
+                    .filter(
+                        cle =>
+                            slots[cle] !== null &&
+                            slots[cle] !== undefined &&
+                            slots[cle] !== ""
+                    );
+        }
+
+        //======================================================
+        // 📚 MOTS CONNUS / INCONNUS
+        //======================================================
+
+        const motsConnus = [];
+        const motsInconnus = [];
+
+        const dictionnaires =
+            NeoAI.NEO_DICTIONNAIRES || {};
+
+        const motsTexte =
+            texteNormalise
+                .split(/\s+/)
+                .filter(Boolean);
+
+        for (
+            const mot of motsTexte
+        ) {
+
+            let connu = false;
+
+            for (
+                const groupe of Object.values(dictionnaires)
+            ) {
+
+                if (
+                    Array.isArray(groupe) &&
+                    groupe.some(
+                        element =>
+                            typeof element === "string" &&
+                            NeoAI.neoNormaliserTexte(
+                                element
+                            ) === mot
+                    )
+                ) {
+
+                    connu = true;
+                    break;
+                }
+
+                if (
+                    groupe &&
+                    typeof groupe === "object" &&
+                    !Array.isArray(groupe)
+                ) {
+
+                    for (
+                        const valeur of Object.values(groupe)
+                    ) {
+
+                        if (
+                            Array.isArray(valeur) &&
+                            valeur.some(
+                                element =>
+                                    typeof element === "string" &&
+                                    NeoAI.neoNormaliserTexte(
+                                        element
+                                    ) === mot
+                            )
+                        ) {
+
+                            connu = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (connu) {
+                    break;
+                }
+            }
+
+            if (connu) {
+                motsConnus.push(mot);
+            } else {
+                motsInconnus.push(mot);
+            }
+        }
+
+        //======================================================
+        // 🧠 COMPRÉHENSION
+        //======================================================
+
+        let comprehension =
+            `L'action « ${action} » a été reconnue.`;
+
+        if (meilleurModele) {
+
+            comprehension +=
+                ` Le modèle « ${
+                    meilleurModele.id ||
+                    meilleurModele.nom ||
+                    "inconnu"
+                } » correspond à la structure détectée.`;
+        }
+
+        if (
+            requisManquants.length
+        ) {
+
+            comprehension +=
+                ` Informations manquantes : ${
+                    requisManquants.join(", ")
+                }.`;
+        }
+
+        //======================================================
+        // 💡 RÉSUMÉ
+        //======================================================
+
+        const resumeParts = [];
+
+        if (slots.SUJET) {
+            resumeParts.push(
+                `Sujet : ${slots.SUJET}`
+            );
+        }
+
+        resumeParts.push(
+            `Action : ${action}`
+        );
+
+        if (slots.MANIERE) {
+            resumeParts.push(
+                `Manière : ${slots.MANIERE}`
+            );
+        }
+
+        if (slots.CIBLE) {
+            resumeParts.push(
+                `Cible : ${slots.CIBLE}`
+            );
+        }
+
+        if (slots.ZONE_VISEE) {
+            resumeParts.push(
+                `Zone visée : ${slots.ZONE_VISEE}`
+            );
+        }
+
+        if (slots.COTE) {
+            resumeParts.push(
+                `Côté : ${slots.COTE}`
+            );
+        }
+
+        if (slots.DIRECTION) {
+            resumeParts.push(
+                `Direction : ${slots.DIRECTION}`
+            );
+        }
+
+        if (slots.TRAJECTOIRE) {
+            resumeParts.push(
+                `Trajectoire : ${slots.TRAJECTOIRE}`
+            );
+        }
+
+        if (slots.VITESSE) {
+            resumeParts.push(
+                `Vitesse : ${slots.VITESSE}`
+            );
+        }
+
+        if (slots.DISTANCE) {
+            resumeParts.push(
+                `Distance : ${slots.DISTANCE}`
+            );
+        }
+
+        if (slots.HAUTEUR) {
+            resumeParts.push(
+                `Hauteur : ${slots.HAUTEUR}`
+            );
+        }
+
+        if (slots.ANGLE) {
+            resumeParts.push(
+                `Angle : ${slots.ANGLE}`
+            );
+        }
+
+        if (slots.FIN_TRAJET) {
+            resumeParts.push(
+                `Fin : ${slots.FIN_TRAJET}`
+            );
+        }
+
+        const resume =
+            resumeParts.join(" | ");
+
+        //======================================================
+        // 📦 RÉSULTAT FINAL
         //======================================================
 
         return {
 
             trouve:
                 Boolean(
-                    resultat.trouve
+                    action &&
+                    meilleurModele
                 ),
 
-            score:
-                typeof resultat.score === "number"
-                    ? resultat.score
-                    : 0,
+            score,
 
             texte:
-                resultat.texte ||
                 textePropre,
 
-            //==================================================
-            // 🥊 ACTION
-            //==================================================
-
-            action:
-                resultat.action ||
-                null,
-
-            //==================================================
-            // 📚 MODÈLE
-            //==================================================
+            action,
 
             modele:
-                resultat.modele ||
-                null,
+                meilleurModele
+                    ? (
+                        meilleurModele.id ||
+                        meilleurModele.nom ||
+                        meilleurModele
+                    )
+                    : null,
 
-            //==================================================
-            // 📐 STRUCTURE
-            //==================================================
+            structure,
 
-            structure:
-                Array.isArray(
-                    resultat.structure
-                )
-                    ? resultat.structure
-                    : [],
+            slots,
 
-            //==================================================
-            // 🧠 SLOTS SÉMANTIQUES
-            //==================================================
+            requisManquants,
 
-            slots:
-                resultat.slots &&
-                typeof resultat.slots === "object"
-                    ? resultat.slots
-                    : {},
+            motsConnus,
 
-            //==================================================
-            // ⚠️ REQUIS MANQUANTS
-            //==================================================
+            motsInconnus,
 
-            requisManquants:
-                Array.isArray(
-                    resultat.requisManquants
-                )
-                    ? resultat.requisManquants
-                    : [],
-
-            //==================================================
-            // 📚 MOTS CONNUS
-            //==================================================
-
-            motsConnus:
-                Array.isArray(
-                    resultat.motsConnus
-                )
-                    ? resultat.motsConnus
-                    : [],
-
-            //==================================================
-            // ❓ MOTS INCONNUS
-            //==================================================
-
-            motsInconnus:
-                Array.isArray(
-                    resultat.motsInconnus
-                )
-                    ? resultat.motsInconnus
-                    : [],
-
-            //==================================================
-            // 🧠 COMPRÉHENSION
-            //==================================================
-
-            comprehension:
-                resultat.comprehension ||
-                "Aucune compréhension disponible.",
-
-            //==================================================
-            // 💡 RÉSUMÉ
-            //==================================================
+            comprehension,
 
             resume:
-                resultat.resume ||
+                resume ||
                 textePropre
         };
 
     } catch (error) {
 
         console.error(
-            "❌ NeoAI analyserNeoAI :",
+            "❌ [NeoAI] analyserNeoAI :",
             error
         );
 
         return {
+
             trouve: false,
+
             score: 0,
-            texte: textePropre,
+
+            texte:
+                textePropre,
+
             action: null,
+
             modele: null,
+
             structure: [],
+
             slots: {},
+
             requisManquants: [],
+
             motsConnus: [],
+
             motsInconnus: [],
+
             comprehension:
                 "Une erreur est survenue pendant l'analyse NeoAI.",
-            resume: textePropre
+
+            resume:
+                textePropre
         };
     }
-}
-    
+    }
+                
                                      
 //==============================================================
 // 🧠🌀 NEO AI — AFFICHAGE DU RÉSULTAT
