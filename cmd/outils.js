@@ -1000,6 +1000,9 @@ function extraireTexteNeoAI(
 //==============================================================
 // 🧠🌀 NEO AI — ANALYSEUR LINGUISTIQUE
 //==============================================================
+//==============================================================
+// 🧠🌀 NEO AI — ANALYSEUR LINGUISTIQUE
+//==============================================================
 function analyserNeoAI(
     texte,
     categorie = null
@@ -1017,12 +1020,11 @@ function analyserNeoAI(
             trouve: false,
             score: 0,
             texte: "",
-            categorie: null,
-            famille: null,
+            action: null,
             modele: null,
             structure: [],
             slots: {},
-            verbe: null,
+            requisManquants: [],
             motsConnus: [],
             motsInconnus: [],
             comprehension:
@@ -1031,21 +1033,27 @@ function analyserNeoAI(
         };
     }
 
-    texte = texte
-        .replace(/^🌀\s*:\s*/i, "")
-        .trim();
 
-    if (!texte) {
+    //==========================================================
+    // 🧹 NETTOYAGE
+    //==========================================================
+
+    const textePropre =
+        texte
+            .replace(/^🌀\s*:\s*/i, "")
+            .trim();
+
+
+    if (!textePropre) {
         return {
             trouve: false,
             score: 0,
             texte: "",
-            categorie: null,
-            famille: null,
+            action: null,
             modele: null,
             structure: [],
             slots: {},
-            verbe: null,
+            requisManquants: [],
             motsConnus: [],
             motsInconnus: [],
             comprehension:
@@ -1054,348 +1062,225 @@ function analyserNeoAI(
         };
     }
 
-    //==========================================================
-    // 📚 ANALYSE DES MOTS
-    //==========================================================
-
-    const analyseTexte =
-        NeoAI.neoRechercherTexte(texte);
-
 
     //==========================================================
-    // 🧠 ANALYSE SÉMANTIQUE COMBAT
+    // 🧠 NEO AI
     //==========================================================
-    let combat = null;
-
-    if (
-        typeof NeoAI.neoAnalyserCombat === "function"
-    ) {
-
-        try {
-
-            combat =
-                NeoAI.neoAnalyserCombat(texte);
-
-        } catch (error) {
-
-            console.error(
-                "❌ NeoAI combat analyzer :",
-                error
-            );
-
-            combat = null;
-        }
-    }
-
-
+    //
+    // Toute l'intelligence est maintenant dans NeoAI.js.
+    //
+    // outils.js ne :
+    //
+    // ❌ cherche plus les catégories
+    // ❌ cherche plus les familles
+    // ❌ cherche plus les anciens modèles
+    // ❌ cherche plus les verbes
+    // ❌ compare plus les phrases
+    //
+    // Il demande simplement à NeoAI :
+    //
+    // "Analyse cette phrase."
+    //
     //==========================================================
-    // 🥊 SI UN MODÈLE COMBAT EST TROUVÉ
-    //==========================================================
-    if (
-        combat &&
-        combat.score > 0
-    ) {
 
-        //======================================================
-        // 🔎 VERBE
-        //======================================================
+    try {
 
-        let verbe = null;
-
-        for (
-            const mot of NeoAI.neoTokeniser(texte)
+        if (
+            typeof NeoAI.neoAnalyser !== "function"
         ) {
 
-            const resultat =
-                NeoAI.neoTrouverVerbe(mot);
+            console.error(
+                "❌ NeoAI.neoAnalyser() est introuvable dans DataBase/NeoAI.js"
+            );
 
-            if (resultat) {
-                verbe = resultat;
-                break;
-            }
+            return {
+                trouve: false,
+                score: 0,
+                texte: textePropre,
+                action: null,
+                modele: null,
+                structure: [],
+                slots: {},
+                requisManquants: [],
+                motsConnus: [],
+                motsInconnus: [],
+                comprehension:
+                    "Le moteur NeoAI n'est pas disponible.",
+                resume: textePropre
+            };
         }
 
 
         //======================================================
-        // 📦 RÉSULTAT COMBAT
+        // 🔎 ANALYSE UNIQUE
+        //======================================================
+
+        const resultat =
+            NeoAI.neoAnalyser(
+                textePropre
+            );
+
+
+        //======================================================
+        // 🛡️ SÉCURITÉ
+        //======================================================
+
+        if (
+            !resultat ||
+            typeof resultat !== "object"
+        ) {
+
+            return {
+                trouve: false,
+                score: 0,
+                texte: textePropre,
+                action: null,
+                modele: null,
+                structure: [],
+                slots: {},
+                requisManquants: [],
+                motsConnus: [],
+                motsInconnus: [],
+                comprehension:
+                    "NeoAI n'a retourné aucun résultat.",
+                resume: textePropre
+            };
+        }
+
+
+        //======================================================
+        // 📦 RÉSULTAT NORMALISÉ
         //======================================================
 
         return {
 
             trouve:
-                combat.score >= 70,
+                Boolean(
+                    resultat.trouve
+                ),
 
             score:
-                combat.score,
+                typeof resultat.score === "number"
+                    ? resultat.score
+                    : 0,
 
-            texte,
+            texte:
+                resultat.texte ||
+                textePropre,
 
-            categorie:
-                combat.categorie ||
-                categorie ||
-                "combat",
+            //==================================================
+            // 🥊 ACTION
+            //==================================================
 
-            famille:
-                combat.famille ||
+            action:
+                resultat.action ||
                 null,
+
+            //==================================================
+            // 📚 MODÈLE
+            //==================================================
 
             modele:
-                combat.modele ||
+                resultat.modele ||
                 null,
 
-            structure:
-                combat.structure ||
-                [],
+            //==================================================
+            // 📐 STRUCTURE
+            //==================================================
 
-            /*
-             * Structure sémantique réelle.
-             *
-             * Exemple :
-             *
-             * {
-             *   SUJET: "Maki",
-             *   ACTION: "se déplacer",
-             *   MANIERE: "courir",
-             *   CIBLE: "Tobirama",
-             *   COTE: "droite",
-             *   COURBE: {...},
-             *   VITESSE: "vmax"
-             * }
-             */
+            structure:
+                Array.isArray(
+                    resultat.structure
+                )
+                    ? resultat.structure
+                    : [],
+
+            //==================================================
+            // 🧠 SLOTS SÉMANTIQUES
+            //==================================================
 
             slots:
-                combat.slots ||
-                {},
+                resultat.slots &&
+                typeof resultat.slots === "object"
+                    ? resultat.slots
+                    : {},
+
+            //==================================================
+            // ⚠️ REQUIS MANQUANTS
+            //==================================================
 
             requisManquants:
-                combat.requisManquants ||
-                [],
+                Array.isArray(
+                    resultat.requisManquants
+                )
+                    ? resultat.requisManquants
+                    : [],
 
-            verbe,
+            //==================================================
+            // 📚 MOTS CONNUS
+            //==================================================
 
             motsConnus:
-                analyseTexte.connus ||
-                [],
+                Array.isArray(
+                    resultat.motsConnus
+                )
+                    ? resultat.motsConnus
+                    : [],
+
+            //==================================================
+            // ❓ MOTS INCONNUS
+            //==================================================
 
             motsInconnus:
-                analyseTexte.inconnus ||
-                [],
+                Array.isArray(
+                    resultat.motsInconnus
+                )
+                    ? resultat.motsInconnus
+                    : [],
 
-            /*
-             * 🧠 Compréhension réelle
-             */
+            //==================================================
+            // 🧠 COMPRÉHENSION
+            //==================================================
 
             comprehension:
-                combat.comprehension ||
+                resultat.comprehension ||
                 "Aucune compréhension disponible.",
 
-            /*
-             * 💡 Reformulation réelle
-             */
+            //==================================================
+            // 💡 RÉSUMÉ
+            //==================================================
 
             resume:
-                combat.resume ||
-                texte
+                resultat.resume ||
+                textePropre
+        };
+
+    } catch (error) {
+
+        console.error(
+            "❌ NeoAI analyserNeoAI :",
+            error
+        );
+
+        return {
+            trouve: false,
+            score: 0,
+            texte: textePropre,
+            action: null,
+            modele: null,
+            structure: [],
+            slots: {},
+            requisManquants: [],
+            motsConnus: [],
+            motsInconnus: [],
+            comprehension:
+                "Une erreur est survenue pendant l'analyse NeoAI.",
+            resume: textePropre
         };
     }
-
-
-    //==========================================================
-    // 🔎 ANALYSE LINGUISTIQUE CLASSIQUE
-    //==========================================================
-    //
-    // Si ce n'est pas reconnu comme un modèle combat,
-    // ton ancien système continue de fonctionner.
-    //
-    //==========================================================
-
-    let meilleur = {
-
-        trouve: false,
-
-        score: 0,
-
-        modele: null,
-
-        structure: null,
-
-        categorie:
-            categorie || null
-    };
-
-
-    //==========================================================
-    // 🔎 RECHERCHE DU MEILLEUR MODÈLE
-    //==========================================================
-
-    if (categorie) {
-
-        const resultat =
-            NeoAI.neoTrouverMeilleurModele(
-                texte,
-                categorie
-            );
-
-        if (
-            resultat &&
-            resultat.score >
-            meilleur.score
-        ) {
-
-            meilleur =
-                resultat;
-        }
-
-    } else {
-
-        const categories =
-            NeoAI.neoListerCategories();
-
-        for (
-            const cat of categories
-        ) {
-
-            const resultat =
-                NeoAI.neoTrouverMeilleurModele(
-                    texte,
-                    cat
-                );
-
-            if (
-                resultat &&
-                resultat.score >
-                meilleur.score
-            ) {
-
-                meilleur =
-                    resultat;
-            }
-        }
-    }
-
-
-    //==========================================================
-    // 🔎 RECHERCHE DU VERBE
-    //==========================================================
-
-    let verbe = null;
-
-    for (
-        const mot of NeoAI.neoTokeniser(texte)
-    ) {
-
-        const resultat =
-            NeoAI.neoTrouverVerbe(mot);
-
-        if (resultat) {
-
-            verbe =
-                resultat;
-
-            break;
-        }
-    }
-
-
-    //==========================================================
-    // 📐 STRUCTURE
-    //==========================================================
-
-    let structure =
-        meilleur.structure ||
-        null;
-
-    if (!structure) {
-
-        const comparaison =
-            NeoAI.neoComparerPhrase(
-                texte,
-                meilleur.modele ||
-                texte
-            );
-
-        structure =
-            comparaison.structure ||
-            "S + V";
-    }
-
-
-    //==========================================================
-    // 🧠 COMPRÉHENSION CLASSIQUE
-    //==========================================================
-
-    let comprehension;
-
-    if (
-        meilleur.score >= 50
-    ) {
-
-        comprehension =
-            `Structure reconnue comme proche du modèle « ${meilleur.modele} ».`;
-
-    } else if (
-        meilleur.score > 0
-    ) {
-
-        comprehension =
-            `Le texte présente une similarité de ${meilleur.score}% avec les modèles connus, mais reste sous le seuil de validation.`;
-
-    } else {
-
-        comprehension =
-            `Aucun modèle linguistique suffisamment proche n'a été trouvé.`;
-    }
-
-
-    //==========================================================
-    // 📦 RÉSULTAT CLASSIQUE
-    //==========================================================
-
-    return {
-
-        trouve:
-            meilleur.score >= 50,
-
-        score:
-            meilleur.score,
-
-        texte,
-
-        categorie:
-            meilleur.categorie ||
-            categorie ||
-            null,
-
-        famille: null,
-
-        modele:
-            meilleur.modele ||
-            null,
-
-        structure,
-
-        slots: {},
-
-        requisManquants: [],
-
-        verbe,
-
-        motsConnus:
-            analyseTexte.connus ||
-            [],
-
-        motsInconnus:
-            analyseTexte.inconnus ||
-            [],
-
-        comprehension,
-
-        resume:
-            texte
-    };
 }
-           
-
+    
+                                     
 //==============================================================
 // 🧠🌀 NEO AI — AFFICHAGE DU RÉSULTAT
 //==============================================================
