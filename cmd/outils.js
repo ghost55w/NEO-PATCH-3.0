@@ -2749,7 +2749,7 @@ function neoAnalyserAction(
       texte
     );
 
-  const acteur =
+  let acteur =
     neoDetecterActeur(
       texte,
       contexte
@@ -2786,7 +2786,102 @@ function neoAnalyserAction(
     );
 
   //============================================================
-  // MANIÈRE
+  // 🔧 RÉCUPÉRATION PROPRE DE L'ACTION
+  //============================================================
+
+  const actionNom =
+    typeof action === "string"
+      ? action
+      : (
+          action?.action ||
+          action?.verbe ||
+          null
+        );
+
+  const categorie =
+    typeof action === "object"
+      ? (
+          action?.categorie ||
+          null
+        )
+      : null;
+
+  const famille =
+    typeof action === "object"
+      ? (
+          action?.famille ||
+          null
+        )
+      : null;
+
+  //============================================================
+  // 👤 FALLBACK SUJET
+  //============================================================
+  // Si le détecteur ne trouve pas le sujet,
+  // on récupère le premier nom placé avant l'action.
+
+  if (!acteur) {
+
+    const normal =
+      neoNormaliserTexteLocal(
+        texte
+      )
+        .replace(/^🌀\s*:\s*/u, "")
+        .trim();
+
+    const mots =
+      normal.split(/\s+/u);
+
+    const premiersMotsAction = [
+      "avance",
+      "avancer",
+      "progresse",
+      "progresse",
+      "recule",
+      "reculer",
+      "fonce",
+      "foncer",
+      "court",
+      "courir",
+      "charge",
+      "charger",
+      "bondit",
+      "bondir",
+      "saute",
+      "sauter",
+      "frappe",
+      "frapper",
+      "donne",
+      "donner",
+      "porte",
+      "porter",
+      "pivote",
+      "pivoter",
+      "tourne",
+      "tourner"
+    ];
+
+    const indexAction =
+      mots.findIndex(
+        mot =>
+          premiersMotsAction.includes(
+            neoNormaliserMotLocal(mot)
+          )
+      );
+
+    if (
+      indexAction > 0
+    ) {
+
+      acteur =
+        mots[0];
+
+    }
+
+  }
+
+  //============================================================
+  // 💨 MANIÈRE
   //============================================================
 
   const manieres = [
@@ -2830,7 +2925,7 @@ function neoAnalyserAction(
   }
 
   //============================================================
-  // STRUCTURE
+  // 🧱 STRUCTURE
   //============================================================
 
   const structure = {
@@ -2841,7 +2936,7 @@ function neoAnalyserAction(
         : null,
 
     verbe:
-      action?.action
+      actionNom
         ? "V"
         : null,
 
@@ -2852,10 +2947,10 @@ function neoAnalyserAction(
 
     complement:
       (
-        distance.valeur !== null ||
-        hauteur.valeur !== null ||
+        distance?.valeur !== null ||
+        hauteur?.valeur !== null ||
         maniere ||
-        vitesse.valeur !== null ||
+        vitesse?.valeur !== null ||
         partieCorps
       )
         ? "C"
@@ -2864,10 +2959,10 @@ function neoAnalyserAction(
   };
 
   //============================================================
-  // ANALYSE COMPLÈTE
+  // 📦 ANALYSE UTILISÉE POUR LE MODÈLE
   //============================================================
 
-  const analyse = {
+  const analyseModele = {
 
     texte,
 
@@ -2875,32 +2970,34 @@ function neoAnalyserAction(
 
     sujet: acteur,
 
-    action,
+    action: {
+      action: actionNom,
+      categorie,
+      famille
+    },
 
-    categorie:
-      action?.categorie || null,
+    categorie,
 
-    famille:
-      action?.famille || null,
+    famille,
 
     cible,
 
     maniere,
 
     vitesse:
-      vitesse.valeur,
+      vitesse?.valeur ?? null,
 
     distance:
-      distance.valeur,
+      distance?.valeur ?? null,
 
     distanceUnite:
-      distance.unite,
+      distance?.unite ?? null,
 
     hauteur:
-      hauteur.valeur,
+      hauteur?.valeur ?? null,
 
     hauteurUnite:
-      hauteur.unite,
+      hauteur?.unite ?? null,
 
     direction:
       trajectoire,
@@ -2920,22 +3017,68 @@ function neoAnalyserAction(
   const modele =
     neoReconnaitreModele(
       texte,
-      analyse
+      analyseModele
     );
+
+  //============================================================
+  // ✅ FORMAT DE SORTIE COMPATIBLE AVEC TON AFFICHAGE
+  //============================================================
 
   return {
 
-    ...analyse,
+    texte,
+
+    acteur,
+
+    sujet: acteur,
+
+    // IMPORTANT :
+    // on renvoie une chaîne et non l'objet complet
+    action: actionNom,
+
+    categorie,
+
+    famille,
+
+    cible,
+
+    maniere,
+
+    vitesse:
+      vitesse?.valeur ?? null,
+
+    distance:
+      distance?.valeur ?? null,
+
+    distanceUnite:
+      distance?.unite ?? null,
+
+    hauteur:
+      hauteur?.valeur ?? null,
+
+    hauteurUnite:
+      hauteur?.unite ?? null,
+
+    direction:
+      trajectoire,
+
+    trajectoire,
+
+    partieCorps,
 
     modele:
-      modele.modele,
+      modele?.modele || null,
 
     score:
-      modele.score
+      modele?.score || 0,
+
+    structure
 
   };
 
 }
+
+
 
 //==============================================================
 // ⚖️ ARBITRAGE
