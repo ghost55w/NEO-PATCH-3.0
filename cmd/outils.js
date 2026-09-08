@@ -1784,38 +1784,54 @@ function neoDetecterAction(texte) {
 
 }
 
-
 //==============================================================
-// ✂️ SEGMENTATION DES ACTIONS
+// ✂️ NEOAI — SEGMENTATION INTELLIGENTE DES ACTIONS
 //==============================================================
 
 function neoSegmenterActions(texte) {
 
-  let t =
-    neoNormaliserTexteLocal(
-      texte
-    );
+  const source =
+    neoNormaliserTexteLocal(texte);
 
-  if (!t) {
+  if (!source) {
     return [];
   }
 
   //============================================================
-  // Séparateurs explicites
+  // 1️⃣ SÉPARATEURS EXPLICITES
   //============================================================
 
-  t =
-    t.replace(
-      /\s+(?:puis|ensuite|après|apres|et ensuite)\s+/giu,
-      "|||"
+  const explicite =
+    source
+      .replace(
+        /\s*(?:\|\||\/|;)\s*/gu,
+        "|||"
+      )
+      .replace(
+        /\s+(?:puis|ensuite|après|apres)\s+/giu,
+        "|||"
+      );
+
+  const morceauxExplicites =
+    explicite
+      .split("|||")
+      .map(v => v.trim())
+      .filter(Boolean);
+
+  if (
+    morceauxExplicites.length > 1
+  ) {
+    return neoFusionnerSegments(
+      morceauxExplicites
     );
+  }
 
   //============================================================
-  // Détection des verbes d'action
+  // 2️⃣ DÉTECTION DES VERBES D'ACTION
   //============================================================
 
   const mots =
-    t.split(/\s+/u);
+    source.split(/\s+/u);
 
   const positions = [];
 
@@ -1830,44 +1846,65 @@ function neoSegmenterActions(texte) {
         mots[i]
       );
 
-    const estAction =
-      Object.values(
-        NEO_ACTION_FALLBACK
-      )
-      .flat()
-      .some(v =>
-        neoNormaliserMotLocal(v) === mot
+    if (!mot) {
+      continue;
+    }
+
+    const detection =
+      neoDetecterAction(
+        mots[i]
       );
 
-    if (estAction) {
-      positions.push(i);
+    if (
+      detection?.action
+    ) {
+
+      positions.push({
+        index: i,
+        mot,
+        action: detection
+      });
+
     }
 
   }
 
-  // Si séparateurs explicites,
-  // on les utilise directement.
+  //============================================================
+  // Aucun verbe d'action
+  //============================================================
 
-  if (
-    t.includes("|||")
-  ) {
-
-    return t
-      .split("|||")
-      .map(v => v.trim())
-      .filter(Boolean);
-
+  if (!positions.length) {
+    return [source];
   }
 
   //============================================================
-  // Découpage basé sur les verbes
+  // Un seul verbe = une seule action
   //============================================================
 
   if (
-    positions.length <= 1
+    positions.length === 1
   ) {
-    return [t];
+    return [source];
   }
+
+  //============================================================
+  // 3️⃣ CLASSIFICATION DES VERBES
+  //============================================================
+
+  const infos =
+    positions.map(p => ({
+      ...p,
+
+      categorie:
+        p.action?.categorie ||
+        neoCategorieAction(
+          p.action?.action
+        )
+    }));
+
+  //============================================================
+  // 4️⃣ CONSTRUCTION DES SEGMENTS
+  //============================================================
 
   const segments = [];
 
@@ -1875,29 +1912,61 @@ function neoSegmenterActions(texte) {
 
   for (
     let i = 1;
-    i < positions.length;
+    i < infos.length;
     i++
   ) {
 
-    const position =
-      positions[i];
+    const courant =
+      infos[i];
 
-    const segment =
-      mots
-        .slice(
-          debut,
-          position
-        )
-        .join(" ")
-        .trim();
+    const precedent =
+      infos[i - 1];
 
-    if (segment) {
-      segments.push(segment);
+    //==========================================================
+    // IMPORTANT :
+    //
+    // Un nouveau verbe n'est PAS automatiquement
+    // une nouvelle action.
+    //
+    // Exemple :
+    //
+    // "donne un violent coup de poing"
+    //
+    // donne + coup
+    //
+    // = UNE SEULE ACTION
+    //==========================================================
+
+    if (
+      neoEstNouveauVerbeAction(
+        mots,
+        precedent,
+        courant
+      )
+    ) {
+
+      const segment =
+        mots
+          .slice(
+            debut,
+            courant.index
+          )
+          .join(" ")
+          .trim();
+
+      if (segment) {
+        segments.push(segment);
+      }
+
+      debut =
+        courant.index;
     }
 
-    debut = position;
-
   }
+
+  //============================================================
+  // DERNIER SEGMENT
+  //============================================================
 
   const dernier =
     mots
@@ -1909,9 +1978,307 @@ function neoSegmenterActions(texte) {
     segments.push(dernier);
   }
 
-  return segments;
+  //============================================================
+  // NETTOYAGE
+  //============================================================
+
+  return neoFusionnerSegments(
+    segments
+  );
 
 }
+
+
+//==============================================================
+// 🧠 CATÉGORIE D'UNE ACTION
+//==============================================================
+
+function neoCategorieAction(
+  action
+) {
+
+  const mot =
+    neoNormaliserMotLocal(
+      action
+    );
+
+  for (
+    const [categorie, liste]
+    of Object.entries(
+      NEO_ACTION_FALLBACK
+    )
+  ) {
+
+    if (
+      liste.some(v =>
+        neoNormaliserMotLocal(v) === mot
+      )
+    ) {
+
+      return categorie;
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+//==============================================================
+// 🧠 SAVOIR SI UN VERBE DÉMARRE UNE NOUVELLE ACTION
+//==============================================================
+
+function neoEstNouveauVerbeAction(
+  mots,
+  precedent,
+  courant
+) {
+
+  const entre =
+    mots
+      .slice(
+        precedent.index + 1,
+        courant.index
+      )
+      .map(neoNormaliserMotLocal);
+
+  const motPrecedent =
+    precedent.mot;
+
+  const motCourant =
+    courant.mot;
+
+  //============================================================
+  // 🔥 1. MOTS QUI FONT PARTIE D'UNE ATTAQUE
+  //============================================================
+
+  const elementsAttaque = [
+    "coup",
+    "poing",
+    "pied",
+    "kick",
+    "frontal",
+    "direct",
+    "droite",
+    "droit",
+    "gauche",
+    "visage",
+    "tete",
+    "tête",
+    "abdomen",
+    "ventre",
+    "torse",
+    "corps",
+    "genou",
+    "pied"
+  ];
+
+  //============================================================
+  // Exemple :
+  //
+  // "frappe un coup de poing direct"
+  //
+  // Le "poing" n'est pas une nouvelle action.
+  //============================================================
+
+  if (
+    elementsAttaque.includes(
+      motCourant
+    ) ||
+    entre.some(
+      mot =>
+        elementsAttaque.includes(mot)
+    )
+  ) {
+
+    if (
+      courant.categorie === "attaque"
+    ) {
+
+      return false;
+    }
+
+  }
+
+  //============================================================
+  // 🧭 2. CONJONCTIONS QUI MARQUENT UNE NOUVELLE ACTION
+  //============================================================
+
+  const texteEntre =
+    entre.join(" ");
+
+  if (
+    /\b(?:puis|ensuite|apres|après)\b/iu.test(
+      texteEntre
+    )
+  ) {
+    return true;
+  }
+
+  //============================================================
+  // 🏃 3. DEUX DÉPLACEMENTS DISTINCTS
+  //============================================================
+
+  if (
+    precedent.categorie === "deplacement" &&
+    courant.categorie === "deplacement"
+  ) {
+
+    return true;
+  }
+
+  //============================================================
+  // 🏃 → ⚔️
+  //============================================================
+
+  if (
+    precedent.categorie === "deplacement" &&
+    courant.categorie === "attaque"
+  ) {
+
+    return true;
+  }
+
+  //============================================================
+  // 🏃 → 🛡️
+  //============================================================
+
+  if (
+    precedent.categorie === "deplacement" &&
+    (
+      courant.categorie === "esquive" ||
+      courant.categorie === "parade" ||
+      courant.categorie === "contre"
+    )
+  ) {
+
+    return true;
+  }
+
+  //============================================================
+  // ⚔️ → ⚔️
+  //============================================================
+
+  if (
+    precedent.categorie === "attaque" &&
+    courant.categorie === "attaque"
+  ) {
+
+    // Si le second verbe est introduit par
+    // une structure claire, nouvelle action.
+
+    if (
+      /\b(?:puis|ensuite|apres|après|et)\b/iu.test(
+        texteEntre
+      )
+    ) {
+      return true;
+    }
+
+    // Sinon on considère que cela peut
+    // appartenir à la même construction.
+    return false;
+  }
+
+  //============================================================
+  // 🧠 4. ACTIONS DIFFÉRENTES
+  //============================================================
+
+  if (
+    precedent.categorie !==
+    courant.categorie
+  ) {
+
+    return true;
+  }
+
+  return false;
+
+}
+
+
+//==============================================================
+// 🔗 FUSIONNER / NETTOYER LES SEGMENTS
+//==============================================================
+
+function neoFusionnerSegments(
+  segments
+) {
+
+  const propres =
+    segments
+      .map(v =>
+        String(v || "")
+          .replace(/\s+/gu, " ")
+          .trim()
+      )
+      .filter(Boolean);
+
+  if (
+    propres.length <= 1
+  ) {
+    return propres;
+  }
+
+  const resultat = [];
+
+  for (
+    const segment of propres
+  ) {
+
+    if (!resultat.length) {
+
+      resultat.push(
+        segment
+      );
+
+      continue;
+    }
+
+    const analyse =
+      neoDetecterAction(
+        segment
+      );
+
+    const precedent =
+      neoDetecterAction(
+        resultat[
+          resultat.length - 1
+        ]
+      );
+
+    //==========================================================
+    // "coup de poing" doit rester ensemble
+    //==========================================================
+
+    const contientObjetAttaque =
+      /\b(?:coup|poing|pied|kick|genou)\b/iu
+        .test(segment);
+
+    if (
+      contientObjetAttaque &&
+      precedent?.categorie === "attaque"
+    ) {
+
+      resultat[
+        resultat.length - 1
+      ] += " " + segment;
+
+      continue;
+    }
+
+    resultat.push(
+      segment
+    );
+
+  }
+
+  return resultat;
+
+}
+
 
 
 //==============================================================
