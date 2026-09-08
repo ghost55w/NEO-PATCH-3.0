@@ -527,14 +527,13 @@ async function message_upsert(m, ovl) {
 
 try {
 
-    // NeoAI ne s'intéresse qu'aux messages
-    // commençant par 🌀:
-    const estMessageNeoAI =
-        /^🌀\s*:/u.test(
-            texte.trim()
-        );
+    const texteNeoAI = texte.trim();
 
-    if (estMessageNeoAI) {
+    console.log("🌀 [NeoAI] Message reçu :", texteNeoAI);
+
+    if (/^🌀\s*:/u.test(texteNeoAI)) {
+
+        console.log("✅ [NeoAI] Préfixe 🌀: détecté");
 
         const neoAIHandled =
             await traiterMessageNeoAI(
@@ -543,10 +542,13 @@ try {
                 cmd_options
             );
 
+        console.log(
+            "🧠 [NeoAI] Résultat traitement :",
+            neoAIHandled
+        );
+
         if (neoAIHandled) {
-
             return;
-
         }
 
     }
