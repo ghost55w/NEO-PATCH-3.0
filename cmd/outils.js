@@ -2337,7 +2337,8 @@ function neoGetModeles() {
 
 function neoCalculerSimilariteModele(
   texte,
-  modele
+  modele,
+  analyse = {}
 ) {
 
   if (!modele) {
@@ -2346,49 +2347,232 @@ function neoCalculerSimilariteModele(
 
   const source =
     neoNormaliserTexteLocal(
-      texte
+      texte || ""
     ).toLowerCase();
 
-  const champs = [
-    modele.phrase,
-    modele.modele,
-    modele.texte,
-    modele.structure,
-    modele.pattern,
-    modele.description,
-    modele.intention,
-    modele.action
-  ].filter(Boolean);
-
-  if (!champs.length) {
+  if (!source) {
     return 0;
   }
+
+  //============================================================
+  // OUTILS
+  //============================================================
+
+  const normaliser = (valeur) => {
+
+    if (
+      valeur === null ||
+      valeur === undefined
+    ) {
+      return "";
+    }
+
+    return neoNormaliserMotLocal(
+      String(valeur)
+    ).toLowerCase();
+
+  };
 
   const motsSource =
     new Set(
       source
         .split(/\s+/u)
-        .map(neoNormaliserMotLocal)
+        .map(normaliser)
         .filter(Boolean)
     );
 
-  let meilleur = 0;
+  //============================================================
+  // 1️⃣ FAMILLE / ACTION
+  //============================================================
 
-  for (const champ of champs) {
+  let scoreFamille = 0;
 
-    const motsModele =
-      String(champ)
-        .split(/\s+/u)
-        .map(neoNormaliserMotLocal)
-        .filter(Boolean);
+  const familleModele =
+    normaliser(
+      modele.famille
+    );
 
-    if (!motsModele.length) {
+  const familleTexte =
+    normaliser(
+      analyse.famille ||
+      analyse.action?.famille
+    );
+
+  const actionTexte =
+    normaliser(
+      analyse.action?.action ||
+      analyse.action
+    );
+
+  if (
+    familleModele &&
+    familleTexte
+  ) {
+
+    if (
+      familleModele === familleTexte
+    ) {
+
+      scoreFamille = 100;
+
+    } else if (
+      familleModele.includes(familleTexte) ||
+      familleTexte.includes(familleModele)
+    ) {
+
+      scoreFamille = 80;
+
+    }
+
+  }
+
+  //============================================================
+  // 2️⃣ STRUCTURE
+  //============================================================
+
+  let scoreStructure = 0;
+
+  const structureModele =
+    Array.isArray(modele.structure)
+      ? modele.structure
+      : [];
+
+  const structureAnalyse =
+    analyse.structure || {};
+
+  if (
+    structureModele.length
+  ) {
+
+    let attendus = 0;
+    let trouves = 0;
+
+    for (
+      const element of structureModele
+    ) {
+
+      const slot =
+        normaliser(element);
+
+      if (!slot) {
+        continue;
+      }
+
+      attendus++;
+
+      let present = false;
+
+      switch (slot) {
+
+        case "sujet":
+          present = !!analyse.acteur;
+          break;
+
+        case "action":
+          present = !!(
+            analyse.action?.action ||
+            analyse.action
+          );
+          break;
+
+        case "cible":
+        case "objet":
+          present = !!analyse.cible;
+          break;
+
+        case "maniere":
+          present = !!analyse.maniere;
+          break;
+
+        case "distance":
+          present =
+            analyse.distance !== null &&
+            analyse.distance !== undefined;
+          break;
+
+        case "hauteur":
+          present =
+            analyse.hauteur !== null &&
+            analyse.hauteur !== undefined;
+          break;
+
+        case "vitesse":
+          present =
+            analyse.vitesse !== null &&
+            analyse.vitesse !== undefined;
+          break;
+
+        case "direction":
+          present =
+            !!analyse.direction ||
+            !!analyse.trajectoire;
+          break;
+
+        case "membre":
+        case "partie_corps":
+          present = !!analyse.partieCorps;
+          break;
+
+        default:
+          present = false;
+
+      }
+
+      if (present) {
+        trouves++;
+      }
+
+    }
+
+    if (attendus) {
+
+      scoreStructure =
+        Math.round(
+          (
+            trouves /
+            attendus
+          ) * 100
+        );
+
+    }
+
+  }
+
+  //============================================================
+  // 3️⃣ EXEMPLES
+  //============================================================
+
+  let scoreExemple = 0;
+
+  const exemples =
+    Array.isArray(modele.exemples)
+      ? modele.exemples
+      : [];
+
+  for (
+    const exemple of exemples
+  ) {
+
+    const motsExemple =
+      new Set(
+        neoNormaliserTexteLocal(
+          String(exemple)
+        )
+          .toLowerCase()
+          .split(/\s+/u)
+          .map(normaliser)
+          .filter(Boolean)
+      );
+
+    if (!motsExemple.size) {
       continue;
     }
 
     let communs = 0;
 
-    for (const mot of motsModele) {
+    for (
+      const mot of motsExemple
+    ) {
 
       if (
         motsSource.has(mot)
@@ -2402,24 +2586,96 @@ function neoCalculerSimilariteModele(
       Math.round(
         (
           communs /
-          Math.max(
-            motsModele.length,
-            1
-          )
+          motsExemple.size
         ) * 100
       );
 
-    meilleur =
+    scoreExemple =
       Math.max(
-        meilleur,
+        scoreExemple,
         score
       );
 
   }
 
+  //============================================================
+  // 4️⃣ MOTS
+  //============================================================
+
+  let scoreMots = 0;
+
+  const champs = [
+    modele.categorie,
+    modele.famille
+  ];
+
+  for (
+    const champ of champs
+  ) {
+
+    const motsModele =
+      String(champ || "")
+        .split(/\s+/u)
+        .map(normaliser)
+        .filter(Boolean);
+
+    if (!motsModele.length) {
+      continue;
+    }
+
+    let communs = 0;
+
+    for (
+      const mot of motsModele
+    ) {
+
+      if (
+        motsSource.has(mot)
+      ) {
+        communs++;
+      }
+
+    }
+
+    const score =
+      Math.round(
+        (
+          communs /
+          motsModele.length
+        ) * 100
+      );
+
+    scoreMots =
+      Math.max(
+        scoreMots,
+        score
+      );
+
+  }
+
+  //============================================================
+  // 5️⃣ SCORE FINAL
+  //============================================================
+
+  const scoreFinal =
+    Math.round(
+      (
+        scoreFamille * 0.40
+      ) +
+      (
+        scoreStructure * 0.30
+      ) +
+      (
+        scoreExemple * 0.20
+      ) +
+      (
+        scoreMots * 0.10
+      )
+    );
+
   return Math.min(
     100,
-    meilleur
+    scoreFinal
   );
 
 }
@@ -2431,7 +2687,7 @@ function neoCalculerSimilariteModele(
 
 function neoReconnaitreModele(
   texte,
-  actionDetectee
+  analyse = {}
 ) {
 
   const modeles =
@@ -2449,44 +2705,15 @@ function neoReconnaitreModele(
   let meilleur = null;
   let meilleurScore = 0;
 
-  for (const modele of modeles) {
+  for (
+    const modele of modeles
+  ) {
 
-    let score =
+    const score =
       neoCalculerSimilariteModele(
         texte,
-        modele
-      );
-
-    const actionModele =
-      neoNormaliserMotLocal(
-        modele.action ||
-        modele.verbe ||
-        modele.intention ||
-        ""
-      );
-
-    const actionTexte =
-      neoNormaliserMotLocal(
-        actionDetectee?.action ||
-        ""
-      );
-
-    if (
-      actionModele &&
-      actionTexte &&
-      (
-        actionModele === actionTexte ||
-        actionModele.includes(actionTexte) ||
-        actionTexte.includes(actionModele)
-      )
-    ) {
-      score += 25;
-    }
-
-    score =
-      Math.min(
-        100,
-        score
+        modele,
+        analyse
       );
 
     if (
@@ -2558,12 +2785,6 @@ function neoAnalyserAction(
       texte
     );
 
-  const modele =
-    neoReconnaitreModele(
-      texte,
-      action
-    );
-
   //============================================================
   // MANIÈRE
   //============================================================
@@ -2591,7 +2812,9 @@ function neoAnalyserAction(
       texte
     ).toLowerCase();
 
-  for (const mot of manieres) {
+  for (
+    const mot of manieres
+  ) {
 
     if (
       normal.includes(
@@ -2611,22 +2834,40 @@ function neoAnalyserAction(
   //============================================================
 
   const structure = {
-    sujet: acteur ? "S" : null,
-    verbe: action.action ? "V" : null,
-    objet: cible ? "O" : null,
+
+    sujet:
+      acteur
+        ? "S"
+        : null,
+
+    verbe:
+      action?.action
+        ? "V"
+        : null,
+
+    objet:
+      cible
+        ? "O"
+        : null,
+
     complement:
       (
         distance.valeur !== null ||
         hauteur.valeur !== null ||
         maniere ||
-        vitesse.valeur ||
+        vitesse.valeur !== null ||
         partieCorps
       )
         ? "C"
         : null
+
   };
 
-  return {
+  //============================================================
+  // ANALYSE COMPLÈTE
+  //============================================================
+
+  const analyse = {
 
     texte,
 
@@ -2634,14 +2875,13 @@ function neoAnalyserAction(
 
     sujet: acteur,
 
-    action:
-      action.action,
+    action,
 
     categorie:
-      action.categorie,
+      action?.categorie || null,
 
     famille:
-      action.famille,
+      action?.famille || null,
 
     cible,
 
@@ -2669,18 +2909,33 @@ function neoAnalyserAction(
 
     partieCorps,
 
-    modele:
-      modele.modele,
-
-    score:
-      modele.score,
-
     structure
 
   };
 
-}
+  //============================================================
+  // 📚 RECONNAISSANCE DU MODÈLE
+  //============================================================
 
+  const modele =
+    neoReconnaitreModele(
+      texte,
+      analyse
+    );
+
+  return {
+
+    ...analyse,
+
+    modele:
+      modele.modele,
+
+    score:
+      modele.score
+
+  };
+
+}
 
 //==============================================================
 // ⚖️ ARBITRAGE
