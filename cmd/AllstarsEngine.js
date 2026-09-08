@@ -13,8 +13,226 @@ const { cards } = require("../DataBase/cards");
 const { MyNeoFunctions } = require("../DataBase/myneo_lineup_team");
 const config = require("../set");
 
-// 🧠 NeoAI
-const { analyserNeoAI } = require("./outils");
+// 🧠 OLLAMA
+const OLLAMA_URL =
+    "http://127.0.0.1:11434/api/generate";
+
+const OLLAMA_MODEL =
+    "default";
+
+//================================================
+// 🧠 ANALYSEUR OLLAMA
+//================================================
+
+async function analyserNeoAI(actionsTexte) {
+
+    try {
+
+        //================================================
+        // 🧠 PROMPT EXISTANT
+        //================================================
+
+        const prompt = `
+
+${GEMINI_RULES_PROMPT}
+
+============================================================
+PAVÉ À ANALYSER
+============================================================
+
+${actionsTexte}
+
+============================================================
+FORMAT DE RÉPONSE OBLIGATOIRE
+============================================================
+
+Réponds UNIQUEMENT avec un JSON valide.
+
+{
+  "trouve": true,
+  "score": 0,
+  "categorie": "",
+  "famille": "",
+  "modele": "",
+  "structure": "",
+  "slots": {
+    "SUJET": "",
+    "ACTION": "",
+    "CIBLE": ""
+  },
+  "comprehension": "",
+  "resume": "",
+  "requisManquants": []
+}
+
+RÈGLES :
+
+- trouve = true uniquement si le pavé est réellement compris.
+- score = score de compréhension entre 0 et 100.
+- Ne jamais inventer une information absente.
+- Si une information obligatoire manque, ajoute-la dans requisManquants.
+- Respecte strictement les règles du prompt.
+- Ne réponds avec aucun texte en dehors du JSON.
+`;
+
+        console.log(
+            "🧠 OLLAMA — Analyse du pavé :",
+            actionsTexte
+        );
+
+        //================================================
+        // 🚀 APPEL OLLAMA
+        //================================================
+
+        const response =
+            await axios.post(
+                OLLAMA_URL,
+                {
+                    model: OLLAMA_MODEL,
+                    prompt,
+                    stream: false,
+                    options: {
+                        temperature: 0
+                    }
+                },
+                {
+                    timeout: 120000
+                }
+            );
+
+        const texte =
+            response?.data?.response?.trim();
+
+        if (!texte) {
+
+            console.error(
+                "❌ OLLAMA : réponse vide"
+            );
+
+            return null;
+
+        }
+
+        console.log(
+            "🧠 OLLAMA — Réponse brute :",
+            texte
+        );
+
+        //================================================
+        // 🧹 EXTRACTION JSON
+        //================================================
+
+        let jsonTexte = texte
+            .replace(/```json/gi, "")
+            .replace(/```/g, "")
+            .trim();
+
+        const debut =
+            jsonTexte.indexOf("{");
+
+        const fin =
+            jsonTexte.lastIndexOf("}");
+
+        if (
+            debut === -1 ||
+            fin === -1 ||
+            fin <= debut
+        ) {
+
+            console.error(
+                "❌ OLLAMA : JSON introuvable"
+            );
+
+            return null;
+
+        }
+
+        jsonTexte =
+            jsonTexte.slice(
+                debut,
+                fin + 1
+            );
+
+        //================================================
+        // 📦 PARSE JSON
+        //================================================
+
+        const analyse =
+            JSON.parse(jsonTexte);
+
+        //================================================
+        // 🛡️ NORMALISATION
+        //================================================
+
+        return {
+
+            trouve:
+                analyse.trouve === true,
+
+            score:
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(analyse.score) || 0
+                    )
+                ),
+
+            categorie:
+                analyse.categorie || "",
+
+            famille:
+                analyse.famille || "",
+
+            modele:
+                analyse.modele || "",
+
+            structure:
+                analyse.structure || "",
+
+            slots: {
+
+                SUJET:
+                    analyse.slots?.SUJET || "",
+
+                ACTION:
+                    analyse.slots?.ACTION || "",
+
+                CIBLE:
+                    analyse.slots?.CIBLE || ""
+
+            },
+
+            comprehension:
+                analyse.comprehension || "",
+
+            resume:
+                analyse.resume || "",
+
+            requisManquants:
+                Array.isArray(
+                    analyse.requisManquants
+                )
+                    ? analyse.requisManquants
+                    : []
+
+        };
+
+    } catch (error) {
+
+        console.error(
+            "❌ ERREUR OLLAMA :",
+            error?.response?.data ||
+            error?.message ||
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
 
 //================================================
 // 🧠 ANALYSE PAVÉ AVEC NEOAI🌀🧠 
