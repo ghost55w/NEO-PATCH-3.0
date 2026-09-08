@@ -1657,86 +1657,379 @@ const NEO_ACTION_FALLBACK = {
   ]
 };
 
+//==============================================================
+// 🧠 DÉTECTION DE L'ACTION
+//==============================================================
 
 function neoDetecterAction(texte) {
 
   const t =
     neoNormaliserTexteLocal(
-      texte
+      texte || ""
     ).toLowerCase();
 
   //============================================================
-  // Recherche prioritaire dans NEO_ACTIONS
+  // 🔎 OUTILS
+  //============================================================
+
+  const contientMot = (
+    texteNormalise,
+    mot
+  ) => {
+
+    const normalise =
+      neoNormaliserMotLocal(
+        mot
+      );
+
+    if (!normalise) {
+      return false;
+    }
+
+    return texteNormalise.includes(
+      normalise
+    );
+
+  };
+
+  //============================================================
+  // 📚 RECHERCHE DANS NEO_ACTIONS
   //============================================================
 
   const collection =
     NeoAI?.NEO_ACTIONS;
 
-  if (collection) {
+  if (
+    Array.isArray(collection)
+  ) {
 
-    if (Array.isArray(collection)) {
+    for (
+      const actionDef
+      of collection
+    ) {
 
-      for (const action of collection) {
+      //========================================================
+      // ACTION SIMPLE
+      //========================================================
 
-        if (typeof action === "string") {
+      if (
+        typeof actionDef === "string"
+      ) {
+
+        if (
+          contientMot(
+            t,
+            actionDef
+          )
+        ) {
+
+          return {
+            action: actionDef,
+            categorie: "action",
+            famille: null
+          };
+
+        }
+
+        continue;
+
+      }
+
+      //========================================================
+      // ACTION OBJET
+      //========================================================
+
+      if (
+        !actionDef ||
+        typeof actionDef !== "object"
+      ) {
+        continue;
+      }
+
+      const mots = [
+        actionDef.nom,
+        actionDef.action,
+        actionDef.mot,
+
+        ...(Array.isArray(
+          actionDef.synonymes
+        )
+          ? actionDef.synonymes
+          : []),
+
+        ...(Array.isArray(
+          actionDef.aliases
+        )
+          ? actionDef.aliases
+          : [])
+
+      ].filter(Boolean);
+
+      const trouve =
+        mots.find(
+          mot =>
+            contientMot(
+              t,
+              mot
+            )
+        );
+
+      if (
+        !trouve
+      ) {
+        continue;
+      }
+
+      //========================================================
+      // CATÉGORIE
+      //========================================================
+
+      const categorie =
+        actionDef.categorie ||
+        actionDef.category ||
+        null;
+
+      //========================================================
+      // FAMILLE EXISTANTE
+      //========================================================
+
+      let famille =
+        actionDef.famille ||
+        null;
+
+      //========================================================
+      // SI LA FAMILLE N'EST PAS DÉFINIE,
+      // ON LA CHERCHE DANS LES MODÈLES
+      //========================================================
+
+      if (
+        !famille
+      ) {
+
+        const modeles =
+          neoGetModeles();
+
+        let meilleurFamille = null;
+        let meilleurScore = 0;
+
+        for (
+          const modele
+          of modeles
+        ) {
 
           if (
-            t.includes(
-              neoNormaliserMotLocal(action)
+            categorie &&
+            modele.categorie &&
+            modele.categorie !== categorie
+          ) {
+            continue;
+          }
+
+          const familleModele =
+            modele.famille;
+
+          if (
+            !familleModele
+          ) {
+            continue;
+          }
+
+          const familleNormalisee =
+            neoNormaliserMotLocal(
+              familleModele
+            );
+
+          //====================================================
+          // FAMILLE DIRECTEMENT ASSOCIÉE À L'ACTION
+          //====================================================
+
+          const exemples =
+            Array.isArray(
+              modele.exemples
+            )
+              ? modele.exemples
+              : [];
+
+          let trouveDansExemple =
+            false;
+
+          for (
+            const exemple
+            of exemples
+          ) {
+
+            if (
+              contientMot(
+                neoNormaliserTexteLocal(
+                  exemple
+                ).toLowerCase(),
+                trouve
+              )
+            ) {
+
+              trouveDansExemple = true;
+              break;
+
+            }
+
+          }
+
+          if (
+            trouveDansExemple
+          ) {
+
+            meilleurFamille =
+              familleModele;
+
+            meilleurScore =
+              100;
+
+            break;
+
+          }
+
+          //====================================================
+          // LE NOM DE LA FAMILLE PEUT LUI-MÊME
+          // CORRESPONDRE À L'ACTION
+          //====================================================
+
+          if (
+            familleNormalisee &&
+            contientMot(
+              neoNormaliserTexteLocal(
+                trouve
+              ).toLowerCase(),
+              familleModele
             )
           ) {
-            return {
-              action,
-              categorie: "action",
-              famille: null
-            };
+
+            if (
+              meilleurScore < 90
+            ) {
+
+              meilleurFamille =
+                familleModele;
+
+              meilleurScore =
+                90;
+
+            }
+
           }
 
         }
 
+        famille =
+          meilleurFamille;
+
+      }
+
+      return {
+        action:
+          actionDef.action ||
+          actionDef.nom ||
+          trouve,
+
+        categorie,
+
+        famille
+
+      };
+
+    }
+
+  }
+
+  //============================================================
+  // 🔥 FALLBACK : RECHERCHE DIRECTE DANS LES MODÈLES
+  //============================================================
+
+  const modeles =
+    neoGetModeles();
+
+  for (
+    const modele
+    of modeles
+  ) {
+
+    const exemples =
+      Array.isArray(
+        modele.exemples
+      )
+        ? modele.exemples
+        : [];
+
+    for (
+      const exemple
+      of exemples
+    ) {
+
+      const exempleNormalise =
+        neoNormaliserTexteLocal(
+          exemple
+        ).toLowerCase();
+
+      //========================================================
+      // ON CHERCHE LES VERBES / ACTIONS DANS L'EXEMPLE
+      //========================================================
+
+      const mots =
+        exempleNormalise
+          .split(/\s+/u)
+          .filter(Boolean);
+
+      for (
+        const mot
+        of mots
+      ) {
+
         if (
-          action &&
-          typeof action === "object"
+          t.includes(
+            neoNormaliserMotLocal(
+              mot
+            )
+          )
         ) {
 
-          const mots = [
-            action.nom,
-            action.action,
-            action.mot,
-            ...(Array.isArray(action.synonymes)
-              ? action.synonymes
-              : []),
-            ...(Array.isArray(action.aliases)
-              ? action.aliases
-              : [])
-          ].filter(Boolean);
+          // On évite les mots trop génériques.
+          const motsIgnorer = [
+            "de",
+            "du",
+            "des",
+            "vers",
+            "à",
+            "au",
+            "en",
+            "un",
+            "une",
+            "le",
+            "la",
+            "les",
+            "dans",
+            "sur",
+            "avec",
+            "pour"
+          ];
 
-          const trouve =
-            mots.find(m =>
-              t.includes(
-                neoNormaliserMotLocal(m)
+          if (
+            motsIgnorer.includes(
+              neoNormaliserMotLocal(
+                mot
               )
-            );
-
-          if (trouve) {
-
-            return {
-              action:
-                action.action ||
-                action.nom ||
-                trouve,
-
-              categorie:
-                action.categorie ||
-                action.category ||
-                null,
-
-              famille:
-                action.famille ||
-                null
-            };
-
+            )
+          ) {
+            continue;
           }
+
+          return {
+            action: mot,
+            categorie:
+              modele.categorie ||
+              null,
+            famille:
+              modele.famille ||
+              null
+          };
 
         }
 
@@ -1747,7 +2040,7 @@ function neoDetecterAction(texte) {
   }
 
   //============================================================
-  // Fallback interne
+  // 🔧 FALLBACK INTERNE EXISTANT
   //============================================================
 
   for (
@@ -1757,11 +2050,15 @@ function neoDetecterAction(texte) {
     )
   ) {
 
-    for (const mot of mots) {
+    for (
+      const mot
+      of mots
+    ) {
 
       if (
-        t.includes(
-          neoNormaliserMotLocal(mot)
+        contientMot(
+          t,
+          mot
         )
       ) {
 
@@ -1777,6 +2074,10 @@ function neoDetecterAction(texte) {
 
   }
 
+  //============================================================
+  // ❌ RIEN TROUVÉ
+  //============================================================
+
   return {
     action: null,
     categorie: null,
@@ -1784,6 +2085,8 @@ function neoDetecterAction(texte) {
   };
 
 }
+
+            
 
 //==============================================================
 // ✂️ NEOAI — SEGMENTATION INTELLIGENTE DES ACTIONS
