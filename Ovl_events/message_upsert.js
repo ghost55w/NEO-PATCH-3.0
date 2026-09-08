@@ -522,34 +522,44 @@ async function message_upsert(m, ovl) {
         };
 
         //==========================================================
-        // 🌀🧠 NEOAI — MESSAGE
-        //==========================================================
+// 🌀🧠 NEOAI — MESSAGE AUTOMATIQUE
+//==========================================================
 
-        try {
+try {
 
-            const neoAIHandled =
-                await traiterMessageNeoAI(
-                    ms,
-                    ms_org,
-                    ovl,
-                    auteur_Message
-                );
+    // NeoAI ne s'intéresse qu'aux messages
+    // commençant par 🌀:
+    const estMessageNeoAI =
+        /^🌀\s*:/u.test(
+            texte.trim()
+        );
 
-            if (neoAIHandled) {
+    if (estMessageNeoAI) {
 
-                return;
-
-            }
-
-        } catch (err) {
-
-            console.error(
-                "❌ [NeoAI] Erreur traitement message :",
-                err
+        const neoAIHandled =
+            await traiterMessageNeoAI(
+                ms_org,
+                ovl,
+                cmd_options
             );
+
+        if (neoAIHandled) {
+
+            return;
 
         }
 
+    }
+
+} catch (err) {
+
+    console.error(
+        "❌ [NeoAI] Erreur traitement message :",
+        err
+    );
+
+}
+        
         //==========================================================
         // 🔥 SYSTEME MATCH GLOBAL
         //==========================================================
