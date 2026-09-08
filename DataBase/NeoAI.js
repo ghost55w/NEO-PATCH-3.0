@@ -2018,6 +2018,922 @@ const NEO_ACTIONS_COMBAT = {
 
 };
 
+//==============================================================
+// 🧠🌀 NEO AI — MOTEUR PRINCIPAL
+//==============================================================
+
+function neoAnalyser(texte = "") {
+
+    //==========================================================
+    // 🛡️ VALIDATION
+    //==========================================================
+
+    if (
+        !texte ||
+        typeof texte !== "string"
+    ) {
+        return {
+            trouve: false,
+            score: 0,
+            texte: "",
+            action: null,
+            modele: null,
+            structure: [],
+            slots: {},
+            requisManquants: [],
+            motsConnus: [],
+            motsInconnus: [],
+            comprehension:
+                "Aucun texte à analyser.",
+            resume: ""
+        };
+    }
+
+
+    //==========================================================
+    // 🧹 NORMALISATION
+    //==========================================================
+
+    const texteOriginal =
+        texte.trim();
+
+    const texteNormalise =
+        typeof neoNormaliserTexte === "function"
+            ? neoNormaliserTexte(texteOriginal)
+            : texteOriginal
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^\p{L}\p{N}\s'-]/gu, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+
+
+    if (!texteNormalise) {
+        return {
+            trouve: false,
+            score: 0,
+            texte: texteOriginal,
+            action: null,
+            modele: null,
+            structure: [],
+            slots: {},
+            requisManquants: [],
+            motsConnus: [],
+            motsInconnus: [],
+            comprehension:
+                "Aucun texte exploitable.",
+            resume: texteOriginal
+        };
+    }
+
+
+    //==========================================================
+    // 📚 DICTIONNAIRE
+    //==========================================================
+
+    const dictionnaire =
+        NEO_DICTIONNAIRES || {};
+
+
+    //==========================================================
+    // 🔎 MOTS CONNUS / INCONNUS
+    //==========================================================
+
+    const tokens =
+        texteNormalise
+            .split(/\s+/)
+            .filter(Boolean);
+
+
+    const motsConnus = [];
+    const motsInconnus = [];
+
+
+    /*
+     * On considère comme connus :
+     *
+     * - les actions
+     * - les manières
+     * - les zones du corps
+     * - les directions
+     * - les côtés
+     * - les trajectoires
+     * - les vitesses
+     * - les connecteurs
+     *
+     * Les noms propres comme Naruto ou Maki
+     * peuvent rester inconnus du dictionnaire.
+     */
+
+    const groupesDictionnaire = [
+
+        dictionnaire.actions,
+
+        dictionnaire.manieres,
+
+        dictionnaire.zones,
+
+        dictionnaire.partiesCorps,
+
+        dictionnaire.cotes,
+
+        dictionnaire.directions,
+
+        dictionnaire.trajectoires,
+
+        dictionnaire.vitesses,
+
+        dictionnaire.armes
+
+    ];
+
+
+    const variantesConnues =
+        new Set();
+
+
+    for (
+        const groupe of groupesDictionnaire
+    ) {
+
+        if (
+            !groupe ||
+            typeof groupe !== "object"
+        ) {
+            continue;
+        }
+
+
+        for (
+            const valeur of Object.values(groupe)
+        ) {
+
+            if (
+                Array.isArray(valeur)
+            ) {
+
+                for (
+                    const mot of valeur
+                ) {
+
+                    if (
+                        typeof mot === "string"
+                    ) {
+
+                        variantesConnues.add(
+                            mot
+                                .toLowerCase()
+                                .normalize("NFD")
+                                .replace(
+                                    /[\u0300-\u036f]/g,
+                                    ""
+                                )
+                        );
+                    }
+                }
+
+            } else if (
+                typeof valeur === "string"
+            ) {
+
+                variantesConnues.add(
+                    valeur
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(
+                            /[\u0300-\u036f]/g,
+                            ""
+                        )
+                );
+            }
+        }
+    }
+
+
+    for (
+        const token of tokens
+    ) {
+
+        if (
+            variantesConnues.has(token)
+        ) {
+
+            motsConnus.push(token);
+
+        } else {
+
+            motsInconnus.push(token);
+        }
+    }
+
+
+    //==========================================================
+    // 🥊 1. DÉTECTION DE L'ACTION
+    //==========================================================
+
+    let action = null;
+
+
+    if (
+        typeof neoTrouverAction === "function"
+    ) {
+
+        try {
+
+            action =
+                neoTrouverAction(
+                    texteOriginal
+                );
+
+        } catch (error) {
+
+            console.error(
+                "❌ NeoAI détection action :",
+                error
+            );
+
+            action = null;
+        }
+    }
+
+
+    //==========================================================
+    // ❌ AUCUNE ACTION
+    //==========================================================
+
+    if (!action) {
+
+        return {
+
+            trouve: false,
+
+            score: 0,
+
+            texte:
+                texteOriginal,
+
+            action:
+                null,
+
+            modele:
+                null,
+
+            structure:
+                [],
+
+            slots:
+                {},
+
+            requisManquants:
+                [],
+
+            motsConnus,
+
+            motsInconnus,
+
+            comprehension:
+                "Aucune action de combat reconnue.",
+
+            resume:
+                texteOriginal
+        };
+    }
+
+
+    //==========================================================
+    // 🧠 2. RÉCUPÉRATION DES MODÈLES DE L'ACTION
+    //==========================================================
+
+    const actionData =
+        NEO_ACTIONS_COMBAT[
+            action
+        ];
+
+
+    if (
+        !actionData
+    ) {
+
+        return {
+
+            trouve: false,
+
+            score: 0,
+
+            texte:
+                texteOriginal,
+
+            action,
+
+            modele:
+                null,
+
+            structure:
+                [],
+
+            slots:
+                {},
+
+            requisManquants:
+                [],
+
+            motsConnus,
+
+            motsInconnus,
+
+            comprehension:
+                `L'action « ${action} » est reconnue mais aucun modèle ne lui est associé.`,
+
+            resume:
+                texteOriginal
+        };
+    }
+
+
+    //==========================================================
+    // 📦 NORMALISATION DES MODÈLES
+    //==========================================================
+
+    let modeles = [];
+
+
+    /*
+     * Nouvelle architecture :
+     *
+     * NEO_ACTIONS_COMBAT = {
+     *
+     *     frapper: {
+     *         modeles: [...]
+     *     }
+     *
+     * }
+     *
+     * ou éventuellement :
+     *
+     * frapper: [...]
+     *
+     * On accepte les deux.
+     */
+
+
+    if (
+        Array.isArray(actionData)
+    ) {
+
+        modeles =
+            actionData;
+
+    } else if (
+        Array.isArray(
+            actionData.modeles
+        )
+    ) {
+
+        modeles =
+            actionData.modeles;
+
+    } else if (
+        Array.isArray(
+            actionData.models
+        )
+    ) {
+
+        modeles =
+            actionData.models;
+    }
+
+
+    if (
+        !modeles.length
+    ) {
+
+        return {
+
+            trouve: false,
+
+            score: 0,
+
+            texte:
+                texteOriginal,
+
+            action,
+
+            modele:
+                null,
+
+            structure:
+                [],
+
+            slots:
+                {},
+
+            requisManquants:
+                [],
+
+            motsConnus,
+
+            motsInconnus,
+
+            comprehension:
+                `Aucun modèle disponible pour l'action « ${action} ».`,
+
+            resume:
+                texteOriginal
+        };
+    }
+
+
+    //==========================================================
+    // 🔎 3. EXTRACTION DES SLOTS
+    //==========================================================
+
+    let slots = {};
+
+
+    if (
+        typeof neoExtraireSlots === "function"
+    ) {
+
+        try {
+
+            slots =
+                neoExtraireSlots(
+                    texteOriginal,
+                    action
+                ) || {};
+
+        } catch (error) {
+
+            console.error(
+                "❌ NeoAI extraction slots :",
+                error
+            );
+
+            slots = {};
+        }
+    }
+
+
+    //==========================================================
+    // 🧠 4. COMPARAISON UNIQUEMENT
+    //    AVEC LES MODÈLES DE CETTE ACTION
+    //==========================================================
+
+    let meilleur = null;
+
+
+    for (
+        const modele of modeles
+    ) {
+
+        if (
+            !modele ||
+            typeof modele !== "object"
+        ) {
+            continue;
+        }
+
+
+        let resultat = null;
+
+
+        /*
+         * Si une fonction de comparaison existe,
+         * elle reçoit explicitement le modèle.
+         */
+
+        if (
+            typeof neoComparerModele === "function"
+        ) {
+
+            try {
+
+                resultat =
+                    neoComparerModele(
+                        texteOriginal,
+                        modele,
+                        slots,
+                        action
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    "❌ NeoAI comparaison modèle :",
+                    error
+                );
+
+                resultat = null;
+            }
+        }
+
+
+        //======================================================
+        // 🛡️ FALLBACK DE SÉCURITÉ
+        //======================================================
+
+        if (
+            !resultat ||
+            typeof resultat !== "object"
+        ) {
+
+            const structure =
+                Array.isArray(
+                    modele.structure
+                )
+                    ? modele.structure
+                    : [];
+
+
+            const requis =
+                Array.isArray(
+                    modele.requis
+                )
+                    ? modele.requis
+                    : [];
+
+
+            let presents = 0;
+
+            for (
+                const slot of requis
+            ) {
+
+                if (
+                    slots &&
+                    slots[slot] !== undefined &&
+                    slots[slot] !== null &&
+                    slots[slot] !== ""
+                ) {
+
+                    presents++;
+                }
+            }
+
+
+            const score =
+                requis.length
+                    ? Math.round(
+                        (
+                            presents /
+                            requis.length
+                        ) * 100
+                    )
+                    : 0;
+
+
+            const requisManquants =
+                requis.filter(
+                    slot =>
+                        !slots ||
+                        slots[slot] === undefined ||
+                        slots[slot] === null ||
+                        slots[slot] === ""
+                );
+
+
+            resultat = {
+
+                score,
+
+                modele,
+
+                structure,
+
+                slots,
+
+                requisManquants
+            };
+        }
+
+
+        //======================================================
+        // 🏆 MEILLEUR MODÈLE
+        //======================================================
+
+        const score =
+            typeof resultat.score === "number"
+                ? resultat.score
+                : 0;
+
+
+        if (
+            !meilleur ||
+            score > meilleur.score
+        ) {
+
+            meilleur = {
+
+                score,
+
+                modele:
+                    resultat.modele ||
+                    modele,
+
+                structure:
+                    resultat.structure ||
+                    modele.structure ||
+                    [],
+
+                slots:
+                    resultat.slots ||
+                    slots ||
+                    {},
+
+                requisManquants:
+                    resultat.requisManquants ||
+                    []
+            };
+        }
+    }
+
+
+    //==========================================================
+    // ❌ AUCUN MODÈLE
+    //==========================================================
+
+    if (!meilleur) {
+
+        return {
+
+            trouve: false,
+
+            score: 0,
+
+            texte:
+                texteOriginal,
+
+            action,
+
+            modele:
+                null,
+
+            structure:
+                [],
+
+            slots,
+
+            requisManquants:
+                [],
+
+            motsConnus,
+
+            motsInconnus,
+
+            comprehension:
+                `L'action « ${action} » a été détectée, mais aucun modèle n'a pu être comparé.`,
+
+            resume:
+                texteOriginal
+        };
+    }
+
+
+    //==========================================================
+    // 🧠 5. COMPRÉHENSION
+    //==========================================================
+
+    const slotsFinaux =
+        meilleur.slots || {};
+
+
+    const comprehensionParts = [];
+
+
+    if (
+        slotsFinaux.SUJET
+    ) {
+
+        comprehensionParts.push(
+            `Sujet : ${slotsFinaux.SUJET}`
+        );
+    }
+
+
+    comprehensionParts.push(
+        `Action : ${slotsFinaux.ACTION || action}`
+    );
+
+
+    if (
+        slotsFinaux.MANIERE
+    ) {
+
+        comprehensionParts.push(
+            `Manière : ${slotsFinaux.MANIERE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.CIBLE
+    ) {
+
+        comprehensionParts.push(
+            `Cible : ${slotsFinaux.CIBLE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.ZONE_VISEE
+    ) {
+
+        comprehensionParts.push(
+            `Zone visée : ${slotsFinaux.ZONE_VISEE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.COTE
+    ) {
+
+        comprehensionParts.push(
+            `Côté : ${slotsFinaux.COTE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.DIRECTION
+    ) {
+
+        comprehensionParts.push(
+            `Direction : ${slotsFinaux.DIRECTION}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.TRAJECTOIRE
+    ) {
+
+        comprehensionParts.push(
+            `Trajectoire : ${slotsFinaux.TRAJECTOIRE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.VITESSE
+    ) {
+
+        comprehensionParts.push(
+            `Vitesse : ${slotsFinaux.VITESSE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.DISTANCE
+    ) {
+
+        comprehensionParts.push(
+            `Distance : ${slotsFinaux.DISTANCE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.HAUTEUR
+    ) {
+
+        comprehensionParts.push(
+            `Hauteur : ${slotsFinaux.HAUTEUR}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.ANGLE
+    ) {
+
+        comprehensionParts.push(
+            `Angle : ${slotsFinaux.ANGLE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.FIN_TRAJET
+    ) {
+
+        comprehensionParts.push(
+            `Fin du trajet : ${slotsFinaux.FIN_TRAJET}`
+        );
+    }
+
+
+    const comprehension =
+        comprehensionParts.length
+            ? comprehensionParts.join(" | ")
+            : `Action « ${action} » reconnue.`;
+
+
+    //==========================================================
+    // 💡 6. RÉSUMÉ
+    //==========================================================
+
+    const resumeParts = [];
+
+
+    if (
+        slotsFinaux.SUJET
+    ) {
+
+        resumeParts.push(
+            slotsFinaux.SUJET
+        );
+    }
+
+
+    resumeParts.push(
+        slotsFinaux.ACTION ||
+        action
+    );
+
+
+    if (
+        slotsFinaux.MANIERE
+    ) {
+
+        resumeParts.push(
+            `avec ${slotsFinaux.MANIERE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.CIBLE
+    ) {
+
+        resumeParts.push(
+            `sur ${slotsFinaux.CIBLE}`
+        );
+    }
+
+
+    if (
+        slotsFinaux.ZONE_VISEE
+    ) {
+
+        resumeParts.push(
+            `au ${slotsFinaux.ZONE_VISEE}`
+        );
+    }
+
+
+    const resume =
+        resumeParts.join(" ");
+
+
+    //==========================================================
+    // 📦 RÉSULTAT FINAL
+    //==========================================================
+
+    return {
+
+        trouve:
+            meilleur.score >= 70,
+
+        score:
+            meilleur.score,
+
+        texte:
+            texteOriginal,
+
+        action,
+
+        modele:
+            meilleur.modele.id ||
+            null,
+
+        structure:
+            Array.isArray(
+                meilleur.structure
+            )
+                ? meilleur.structure
+                : [],
+
+        slots:
+            slotsFinaux,
+
+        requisManquants:
+            meilleur.requisManquants,
+
+        motsConnus,
+
+        motsInconnus,
+
+        comprehension,
+
+        resume:
+            resume ||
+            texteOriginal
+    };
+}
 
 //==============================================================
 // 🧹 NORMALISATION
