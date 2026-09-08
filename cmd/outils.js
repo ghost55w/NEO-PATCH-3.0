@@ -788,9 +788,2413 @@ function extraireTexteNeoAI(
   return "";
 }
 
+//==============================================================
+// 🌀🧠 NEOAI — SESSION + NOUVEAU MOTEUR LINGUISTIQUE
+//==============================================================
+
+const neoAISessions = new Map();
+
 
 //==============================================================
-// 📤 EXPORTS
+// 👤 NORMALISATION JID
+//==============================================================
+
+function normaliserJidNeoAI(jid) {
+
+  if (!jid) return null;
+
+  return String(jid)
+    .trim()
+    .replace(/^whatsapp:/i, "");
+
+}
+
+
+//==============================================================
+// 👤 RÉCUPÉRER LE JID UTILISATEUR
+//==============================================================
+
+function getNeoAIUserJid(ms_org, ms, cmd_options = {}) {
+
+  const {
+    auteur_Message,
+    auteur_Msg_Repondu
+  } = cmd_options || {};
+
+  return normaliserJidNeoAI(
+    auteur_Message ||
+    auteur_Msg_Repondu ||
+    ms?.key?.participant ||
+    ms?.participant ||
+    (
+      ms?.key?.remoteJid &&
+      !ms.key.remoteJid.endsWith("@g.us")
+        ? ms.key.remoteJid
+        : null
+    ) ||
+    ms_org
+  );
+
+}
+
+
+//==============================================================
+// 🧠 DÉMARRER SESSION
+//==============================================================
+
+function demarrerSessionNeoAI(userJid, chatJid) {
+
+  userJid = normaliserJidNeoAI(userJid);
+
+  if (!userJid) {
+    return null;
+  }
+
+  const session = {
+    userJid,
+    chatJid,
+
+    active: true,
+
+    createdAt: Date.now(),
+    lastActivity: Date.now(),
+
+    messagesAnalyses: 0,
+
+    historique: [],
+
+    contexte: {
+      dernierActeur: null,
+      derniereCible: null,
+      derniereAction: null
+    }
+  };
+
+  neoAISessions.set(userJid, session);
+
+  console.log(
+    "🧠 [NeoAI] Session créée :",
+    userJid
+  );
+
+  return session;
+}
+
+
+//==============================================================
+// 🔎 RÉCUPÉRER SESSION
+//==============================================================
+
+function getSessionNeoAI(userJid) {
+
+  userJid = normaliserJidNeoAI(userJid);
+
+  if (!userJid) {
+    return null;
+  }
+
+  const session = neoAISessions.get(userJid);
+
+  if (!session) {
+    return null;
+  }
+
+  session.lastActivity = Date.now();
+
+  return session;
+}
+
+
+//==============================================================
+// ✅ SESSION ACTIVE
+//==============================================================
+
+function sessionNeoAIActive(userJid) {
+
+  const session =
+    getSessionNeoAI(userJid);
+
+  return !!(
+    session &&
+    session.active
+  );
+}
+
+
+//==============================================================
+// ❌ FERMER SESSION
+//==============================================================
+
+function fermerSessionNeoAI(userJid) {
+
+  userJid = normaliserJidNeoAI(userJid);
+
+  if (!userJid) {
+    return false;
+  }
+
+  const session =
+    neoAISessions.get(userJid);
+
+  if (!session) {
+    return false;
+  }
+
+  session.active = false;
+
+  neoAISessions.delete(userJid);
+
+  console.log(
+    "🛑 [NeoAI] Session fermée :",
+    userJid
+  );
+
+  return true;
+}
+
+
+//==============================================================
+// 🛑 COMMANDES D'ARRÊT
+//==============================================================
+
+function estCommandeArretNeoAI(texte) {
+
+  const t =
+    String(texte || "")
+      .trim()
+      .toLowerCase();
+
+  return [
+    "stop",
+    "neo stop",
+    "neoai stop",
+    "🛑",
+    "arrête",
+    "arrete",
+    "arrêter",
+    "arreter",
+    "fermer neo",
+    "quitter neo"
+  ].includes(t);
+
+}
+
+
+//==============================================================
+// 🧹 NORMALISATION LINGUISTIQUE
+//==============================================================
+
+function neoNormaliserTexteLocal(texte) {
+
+  return String(texte || "")
+    .replace(/🌀/gu, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+
+}
+
+
+function neoNormaliserMotLocal(mot) {
+
+  return String(mot || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}'-]/gu, "")
+    .trim();
+
+}
+
+
+//==============================================================
+// 📝 EXTRACTION DES MOTS
+//==============================================================
+
+function neoExtraireMots(texte) {
+
+  return neoNormaliserTexteLocal(texte)
+    .split(/\s+/u)
+    .map(m => m.trim())
+    .filter(Boolean);
+
+}
+
+
+//==============================================================
+// 📚 RÉCUPÉRATION DE LA BASE NEOAI
+//==============================================================
+
+function neoGetCollections() {
+
+  const collections = {};
+
+  if (!NeoAI || typeof NeoAI !== "object") {
+    return collections;
+  }
+
+  for (const [cle, valeur] of Object.entries(NeoAI)) {
+
+    if (
+      Array.isArray(valeur) ||
+      (
+        valeur &&
+        typeof valeur === "object"
+      )
+    ) {
+      collections[cle] = valeur;
+    }
+
+  }
+
+  return collections;
+
+}
+
+
+//==============================================================
+// 🔍 CHERCHER DANS UNE COLLECTION
+//==============================================================
+
+function neoChercherDansCollection(
+  mot,
+  collection
+) {
+
+  const cible =
+    neoNormaliserMotLocal(mot);
+
+  if (!collection) {
+    return false;
+  }
+
+  if (Array.isArray(collection)) {
+
+    for (const element of collection) {
+
+      if (typeof element === "string") {
+
+        if (
+          neoNormaliserMotLocal(element) === cible
+        ) {
+          return true;
+        }
+
+      }
+
+      if (
+        element &&
+        typeof element === "object"
+      ) {
+
+        const valeurs = [
+          element.mot,
+          element.nom,
+          element.terme,
+          element.texte,
+          element.value,
+          element.verbe,
+          element.action
+        ];
+
+        if (
+          valeurs.some(v =>
+            v &&
+            neoNormaliserMotLocal(v) === cible
+          )
+        ) {
+          return true;
+        }
+
+        if (
+          Array.isArray(element.synonymes) &&
+          element.synonymes.some(v =>
+            neoNormaliserMotLocal(v) === cible
+          )
+        ) {
+          return true;
+        }
+
+        if (
+          Array.isArray(element.aliases) &&
+          element.aliases.some(v =>
+            neoNormaliserMotLocal(v) === cible
+          )
+        ) {
+          return true;
+        }
+
+      }
+    }
+
+    return false;
+  }
+
+  if (
+    typeof collection === "object"
+  ) {
+
+    for (const [cle, valeur] of Object.entries(collection)) {
+
+      if (
+        neoNormaliserMotLocal(cle) === cible
+      ) {
+        return true;
+      }
+
+      if (
+        typeof valeur === "string" &&
+        neoNormaliserMotLocal(valeur) === cible
+      ) {
+        return true;
+      }
+
+      if (
+        Array.isArray(valeur) &&
+        valeur.some(v =>
+          typeof v === "string" &&
+          neoNormaliserMotLocal(v) === cible
+        )
+      ) {
+        return true;
+      }
+
+    }
+  }
+
+  return false;
+}
+
+
+//==============================================================
+// 📚 MOT CONNU
+//==============================================================
+
+function neoMotConnu(mot) {
+
+  const collections =
+    neoGetCollections();
+
+  for (const collection of Object.values(collections)) {
+
+    if (
+      neoChercherDansCollection(
+        mot,
+        collection
+      )
+    ) {
+      return true;
+    }
+
+  }
+
+  return false;
+}
+
+
+//==============================================================
+// 🧠 TROUVER UNE COLLECTION PAR MOT-CLÉ
+//==============================================================
+
+function neoTrouverCollection(
+  motsCles = []
+) {
+
+  const collections =
+    neoGetCollections();
+
+  const cles =
+    Object.keys(collections);
+
+  for (const cle of cles) {
+
+    const n =
+      neoNormaliserMotLocal(cle);
+
+    if (
+      motsCles.some(m =>
+        n.includes(
+          neoNormaliserMotLocal(m)
+        )
+      )
+    ) {
+      return collections[cle];
+    }
+
+  }
+
+  return null;
+}
+
+
+//==============================================================
+// 📐 DISTANCE
+//==============================================================
+
+function neoDetecterDistance(texte) {
+
+  const match =
+    String(texte || "").match(
+      /(\d+(?:[.,]\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu
+    );
+
+  if (!match) {
+    return {
+      valeur: null,
+      unite: null
+    };
+  }
+
+  const valeur =
+    Number(
+      match[1]
+        .replace(",", ".")
+    );
+
+  let unite =
+    match[2].toLowerCase();
+
+  if (
+    unite.startsWith("cm") ||
+    unite.startsWith("cent")
+  ) {
+    unite = "cm";
+  } else {
+    unite = "m";
+  }
+
+  return {
+    valeur,
+    unite
+  };
+
+}
+
+
+//==============================================================
+// 📏 HAUTEUR
+//==============================================================
+
+function neoDetecterHauteur(texte) {
+
+  const t =
+    String(texte || "");
+
+  const regex =
+    /(?:hauteur|haut(?:eur)?|monte(?:r)?|montant|saut(?:e|ant)?|en\s+l['’]air)\D{0,20}(\d+(?:[.,]\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu;
+
+  const match =
+    t.match(regex);
+
+  if (!match) {
+    return {
+      valeur: null,
+      unite: null
+    };
+  }
+
+  return {
+    valeur: Number(
+      match[1]
+        .replace(",", ".")
+    ),
+    unite:
+      /cm|centim/i.test(match[2])
+        ? "cm"
+        : "m"
+  };
+
+}
+
+
+//==============================================================
+// ⚡ VITESSE
+//==============================================================
+
+function neoDetecterVitesse(texte) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  const valeurs = [
+    "vmax",
+    "v max",
+    "vitesse maximale",
+    "pleine vitesse",
+    "à pleine vitesse",
+    "a pleine vitesse",
+    "très vite",
+    "tres vite",
+    "rapidement",
+    "lentement"
+  ];
+
+  for (const valeur of valeurs) {
+
+    if (
+      t.includes(valeur)
+    ) {
+
+      return {
+        valeur:
+          valeur.includes("vmax") ||
+          valeur.includes("v max") ||
+          valeur.includes("maximale")
+            ? "maximale"
+            : valeur
+      };
+
+    }
+
+  }
+
+  return {
+    valeur: null
+  };
+
+}
+
+
+//==============================================================
+// 🦵 PARTIE DU CORPS
+//==============================================================
+
+function neoDetecterPartieCorps(texte) {
+
+  const parties = [
+    "visage",
+    "tête",
+    "tete",
+    "crâne",
+    "crane",
+    "mâchoire",
+    "machoire",
+    "menton",
+    "cou",
+    "épaule",
+    "epaule",
+    "bras",
+    "avant-bras",
+    "poignet",
+    "main",
+    "doigts",
+    "torse",
+    "poitrine",
+    "ventre",
+    "abdomen",
+    "dos",
+    "hanche",
+    "cuisse",
+    "genou",
+    "tibia",
+    "mollet",
+    "cheville",
+    "pied"
+  ];
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    );
+
+  for (const partie of parties) {
+
+    if (
+      t.includes(
+        neoNormaliserTexteLocal(partie)
+      )
+    ) {
+      return partie;
+    }
+
+  }
+
+  return null;
+
+}
+
+
+//==============================================================
+// 🧭 DIRECTION / TRAJECTOIRE
+//==============================================================
+
+function neoDetecterTrajectoire(texte) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  if (
+    /\bvers\b/iu.test(t)
+  ) {
+    return "vers";
+  }
+
+  if (
+    /\ben\s+ligne\s+droite\b/iu.test(t)
+  ) {
+    return "ligne_droite";
+  }
+
+  if (
+    /\bfrontal\b/iu.test(t)
+  ) {
+    return "frontale";
+  }
+
+  if (
+    /\blatéral\b|\blateral\b/iu.test(t)
+  ) {
+    return "laterale";
+  }
+
+  if (
+    /\bdiagonal\b/iu.test(t)
+  ) {
+    return "diagonale";
+  }
+
+  if (
+    /\ben\s+l['’]air\b/iu.test(t) ||
+    /\bsaute\b/iu.test(t) ||
+    /\bsautant\b/iu.test(t)
+  ) {
+    return "aerienne";
+  }
+
+  return null;
+
+}
+
+
+//==============================================================
+// 🎯 CIBLE
+//==============================================================
+
+function neoDetecterCible(texte) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    );
+
+  const patterns = [
+    /\bvers\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+    /\bcontre\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+    /\bsur\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+    /\bà\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+    /\bau\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+    /\bson\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu
+  ];
+
+  for (const pattern of patterns) {
+
+    const match =
+      t.match(pattern);
+
+    if (
+      match &&
+      match[1]
+    ) {
+
+      const mot =
+        match[1];
+
+      if (
+        ![
+          "visage",
+          "abdomen",
+          "corps",
+          "adversaire",
+          "ennemi",
+          "cible",
+          "direction",
+          "maximum"
+        ].includes(
+          neoNormaliserMotLocal(mot)
+        )
+      ) {
+        return mot;
+      }
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+//==============================================================
+// 👤 ACTEUR
+//==============================================================
+
+function neoDetecterActeur(
+  texte,
+  contexte = {}
+) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    );
+
+  // Si le texte commence par un nom propre,
+  // on privilégie celui-ci.
+
+  const premier =
+    t.match(
+      /^([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)\b/u
+    );
+
+  if (
+    premier &&
+    premier[1]
+  ) {
+    return premier[1];
+  }
+
+  // Sinon contexte précédent.
+
+  if (
+    contexte.dernierActeur
+  ) {
+    return contexte.dernierActeur;
+  }
+
+  return null;
+
+}
+
+
+//==============================================================
+// ⚔️ DÉTECTION ACTION
+//==============================================================
+
+const NEO_ACTION_FALLBACK = {
+
+  deplacement: [
+    "avance",
+    "avancer",
+    "fonce",
+    "foncer",
+    "court",
+    "courir",
+    "marche",
+    "marcher",
+    "recule",
+    "reculer",
+    "approche",
+    "approcher",
+    "saut",
+    "saute",
+    "sauter",
+    "bond",
+    "bondit",
+    "bondir",
+    "vole",
+    "voler"
+  ],
+
+  attaque: [
+    "frappe",
+    "frapper",
+    "attaque",
+    "attaquer",
+    "coup",
+    "poing",
+    "pied",
+    "kick",
+    "donne",
+    "assène",
+    "assene"
+  ],
+
+  esquive: [
+    "esquive",
+    "esquiver",
+    "évite",
+    "evite",
+    "éviter",
+    "eviter",
+    "se baisse",
+    "se décale",
+    "se decale"
+  ],
+
+  contre: [
+    "contre",
+    "contre-attaque",
+    "contreattaque",
+    "riposte",
+    "riposter"
+  ],
+
+  parade: [
+    "pare",
+    "parer",
+    "bloque",
+    "bloquer",
+    "dévie",
+    "devie",
+    "dévier",
+    "devier"
+  ],
+
+  saisie: [
+    "saisit",
+    "saisir",
+    "attrape",
+    "attraper",
+    "agrippe",
+    "agripper",
+    "empoigne",
+    "empoigner"
+  ]
+};
+
+
+function neoDetecterAction(texte) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  //============================================================
+  // Recherche prioritaire dans NEO_ACTIONS
+  //============================================================
+
+  const collection =
+    NeoAI?.NEO_ACTIONS;
+
+  if (collection) {
+
+    if (Array.isArray(collection)) {
+
+      for (const action of collection) {
+
+        if (typeof action === "string") {
+
+          if (
+            t.includes(
+              neoNormaliserMotLocal(action)
+            )
+          ) {
+            return {
+              action,
+              categorie: "action",
+              famille: null
+            };
+          }
+
+        }
+
+        if (
+          action &&
+          typeof action === "object"
+        ) {
+
+          const mots = [
+            action.nom,
+            action.action,
+            action.mot,
+            ...(Array.isArray(action.synonymes)
+              ? action.synonymes
+              : []),
+            ...(Array.isArray(action.aliases)
+              ? action.aliases
+              : [])
+          ].filter(Boolean);
+
+          const trouve =
+            mots.find(m =>
+              t.includes(
+                neoNormaliserMotLocal(m)
+              )
+            );
+
+          if (trouve) {
+
+            return {
+              action:
+                action.action ||
+                action.nom ||
+                trouve,
+
+              categorie:
+                action.categorie ||
+                action.category ||
+                null,
+
+              famille:
+                action.famille ||
+                null
+            };
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+  //============================================================
+  // Fallback interne
+  //============================================================
+
+  for (
+    const [categorie, mots]
+    of Object.entries(
+      NEO_ACTION_FALLBACK
+    )
+  ) {
+
+    for (const mot of mots) {
+
+      if (
+        t.includes(
+          neoNormaliserMotLocal(mot)
+        )
+      ) {
+
+        return {
+          action: mot,
+          categorie,
+          famille: categorie
+        };
+
+      }
+
+    }
+
+  }
+
+  return {
+    action: null,
+    categorie: null,
+    famille: null
+  };
+
+}
+
+
+//==============================================================
+// ✂️ SEGMENTATION DES ACTIONS
+//==============================================================
+
+function neoSegmenterActions(texte) {
+
+  let t =
+    neoNormaliserTexteLocal(
+      texte
+    );
+
+  if (!t) {
+    return [];
+  }
+
+  //============================================================
+  // Séparateurs explicites
+  //============================================================
+
+  t =
+    t.replace(
+      /\s+(?:puis|ensuite|après|apres|et ensuite)\s+/giu,
+      "|||"
+    );
+
+  //============================================================
+  // Détection des verbes d'action
+  //============================================================
+
+  const mots =
+    t.split(/\s+/u);
+
+  const positions = [];
+
+  for (
+    let i = 0;
+    i < mots.length;
+    i++
+  ) {
+
+    const mot =
+      neoNormaliserMotLocal(
+        mots[i]
+      );
+
+    const estAction =
+      Object.values(
+        NEO_ACTION_FALLBACK
+      )
+      .flat()
+      .some(v =>
+        neoNormaliserMotLocal(v) === mot
+      );
+
+    if (estAction) {
+      positions.push(i);
+    }
+
+  }
+
+  // Si séparateurs explicites,
+  // on les utilise directement.
+
+  if (
+    t.includes("|||")
+  ) {
+
+    return t
+      .split("|||")
+      .map(v => v.trim())
+      .filter(Boolean);
+
+  }
+
+  //============================================================
+  // Découpage basé sur les verbes
+  //============================================================
+
+  if (
+    positions.length <= 1
+  ) {
+    return [t];
+  }
+
+  const segments = [];
+
+  let debut = 0;
+
+  for (
+    let i = 1;
+    i < positions.length;
+    i++
+  ) {
+
+    const position =
+      positions[i];
+
+    const segment =
+      mots
+        .slice(
+          debut,
+          position
+        )
+        .join(" ")
+        .trim();
+
+    if (segment) {
+      segments.push(segment);
+    }
+
+    debut = position;
+
+  }
+
+  const dernier =
+    mots
+      .slice(debut)
+      .join(" ")
+      .trim();
+
+  if (dernier) {
+    segments.push(dernier);
+  }
+
+  return segments;
+
+}
+
+
+//==============================================================
+// 📚 MODÈLES D'ACTIONS
+//==============================================================
+
+function neoGetModeles() {
+
+  const sources = [
+    NeoAI?.NEO_ACTION_MODELS,
+    NeoAI?.NEO_COMBAT_MODELS,
+    NeoAI?.ACTION_MODELS,
+    NeoAI?.MODELES_ACTIONS
+  ];
+
+  for (const source of sources) {
+
+    if (
+      Array.isArray(source) &&
+      source.length
+    ) {
+      return source;
+    }
+
+    if (
+      source &&
+      typeof source === "object"
+    ) {
+
+      return Object.entries(source)
+        .map(([id, modele]) => ({
+          id,
+          ...(
+            modele &&
+            typeof modele === "object"
+              ? modele
+              : {
+                  phrase: String(modele)
+                }
+          )
+        }));
+
+    }
+
+  }
+
+  return [];
+
+}
+
+
+//==============================================================
+// 🧮 SIMILARITÉ MODÈLE
+//==============================================================
+
+function neoCalculerSimilariteModele(
+  texte,
+  modele
+) {
+
+  if (!modele) {
+    return 0;
+  }
+
+  const source =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  const champs = [
+    modele.phrase,
+    modele.modele,
+    modele.texte,
+    modele.structure,
+    modele.pattern,
+    modele.description,
+    modele.intention,
+    modele.action
+  ].filter(Boolean);
+
+  if (!champs.length) {
+    return 0;
+  }
+
+  const motsSource =
+    new Set(
+      source
+        .split(/\s+/u)
+        .map(neoNormaliserMotLocal)
+        .filter(Boolean)
+    );
+
+  let meilleur = 0;
+
+  for (const champ of champs) {
+
+    const motsModele =
+      String(champ)
+        .split(/\s+/u)
+        .map(neoNormaliserMotLocal)
+        .filter(Boolean);
+
+    if (!motsModele.length) {
+      continue;
+    }
+
+    let communs = 0;
+
+    for (const mot of motsModele) {
+
+      if (
+        motsSource.has(mot)
+      ) {
+        communs++;
+      }
+
+    }
+
+    const score =
+      Math.round(
+        (
+          communs /
+          Math.max(
+            motsModele.length,
+            1
+          )
+        ) * 100
+      );
+
+    meilleur =
+      Math.max(
+        meilleur,
+        score
+      );
+
+  }
+
+  return Math.min(
+    100,
+    meilleur
+  );
+
+}
+
+
+//==============================================================
+// 📚 RECONNAISSANCE DU MEILLEUR MODÈLE
+//==============================================================
+
+function neoReconnaitreModele(
+  texte,
+  actionDetectee
+) {
+
+  const modeles =
+    neoGetModeles();
+
+  if (!modeles.length) {
+
+    return {
+      modele: null,
+      score: 0
+    };
+
+  }
+
+  let meilleur = null;
+  let meilleurScore = 0;
+
+  for (const modele of modeles) {
+
+    let score =
+      neoCalculerSimilariteModele(
+        texte,
+        modele
+      );
+
+    const actionModele =
+      neoNormaliserMotLocal(
+        modele.action ||
+        modele.verbe ||
+        modele.intention ||
+        ""
+      );
+
+    const actionTexte =
+      neoNormaliserMotLocal(
+        actionDetectee?.action ||
+        ""
+      );
+
+    if (
+      actionModele &&
+      actionTexte &&
+      (
+        actionModele === actionTexte ||
+        actionModele.includes(actionTexte) ||
+        actionTexte.includes(actionModele)
+      )
+    ) {
+      score += 25;
+    }
+
+    score =
+      Math.min(
+        100,
+        score
+      );
+
+    if (
+      score > meilleurScore
+    ) {
+
+      meilleurScore = score;
+      meilleur = modele;
+
+    }
+
+  }
+
+  return {
+    modele: meilleur,
+    score: meilleurScore
+  };
+
+}
+
+
+//==============================================================
+// 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
+//==============================================================
+
+function neoAnalyserAction(
+  texte,
+  contexte = {}
+) {
+
+  const action =
+    neoDetecterAction(
+      texte
+    );
+
+  const acteur =
+    neoDetecterActeur(
+      texte,
+      contexte
+    );
+
+  const cible =
+    neoDetecterCible(
+      texte
+    );
+
+  const distance =
+    neoDetecterDistance(
+      texte
+    );
+
+  const hauteur =
+    neoDetecterHauteur(
+      texte
+    );
+
+  const vitesse =
+    neoDetecterVitesse(
+      texte
+    );
+
+  const partieCorps =
+    neoDetecterPartieCorps(
+      texte
+    );
+
+  const trajectoire =
+    neoDetecterTrajectoire(
+      texte
+    );
+
+  const modele =
+    neoReconnaitreModele(
+      texte,
+      action
+    );
+
+  //============================================================
+  // MANIÈRE
+  //============================================================
+
+  const manieres = [
+    "violemment",
+    "violent",
+    "violente",
+    "rapidement",
+    "brutalement",
+    "brutal",
+    "brutale",
+    "direct",
+    "directe",
+    "furtivement",
+    "précipitamment",
+    "precipitamment",
+    "doucement"
+  ];
+
+  let maniere = null;
+
+  const normal =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  for (const mot of manieres) {
+
+    if (
+      normal.includes(
+        neoNormaliserMotLocal(mot)
+      )
+    ) {
+
+      maniere = mot;
+      break;
+
+    }
+
+  }
+
+  //============================================================
+  // STRUCTURE
+  //============================================================
+
+  const structure = {
+    sujet: acteur ? "S" : null,
+    verbe: action.action ? "V" : null,
+    objet: cible ? "O" : null,
+    complement:
+      (
+        distance.valeur !== null ||
+        hauteur.valeur !== null ||
+        maniere ||
+        vitesse.valeur ||
+        partieCorps
+      )
+        ? "C"
+        : null
+  };
+
+  return {
+
+    texte,
+
+    acteur,
+
+    sujet: acteur,
+
+    action:
+      action.action,
+
+    categorie:
+      action.categorie,
+
+    famille:
+      action.famille,
+
+    cible,
+
+    maniere,
+
+    vitesse:
+      vitesse.valeur,
+
+    distance:
+      distance.valeur,
+
+    distanceUnite:
+      distance.unite,
+
+    hauteur:
+      hauteur.valeur,
+
+    hauteurUnite:
+      hauteur.unite,
+
+    direction:
+      trajectoire,
+
+    trajectoire,
+
+    partieCorps,
+
+    modele:
+      modele.modele,
+
+    score:
+      modele.score,
+
+    structure
+
+  };
+
+}
+
+
+//==============================================================
+// ⚖️ ARBITRAGE
+//==============================================================
+
+function neoArbitrer(
+  analyse,
+  options = {}
+) {
+
+  const regles =
+    options.regles || {};
+
+  const scoreMin =
+    Number(
+      regles.similariteMinimale ??
+      50
+    );
+
+  const maxActions =
+    Number(
+      regles.maxActions ??
+      20
+    );
+
+  const raisons = [];
+
+  //============================================================
+  // Nombre d'actions
+  //============================================================
+
+  if (
+    options.nombreActions >
+    maxActions
+  ) {
+
+    raisons.push(
+      `Nombre d'actions supérieur à la limite (${maxActions}).`
+    );
+
+  }
+
+  //============================================================
+  // Action inconnue
+  //============================================================
+
+  if (!analyse.action) {
+
+    raisons.push(
+      "Aucune action reconnue."
+    );
+
+  }
+
+  //============================================================
+  // Similarité
+  //============================================================
+
+  if (
+    analyse.score < scoreMin
+  ) {
+
+    raisons.push(
+      `Similarité insuffisante (${analyse.score}% < ${scoreMin}%).`
+    );
+
+  }
+
+  return {
+    valide:
+      raisons.length === 0,
+
+    verdict:
+      raisons.length === 0
+        ? "VALIDÉ"
+        : "REFUSÉ",
+
+    raisons
+
+  };
+
+}
+
+
+//==============================================================
+// 💡 RÉSUMÉ
+//==============================================================
+
+function neoGenererResume(
+  analyse
+) {
+
+  const morceaux = [];
+
+  if (analyse.acteur) {
+    morceaux.push(
+      analyse.acteur
+    );
+  }
+
+  if (analyse.action) {
+    morceaux.push(
+      analyse.action
+    );
+  }
+
+  if (analyse.cible) {
+    morceaux.push(
+      `vers ${analyse.cible}`
+    );
+  }
+
+  if (analyse.distance !== null) {
+
+    morceaux.push(
+      `${analyse.distance}${analyse.distanceUnite || "m"}`
+    );
+
+  }
+
+  if (analyse.hauteur !== null) {
+
+    morceaux.push(
+      `à ${analyse.hauteur}${analyse.hauteurUnite || "m"} de hauteur`
+    );
+
+  }
+
+  if (analyse.partieCorps) {
+
+    morceaux.push(
+      `visant ${analyse.partieCorps}`
+    );
+
+  }
+
+  if (analyse.maniere) {
+
+    morceaux.push(
+      `de manière ${analyse.maniere}`
+    );
+
+  }
+
+  if (analyse.vitesse) {
+
+    morceaux.push(
+      `à ${analyse.vitesse}`
+    );
+
+  }
+
+  if (!morceaux.length) {
+    return analyse.texte;
+  }
+
+  return morceaux.join(" ");
+
+}
+
+
+//==============================================================
+// 🧠 NOUVEAU ANALYSER NEOAI
+//==============================================================
+
+function AnalyserNeoAI(
+  texte,
+  options = {}
+) {
+
+  const brut =
+    String(texte || "");
+
+  const normalise =
+    neoNormaliserTexteLocal(
+      brut
+    );
+
+  if (!normalise) {
+
+    return {
+      trouve: false,
+      valide: false,
+      verdict: "REFUSÉ",
+
+      texte: brut,
+
+      actions: [],
+
+      nombreActions: 0,
+
+      score: 0,
+
+      raisons: [
+        "Texte vide."
+      ],
+
+      motsConnus: [],
+      motsInconnus: [],
+
+      comprehension: null,
+
+      resume: ""
+    };
+
+  }
+
+  //============================================================
+  // 📝 MOTS
+  //============================================================
+
+  const mots =
+    neoExtraireMots(
+      normalise
+    );
+
+  const motsConnus = [];
+  const motsInconnus = [];
+
+  for (const mot of mots) {
+
+    const propre =
+      neoNormaliserMotLocal(
+        mot
+      );
+
+    if (!propre) {
+      continue;
+    }
+
+    if (
+      neoMotConnu(propre)
+    ) {
+      motsConnus.push(mot);
+    } else {
+      motsInconnus.push(mot);
+    }
+
+  }
+
+  //============================================================
+  // ✂️ SEGMENTATION
+  //============================================================
+
+  const segments =
+    neoSegmenterActions(
+      normalise
+    );
+
+  //============================================================
+  // 🧠 ANALYSE ACTIONS
+  //============================================================
+
+  const actions = [];
+
+  let contexte = {
+    dernierActeur: null,
+    derniereCible: null,
+    derniereAction: null
+  };
+
+  for (
+    const segment of segments
+  ) {
+
+    const analyse =
+      neoAnalyserAction(
+        segment,
+        contexte
+      );
+
+    //==========================================================
+    // Héritage de contexte
+    //==========================================================
+
+    if (
+      !analyse.acteur &&
+      contexte.dernierActeur
+    ) {
+      analyse.acteur =
+        contexte.dernierActeur;
+
+      analyse.sujet =
+        contexte.dernierActeur;
+    }
+
+    if (
+      !analyse.cible &&
+      contexte.derniereCible
+    ) {
+      analyse.cible =
+        contexte.derniereCible;
+    }
+
+    contexte = {
+      dernierActeur:
+        analyse.acteur ||
+        contexte.dernierActeur,
+
+      derniereCible:
+        analyse.cible ||
+        contexte.derniereCible,
+
+      derniereAction:
+        analyse.action ||
+        contexte.derniereAction
+    };
+
+    actions.push(
+      analyse
+    );
+
+  }
+
+  //============================================================
+  // ⚖️ ARBITRAGE GLOBAL
+  //============================================================
+
+  const arbitre =
+    neoArbitrer(
+      {
+        ...(
+          actions[0] || {
+            action: null,
+            score: 0
+          }
+        )
+      },
+      {
+        ...options,
+        nombreActions:
+          actions.length
+      }
+    );
+
+  //============================================================
+  // RAISONS ACTIONS
+  //============================================================
+
+  const raisons =
+    [...arbitre.raisons];
+
+  for (
+    let i = 0;
+    i < actions.length;
+    i++
+  ) {
+
+    const action =
+      actions[i];
+
+    if (
+      !action.action
+    ) {
+
+      raisons.push(
+        `Action ${i + 1} : action non reconnue.`
+      );
+
+    }
+
+  }
+
+  const valide =
+    raisons.length === 0;
+
+  //============================================================
+  // RÉSUMÉ
+  //============================================================
+
+  const resume =
+    actions
+      .map(
+        neoGenererResume
+      )
+      .join(" puis ");
+
+  //============================================================
+  // COMPRÉHENSION GLOBALE
+  //============================================================
+
+  const premiere =
+    actions[0] || {};
+
+  return {
+
+    trouve:
+      actions.length > 0,
+
+    valide,
+
+    verdict:
+      valide
+        ? "VALIDÉ"
+        : "REFUSÉ",
+
+    texte: brut,
+
+    texteNormalise:
+      normalise,
+
+    nombreActions:
+      actions.length,
+
+    actions,
+
+    // Compatibilité ancienne architecture
+    action:
+      premiere.action || null,
+
+    modele:
+      premiere.modele || null,
+
+    score:
+      premiere.score || 0,
+
+    structure:
+      premiere.structure || null,
+
+    slots: {
+      acteur:
+        premiere.acteur || null,
+
+      cible:
+        premiere.cible || null,
+
+      action:
+        premiere.action || null,
+
+      maniere:
+        premiere.maniere || null,
+
+      vitesse:
+        premiere.vitesse || null,
+
+      distance:
+        premiere.distance ?? null,
+
+      distanceUnite:
+        premiere.distanceUnite || null,
+
+      hauteur:
+        premiere.hauteur ?? null,
+
+      hauteurUnite:
+        premiere.hauteurUnite || null,
+
+      trajectoire:
+        premiere.trajectoire || null,
+
+      partieCorps:
+        premiere.partieCorps || null
+    },
+
+    motsConnus,
+
+    motsInconnus,
+
+    comprehension: {
+
+      sujet:
+        premiere.acteur || null,
+
+      action:
+        premiere.action || null,
+
+      maniere:
+        premiere.maniere || null,
+
+      cible:
+        premiere.cible || null,
+
+      trajectoire:
+        premiere.trajectoire || null,
+
+      distance:
+        premiere.distance ?? null,
+
+      hauteur:
+        premiere.hauteur ?? null,
+
+      vitesse:
+        premiere.vitesse || null,
+
+      partieCorps:
+        premiere.partieCorps || null
+
+    },
+
+    arbitrage: {
+      valide,
+      verdict:
+        valide
+          ? "VALIDÉ"
+          : "REFUSÉ",
+
+      raisons
+    },
+
+    raisons,
+
+    resume
+
+  };
+
+}
+
+
+//==============================================================
+// 🔄 COMPATIBILITÉ ANCIEN NOM
+//==============================================================
+
+function analyserNeoAI(
+  texte,
+  options = {}
+) {
+
+  return AnalyserNeoAI(
+    texte,
+    options
+  );
+
+}
+
+
+//==============================================================
+// 📤 AFFICHAGE DU RÉSULTAT NEOAI
+//==============================================================
+
+async function envoyerResultatNeoAI(
+  ovl,
+  ms_org,
+  resultat,
+  ms
+) {
+
+  if (!resultat) {
+    return;
+  }
+
+  const actions =
+    resultat.actions || [];
+
+  let texte =
+`🌀🧠 *NeoAI*
+━━━━━━━━━━━━━━━━━━
+
+📝 *Texte :*
+${resultat.texte || "—"}
+
+🏷️ *Catégorie :*
+${actions[0]?.categorie || "—"}
+
+🎯 *Famille :*
+${actions[0]?.famille || "—"}
+
+📊 *Actions détectées :*
+${resultat.nombreActions || 0}
+
+`;
+
+  if (actions.length) {
+
+    texte +=
+`📚 *Analyse des actions :*
+`;
+
+    actions.forEach(
+      (action, index) => {
+
+        texte +=
+`
+*Action ${index + 1}*
+├ 🧍 Sujet : ${action.acteur || "—"}
+├ ⚔️ Action : ${action.action || "—"}
+├ 🎯 Cible : ${action.cible || "—"}
+├ 🌀 Catégorie : ${action.categorie || "—"}
+├ 🎯 Famille : ${action.famille || "—"}
+├ 💨 Manière : ${action.maniere || "—"}
+├ ⚡ Vitesse : ${action.vitesse || "—"}
+├ 📐 Distance : ${
+          action.distance !== null &&
+          action.distance !== undefined
+            ? `${action.distance}${action.distanceUnite || "m"}`
+            : "—"
+        }
+├ 📏 Hauteur : ${
+          action.hauteur !== null &&
+          action.hauteur !== undefined
+            ? `${action.hauteur}${action.hauteurUnite || "m"}`
+            : "—"
+        }
+├ 🧭 Trajectoire : ${action.trajectoire || "—"}
+├ 🦵 Partie du corps : ${action.partieCorps || "—"}
+├ 📚 Modèle : ${
+          action.modele?.id ||
+          action.modele?.nom ||
+          action.modele ||
+          "—"
+        }
+╰ 📊 Similarité : ${action.score || 0}%
+`;
+
+      }
+    );
+
+  }
+
+  texte +=
+`
+🧠 *Mots connus :*
+${
+    resultat.motsConnus?.length
+      ? resultat.motsConnus.join(", ")
+      : "Aucun"
+  }
+
+❓ *Mots inconnus :*
+${
+    resultat.motsInconnus?.length
+      ? resultat.motsInconnus.join(", ")
+      : "Aucun"
+  }
+
+⚖️ *Arbitrage :*
+${
+    resultat.valide
+      ? "✅ *VALIDÉ*"
+      : "❌ *REFUSÉ*"
+  }
+
+📌 *Raisons :*
+${
+    resultat.raisons?.length
+      ? resultat.raisons
+          .map(r => `• ${r}`)
+          .join("\n")
+      : "Aucune"
+  }
+
+💡 *Résumé :*
+${resultat.resume || "—"}
+
+╰──────────────────
+         *Powered by NEOVERSE™🌀*
+`;
+
+  return ovl.sendMessage(
+    ms_org,
+    {
+      text: texte
+    },
+    {
+      quoted: ms
+    }
+  );
+
+}
+
+
+//==============================================================
+// 🌀 TRAITER MESSAGE NEOAI
+//==============================================================
+
+async function traiterMessageNeoAI(
+  ms_org,
+  ovl,
+  cmd_options
+) {
+
+  const ms =
+    cmd_options?.ms;
+
+  const userJid =
+    getNeoAIUserJid(
+      ms_org,
+      ms,
+      cmd_options
+    );
+
+  if (!userJid) {
+    return;
+  }
+
+  const texte =
+    extraireTexteNeoAI(
+      ms
+    );
+
+  //============================================================
+  // 🛑 STOP
+  //============================================================
+
+  if (
+    estCommandeArretNeoAI(
+      texte
+    )
+  ) {
+
+    if (
+      sessionNeoAIActive(
+        userJid
+      )
+    ) {
+
+      fermerSessionNeoAI(
+        userJid
+      );
+
+      return ovl.sendMessage(
+        ms_org,
+        {
+          text:
+            "🛑 *NeoAI arrêté.*\n\nLa session d'analyse a été fermée."
+        },
+        {
+          quoted: ms
+        }
+      );
+
+    }
+
+    return;
+
+  }
+
+  //============================================================
+  // 🔎 SESSION
+  //============================================================
+
+  const session =
+    getSessionNeoAI(
+      userJid
+    );
+
+  if (
+    !session ||
+    !session.active
+  ) {
+    return;
+  }
+
+  //============================================================
+  // 🌀 SEULS LES PAVÉS 🌀: SONT ANALYSÉS
+  //============================================================
+
+  if (
+    !/^🌀\s*:/u.test(
+      texte
+    )
+  ) {
+    return;
+  }
+
+  //============================================================
+  // ANALYSE
+  //============================================================
+
+  try {
+
+    console.log(
+      "🧠 [NeoAI] Analyse :",
+      texte
+    );
+
+    const resultat =
+      await AnalyserNeoAI(
+        texte,
+        {
+          jeu: "NeoAI-Test",
+
+          regles: {
+
+            // Pour le laboratoire NeoAI,
+            // on ne bloque pas encore
+            // les pavés complexes.
+
+            maxActions: 20,
+
+            similariteMinimale: 50
+
+          },
+
+          debug: true,
+
+          session
+        }
+      );
+
+    session.messagesAnalyses++;
+
+    //==========================================================
+    // HISTORIQUE
+    //==========================================================
+
+    session.historique.push({
+
+      texte,
+
+      resultat,
+
+      timestamp:
+        Date.now()
+
+    });
+
+    // Limite mémoire
+    if (
+      session.historique.length > 50
+    ) {
+
+      session.historique =
+        session.historique.slice(-50);
+
+    }
+
+    //==========================================================
+    // CONTEXTE
+    //==========================================================
+
+    if (
+      resultat.actions?.length
+    ) {
+
+      const derniere =
+        resultat.actions[
+          resultat.actions.length - 1
+        ];
+
+      session.contexte = {
+
+        dernierActeur:
+          derniere.acteur ||
+          session.contexte.dernierActeur,
+
+        derniereCible:
+          derniere.cible ||
+          session.contexte.derniereCible,
+
+        derniereAction:
+          derniere.action ||
+          session.contexte.derniereAction
+
+      };
+
+    }
+
+    //==========================================================
+    // ENVOI
+    //==========================================================
+
+    return envoyerResultatNeoAI(
+      ovl,
+      ms_org,
+      resultat,
+      ms
+    );
+
+  } catch (error) {
+
+    console.error(
+      "❌ [NeoAI] Erreur analyse :",
+      error
+    );
+
+    return ovl.sendMessage(
+      ms_org,
+      {
+        text:
+          "❌ Une erreur est survenue pendant l'analyse de NeoAI."
+      },
+      {
+        quoted: ms
+      }
+    );
+
+  }
+
+}
+
+//==============================================================
+// 📤 EXPORTS NEOAI
 //==============================================================
 
 module.exports.traiterMessageNeoAI =
@@ -813,6 +3217,9 @@ module.exports.estCommandeArretNeoAI =
 
 module.exports.analyserNeoAI =
   analyserNeoAI;
+
+module.exports.AnalyserNeoAI =
+  AnalyserNeoAI;
 
 module.exports.extraireTexteNeoAI =
   extraireTexteNeoAI;
