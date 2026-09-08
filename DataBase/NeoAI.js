@@ -2797,8 +2797,7 @@ module.exports = {
 
     neoTrouverMeilleurModele,
 
-    neoComparerModele,
+    neoComparerModele
 
-    neoNormaliserTexte
 
 };
