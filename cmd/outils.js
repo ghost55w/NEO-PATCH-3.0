@@ -1600,18 +1600,19 @@ const NEO_ACTION_FALLBACK = {
   ],
 
   attaque: [
-    "frappe",
-    "frapper",
-    "attaque",
-    "attaquer",
-    "coup",
-    "poing",
-    "pied",
-    "kick",
-    "donne",
-    "assène",
-    "assene"
-  ],
+  "frappe",
+  "frapper",
+  "attaque",
+  "attaquer",
+  "donne",
+  "donner",
+  "assène",
+  "assene",
+  "asséner",
+  "assener",
+  "lance",
+  "lancer"
+],
 
   esquive: [
     "esquive",
