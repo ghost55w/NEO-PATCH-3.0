@@ -1468,7 +1468,6 @@ function neoDetecterTrajectoire(texte) {
 
 }
 
-
 //==============================================================
 // 🎯 CIBLE
 //==============================================================
@@ -1479,6 +1478,46 @@ function neoDetecterCible(texte) {
     neoNormaliserTexteLocal(
       texte
     );
+
+  const motsExclus = new Set([
+    "visage",
+    "abdomen",
+    "corps",
+    "adversaire",
+    "ennemi",
+    "cible",
+    "direction",
+    "maximum",
+
+    // Articles / déterminants
+    "le",
+    "la",
+    "les",
+    "un",
+    "une",
+    "des",
+    "du",
+    "de",
+    "au",
+    "aux",
+    "son",
+    "sa",
+    "ses",
+
+    // Directions / formulations qui ne sont pas des cibles
+    "avant",
+    "arrière",
+    "arriere",
+    "gauche",
+    "droite",
+
+    // Mesures
+    "m",
+    "mètre",
+    "mètres",
+    "metre",
+    "metres"
+  ]);
 
   const patterns = [
     /\bvers\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
@@ -1495,32 +1534,38 @@ function neoDetecterCible(texte) {
       t.match(pattern);
 
     if (
-      match &&
-      match[1]
+      !match ||
+      !match[1]
     ) {
-
-      const mot =
-        match[1];
-
-      if (
-        ![
-          "visage",
-          "abdomen",
-          "corps",
-          "adversaire",
-          "ennemi",
-          "cible",
-          "direction",
-          "maximum"
-        ].includes(
-          neoNormaliserMotLocal(mot)
-        )
-      ) {
-        return mot;
-      }
-
+      continue;
     }
 
+    const mot =
+      match[1];
+
+    const motNormalise =
+      neoNormaliserMotLocal(
+        mot
+      );
+
+    if (
+      motsExclus.has(
+        motNormalise
+      )
+    ) {
+      continue;
+    }
+
+    // Ignore les valeurs numériques / distances
+    if (
+      /^\d+(?:[.,]\d+)?(?:m|cm|km)?$/iu.test(
+        motNormalise
+      )
+    ) {
+      continue;
+    }
+
+    return mot;
   }
 
   return null;
