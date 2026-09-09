@@ -1537,13 +1537,24 @@ function neoDetecterActeur(
   contexte = {}
 ) {
 
+  // ------------------------------------------------------------
+  // Nettoyage du marqueur NeoAI
+  // ------------------------------------------------------------
+
+  const textePropre =
+    String(texte || "")
+      .replace(/^🌀\s*:\s*/u, "")
+      .trim();
+
   const t =
     neoNormaliserTexteLocal(
-      texte
+      textePropre
     );
 
+  // ------------------------------------------------------------
   // Si le texte commence par un nom propre,
   // on privilégie celui-ci.
+  // ------------------------------------------------------------
 
   const premier =
     t.match(
@@ -1557,7 +1568,9 @@ function neoDetecterActeur(
     return premier[1];
   }
 
+  // ------------------------------------------------------------
   // Sinon contexte précédent.
+  // ------------------------------------------------------------
 
   if (
     contexte.dernierActeur
@@ -1566,7 +1579,6 @@ function neoDetecterActeur(
   }
 
   return null;
-
 }
 
 
