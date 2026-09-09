@@ -3199,8 +3199,74 @@ function neoAnalyserAction(
   //============================================================
   // 💨 MANIÈRE
   //============================================================
+  // La manière décrit COMMENT l'action est réalisée.
+  // Elle doit être explicitement présente dans le texte.
+  //============================================================
 
   const manieres = [
+
+    // ----------------------------------------------------------
+    // 🏃 DÉPLACEMENTS
+    // ----------------------------------------------------------
+
+    "course",
+    "sprint",
+    "bond",
+    "bondissant",
+    "saut",
+    "sautant",
+    "zigzag",
+    "zigzagant",
+
+    // ----------------------------------------------------------
+    // 👊 ATTAQUES
+    // ----------------------------------------------------------
+
+    "direct",
+    "directe",
+    "circulaire",
+    "circulairement",
+    "revers",
+    "retourné",
+    "retourne",
+    "crochet",
+    "uppercut",
+    "frontal",
+    "latéral",
+    "laterale",
+    "latérale",
+
+    // ----------------------------------------------------------
+    // 🌀 MOUVEMENTS
+    // ----------------------------------------------------------
+
+    "vrille",
+    "rotation",
+    "tournant",
+    "pivot",
+    "pivôt",
+    "diagonale",
+    "diagonal",
+    "diagonale",
+    "latéralement",
+    "lateralement",
+    "frontalement",
+
+    // ----------------------------------------------------------
+    // 🛡️ ESQUIVES / DÉFENSES
+    // ----------------------------------------------------------
+
+    "esquive",
+    "zigzag",
+    "déviation",
+    "deviation",
+    "écart",
+    "écartement",
+
+    // ----------------------------------------------------------
+    // ⚡ INTENSITÉ / EXÉCUTION
+    // ----------------------------------------------------------
+
     "violemment",
     "violent",
     "violente",
@@ -3208,12 +3274,11 @@ function neoAnalyserAction(
     "brutalement",
     "brutal",
     "brutale",
-    "direct",
-    "directe",
     "furtivement",
     "précipitamment",
     "precipitamment",
     "doucement"
+
   ];
 
   let maniere = null;
@@ -3227,10 +3292,19 @@ function neoAnalyserAction(
     const mot of manieres
   ) {
 
+    const motNormalise =
+      neoNormaliserMotLocal(
+        mot
+      );
+
+    const regex =
+      new RegExp(
+        `\\b${motNormalise.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        "iu"
+      );
+
     if (
-      normal.includes(
-        neoNormaliserMotLocal(mot)
-      )
+      regex.test(normal)
     ) {
 
       maniere = mot;
