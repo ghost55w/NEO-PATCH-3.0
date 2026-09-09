@@ -1356,11 +1356,11 @@ function neoDetecterVitesse(texte) {
 }
 
 
-//==============================================================
-// 🦵 PARTIE DU CORPS
-//==============================================================
+ //==============================================================
+ // 🦵 PARTIE DU CORPS
+ //==============================================================
 
-function neoDetecterPartieCorps(texte) {
+ function neoDetecterPartieCorps(texte) {
 
   const parties = [
     "visage",
@@ -1396,14 +1396,23 @@ function neoDetecterPartieCorps(texte) {
   const t =
     neoNormaliserTexteLocal(
       texte
-    );
+    ).toLowerCase();
 
   for (const partie of parties) {
 
+    const partieNormalisee =
+      neoNormaliserTexteLocal(
+        partie
+      ).toLowerCase();
+
+    const regex =
+      new RegExp(
+        `(?<![A-Za-zÀ-ÿ0-9_-])${partieNormalisee.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-zÀ-ÿ0-9_-])`,
+        "iu"
+      );
+
     if (
-      t.includes(
-        neoNormaliserTexteLocal(partie)
-      )
+      regex.test(t)
     ) {
       return partie;
     }
@@ -1413,6 +1422,7 @@ function neoDetecterPartieCorps(texte) {
   return null;
 
 }
+
 
 
 //==============================================================
