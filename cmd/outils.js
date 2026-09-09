@@ -3142,6 +3142,7 @@ function neoAnalyserAction(
         texte
       )
         .replace(/^🌀\s*:\s*/u, "")
+        .replace(/^:\s*/u, "")
         .trim();
 
     const mots =
