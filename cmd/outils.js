@@ -1364,10 +1364,7 @@ function neoDetecterPartieCorps(texte) {
 
   const parties = [
 
-    // ─────────────────────────────────────────────
     // 🧠 TÊTE / VISAGE
-    // ─────────────────────────────────────────────
-
     "tête",
     "tete",
     "crâne",
@@ -1380,8 +1377,8 @@ function neoDetecterPartieCorps(texte) {
     "œil",
     "oeil",
     "œil gauche",
+    "oeil droit",
     "oeil gauche",
-    "œil droit",
     "oeil droit",
     "oreille",
     "oreille gauche",
@@ -1405,10 +1402,7 @@ function neoDetecterPartieCorps(texte) {
     "machoire droite",
     "menton",
 
-    // ─────────────────────────────────────────────
     // 🦴 COU / ÉPAULES
-    // ─────────────────────────────────────────────
-
     "cou",
     "nuque",
     "gorge",
@@ -1419,10 +1413,7 @@ function neoDetecterPartieCorps(texte) {
     "épaule droite",
     "epaule droite",
 
-    // ─────────────────────────────────────────────
     // 💪 BRAS
-    // ─────────────────────────────────────────────
-
     "bras",
     "bras gauche",
     "bras droit",
@@ -1441,10 +1432,7 @@ function neoDetecterPartieCorps(texte) {
     "poignet gauche",
     "poignet droit",
 
-    // ─────────────────────────────────────────────
     // ✋ MAIN
-    // ─────────────────────────────────────────────
-
     "main",
     "main gauche",
     "main droite",
@@ -1468,10 +1456,7 @@ function neoDetecterPartieCorps(texte) {
     "annulaire",
     "auriculaire",
 
-    // ─────────────────────────────────────────────
     // 🫀 TRONC
-    // ─────────────────────────────────────────────
-
     "torse",
     "poitrine",
     "pectoraux",
@@ -1492,10 +1477,7 @@ function neoDetecterPartieCorps(texte) {
     "flanc gauche",
     "flanc droit",
 
-    // ─────────────────────────────────────────────
     // 🦵 BASSIN / JAMBES
-    // ─────────────────────────────────────────────
-
     "bassin",
     "hanche",
     "hanche gauche",
@@ -1519,10 +1501,7 @@ function neoDetecterPartieCorps(texte) {
     "mollet gauche",
     "mollet droit",
 
-    // ─────────────────────────────────────────────
     // 🦶 CHEVILLE / PIED
-    // ─────────────────────────────────────────────
-
     "cheville",
     "cheville gauche",
     "cheville droite",
@@ -1556,7 +1535,17 @@ function neoDetecterPartieCorps(texte) {
       texte
     ).toLowerCase();
 
-  for (const partie of parties) {
+  // Les expressions composées passent AVANT
+  // les expressions simples.
+  const partiesTriees =
+    [...parties].sort(
+      (a, b) =>
+        b.length - a.length
+    );
+
+  for (
+    const partie of partiesTriees
+  ) {
 
     const partieNormalisee =
       neoNormaliserTexteLocal(
@@ -1572,7 +1561,9 @@ function neoDetecterPartieCorps(texte) {
     if (
       regex.test(t)
     ) {
+
       return partie;
+
     }
 
   }
@@ -1580,7 +1571,6 @@ function neoDetecterPartieCorps(texte) {
   return null;
 
 }
-
 
 
 //==============================================================
