@@ -1850,9 +1850,82 @@ function neoDetecterAction(texte) {
       texte || ""
     ).toLowerCase();
 
+  if (!t) {
+    return {
+      action: null,
+      categorie: null,
+      famille: null
+    };
+  }
+
+  //============================================================
+  // 🚫 MOTS QUI NE PEUVENT JAMAIS ÊTRE DES ACTIONS
+  //============================================================
+
+  const motsInterdits = new Set([
+    "a",
+    "à",
+    "au",
+    "aux",
+    "de",
+    "du",
+    "des",
+    "un",
+    "une",
+    "le",
+    "la",
+    "les",
+    "dans",
+    "sur",
+    "vers",
+    "avec",
+    "pour",
+    "par",
+    "en",
+    "et",
+    "ou",
+    "où",
+    "son",
+    "sa",
+    "ses",
+    "mon",
+    "ma",
+    "mes",
+    "ton",
+    "ta",
+    "tes",
+    "ce",
+    "cet",
+    "cette",
+    "ces",
+    "qui",
+    "que",
+    "se",
+    "s",
+    "visant",
+    "vise",
+    "visée",
+    "puis",
+    "ensuite",
+    "après",
+    "apres"
+  ]);
+
   //============================================================
   // 🔎 OUTILS
   //============================================================
+
+  const normaliser =
+    valeur =>
+      neoNormaliserMotLocal(
+        String(valeur || "")
+      ).toLowerCase();
+
+  const estMotInterdit =
+    valeur =>
+      motsInterdits.has(
+        normaliser(valeur)
+      );
 
   const contientMot = (
     texteNormalise,
@@ -1860,16 +1933,44 @@ function neoDetecterAction(texte) {
   ) => {
 
     const normalise =
-      neoNormaliserMotLocal(
-        mot
-      );
+      normaliser(mot);
 
     if (!normalise) {
       return false;
     }
 
-    return texteNormalise.includes(
+    if (
+      motsInterdits.has(normalise)
+    ) {
+      return false;
+    }
+
+    //==========================================================
+    // MOT SEUL → CORRESPONDANCE EXACTE
+    //==========================================================
+
+    if (
+      texteNormalise.trim() ===
       normalise
+    ) {
+      return true;
+    }
+
+    //==========================================================
+    // PHRASE → MOT ENTIER
+    //==========================================================
+
+    const pattern =
+      new RegExp(
+        `(^|\\s)${normalise.replace(
+          /[.*+?^${}()|[\]\\]/gu,
+          "\\$&"
+        )}(?=\\s|$)`,
+        "iu"
+      );
+
+    return pattern.test(
+      texteNormalise
     );
 
   };
@@ -1897,6 +1998,18 @@ function neoDetecterAction(texte) {
       if (
         typeof actionDef === "string"
       ) {
+
+        const actionNormalisee =
+          normaliser(actionDef);
+
+        if (
+          !actionNormalisee ||
+          motsInterdits.has(
+            actionNormalisee
+          )
+        ) {
+          continue;
+        }
 
         if (
           contientMot(
@@ -1945,7 +2058,11 @@ function neoDetecterAction(texte) {
           ? actionDef.aliases
           : [])
 
-      ].filter(Boolean);
+      ].filter(
+        mot =>
+          mot &&
+          !estMotInterdit(mot)
+      );
 
       const trouve =
         mots.find(
@@ -1980,8 +2097,7 @@ function neoDetecterAction(texte) {
         null;
 
       //========================================================
-      // SI LA FAMILLE N'EST PAS DÉFINIE,
-      // ON LA CHERCHE DANS LES MODÈLES
+      // RECHERCHE DE FAMILLE DANS LES MODÈLES
       //========================================================
 
       if (
@@ -2016,24 +2132,12 @@ function neoDetecterAction(texte) {
             continue;
           }
 
-          const familleNormalisee =
-            neoNormaliserMotLocal(
-              familleModele
-            );
-
-          //====================================================
-          // FAMILLE DIRECTEMENT ASSOCIÉE À L'ACTION
-          //====================================================
-
           const exemples =
             Array.isArray(
               modele.exemples
             )
               ? modele.exemples
               : [];
-
-          let trouveDansExemple =
-            false;
 
           for (
             const exemple
@@ -2049,7 +2153,12 @@ function neoDetecterAction(texte) {
               )
             ) {
 
-              trouveDansExemple = true;
+              meilleurFamille =
+                familleModele;
+
+              meilleurScore =
+                100;
+
               break;
 
             }
@@ -2057,46 +2166,9 @@ function neoDetecterAction(texte) {
           }
 
           if (
-            trouveDansExemple
+            meilleurScore === 100
           ) {
-
-            meilleurFamille =
-              familleModele;
-
-            meilleurScore =
-              100;
-
             break;
-
-          }
-
-          //====================================================
-          // LE NOM DE LA FAMILLE PEUT LUI-MÊME
-          // CORRESPONDRE À L'ACTION
-          //====================================================
-
-          if (
-            familleNormalisee &&
-            contientMot(
-              neoNormaliserTexteLocal(
-                trouve
-              ).toLowerCase(),
-              familleModele
-            )
-          ) {
-
-            if (
-              meilleurScore < 90
-            ) {
-
-              meilleurFamille =
-                familleModele;
-
-              meilleurScore =
-                90;
-
-            }
-
           }
 
         }
@@ -2134,6 +2206,16 @@ function neoDetecterAction(texte) {
     of modeles
   ) {
 
+    //==========================================================
+    // ⚠️ IMPORTANT
+    //
+    // On ne considère PLUS chaque mot d'un exemple
+    // comme une action.
+    //
+    // On cherche uniquement les actions connues
+    // dans NEO_ACTIONS.
+    //==========================================================
+
     const exemples =
       Array.isArray(
         modele.exemples
@@ -2151,67 +2233,80 @@ function neoDetecterAction(texte) {
           exemple
         ).toLowerCase();
 
+      if (!exempleNormalise) {
+        continue;
+      }
+
       //========================================================
-      // ON CHERCHE LES VERBES / ACTIONS DANS L'EXEMPLE
+      // Chercher uniquement les actions connues
       //========================================================
 
-      const mots =
-        exempleNormalise
-          .split(/\s+/u)
-          .filter(Boolean);
+      if (
+        !Array.isArray(collection)
+      ) {
+        continue;
+      }
 
       for (
-        const mot
-        of mots
+        const actionDef
+        of collection
       ) {
 
-        if (
-          t.includes(
-            neoNormaliserMotLocal(
-              mot
-            )
-          )
+        const candidats =
+          typeof actionDef === "string"
+            ? [actionDef]
+            : [
+                actionDef?.nom,
+                actionDef?.action,
+                actionDef?.mot,
+                ...(Array.isArray(
+                  actionDef?.synonymes
+                )
+                  ? actionDef.synonymes
+                  : []),
+                ...(Array.isArray(
+                  actionDef?.aliases
+                )
+                  ? actionDef.aliases
+                  : [])
+              ].filter(Boolean);
+
+        for (
+          const candidat
+          of candidats
         ) {
 
-          // On évite les mots trop génériques.
-          const motsIgnorer = [
-            "de",
-            "du",
-            "des",
-            "vers",
-            "à",
-            "au",
-            "en",
-            "un",
-            "une",
-            "le",
-            "la",
-            "les",
-            "dans",
-            "sur",
-            "avec",
-            "pour"
-          ];
-
           if (
-            motsIgnorer.includes(
-              neoNormaliserMotLocal(
-                mot
-              )
-            )
+            estMotInterdit(candidat)
           ) {
             continue;
           }
 
-          return {
-            action: mot,
-            categorie:
-              modele.categorie ||
-              null,
-            famille:
-              modele.famille ||
-              null
-          };
+          if (
+            contientMot(
+              exempleNormalise,
+              candidat
+            ) &&
+            contientMot(
+              t,
+              candidat
+            )
+          ) {
+
+            return {
+              action: candidat,
+
+              categorie:
+                modele.categorie ||
+                null,
+
+              famille:
+                modele.famille ||
+                null
+
+            };
+
+          }
 
         }
 
@@ -2236,6 +2331,12 @@ function neoDetecterAction(texte) {
       const mot
       of mots
     ) {
+
+      if (
+        estMotInterdit(mot)
+      ) {
+        continue;
+      }
 
       if (
         contientMot(
@@ -2267,8 +2368,6 @@ function neoDetecterAction(texte) {
   };
 
 }
-
-            
 
 //==============================================================
 // ✂️ NEOAI — SEGMENTATION INTELLIGENTE DES ACTIONS
