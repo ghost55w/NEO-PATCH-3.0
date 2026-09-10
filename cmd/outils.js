@@ -1572,7 +1572,6 @@ function neoDetecterPartieCorps(texte) {
 
 }
 
-
 //==============================================================
 // 🧭 DIRECTION / TRAJECTOIRE
 //==============================================================
@@ -1584,42 +1583,133 @@ function neoDetecterTrajectoire(texte) {
       texte
     ).toLowerCase();
 
-  if (
-    /\bvers\b/iu.test(t)
-  ) {
-    return "vers";
-  }
+  //============================================================
+  // 🌀 CIRCULAIRE
+  //============================================================
 
   if (
-    /\ben\s+ligne\s+droite\b/iu.test(t)
+    /\bcirculaire\b/iu.test(t) ||
+    /\bcirculairement\b/iu.test(t) ||
+    /\ben\s+cercle\b/iu.test(t) ||
+    /\ben\s+arc\b/iu.test(t)
   ) {
-    return "ligne_droite";
+    return "circulaire";
   }
 
+  //============================================================
+  // 🌀 ZIGZAG
+  //============================================================
+
   if (
-    /\bfrontal\b/iu.test(t)
+    /\bzig[\s-]?zag\b/iu.test(t) ||
+    /\bzigzaguant\b/iu.test(t) ||
+    /\ben\s+zig[\s-]?zag\b/iu.test(t)
+  ) {
+    return "zigzag";
+  }
+
+  //============================================================
+  // ➡️ FRONTALE
+  //============================================================
+
+  if (
+    /\bfrontal\b/iu.test(t) ||
+    /\bfrontale\b/iu.test(t) ||
+    /\bfrontalement\b/iu.test(t) ||
+    /\bde\s+face\b/iu.test(t)
   ) {
     return "frontale";
   }
 
+  //============================================================
+  // ↔️ LATÉRALE
+  //============================================================
+
   if (
-    /\blatéral\b|\blateral\b/iu.test(t)
+    /\blatéral(?:e|ement)?\s+(?:gauche|à\s+gauche)\b/iu.test(t) ||
+    /\b(?:côté|cote)\s+gauche\b/iu.test(t) ||
+    /\b(?:sur|vers)\s+le\s+côté\s+gauche\b/iu.test(t)
+  ) {
+    return "laterale_gauche";
+  }
+
+  if (
+    /\blatéral(?:e|ement)?\s+(?:droit|à\s+droite)\b/iu.test(t) ||
+    /\b(?:côté|cote)\s+droit\b/iu.test(t) ||
+    /\b(?:sur|vers)\s+le\s+côté\s+droit\b/iu.test(t)
+  ) {
+    return "laterale_droite";
+  }
+
+  if (
+    /\blatéral\b|\blaterale\b|\blatéralement\b|\blateralement\b/iu.test(t)
   ) {
     return "laterale";
   }
 
+  //============================================================
+  // ↗️ DIAGONALE
+  //============================================================
+
   if (
-    /\bdiagonal\b/iu.test(t)
+    /\bdiagonal(?:e|ement)?\b/iu.test(t)
   ) {
     return "diagonale";
   }
 
+  //============================================================
+  // ⬅️ ARRIÈRE
+  //============================================================
+
+  if (
+    /\barrière\b/iu.test(t) ||
+    /\ben\s+arrière\b/iu.test(t) ||
+    /\bvers\s+l['’]arrière\b/iu.test(t) ||
+    /\bvers\s+arrière\b/iu.test(t) ||
+    /\brecule\b/iu.test(t) ||
+    /\ben\s+reculant\b/iu.test(t)
+  ) {
+    return "arriere";
+  }
+
+  //============================================================
+  // ⬆️ AÉRIENNE
+  //============================================================
+
   if (
     /\ben\s+l['’]air\b/iu.test(t) ||
+    /\baérien(?:ne)?\b/iu.test(t) ||
+    /\baérienne\b/iu.test(t) ||
     /\bsaute\b/iu.test(t) ||
-    /\bsautant\b/iu.test(t)
+    /\bsautant\b/iu.test(t) ||
+    /\bbondit\b/iu.test(t) ||
+    /\ben\s+sautant\b/iu.test(t)
   ) {
     return "aerienne";
+  }
+
+  //============================================================
+  // ➡️ LIGNE DROITE
+  //============================================================
+
+  if (
+    /\ben\s+ligne\s+droite\b/iu.test(t) ||
+    /\ben\s+ligne\s+directe\b/iu.test(t)
+  ) {
+    return "ligne_droite";
+  }
+
+  //============================================================
+  // 🎯 "VERS" = DIRECTION GÉNÉRIQUE
+  //
+  // On ne retourne "vers" que si aucune trajectoire
+  // plus précise n'a été trouvée.
+  //============================================================
+
+  if (
+    /\bvers\b/iu.test(t)
+  ) {
+    return "vers";
   }
 
   return null;
