@@ -3176,31 +3176,32 @@ if (
   }
 
   //============================================================
-  // 5️⃣ SCORE FINAL
-  //============================================================
+// 5️⃣ SCORE FINAL
+//============================================================
 
-  const scoreFinal =
-    Math.round(
-      (
-        scoreFamille * 0.40
-      ) +
-      (
-        scoreStructure * 0.30
-      ) +
-      (
-        scoreExemple * 0.20
-      ) +
-      (
-        scoreMots * 0.10
-      )
-    );
-
-  return Math.min(
-    100,
-    scoreFinal
+const scoreFinal =
+  Math.round(
+    (
+      scoreAction * 0.25
+    ) +
+    (
+      scoreManiere * 0.15
+    ) +
+    (
+      scoreStructure * 0.30
+    ) +
+    (
+      scoreExemple * 0.20
+    ) +
+    (
+      scoreMots * 0.10
+    )
   );
 
-}
+return Math.min(
+  100,
+  scoreFinal
+);
 
 
 //==============================================================
