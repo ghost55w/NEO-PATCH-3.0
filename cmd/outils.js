@@ -3367,6 +3367,15 @@ function neoReconnaitreModele(
     const modele of modeles
   ) {
 
+    console.log(
+      "🧪 [NeoAI MODEL]",
+      modele.id,
+      modele.famille,
+      Array.isArray(modele.exemples)
+        ? modele.exemples.length
+        : 0
+    );
+
     const score =
       neoCalculerSimilariteModele(
         texte,
