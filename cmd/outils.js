@@ -2765,8 +2765,6 @@ function neoFusionnerSegments(
 
 }
 
-
-
 //==============================================================
 // 📚 MODÈLES D'ACTIONS
 //==============================================================
@@ -2782,30 +2780,96 @@ function neoGetModeles() {
 
   for (const source of sources) {
 
+    //============================================================
+    // SOURCE = TABLEAU DE MODÈLES
+    //============================================================
+
     if (
       Array.isArray(source) &&
       source.length
     ) {
+
       return source;
+
     }
+
+    //============================================================
+    // SOURCE = OBJET DE CATÉGORIES
+    //============================================================
 
     if (
       source &&
       typeof source === "object"
     ) {
 
-      return Object.entries(source)
-        .map(([id, modele]) => ({
-          id,
-          ...(
-            modele &&
-            typeof modele === "object"
-              ? modele
-              : {
-                  phrase: String(modele)
-                }
-          )
-        }));
+      const modeles = [];
+
+      for (
+        const [categorie, valeur]
+        of Object.entries(source)
+      ) {
+
+        //========================================================
+        // CATÉGORIE CONTENANT PLUSIEURS MODÈLES
+        //========================================================
+
+        if (
+          Array.isArray(valeur)
+        ) {
+
+          for (
+            const modele of valeur
+          ) {
+
+            if (
+              modele &&
+              typeof modele === "object"
+            ) {
+
+              modeles.push({
+                categorie:
+                  modele.categorie ||
+                  categorie,
+
+                ...modele
+              });
+
+            }
+
+          }
+
+          continue;
+
+        }
+
+        //========================================================
+        // CATÉGORIE CONTENANT UN SEUL MODÈLE
+        //========================================================
+
+        if (
+          valeur &&
+          typeof valeur === "object"
+        ) {
+
+          modeles.push({
+            categorie:
+              valeur.categorie ||
+              categorie,
+
+            ...valeur
+          });
+
+        }
+
+      }
+
+      if (
+        modeles.length
+      ) {
+
+        return modeles;
+
+      }
 
     }
 
@@ -2814,6 +2878,7 @@ function neoGetModeles() {
   return [];
 
 }
+
 
 
 //==============================================================
