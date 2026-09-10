@@ -3060,65 +3060,200 @@ if (
 
   }
 
-  //============================================================
-  // 3️⃣ EXEMPLES
-  //============================================================
+//============================================================
+// 3️⃣ EXEMPLES
+//============================================================
 
-  let scoreExemple = 0;
+let scoreExemple = 0;
 
-  const exemples =
-    Array.isArray(modele.exemples)
-      ? modele.exemples
-      : [];
+const exemples =
+  Array.isArray(modele.exemples)
+    ? modele.exemples
+    : [];
+
+//------------------------------------------------------------
+// MOTS SANS VALEUR POUR LA RECONNAISSANCE DU MODÈLE
+//------------------------------------------------------------
+
+const motsVides = new Set([
+  "un",
+  "une",
+  "le",
+  "la",
+  "les",
+  "des",
+  "du",
+  "de",
+  "au",
+  "aux",
+  "son",
+  "sa",
+  "ses",
+  "dans",
+  "sur",
+  "vers",
+  "avec",
+  "pour",
+  "par",
+  "où",
+  "ou",
+  "et",
+  "en",
+  "visant",
+  "vise",
+  "visée",
+  "contre",
+  "donne",
+  "donner",
+  "frappe",
+  "frapper",
+  "porte",
+  "porter",
+  "attaque",
+  "attaquer",
+  "assène",
+  "assener"
+]);
+
+//------------------------------------------------------------
+// PHRASES / EXPRESSIONS TECHNIQUES
+//------------------------------------------------------------
+
+const expressionsTechniques = [
+  "coup de poing",
+  "coup de pied",
+  "coup de genou",
+  "coup en revers",
+  "coup marteau",
+  "coup de pied frontal",
+  "coup de pied circulaire",
+  "coup de pied lateral",
+  "coup de pied arrière",
+  "coup de pied descendant",
+  "coup de poing direct",
+  "coup de poing circulaire",
+  "coup de poing revers",
+  "coup de poing marteau"
+];
+
+//------------------------------------------------------------
+// NORMALISATION TECHNIQUE
+//------------------------------------------------------------
+
+const extraireMotsUtiles = (valeur) => {
+
+  let texteNormalise =
+    neoNormaliserTexteLocal(
+      String(valeur || "")
+    )
+      .toLowerCase();
+
+  // Transforme les expressions importantes
+  // en unités techniques uniques.
 
   for (
-    const exemple of exemples
+    const expression of expressionsTechniques
   ) {
 
-    const motsExemple =
-      new Set(
-        neoNormaliserTexteLocal(
-          String(exemple)
+    const normalisee =
+      expression
+        .toLowerCase()
+        .replace(/\s+/gu, "_");
+
+    const pattern =
+      expression
+        .split(/\s+/u)
+        .map(mot =>
+          mot.replace(
+            /[.*+?^${}()|[\]\\]/gu,
+            "\\$&"
+          )
         )
-          .toLowerCase()
-          .split(/\s+/u)
-          .map(normaliser)
-          .filter(Boolean)
-      );
+        .join("\\s+");
 
-    if (!motsExemple.size) {
-      continue;
-    }
-
-    let communs = 0;
-
-    for (
-      const mot of motsExemple
-    ) {
-
-      if (
-        motsSource.has(mot)
-      ) {
-        communs++;
-      }
-
-    }
-
-    const score =
-      Math.round(
-        (
-          communs /
-          motsExemple.size
-        ) * 100
-      );
-
-    scoreExemple =
-      Math.max(
-        scoreExemple,
-        score
+    texteNormalise =
+      texteNormalise.replace(
+        new RegExp(
+          `\\b${pattern}\\b`,
+          "giu"
+        ),
+        normalisee
       );
 
   }
+
+  return new Set(
+    texteNormalise
+      .split(/\s+/u)
+      .map(normaliser)
+      .filter(Boolean)
+      .filter(
+        mot =>
+          !motsVides.has(mot)
+      )
+  );
+
+};
+
+//------------------------------------------------------------
+// MOTS UTILES DU TEXTE
+//------------------------------------------------------------
+
+const motsUtilesSource =
+  extraireMotsUtiles(
+    source
+  );
+
+//------------------------------------------------------------
+// COMPARAISON AVEC CHAQUE EXEMPLE
+//------------------------------------------------------------
+
+for (
+  const exemple of exemples
+) {
+
+  const motsExemple =
+    extraireMotsUtiles(
+      exemple
+    );
+
+  if (
+    !motsExemple.size
+  ) {
+    continue;
+  }
+
+  let communs = 0;
+
+  for (
+    const mot of motsExemple
+  ) {
+
+    if (
+      motsUtilesSource.has(mot)
+    ) {
+
+      communs++;
+
+    }
+
+  }
+
+  const score =
+    Math.round(
+      (
+        communs /
+        motsExemple.size
+      ) * 100
+    );
+
+  scoreExemple =
+    Math.max(
+      scoreExemple,
+      score
+    );
+
+}
 
   //============================================================
   // 4️⃣ MOTS
