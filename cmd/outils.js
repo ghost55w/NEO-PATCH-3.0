@@ -4798,7 +4798,7 @@ ${resultat.nombreActions || 0}
     actions.forEach(
       (action, index) => {
 
-        texte +=
+                texte +=
 `
 *Action ${index + 1}*
 ├ 🧍 Sujet : ${action.acteur || "—"}
@@ -4819,10 +4819,11 @@ ${resultat.nombreActions || 0}
           action.hauteur !== undefined
             ? `${action.hauteur}${action.hauteurUnite || "m"}`
             : "—"
-       ├ 🧭 Trajectoire : ${action.trajectoire || "—"}
+        }
+├ 🧭 Trajectoire : ${action.trajectoire || "—"}
 ├ 🦾 Membre utilisé : ${action.membre || "—"}
 ├ 🦵 Partie du corps : ${action.partieCorps || "—"}
-├ 📚 Modèle : ${ 
+├ 📚 Modèle : ${
           action.modele?.id ||
           action.modele?.nom ||
           action.modele ||
