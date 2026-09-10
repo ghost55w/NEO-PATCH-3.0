@@ -1356,41 +1356,199 @@ function neoDetecterVitesse(texte) {
 }
 
 
- //==============================================================
- // 🦵 PARTIE DU CORPS
- //==============================================================
+//==============================================================
+// 🦵 PARTIE DU CORPS
+//==============================================================
 
- function neoDetecterPartieCorps(texte) {
+function neoDetecterPartieCorps(texte) {
 
   const parties = [
-    "visage",
+
+    // ─────────────────────────────────────────────
+    // 🧠 TÊTE / VISAGE
+    // ─────────────────────────────────────────────
+
     "tête",
     "tete",
     "crâne",
     "crane",
+    "visage",
+    "front",
+    "tempe",
+    "tempe gauche",
+    "tempe droite",
+    "œil",
+    "oeil",
+    "œil gauche",
+    "oeil gauche",
+    "œil droit",
+    "oeil droit",
+    "oreille",
+    "oreille gauche",
+    "oreille droite",
+    "nez",
+    "joue",
+    "joue gauche",
+    "joue droite",
+    "bouche",
+    "lèvre",
+    "levre",
+    "lèvre gauche",
+    "levre gauche",
+    "lèvre droite",
+    "levre droite",
     "mâchoire",
     "machoire",
+    "mâchoire gauche",
+    "machoire gauche",
+    "mâchoire droite",
+    "machoire droite",
     "menton",
+
+    // ─────────────────────────────────────────────
+    // 🦴 COU / ÉPAULES
+    // ─────────────────────────────────────────────
+
     "cou",
+    "nuque",
+    "gorge",
     "épaule",
     "epaule",
+    "épaule gauche",
+    "epaule gauche",
+    "épaule droite",
+    "epaule droite",
+
+    // ─────────────────────────────────────────────
+    // 💪 BRAS
+    // ─────────────────────────────────────────────
+
     "bras",
+    "bras gauche",
+    "bras droit",
+    "biceps",
+    "triceps",
     "avant-bras",
+    "avant bras",
+    "avant-bras gauche",
+    "avant bras gauche",
+    "avant-bras droit",
+    "avant bras droit",
+    "coude",
+    "coude gauche",
+    "coude droit",
     "poignet",
+    "poignet gauche",
+    "poignet droit",
+
+    // ─────────────────────────────────────────────
+    // ✋ MAIN
+    // ─────────────────────────────────────────────
+
     "main",
+    "main gauche",
+    "main droite",
+    "paume",
+    "paume gauche",
+    "paume droite",
+    "dos de la main",
+    "dos de main",
+    "poing",
+    "poing gauche",
+    "poing droit",
+    "doigt",
     "doigts",
+    "pouce",
+    "pouce gauche",
+    "pouce droit",
+    "index",
+    "index gauche",
+    "index droit",
+    "majeur",
+    "annulaire",
+    "auriculaire",
+
+    // ─────────────────────────────────────────────
+    // 🫀 TRONC
+    // ─────────────────────────────────────────────
+
     "torse",
     "poitrine",
+    "pectoraux",
+    "sein",
     "ventre",
     "abdomen",
+    "nombril",
+    "plexus",
+    "côtes",
+    "cotes",
+    "côte",
+    "cote",
     "dos",
+    "haut du dos",
+    "bas du dos",
+    "lombaires",
+    "flanc",
+    "flanc gauche",
+    "flanc droit",
+
+    // ─────────────────────────────────────────────
+    // 🦵 BASSIN / JAMBES
+    // ─────────────────────────────────────────────
+
+    "bassin",
     "hanche",
+    "hanche gauche",
+    "hanche droite",
+    "fesse",
+    "fesse gauche",
+    "fesse droite",
     "cuisse",
+    "cuisse gauche",
+    "cuisse droite",
     "genou",
+    "genou gauche",
+    "genou droit",
+    "rotule",
+    "rotule gauche",
+    "rotule droite",
     "tibia",
+    "tibia gauche",
+    "tibia droit",
     "mollet",
+    "mollet gauche",
+    "mollet droit",
+
+    // ─────────────────────────────────────────────
+    // 🦶 CHEVILLE / PIED
+    // ─────────────────────────────────────────────
+
     "cheville",
-    "pied"
+    "cheville gauche",
+    "cheville droite",
+    "talon",
+    "talon gauche",
+    "talon droit",
+    "pied",
+    "pied gauche",
+    "pied droit",
+    "dessus du pied",
+    "dessus du pied gauche",
+    "dessus du pied droit",
+    "plante du pied",
+    "plante du pied gauche",
+    "plante du pied droit",
+    "semelle",
+    "semelle gauche",
+    "semelle droite",
+    "semelle du pied gauche",
+    "semelle du pied droit",
+    "orteil",
+    "orteils",
+    "gros orteil",
+    "gros orteil gauche",
+    "gros orteil droit"
+
   ];
 
   const t =
