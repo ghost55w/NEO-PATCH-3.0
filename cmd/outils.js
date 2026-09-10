@@ -2866,50 +2866,87 @@ function neoCalculerSimilariteModele(
         .filter(Boolean)
     );
 
-  //============================================================
-  // 1️⃣ FAMILLE / ACTION
-  //============================================================
+//============================================================
+// 1️⃣ ACTION + MANIÈRE
+//============================================================
 
-  let scoreFamille = 0;
+let scoreAction = 0;
+let scoreManiere = 0;
 
-  const familleModele =
-    normaliser(
-      modele.famille
-    );
+//------------------------------------------------------------
+// ACTION
+//------------------------------------------------------------
 
-  const familleTexte =
-    normaliser(
-      analyse.famille ||
-      analyse.action?.famille
-    );
+const actionModele =
+  normaliser(
+    modele.action
+  );
 
-  const actionTexte =
-    normaliser(
-      analyse.action?.action ||
-      analyse.action
-    );
+const actionTexte =
+  normaliser(
+    analyse.action?.action ||
+    analyse.action
+  );
+
+if (
+  actionModele &&
+  actionTexte
+) {
 
   if (
-    familleModele &&
-    familleTexte
+    actionModele === actionTexte
   ) {
 
-    if (
-      familleModele === familleTexte
-    ) {
+    scoreAction = 100;
 
-      scoreFamille = 100;
+  } else if (
+    actionModele.includes(actionTexte) ||
+    actionTexte.includes(actionModele)
+  ) {
 
-    } else if (
-      familleModele.includes(familleTexte) ||
-      familleTexte.includes(familleModele)
-    ) {
-
-      scoreFamille = 80;
-
-    }
+    scoreAction = 80;
 
   }
+
+}
+
+//------------------------------------------------------------
+// MANIÈRE
+//------------------------------------------------------------
+
+const maniereModele =
+  normaliser(
+    modele.maniere ||
+    modele.famille
+  );
+
+const maniereTexte =
+  normaliser(
+    analyse.maniere
+  );
+
+if (
+  maniereModele &&
+  maniereTexte
+) {
+
+  if (
+    maniereModele === maniereTexte
+  ) {
+
+    scoreManiere = 100;
+
+  } else if (
+    maniereModele.includes(maniereTexte) ||
+    maniereTexte.includes(maniereModele)
+  ) {
+
+    scoreManiere = 80;
+
+  }
+
+}
+ 
 
   //============================================================
   // 2️⃣ STRUCTURE
