@@ -4329,10 +4329,15 @@ function neoGenererResume(
     return "Aucune action décrite.";
   }
 
-  // Retirer le marqueur du pavé
+  //============================================================
+  // 🧹 NETTOYAGE DU MARQUEUR NEO
+  //============================================================
+
   texte = texte
     .replace(/^🌀\s*:\s*/iu, "")
     .replace(/^🌀\s*/iu, "")
+    .replace(/^:\s*/u, "")
+    .replace(/\s+/g, " ")
     .trim();
 
   if (!texte) {
@@ -4340,62 +4345,368 @@ function neoGenererResume(
   }
 
   //============================================================
-  // 🔄 SYNONYMES NARRATIFS
+  // 🎲 OUTIL DE VARIATION
   //============================================================
 
-  const remplacements = [
-
-    // Attaques
-    [/\bfrappe\b/iu, "décoche"],
-    [/\bfrapper\b/iu, "décoche"],
-    [/\bfrappant\b/iu, "décoche"],
-    [/\bassène\b/iu, "porte"],
-    [/\basséner\b/iu, "porter"],
-
-    // Coups
-    [/\bcoup de poing\b/iu, "direct"],
-    [/\bcoup de pied\b/iu, "coup de pied"],
-
-    // Déplacements
-    [/\bcourt vers\b/iu, "fonce vers"],
-    [/\bcourant vers\b/iu, "fonce vers"],
-    [/\bse déplace vers\b/iu, "s'avance vers"],
-    [/\bavance vers\b/iu, "s'élance vers"],
-    [/\brecule\b/iu, "se replie"],
-
-    // Esquives
-    [/\besquive\b/iu, "évite"],
-    [/\besquiver\b/iu, "éviter"],
-
-    // Sauts
-    [/\bsaut(e|ant)?\b/iu, "bondit"],
-    [/\bbond(e|it|issant)?\b/iu, "s'élance"],
-
-    // Saisies
-    [/\battrape\b/iu, "saisit"],
-    [/\battraper\b/iu, "saisir"],
-    [/\bempoigne\b/iu, "saisit"],
-
-    // Regard
-    [/\bregarde\b/iu, "fixe"],
-    [/\bregarder\b/iu, "fixer"],
-
-  ];
-
-  for (
-    const [pattern, remplacement]
-    of remplacements
+  function choisir(
+    variantes
   ) {
 
-    texte = texte.replace(
-      pattern,
-      remplacement
-    );
+    return variantes[
+      Math.floor(
+        Math.random() *
+        variantes.length
+      )
+    ];
 
   }
 
   //============================================================
-  // 🧹 NETTOYAGE LÉGER
+  // 🔄 SYNONYMES NARRATIFS
+  //
+  // Chaque groupe contient plusieurs variantes.
+  // La phrase originale peut aussi être conservée.
+  //============================================================
+
+  const synonymes = [
+
+    //==========================================================
+    // 🥊 ATTAQUES
+    //==========================================================
+
+    {
+      regex: /\bfrappe\b/iu,
+      variantes: [
+        "frappe",
+        "porte",
+        "assène",
+        "lance",
+        "déclenche"
+      ]
+    },
+
+    {
+      regex: /\bfrapper\b/iu,
+      variantes: [
+        "frapper",
+        "porter",
+        "asséner",
+        "lancer",
+        "déclencher"
+      ]
+    },
+
+    {
+      regex: /\bdonne un coup\b/iu,
+      variantes: [
+        "donne un coup",
+        "porte un coup",
+        "lance un coup",
+        "assène un coup"
+      ]
+    },
+
+    {
+      regex: /\bfonce\b/iu,
+      variantes: [
+        "fonce",
+        "se précipite",
+        "s'élance",
+        "charge",
+        "se rue"
+      ]
+    },
+
+    {
+      regex: /\bfoncer\b/iu,
+      variantes: [
+        "foncer",
+        "se précipiter",
+        "s'élancer",
+        "charger",
+        "se ruer"
+      ]
+    },
+
+    //==========================================================
+    // 🏃 DÉPLACEMENTS
+    //==========================================================
+
+    {
+      regex: /\bcourt vers\b/iu,
+      variantes: [
+        "court vers",
+        "fonce vers",
+        "s'élance vers",
+        "se précipite vers"
+      ]
+    },
+
+    {
+      regex: /\bcourant vers\b/iu,
+      variantes: [
+        "courant vers",
+        "fonçant vers",
+        "s'élançant vers",
+        "se précipitant vers"
+      ]
+    },
+
+    {
+      regex: /\bse déplace vers\b/iu,
+      variantes: [
+        "se déplace vers",
+        "avance vers",
+        "se dirige vers",
+        "s'avance vers"
+      ]
+    },
+
+    {
+      regex: /\bavance vers\b/iu,
+      variantes: [
+        "avance vers",
+        "se dirige vers",
+        "s'avance vers",
+        "progresse vers"
+      ]
+    },
+
+    {
+      regex: /\brecule\b/iu,
+      variantes: [
+        "recule",
+        "se replie",
+        "fait un pas en arrière",
+        "s'éloigne"
+      ]
+    },
+
+    //==========================================================
+    // 🌀 DIRECTION
+    //==========================================================
+
+    {
+      regex: /\bvers\b/iu,
+      variantes: [
+        "vers",
+        "en direction de",
+        "vers la direction de"
+      ]
+    },
+
+    //==========================================================
+    // 🛡️ ESQUIVE / DÉFENSE
+    //==========================================================
+
+    {
+      regex: /\besquive\b/iu,
+      variantes: [
+        "esquive",
+        "évite",
+        "se dérobe à",
+        "se soustrait à"
+      ]
+    },
+
+    {
+      regex: /\besquiver\b/iu,
+      variantes: [
+        "esquiver",
+        "éviter",
+        "se dérober à",
+        "se soustraire à"
+      ]
+    },
+
+    {
+      regex: /\bpar(e|er)\b/iu,
+      variantes: [
+        "pare",
+        "bloque",
+        "intercepte",
+        "dévie"
+      ]
+    },
+
+    //==========================================================
+    // ✋ SAISIES
+    //==========================================================
+
+    {
+      regex: /\battrape\b/iu,
+      variantes: [
+        "attrape",
+        "saisit",
+        "empoigne",
+        "agrippe"
+      ]
+    },
+
+    {
+      regex: /\battraper\b/iu,
+      variantes: [
+        "attraper",
+        "saisir",
+        "empoigner",
+        "agripper"
+      ]
+    },
+
+    {
+      regex: /\bempoigne\b/iu,
+      variantes: [
+        "empoigne",
+        "saisit",
+        "agrippe",
+        "attrape"
+      ]
+    },
+
+    //==========================================================
+    // 🦘 SAUTS
+    //==========================================================
+
+    {
+      regex: /\bsaut(e|ant)?\b/iu,
+      variantes: [
+        "saute",
+        "bondit",
+        "s'élance dans les airs",
+        "effectue un bond"
+      ]
+    },
+
+    {
+      regex: /\bbondit\b/iu,
+      variantes: [
+        "bondit",
+        "saute",
+        "s'élève",
+        "s'élance dans les airs"
+      ]
+    },
+
+    //==========================================================
+    // 👁️ PERCEPTION
+    //==========================================================
+
+    {
+      regex: /\bregarde\b/iu,
+      variantes: [
+        "regarde",
+        "observe",
+        "fixe",
+        "scrute"
+      ]
+    },
+
+    {
+      regex: /\bregarder\b/iu,
+      variantes: [
+        "regarder",
+        "observer",
+        "fixer",
+        "scruter"
+      ]
+    }
+
+  ];
+
+  //============================================================
+  // 🎯 NOMBRE DE TRANSFORMATIONS
+  //
+  // Parfois aucune modification.
+  // Parfois 1 ou 2 mots seulement.
+  // Cela garde le résumé proche du pavé.
+  //============================================================
+
+  const candidats = [];
+
+  for (
+    const item of synonymes
+  ) {
+
+    if (
+      item.regex.test(texte)
+    ) {
+
+      candidats.push(
+        item
+      );
+
+    }
+
+  }
+
+  // Mélange les candidats
+  for (
+    let i = candidats.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(
+        Math.random() *
+        (i + 1)
+      );
+
+    [
+      candidats[i],
+      candidats[j]
+    ] = [
+      candidats[j],
+      candidats[i]
+    ];
+
+  }
+
+  //============================================================
+  // 🎲 30 % : conserver presque exactement le pavé
+  //============================================================
+
+  const hasard = Math.random();
+
+  if (hasard >= 0.30) {
+
+    // 1 ou 2 reformulations maximum
+    const nombre =
+      candidats.length > 1 &&
+      Math.random() > 0.55
+        ? 2
+        : 1;
+
+    let modifications = 0;
+
+    for (
+      const item of candidats
+    ) {
+
+      if (
+        modifications >= nombre
+      ) {
+        break;
+      }
+
+      const variante =
+        choisir(
+          item.variantes
+        );
+
+      texte = texte.replace(
+        item.regex,
+        variante
+      );
+
+      modifications++;
+
+    }
+
+  }
+
+  //============================================================
+  // 🧹 NETTOYAGE FINAL
   //============================================================
 
   texte = texte
@@ -4403,28 +4714,7 @@ function neoGenererResume(
     .replace(/\s+([,.!?])/g, "$1")
     .trim();
 
-  //============================================================
-  // 🎯 NORMALISATION DE QUELQUES FORMES
-  //============================================================
-
-  // "visant la..." reste naturel.
-  // "visant mâchoire..." devient "visant la mâchoire..."
-  if (
-    analyse.partieCorps &&
-    !new RegExp(
-      `\\b${analyse.partieCorps}\\b`,
-      "iu"
-    ).test(texte)
-  ) {
-
-    // On ne reconstruit PAS la phrase :
-    // on laisse simplement le texte original intact.
-  }
-
-  //============================================================
-  // ✨ PREMIÈRE LETTRE
-  //============================================================
-
+  // Première lettre en majuscule
   if (texte.length) {
 
     texte =
@@ -4433,10 +4723,7 @@ function neoGenererResume(
 
   }
 
-  //============================================================
-  // 🏁 PONCTUATION
-  //============================================================
-
+  // Point final
   if (
     !/[.!?]$/u.test(texte)
   ) {
@@ -4448,6 +4735,7 @@ function neoGenererResume(
   return texte;
 
 }
+
 
 
 //==============================================================
