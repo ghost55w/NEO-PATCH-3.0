@@ -3202,7 +3202,7 @@ return Math.min(
   100,
   scoreFinal
 );
-
+} 
 
 //==============================================================
 // 📚 RECONNAISSANCE DU MEILLEUR MODÈLE
