@@ -4819,10 +4819,10 @@ ${resultat.nombreActions || 0}
           action.hauteur !== undefined
             ? `${action.hauteur}${action.hauteurUnite || "m"}`
             : "—"
-        }
-├ 🧭 Trajectoire : ${action.trajectoire || "—"}
+       ├ 🧭 Trajectoire : ${action.trajectoire || "—"}
+├ 🦾 Membre utilisé : ${action.membre || "—"}
 ├ 🦵 Partie du corps : ${action.partieCorps || "—"}
-├ 📚 Modèle : ${
+├ 📚 Modèle : ${ 
           action.modele?.id ||
           action.modele?.nom ||
           action.modele ||
