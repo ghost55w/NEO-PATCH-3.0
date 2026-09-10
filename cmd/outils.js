@@ -4313,78 +4313,139 @@ function neoArbitrer(
 
 
 //==============================================================
-// 💡 RÉSUMÉ
+// 💡 RÉSUMÉ NARRATIF
 //==============================================================
 
 function neoGenererResume(
   analyse
 ) {
 
-  const morceaux = [];
+  let texte = String(
+    analyse?.texte ||
+    ""
+  ).trim();
 
-  if (analyse.acteur) {
-    morceaux.push(
-      analyse.acteur
+  if (!texte) {
+    return "Aucune action décrite.";
+  }
+
+  // Retirer le marqueur du pavé
+  texte = texte
+    .replace(/^🌀\s*:\s*/iu, "")
+    .replace(/^🌀\s*/iu, "")
+    .trim();
+
+  if (!texte) {
+    return "Aucune action décrite.";
+  }
+
+  //============================================================
+  // 🔄 SYNONYMES NARRATIFS
+  //============================================================
+
+  const remplacements = [
+
+    // Attaques
+    [/\bfrappe\b/iu, "décoche"],
+    [/\bfrapper\b/iu, "décoche"],
+    [/\bfrappant\b/iu, "décoche"],
+    [/\bassène\b/iu, "porte"],
+    [/\basséner\b/iu, "porter"],
+
+    // Coups
+    [/\bcoup de poing\b/iu, "direct"],
+    [/\bcoup de pied\b/iu, "coup de pied"],
+
+    // Déplacements
+    [/\bcourt vers\b/iu, "fonce vers"],
+    [/\bcourant vers\b/iu, "fonce vers"],
+    [/\bse déplace vers\b/iu, "s'avance vers"],
+    [/\bavance vers\b/iu, "s'élance vers"],
+    [/\brecule\b/iu, "se replie"],
+
+    // Esquives
+    [/\besquive\b/iu, "évite"],
+    [/\besquiver\b/iu, "éviter"],
+
+    // Sauts
+    [/\bsaut(e|ant)?\b/iu, "bondit"],
+    [/\bbond(e|it|issant)?\b/iu, "s'élance"],
+
+    // Saisies
+    [/\battrape\b/iu, "saisit"],
+    [/\battraper\b/iu, "saisir"],
+    [/\bempoigne\b/iu, "saisit"],
+
+    // Regard
+    [/\bregarde\b/iu, "fixe"],
+    [/\bregarder\b/iu, "fixer"],
+
+  ];
+
+  for (
+    const [pattern, remplacement]
+    of remplacements
+  ) {
+
+    texte = texte.replace(
+      pattern,
+      remplacement
     );
-  }
-
-  if (analyse.action) {
-    morceaux.push(
-      analyse.action
-    );
-  }
-
-  if (analyse.cible) {
-    morceaux.push(
-      `vers ${analyse.cible}`
-    );
-  }
-
-  if (analyse.distance !== null) {
-
-    morceaux.push(
-      `${analyse.distance}${analyse.distanceUnite || "m"}`
-    );
 
   }
 
-  if (analyse.hauteur !== null) {
+  //============================================================
+  // 🧹 NETTOYAGE LÉGER
+  //============================================================
 
-    morceaux.push(
-      `à ${analyse.hauteur}${analyse.hauteurUnite || "m"} de hauteur`
-    );
+  texte = texte
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,.!?])/g, "$1")
+    .trim();
+
+  //============================================================
+  // 🎯 NORMALISATION DE QUELQUES FORMES
+  //============================================================
+
+  // "visant la..." reste naturel.
+  // "visant mâchoire..." devient "visant la mâchoire..."
+  if (
+    analyse.partieCorps &&
+    !new RegExp(
+      `\\b${analyse.partieCorps}\\b`,
+      "iu"
+    ).test(texte)
+  ) {
+
+    // On ne reconstruit PAS la phrase :
+    // on laisse simplement le texte original intact.
+  }
+
+  //============================================================
+  // ✨ PREMIÈRE LETTRE
+  //============================================================
+
+  if (texte.length) {
+
+    texte =
+      texte.charAt(0).toUpperCase() +
+      texte.slice(1);
 
   }
 
-  if (analyse.partieCorps) {
+  //============================================================
+  // 🏁 PONCTUATION
+  //============================================================
 
-    morceaux.push(
-      `visant ${analyse.partieCorps}`
-    );
+  if (
+    !/[.!?]$/u.test(texte)
+  ) {
 
-  }
-
-  if (analyse.maniere) {
-
-    morceaux.push(
-      `de manière ${analyse.maniere}`
-    );
+    texte += ".";
 
   }
 
-  if (analyse.vitesse) {
-
-    morceaux.push(
-      `à ${analyse.vitesse}`
-    );
-
-  }
-
-  if (!morceaux.length) {
-    return analyse.texte;
-  }
-
-  return morceaux.join(" ");
+  return texte;
 
 }
 
