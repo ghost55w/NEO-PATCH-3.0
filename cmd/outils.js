@@ -1491,7 +1491,34 @@ function neoDetecterCible(texte) {
 
   const motsExclus = new Set([
     "visage",
+    "tête",
+    "tete",
+    "crâne",
+    "crane",
+    "mâchoire",
+    "machoire",
+    "menton",
+    "cou",
+    "épaule",
+    "epaule",
+    "bras",
+    "avant-bras",
+    "poignet",
+    "main",
+    "doigts",
+    "torse",
+    "poitrine",
+    "ventre",
     "abdomen",
+    "dos",
+    "hanche",
+    "cuisse",
+    "genou",
+    "tibia",
+    "mollet",
+    "cheville",
+    "pied",
+
     "corps",
     "adversaire",
     "ennemi",
@@ -1514,7 +1541,7 @@ function neoDetecterCible(texte) {
     "sa",
     "ses",
 
-    // Directions / formulations qui ne sont pas des cibles
+    // Directions
     "avant",
     "arrière",
     "arriere",
@@ -1528,6 +1555,94 @@ function neoDetecterCible(texte) {
     "metre",
     "metres"
   ]);
+
+  //============================================================
+  // 🎯 CIBLE APRÈS UNE PARTIE DU CORPS
+  //============================================================
+  // Exemples :
+  // "au visage de Panda"
+  // "dans le ventre de Panda"
+  // "sur sa tête de Panda"
+  //============================================================
+
+  const partiesCorps =
+    [
+      "visage",
+      "tête",
+      "tete",
+      "crâne",
+      "crane",
+      "mâchoire",
+      "machoire",
+      "menton",
+      "cou",
+      "épaule",
+      "epaule",
+      "bras",
+      "avant-bras",
+      "poignet",
+      "main",
+      "doigts",
+      "torse",
+      "poitrine",
+      "ventre",
+      "abdomen",
+      "dos",
+      "hanche",
+      "cuisse",
+      "genou",
+      "tibia",
+      "mollet",
+      "cheville",
+      "pied"
+    ];
+
+  for (
+    const partie of partiesCorps
+  ) {
+
+    const partieNormalisee =
+      neoNormaliserMotLocal(
+        partie
+      );
+
+    const regex =
+      new RegExp(
+        `\\b${partieNormalisee.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+de\\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)`,
+        "iu"
+      );
+
+    const match =
+      t.match(regex);
+
+    if (
+      match &&
+      match[1]
+    ) {
+
+      const cible =
+        match[1];
+
+      const cibleNormalisee =
+        neoNormaliserMotLocal(
+          cible
+        );
+
+      if (
+        !motsExclus.has(
+          cibleNormalisee
+        )
+      ) {
+        return cible;
+      }
+
+    }
+
+  }
+
+  //============================================================
+  // 🎯 PATTERNS CLASSIQUES
+  //============================================================
 
   const patterns = [
     /\bvers\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
@@ -1566,7 +1681,6 @@ function neoDetecterCible(texte) {
       continue;
     }
 
-    // Ignore les valeurs numériques / distances
     if (
       /^\d+(?:[.,]\d+)?(?:m|cm|km)?$/iu.test(
         motNormalise
@@ -1581,6 +1695,7 @@ function neoDetecterCible(texte) {
   return null;
 
 }
+
 
 
 //==============================================================
