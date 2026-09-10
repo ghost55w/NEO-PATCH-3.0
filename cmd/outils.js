@@ -1627,7 +1627,7 @@ function neoDetecterTrajectoire(texte) {
 }
 
 //==============================================================
-// 🎯 CIBLE
+// 🎯 DÉTECTION DE LA CIBLE
 //==============================================================
 
 function neoDetecterCible(texte) {
@@ -1639,42 +1639,13 @@ function neoDetecterCible(texte) {
 
   const motsExclus = new Set([
     "visage",
-    "tête",
-    "tete",
-    "crâne",
-    "crane",
-    "mâchoire",
-    "machoire",
-    "menton",
-    "cou",
-    "épaule",
-    "epaule",
-    "bras",
-    "avant-bras",
-    "poignet",
-    "main",
-    "doigts",
-    "torse",
-    "poitrine",
-    "ventre",
     "abdomen",
-    "dos",
-    "hanche",
-    "cuisse",
-    "genou",
-    "tibia",
-    "mollet",
-    "cheville",
-    "pied",
-
     "corps",
     "adversaire",
     "ennemi",
     "cible",
     "direction",
     "maximum",
-
-    // Articles / déterminants
     "le",
     "la",
     "les",
@@ -1688,15 +1659,11 @@ function neoDetecterCible(texte) {
     "son",
     "sa",
     "ses",
-
-    // Directions
     "avant",
     "arrière",
     "arriere",
     "gauche",
     "droite",
-
-    // Mesures
     "m",
     "mètre",
     "mètres",
@@ -1705,103 +1672,41 @@ function neoDetecterCible(texte) {
   ]);
 
   //============================================================
-  // 🎯 CIBLE APRÈS UNE PARTIE DU CORPS
-  //============================================================
-  // Exemples :
-  // "au visage de Panda"
-  // "dans le ventre de Panda"
-  // "sur sa tête de Panda"
-  //============================================================
-
-  const partiesCorps =
-    [
-      "visage",
-      "tête",
-      "tete",
-      "crâne",
-      "crane",
-      "mâchoire",
-      "machoire",
-      "menton",
-      "cou",
-      "épaule",
-      "epaule",
-      "bras",
-      "avant-bras",
-      "poignet",
-      "main",
-      "doigts",
-      "torse",
-      "poitrine",
-      "ventre",
-      "abdomen",
-      "dos",
-      "hanche",
-      "cuisse",
-      "genou",
-      "tibia",
-      "mollet",
-      "cheville",
-      "pied"
-    ];
-
-  for (
-    const partie of partiesCorps
-  ) {
-
-    const partieNormalisee =
-      neoNormaliserMotLocal(
-        partie
-      );
-
-    const regex =
-      new RegExp(
-        `\\b${partieNormalisee.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+de\\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)`,
-        "iu"
-      );
-
-    const match =
-      t.match(regex);
-
-    if (
-      match &&
-      match[1]
-    ) {
-
-      const cible =
-        match[1];
-
-      const cibleNormalisee =
-        neoNormaliserMotLocal(
-          cible
-        );
-
-      if (
-        !motsExclus.has(
-          cibleNormalisee
-        )
-      ) {
-        return cible;
-      }
-
-    }
-
-  }
-
-  //============================================================
-  // 🎯 PATTERNS CLASSIQUES
+  // 🎯 PATTERNS DE CIBLE
   //============================================================
 
   const patterns = [
+
+    // "visant Sarutobi"
+    /\bvisant\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "visant le visage de Sarutobi"
+    // On cherche directement la cible située après "de".
+    /\bvisant\s+(?:le|la|les|un|une|des)\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*(?:\s+[A-Za-zÀ-ÿ]+)*\s+\bde\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "vers Sarutobi"
     /\bvers\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "contre Sarutobi"
     /\bcontre\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "sur Sarutobi"
     /\bsur\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "à Sarutobi"
     /\bà\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "au Sarutobi"
     /\bau\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
+
+    // "son adversaire"
     /\bson\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu
+
   ];
 
-  for (const pattern of patterns) {
+  for (
+    const pattern of patterns
+  ) {
 
     const match =
       t.match(pattern);
@@ -1838,13 +1743,13 @@ function neoDetecterCible(texte) {
     }
 
     return mot;
+
   }
 
   return null;
 
 }
-
-
+      
 
 //==============================================================
 // 👤 ACTEUR
