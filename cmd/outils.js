@@ -3796,8 +3796,6 @@ function neoAnalyserAction(
   //============================================================
   // 👤 FALLBACK SUJET
   //============================================================
-  // Si le détecteur ne trouve pas le sujet,
-  // on récupère le premier nom placé avant l'action.
 
   if (!acteur) {
 
@@ -3815,7 +3813,6 @@ function neoAnalyserAction(
     const premiersMotsAction = [
       "avance",
       "avancer",
-      "progresse",
       "progresse",
       "recule",
       "reculer",
@@ -3863,15 +3860,8 @@ function neoAnalyserAction(
   //============================================================
   // 💨 MANIÈRE
   //============================================================
-  // La manière décrit COMMENT l'action est réalisée.
-  // Elle doit être explicitement présente dans le texte.
-  //============================================================
 
   const manieres = [
-
-    // ----------------------------------------------------------
-    // 🏃 DÉPLACEMENTS
-    // ----------------------------------------------------------
 
     "course",
     "sprint",
@@ -3881,10 +3871,6 @@ function neoAnalyserAction(
     "sautant",
     "zigzag",
     "zigzagant",
-
-    // ----------------------------------------------------------
-    // 👊 ATTAQUES
-    // ----------------------------------------------------------
 
     "direct",
     "directe",
@@ -3900,10 +3886,6 @@ function neoAnalyserAction(
     "laterale",
     "latérale",
 
-    // ----------------------------------------------------------
-    // 🌀 MOUVEMENTS
-    // ----------------------------------------------------------
-
     "vrille",
     "rotation",
     "tournant",
@@ -3911,25 +3893,15 @@ function neoAnalyserAction(
     "pivôt",
     "diagonale",
     "diagonal",
-    "diagonale",
     "latéralement",
     "lateralement",
     "frontalement",
 
-    // ----------------------------------------------------------
-    // 🛡️ ESQUIVES / DÉFENSES
-    // ----------------------------------------------------------
-
     "esquive",
-    "zigzag",
     "déviation",
     "deviation",
     "écart",
     "écartement",
-
-    // ----------------------------------------------------------
-    // ⚡ INTENSITÉ / EXÉCUTION
-    // ----------------------------------------------------------
 
     "violemment",
     "violent",
@@ -3979,6 +3951,222 @@ function neoAnalyserAction(
   }
 
   //============================================================
+  // 🦾 MEMBRE UTILISÉ
+  //============================================================
+  // Le membre appartient à L'ACTEUR.
+  //
+  // Exemple :
+  // "Naruto frappe du droit visant la mâchoire"
+  //
+  // membre      = main droite
+  // partieCorps = mâchoire
+  //
+  // On cherche d'abord les membres explicitement écrits.
+  //============================================================
+
+  let membre = null;
+
+  const membres = [
+
+    // ─────────────────────────────────────────────
+    // ✋ MAINS / POINGS
+    // ─────────────────────────────────────────────
+
+    "main droite",
+    "main gauche",
+    "poing droit",
+    "poing gauche",
+    "paume droite",
+    "paume gauche",
+    "dos de la main droite",
+    "dos de la main gauche",
+
+    // ─────────────────────────────────────────────
+    // 💪 BRAS
+    // ─────────────────────────────────────────────
+
+    "bras droit",
+    "bras gauche",
+    "avant-bras droit",
+    "avant-bras gauche",
+    "coude droit",
+    "coude gauche",
+    "poignet droit",
+    "poignet gauche",
+
+    // ─────────────────────────────────────────────
+    // 🦵 JAMBES
+    // ─────────────────────────────────────────────
+
+    "cuisse droite",
+    "cuisse gauche",
+    "genou droit",
+    "genou gauche",
+    "tibia droit",
+    "tibia gauche",
+    "mollet droit",
+    "mollet gauche",
+
+    // ─────────────────────────────────────────────
+    // 🦶 PIEDS
+    // ─────────────────────────────────────────────
+
+    "pied droit",
+    "pied gauche",
+    "talon droit",
+    "talon gauche",
+    "cheville droite",
+    "cheville gauche",
+
+    "dessus du pied droit",
+    "dessus du pied gauche",
+
+    "plante du pied droit",
+    "plante du pied gauche",
+
+    "semelle du pied droit",
+    "semelle du pied gauche",
+
+    "semelle droite",
+    "semelle gauche",
+
+    "gros orteil droit",
+    "gros orteil gauche"
+
+  ];
+
+  // Les expressions longues doivent être testées
+  // avant les expressions courtes.
+  const membresTries =
+    [...membres].sort(
+      (a, b) =>
+        b.length - a.length
+    );
+
+  for (
+    const partie of membresTries
+  ) {
+
+    const partieNormalisee =
+      neoNormaliserTexteLocal(
+        partie
+      ).toLowerCase();
+
+    const regex =
+      new RegExp(
+        `(?<![A-Za-zÀ-ÿ0-9_-])${partieNormalisee.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-zÀ-ÿ0-9_-])`,
+        "iu"
+      );
+
+    if (
+      regex.test(normal)
+    ) {
+
+      membre = partie;
+      break;
+
+    }
+
+  }
+
+  //============================================================
+  // 🧠 INTERPRÉTATION DE "DU DROIT / DU GAUCHE"
+  //============================================================
+  // Exemple :
+  //
+  // "Naruto frappe un uppercut du droit"
+  //
+  // "du droit" ne contient pas "main droite".
+  // On déduit donc le membre selon le type d'action.
+  //============================================================
+
+  if (!membre) {
+
+    const droit =
+      /\bdu\s+droit\b/iu.test(normal) ||
+      /\bde\s+la\s+droite\b/iu.test(normal) ||
+      /\bà\s+droite\b/iu.test(normal);
+
+    const gauche =
+      /\bdu\s+gauche\b/iu.test(normal) ||
+      /\bde\s+la\s+gauche\b/iu.test(normal) ||
+      /\bà\s+gauche\b/iu.test(normal);
+
+    if (
+      droit ||
+      gauche
+    ) {
+
+      const cote =
+        droit
+          ? "droite"
+          : "gauche";
+
+      // 👊 Poings
+      if (
+        /\b(poing|uppercut|crochet|frappe|frapper|coup de poing)\b/iu.test(normal)
+      ) {
+
+        membre =
+          `main ${cote}`;
+
+      }
+
+      // 🦵 Genou
+      else if (
+        /\b(genou|coup de genou)\b/iu.test(normal)
+      ) {
+
+        membre =
+          `genou ${cote}`;
+
+      }
+
+      // 🦶 Pied
+      else if (
+        /\b(pied|coup de pied|kick|semelle|plante du pied)\b/iu.test(normal)
+      ) {
+
+        membre =
+          `pied ${cote}`;
+
+      }
+
+      // 💪 Coude
+      else if (
+        /\b(coude|coup de coude)\b/iu.test(normal)
+      ) {
+
+        membre =
+          `coude ${cote}`;
+
+      }
+
+      // 🦵 Jambe
+      else if (
+        /\b(jambe|cuisse|tibia|mollet)\b/iu.test(normal)
+      ) {
+
+        membre =
+          `jambe ${cote}`;
+
+      }
+
+      // 💪 Bras
+      else if (
+        /\b(bras|avant-bras|poignet)\b/iu.test(normal)
+      ) {
+
+        membre =
+          `bras ${cote}`;
+
+      }
+
+    }
+
+  }
+
+  //============================================================
   // 🧱 STRUCTURE
   //============================================================
 
@@ -4005,6 +4193,7 @@ function neoAnalyserAction(
         hauteur?.valeur !== null ||
         maniere ||
         vitesse?.valeur !== null ||
+        membre ||
         partieCorps
       )
         ? "C"
@@ -4037,6 +4226,8 @@ function neoAnalyserAction(
     cible,
 
     maniere,
+
+    membre,
 
     vitesse:
       vitesse?.valeur ?? null,
@@ -4075,7 +4266,7 @@ function neoAnalyserAction(
     );
 
   //============================================================
-  // ✅ FORMAT DE SORTIE COMPATIBLE AVEC TON AFFICHAGE
+  // ✅ FORMAT DE SORTIE
   //============================================================
 
   return {
@@ -4086,8 +4277,6 @@ function neoAnalyserAction(
 
     sujet: acteur,
 
-    // IMPORTANT :
-    // on renvoie une chaîne et non l'objet complet
     action: actionNom,
 
     categorie,
@@ -4097,6 +4286,8 @@ function neoAnalyserAction(
     cible,
 
     maniere,
+
+    membre,
 
     vitesse:
       vitesse?.valeur ?? null,
@@ -4131,7 +4322,6 @@ function neoAnalyserAction(
   };
 
 }
-
 
 
 //==============================================================
