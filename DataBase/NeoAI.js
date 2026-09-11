@@ -556,108 +556,2364 @@ const NEO_ACTIONS = {
 
 const NEO_ACTION_MODELS = {
 
+// ==================================================
+// DÉPLACEMENTS
+// ==================================================
+
+deplacement: [
+
     // ==================================================
-    // DÉPLACEMENTS
+    // SAUT / BOND — MODÈLE EXISTANT
     // ==================================================
 
-    deplacement: [
+    {
+        id: "DEP_SB_001",
+        categorie: "deplacement",
+        famille: "saut_bond",
 
-        {
-            id: "DEP_SB_001",
-            categorie: "deplacement",
-            famille: "saut_bond",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "HAUTEUR"
+        ],
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "MANIERE",
-                "CIBLE",
-                "HAUTEUR"
-            ],
-
-            exemples: [
-                "Naruto saute vers panda en montant à 5m de hauteur",
-                "Naruto bondit vers panda à 5 mètres",
-                "Naruto effectue un saut aérien vers panda"
-            ]
-        },
-
-        {
-            id: "DEP_COURSE_001",
-            categorie: "deplacement",
-            famille: "course",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "MANIERE",
-                "CIBLE"
-            ],
-
-            exemples: [
-                "Naruto court vers panda",
-                "Naruto fonce vers panda",
-                "Naruto se rue vers panda",
-                "Naruto charge panda"
-            ]
-        },
-
-        {
-            id: "DEP_AV_001",
-            categorie: "deplacement",
-            famille: "avance",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "DISTANCE"
-            ],
-
-            exemples: [
-                "Naruto avance de 8m",
-                "Naruto progresse de 8 mètres",
-                "Naruto se déplace de 8m"
-            ]
-        },
-
-        {
-            id: "DEP_REC_001",
-            categorie: "deplacement",
-            famille: "recul",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "DISTANCE"
-            ],
-
-            exemples: [
-                "Naruto recule de 5m",
-                "Naruto se replie de 5 mètres"
-            ]
-        },
-
-        {
-            id: "DEP_ROT_001",
-            categorie: "deplacement",
-            famille: "rotation",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "DIRECTION"
-            ],
-
-            exemples: [
-                "Naruto pivote vers la droite",
-                "Naruto tourne à droite",
-                "Naruto effectue une rotation vers la droite"
-            ]
-        }
-    ],
+        exemples: [
+            "Naruto saute vers Panda en montant à 5m de hauteur",
+            "Naruto bondit vers Panda à 5 mètres",
+            "Naruto effectue un saut aérien vers Panda",
+            "Naruto fait un bond vers Panda",
+            "Naruto effectue un bond vers Panda à 5m",
+            "Naruto saute en direction de Panda",
+            "Naruto bondit en direction de Panda"
+        ]
+    },
 
 
     // ==================================================
+    // SAUT SIMPLE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_001",
+        categorie: "deplacement",
+        famille: "saut",
+
+        structure: [
+            "SUJET",
+            "ACTION"
+        ],
+
+        exemples: [
+            "Naruto saute",
+            "Naruto bondit",
+            "Naruto fait un saut",
+            "Naruto fait un bond",
+            "Naruto effectue un saut",
+            "Naruto effectue un bond",
+            "Naruto réalise un saut",
+            "Naruto réalise un bond",
+            "Naruto s'élève dans les airs",
+            "Naruto bondit dans les airs",
+            "Naruto fait un saut dans les airs",
+            "Naruto fait un bond dans les airs",
+            "Naruto effectue un saut aérien",
+            "Naruto effectue un bond aérien",
+            "Naruto prend son élan et saute",
+            "Naruto prend son élan et fait un bond",
+            "Naruto se projette dans les airs",
+            "Naruto quitte le sol en sautant"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT VERS UNE CIBLE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_002",
+        categorie: "deplacement",
+        famille: "saut_vers_cible",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saute vers Panda",
+            "Naruto bondit vers Panda",
+            "Naruto fait un saut vers Panda",
+            "Naruto fait un bond vers Panda",
+            "Naruto effectue un saut vers Panda",
+            "Naruto effectue un bond vers Panda",
+            "Naruto réalise un saut vers Panda",
+            "Naruto réalise un bond vers Panda",
+            "Naruto saute en direction de Panda",
+            "Naruto bondit en direction de Panda",
+            "Naruto fait un saut en direction de Panda",
+            "Naruto fait un bond en direction de Panda",
+            "Naruto effectue un saut en direction de Panda",
+            "Naruto effectue un bond en direction de Panda",
+            "Naruto s'élance vers Panda en sautant",
+            "Naruto se projette dans les airs vers Panda",
+            "Naruto saute pour rejoindre Panda",
+            "Naruto fait un bond pour rejoindre Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT AVEC DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_003",
+        categorie: "deplacement",
+        famille: "saut_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto saute sur 5m",
+            "Naruto bondit sur 5m",
+            "Naruto fait un saut sur 5m",
+            "Naruto fait un bond sur 5m",
+            "Naruto effectue un saut de 5m",
+            "Naruto effectue un bond de 5m",
+            "Naruto réalise un saut de 5m",
+            "Naruto réalise un bond de 5m",
+            "Naruto saute sur une distance de 5m",
+            "Naruto bondit sur une distance de 5m",
+            "Naruto fait un saut sur une distance de 5m",
+            "Naruto fait un bond sur une distance de 5m",
+            "Naruto parcourt 5m dans les airs",
+            "Naruto se projette sur 5m",
+            "Naruto se propulse sur 5m"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT AVEC HAUTEUR
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_004",
+        categorie: "deplacement",
+        famille: "saut_hauteur",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR"
+        ],
+
+        exemples: [
+            "Naruto saute à 5m de hauteur",
+            "Naruto bondit à 5m de hauteur",
+            "Naruto fait un saut à 5m de hauteur",
+            "Naruto fait un bond à 5m de hauteur",
+            "Naruto effectue un saut de 5m de hauteur",
+            "Naruto effectue un bond de 5m de hauteur",
+            "Naruto réalise un saut à 5m de hauteur",
+            "Naruto réalise un bond à 5m de hauteur",
+            "Naruto s'élève à 5m",
+            "Naruto monte à 5m dans les airs",
+            "Naruto atteint une hauteur de 5m en sautant",
+            "Naruto fait un saut jusqu'à 5m",
+            "Naruto fait un bond jusqu'à 5m"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT + HAUTEUR + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_005",
+        categorie: "deplacement",
+        famille: "saut_hauteur_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto saute de 5m de hauteur sur 10m",
+            "Naruto bondit à 5m de hauteur sur 10m",
+            "Naruto fait un saut de 5m de hauteur sur 10m",
+            "Naruto fait un bond de 5m de hauteur sur 10m",
+            "Naruto effectue un saut de 5m de hauteur sur 10m",
+            "Naruto effectue un bond de 5m de hauteur sur 10m",
+            "Naruto réalise un saut de 5m de hauteur sur 10m",
+            "Naruto réalise un bond de 5m de hauteur sur 10m",
+            "Naruto s'élève à 5m et parcourt 10m",
+            "Naruto saute à 5m de hauteur pour parcourir 10m",
+            "Naruto se projette à 5m de hauteur sur 10m",
+            "Naruto fait un saut de 5m de haut sur une distance de 10m",
+            "Naruto fait un bond de 5m de haut sur une distance de 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT + VITESSE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_006",
+        categorie: "deplacement",
+        famille: "saut_vitesse",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "VITESSE"
+        ],
+
+        exemples: [
+            "Naruto saute à vitesse maximale",
+            "Naruto bondit à vitesse maximale",
+            "Naruto fait un saut à vitesse maximale",
+            "Naruto fait un bond à vitesse maximale",
+            "Naruto effectue un saut à vitesse maximale",
+            "Naruto effectue un bond à vitesse maximale",
+            "Naruto réalise un saut à vitesse maximale",
+            "Naruto réalise un bond à vitesse maximale",
+            "Naruto saute à vmax",
+            "Naruto bondit à vmax",
+            "Naruto fait un saut à vmax",
+            "Naruto fait un bond à vmax",
+            "Naruto effectue un saut à vmax",
+            "Naruto effectue un bond à vmax",
+            "Naruto s'élance dans les airs à pleine vitesse",
+            "Naruto se projette dans les airs à vitesse maximale"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT + ATTERRISSAGE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_007",
+        categorie: "deplacement",
+        famille: "saut_atterrissage",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saute vers Panda pour atterrir sur lui",
+            "Naruto bondit vers Panda pour retomber sur lui",
+            "Naruto fait un saut vers Panda pour atterrir sur lui",
+            "Naruto fait un bond vers Panda pour retomber sur lui",
+            "Naruto effectue un saut vers Panda pour atterrir sur lui",
+            "Naruto effectue un bond vers Panda pour retomber sur lui",
+            "Naruto réalise un saut vers Panda pour atterrir sur lui",
+            "Naruto réalise un bond vers Panda pour retomber sur lui",
+            "Naruto saute jusqu'à Panda avant d'atterrir",
+            "Naruto bondit jusqu'à Panda avant de retomber",
+            "Naruto saute vers Panda et atterrit sur lui",
+            "Naruto bondit vers Panda et retombe sur lui"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT + ATTERRISSAGE + PARTIE DU CORPS
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_008",
+        categorie: "deplacement",
+        famille: "saut_atterrissage_corps",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "PARTIE_CORPS"
+        ],
+
+        exemples: [
+            "Naruto saute vers Panda pour atterrir sur sa tête",
+            "Naruto bondit vers Panda pour retomber sur sa tête",
+            "Naruto fait un saut vers Panda pour atterrir sur sa tête",
+            "Naruto fait un bond vers Panda pour retomber sur sa tête",
+            "Naruto effectue un saut vers Panda pour atterrir sur son abdomen",
+            "Naruto effectue un bond vers Panda pour retomber sur son abdomen",
+            "Naruto réalise un saut vers Panda pour atterrir sur son dos",
+            "Naruto réalise un bond vers Panda pour retomber sur son dos",
+            "Naruto saute vers Panda et atterrit sur son épaule",
+            "Naruto bondit vers Panda et retombe sur son épaule",
+            "Naruto fait un saut vers Panda pour atterrir sur son torse",
+            "Naruto fait un bond vers Panda pour retomber sur son torse",
+            "Naruto saute vers Panda pour atterrir sur ses jambes",
+            "Naruto bondit vers Panda pour retomber sur ses jambes",
+            "Naruto effectue un saut vers Panda et atterrit sur sa tête",
+            "Naruto effectue un bond vers Panda et retombe sur son abdomen"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT + CIBLE + VITESSE + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_009",
+        categorie: "deplacement",
+        famille: "saut_cible_vitesse_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto saute vers Panda vmax sur 10m",
+            "Naruto bondit vers Panda vmax sur 10m",
+            "Naruto fait un saut vers Panda vmax sur 10m",
+            "Naruto fait un bond vers Panda vmax sur 10m",
+            "Naruto effectue un saut vers Panda à vitesse maximale sur 10m",
+            "Naruto effectue un bond vers Panda à vitesse maximale sur 10m",
+            "Naruto réalise un saut vers Panda à vmax sur 10m",
+            "Naruto réalise un bond vers Panda à vmax sur 10m",
+            "Naruto saute en direction de Panda à pleine vitesse sur 10m",
+            "Naruto bondit en direction de Panda à pleine vitesse sur 10m",
+            "Naruto fait un saut en direction de Panda à vitesse maximale sur 10m",
+            "Naruto fait un bond en direction de Panda à vitesse maximale sur 10m",
+            "Naruto se projette vers Panda à vitesse maximale sur 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT COMPLET
+    // ==================================================
+
+    {
+        id: "DEP_SAUT_010",
+        categorie: "deplacement",
+        famille: "saut_complet",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE",
+            "PARTIE_CORPS"
+        ],
+
+        exemples: [
+            "Naruto saute de 5m de hauteur vers Panda vmax sur 10m pour atterrir sur sa tête",
+            "Naruto bondit de 5m de hauteur vers Panda vmax sur 10m pour retomber sur sa tête",
+            "Naruto fait un saut de 5m de hauteur vers Panda vmax sur 10m pour atterrir sur sa tête",
+            "Naruto fait un bond de 5m de hauteur vers Panda vmax sur 10m pour retomber sur sa tête",
+            "Naruto effectue un saut de 5m de hauteur vers Panda à vitesse maximale sur 10m pour atterrir sur sa tête",
+            "Naruto effectue un bond de 5m de hauteur vers Panda à vitesse maximale sur 10m pour retomber sur sa tête",
+            "Naruto réalise un saut de 5m de hauteur vers Panda à vmax sur 10m pour atterrir sur sa tête",
+            "Naruto réalise un bond de 5m de hauteur vers Panda à vmax sur 10m pour retomber sur sa tête",
+            "Naruto s'élève à 5m puis se projette vers Panda à vmax sur 10m pour atterrir sur sa tête",
+            "Naruto fait un saut à 5m de hauteur vers Panda à vitesse maximale sur 10m pour retomber sur sa tête",
+            "Naruto fait un bond à 5m de hauteur vers Panda à vitesse maximale sur 10m pour atterrir sur sa tête",
+            "Naruto effectue un saut aérien de 5m vers Panda sur 10m avant de retomber sur sa tête",
+            "Naruto effectue un bond aérien de 5m vers Panda sur 10m avant d'atterrir sur sa tête",
+            "Naruto saute à 5m de hauteur vers Panda sur 10m pour atterrir sur sa tête",
+            "Naruto bondit à 5m de hauteur vers Panda sur 10m pour retomber sur sa tête"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE SIMPLE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_001",
+        categorie: "deplacement",
+        famille: "course",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto court vers Panda",
+            "Naruto fonce vers Panda",
+            "Naruto se rue vers Panda",
+            "Naruto charge Panda",
+            "Naruto court en direction de Panda",
+            "Naruto se précipite vers Panda",
+            "Naruto s'élance vers Panda",
+            "Naruto sprinte vers Panda",
+            "Naruto court rapidement vers Panda",
+            "Naruto court à pleine vitesse vers Panda",
+            "Naruto fonce à toute vitesse vers Panda",
+            "Naruto charge en courant vers Panda",
+            "Naruto avance en courant vers Panda",
+            "Naruto court droit vers Panda",
+            "Naruto court frontalement vers Panda",
+            "Naruto court de face vers Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_002",
+        categorie: "deplacement",
+        famille: "course_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto court sur 5m",
+            "Naruto court sur 10m",
+            "Naruto parcourt 10m en courant",
+            "Naruto court pendant 10m",
+            "Naruto sprinte sur 10m",
+            "Naruto fonce sur 10m",
+            "Naruto se précipite sur 10m",
+            "Naruto avance en courant sur 10m",
+            "Naruto parcourt une distance de 10m en courant",
+            "Naruto court sur une distance de 20m"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE + VITESSE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_003",
+        categorie: "deplacement",
+        famille: "course_vitesse",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "VITESSE"
+        ],
+
+        exemples: [
+            "Naruto court à vitesse maximale",
+            "Naruto fonce à vitesse maximale",
+            "Naruto sprinte à pleine vitesse",
+            "Naruto court à vmax",
+            "Naruto fonce à vmax",
+            "Naruto se rue à toute vitesse",
+            "Naruto court rapidement",
+            "Naruto accélère à pleine vitesse",
+            "Naruto sprinte à toute vitesse"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE + CIBLE + VITESSE + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_004",
+        categorie: "deplacement",
+        famille: "course_complete",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto court vers Panda à vmax sur 10m",
+            "Naruto fonce vers Panda à vitesse maximale sur 10m",
+            "Naruto sprinte vers Panda à pleine vitesse sur 10m",
+            "Naruto se rue vers Panda à vmax sur 10m",
+            "Naruto charge Panda à toute vitesse sur 10m",
+            "Naruto court en direction de Panda à vmax sur 10m",
+            "Naruto se précipite vers Panda à vitesse maximale sur 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE CIRCULAIRE / EN COURBE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_005",
+        categorie: "deplacement",
+        famille: "course_circulaire",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE"
+        ],
+
+        exemples: [
+            "Naruto court en courbe autour de Panda",
+            "Naruto court en arc autour de Panda",
+            "Naruto décrit une courbe autour de Panda en courant",
+            "Naruto décrit un arc de cercle autour de Panda",
+            "Naruto effectue une trajectoire courbe autour de Panda en courant",
+            "Naruto se déplace en courbe autour de Panda",
+            "Naruto court en cercle autour de Panda en suivant une courbe",
+            "Naruto tourne en courant autour de Panda en courbe",
+            "Naruto court en courbe vers la gauche autour de Panda",
+            "Naruto court en courbe vers la droite autour de Panda",
+            "Naruto effectue une courbe de 2m autour de Panda en courant",
+            "Naruto court en arc de 2m autour de Panda",
+            "Naruto décrit une courbe de 2m autour de Panda",
+            "Naruto contourne Panda en courant suivant une trajectoire courbe",
+            "Naruto contourne Panda en décrivant une courbe",
+            "Naruto court autour de Panda en suivant une courbe",
+            "Naruto se déplace autour de Panda en arc de cercle"
+        ]
+    },
+
+        // ==================================================
+    // COURSE CIRCULAIRE + CÔTÉ GAUCHE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_006",
+        categorie: "deplacement",
+        famille: "course_circulaire_cote_gauche",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto court en courbe autour de Panda par la gauche",
+            "Naruto court autour de Panda en passant par la gauche",
+            "Naruto contourne Panda par la gauche en courant",
+            "Naruto contourne Panda en passant par la gauche",
+            "Naruto effectue une course circulaire par la gauche autour de Panda",
+            "Naruto court en cercle autour de Panda par la gauche",
+            "Naruto décrit une courbe autour de Panda par la gauche",
+            "Naruto court en arc autour de Panda en passant par la gauche",
+            "Naruto court autour de Panda afin d'arriver par la gauche",
+            "Naruto court autour de Panda pour arriver sur son profil gauche",
+            "Naruto court en courbe autour de Panda pour finir sur son profil gauche",
+            "Naruto court autour de Panda afin de finir sur son côté gauche",
+            "Naruto contourne Panda par la gauche pour arriver sur son profil gauche",
+            "Naruto se déplace en courbe autour de Panda pour finir à gauche de lui"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE CIRCULAIRE + CÔTÉ DROIT
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_007",
+        categorie: "deplacement",
+        famille: "course_circulaire_cote_droit",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto court en courbe autour de Panda par la droite",
+            "Naruto court autour de Panda en passant par la droite",
+            "Naruto contourne Panda par la droite en courant",
+            "Naruto contourne Panda en passant par la droite",
+            "Naruto effectue une course circulaire par la droite autour de Panda",
+            "Naruto court en cercle autour de Panda par la droite",
+            "Naruto décrit une courbe autour de Panda par la droite",
+            "Naruto court en arc autour de Panda en passant par la droite",
+            "Naruto court autour de Panda afin d'arriver par la droite",
+            "Naruto court autour de Panda pour arriver sur son profil droit",
+            "Naruto court en courbe autour de Panda pour finir sur son profil droit",
+            "Naruto court autour de Panda afin de finir sur son côté droit",
+            "Naruto contourne Panda par la droite pour arriver sur son profil droit",
+            "Naruto se déplace en courbe autour de Panda pour finir à droite de lui"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE CIRCULAIRE + DISTANCE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_008",
+        categorie: "deplacement",
+        famille: "course_circulaire_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "COURBE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto court en courbe autour de Panda sur 5m pour arriver sur son profil gauche",
+            "Naruto court en courbe autour de Panda sur 5m pour arriver sur son profil droit",
+            "Naruto court autour de Panda sur 5m afin d'arriver par la gauche",
+            "Naruto court autour de Panda sur 5m afin d'arriver par la droite",
+            "Naruto contourne Panda sur 5m en passant par la gauche",
+            "Naruto contourne Panda sur 5m en passant par la droite",
+            "Naruto décrit une courbe de 5m autour de Panda pour finir sur son côté gauche",
+            "Naruto décrit une courbe de 5m autour de Panda pour finir sur son côté droit",
+            "Naruto court en arc de 5m autour de Panda pour arriver sur son profil gauche",
+            "Naruto court en arc de 5m autour de Panda pour arriver sur son profil droit",
+            "Naruto effectue une course circulaire de 5m autour de Panda afin de finir à gauche de lui",
+            "Naruto effectue une course circulaire de 5m autour de Panda afin de finir à droite de lui"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE CIRCULAIRE + VITESSE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_009",
+        categorie: "deplacement",
+        famille: "course_circulaire_vitesse_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "COURBE",
+            "VITESSE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto court en courbe autour de Panda à vmax pour arriver sur son profil gauche",
+            "Naruto court en courbe autour de Panda à vmax pour arriver sur son profil droit",
+            "Naruto fonce autour de Panda en passant par la gauche à vitesse maximale",
+            "Naruto fonce autour de Panda en passant par la droite à vitesse maximale",
+            "Naruto court autour de Panda à pleine vitesse afin d'arriver par la gauche",
+            "Naruto court autour de Panda à pleine vitesse afin d'arriver par la droite",
+            "Naruto contourne Panda à vmax par la gauche pour finir sur son profil gauche",
+            "Naruto contourne Panda à vmax par la droite pour finir sur son profil droit"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE CIRCULAIRE COMPLÈTE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_010",
+        categorie: "deplacement",
+        famille: "course_circulaire_complete",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE",
+            "VITESSE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto court en courbe autour de Panda par la gauche à vmax sur 5m pour arriver sur son profil gauche",
+            "Naruto court en courbe autour de Panda par la droite à vmax sur 5m pour arriver sur son profil droit",
+            "Naruto court autour de Panda en passant par la gauche à vitesse maximale sur 5m afin d'arriver sur son profil gauche",
+            "Naruto court autour de Panda en passant par la droite à vitesse maximale sur 5m afin d'arriver sur son profil droit",
+            "Naruto contourne Panda par la gauche à vmax sur 5m pour finir sur son côté gauche",
+            "Naruto contourne Panda par la droite à vmax sur 5m pour finir sur son côté droit",
+            "Naruto effectue une course circulaire de 5m autour de Panda par la gauche à vmax pour arriver sur son profil gauche",
+            "Naruto effectue une course circulaire de 5m autour de Panda par la droite à vmax pour arriver sur son profil droit",
+            "Naruto court en arc autour de Panda sur 5m en passant par la gauche pour finir sur son profil gauche",
+            "Naruto court en arc autour de Panda sur 5m en passant par la droite pour finir sur son profil droit"
+        ]
+    },
+
+    // ==================================================
+    // COURSE LATÉRALE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_006",
+        categorie: "deplacement",
+        famille: "course_laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto court vers la gauche",
+            "Naruto court vers la droite",
+            "Naruto sprinte vers la gauche",
+            "Naruto sprinte vers la droite",
+            "Naruto fonce latéralement vers la gauche",
+            "Naruto fonce latéralement vers la droite",
+            "Naruto court sur le côté gauche",
+            "Naruto court sur le côté droit",
+            "Naruto court latéralement vers Panda",
+            "Naruto sprinte latéralement vers Panda",
+            "Naruto se déplace en courant vers le côté gauche",
+            "Naruto se déplace en courant vers le côté droit"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE DIAGONALE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_007",
+        categorie: "deplacement",
+        famille: "course_diagonale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto court en diagonale",
+            "Naruto court en diagonale vers la gauche",
+            "Naruto court en diagonale vers la droite",
+            "Naruto fonce en diagonale vers Panda",
+            "Naruto sprinte en diagonale vers Panda",
+            "Naruto se précipite en diagonale vers Panda",
+            "Naruto court diagonalement vers Panda",
+            "Naruto avance en courant en diagonale vers Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE ARRIÈRE
+    // ==================================================
+
+    {
+        id: "DEP_COURSE_008",
+        categorie: "deplacement",
+        famille: "course_arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto court vers l'arrière",
+            "Naruto court à reculons",
+            "Naruto sprinte à reculons",
+            "Naruto recule en courant",
+            "Naruto court en arrière",
+            "Naruto se déplace en courant vers l'arrière",
+            "Naruto fuit en courant vers l'arrière",
+            "Naruto court à reculons sur 5m",
+            "Naruto recule en courant de 5m"
+        ]
+    },
+
+
+    // ==================================================
+    // AVANCE
+    // ==================================================
+
+    {
+        id: "DEP_AV_001",
+        categorie: "deplacement",
+        famille: "avance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto avance de 8m",
+            "Naruto progresse de 8 mètres",
+            "Naruto se déplace de 8m",
+            "Naruto avance de 5m",
+            "Naruto progresse de 10m",
+            "Naruto fait quelques pas en avant",
+            "Naruto avance progressivement",
+            "Naruto s'avance de 5m",
+            "Naruto se dirige vers l'avant",
+            "Naruto marche vers l'avant",
+            "Naruto avance droit devant",
+            "Naruto fait un pas en avant",
+            "Naruto fait plusieurs pas en avant"
+        ]
+    },
+
+
+    // ==================================================
+    // AVANCE VERS UNE CIBLE
+    // ==================================================
+
+    {
+        id: "DEP_AV_002",
+        categorie: "deplacement",
+        famille: "avance_vers_cible",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto avance vers Panda",
+            "Naruto progresse vers Panda",
+            "Naruto s'avance vers Panda",
+            "Naruto se dirige vers Panda",
+            "Naruto marche vers Panda",
+            "Naruto avance en direction de Panda",
+            "Naruto progresse en direction de Panda",
+            "Naruto s'approche de Panda",
+            "Naruto marche en direction de Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // RECUL
+    // ==================================================
+
+    {
+        id: "DEP_REC_001",
+        categorie: "deplacement",
+        famille: "recul",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto recule de 5m",
+            "Naruto se replie de 5 mètres",
+            "Naruto recule de 10m",
+            "Naruto fait un pas en arrière",
+            "Naruto fait plusieurs pas en arrière",
+            "Naruto se retire de 5m",
+            "Naruto s'éloigne de 5m",
+            "Naruto revient en arrière de 5m",
+            "Naruto prend du recul",
+            "Naruto fait marche arrière"
+        ]
+    },
+
+
+    // ==================================================
+    // RECUL PAR RAPPORT À UNE CIBLE
+    // ==================================================
+
+    {
+        id: "DEP_REC_002",
+        categorie: "deplacement",
+        famille: "recul_cible",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto recule face à Panda",
+            "Naruto se replie face à Panda",
+            "Naruto s'éloigne de Panda",
+            "Naruto prend ses distances avec Panda",
+            "Naruto recule loin de Panda",
+            "Naruto se retire devant Panda",
+            "Naruto s'éloigne en reculant de Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // ROTATION
+    // ==================================================
+
+    {
+        id: "DEP_ROT_001",
+        categorie: "deplacement",
+        famille: "rotation",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
+
+        exemples: [
+            "Naruto pivote vers la droite",
+            "Naruto tourne à droite",
+            "Naruto effectue une rotation vers la droite",
+            "Naruto pivote vers la gauche",
+            "Naruto tourne à gauche",
+            "Naruto effectue une rotation vers la gauche",
+            "Naruto pivote sur lui-même",
+            "Naruto tourne sur lui-même",
+            "Naruto effectue un demi-tour",
+            "Naruto fait volte-face",
+            "Naruto fait demi-tour",
+            "Naruto se retourne"
+        ]
+    },
+
+
+    // ==================================================
+    // DÉPLACEMENT LATÉRAL
+    // ==================================================
+
+    {
+        id: "DEP_LAT_001",
+        categorie: "deplacement",
+        famille: "lateral",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto se déplace latéralement vers la gauche",
+            "Naruto se déplace latéralement vers la droite",
+            "Naruto avance sur le côté gauche",
+            "Naruto avance sur le côté droit",
+            "Naruto fait un pas latéral à gauche",
+            "Naruto fait un pas latéral à droite",
+            "Naruto se décale vers la gauche",
+            "Naruto se décale vers la droite",
+            "Naruto glisse sur le côté gauche",
+            "Naruto glisse sur le côté droit",
+            "Naruto se déplace de 2m vers la gauche",
+            "Naruto se déplace de 2m vers la droite"
+        ]
+    },
+
+
+    // ==================================================
+    // DÉPLACEMENT DIAGONAL
+    // ==================================================
+
+    {
+        id: "DEP_DIAG_001",
+        categorie: "deplacement",
+        famille: "diagonale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto avance en diagonale",
+            "Naruto se déplace en diagonale",
+            "Naruto avance en diagonale vers la gauche",
+            "Naruto avance en diagonale vers la droite",
+            "Naruto se déplace en diagonale vers la gauche",
+            "Naruto se déplace en diagonale vers la droite",
+            "Naruto fonce en diagonale vers Panda",
+            "Naruto court en diagonale vers Panda",
+            "Naruto avance en diagonale sur 5m",
+            "Naruto se déplace en diagonale sur 3m"
+        ]
+    },
+
+
+    // ==================================================
+    // DÉPLACEMENT CIRCULAIRE / EN COURBE
+    // ==================================================
+
+    {
+        id: "DEP_CIRC_001",
+        categorie: "deplacement",
+        famille: "circulaire",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "COURBE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto se déplace en cercle autour de Panda en suivant une courbe",
+            "Naruto tourne autour de Panda en courbe",
+            "Naruto court autour de Panda en décrivant une courbe",
+            "Naruto se déplace circulairement autour de Panda en courbe",
+            "Naruto effectue une trajectoire courbe autour de Panda",
+            "Naruto décrit un cercle autour de Panda en suivant une courbe",
+            "Naruto tourne en courbe vers la gauche autour de Panda",
+            "Naruto tourne en courbe vers la droite autour de Panda",
+            "Naruto fait une courbe de 2m autour de Panda",
+            "Naruto se déplace en arc autour de Panda",
+            "Naruto contourne Panda en suivant une courbe",
+            "Naruto contourne Panda en arc de cercle"
+        ]
+    },
+
+
+    // ==================================================
+    // ZIGZAG
+    // ==================================================
+
+    {
+        id: "DEP_ZIG_001",
+        categorie: "deplacement",
+        famille: "zigzag",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto avance en zigzag",
+            "Naruto court en zigzag",
+            "Naruto fonce en zigzag vers Panda",
+            "Naruto se déplace en zigzag vers Panda",
+            "Naruto se précipite en zigzag vers Panda",
+            "Naruto effectue un déplacement en zigzag",
+            "Naruto zigzague vers Panda",
+            "Naruto se déplace en zig-zag",
+            "Naruto court en zig-zag vers Panda",
+            "Naruto avance en zig-zag vers Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // DÉPLACEMENT ARRIÈRE
+    // ==================================================
+
+    {
+        id: "DEP_ARR_001",
+        categorie: "deplacement",
+        famille: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto se déplace vers l'arrière",
+            "Naruto marche vers l'arrière",
+            "Naruto recule en marchant",
+            "Naruto recule en courant",
+            "Naruto part vers l'arrière",
+            "Naruto avance à reculons",
+            "Naruto se déplace à reculons",
+            "Naruto court à reculons",
+            "Naruto recule de 5m",
+            "Naruto marche à reculons",
+            "Naruto se déplace en arrière"
+        ]
+    },
+
+
+    // ==================================================
+    // MARCHE
+    // ==================================================
+
+    {
+        id: "DEP_MARCHE_001",
+        categorie: "deplacement",
+        famille: "marche",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto marche",
+            "Naruto marche vers Panda",
+            "Naruto avance en marchant",
+            "Naruto marche en direction de Panda",
+            "Naruto se dirige vers Panda en marchant",
+            "Naruto progresse à pied vers Panda",
+            "Naruto se déplace à pied vers Panda",
+            "Naruto marche droit vers Panda",
+            "Naruto marche rapidement vers Panda",
+            "Naruto marche lentement vers Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // DÉPLACEMENT AVEC MANIÈRE
+    // ==================================================
+
+    {
+        id: "DEP_MAN_001",
+        categorie: "deplacement",
+        famille: "deplacement_manier",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto se déplace en courant vers Panda",
+            "Naruto se déplace en marchant vers Panda",
+            "Naruto avance en courant vers Panda",
+            "Naruto avance en marchant vers Panda",
+            "Naruto fonce en courant vers Panda",
+            "Naruto se dirige rapidement vers Panda",
+            "Naruto se déplace lentement vers Panda",
+            "Naruto progresse rapidement vers Panda",
+            "Naruto avance prudemment vers Panda",
+            "Naruto se déplace rapidement vers Panda",
+            "Naruto se déplace lentement vers Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL SIMPLE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_001",
+        categorie: "deplacement",
+        famille: "vol",
+
+        structure: [
+            "SUJET",
+            "ACTION"
+        ],
+
+        exemples: [
+            "Naruto vole",
+            "Naruto s'envole",
+            "Naruto est en vol",
+            "Naruto se maintient dans les airs",
+            "Naruto plane dans les airs",
+            "Naruto se déplace dans les airs",
+            "Naruto évolue dans les airs",
+            "Naruto se déplace en volant",
+            "Naruto vole dans les airs",
+            "Naruto prend son envol"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL VERS UNE CIBLE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_002",
+        categorie: "deplacement",
+        famille: "vol_vers_cible",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto vole vers Panda",
+            "Naruto s'envole vers Panda",
+            "Naruto plane vers Panda",
+            "Naruto se dirige vers Panda dans les airs",
+            "Naruto vole en direction de Panda",
+            "Naruto se déplace dans les airs vers Panda",
+            "Naruto fonce dans les airs vers Panda",
+            "Naruto se précipite vers Panda en volant",
+            "Naruto prend son envol vers Panda",
+            "Naruto se rapproche de Panda en volant"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL AVEC DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_003",
+        categorie: "deplacement",
+        famille: "vol_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole sur 10m",
+            "Naruto parcourt 10m dans les airs",
+            "Naruto se déplace sur 10m en volant",
+            "Naruto plane sur 10m",
+            "Naruto avance dans les airs sur 10m",
+            "Naruto parcourt une distance de 10m dans les airs",
+            "Naruto se déplace de 10m dans les airs",
+            "Naruto vole sur une distance de 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL AVEC HAUTEUR
+    // ==================================================
+
+    {
+        id: "DEP_VOL_004",
+        categorie: "deplacement",
+        famille: "vol_hauteur",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR"
+        ],
+
+        exemples: [
+            "Naruto vole à 5m de hauteur",
+            "Naruto s'envole à 5m de hauteur",
+            "Naruto monte à 5m dans les airs",
+            "Naruto vole à 5m au-dessus du sol",
+            "Naruto se maintient à 5m de hauteur",
+            "Naruto plane à 5m de hauteur",
+            "Naruto évolue à 5m dans les airs",
+            "Naruto atteint 5m de hauteur en volant"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL + HAUTEUR + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_005",
+        categorie: "deplacement",
+        famille: "vol_hauteur_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole à 5m de hauteur sur 10m",
+            "Naruto parcourt 10m à 5m de hauteur",
+            "Naruto vole à 5m au-dessus du sol sur 10m",
+            "Naruto se déplace dans les airs à 5m de hauteur sur 10m",
+            "Naruto plane à 5m de hauteur sur une distance de 10m",
+            "Naruto évolue à 5m de hauteur et parcourt 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL + VITESSE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_006",
+        categorie: "deplacement",
+        famille: "vol_vitesse",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "VITESSE"
+        ],
+
+        exemples: [
+            "Naruto vole à vitesse maximale",
+            "Naruto s'envole à vitesse maximale",
+            "Naruto plane à pleine vitesse",
+            "Naruto vole à vmax",
+            "Naruto se déplace dans les airs à vmax",
+            "Naruto fonce dans les airs à vitesse maximale",
+            "Naruto vole à toute vitesse",
+            "Naruto accélère dans les airs à pleine vitesse"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL + CIBLE + VITESSE + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_007",
+        categorie: "deplacement",
+        famille: "vol_cible_vitesse_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole vers Panda vmax sur 10m",
+            "Naruto s'envole vers Panda à vitesse maximale sur 10m",
+            "Naruto fonce vers Panda dans les airs à vmax sur 10m",
+            "Naruto vole en direction de Panda à pleine vitesse sur 10m",
+            "Naruto se déplace dans les airs vers Panda à vmax sur 10m",
+            "Naruto plane vers Panda à vitesse maximale sur 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL COMPLET
+    // ==================================================
+
+    {
+        id: "DEP_VOL_008",
+        categorie: "deplacement",
+        famille: "vol_complet",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "CIBLE",
+            "VITESSE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole à 5m de hauteur vers Panda vmax sur 10m",
+            "Naruto s'envole à 5m de hauteur vers Panda à vitesse maximale sur 10m",
+            "Naruto fonce dans les airs à 5m de hauteur vers Panda vmax sur 10m",
+            "Naruto se déplace dans les airs à 5m de hauteur vers Panda sur 10m",
+            "Naruto vole vers Panda à 5m de hauteur à pleine vitesse sur 10m",
+            "Naruto plane à 5m de hauteur vers Panda à vmax sur 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL LATÉRAL
+    // ==================================================
+
+    {
+        id: "DEP_VOL_009",
+        categorie: "deplacement",
+        famille: "vol_lateral",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole vers la gauche",
+            "Naruto vole vers la droite",
+            "Naruto se déplace dans les airs vers la gauche",
+            "Naruto se déplace dans les airs vers la droite",
+            "Naruto plane latéralement vers la gauche",
+            "Naruto plane latéralement vers la droite",
+            "Naruto vole de 5m vers la gauche",
+            "Naruto vole de 5m vers la droite"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL DIAGONAL
+    // ==================================================
+
+    {
+        id: "DEP_VOL_010",
+        categorie: "deplacement",
+        famille: "vol_diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole en diagonale",
+            "Naruto se déplace en diagonale dans les airs",
+            "Naruto vole en diagonale vers la gauche",
+            "Naruto vole en diagonale vers la droite",
+            "Naruto plane en diagonale vers Panda",
+            "Naruto fonce en diagonale dans les airs vers Panda",
+            "Naruto vole en diagonale sur 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL CIRCULAIRE / EN COURBE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_011",
+        categorie: "deplacement",
+        famille: "vol_circulaire",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE"
+        ],
+
+        exemples: [
+            "Naruto vole en courbe autour de Panda",
+            "Naruto vole en arc autour de Panda",
+            "Naruto décrit une courbe autour de Panda en volant",
+            "Naruto décrit un arc de cercle autour de Panda",
+            "Naruto effectue une trajectoire courbe autour de Panda",
+            "Naruto se déplace en courbe autour de Panda dans les airs",
+            "Naruto plane en courbe autour de Panda",
+            "Naruto vole en courbe vers la gauche autour de Panda",
+            "Naruto vole en courbe vers la droite autour de Panda",
+            "Naruto effectue une courbe de 2m autour de Panda",
+            "Naruto vole en arc de 2m autour de Panda",
+            "Naruto décrit une courbe de 2m autour de Panda",
+            "Naruto contourne Panda en suivant une trajectoire courbe",
+            "Naruto contourne Panda dans les airs en décrivant une courbe",
+            "Naruto vole autour de Panda en suivant une courbe",
+            "Naruto se déplace autour de Panda en arc de cercle"
+        ]
+    },
+
+    // ==================================================
+    // VOL CIRCULAIRE + CÔTÉ GAUCHE
+    // ==================================================
+
+    {
+        id: "DEP_VOL_014",
+        categorie: "deplacement",
+        famille: "vol_circulaire_cote_gauche",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto vole en courbe autour de Panda par la gauche",
+            "Naruto vole autour de Panda en passant par la gauche",
+            "Naruto contourne Panda par la gauche dans les airs",
+            "Naruto vole en cercle autour de Panda par la gauche",
+            "Naruto décrit une courbe autour de Panda en passant par la gauche",
+            "Naruto vole en arc autour de Panda par la gauche",
+            "Naruto vole autour de Panda afin d'arriver par la gauche",
+            "Naruto vole autour de Panda pour arriver sur son profil gauche",
+            "Naruto vole en courbe autour de Panda pour finir sur son profil gauche",
+            "Naruto vole autour de Panda afin de finir sur son côté gauche",
+            "Naruto contourne Panda par la gauche pour arriver sur son profil gauche",
+            "Naruto se déplace dans les airs autour de Panda pour finir à gauche de lui"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL CIRCULAIRE + CÔTÉ DROIT
+    // ==================================================
+
+    {
+        id: "DEP_VOL_015",
+        categorie: "deplacement",
+        famille: "vol_circulaire_cote_droit",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto vole en courbe autour de Panda par la droite",
+            "Naruto vole autour de Panda en passant par la droite",
+            "Naruto contourne Panda par la droite dans les airs",
+            "Naruto vole en cercle autour de Panda par la droite",
+            "Naruto décrit une courbe autour de Panda en passant par la droite",
+            "Naruto vole en arc autour de Panda par la droite",
+            "Naruto vole autour de Panda afin d'arriver par la droite",
+            "Naruto vole autour de Panda pour arriver sur son profil droit",
+            "Naruto vole en courbe autour de Panda pour finir sur son profil droit",
+            "Naruto vole autour de Panda afin de finir sur son côté droit",
+            "Naruto contourne Panda par la droite pour arriver sur son profil droit",
+            "Naruto se déplace dans les airs autour de Panda pour finir à droite de lui"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL CIRCULAIRE + DISTANCE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_VOL_016",
+        categorie: "deplacement",
+        famille: "vol_circulaire_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "COURBE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto vole en courbe autour de Panda sur 5m pour arriver sur son profil gauche",
+            "Naruto vole en courbe autour de Panda sur 5m pour arriver sur son profil droit",
+            "Naruto vole autour de Panda sur 5m afin d'arriver par la gauche",
+            "Naruto vole autour de Panda sur 5m afin d'arriver par la droite",
+            "Naruto contourne Panda sur 5m en passant par la gauche",
+            "Naruto contourne Panda sur 5m en passant par la droite",
+            "Naruto décrit une courbe de 5m autour de Panda pour finir sur son côté gauche",
+            "Naruto décrit une courbe de 5m autour de Panda pour finir sur son côté droit",
+            "Naruto vole en arc de 5m autour de Panda pour arriver sur son profil gauche",
+            "Naruto vole en arc de 5m autour de Panda pour arriver sur son profil droit"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL CIRCULAIRE + VITESSE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_VOL_017",
+        categorie: "deplacement",
+        famille: "vol_circulaire_vitesse_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "COURBE",
+            "VITESSE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto vole en courbe autour de Panda à vmax pour arriver sur son profil gauche",
+            "Naruto vole en courbe autour de Panda à vmax pour arriver sur son profil droit",
+            "Naruto fonce autour de Panda dans les airs en passant par la gauche à vitesse maximale",
+            "Naruto fonce autour de Panda dans les airs en passant par la droite à vitesse maximale",
+            "Naruto vole autour de Panda à pleine vitesse afin d'arriver par la gauche",
+            "Naruto vole autour de Panda à pleine vitesse afin d'arriver par la droite",
+            "Naruto contourne Panda à vmax par la gauche pour finir sur son profil gauche",
+            "Naruto contourne Panda à vmax par la droite pour finir sur son profil droit"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL CIRCULAIRE COMPLET
+    // ==================================================
+
+    {
+        id: "DEP_VOL_018",
+        categorie: "deplacement",
+        famille: "vol_circulaire_complet",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DIRECTION",
+            "COURBE",
+            "VITESSE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto vole en courbe autour de Panda par la gauche à vmax sur 5m pour arriver sur son profil gauche",
+            "Naruto vole en courbe autour de Panda par la droite à vmax sur 5m pour arriver sur son profil droit",
+            "Naruto vole autour de Panda en passant par la gauche à vitesse maximale sur 5m afin d'arriver sur son profil gauche",
+            "Naruto vole autour de Panda en passant par la droite à vitesse maximale sur 5m afin d'arriver sur son profil droit",
+            "Naruto contourne Panda par la gauche à vmax sur 5m pour finir sur son côté gauche",
+            "Naruto contourne Panda par la droite à vmax sur 5m pour finir sur son côté droit",
+            "Naruto effectue un vol circulaire de 5m autour de Panda par la gauche à vmax pour arriver sur son profil gauche",
+            "Naruto effectue un vol circulaire de 5m autour de Panda par la droite à vmax pour arriver sur son profil droit",
+            "Naruto vole en arc autour de Panda sur 5m en passant par la gauche pour finir sur son profil gauche",
+            "Naruto vole en arc autour de Panda sur 5m en passant par la droite pour finir sur son profil droit"
+        ]
+    },
+    
+    // ==================================================
+    // VOL ZIGZAG
+    // ==================================================
+
+    {
+        id: "DEP_VOL_012",
+        categorie: "deplacement",
+        famille: "vol_zigzag",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto vole en zigzag",
+            "Naruto vole en zigzag vers Panda",
+            "Naruto se déplace dans les airs en zigzag",
+            "Naruto fonce en zigzag vers Panda dans les airs",
+            "Naruto plane en zigzag vers Panda",
+            "Naruto effectue un déplacement aérien en zigzag",
+            "Naruto se précipite vers Panda en zigzag dans les airs"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL RAS DU SOL
+    // ==================================================
+
+    {
+        id: "DEP_VOL_013",
+        categorie: "deplacement",
+        famille: "vol_ras_du_sol",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto vole ras du sol",
+            "Naruto vole à ras du sol",
+            "Naruto se déplace à ras du sol en volant",
+            "Naruto rase le sol en volant",
+            "Naruto plane juste au-dessus du sol",
+            "Naruto vole à quelques centimètres du sol",
+            "Naruto se déplace dans les airs juste au-dessus du sol",
+            "Naruto fonce à ras du sol vers Panda",
+            "Naruto vole à ras du sol vers Panda",
+            "Naruto se déplace à ras du sol vers Panda",
+            "Naruto plane à ras du sol vers Panda",
+            "Naruto vole à ras du sol sur 10m",
+            "Naruto fonce à ras du sol sur 10m",
+            "Naruto se déplace à ras du sol vers Panda sur 10m",
+            "Naruto vole à quelques centimètres du sol vers Panda"
+        ]
+    }, 
+                                
+    // ==================================================
+    // DÉPLACEMENT + INTENTION FINALE
+    // ==================================================
+
+    {
+        id: "DEP_INTENTION_001",
+        categorie: "deplacement",
+        famille: "deplacement_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DISTANCE",
+            "INTENTION",
+            "POSITION_FINALE"
+        ],
+
+        exemples: [
+            "Naruto court autour de Panda sur 5m pour arriver sur son profil gauche",
+            "Naruto court autour de Panda sur 5m pour arriver sur son profil droit",
+            "Naruto court autour de Panda sur 5m afin d'arriver sur son profil gauche",
+            "Naruto court autour de Panda sur 5m afin d'arriver sur son profil droit",
+            "Naruto court autour de Panda sur 5m pour finir sur son profil gauche",
+            "Naruto court autour de Panda sur 5m pour finir sur son profil droit",
+            "Naruto court autour de Panda sur 5m afin de finir sur son côté gauche",
+            "Naruto court autour de Panda sur 5m afin de finir sur son côté droit",
+            "Naruto vole autour de Panda sur 5m pour arriver sur son profil gauche",
+            "Naruto vole autour de Panda sur 5m pour arriver sur son profil droit",
+            "Naruto vole autour de Panda sur 5m afin d'arriver sur son profil gauche",
+            "Naruto vole autour de Panda sur 5m afin d'arriver sur son profil droit",
+            "Naruto vole autour de Panda sur 5m pour atterrir sur son côté gauche",
+            "Naruto vole autour de Panda sur 5m pour atterrir sur son côté droit",
+            "Naruto vole autour de Panda sur 5m pour finir sur son profil gauche",
+            "Naruto vole autour de Panda sur 5m pour finir sur son profil droit"
+        ]
+    }, 
+        // ==================================================
+    // ACROBATIE — SIMPLE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_001",
+        categorie: "deplacement",
+        famille: "acrobatie",
+
+        structure: [
+            "SUJET",
+            "ACTION"
+        ],
+
+        exemples: [
+            "Naruto fait un salto",
+            "Naruto effectue un salto",
+            "Naruto réalise un salto",
+            "Naruto fait une pirouette",
+            "Naruto effectue une pirouette",
+            "Naruto réalise une pirouette",
+            "Naruto fait une vrille",
+            "Naruto effectue une vrille",
+            "Naruto réalise une vrille",
+            "Naruto fait un backflip",
+            "Naruto effectue un backflip",
+            "Naruto réalise un backflip",
+            "Naruto fait un flip",
+            "Naruto effectue un flip",
+            "Naruto fait une roulade",
+            "Naruto effectue une roulade",
+            "Naruto fait une rotation aérienne",
+            "Naruto effectue une rotation aérienne"
+        ]
+    },
+
+
+    // ==================================================
+    // SALTO AVANT
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_002",
+        categorie: "deplacement",
+        famille: "salto_avant",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
+
+        exemples: [
+            "Naruto fait un salto avant",
+            "Naruto effectue un salto avant",
+            "Naruto réalise un salto avant",
+            "Naruto fait une rotation vers l'avant",
+            "Naruto effectue une rotation avant",
+            "Naruto fait un flip avant",
+            "Naruto effectue un flip avant",
+            "Naruto réalise un flip avant",
+            "Naruto fait une roulade avant dans les airs",
+            "Naruto effectue une rotation aérienne vers l'avant"
+        ]
+    },
+
+
+    // ==================================================
+    // SALTO ARRIÈRE / BACKFLIP
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_003",
+        categorie: "deplacement",
+        famille: "salto_arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
+
+        exemples: [
+            "Naruto fait un salto arrière",
+            "Naruto effectue un salto arrière",
+            "Naruto réalise un salto arrière",
+            "Naruto fait un backflip",
+            "Naruto effectue un backflip",
+            "Naruto réalise un backflip",
+            "Naruto fait un flip arrière",
+            "Naruto effectue un flip arrière",
+            "Naruto réalise un flip arrière",
+            "Naruto fait une rotation vers l'arrière",
+            "Naruto effectue une rotation aérienne vers l'arrière",
+            "Naruto fait une roulade arrière dans les airs"
+        ]
+    },
+
+
+    // ==================================================
+    // SALTO LATÉRAL
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_004",
+        categorie: "deplacement",
+        famille: "salto_lateral",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
+
+        exemples: [
+            "Naruto fait un salto latéral gauche",
+            "Naruto fait un salto latéral droit",
+            "Naruto effectue un salto latéral vers la gauche",
+            "Naruto effectue un salto latéral vers la droite",
+            "Naruto réalise un flip latéral gauche",
+            "Naruto réalise un flip latéral droit",
+            "Naruto fait une rotation latérale vers la gauche",
+            "Naruto fait une rotation latérale vers la droite",
+            "Naruto effectue une acrobatie latérale vers la gauche",
+            "Naruto effectue une acrobatie latérale vers la droite"
+        ]
+    },
+
+
+    // ==================================================
+    // PIROUETTE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_005",
+        categorie: "deplacement",
+        famille: "pirouette",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
+
+        exemples: [
+            "Naruto fait une pirouette",
+            "Naruto effectue une pirouette",
+            "Naruto réalise une pirouette",
+            "Naruto fait une pirouette vers la gauche",
+            "Naruto fait une pirouette vers la droite",
+            "Naruto effectue une pirouette vers la gauche",
+            "Naruto effectue une pirouette vers la droite",
+            "Naruto tourne sur lui-même",
+            "Naruto effectue une rotation sur lui-même",
+            "Naruto fait une rotation complète",
+            "Naruto effectue une rotation complète"
+        ]
+    },
+
+
+    // ==================================================
+    // VRILLE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_006",
+        categorie: "deplacement",
+        famille: "vrille",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
+
+        exemples: [
+            "Naruto fait une vrille",
+            "Naruto effectue une vrille",
+            "Naruto réalise une vrille",
+            "Naruto part en vrille",
+            "Naruto effectue une vrille vers la gauche",
+            "Naruto effectue une vrille vers la droite",
+            "Naruto fait une vrille latérale",
+            "Naruto effectue une vrille aérienne",
+            "Naruto tourne en vrille dans les airs",
+            "Naruto se vrille dans les airs"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + HAUTEUR
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_007",
+        categorie: "deplacement",
+        famille: "acrobatie_hauteur",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR"
+        ],
+
+        exemples: [
+            "Naruto fait un salto à 5m de hauteur",
+            "Naruto effectue un salto à 5m de hauteur",
+            "Naruto fait un backflip à 5m de hauteur",
+            "Naruto effectue un backflip à 5m de hauteur",
+            "Naruto fait une pirouette à 5m de hauteur",
+            "Naruto effectue une pirouette à 5m de hauteur",
+            "Naruto fait une vrille à 5m de hauteur",
+            "Naruto effectue une vrille à 5m de hauteur",
+            "Naruto effectue un flip à 5m dans les airs",
+            "Naruto réalise une rotation aérienne à 5m"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_008",
+        categorie: "deplacement",
+        famille: "acrobatie_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto sur 5m",
+            "Naruto effectue un salto sur 5m",
+            "Naruto fait un backflip sur 5m",
+            "Naruto effectue un backflip sur 5m",
+            "Naruto fait une pirouette sur 5m",
+            "Naruto effectue une pirouette sur 5m",
+            "Naruto fait une vrille sur 5m",
+            "Naruto effectue une vrille sur 5m",
+            "Naruto réalise un flip sur 5m",
+            "Naruto effectue une rotation aérienne sur 5m"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + HAUTEUR + DISTANCE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_009",
+        categorie: "deplacement",
+        famille: "acrobatie_hauteur_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto à 5m de hauteur sur 10m",
+            "Naruto effectue un salto à 5m de hauteur sur 10m",
+            "Naruto fait un backflip à 5m de hauteur sur 10m",
+            "Naruto effectue un backflip à 5m de hauteur sur 10m",
+            "Naruto fait une pirouette à 5m de hauteur sur 10m",
+            "Naruto effectue une pirouette à 5m de hauteur sur 10m",
+            "Naruto fait une vrille à 5m de hauteur sur 10m",
+            "Naruto effectue une vrille à 5m de hauteur sur 10m",
+            "Naruto réalise un flip à 5m de hauteur sur 10m",
+            "Naruto effectue une rotation aérienne à 5m sur 10m"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + CÔTÉ GAUCHE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_010",
+        categorie: "deplacement",
+        famille: "acrobatie_cote_gauche",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto vers la gauche autour de Panda",
+            "Naruto effectue un salto vers la gauche autour de Panda",
+            "Naruto fait un backflip vers la gauche autour de Panda",
+            "Naruto effectue un backflip vers la gauche autour de Panda",
+            "Naruto fait une pirouette vers la gauche autour de Panda",
+            "Naruto effectue une pirouette vers la gauche autour de Panda",
+            "Naruto fait une vrille vers la gauche autour de Panda",
+            "Naruto effectue une vrille vers la gauche autour de Panda",
+            "Naruto passe par la gauche de Panda en faisant un salto",
+            "Naruto passe par la gauche de Panda en faisant une pirouette",
+            "Naruto contourne Panda par la gauche en faisant une vrille"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + CÔTÉ DROIT
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_011",
+        categorie: "deplacement",
+        famille: "acrobatie_cote_droit",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto vers la droite autour de Panda",
+            "Naruto effectue un salto vers la droite autour de Panda",
+            "Naruto fait un backflip vers la droite autour de Panda",
+            "Naruto effectue un backflip vers la droite autour de Panda",
+            "Naruto fait une pirouette vers la droite autour de Panda",
+            "Naruto effectue une pirouette vers la droite autour de Panda",
+            "Naruto fait une vrille vers la droite autour de Panda",
+            "Naruto effectue une vrille vers la droite autour de Panda",
+            "Naruto passe par la droite de Panda en faisant un salto",
+            "Naruto passe par la droite de Panda en faisant une pirouette",
+            "Naruto contourne Panda par la droite en faisant une vrille"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + DISTANCE + DIRECTION
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_012",
+        categorie: "deplacement",
+        famille: "acrobatie_direction_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto vers la gauche sur 5m",
+            "Naruto fait un salto vers la droite sur 5m",
+            "Naruto effectue un backflip vers la gauche sur 5m",
+            "Naruto effectue un backflip vers la droite sur 5m",
+            "Naruto fait une pirouette vers la gauche sur 5m",
+            "Naruto fait une pirouette vers la droite sur 5m",
+            "Naruto effectue une vrille vers la gauche sur 5m",
+            "Naruto effectue une vrille vers la droite sur 5m",
+            "Naruto fait un flip en diagonale vers la gauche sur 5m",
+            "Naruto fait un flip en diagonale vers la droite sur 5m"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + CIBLE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_013",
+        categorie: "deplacement",
+        famille: "acrobatie_cible",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto vers Panda",
+            "Naruto effectue un salto vers Panda",
+            "Naruto fait un backflip vers Panda",
+            "Naruto effectue un backflip vers Panda",
+            "Naruto fait une pirouette vers Panda",
+            "Naruto effectue une pirouette vers Panda",
+            "Naruto fait une vrille vers Panda",
+            "Naruto effectue une vrille vers Panda",
+            "Naruto fait un flip vers Panda",
+            "Naruto effectue une rotation aérienne vers Panda"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_014",
+        categorie: "deplacement",
+        famille: "acrobatie_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "INTENTION",
+            "POSITION_FINALE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto vers Panda pour arriver sur son profil gauche",
+            "Naruto fait un salto vers Panda pour arriver sur son profil droit",
+            "Naruto effectue un salto vers Panda afin d'arriver sur son profil gauche",
+            "Naruto effectue un salto vers Panda afin d'arriver sur son profil droit",
+            "Naruto fait un backflip vers Panda pour finir sur son profil gauche",
+            "Naruto fait un backflip vers Panda pour finir sur son profil droit",
+            "Naruto effectue une pirouette vers Panda pour arriver sur son côté gauche",
+            "Naruto effectue une pirouette vers Panda pour arriver sur son côté droit",
+            "Naruto fait une vrille vers Panda afin de finir à gauche de lui",
+            "Naruto fait une vrille vers Panda afin de finir à droite de lui",
+            "Naruto effectue un flip vers Panda pour se retrouver sur son profil gauche",
+            "Naruto effectue un flip vers Panda pour se retrouver sur son profil droit"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + HAUTEUR + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_015",
+        categorie: "deplacement",
+        famille: "acrobatie_hauteur_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION",
+            "POSITION_FINALE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto à 5m de hauteur vers Panda pour arriver sur son profil gauche",
+            "Naruto fait un salto à 5m de hauteur vers Panda pour arriver sur son profil droit",
+            "Naruto effectue un backflip à 5m de hauteur vers Panda afin d'arriver sur son profil gauche",
+            "Naruto effectue un backflip à 5m de hauteur vers Panda afin d'arriver sur son profil droit",
+            "Naruto fait une pirouette à 5m de hauteur vers Panda pour finir sur son côté gauche",
+            "Naruto fait une pirouette à 5m de hauteur vers Panda pour finir sur son côté droit",
+            "Naruto effectue une vrille à 5m de hauteur vers Panda pour atterrir à gauche de lui",
+            "Naruto effectue une vrille à 5m de hauteur vers Panda pour atterrir à droite de lui",
+            "Naruto fait un flip à 5m vers Panda afin de se retrouver sur son profil gauche",
+            "Naruto fait un flip à 5m vers Panda afin de se retrouver sur son profil droit"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + DISTANCE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_016",
+        categorie: "deplacement",
+        famille: "acrobatie_distance_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "CIBLE",
+            "DISTANCE",
+            "INTENTION",
+            "POSITION_FINALE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto vers Panda sur 5m pour arriver sur son profil gauche",
+            "Naruto fait un salto vers Panda sur 5m pour arriver sur son profil droit",
+            "Naruto effectue un backflip vers Panda sur 5m afin d'arriver sur son profil gauche",
+            "Naruto effectue un backflip vers Panda sur 5m afin d'arriver sur son profil droit",
+            "Naruto fait une pirouette vers Panda sur 5m pour finir sur son côté gauche",
+            "Naruto fait une pirouette vers Panda sur 5m pour finir sur son côté droit",
+            "Naruto effectue une vrille vers Panda sur 5m pour atterrir à gauche de lui",
+            "Naruto effectue une vrille vers Panda sur 5m pour atterrir à droite de lui"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE + HAUTEUR + DISTANCE + INTENTION
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_017",
+        categorie: "deplacement",
+        famille: "acrobatie_hauteur_distance_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "HAUTEUR",
+            "CIBLE",
+            "DISTANCE",
+            "INTENTION",
+            "POSITION_FINALE"
+        ],
+
+        exemples: [
+            "Naruto fait un salto à 5m de hauteur vers Panda sur 10m pour arriver sur son profil gauche",
+            "Naruto fait un salto à 5m de hauteur vers Panda sur 10m pour arriver sur son profil droit",
+            "Naruto effectue un backflip à 5m de hauteur vers Panda sur 10m afin d'arriver sur son profil gauche",
+            "Naruto effectue un backflip à 5m de hauteur vers Panda sur 10m afin d'arriver sur son profil droit",
+            "Naruto fait une pirouette à 5m de hauteur vers Panda sur 10m pour finir sur son côté gauche",
+            "Naruto fait une pirouette à 5m de hauteur vers Panda sur 10m pour finir sur son côté droit",
+            "Naruto effectue une vrille à 5m de hauteur vers Panda sur 10m pour atterrir à gauche de lui",
+            "Naruto effectue une vrille à 5m de hauteur vers Panda sur 10m pour atterrir à droite de lui",
+            "Naruto fait un flip à 5m vers Panda sur 10m afin de se retrouver sur son profil gauche",
+            "Naruto fait un flip à 5m vers Panda sur 10m afin de se retrouver sur son profil droit"
+        ]
+    },
+
+
+    // ==================================================
+    // ACROBATIE COMPLÈTE
+    // ==================================================
+
+    {
+        id: "DEP_ACRO_018",
+        categorie: "deplacement",
+        famille: "acrobatie_complete",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "HAUTEUR",
+            "CIBLE",
+            "DISTANCE",
+            "VITESSE",
+            "INTENTION",
+            "POSITION_FINALE"
+        ],
+
+        exemples: [
+            "Naruto effectue un salto avant à 5m de hauteur vers Panda sur 10m à vmax pour arriver sur son profil gauche",
+            "Naruto effectue un salto avant à 5m de hauteur vers Panda sur 10m à vmax pour arriver sur son profil droit",
+            "Naruto fait un backflip à 5m de hauteur vers Panda sur 10m à vmax afin d'arriver sur son profil gauche",
+            "Naruto fait un backflip à 5m de hauteur vers Panda sur 10m à vmax afin d'arriver sur son profil droit",
+            "Naruto effectue une pirouette vers la gauche à 5m de hauteur vers Panda sur 10m pour finir sur son côté gauche",
+            "Naruto effectue une pirouette vers la droite à 5m de hauteur vers Panda sur 10m pour finir sur son côté droit",
+            "Naruto fait une vrille vers la gauche à 5m de hauteur vers Panda sur 10m à vmax pour atterrir sur son profil gauche",
+            "Naruto fait une vrille vers la droite à 5m de hauteur vers Panda sur 10m à vmax pour atterrir sur son profil droit",
+            "Naruto effectue un flip latéral gauche à 5m vers Panda sur 10m pour arriver sur son côté gauche",
+            "Naruto effectue un flip latéral droit à 5m vers Panda sur 10m pour arriver sur son côté droit"
+        ]
+    }
+    
+   ], 
+
+ // ==================================================
 // ATTAQUES
 // ==================================================
 
