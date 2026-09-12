@@ -3491,83 +3491,924 @@ attaque: [
 ],
 
 
-    // ==================================================
-    // ESQUIVES
-    // ==================================================
+// ==================================================
+// ESQUIVES
+// ==================================================
 
-    esquive: [
-
-        {
-            id: "ESQ_001",
-            categorie: "esquive",
-            famille: "esquive_laterale",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "DIRECTION"
-            ],
-
-            exemples: [
-                "Naruto esquive vers la droite",
-                "Naruto évite l'attaque en allant sur le côté",
-                "Naruto se déporte vers la droite"
-            ]
-        }
-    ],
-
+esquive: [
 
     // ==================================================
-    // PARADES
+    // ESQUIVE — LATÉRALE
     // ==================================================
 
-    parade: [
+    {
+        id: "ESQ_001",
+        categorie: "esquive",
+        famille: "esquive_laterale",
 
-        {
-            id: "PAR_001",
-            categorie: "parade",
-            famille: "blocage",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION"
+        ],
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "PARTIE_CORPS"
-            ],
-
-            exemples: [
-                "Naruto bloque le coup avec son bras",
-                "Naruto pare l'attaque avec son avant-bras"
-            ]
-        }
-    ],
-
+        exemples: [
+            "Naruto esquive vers la droite",
+            "Naruto esquive vers la gauche",
+            "Naruto évite l'attaque en allant sur le côté droit",
+            "Naruto évite l'attaque en allant sur le côté gauche",
+            "Naruto se déporte vers la droite",
+            "Naruto se déporte vers la gauche",
+            "Naruto fait un pas sur le côté droit pour éviter le coup",
+            "Naruto fait un pas sur le côté gauche pour éviter le coup",
+            "Naruto se décale rapidement vers la droite",
+            "Naruto se décale rapidement vers la gauche"
+        ]
+    },
 
     // ==================================================
-    // SAISIES
+    // ESQUIVE — LATÉRALE + VMAX
     // ==================================================
 
-    saisie: [
+    {
+        id: "ESQ_002",
+        categorie: "esquive",
+        famille: "esquive_laterale_vmax",
 
-        {
-            id: "SAI_001",
-            categorie: "saisie",
-            famille: "saisie_corps",
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "VITESSE"
+        ],
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "PARTIE_CORPS",
-                "CIBLE"
-            ],
+        exemples: [
+            "Naruto esquive le coup vers la droite à VMAX",
+            "Naruto esquive le coup vers la gauche à VMAX",
+            "Naruto se déporte à VMAX vers la droite pour éviter le coup",
+            "Naruto se déporte à VMAX vers la gauche pour éviter le coup",
+            "Naruto esquive latéralement à VMAX vers la droite",
+            "Naruto esquive latéralement à VMAX vers la gauche",
+            "Naruto part sur le côté droit à VMAX pour éviter l'attaque",
+            "Naruto part sur le côté gauche à VMAX pour éviter l'attaque",
+            "Naruto se décale à vitesse maximale vers la droite",
+            "Naruto se décale à vitesse maximale vers la gauche"
+        ]
+    },
 
-            exemples: [
-                "Naruto saisit le bras de Panda",
-                "Naruto attrape Panda par le bras",
-                "Naruto agrippe son adversaire au bras"
-            ]
-        }
-    ]
-};
+    // ==================================================
+    // ESQUIVE — ABAISSEMENT
+    // ==================================================
+
+    {
+        id: "ESQ_003",
+        categorie: "esquive",
+        famille: "esquive_basse",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto esquive le coup en se baissant",
+            "Naruto évite le coup en se baissant",
+            "Naruto se baisse pour laisser passer le coup",
+            "Naruto fléchit les jambes pour éviter l'attaque",
+            "Naruto s'accroupit pour esquiver le coup",
+            "Naruto se penche vers le bas pour éviter le coup",
+            "Naruto abaisse son corps pour laisser passer l'attaque au-dessus de lui",
+            "Naruto se baisse pour laisser passer le poing au-dessus de sa tête",
+            "Naruto descend sous le coup pour l'éviter",
+            "Naruto plonge vers le bas pour éviter l'attaque"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — ABAISSEMENT + VMAX
+    // ==================================================
+
+    {
+        id: "ESQ_004",
+        categorie: "esquive",
+        famille: "esquive_basse_vmax",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "VITESSE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto esquive le coup en se baissant VMAX pour laisser passer le coup au-dessus de sa tête",
+            "Naruto se baisse à VMAX pour éviter le poing visant sa tête",
+            "Naruto s'accroupit à VMAX pour laisser passer l'attaque au-dessus de lui",
+            "Naruto fléchit les jambes à VMAX pour esquiver le coup",
+            "Naruto abaisse son corps à VMAX pour éviter l'attaque",
+            "Naruto plonge vers le bas à VMAX pour esquiver le coup",
+            "Naruto se penche vers le bas à VMAX pour éviter le poing",
+            "Naruto descend sous l'attaque à VMAX pour la laisser passer",
+            "Naruto baisse rapidement la tête à VMAX pour éviter le coup",
+            "Naruto se baisse à vitesse maximale pour laisser passer le coup au-dessus de sa tête"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — ARRIÈRE
+    // ==================================================
+
+    {
+        id: "ESQ_005",
+        categorie: "esquive",
+        famille: "esquive_arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto recule pour éviter le coup",
+            "Naruto fait un pas en arrière pour esquiver",
+            "Naruto se déplace vers l'arrière pour éviter l'attaque",
+            "Naruto se replie pour laisser passer le coup",
+            "Naruto s'éloigne de l'attaque",
+            "Naruto recule hors de portée du poing",
+            "Naruto recule pour éviter le coup visant son visage",
+            "Naruto fait un pas en arrière pour laisser passer le coup",
+            "Naruto se retire vers l'arrière pour esquiver",
+            "Naruto se dégage en reculant"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — ARRIÈRE + VMAX
+    // ==================================================
+
+    {
+        id: "ESQ_006",
+        categorie: "esquive",
+        famille: "esquive_arriere_vmax",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "VITESSE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto recule à VMAX pour éviter le coup",
+            "Naruto se déplace vers l'arrière à VMAX pour esquiver",
+            "Naruto fait un pas en arrière à VMAX pour éviter l'attaque",
+            "Naruto se replie à VMAX pour laisser passer le poing",
+            "Naruto s'éloigne à VMAX du coup visant son visage",
+            "Naruto recule à vitesse maximale pour sortir de portée",
+            "Naruto se retire à VMAX pour éviter le coup",
+            "Naruto recule rapidement à VMAX pour esquiver l'attaque",
+            "Naruto se dégage vers l'arrière à VMAX",
+            "Naruto recule à VMAX pour laisser passer l'attaque devant lui"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — PENCHÉE
+    // ==================================================
+
+    {
+        id: "ESQ_007",
+        categorie: "esquive",
+        famille: "esquive_penchee",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto penche la tête vers la gauche pour éviter le coup",
+            "Naruto penche la tête vers la droite pour éviter le coup",
+            "Naruto incline son corps vers la gauche pour esquiver",
+            "Naruto incline son corps vers la droite pour esquiver",
+            "Naruto se penche à gauche pour laisser passer le poing",
+            "Naruto se penche à droite pour laisser passer le poing",
+            "Naruto dévie son buste vers la gauche pour éviter l'attaque",
+            "Naruto dévie son buste vers la droite pour éviter l'attaque",
+            "Naruto incline son visage vers la gauche pour éviter le coup",
+            "Naruto incline son visage vers la droite pour éviter le coup"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — SAUT
+    // ==================================================
+
+    {
+        id: "ESQ_008",
+        categorie: "esquive",
+        famille: "esquive_saut",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MANIERE",
+            "HAUTEUR",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saute pour éviter le coup",
+            "Naruto bondit pour esquiver l'attaque",
+            "Naruto saute au-dessus du coup",
+            "Naruto bondit au-dessus du poing",
+            "Naruto s'élève dans les airs pour éviter l'attaque",
+            "Naruto fait un bond pour laisser passer le coup sous lui",
+            "Naruto saute à 1m de hauteur pour éviter le coup",
+            "Naruto bondit à 2m de hauteur pour esquiver l'attaque",
+            "Naruto saute pour laisser passer le coup sous ses pieds",
+            "Naruto s'élève pour éviter l'attaque visant ses jambes"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — DISTANCE
+    // ==================================================
+
+    {
+        id: "ESQ_009",
+        categorie: "esquive",
+        famille: "esquive_distance",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DISTANCE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto recule de 2m pour éviter le coup",
+            "Naruto se décale de 1m vers la droite pour esquiver",
+            "Naruto se déplace de 2m vers la gauche pour éviter l'attaque",
+            "Naruto recule de 3m pour sortir de portée",
+            "Naruto se déporte de 2m vers la droite pour éviter le poing",
+            "Naruto se déporte de 2m vers la gauche pour éviter le poing",
+            "Naruto bondit de 2m en arrière pour esquiver",
+            "Naruto fait un déplacement de 1m vers la droite pour éviter le coup",
+            "Naruto s'éloigne de 3m pour laisser passer l'attaque",
+            "Naruto se retire de 2m pour éviter le coup"
+        ]
+    },
+
+    // ==================================================
+    // ESQUIVE — COMPLÈTE
+    // ==================================================
+
+    {
+        id: "ESQ_010",
+        categorie: "esquive",
+        famille: "esquive_complete",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "VITESSE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto esquive le coup vers la droite à VMAX sur 2m",
+            "Naruto esquive le coup vers la gauche à VMAX sur 2m",
+            "Naruto se baisse à VMAX pour laisser passer le coup au-dessus de sa tête",
+            "Naruto recule à VMAX sur 2m pour sortir de portée",
+            "Naruto saute à 2m de hauteur pour éviter le coup",
+            "Naruto bondit à VMAX sur 2m pour éviter l'attaque",
+            "Naruto se déporte à VMAX de 2m vers la droite pour esquiver",
+            "Naruto se déporte à VMAX de 2m vers la gauche pour esquiver",
+            "Naruto recule de 3m à VMAX pour éviter le coup visant son visage",
+            "Naruto saute à 1m de hauteur à VMAX pour laisser passer l'attaque sous lui"
+        ]
+    }
+],
+
+
+// ==================================================
+// PARADES
+// ==================================================
+
+parade: [
+
+    // ==================================================
+    // PARADE — BRAS / AVANT-BRAS
+    // ==================================================
+
+    {
+        id: "PAR_001",
+        categorie: "parade",
+        famille: "blocage_bras",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup avec son bras",
+            "Naruto bloque l'attaque avec son avant-bras",
+            "Naruto pare le coup avec son avant-bras droit",
+            "Naruto pare le coup avec son avant-bras gauche",
+            "Naruto bloque le poing avec son bras droit",
+            "Naruto bloque le poing avec son bras gauche",
+            "Naruto place son avant-bras droit en opposition au coup",
+            "Naruto place son avant-bras gauche en opposition à l'attaque",
+            "Naruto interpose son bras droit devant le coup",
+            "Naruto interpose son avant-bras gauche devant son visage"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — PAUME
+    // ==================================================
+
+    {
+        id: "PAR_002",
+        categorie: "parade",
+        famille: "blocage_paume",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup avec sa paume",
+            "Naruto pare l'attaque avec sa paume",
+            "Naruto bloque le coup avec sa paume droite",
+            "Naruto bloque le coup avec sa paume gauche",
+            "Naruto met sa paume droite en opposition au coup",
+            "Naruto met sa paume gauche en opposition au coup",
+            "Naruto place sa paume droite devant l'attaque",
+            "Naruto place sa paume gauche devant l'attaque",
+            "Naruto interpose sa paume droite entre lui et le poing",
+            "Naruto interpose sa paume gauche entre lui et le coup"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — MAIN / POING
+    // ==================================================
+
+    {
+        id: "PAR_003",
+        categorie: "parade",
+        famille: "blocage_main",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup avec sa main droite",
+            "Naruto bloque le coup avec sa main gauche",
+            "Naruto pare l'attaque avec sa main droite",
+            "Naruto pare l'attaque avec sa main gauche",
+            "Naruto utilise sa main droite pour bloquer le poing",
+            "Naruto utilise sa main gauche pour bloquer le poing",
+            "Naruto lève sa main droite pour bloquer le coup",
+            "Naruto lève sa main gauche pour bloquer l'attaque",
+            "Naruto place sa main droite en opposition au coup",
+            "Naruto place sa main gauche en opposition à l'attaque"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — DEUX MAINS
+    // ==================================================
+
+    {
+        id: "PAR_004",
+        categorie: "parade",
+        famille: "blocage_deux_mains",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup à deux mains",
+            "Naruto bloque le poing avec ses deux mains",
+            "Naruto pare l'attaque avec ses deux mains",
+            "Naruto interpose ses deux mains devant le coup",
+            "Naruto utilise ses deux mains pour bloquer le poing",
+            "Naruto place ses deux paumes en opposition au coup",
+            "Naruto bloque l'attaque avec ses deux avant-bras",
+            "Naruto croise ses deux bras pour bloquer le coup",
+            "Naruto protège son visage avec ses deux mains",
+            "Naruto ferme sa garde avec ses deux bras"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — JAMBES
+    // ==================================================
+
+    {
+        id: "PAR_005",
+        categorie: "parade",
+        famille: "blocage_jambe",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup avec sa jambe droite",
+            "Naruto bloque le coup avec sa jambe gauche",
+            "Naruto pare le coup de pied avec son tibia droit",
+            "Naruto pare le coup de pied avec son tibia gauche",
+            "Naruto lève sa jambe droite pour bloquer le kick",
+            "Naruto lève sa jambe gauche pour bloquer le coup",
+            "Naruto interpose son tibia droit devant le pied",
+            "Naruto interpose son tibia gauche devant le pied",
+            "Naruto utilise son genou droit pour bloquer le coup",
+            "Naruto utilise son genou gauche pour bloquer l'attaque"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — TÊTE / CORPS
+    // ==================================================
+
+    {
+        id: "PAR_006",
+        categorie: "parade",
+        famille: "blocage_corps",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto protège son visage avec son avant-bras",
+            "Naruto protège sa mâchoire avec son bras",
+            "Naruto protège sa tête avec ses deux mains",
+            "Naruto couvre son visage avec ses bras",
+            "Naruto protège son abdomen avec son avant-bras",
+            "Naruto couvre son torse avec ses bras",
+            "Naruto protège ses côtes avec son coude",
+            "Naruto protège son ventre avec son bras gauche",
+            "Naruto protège son flanc droit avec son bras droit",
+            "Naruto ferme sa garde pour protéger son visage"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — OPPOSITION
+    // ==================================================
+
+    {
+        id: "PAR_007",
+        categorie: "parade",
+        famille: "blocage_opposition",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "CIBLE",
+            "MANIERE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup en mettant sa paume gauche en opposition",
+            "Naruto bloque le coup en mettant sa paume droite en opposition",
+            "Naruto pare le poing en mettant son avant-bras gauche en opposition",
+            "Naruto pare le poing en mettant son avant-bras droit en opposition",
+            "Naruto intercepte l'attaque avec sa main gauche en opposition",
+            "Naruto intercepte l'attaque avec sa main droite en opposition",
+            "Naruto place son bras gauche en opposition au coup",
+            "Naruto place son bras droit en opposition au coup",
+            "Naruto met ses deux paumes en opposition à l'attaque",
+            "Naruto met son tibia droit en opposition au coup de pied"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — DÉVIATION
+    // ==================================================
+
+    {
+        id: "PAR_008",
+        categorie: "parade",
+        famille: "deviation",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto dévie le coup avec sa main droite vers la gauche",
+            "Naruto dévie le coup avec sa main gauche vers la droite",
+            "Naruto dévie le poing avec son avant-bras droit vers l'extérieur",
+            "Naruto dévie le poing avec son avant-bras gauche vers l'extérieur",
+            "Naruto détourne le coup avec sa paume droite",
+            "Naruto détourne le coup avec sa paume gauche",
+            "Naruto repousse le poing sur le côté avec son avant-bras droit",
+            "Naruto repousse l'attaque sur le côté avec son avant-bras gauche",
+            "Naruto dévie le coup vers la droite avec sa main gauche",
+            "Naruto dévie le coup vers la gauche avec sa main droite"
+        ]
+    },
+
+    // ==================================================
+    // PARADE — COMPLÈTE
+    // ==================================================
+
+    {
+        id: "PAR_009",
+        categorie: "parade",
+        famille: "parade_complete",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "DIRECTION",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto bloque le coup avec sa paume gauche en opposition à son visage",
+            "Naruto bloque le coup avec sa paume droite en opposition à sa mâchoire",
+            "Naruto pare le poing avec son avant-bras gauche devant son visage",
+            "Naruto pare le poing avec son avant-bras droit devant sa tête",
+            "Naruto bloque le coup avec son bras gauche devant son torse",
+            "Naruto bloque le coup avec son bras droit devant son abdomen",
+            "Naruto pare le kick avec son tibia gauche devant sa jambe",
+            "Naruto pare le kick avec son tibia droit devant son genou",
+            "Naruto dévie le coup avec sa main droite vers la gauche",
+            "Naruto dévie l'attaque avec sa main gauche vers la droite"
+        ]
+    }
+],
+
+
+// ==================================================
+// SAISIES
+// ==================================================
+
+saisie: [
+
+    // ==================================================
+    // SAISIE — POIGNET
+    // ==================================================
+
+    {
+        id: "SAI_001",
+        categorie: "saisie",
+        famille: "saisie_poignet",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit le poignet de Goku de la main droite",
+            "Naruto saisit le poignet de Goku de la main gauche",
+            "Naruto attrape le poignet droit de Goku avec sa main droite",
+            "Naruto attrape le poignet gauche de Goku avec sa main gauche",
+            "Naruto agrippe le poignet de Goku avec sa main droite",
+            "Naruto agrippe le poignet de Goku avec sa main gauche",
+            "Naruto empoigne le poignet de Goku de la main droite",
+            "Naruto empoigne le poignet de Goku de la main gauche",
+            "Naruto bloque le poignet de Goku avec sa main droite",
+            "Naruto contrôle le poignet de Goku avec sa main gauche"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — BRAS / AVANT-BRAS
+    // ==================================================
+
+    {
+        id: "SAI_002",
+        categorie: "saisie",
+        famille: "saisie_bras",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit le bras de Goku de la main droite",
+            "Naruto saisit le bras de Goku de la main gauche",
+            "Naruto attrape l'avant-bras de Goku avec sa main droite",
+            "Naruto attrape l'avant-bras de Goku avec sa main gauche",
+            "Naruto agrippe le bras droit de Goku",
+            "Naruto agrippe le bras gauche de Goku",
+            "Naruto empoigne l'avant-bras de Goku",
+            "Naruto contrôle le bras de Goku avec sa main droite",
+            "Naruto retient le bras de Goku avec sa main gauche",
+            "Naruto saisit l'avant-bras de Goku de la main droite"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — ÉPAULE
+    // ==================================================
+
+    {
+        id: "SAI_003",
+        categorie: "saisie",
+        famille: "saisie_epaule",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit l'épaule de Goku de la main droite",
+            "Naruto saisit l'épaule de Goku de la main gauche",
+            "Naruto attrape l'épaule droite de Goku avec sa main droite",
+            "Naruto attrape l'épaule gauche de Goku avec sa main gauche",
+            "Naruto agrippe l'épaule de Goku",
+            "Naruto empoigne l'épaule de Goku de la main droite",
+            "Naruto contrôle l'épaule de Goku avec sa main gauche",
+            "Naruto retient Goku par l'épaule droite",
+            "Naruto saisit Goku à l'épaule gauche",
+            "Naruto attrape Goku par l'épaule avec sa main droite"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — COL / VÊTEMENT
+    // ==================================================
+
+    {
+        id: "SAI_004",
+        categorie: "saisie",
+        famille: "saisie_col",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit Goku par le col de la main droite",
+            "Naruto saisit Goku par le col de la main gauche",
+            "Naruto attrape Goku par le col avec sa main droite",
+            "Naruto attrape Goku par le col avec sa main gauche",
+            "Naruto agrippe le col de Goku",
+            "Naruto empoigne le col de Goku de la main droite",
+            "Naruto retient Goku par son vêtement",
+            "Naruto saisit le vêtement de Goku avec sa main droite",
+            "Naruto attrape le haut de Goku avec sa main gauche",
+            "Naruto saisit la tenue de Goku pour le retenir"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — CORPS
+    // ==================================================
+
+    {
+        id: "SAI_005",
+        categorie: "saisie",
+        famille: "saisie_corps",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit Goku par le bras",
+            "Naruto attrape Goku par l'épaule",
+            "Naruto agrippe Goku au torse",
+            "Naruto saisit Goku à la taille",
+            "Naruto attrape le corps de Goku avec ses deux bras",
+            "Naruto empoigne Goku au niveau du torse",
+            "Naruto retient Goku par la taille",
+            "Naruto saisit Goku au niveau des côtes",
+            "Naruto agrippe Goku au niveau du dos",
+            "Naruto contrôle le corps de Goku avec ses deux bras"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — JAMBES
+    // ==================================================
+
+    {
+        id: "SAI_006",
+        categorie: "saisie",
+        famille: "saisie_jambe",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit la jambe de Goku de la main droite",
+            "Naruto saisit la jambe de Goku de la main gauche",
+            "Naruto attrape la cuisse de Goku avec sa main droite",
+            "Naruto attrape le mollet de Goku avec sa main gauche",
+            "Naruto agrippe la cheville de Goku",
+            "Naruto empoigne le tibia de Goku",
+            "Naruto saisit le genou de Goku",
+            "Naruto contrôle la jambe de Goku avec ses deux mains",
+            "Naruto retient le pied de Goku avec sa main droite",
+            "Naruto attrape la cheville droite de Goku"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — DEUX MAINS
+    // ==================================================
+
+    {
+        id: "SAI_007",
+        categorie: "saisie",
+        famille: "saisie_deux_mains",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE"
+        ],
+
+        exemples: [
+            "Naruto saisit le bras de Goku avec ses deux mains",
+            "Naruto attrape le poignet de Goku avec ses deux mains",
+            "Naruto agrippe l'avant-bras de Goku avec ses deux mains",
+            "Naruto saisit l'épaule de Goku avec ses deux mains",
+            "Naruto empoigne Goku à deux mains",
+            "Naruto contrôle le bras de Goku avec ses deux mains",
+            "Naruto retient Goku avec ses deux mains",
+            "Naruto saisit la taille de Goku avec ses deux mains",
+            "Naruto attrape le torse de Goku à deux mains",
+            "Naruto agrippe le corps de Goku avec ses deux mains"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — AVEC INTENTION
+    // ==================================================
+
+    {
+        id: "SAI_008",
+        categorie: "saisie",
+        famille: "saisie_intention",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto saisit le poignet de Goku de la main droite pour l'immobiliser",
+            "Naruto saisit le poignet de Goku de la main gauche pour empêcher son attaque",
+            "Naruto attrape le bras de Goku avec sa main droite pour le contrôler",
+            "Naruto agrippe l'avant-bras de Goku avec sa main gauche pour bloquer son mouvement",
+            "Naruto saisit l'épaule de Goku pour l'empêcher de reculer",
+            "Naruto attrape le bras de Goku pour le maintenir sur place",
+            "Naruto saisit la jambe de Goku pour stopper son déplacement",
+            "Naruto agrippe la cheville de Goku pour l'empêcher de s'éloigner",
+            "Naruto saisit le col de Goku pour le retenir",
+            "Naruto attrape Goku par le bras pour préparer une projection"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — VMAX / DISTANCE
+    // ==================================================
+
+    {
+        id: "SAI_009",
+        categorie: "saisie",
+        famille: "saisie_approche",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE",
+            "DISTANCE"
+        ],
+
+        exemples: [
+            "Naruto avance de 2m puis saisit le poignet de Goku de la main droite",
+            "Naruto fonce sur 3m puis attrape le bras de Goku",
+            "Naruto se rapproche de 1m pour saisir l'avant-bras de Goku",
+            "Naruto parcourt 2m pour saisir le poignet de Goku",
+            "Naruto court sur 3m vers Goku puis saisit son bras",
+            "Naruto se déplace de 2m vers Goku pour attraper son poignet",
+            "Naruto avance à VMAX sur 2m puis saisit le bras de Goku",
+            "Naruto fonce à VMAX sur 3m pour agripper le poignet de Goku",
+            "Naruto se rapproche à VMAX puis saisit l'épaule de Goku",
+            "Naruto court à VMAX sur 2m pour attraper l'avant-bras de Goku"
+        ]
+    },
+
+    // ==================================================
+    // SAISIE — COMPLÈTE
+    // ==================================================
+
+    {
+        id: "SAI_010",
+        categorie: "saisie",
+        famille: "saisie_complete",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "PARTIE_CORPS",
+            "CIBLE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        exemples: [
+            "Naruto avance de 2m à VMAX puis saisit le poignet de Goku de la main droite pour l'immobiliser",
+            "Naruto avance de 2m à VMAX puis saisit le poignet de Goku de la main gauche pour l'immobiliser",
+            "Naruto fonce sur 3m à VMAX puis attrape le bras droit de Goku avec sa main droite",
+            "Naruto court sur 2m à VMAX puis agrippe l'avant-bras de Goku pour empêcher son attaque",
+            "Naruto se rapproche à VMAX sur 2m puis saisit l'épaule de Goku pour le contrôler",
+            "Naruto avance sur 3m à VMAX puis attrape la jambe de Goku pour stopper son déplacement",
+            "Naruto se déplace de 2m à VMAX puis saisit la cheville de Goku pour l'immobiliser",
+            "Naruto fonce vers Goku à VMAX puis saisit son poignet de la main droite pour préparer une projection",
+            "Naruto court sur 3m à VMAX vers Goku puis agrippe son bras avec ses deux mains",
+            "Naruto avance de 2m à VMAX puis saisit Goku par le col pour le retenir"
+        ]
+    }
+],
+
 
 
 // ======================================================
