@@ -4407,8 +4407,7 @@ saisie: [
             "Naruto avance de 2m à VMAX puis saisit Goku par le col pour le retenir"
         ]
     }
-],
-
+];
 
 
 // ======================================================
