@@ -4406,9 +4406,10 @@ saisie: [
             "Naruto court sur 3m à VMAX vers Goku puis agrippe son bras avec ses deux mains",
             "Naruto avance de 2m à VMAX puis saisit Goku par le col pour le retenir"
         ]
-    }
-];
 
+        }
+    ]
+};
 
 // ======================================================
 // CATÉGORIES GÉNÉRALES
