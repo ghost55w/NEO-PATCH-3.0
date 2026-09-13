@@ -3124,7 +3124,13 @@ function neoGetModeles() {
 
 
 //==============================================================
-// 🧮 SIMILARITÉ MODÈLE
+// 🧩 COMPARAISON SÉMANTIQUE D'UN MODÈLE
+//==============================================================
+//
+// Le score sert uniquement à sélectionner le modèle.
+// Il ne sert PLUS à valider ou refuser le pavé.
+//
+// VALIDATION = structure sémantique complète.
 //==============================================================
 
 function neoCalculerSimilariteModele(
@@ -3137,20 +3143,25 @@ function neoCalculerSimilariteModele(
     return 0;
   }
 
-  const source =
-    neoNormaliserTexteLocal(
-      texte || ""
-    ).toLowerCase();
+  const existe = valeur => {
 
-  if (!source) {
-    return 0;
-  }
+    if (
+      valeur === null ||
+      valeur === undefined
+    ) {
+      return false;
+    }
 
-  //============================================================
-  // OUTILS
-  //============================================================
+    if (
+      typeof valeur === "string"
+    ) {
+      return valeur.trim() !== "";
+    }
 
-  const normaliser = (valeur) => {
+    return true;
+  };
+
+  const normaliser = valeur => {
 
     if (
       valeur === null ||
@@ -3161,490 +3172,324 @@ function neoCalculerSimilariteModele(
 
     return neoNormaliserMotLocal(
       String(valeur)
-    ).toLowerCase();
-
+    )
+      .toLowerCase()
+      .trim();
   };
 
-  const motsSource =
-    new Set(
-      source
-        .split(/\s+/u)
-        .map(normaliser)
-        .filter(Boolean)
-    );
+  const valeurs = {
 
-//============================================================
-// 1️⃣ ACTION + MANIÈRE
-//============================================================
+    SUJET:
+      analyse.acteur ||
+      analyse.sujet ||
+      null,
 
-let scoreAction = 0;
-let scoreManiere = 0;
+    ACTION:
+      typeof analyse.action === "object"
+        ? (
+            analyse.action.action ||
+            analyse.action.verbe ||
+            null
+          )
+        : (
+            analyse.action ||
+            null
+          ),
 
-//------------------------------------------------------------
-// ACTION
-//------------------------------------------------------------
+    CIBLE:
+      analyse.cible ||
+      null,
 
-const actionModele =
-  normaliser(
-    modele.action
-  );
+    MEMBRE:
+      analyse.membre ||
+      null,
 
-const actionTexte =
-  normaliser(
-    analyse.action?.action ||
-    analyse.action
-  );
+    PARTIE_CORPS:
+      analyse.partieCorps ||
+      null,
 
-if (
-  actionModele &&
-  actionTexte
-) {
+    MANIERE:
+      analyse.maniere ||
+      null,
 
-  if (
-    actionModele === actionTexte
-  ) {
+    DISTANCE:
+      analyse.distance ??
+      null,
 
-    scoreAction = 100;
+    HAUTEUR:
+      analyse.hauteur ??
+      null,
 
-  } else if (
-    actionModele.includes(actionTexte) ||
-    actionTexte.includes(actionModele)
-  ) {
+    VITESSE:
+      analyse.vitesse ??
+      null,
 
-    scoreAction = 80;
+    DIRECTION:
+      analyse.direction ||
+      analyse.trajectoire ||
+      null,
 
-  }
-
-}
-
-//------------------------------------------------------------
-// MANIÈRE
-//------------------------------------------------------------
-
-const maniereModele =
-  normaliser(
-    modele.maniere ||
-    modele.famille
-  );
-
-const maniereTexte =
-  normaliser(
-    analyse.maniere
-  );
-
-if (
-  maniereModele &&
-  maniereTexte
-) {
-
-  if (
-    maniereModele === maniereTexte
-  ) {
-
-    scoreManiere = 100;
-
-  } else if (
-    maniereModele.includes(maniereTexte) ||
-    maniereTexte.includes(maniereModele)
-  ) {
-
-    scoreManiere = 80;
-
-  }
-
-}
- 
-
-  //============================================================
-  // 2️⃣ STRUCTURE
-  //============================================================
-
-  let scoreStructure = 0;
+    TRAJECTOIRE:
+      analyse.trajectoire ||
+      null
+  };
 
   const structureModele =
     Array.isArray(modele.structure)
       ? modele.structure
       : [];
 
-  const structureAnalyse =
-    analyse.structure || {};
+  if (!structureModele.length) {
+    return 0;
+  }
 
-  if (
-    structureModele.length
+  const normaliserSlot = valeur => {
+
+    return normaliser(valeur)
+      .toUpperCase()
+      .replace(/\s+/g, "_");
+  };
+
+  let attendus = 0;
+  let trouves = 0;
+
+  const slotsTrouves = [];
+  const slotsManquants = [];
+
+  for (
+    const element of structureModele
   ) {
 
-    let attendus = 0;
-    let trouves = 0;
+    const slot =
+      normaliserSlot(element);
 
-    for (
-      const element of structureModele
-    ) {
-
-      const slot =
-        normaliser(element);
-
-      if (!slot) {
-        continue;
-      }
-
-      attendus++;
-
-      let present = false;
-
-      switch (slot) {
-
-        case "sujet":
-          present = !!analyse.acteur;
-          break;
-
-        case "action":
-          present = !!(
-            analyse.action?.action ||
-            analyse.action
-          );
-          break;
-
-        case "cible":
-        case "objet":
-          present = !!analyse.cible;
-          break;
-
-        case "maniere":
-          present = !!analyse.maniere;
-          break;
-
-        case "distance":
-          present =
-            analyse.distance !== null &&
-            analyse.distance !== undefined;
-          break;
-
-        case "hauteur":
-          present =
-            analyse.hauteur !== null &&
-            analyse.hauteur !== undefined;
-          break;
-
-        case "vitesse":
-          present =
-            analyse.vitesse !== null &&
-            analyse.vitesse !== undefined;
-          break;
-
-        case "direction":
-          present =
-            !!analyse.direction ||
-            !!analyse.trajectoire;
-          break;
-
-        case "membre":
-        case "partie_corps":
-          present = !!analyse.partieCorps;
-          break;
-
-        default:
-          present = false;
-
-      }
-
-      if (present) {
-        trouves++;
-      }
-
+    if (!slot) {
+      continue;
     }
 
-    if (attendus) {
+    attendus++;
 
-      scoreStructure =
-        Math.round(
+    let valeur = null;
+
+    switch (slot) {
+
+      case "SUJET":
+      case "ACTEUR":
+
+        valeur = valeurs.SUJET;
+        break;
+
+      case "ACTION":
+      case "VERBE":
+
+        valeur = valeurs.ACTION;
+        break;
+
+      case "CIBLE":
+      case "OBJET":
+
+        valeur = valeurs.CIBLE;
+        break;
+
+      case "MEMBRE":
+
+        valeur = valeurs.MEMBRE;
+        break;
+
+      case "PARTIE_CORPS":
+      case "PARTIECORPS":
+
+        valeur = valeurs.PARTIE_CORPS;
+        break;
+
+      case "MANIERE":
+
+        valeur = valeurs.MANIERE;
+        break;
+
+      case "DISTANCE":
+
+        valeur = valeurs.DISTANCE;
+        break;
+
+      case "HAUTEUR":
+
+        valeur = valeurs.HAUTEUR;
+        break;
+
+      case "VITESSE":
+
+        valeur = valeurs.VITESSE;
+        break;
+
+      case "DIRECTION":
+
+        valeur = valeurs.DIRECTION;
+        break;
+
+      case "TRAJECTOIRE":
+
+        valeur = valeurs.TRAJECTOIRE;
+        break;
+
+      default:
+
+        valeur = null;
+        break;
+    }
+
+    if (existe(valeur)) {
+
+      trouves++;
+
+      slotsTrouves.push({
+        slot,
+        valeur
+      });
+
+    } else {
+
+      slotsManquants.push(slot);
+
+    }
+  }
+
+  const scoreStructure =
+    attendus > 0
+      ? Math.round(
           (
             trouves /
             attendus
           ) * 100
-        );
-
-    }
-
-  }
-
-//============================================================
-// 3️⃣ EXEMPLES
-//============================================================
-
-let scoreExemple = 0;
-
-const exemples =
-  Array.isArray(modele.exemples)
-    ? modele.exemples
-    : [];
-
-//------------------------------------------------------------
-// MOTS SANS VALEUR POUR LA RECONNAISSANCE DU MODÈLE
-//------------------------------------------------------------
-
-const motsVides = new Set([
-  "un",
-  "une",
-  "le",
-  "la",
-  "les",
-  "des",
-  "du",
-  "de",
-  "au",
-  "aux",
-  "son",
-  "sa",
-  "ses",
-  "dans",
-  "sur",
-  "vers",
-  "avec",
-  "pour",
-  "par",
-  "où",
-  "ou",
-  "et",
-  "en",
-  "visant",
-  "vise",
-  "visée",
-  "contre",
-  "donne",
-  "donner",
-  "frappe",
-  "frapper",
-  "porte",
-  "porter",
-  "attaque",
-  "attaquer",
-  "assène",
-  "assener"
-]);
-
-//------------------------------------------------------------
-// PHRASES / EXPRESSIONS TECHNIQUES
-//------------------------------------------------------------
-
-const expressionsTechniques = [
-  "coup de poing",
-  "coup de pied",
-  "coup de genou",
-  "coup en revers",
-  "coup marteau",
-  "coup de pied frontal",
-  "coup de pied circulaire",
-  "coup de pied lateral",
-  "coup de pied arrière",
-  "coup de pied descendant",
-  "coup de poing direct",
-  "coup de poing circulaire",
-  "coup de poing revers",
-  "coup de poing marteau"
-];
-
-//------------------------------------------------------------
-// NORMALISATION TECHNIQUE
-//------------------------------------------------------------
-
-const extraireMotsUtiles = (valeur) => {
-
-  let texteNormalise =
-    neoNormaliserTexteLocal(
-      String(valeur || "")
-    )
-      .toLowerCase();
-
-  // Transforme les expressions importantes
-  // en unités techniques uniques.
-
-  for (
-    const expression of expressionsTechniques
-  ) {
-
-    const normalisee =
-      expression
-        .toLowerCase()
-        .replace(/\s+/gu, "_");
-
-    const pattern =
-      expression
-        .split(/\s+/u)
-        .map(mot =>
-          mot.replace(
-            /[.*+?^${}()|[\]\\]/gu,
-            "\\$&"
-          )
         )
-        .join("\\s+");
+      : 0;
 
-    texteNormalise =
-      texteNormalise.replace(
-        new RegExp(
-          `\\b${pattern}\\b`,
-          "giu"
-        ),
-        normalisee
-      );
+  analyse.scoreStructure =
+    scoreStructure;
 
-  }
+  analyse.slotsTrouves =
+    slotsTrouves;
 
-  return new Set(
-    texteNormalise
-      .split(/\s+/u)
-      .map(normaliser)
-      .filter(Boolean)
-      .filter(
-        mot =>
-          !motsVides.has(mot)
-      )
+  analyse.slotsManquants =
+    slotsManquants;
+
+  analyse.structureComplete =
+    slotsManquants.length === 0;
+
+  console.log(
+    "🧩 [NeoAI STRUCTURE]",
+    modele.id,
+    "|",
+    `${trouves}/${attendus}`,
+    "|",
+    `${scoreStructure}%`,
+    "| Manquants:",
+    slotsManquants
   );
 
-};
+  //============================================================
+  // SCORE DE RECONNAISSANCE DU MODÈLE
+  //============================================================
+  //
+  // Ce score sert seulement à choisir le modèle.
+  // Il ne décide jamais de la validation finale.
+  //============================================================
 
-//------------------------------------------------------------
-// MOTS UTILES DU TEXTE
-//------------------------------------------------------------
+  let scoreAction = 0;
 
-const motsUtilesSource =
-  extraireMotsUtiles(
-    source
-  );
+  const actionModele =
+    normaliser(modele.action);
 
-//------------------------------------------------------------
-// COMPARAISON AVEC CHAQUE EXEMPLE
-//------------------------------------------------------------
-
-for (
-  const exemple of exemples
-) {
-
-  const motsExemple =
-    extraireMotsUtiles(
-      exemple
-    );
+  const actionTexte =
+    normaliser(valeurs.ACTION);
 
   if (
-    !motsExemple.size
-  ) {
-    continue;
-  }
-
-  let communs = 0;
-
-  for (
-    const mot of motsExemple
+    actionModele &&
+    actionTexte
   ) {
 
     if (
-      motsUtilesSource.has(mot)
+      actionModele === actionTexte
     ) {
 
-      communs++;
+      scoreAction = 100;
 
+    } else if (
+      actionModele.includes(actionTexte) ||
+      actionTexte.includes(actionModele)
+    ) {
+
+      scoreAction = 80;
     }
-
   }
 
-  const score =
-    Math.round(
-      (
-        communs /
-        motsExemple.size
-      ) * 100
-    );
+  let scoreCategorie = 0;
 
-  scoreExemple =
-    Math.max(
-      scoreExemple,
-      score
-    );
+  const categorieModele =
+    normaliser(modele.categorie);
 
-}
+  const categorieAnalyse =
+    normaliser(analyse.categorie);
 
-  //============================================================
-  // 4️⃣ MOTS
-  //============================================================
-
-  let scoreMots = 0;
-
-  const champs = [
-    modele.categorie,
-    modele.famille
-  ];
-
-  for (
-    const champ of champs
+  if (
+    categorieModele &&
+    categorieAnalyse &&
+    categorieModele === categorieAnalyse
   ) {
 
-    const motsModele =
-      String(champ || "")
-        .split(/\s+/u)
-        .map(normaliser)
-        .filter(Boolean);
-
-    if (!motsModele.length) {
-      continue;
-    }
-
-    let communs = 0;
-
-    for (
-      const mot of motsModele
-    ) {
-
-      if (
-        motsSource.has(mot)
-      ) {
-        communs++;
-      }
-
-    }
-
-    const score =
-      Math.round(
-        (
-          communs /
-          motsModele.length
-        ) * 100
-      );
-
-    scoreMots =
-      Math.max(
-        scoreMots,
-        score
-      );
-
+    scoreCategorie = 100;
   }
 
-  //============================================================
-// 5️⃣ SCORE FINAL
-//============================================================
+  let scoreFamille = 0;
 
-const scoreFinal =
-  Math.round(
-    (
-      scoreAction * 0.25
-    ) +
-    (
-      scoreManiere * 0.15
-    ) +
-    (
-      scoreStructure * 0.30
-    ) +
-    (
-      scoreExemple * 0.20
-    ) +
-    (
-      scoreMots * 0.10
-    )
+  const familleModele =
+    normaliser(modele.famille);
+
+  const familleAnalyse =
+    normaliser(analyse.famille);
+
+  if (
+    familleModele &&
+    familleAnalyse &&
+    familleModele === familleAnalyse
+  ) {
+
+    scoreFamille = 100;
+  }
+
+  const scoreFinal =
+    Math.round(
+
+      (
+        scoreStructure *
+        0.60
+      ) +
+
+      (
+        scoreAction *
+        0.25
+      ) +
+
+      (
+        scoreCategorie *
+        0.10
+      ) +
+
+      (
+        scoreFamille *
+        0.05
+      )
+
+    );
+
+  analyse.scoreReconnaissance =
+    scoreFinal;
+
+  return Math.min(
+    100,
+    scoreFinal
   );
-
-return Math.min(
-  100,
-  scoreFinal
-);
-} 
+}
 
 //==============================================================
 // 📚 RECONNAISSANCE DU MEILLEUR MODÈLE
@@ -4320,7 +4165,21 @@ function neoAnalyserAction(
 
 
 //==============================================================
-// ⚖️ ARBITRAGE
+// ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
+//==============================================================
+//
+// IMPORTANT :
+// AUCUN seuil de similarité 50 % / 70 %.
+//
+// Le modèle peut être reconnu avec une faible similarité.
+//
+// La seule vraie condition de validation est :
+//
+//     structureComplete === true
+//
+// Donc :
+//     modèle trouvé + structure complète = VALIDÉ
+//
 //==============================================================
 
 function neoArbitrer(
@@ -4328,29 +4187,21 @@ function neoArbitrer(
   options = {}
 ) {
 
-  const regles =
-    options.regles || {};
-
-  const scoreMin =
-    Number(
-      regles.similariteMinimale ??
-      50
-    );
-
   const maxActions =
     Number(
-      regles.maxActions ??
+      options?.regles?.maxActions ??
+      options?.maxActions ??
       20
     );
 
   const raisons = [];
 
   //============================================================
-  // Nombre d'actions
+  // NOMBRE D'ACTIONS
   //============================================================
 
   if (
-    options.nombreActions >
+    Number(options.nombreActions || 0) >
     maxActions
   ) {
 
@@ -4361,10 +4212,16 @@ function neoArbitrer(
   }
 
   //============================================================
-  // Action inconnue
+  // ACTION
   //============================================================
 
-  if (!analyse.action) {
+  const actionExiste =
+    !!(
+      analyse?.action?.action ||
+      analyse?.action
+    );
+
+  if (!actionExiste) {
 
     raisons.push(
       "Aucune action reconnue."
@@ -4373,33 +4230,99 @@ function neoArbitrer(
   }
 
   //============================================================
-  // Similarité
+  // MODÈLE
   //============================================================
 
   if (
-    analyse.score < scoreMin
+    !analyse?.modele
   ) {
 
     raisons.push(
-      `Similarité insuffisante (${analyse.score}% < ${scoreMin}%).`
+      "Aucun modèle d'action reconnu."
     );
 
   }
 
+  //============================================================
+  // STRUCTURE
+  //============================================================
+
+  const structureComplete =
+    analyse?.structureComplete === true;
+
+  const slotsManquants =
+    Array.isArray(
+      analyse?.slotsManquants
+    )
+      ? analyse.slotsManquants
+      : [];
+
+  //============================================================
+  // STRUCTURE INCOMPLÈTE
+  //============================================================
+
+  if (
+    !structureComplete
+  ) {
+
+    if (
+      slotsManquants.length
+    ) {
+
+      raisons.push(
+        `Informations manquantes : ${slotsManquants.join(", ")}.`
+      );
+
+    } else {
+
+      raisons.push(
+        "Structure sémantique incomplète."
+      );
+
+    }
+
+  }
+
+  //============================================================
+  // VERDICT FINAL
+  //============================================================
+
+  const valide =
+    raisons.length === 0;
+
+  //============================================================
+  // SCORE STRUCTUREL
+  //============================================================
+
+  const scoreStructure =
+    Number(
+      analyse?.scoreStructure
+    ) || 0;
+
   return {
-    valide:
-      raisons.length === 0,
+
+    valide,
 
     verdict:
-      raisons.length === 0
+      valide
         ? "VALIDÉ"
         : "REFUSÉ",
+
+    score:
+      scoreStructure,
+
+    scoreStructure,
+
+    structureComplete,
+
+    slotsManquants,
 
     raisons
 
   };
 
 }
+
 
 
 //==============================================================
