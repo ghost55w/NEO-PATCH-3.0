@@ -171,17 +171,28 @@ async function analysePaveAvecNeoAI(message, contexteMatch = {}) {
 
 
         //================================================
-        // 6️⃣ VALIDATION
-        //================================================
+// 6️⃣ VALIDATION SÉMANTIQUE
+//================================================
+//
+// IMPORTANT :
+// Aucun seuil de 50 % ou 70 %.
+//
+// NeoAI valide lorsque le modèle a été reconnu
+// ET que toute sa structure obligatoire est présente.
+//
+//================================================
 
-        const score =
-            Number(analyse.score) || 0;
+const score =
+    Number(
+        analyse.scoreStructure ??
+        analyse.score ??
+        0
+    );
 
-
-        const valide =
-            analyse.trouve === true &&
-            score >= 70;
-
+const valide =
+    analyse.trouve === true &&
+    analyse.valide === true &&
+    analyse.structureComplete === true;
 
         //================================================
         // 7️⃣ CONSTRUCTION DE L'ACTION
