@@ -4105,64 +4105,378 @@ function neoAnalyserAction(
       analyseModele
     );
 
+//============================================================
+// 🧩 VALIDATION DE LA STRUCTURE DU MODÈLE RECONNU
+//============================================================
+
+const modeleReconnu =
+  modele?.modele || null;
+
+let scoreStructure = 0;
+
+let structureComplete = false;
+
+let slotsManquants = [];
+
+let slotsTrouves = [];
+
+//============================================================
+// SI UN MODÈLE A ÉTÉ RECONNU
+//============================================================
+
+if (
+  modeleReconnu
+) {
+
+  const structureModele =
+    Array.isArray(
+      modeleReconnu.structure
+    )
+      ? modeleReconnu.structure
+      : [];
+
+  const existe = valeur => {
+
+    if (
+      valeur === null ||
+      valeur === undefined
+    ) {
+      return false;
+    }
+
+    return String(
+      valeur
+    ).trim() !== "";
+
+  };
+
+  const valeurs = {
+
+    SUJET:
+      acteur ||
+      null,
+
+    ACTION:
+      actionNom ||
+      null,
+
+    CIBLE:
+      cible ||
+      null,
+
+    MEMBRE:
+      membre ||
+      null,
+
+    PARTIE_CORPS:
+      partieCorps ||
+      null,
+
+    MANIERE:
+      maniere ||
+      null,
+
+    DISTANCE:
+      distance?.valeur ??
+      null,
+
+    HAUTEUR:
+      hauteur?.valeur ??
+      null,
+
+    VITESSE:
+      vitesse?.valeur ??
+      null,
+
+    DIRECTION:
+      trajectoire ||
+      null,
+
+    TRAJECTOIRE:
+      trajectoire ||
+      null
+
+  };
+
+  for (
+    const element of structureModele
+  ) {
+
+    const slot =
+      neoNormaliserMotLocal(
+        String(element)
+      )
+        .toUpperCase()
+        .replace(/\s+/g, "_");
+
+    if (!slot) {
+      continue;
+    }
+
+    let valeur = null;
+
+    switch (slot) {
+
+      case "SUJET":
+      case "ACTEUR":
+
+        valeur =
+          valeurs.SUJET;
+
+        break;
+
+      case "ACTION":
+      case "VERBE":
+
+        valeur =
+          valeurs.ACTION;
+
+        break;
+
+      case "CIBLE":
+      case "OBJET":
+
+        valeur =
+          valeurs.CIBLE;
+
+        break;
+
+      case "MEMBRE":
+
+        valeur =
+          valeurs.MEMBRE;
+
+        break;
+
+      case "PARTIE_CORPS":
+      case "PARTIECORPS":
+
+        valeur =
+          valeurs.PARTIE_CORPS;
+
+        break;
+
+      case "MANIERE":
+
+        valeur =
+          valeurs.MANIERE;
+
+        break;
+
+      case "DISTANCE":
+
+        valeur =
+          valeurs.DISTANCE;
+
+        break;
+
+      case "HAUTEUR":
+
+        valeur =
+          valeurs.HAUTEUR;
+
+        break;
+
+      case "VITESSE":
+
+        valeur =
+          valeurs.VITESSE;
+
+        break;
+
+      case "DIRECTION":
+
+        valeur =
+          valeurs.DIRECTION;
+
+        break;
+
+      case "TRAJECTOIRE":
+
+        valeur =
+          valeurs.TRAJECTOIRE;
+
+        break;
+
+      default:
+
+        valeur = null;
+
+        break;
+
+    }
+
+    if (
+      existe(valeur)
+    ) {
+
+      slotsTrouves.push({
+        slot,
+        valeur
+      });
+
+    } else {
+
+      slotsManquants.push(
+        slot
+      );
+
+    }
+
+  }
+
+  const totalSlots =
+    structureModele.length;
+
+  const totalTrouves =
+    slotsTrouves.length;
+
+  scoreStructure =
+    totalSlots > 0
+      ? Math.round(
+          (
+            totalTrouves /
+            totalSlots
+          ) * 100
+        )
+      : 0;
+
+  structureComplete =
+    slotsManquants.length === 0;
+
+}
+
+//============================================================
+// 🧠 STRUCTURE SÉMANTIQUE FINALE
+//============================================================
+
+const structureSemantique = {
+
+  sujet:
+    acteur ||
+    null,
+
+  action:
+    actionNom ||
+    null,
+
+  cible:
+    cible ||
+    null,
+
+  membre:
+    membre ||
+    null,
+
+  partieCorps:
+    partieCorps ||
+    null,
+
+  maniere:
+    maniere ||
+    null,
+
+  distance:
+    distance?.valeur ??
+    null,
+
+  hauteur:
+    hauteur?.valeur ??
+    null,
+
+  vitesse:
+    vitesse?.valeur ??
+    null,
+
+  trajectoire:
+    trajectoire ||
+    null
+
+};
+    
   //============================================================
   // ✅ FORMAT DE SORTIE
   //============================================================
-
-  return {
+return {
 
     texte,
 
+    // 👤 SUJET
     acteur,
-
     sujet: acteur,
 
+    // ⚔️ ACTION
     action: actionNom,
 
     categorie,
-
     famille,
 
+    // 🎯 CIBLE
     cible,
 
+    // 🧩 COMPLÉMENTS
     maniere,
-
     membre,
 
     vitesse:
-      vitesse?.valeur ?? null,
+        vitesse?.valeur ?? null,
 
     distance:
-      distance?.valeur ?? null,
+        distance?.valeur ?? null,
 
     distanceUnite:
-      distance?.unite ?? null,
+        distance?.unite ?? null,
 
     hauteur:
-      hauteur?.valeur ?? null,
+        hauteur?.valeur ?? null,
 
     hauteurUnite:
-      hauteur?.unite ?? null,
+        hauteur?.unite ?? null,
 
     direction:
-      trajectoire,
+        trajectoire,
 
     trajectoire,
 
     partieCorps,
 
+    // 🧠 MODÈLE SÉLECTIONNÉ
     modele:
-      modele?.modele || null,
+        modele?.modele || null,
 
+    // 🔎 SCORE DE RECONNAISSANCE DU MODÈLE
     score:
-      modele?.score || 0,
+        modele?.score || 0,
 
-    structure
+    // 🧩 SCORE DE STRUCTURE
+    scoreStructure:
+        modele?.structure?.scoreStructure ?? 0,
 
-  };
+    // ✅ STRUCTURE COMPLÈTE ?
+    structureComplete:
+        modele?.structure?.structureComplete === true,
 
-}
+    // ❌ CHAMPS MANQUANTS
+    slotsManquants:
+        modele?.structure?.slotsManquants || [],
 
+    // ✅ CHAMPS TROUVÉS
+    slotsTrouves:
+        modele?.structure?.slotsTrouves || [],
+
+    // Alias utilisé par l'arbitrage
+    requisManquants:
+        modele?.structure?.slotsManquants || [],
+
+    // 🧱 STRUCTURE GRAMMATICALE EXISTANTE
+    structure,
+
+    // 🧠 STRUCTURE SÉMANTIQUE DU MODÈLE
+    structureSemantique:
+        modele?.structure?.structure || []
+
+};
+  
 
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
