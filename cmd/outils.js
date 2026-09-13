@@ -5218,26 +5218,22 @@ function AnalyserNeoAI(
 
   }
 
-  //============================================================
-  // ⚖️ ARBITRAGE GLOBAL
-  //============================================================
+//============================================================
+// ⚖️ ARBITRAGE GLOBAL
+//============================================================
+const premiereAction =
+  actions[0] || {};
 
-  const arbitre =
-    neoArbitrer(
-      {
-        ...(
-          actions[0] || {
-            action: null,
-            score: 0
-          }
-        )
-      },
-      {
-        ...options,
-        nombreActions:
-          actions.length
-      }
-    );
+const arbitre =
+  neoArbitrer(
+    premiereAction,
+    {
+      ...options,
+
+      nombreActions:
+        actions.length
+    }
+  );
 
   //============================================================
   // RAISONS ACTIONS
@@ -5319,9 +5315,23 @@ function AnalyserNeoAI(
 
     score:
       premiere.score || 0,
+      scoreStructure:
+    premiere.scoreStructure || 0,
+
+structureComplete:
+    premiere.structureComplete === true,
+
+slotsManquants:
+    premiere.slotsManquants || [],
+
+requisManquants:
+    premiere.requisManquants || [],
 
     structure:
-      premiere.structure || null,
+    premiere.structure || null,
+
+structureSemantique:
+    premiere.structureSemantique || null,
 
     slots: {
       acteur:
@@ -5364,35 +5374,47 @@ function AnalyserNeoAI(
 
     comprehension: {
 
-      sujet:
-        premiere.acteur || null,
+    sujet:
+        premiere.acteur ||
+        null,
 
-      action:
-        premiere.action || null,
+    action:
+        premiere.action ||
+        null,
 
-      maniere:
-        premiere.maniere || null,
+    maniere:
+        premiere.maniere ||
+        null,
 
-      cible:
-        premiere.cible || null,
+    cible:
+        premiere.cible ||
+        null,
 
-      trajectoire:
-        premiere.trajectoire || null,
+    membre:
+        premiere.membre ||
+        null,
 
-      distance:
-        premiere.distance ?? null,
+    partieCorps:
+        premiere.partieCorps ||
+        null,
 
-      hauteur:
-        premiere.hauteur ?? null,
+    trajectoire:
+        premiere.trajectoire ||
+        null,
 
-      vitesse:
-        premiere.vitesse || null,
+    distance:
+        premiere.distance ??
+        null,
 
-      partieCorps:
-        premiere.partieCorps || null
+    hauteur:
+        premiere.hauteur ??
+        null,
 
-    },
+    vitesse:
+        premiere.vitesse ||
+        null
 
+},
     arbitrage: {
       valide,
       verdict:
