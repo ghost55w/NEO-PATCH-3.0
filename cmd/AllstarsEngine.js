@@ -225,14 +225,13 @@ const valide =
             valide,
 
             raison:
-                valide
-                    ? "Action comprise et validée par NeoAI."
-                    : (
-                        analyse.requisManquants?.length
-                            ? `Informations manquantes : ${analyse.requisManquants.join(", ")}`
-                            : "Similarité insuffisante."
-                    )
-
+    valide
+        ? "Action comprise et validée par NeoAI."
+        : (
+            analyse.requisManquants?.length
+                ? `Informations manquantes : ${analyse.requisManquants.join(", ")}`
+                : "Structure sémantique incomplète."
+        )
         };
 
 
@@ -334,7 +333,7 @@ const valide =
                     : (
                         analyse.requisManquants?.length
                             ? `Pavé refusé : informations manquantes (${analyse.requisManquants.join(", ")}).`
-                            : "Pavé refusé : similarité insuffisante."
+                            : "Pavé refusé : structure sémantique incomplète."
                     ),
 
             resume:
