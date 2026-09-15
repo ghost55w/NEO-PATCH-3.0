@@ -3010,142 +3010,208 @@ function neoFusionnerSegments(
 //==============================================================
 // 📚 MODÈLES D'ACTIONS
 //==============================================================
-
 function neoGetModeles() {
 
-  const sources = [
-    NeoAI?.NEO_ACTION_MODELS,
-    NeoAI?.NEO_COMBAT_MODELS,
-    NeoAI?.ACTION_MODELS,
-    NeoAI?.MODELES_ACTIONS
-  ];
+    const sources = [
+        NeoAI?.NEO_ACTION_MODELS,
+        NeoAI?.NEO_COMBAT_MODELS,
+        NeoAI?.ACTION_MODELS,
+        NeoAI?.MODELES_ACTIONS,
 
-  for (const source of sources) {
+        // IMPORTANT :
+        // Dans NeoAI.js, NEO_ACTIONS_COMBAT est directement
+        // disponible et contient les modèles regroupés par
+        // action canonique.
+        typeof NEO_ACTIONS_COMBAT !== "undefined"
+            ? NEO_ACTIONS_COMBAT
+            : null
+    ];
 
-    //============================================================
-    // SOURCE = TABLEAU DE MODÈLES
-    //============================================================
 
-    if (
-      Array.isArray(source) &&
-      source.length
-    ) {
+    for (const source of sources) {
 
-      return source;
+        if (!source) {
+            continue;
+        }
 
-    }
 
-    //============================================================
-    // SOURCE = OBJET CLASSÉ PAR ACTION
-    //
-    // Exemple :
-    //
-    // {
-    //   frapper: [...],
-    //   courir: [...],
-    //   sauter: [...],
-    //   esquiver: [...]
-    // }
-    //
-    // On conserve maintenant la clé "action".
-    //============================================================
+        // ============================================================
+        // 📦 SOURCE SOUS FORME DE TABLEAU
+        // ============================================================
 
-    if (
-      source &&
-      typeof source === "object"
-    ) {
+        if (Array.isArray(source)) {
 
-      const modeles = [];
+            const modeles = [];
 
-      for (
-        const [action, valeur]
-        of Object.entries(source)
-      ) {
+            for (const modele of source) {
 
-        //========================================================
-        // ACTION CONTENANT PLUSIEURS MODÈLES
-        //========================================================
+                if (
+                    !modele ||
+                    typeof modele !== "object"
+                ) {
+                    continue;
+                }
 
-        if (
-          Array.isArray(valeur)
-        ) {
+                modeles.push({
+                    ...modele,
 
-          for (
-            const modele of valeur
-          ) {
-
-            if (
-              modele &&
-              typeof modele === "object"
-            ) {
-
-              modeles.push({
-
-                // ACTION = clé réelle de NEO_ACTIONS_COMBAT
-                action:
-                  modele.action ||
-                  action,
-
-                categorie:
-                  modele.categorie ||
-                  "combat",
-
-                ...modele
-
-              });
-
+                    // Si le modèle possède déjà une action,
+                    // on la conserve.
+                    action:
+                        modele.action ||
+                        modele.nomAction ||
+                        modele.categorie ||
+                        null
+                });
             }
 
-          }
 
-          continue;
+            if (modeles.length) {
 
+                console.log(
+                    "📚 [NeoAI MODELES] Source tableau :",
+                    modeles.length
+                );
+
+                return modeles;
+            }
+
+            continue;
         }
 
-        //========================================================
-        // ACTION CONTENANT UN SEUL MODÈLE
-        //========================================================
+
+        // ============================================================
+        // 📚 SOURCE SOUS FORME D'OBJET
+        //
+        // Exemple :
+        //
+        // NEO_ACTIONS_COMBAT = {
+        //     frapper: [ ATT_001, ATT_002 ],
+        //     courir:  [ DEP_001, DEP_002 ],
+        //     sauter:  [ SAUT_001 ]
+        // }
+        //
+        // La clé "frapper" doit devenir :
+        //
+        // modele.action = "frapper"
+        // ============================================================
 
         if (
-          valeur &&
-          typeof valeur === "object"
+            typeof source === "object"
         ) {
 
-          modeles.push({
+            const modeles = [];
 
-            // ACTION = clé réelle
-            action:
-              valeur.action ||
-              action,
 
-            categorie:
-              valeur.categorie ||
-              "combat",
+            for (
+                const [actionCanonique, valeur]
+                of Object.entries(source)
+            ) {
 
-            ...valeur
+                // ----------------------------------------------------
+                // Groupe contenant plusieurs modèles
+                // ----------------------------------------------------
 
-          });
+                if (Array.isArray(valeur)) {
 
+                    for (const modele of valeur) {
+
+                        if (
+                            !modele ||
+                            typeof modele !== "object"
+                        ) {
+                            continue;
+                        }
+
+
+                        modeles.push({
+
+                            // On place le modèle en premier
+                            ...modele,
+
+                            // Puis on FORCE l'action provenant
+                            // de la clé du groupe.
+                            //
+                            // Exemple :
+                            // frapper: [ATT_001]
+                            //
+                            // devient :
+                            // action: "frapper"
+                            // ------------------------------------------------
+                            action:
+                                modele.action ||
+                                actionCanonique,
+
+                            categorie:
+                                modele.categorie ||
+                                actionCanonique
+                        });
+                    }
+
+                    continue;
+                }
+
+
+                // ----------------------------------------------------
+                // Groupe contenant un seul modèle
+                // ----------------------------------------------------
+
+                if (
+                    valeur &&
+                    typeof valeur === "object"
+                ) {
+
+                    modeles.push({
+
+                        ...valeur,
+
+                        action:
+                            valeur.action ||
+                            actionCanonique,
+
+                        categorie:
+                            valeur.categorie ||
+                            actionCanonique
+                    });
+                }
+            }
+
+
+            if (modeles.length) {
+
+                console.log(
+                    "📚 [NeoAI MODELES] Source objet :",
+                    modeles.length
+                );
+
+                console.log(
+                    "🎯 [NeoAI ACTIONS DISPONIBLES] :",
+                    [
+                        ...new Set(
+                            modeles.map(
+                                modele =>
+                                    modele.action
+                            )
+                        )
+                    ]
+                );
+
+                return modeles;
+            }
         }
-
-      }
-
-      if (
-        modeles.length
-      ) {
-
-        return modeles;
-
-      }
-
     }
 
-  }
 
-  return [];
+    // ================================================================
+    // ❌ AUCUN MODÈLE
+    // ================================================================
 
+    console.log(
+        "⚠️ [NeoAI MODELES] Aucun modèle trouvé."
+    );
+
+    return [];
 }
-
 
 
 
@@ -3529,288 +3595,389 @@ function neoCalculerSimilariteModele(
 // 5. Le score ne valide jamais le pavé.
 //==============================================================
 
-function neoReconnaitreModele(
-  texte,
-  analyse = {}
-) {
+function neoReconnaitreModele(texte, analyse = {}) {
 
-  const tousLesModeles =
-    neoGetModeles();
+    // ================================================================
+    // 📚 RÉCUPÉRATION DE TOUS LES MODÈLES
+    // ================================================================
 
-  if (
-    !tousLesModeles.length
-  ) {
+    const tousLesModeles = neoGetModeles();
 
-    return {
-      modele: null,
-      score: 0,
-      structure: null
-    };
+    if (!Array.isArray(tousLesModeles) || !tousLesModeles.length) {
 
-  }
-
-  //============================================================
-  // 🔎 ACTION DÉTECTÉE
-  //============================================================
-
-  const actionDetectee =
-    typeof analyse.action === "object"
-      ? (
-          analyse.action.action ||
-          analyse.action.verbe ||
-          null
-        )
-      : (
-          analyse.action ||
-          null
+        console.log(
+            "⚠️ [NeoAI MODEL] Aucun modèle disponible."
         );
 
-  //==============================================================
-// 🎯 CONVERSION DE L'ACTION DÉTECTÉE
-//    vers l'ACTION CANONIQUE DE NEOAI
-//
-// "fonce"  → "courir"
-// "court"  → "courir"
-// "bondit" → "sauter"
-// "frappe" → "frapper"
-//==============================================================
+        return {
+            modele: null,
+            score: 0,
+            scoreStructure: 0,
+            structureComplete: false,
+            slotsTrouves: [],
+            slotsManquants: [],
+            actionCanonique: null
+        };
+    }
 
-const actionBrute =
-  neoNormaliserMotLocal(
-    String(actionDetectee || "")
-  )
-    .toLowerCase()
-    .trim();
 
-let actionNormalisee = actionBrute;
+    // ================================================================
+    // 🎯 ACTION DÉTECTÉE
+    // ================================================================
 
-const dictionnaireActions =
-  NeoAI?.NEO_DICTIONNAIRES?.actions ||
-  {};
+    const actionDetectee =
+        analyse?.action ||
+        neoDetecterAction(texte);
 
-for (
-  const [actionCanonique, aliases]
-  of Object.entries(dictionnaireActions)
-) {
 
-  if (
-    actionCanonique === actionBrute
-  ) {
+    const actionBrute =
+        typeof actionDetectee === "string"
+            ? actionDetectee
+            : (
+                actionDetectee?.action ||
+                actionDetectee?.verbe ||
+                ""
+            );
 
-    actionNormalisee =
-      actionCanonique;
 
-    break;
-
-  }
-
-  if (
-    Array.isArray(aliases) &&
-    aliases.some(alias =>
-      neoNormaliserMotLocal(
-        String(alias)
-      )
-        .toLowerCase()
-        .trim() === actionBrute
-    )
-  ) {
-
-    actionNormalisee =
-      actionCanonique;
-
-    break;
-
-  }
-
-}
-
-  //============================================================
-  // ❌ AUCUNE ACTION
-  //============================================================
-
-  if (!actionNormalisee) {
-
-    return {
-      modele: null,
-      score: 0,
-      structure: null
-    };
-
-  }
-
-  //============================================================
-  // 🎯 FILTRAGE STRICT PAR ACTION
-  //
-  // Exemple :
-  //
-  // ACTION = "courir"
-  //
-  // → uniquement les modèles :
-  //    courir: [...]
-  //
-  // ACTION = "sauter"
-  //
-  // → uniquement :
-  //    sauter: [...]
-  //
-  // ACTION = "frapper"
-  //
-  // → uniquement :
-  //    frapper: [...]
-  //============================================================
-
-  const modelesCompatibles =
-    tousLesModeles.filter(
-      modele => {
-
-        const actionModele =
-          neoNormaliserMotLocal(
-            String(
-              modele?.action ||
-              ""
-            )
-          )
+    const actionBruteNormalisee =
+        neoNormaliserMotLocal(
+            String(actionBrute)
+        )
             .toLowerCase()
             .trim();
 
-        return (
-          actionModele ===
-          actionNormalisee
-        );
 
-      }
-    );
+    // ================================================================
+    // 🧠 CONVERSION ALIAS → ACTION CANONIQUE
+    //
+    // fonce  → courir
+    // court  → courir
+    // bondit → sauter
+    // saute  → sauter
+    // frappe → frapper
+    // esquive → esquiver
+    // ================================================================
 
-  //============================================================
-  // ❌ AUCUN MODÈLE POUR CETTE ACTION
-  //============================================================
+    let actionCanonique =
+        actionBruteNormalisee;
 
-  if (
-    !modelesCompatibles.length
-  ) {
 
-    console.log(
-      "⚠️ [NeoAI MODEL] Aucun modèle pour l'action :",
-      actionDetectee
-    );
+    const dictionnaireActions =
+        NEO_DICTIONNAIRES?.actions || {};
 
-    return {
-      modele: null,
-      score: 0,
-      structure: null,
-      action: actionDetectee
-    };
 
-  }
-
-  console.log(
-    "🎯 [NeoAI ACTION]",
-    actionDetectee
-  );
-
-  console.log(
-    "📚 [NeoAI MODELES COMPATIBLES]",
-    modelesCompatibles.length
-  );
-
-  //============================================================
-  // 🧠 COMPARAISON UNIQUEMENT DANS LE GROUPE
-  //============================================================
-
-  let meilleur = null;
-  let meilleurScore = -1;
-  let meilleurStructure = null;
-
-  for (
-    const modele
-    of modelesCompatibles
-  ) {
-
-    console.log(
-      "🧪 [NeoAI MODEL]",
-      modele.id,
-      modele.action,
-      modele.famille,
-      Array.isArray(modele.structure)
-        ? modele.structure
-        : []
-    );
-
-    const score =
-      neoCalculerSimilariteModele(
-        texte,
-        modele,
-        analyse
-      );
-
-    //==========================================================
-    // STRUCTURE DU MODÈLE
-    //==========================================================
-
-    const structureModele =
-      Array.isArray(
-        modele.structure
-      )
-        ? modele.structure
-        : [];
-
-    //==========================================================
-    // MEILLEUR MODÈLE
-    //==========================================================
-
-    if (
-      score > meilleurScore
+    for (
+        const [canonique, aliases]
+        of Object.entries(dictionnaireActions)
     ) {
 
-      meilleurScore =
-        score;
+        const canoniqueNormalisee =
+            neoNormaliserMotLocal(
+                String(canonique)
+            )
+                .toLowerCase()
+                .trim();
 
-      meilleur =
-        modele;
 
-      meilleurStructure = {
-        structure:
-          structureModele,
+        // ------------------------------------------------------------
+        // Le mot est déjà le nom canonique
+        // ------------------------------------------------------------
 
-        scoreStructure:
-          analyse.scoreStructure || 0,
+        if (
+            actionBruteNormalisee ===
+            canoniqueNormalisee
+        ) {
 
-        structureComplete:
-          analyse.structureComplete === true,
+            actionCanonique =
+                canonique;
 
-        slotsTrouves:
-          analyse.slotsTrouves || [],
+            break;
+        }
 
-        slotsManquants:
-          analyse.slotsManquants || []
-      };
 
+        // ------------------------------------------------------------
+        // Le mot est un alias
+        // ------------------------------------------------------------
+
+        if (
+            Array.isArray(aliases) &&
+            aliases.some(alias =>
+                neoNormaliserMotLocal(
+                    String(alias)
+                )
+                    .toLowerCase()
+                    .trim() ===
+                actionBruteNormalisee
+            )
+        ) {
+
+            actionCanonique =
+                canonique;
+
+            break;
+        }
     }
 
-  }
 
-  //============================================================
-  // 📤 RÉSULTAT
-  //============================================================
+    console.log(
+        "🧠 [NeoAI ACTION BRUTE] :",
+        actionBruteNormalisee
+    );
 
-  return {
+    console.log(
+        "🎯 [NeoAI ACTION CANONIQUE] :",
+        actionCanonique
+    );
 
-    modele:
-      meilleur,
 
-    score:
-      meilleurScore,
+    // ================================================================
+    // 🔒 FILTRE STRICT PAR ACTION
+    //
+    // IMPORTANT :
+    // On ne compare PLUS tous les modèles.
+    //
+    // fonce  → uniquement modèles "courir"
+    // frappe → uniquement modèles "frapper"
+    // saute  → uniquement modèles "sauter"
+    // ================================================================
 
-    structure:
-      meilleurStructure,
+    const modelesCompatibles =
+        tousLesModeles.filter(modele => {
 
-    action:
-      actionDetectee
+            const actionModele =
+                neoNormaliserMotLocal(
+                    String(
+                        modele?.action ||
+                        ""
+                    )
+                )
+                    .toLowerCase()
+                    .trim();
 
-  };
 
+            return (
+                actionModele ===
+                String(actionCanonique)
+                    .toLowerCase()
+                    .trim()
+            );
+        });
+
+
+    console.log(
+        "📚 [NeoAI MODÈLES COMPATIBLES] :",
+        modelesCompatibles.length
+    );
+
+
+    // ================================================================
+    // ❌ AUCUN MODÈLE POUR CETTE ACTION
+    // ================================================================
+
+    if (!modelesCompatibles.length) {
+
+        console.log(
+            "⚠️ [NeoAI MODEL] Aucun modèle pour l'action canonique :",
+            actionCanonique
+        );
+
+        return {
+            modele: null,
+            score: 0,
+            scoreStructure: 0,
+            structureComplete: false,
+            slotsTrouves: [],
+            slotsManquants: [],
+            actionCanonique
+        };
+    }
+
+
+    // ================================================================
+    // 🧠 RECHERCHE DU MEILLEUR MODÈLE
+    //
+    // La similarité sert UNIQUEMENT à choisir
+    // le meilleur modèle parmi les modèles de
+    // cette action.
+    //
+    // Elle NE valide PAS l'action.
+    // ================================================================
+
+    let meilleur =
+        null;
+
+    let meilleurScore =
+        -1;
+
+    let meilleureAnalyse =
+        null;
+
+
+    for (
+        const modele
+        of modelesCompatibles
+    ) {
+
+        console.log(
+            "🔎 [NeoAI MODEL] Comparaison :",
+            modele?.id ||
+            modele?.nom ||
+            "sans-id"
+        );
+
+
+        // ------------------------------------------------------------
+        // Analyse isolée pour éviter que les candidats
+        // écrasent les informations du modèle précédent.
+        // ------------------------------------------------------------
+
+        const analyseModele = {
+            ...analyse
+        };
+
+
+        const score =
+            neoCalculerSimilariteModele(
+                texte,
+                modele,
+                analyseModele
+            );
+
+
+        if (
+            score >
+            meilleurScore
+        ) {
+
+            meilleurScore =
+                score;
+
+            meilleur =
+                modele;
+
+            meilleureAnalyse =
+                analyseModele;
+        }
+    }
+
+
+    // ================================================================
+    // ❌ SÉCURITÉ
+    // ================================================================
+
+    if (!meilleur) {
+
+        return {
+            modele: null,
+            score: 0,
+            scoreStructure: 0,
+            structureComplete: false,
+            slotsTrouves: [],
+            slotsManquants: [],
+            actionCanonique
+        };
+    }
+
+
+    // ================================================================
+    // 📊 INFORMATIONS DU MODÈLE RETENU
+    // ================================================================
+
+    const structure =
+        Array.isArray(
+            meilleur?.structure
+        )
+            ? meilleur.structure
+            : [];
+
+
+    const scoreStructure =
+        Number(
+            meilleureAnalyse?.scoreStructure ??
+            0
+        );
+
+
+    const slotsTrouves =
+        Array.isArray(
+            meilleureAnalyse?.slotsTrouves
+        )
+            ? meilleureAnalyse.slotsTrouves
+            : [];
+
+
+    const slotsManquants =
+        Array.isArray(
+            meilleureAnalyse?.slotsManquants
+        )
+            ? meilleureAnalyse.slotsManquants
+            : [];
+
+
+    const structureComplete =
+        slotsManquants.length === 0;
+
+
+    console.log(
+        "🏆 [NeoAI MODEL RETENU] :",
+        meilleur?.id ||
+        meilleur?.nom ||
+        "sans-id"
+    );
+
+    console.log(
+        "🎯 [NeoAI ACTION CANONIQUE] :",
+        actionCanonique
+    );
+
+    console.log(
+        "📊 [NeoAI SCORE RECONNAISSANCE] :",
+        meilleurScore
+    );
+
+    console.log(
+        "📐 [NeoAI SCORE STRUCTURE] :",
+        scoreStructure
+    );
+
+    console.log(
+        "🧩 [NeoAI STRUCTURE] :",
+        structure
+    );
+
+    console.log(
+        "✅ [NeoAI STRUCTURE COMPLÈTE] :",
+        structureComplete
+    );
+
+
+    // ================================================================
+    // 📤 RETOUR
+    // ================================================================
+
+    return {
+
+        modele:
+            meilleur,
+
+        score:
+            meilleurScore,
+
+        scoreStructure,
+
+        structureComplete,
+
+        slotsTrouves,
+
+        slotsManquants,
+
+        actionCanonique,
+
+        structure
+    };
 }
-
+              
 
 //==============================================================
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
