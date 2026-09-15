@@ -4476,7 +4476,7 @@ return {
         modele?.structure?.structure || []
 
 };
-  
+}  
 
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
