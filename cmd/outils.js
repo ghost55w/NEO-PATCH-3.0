@@ -3565,12 +3565,64 @@ function neoReconnaitreModele(
           null
         );
 
-  const actionNormalisee =
-    neoNormaliserMotLocal(
-      String(actionDetectee || "")
+  //==============================================================
+// 🎯 CONVERSION DE L'ACTION DÉTECTÉE
+//    vers l'ACTION CANONIQUE DE NEOAI
+//
+// "fonce"  → "courir"
+// "court"  → "courir"
+// "bondit" → "sauter"
+// "frappe" → "frapper"
+//==============================================================
+
+const actionBrute =
+  neoNormaliserMotLocal(
+    String(actionDetectee || "")
+  )
+    .toLowerCase()
+    .trim();
+
+let actionNormalisee = actionBrute;
+
+const dictionnaireActions =
+  NeoAI?.NEO_DICTIONNAIRES?.actions ||
+  {};
+
+for (
+  const [actionCanonique, aliases]
+  of Object.entries(dictionnaireActions)
+) {
+
+  if (
+    actionCanonique === actionBrute
+  ) {
+
+    actionNormalisee =
+      actionCanonique;
+
+    break;
+
+  }
+
+  if (
+    Array.isArray(aliases) &&
+    aliases.some(alias =>
+      neoNormaliserMotLocal(
+        String(alias)
+      )
+        .toLowerCase()
+        .trim() === actionBrute
     )
-      .toLowerCase()
-      .trim();
+  ) {
+
+    actionNormalisee =
+      actionCanonique;
+
+    break;
+
+  }
+
+}
 
   //============================================================
   // ❌ AUCUNE ACTION
