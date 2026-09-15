@@ -3166,9 +3166,491 @@ mains: {
             }
         }
     },
+            circulaire"
+            ],
+
+            exemples: [
+                "Yamato fait tourner son épée à 360° avant de frapper Naruto",
+                "Goku effectue une coupe circulaire de 180° vers Vegeta",
+                "Ichigo réalise une taillade circulaire de 360° contre Ulquiorra",
+                "Sasuke tourne son épée et frappe Naruto avec une coupe circulaire",
+                "Luffy effectue une rotation de 360° avec son épée vers Zoro"
+            ]
+        }
+    },
+
+//================================================
+// ⚔️ FRAPPES AVEC ARMES
+//================================================
+
+armes: {
+
+    //================================================
+    // ⚔️ KATANA
+    //================================================
+
+    katana: {
+
+        //================================================
+        // 1 — COUPE HORIZONTALE
+        //================================================
+
+        coupe_horizontale: {
+            id: "ARME_001",
+            action: "frappe",
+            maniere: "coupe_horizontale",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "katana",
+                trajectoire: ["horizontale"],
+                direction: ["gauche", "droite"]
+            },
+
+            aliases: [
+                "coupe horizontale",
+                "taillade horizontale",
+                "coup horizontal",
+                "slash horizontal"
+            ],
+
+            exemples: [
+                "Yamato frappe Naruto avec son katana par une coupe horizontale de gauche à droite",
+                "Goku taille horizontalement vers Vegeta avec son katana",
+                "Ichigo porte une coupe horizontale vers le torse d'Ulquiorra",
+                "Sasuke effectue une taillade horizontale vers Naruto",
+                "Luffy donne un coup horizontal de katana vers le flanc de Zoro"
+            ]
+        },
 
 
+        //================================================
+        // 2 — COUPE VERTICALE
+        //================================================
 
+        coupe_verticale: {
+            id: "ARME_002",
+            action: "frappe",
+            maniere: "coupe_verticale",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "katana",
+                trajectoire: ["verticale"],
+                direction: ["haut", "bas"]
+            },
+
+            aliases: [
+                "coupe verticale",
+                "taillade verticale",
+                "coup vertical",
+                "slash vertical"
+            ],
+
+            exemples: [
+                "Yamato abat son katana verticalement vers Naruto",
+                "Goku effectue une coupe verticale vers Vegeta",
+                "Ichigo porte une taillade verticale vers Ulquiorra",
+                "Sasuke frappe Naruto avec une coupe verticale descendante",
+                "Luffy abat son katana vers le torse de Zoro"
+            ]
+        },
+
+
+        //================================================
+        // 3 — COUPE DIAGONALE
+        //================================================
+
+        coupe_diagonale: {
+            id: "ARME_003",
+            action: "frappe",
+            maniere: "coupe_diagonale",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "katana",
+                trajectoire: ["diagonale"],
+                direction: [
+                    "haut_gauche",
+                    "haut_droite",
+                    "bas_gauche",
+                    "bas_droite"
+                ]
+            },
+
+            aliases: [
+                "coupe diagonale",
+                "taillade diagonale",
+                "coup diagonal",
+                "slash diagonal"
+            ],
+
+            exemples: [
+                "Yamato frappe Naruto avec une coupe diagonale descendante",
+                "Goku porte une taillade diagonale vers Vegeta",
+                "Ichigo effectue une coupe diagonale vers Ulquiorra",
+                "Sasuke donne un slash diagonal vers Naruto",
+                "Luffy frappe Zoro avec une coupe diagonale de son katana"
+            ]
+        },
+
+
+        //================================================
+        // 🗡️ ÉPÉE — ESTOC
+        //================================================
+
+        estoc_epee: {
+            id: "ARME_004",
+            action: "frappe",
+            maniere: "estoc",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "epee",
+                trajectoire: ["directe"],
+                direction: ["avant"]
+            },
+
+            aliases: [
+                "estoc",
+                "coup d'estoc",
+                "estocade",
+                "coup d'épée direct",
+                "coup d'épée droit"
+            ],
+
+            exemples: [
+                "Yamato porte une estocade avec son épée vers Naruto",
+                "Goku pousse son épée directement vers Vegeta",
+                "Ichigo donne un coup d'estoc vers le torse d'Ulquiorra",
+                "Sasuke effectue une estocade vers Naruto",
+                "Luffy frappe Zoro avec un coup d'épée direct"
+            ]
+        },
+
+
+        //================================================
+        // 🗡️ ÉPÉE — COUPE CIRCULAIRE
+        //================================================
+
+        coupe_circulaire_epee: {
+            id: "ARME_005",
+            action: "frappe",
+            maniere: "coupe_circulaire",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "ROTATION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "epee",
+                trajectoire: ["circulaire"],
+                rotation: {
+                    type: "angle",
+                    unite: ["°"]
+                }
+            },
+
+            aliases: [
+                "coupe circulaire",
+                "coup d'épée circulaire",
+                "épée tournante",
+                "slash circulaire"
+            ],
+
+            exemples: [
+                "Yamato fait tourner son épée à 360° avant de frapper Naruto",
+                "Goku effectue une coupe circulaire de 180° vers Vegeta",
+                "Ichigo réalise une taillade circulaire de 360° contre Ulquiorra",
+                "Sasuke tourne son épée et frappe Naruto avec une coupe circulaire",
+                "Luffy effectue une rotation de 360° avec son épée vers Zoro"
+            ]
+        }
+    },
+
+
+    //================================================
+    // 🔱 LANCE
+    //================================================
+
+    lance: {
+
+        //================================================
+        // 6 — COUP D'ESTOC
+        //================================================
+
+        estoc_lance: {
+            id: "ARME_006",
+            action: "frappe",
+            maniere: "estoc",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "lance",
+                trajectoire: ["directe"],
+                direction: ["avant"]
+            },
+
+            aliases: [
+                "estoc de lance",
+                "coup de lance",
+                "pique de lance",
+                "estocade à la lance"
+            ],
+
+            exemples: [
+                "Yamato pousse sa lance directement vers Naruto",
+                "Goku porte une estocade de lance vers Vegeta",
+                "Luffy frappe Ulquiorra avec la pointe de sa lance",
+                "Ichigo effectue un coup de lance direct vers Naruto",
+                "Sasuke plante sa lance vers le torse de Madara"
+            ]
+        },
+
+
+        //================================================
+        // 7 — COUP DE LANCE CIRCULAIRE
+        //================================================
+
+        balayage_lance: {
+            id: "ARME_007",
+            action: "frappe",
+            maniere: "balayage",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "TRAJECTOIRE",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "lance",
+                trajectoire: ["circulaire"],
+                direction: ["gauche", "droite"]
+            },
+
+            aliases: [
+                "balayage de lance",
+                "coup circulaire de lance",
+                "balayage avec la lance",
+                "lance circulaire"
+            ],
+
+            exemples: [
+                "Yamato fait tourner sa lance vers la droite pour frapper Naruto",
+                "Goku effectue un balayage circulaire de sa lance vers Vegeta",
+                "Luffy balaie horizontalement avec sa lance vers Zoro",
+                "Ichigo fait pivoter sa lance vers Ulquiorra",
+                "Sasuke réalise un balayage de lance vers les jambes de Naruto"
+            ]
+        }
+    },
+
+
+    //================================================
+    // 🥋 NUNCHAKU
+    //================================================
+
+    nunchaku: {
+
+        //================================================
+        // 8 — FRAPPE CIRCULAIRE
+        //================================================
+
+        frappe_circulaire: {
+            id: "ARME_008",
+            action: "frappe",
+            maniere: "frappe_circulaire",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "TRAJECTOIRE",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "nunchaku",
+                trajectoire: ["circulaire"],
+                direction: ["gauche", "droite"]
+            },
+
+            aliases: [
+                "frappe circulaire au nunchaku",
+                "coup circulaire de nunchaku",
+                "nunchaku circulaire"
+            ],
+
+            exemples: [
+                "Yamato fait tourner son nunchaku vers Naruto avec une frappe circulaire",
+                "Goku frappe Vegeta avec un mouvement circulaire de nunchaku",
+                "Luffy porte une frappe circulaire de nunchaku au bras de Zoro",
+                "Ichigo fait tournoyer son nunchaku vers Ulquiorra",
+                "Sasuke frappe Naruto avec un nunchaku en mouvement circulaire"
+            ]
+        },
+
+
+        //================================================
+        // 9 — FRAPPE DIRECTE
+        //================================================
+
+        frappe_directe: {
+            id: "ARME_009",
+            action: "frappe",
+            maniere: "frappe_directe",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "DIRECTION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "nunchaku",
+                trajectoire: ["directe"],
+                direction: ["avant"]
+            },
+
+            aliases: [
+                "frappe directe au nunchaku",
+                "coup direct de nunchaku",
+                "nunchaku direct"
+            ],
+
+            exemples: [
+                "Yamato frappe Naruto directement avec son nunchaku",
+                "Goku donne un coup direct de nunchaku à Vegeta",
+                "Luffy porte une frappe directe au visage de Zoro avec son nunchaku",
+                "Ichigo frappe Ulquiorra directement avec son nunchaku",
+                "Sasuke donne un coup de nunchaku direct vers Naruto"
+            ]
+        },
+
+
+        //================================================
+        // 10 — FRAPPE ROTATIVE
+        //================================================
+
+        frappe_rotative: {
+            id: "ARME_010",
+            action: "frappe",
+            maniere: "frappe_rotative",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "ROTATION",
+                "PARTIE_CORPS",
+                "CIBLE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: "nunchaku",
+                trajectoire: ["rotative"],
+                rotation: {
+                    type: "angle",
+                    unite: ["°"]
+                }
+            },
+
+            aliases: [
+                "frappe rotative",
+                "coup rotatif de nunchaku",
+                "nunchaku rotatif",
+                "frappe tournante au nunchaku"
+            ],
+
+            exemples: [
+                "Yamato fait tourner son nunchaku à 360° avant de frapper Naruto",
+                "Goku réalise une rotation de 180° avec son nunchaku vers Vegeta",
+                "Luffy effectue une frappe rotative de nunchaku vers Zoro",
+                "Ichigo fait tourner son nunchaku à 360° contre Ulquiorra",
+                "Sasuke réalise une rotation avec son nunchaku avant de frapper Naruto"
+            ]
+        }
+
+    }
+
+},
+    
     
 // ==================================================
 // ESQUIVES
