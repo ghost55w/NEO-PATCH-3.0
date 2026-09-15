@@ -558,6 +558,9 @@ const NEO_ACTIONS = {
 
     const NEO_ACTION_MODELS = {
 
+        deplacement: {
+        categorie: "deplacement",
+
     course: [
 
     // ==================================================
