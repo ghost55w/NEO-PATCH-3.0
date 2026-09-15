@@ -558,7 +558,16 @@ const NEO_ACTIONS = {
 
     const NEO_ACTION_MODELS = {
 
-    course: {
+    course: [
+
+    // ==================================================
+    // COURSE FRONTALE
+    // ==================================================
+
+    {
+        id: "COURSE_001",
+        action: "course",
+        maniere: "frontale",
 
         structure: [
             "SUJET",
@@ -574,15 +583,195 @@ const NEO_ACTIONS = {
         params: {
             direction: [
                 "avant",
-                "arriere",
+                "arriere"
+            ],
+
+            trajectoire: [
+                "frontale"
+            ],
+
+            vitesse: [
+                "vmax",
+                "vitesse_maximale",
+                "a_grande_vitesse",
+                "a_pleine_vitesse",
+                "rapidement",
+                "tres_rapidement"
+            ],
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato court droit vers Naruto à VMax sur 5m pour l'atteindre",
+
+            "Goku se précipite frontalement vers Vegeta à pleine vitesse sur 6m pour réduire la distance",
+
+            "Ichigo sprinte vers Ulquiorra en ligne droite à vitesse maximale sur 4m pour le rejoindre",
+
+            "Luffy fonce vers Zoro à grande vitesse sur 3m pour arriver devant lui",
+
+            "Sasuke accélère droit vers Naruto à VMax sur 5m pour l'intercepter"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE CIRCULAIRE
+    // ==================================================
+
+    {
+        id: "COURSE_002",
+        action: "course",
+        maniere: "circulaire",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "VITESSE",
+            "CIBLE",
+            "DISTANCE",
+            "COURBE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
                 "gauche",
                 "droite"
             ],
 
             trajectoire: [
-                "frontale",
-                "circulaire",
-                "diagonale",
+                "circulaire"
+            ],
+
+            vitesse: [
+                "vmax",
+                "vitesse_maximale",
+                "a_grande_vitesse",
+                "a_pleine_vitesse",
+                "rapidement",
+                "tres_rapidement"
+            ],
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            courbe: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto court autour de Sasuke vers la droite à grande vitesse avec une courbe de 2m sur 5m pour le contourner",
+
+            "Luffy se précipite autour de Zoro vers la gauche à pleine vitesse avec une courbe de 1,5m sur 4m pour atteindre son flanc",
+
+            "Goku accélère en cercle autour de Vegeta vers la droite à VMax avec une courbe de 3m sur 6m pour passer derrière lui",
+
+            "Yamato file autour de Madara vers la gauche à vitesse maximale avec une courbe de 2,5m sur 5m pour le contourner",
+
+            "Ichigo progresse en trajectoire circulaire vers la droite autour d'Ulquiorra avec une courbe de 1m sur 4m pour arriver sur son côté"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE DIAGONALE
+    // ==================================================
+
+    {
+        id: "COURSE_003",
+        action: "course",
+        maniere: "diagonale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "VITESSE",
+            "CIBLE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "gauche",
+                "droite",
+                "avant",
+                "arriere"
+            ],
+
+            trajectoire: [
+                "diagonale"
+            ],
+
+            vitesse: [
+                "vmax",
+                "vitesse_maximale",
+                "a_grande_vitesse",
+                "a_pleine_vitesse",
+                "rapidement",
+                "tres_rapidement"
+            ],
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Goku court en diagonale vers la droite en direction de Vegeta à VMax sur 5m pour l'intercepter",
+
+            "Sasuke se précipite en diagonale vers la gauche vers Naruto à pleine vitesse sur 4m pour le rejoindre",
+
+            "Ichigo sprinte en diagonale vers l'avant à grande vitesse sur 6m pour atteindre Ulquiorra",
+
+            "Luffy file en diagonale vers la droite vers Zoro à vitesse maximale sur 3m pour se rapprocher de lui",
+
+            "Yamato accélère en diagonale vers la gauche à VMax sur 5m pour couper la trajectoire de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // COURSE EN ZIG ZAG
+    // ==================================================
+
+    {
+        id: "COURSE_004",
+        action: "course",
+        maniere: "zig_zag",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "VITESSE",
+            "CIBLE",
+            "DISTANCE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant",
+                "arriere"
+            ],
+
+            trajectoire: [
                 "zig_zag"
             ],
 
@@ -591,692 +780,903 @@ const NEO_ACTIONS = {
                 "vitesse_maximale",
                 "a_grande_vitesse",
                 "a_pleine_vitesse",
-                "tres_rapidement",
-                "rapidement"
+                "rapidement",
+                "tres_rapidement"
             ],
 
             distance: {
                 type: "distance",
-                unite: ["cm", "m", "km"]
-            }
-        },
-
-        exemples: [
-            "Yamato court vers Naruto en trajectoire frontale vers l'avant à VMax sur 5m pour l'atteindre",
-
-            "Naruto se précipite vers Sasuke en trajectoire circulaire vers la droite à grande vitesse sur 4m pour le contourner",
-
-            "Goku accélère vers Vegeta en diagonale vers la gauche à vitesse maximale sur 6m pour l'intercepter",
-
-            "Ichigo sprinte vers Ulquiorra en zig zag vers l'avant à pleine vitesse sur 5m pour se rapprocher de lui",
-
-            "Sasuke se déplace vers Naruto en trajectoire frontale vers l'avant très rapidement sur 3m pour l'atteindre",
-
-            "Luffy file vers Zoro en trajectoire circulaire vers la gauche à grande vitesse sur 4m pour passer sur son côté",
-
-            "Vegeta progresse vers Goku en diagonale vers la droite à VMax sur 5m pour réduire la distance",
-
-            "Kakashi se lance vers Obito en zig zag vers l'avant rapidement sur 4m pour éviter son attaque",
-
-            "Yamato avance vers Madara en diagonale vers la gauche à pleine vitesse sur 5m pour arriver à portée",
-
-            "Naruto traverse rapidement la distance vers Sasuke en trajectoire circulaire vers la droite à vitesse maximale sur 5m pour le contourner"
-        ]
-    },
-
-    // ======================================================
-    // PROCHAINE ACTION : SAUT
-    // ======================================================
-
-    saut: {
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-
-        params: {
-            // À compléter
-        },
-
-        exemples: [
-            // SAUT
-        ]
-    },
-
-    // ======================================================
-    // PROCHAINE ACTION : BOND
-    // ======================================================
-
-    bond: {
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-
-        params: {
-            // À compléter
-        },
-
-        exemples: [
-            // BOND
-        ]
-    },
-
-    // ======================================================
-    // PROCHAINE ACTION : VOL
-    // ======================================================
-
-    vol: {
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-
-        params: {
-            // À compléter
-        },
-
-        exemples: [
-            // VOL
-        ]
-    },
-    // ======================================================
-    // PROCHAINE ACTION : SAUT
-    // ======================================================
-
-    saut: {
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-
-        params: {
-            // À compléter
-        },
-
-        exemples: [
-            // SAUT
-        ]
-    },
-
-    // ======================================================
-    // PROCHAINE ACTION : BOND
-    // ======================================================
-
-    bond: {
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-
-        params: {
-            // À compléter
-        },
-
-        exemples: [
-            // BOND
-        ]
-    },
-
-    // ======================================================
-    // PROCHAINE ACTION : VOL
-    // ======================================================
-
-    vol: {
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-
-        params: {
-            // À compléter
-        },
-
-        exemples: [
-            // VOL
-        ]
-    },
-
-    {
-        id: "SAUT_004",
-        famille: "vertical_hauteur_cible",
-        structure: [
-            "SUJET",
-            "ACTION",
-            "TRAJECTOIRE",
-            "HAUTEUR",
-            "CIBLE",
-            "INTENTION"
-        ],
-        params: {
-            trajectoire: ["vertical", "vers_le_haut"],
-            hauteur: {
-                type: "distance",
                 unite: ["cm", "m"]
             }
         },
+
         exemples: [
-            "Yamato saute à 1m de hauteur pour atteindre Naruto",
-            "Naruto saute à 2m de hauteur vers Sasuke",
-            "Goku saute à 3m de hauteur pour rejoindre Vegeta",
-            "Ichigo saute à 50cm de hauteur vers Ulquiorra",
-            "Sasuke saute à 1,5m de hauteur pour atteindre Naruto"
+            "Naruto court en zig zag vers Sasuke à VMax sur 5m pour l'atteindre",
+
+            "Goku se précipite en zig zag vers Vegeta à grande vitesse sur 6m pour se rapprocher de lui",
+
+            "Luffy sprinte en zig zag vers Zoro à pleine vitesse sur 4m pour éviter ses attaques",
+
+            "Ichigo file en zig zag vers Ulquiorra à vitesse maximale sur 5m pour l'intercepter",
+
+            "Yamato avance en zig zag vers Madara rapidement sur 3m pour brouiller sa trajectoire"
         ]
     },
 
+
+    // ==================================================
+    // COURSE LATERALE
+    // ==================================================
+
     {
-        id: "SAUT_005",
-        famille: "vertical_distance",
+        id: "COURSE_005",
+        action: "course",
+        maniere: "laterale",
+
         structure: [
             "SUJET",
             "ACTION",
+            "DIRECTION",
             "TRAJECTOIRE",
+            "VITESSE",
+            "CIBLE",
             "DISTANCE",
             "INTENTION"
         ],
+
         params: {
-            trajectoire: ["vertical", "vers_le_haut"],
+            direction: [
+                "gauche",
+                "droite"
+            ],
+
+            trajectoire: [
+                "laterale"
+            ],
+
+            vitesse: [
+                "vmax",
+                "vitesse_maximale",
+                "a_grande_vitesse",
+                "a_pleine_vitesse",
+                "rapidement",
+                "tres_rapidement"
+            ],
+
             distance: {
                 type: "distance",
                 unite: ["cm", "m"]
             }
         },
+
         exemples: [
-            "Yamato saute verticalement sur 1m",
-            "Naruto saute vers le haut sur 2m",
-            "Goku saute verticalement sur 3m",
-            "Ichigo effectue un saut de 50cm",
-            "Sasuke fait un saut vertical sur 1,5m"
+            "Sasuke court latéralement vers la droite à VMax sur 4m pour contourner Naruto",
+
+            "Goku se déplace rapidement sur le côté gauche vers Vegeta sur 3m pour éviter son attaque",
+
+            "Luffy sprinte latéralement vers la droite à pleine vitesse sur 5m pour arriver sur le flanc de Zoro",
+
+            "Ichigo file sur le côté gauche vers Ulquiorra à grande vitesse sur 4m pour se repositionner",
+
+            "Yamato accélère latéralement vers la droite à vitesse maximale sur 6m pour passer à côté de Madara"
         ]
-    },
-
-    {
-        id: "SAUT_006",
-        famille: "vertical_distance_hauteur",
-        structure: [
-            "SUJET",
-            "ACTION",
-            "TRAJECTOIRE",
-            "DISTANCE",
-            "HAUTEUR",
-            "INTENTION"
-        ],
-        params: {
-            trajectoire: ["vertical", "vers_le_haut"],
-            distance: {
-                type: "distance",
-                unite: ["cm", "m"]
-            },
-            hauteur: {
-                type: "distance",
-                unite: ["cm", "m"]
-            }
-        },
-        exemples: [
-            "Yamato saute verticalement sur 1m jusqu'à 1m de hauteur",
-            "Naruto saute sur 2m jusqu'à 2m de hauteur",
-            "Goku effectue un saut de 3m jusqu'à 3m de hauteur",
-            "Ichigo saute sur 50cm jusqu'à 50cm de hauteur",
-            "Sasuke fait un saut sur 1,5m jusqu'à 1,5m de hauteur"
-        ]
-    },
-
-    {
-        id: "SAUT_007",
-        famille: "vertical_vitesse",
-        structure: [
-            "SUJET",
-            "ACTION",
-            "TRAJECTOIRE",
-            "VITESSE",
-            "INTENTION"
-        ],
-        params: {
-            trajectoire: ["vertical", "vers_le_haut"],
-            vitesse: {
-                type: "vitesse",
-                unite: ["m/s", "km/h"]
-            }
-        },
-        exemples: [
-            "Yamato saute verticalement à 6 m/s",
-            "Naruto saute vers le haut à 8 m/s",
-            "Goku saute verticalement à 10 m/s",
-            "Ichigo effectue un saut à 7 m/s",
-            "Sasuke saute vers le haut à 9 m/s"
-        ]
-    },
-
-    {
-        id: "SAUT_008",
-        famille: "vertical_cible_vitesse",
-        structure: [
-            "SUJET",
-            "ACTION",
-            "TRAJECTOIRE",
-            "CIBLE",
-            "VITESSE",
-            "INTENTION"
-        ],
-        params: {
-            trajectoire: ["vertical", "vers_le_haut"],
-            vitesse: {
-                type: "vitesse",
-                unite: ["m/s", "km/h"]
-            }
-        },
-        exemples: [
-            "Yamato saute verticalement vers Naruto à 6 m/s",
-            "Naruto saute vers Sasuke à 8 m/s",
-            "Goku saute vers Vegeta à 10 m/s",
-            "Ichigo saute vers Ulquiorra à 7 m/s",
-            "Sasuke saute vers Naruto à 9 m/s"
-        ]
-    },
-
-    {
-        id: "SAUT_009",
-        famille: "vertical_distance_vitesse",
-        structure: [
-            "SUJET",
-            "ACTION",
-            "TRAJECTOIRE",
-            "DISTANCE",
-            "VITESSE",
-            "INTENTION"
-        ],
-        params: {
-            trajectoire: ["vertical", "vers_le_haut"],
-            distance: {
-                type: "distance",
-                unite: ["cm", "m"]
-            },
-            vitesse: {
-                type: "vitesse",
-                unite: ["m/s", "km/h"]
-            }
-        },
-        exemples: [
-            "Yamato saute verticalement sur 1m à 6 m/s",
-            "Naruto saute sur 2m à 8 m/s",
-            "Goku effectue un saut de 3m à 10 m/s",
-            "Ichigo saute sur 50cm à 7 m/s",
-            "Sasuke fait un saut vertical de 1,5m à 9 m/s"
-        ]
-    },
-
-    {
-        id: "SAUT_010",
-        famille: "vertical_complet",
-        structure: [
-            "SUJET",
-            "ACTION",
-            "TRAJECTOIRE",
-            "CIBLE",
-            "DISTANCE",
-            "HAUTEUR",
-            "VITESSE",
-            "INTENTION"
-        ],
-        params: {
-            trajectoire: ["vertical", "vers_le_haut"],
-            distance: {
-                type: "distance",
-                unite: ["cm", "m"]
-            },
-            hauteur: {
-                type: "distance",
-                unite: ["cm", "m"]
-            },
-            vitesse: {
-                type: "vitesse",
-                unite: ["m/s", "km/h"]
-            }
-        },
-        exemples: [
-            "Yamato saute verticalement vers Naruto sur 1m jusqu'à 2m de hauteur à 6 m/s",
-            "Goku saute vers Vegeta sur 2m jusqu'à 3m de hauteur à 10 m/s",
-            "Naruto saute vers Sasuke sur 1,5m jusqu'à 2m de hauteur à 8 m/s",
-            "Ichigo saute vers Ulquiorra sur 50cm jusqu'à 1m de hauteur à 7 m/s",
-            "Luffy saute vers Zoro sur 2m jusqu'à 2,5m de hauteur à 9 m/s"
-        
-            ]
-        }
-
-    ], 
+    }
 
 ],
 
     // ======================================================
-    // MODÈLES BOND
-    // BOND VERTICAL — 001 à 010
-    // 5 EXEMPLES PAR MODÈLE
+    // PROCHAINE ACTION : SAUT
+    // ======================================================
+saut: [
+
+    // ==================================================
+    // SAUT VERTICAL — SUR PLACE
+    // ==================================================
+
+    {
+        id: "SAUT_001",
+        action: "saut",
+        maniere: "vertical",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: [
+                "verticale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato saute verticalement à 2m de hauteur pour prendre de la hauteur face à Naruto",
+
+            "Goku saute droit vers le haut à une hauteur de 3m pour éviter Vegeta",
+
+            "Luffy effectue un saut vertical de 1,5m de hauteur pour atteindre Zoro",
+
+            "Ichigo réalise un saut vertical de 2,5m de hauteur pour esquiver Ulquiorra",
+
+            "Sasuke se propulse en sautant vers le haut jusqu'à 3m de hauteur pour prendre de la hauteur face à Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT FRONTAL
+    // ==================================================
+
+    {
+        id: "SAUT_002",
+        action: "saut",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant"
+            ],
+
+            trajectoire: [
+                "frontale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto saute vers l'avant à 1m de hauteur sur 3m pour atteindre Sasuke",
+
+            "Goku effectue un saut frontal vers Vegeta à une hauteur de 2m sur 4m pour l'intercepter",
+
+            "Luffy réalise un saut en avant à 1,5m de hauteur sur 2m pour rejoindre Zoro",
+
+            "Ichigo se propulse en sautant droit devant lui à 2,5m de hauteur sur 5m pour atteindre Ulquiorra",
+
+            "Yamato saute vers Madara en trajectoire frontale à 2m de hauteur sur 3,5m pour l'attaquer"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT ARRIERE
+    // ==================================================
+
+    {
+        id: "SAUT_003",
+        action: "saut",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "arriere"
+            ],
+
+            trajectoire: [
+                "arriere"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke saute vers l'arrière à 1m de hauteur sur 2m pour s'éloigner de Naruto",
+
+            "Goku effectue un saut arrière à 2m de hauteur sur 3m pour éviter l'attaque de Vegeta",
+
+            "Ichigo réalise un saut vers l'arrière à 1,5m de hauteur sur 2,5m pour prendre ses distances avec Ulquiorra",
+
+            "Luffy se propulse en sautant vers l'arrière à 2m de hauteur sur 3m pour esquiver Zoro",
+
+            "Yamato saute en arrière à 2,5m de hauteur sur 4m pour sortir de portée de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT LATERAL
+    // ==================================================
+
+    {
+        id: "SAUT_004",
+        action: "saut",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "gauche",
+                "droite"
+            ],
+
+            trajectoire: [
+                "laterale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto saute vers la droite à 1m de hauteur sur 2m pour éviter Sasuke",
+
+            "Goku effectue un saut latéral vers la gauche à 1,5m de hauteur sur 3m pour esquiver Vegeta",
+
+            "Luffy réalise un saut sur le côté droit à 2m de hauteur sur 2,5m pour contourner Zoro",
+
+            "Ichigo se propulse en sautant vers la gauche à 1m de hauteur sur 1,5m pour se décaler d'Ulquiorra",
+
+            "Yamato saute latéralement vers la droite à 2m de hauteur sur 3m pour passer à côté de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // SAUT DIAGONAL
+    // ==================================================
+
+    {
+        id: "SAUT_005",
+        action: "saut",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+
+            trajectoire: [
+                "diagonale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto saute en diagonale vers l'avant droite à 1,5m de hauteur sur 3m pour atteindre Sasuke",
+
+            "Goku effectue un saut diagonal vers l'avant gauche à 2m de hauteur sur 4m pour intercepter Vegeta",
+
+            "Luffy réalise un saut en diagonale vers l'arrière droite à 1m de hauteur sur 2,5m pour éviter Zoro",
+
+            "Ichigo se propulse en sautant en diagonale vers l'avant gauche à 2,5m de hauteur sur 5m pour rejoindre Ulquiorra",
+
+            "Yamato saute en diagonale vers l'arrière gauche à 2m de hauteur sur 3,5m pour s'éloigner de Madara"
+        ]
+    }
+
+],
+        
+    
+    // ======================================================
+    // PROCHAINE ACTION : BOND
+    // ======================================================
+bond: [
+
+    // ==================================================
+    // BOND VERTICAL — SUR PLACE
+    // ==================================================
+
+    {
+        id: "BOND_001",
+        action: "bond",
+        maniere: "vertical",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: [
+                "verticale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato bondit verticalement à 2m de hauteur pour prendre de la hauteur face à Naruto",
+
+            "Goku effectue un bond vertical à 3m de hauteur pour éviter Vegeta",
+
+            "Luffy réalise un bond droit vers le haut à 1,5m de hauteur pour atteindre Zoro",
+
+            "Ichigo bondit verticalement jusqu'à 2,5m de hauteur pour esquiver Ulquiorra",
+
+            "Sasuke effectue un bond vers le haut jusqu'à 3m de hauteur pour prendre de la hauteur face à Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BOND FRONTAL
+    // ==================================================
+
+    {
+        id: "BOND_002",
+        action: "bond",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant"
+            ],
+
+            trajectoire: [
+                "frontale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto bondit vers l'avant à 1m de hauteur sur 3m pour atteindre Sasuke",
+
+            "Goku effectue un bond frontal vers Vegeta à 2m de hauteur sur 4m pour l'intercepter",
+
+            "Luffy réalise un bond en avant à 1,5m de hauteur sur 2m pour rejoindre Zoro",
+
+            "Ichigo bondit droit devant lui à 2,5m de hauteur sur 5m pour atteindre Ulquiorra",
+
+            "Yamato effectue un bond vers Madara en trajectoire frontale à 2m de hauteur sur 3,5m pour l'attaquer"
+        ]
+    },
+
+
+    // ==================================================
+    // BOND ARRIERE
+    // ==================================================
+
+    {
+        id: "BOND_003",
+        action: "bond",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "arriere"
+            ],
+
+            trajectoire: [
+                "arriere"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke bondit vers l'arrière à 1m de hauteur sur 2m pour s'éloigner de Naruto",
+
+            "Goku effectue un bond arrière à 2m de hauteur sur 3m pour éviter l'attaque de Vegeta",
+
+            "Ichigo réalise un bond vers l'arrière à 1,5m de hauteur sur 2,5m pour prendre ses distances avec Ulquiorra",
+
+            "Luffy bondit en arrière à 2m de hauteur sur 3m pour esquiver Zoro",
+
+            "Yamato effectue un bond vers l'arrière à 2,5m de hauteur sur 4m pour sortir de portée de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // BOND LATERAL
+    // ==================================================
+
+    {
+        id: "BOND_004",
+        action: "bond",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "gauche",
+                "droite"
+            ],
+
+            trajectoire: [
+                "laterale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto bondit vers la droite à 1m de hauteur sur 2m pour éviter Sasuke",
+
+            "Goku effectue un bond latéral vers la gauche à 1,5m de hauteur sur 3m pour esquiver Vegeta",
+
+            "Luffy réalise un bond sur le côté droit à 2m de hauteur sur 2,5m pour contourner Zoro",
+
+            "Ichigo bondit vers la gauche à 1m de hauteur sur 1,5m pour se décaler d'Ulquiorra",
+
+            "Yamato effectue un bond latéral vers la droite à 2m de hauteur sur 3m pour passer à côté de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // BOND DIAGONAL
+    // ==================================================
+
+    {
+        id: "BOND_005",
+        action: "bond",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+
+            trajectoire: [
+                "diagonale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto bondit en diagonale vers l'avant droite à 1,5m de hauteur sur 3m pour atteindre Sasuke",
+
+            "Goku effectue un bond diagonal vers l'avant gauche à 2m de hauteur sur 4m pour intercepter Vegeta",
+
+            "Luffy réalise un bond en diagonale vers l'arrière droite à 1m de hauteur sur 2,5m pour éviter Zoro",
+
+            "Ichigo bondit en diagonale vers l'avant gauche à 2,5m de hauteur sur 5m pour rejoindre Ulquiorra",
+
+            "Yamato effectue un bond en diagonale vers l'arrière gauche à 2m de hauteur sur 3,5m pour s'éloigner de Madara"
+        ]
+    }
+
+],
+    
+    // ======================================================
+    // PROCHAINE ACTION : VOL
     // ======================================================
 
-    bond: [
+vol: [
 
-        {
-            id: "BOND_001",
-            famille: "vertical_simple",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "INTENTION"
+    // ==================================================
+    // VOL VERTICAL — SUR PLACE
+    // ==================================================
+
+    {
+        id: "VOL_001",
+        action: "vol",
+        maniere: "vertical",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: [
+                "verticale"
             ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"]
-            },
-            exemples: [
-                "Yamato bondit verticalement pour s'élever",
-                "Naruto bondit vers le haut pour prendre de la hauteur",
-                "Goku bondit droit vers le ciel",
-                "Ichigo effectue un bond vertical pour s'élever",
-                "Sasuke fait un bond vertical pour prendre de la hauteur"
-            ]
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
         },
 
-        {
-            id: "BOND_002",
-            famille: "vertical_hauteur",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "HAUTEUR",
-                "INTENTION"
+        exemples: [
+            "Yamato vole verticalement jusqu'à 5m de hauteur pour prendre de la hauteur face à Naruto",
+
+            "Goku s'élève dans les airs jusqu'à une hauteur de 10m pour éviter Vegeta",
+
+            "Luffy monte verticalement à 3m de hauteur pour atteindre Zoro",
+
+            "Ichigo prend de l'altitude jusqu'à 7m de hauteur pour esquiver Ulquiorra",
+
+            "Sasuke se maintient en vol à 4m de hauteur pour observer Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL FRONTAL
+    // ==================================================
+
+    {
+        id: "VOL_002",
+        action: "vol",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant"
             ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                hauteur: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                }
+
+            trajectoire: [
+                "frontale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
             },
-            exemples: [
-                "Yamato bondit verticalement à 1m de hauteur",
-                "Naruto bondit vers le haut à 2m de hauteur",
-                "Goku bondit à 3 mètres de hauteur",
-                "Ichigo effectue un bond vertical de 50cm",
-                "Sasuke fait un bond vertical de 1,5m de hauteur"
-            ]
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
         },
 
-        {
-            id: "BOND_003",
-            famille: "vertical_cible",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "CIBLE",
-                "INTENTION"
+        exemples: [
+            "Naruto vole vers l'avant à 5m de hauteur sur 10m pour atteindre Sasuke",
+
+            "Goku se déplace dans les airs vers Vegeta à 8m de hauteur sur 15m pour l'intercepter",
+
+            "Luffy vole droit devant lui à 3m de hauteur sur 6m pour rejoindre Zoro",
+
+            "Ichigo traverse les airs à 7m de hauteur sur 12m pour atteindre Ulquiorra",
+
+            "Yamato fonce dans les airs vers Madara à 10m de hauteur sur 20m pour l'attaquer"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL ARRIERE
+    // ==================================================
+
+    {
+        id: "VOL_003",
+        action: "vol",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "arriere"
             ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"]
+
+            trajectoire: [
+                "arriere"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
             },
-            exemples: [
-                "Yamato bondit verticalement pour atteindre Naruto",
-                "Naruto bondit vers le haut en direction de Sasuke",
-                "Goku bondit verticalement vers Vegeta",
-                "Ichigo bondit vers Ulquiorra",
-                "Sasuke bondit vers le haut pour rejoindre Naruto"
-            ]
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
         },
 
-        {
-            id: "BOND_004",
-            famille: "vertical_hauteur_cible",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "HAUTEUR",
-                "CIBLE",
-                "INTENTION"
+        exemples: [
+            "Sasuke vole vers l'arrière à 4m de hauteur sur 5m pour s'éloigner de Naruto",
+
+            "Goku recule dans les airs à 8m de hauteur sur 10m pour éviter l'attaque de Vegeta",
+
+            "Ichigo se déplace en volant vers l'arrière à 6m de hauteur sur 7m pour prendre ses distances avec Ulquiorra",
+
+            "Luffy vole en arrière à 3m de hauteur sur 5m pour esquiver Zoro",
+
+            "Yamato se retire dans les airs à 10m de hauteur sur 12m pour sortir de portée de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL LATERAL
+    // ==================================================
+
+    {
+        id: "VOL_004",
+        action: "vol",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "gauche",
+                "droite"
             ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                hauteur: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                }
+
+            trajectoire: [
+                "laterale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
             },
-            exemples: [
-                "Yamato bondit à 1m de hauteur pour atteindre Naruto",
-                "Naruto bondit à 2m de hauteur vers Sasuke",
-                "Goku bondit à 3m de hauteur pour rejoindre Vegeta",
-                "Ichigo bondit à 50cm de hauteur vers Ulquiorra",
-                "Sasuke bondit à 1,5m de hauteur pour atteindre Naruto"
-            ]
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
         },
 
-        {
-            id: "BOND_005",
-            famille: "vertical_distance",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "DISTANCE",
-                "INTENTION"
+        exemples: [
+            "Naruto vole vers la droite à 5m de hauteur sur 6m pour éviter Sasuke",
+
+            "Goku se déplace dans les airs vers la gauche à 8m de hauteur sur 10m pour esquiver Vegeta",
+
+            "Luffy vole sur le côté droit à 3m de hauteur sur 5m pour contourner Zoro",
+
+            "Ichigo se déplace latéralement dans les airs vers la gauche à 7m de hauteur sur 8m pour se décaler d'Ulquiorra",
+
+            "Yamato vole vers la droite à 10m de hauteur sur 12m pour passer à côté de Madara"
+        ]
+    },
+
+
+    // ==================================================
+    // VOL DIAGONAL
+    // ==================================================
+
+    {
+        id: "VOL_005",
+        action: "vol",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
             ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                distance: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                }
+
+            trajectoire: [
+                "diagonale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
             },
-            exemples: [
-                "Yamato bondit verticalement sur 1m",
-                "Naruto bondit vers le haut sur 2m",
-                "Goku bondit verticalement sur 3m",
-                "Ichigo effectue un bond de 50cm",
-                "Sasuke fait un bond vertical sur 1,5m"
-            ]
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
         },
 
-        {
-            id: "BOND_006",
-            famille: "vertical_distance_hauteur",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "DISTANCE",
-                "HAUTEUR",
-                "INTENTION"
-            ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                distance: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                },
-                hauteur: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                }
-            },
-            exemples: [
-                "Yamato bondit verticalement sur 1m jusqu'à 1m de hauteur",
-                "Naruto bondit sur 2m jusqu'à 2m de hauteur",
-                "Goku effectue un bond de 3m jusqu'à 3m de hauteur",
-                "Ichigo bondit sur 50cm jusqu'à 50cm de hauteur",
-                "Sasuke fait un bond sur 1,5m jusqu'à 1,5m de hauteur"
-            ]
-        },
+        exemples: [
+            "Naruto vole en diagonale vers l'avant droite à 5m de hauteur sur 8m pour atteindre Sasuke",
 
-        {
-            id: "BOND_007",
-            famille: "vertical_vitesse",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "VITESSE",
-                "INTENTION"
-            ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                vitesse: {
-                    type: "vitesse",
-                    unite: ["m/s", "km/h"]
-                }
-            },
-            exemples: [
-                "Yamato bondit verticalement à 6 m/s",
-                "Naruto bondit vers le haut à 8 m/s",
-                "Goku bondit verticalement à 10 m/s",
-                "Ichigo effectue un bond à 7 m/s",
-                "Sasuke bondit vers le haut à 9 m/s"
-            ]
-        },
+            "Goku se déplace dans les airs en diagonale vers l'avant gauche à 10m de hauteur sur 12m pour intercepter Vegeta",
 
-        {
-            id: "BOND_008",
-            famille: "vertical_cible_vitesse",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "CIBLE",
-                "VITESSE",
-                "INTENTION"
-            ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                vitesse: {
-                    type: "vitesse",
-                    unite: ["m/s", "km/h"]
-                }
-            },
-            exemples: [
-                "Yamato bondit verticalement vers Naruto à 6 m/s",
-                "Naruto bondit vers Sasuke à 8 m/s",
-                "Goku bondit vers Vegeta à 10 m/s",
-                "Ichigo bondit vers Ulquiorra à 7 m/s",
-                "Sasuke bondit vers Naruto à 9 m/s"
-            ]
-        },
+            "Luffy vole en diagonale vers l'arrière droite à 3m de hauteur sur 6m pour éviter Zoro",
 
-        {
-            id: "BOND_009",
-            famille: "vertical_distance_vitesse",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "DISTANCE",
-                "VITESSE",
-                "INTENTION"
-            ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                distance: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                },
-                vitesse: {
-                    type: "vitesse",
-                    unite: ["m/s", "km/h"]
-                }
-            },
-            exemples: [
-                "Yamato bondit verticalement sur 1m à 6 m/s",
-                "Naruto bondit sur 2m à 8 m/s",
-                "Goku effectue un bond de 3m à 10 m/s",
-                "Ichigo bondit sur 50cm à 7 m/s",
-                "Sasuke fait un bond vertical de 1,5m à 9 m/s"
-            ]
-        },
+            "Ichigo traverse les airs en diagonale vers l'avant gauche à 7m de hauteur sur 10m pour rejoindre Ulquiorra",
 
-        {
-            id: "BOND_010",
-            famille: "vertical_complet",
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "CIBLE",
-                "DISTANCE",
-                "HAUTEUR",
-                "VITESSE",
-                "INTENTION"
-            ],
-            params: {
-                trajectoire: ["vertical", "vers_le_haut"],
-                distance: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                },
-                hauteur: {
-                    type: "distance",
-                    unite: ["cm", "m"]
-                },
-                vitesse: {
-                    type: "vitesse",
-                    unite: ["m/s", "km/h"]
-                }
-            },
-            exemples: [
-                "Yamato bondit verticalement vers Naruto sur 1m jusqu'à 2m de hauteur à 6 m/s",
-                "Goku bondit vers Vegeta sur 2m jusqu'à 3m de hauteur à 10 m/s",
-                "Naruto bondit vers Sasuke sur 1,5m jusqu'à 2m de hauteur à 8 m/s",
-                "Ichigo bondit vers Ulquiorra sur 50cm jusqu'à 1m de hauteur à 7 m/s",
-                "Luffy bondit vers Zoro sur 2m jusqu'à 2,5m de hauteur à 9 m/s"
-            ]
-        }
-     
+            "Yamato vole en diagonale vers l'arrière gauche à 12m de hauteur sur 15m pour s'éloigner de Madara"
+        ]
+    }
+
+],
+        
+    
+        
+            
+                            
                            
                                     
  // ==================================================
