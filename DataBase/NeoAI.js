@@ -1676,10 +1676,884 @@ vol: [
 
 ],
         
-    
-        
+// ==================================================
+// ACCROBATIES
+// ==================================================
+salto: [
+
+    {
+        id: "SALTO_001",
+        action: "salto",
+        maniere: "sur_place",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: ["rotation_avant", "rotation_arriere"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato effectue un salto sur place à 2m de hauteur pour esquiver Naruto",
+            "Goku réalise un salto arrière sur place à 3m de hauteur pour éviter Vegeta",
+            "Luffy fait un salto avant sur place à 1,5m de hauteur pour prendre de la hauteur face à Zoro",
+            "Ichigo exécute un salto arrière sur place jusqu'à 2,5m de hauteur pour esquiver Ulquiorra",
+            "Sasuke réalise une rotation acrobatique sur place à 2m de hauteur pour éviter Naruto"
+        ]
+    },
+
+    {
+        id: "SALTO_002",
+        action: "salto",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["avant"],
+            trajectoire: ["rotation_avant"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue un salto avant vers Sasuke à 2m de hauteur sur 3m pour l'atteindre",
+            "Goku réalise un salto frontal vers Vegeta à 2,5m de hauteur sur 4m pour l'intercepter",
+            "Luffy fait un salto vers l'avant à 1,5m de hauteur sur 2m pour rejoindre Zoro",
+            "Ichigo exécute un salto avant sur 5m à 3m de hauteur pour atteindre Ulquiorra",
+            "Yamato se lance dans un salto frontal vers Madara à 2m de hauteur sur 3,5m pour l'attaquer"
+        ]
+    },
+
+    {
+        id: "SALTO_003",
+        action: "salto",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["arriere"],
+            trajectoire: ["rotation_arriere"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke effectue un salto arrière à 2m de hauteur sur 3m pour s'éloigner de Naruto",
+            "Goku réalise un salto vers l'arrière à 2,5m de hauteur sur 4m pour éviter Vegeta",
+            "Ichigo fait un salto arrière sur 2m à 1,5m de hauteur pour prendre ses distances avec Ulquiorra",
+            "Luffy exécute une rotation arrière sur 3m à 2m de hauteur pour esquiver Zoro",
+            "Yamato se propulse dans un salto arrière à 3m de hauteur sur 4m pour sortir de portée de Madara"
+        ]
+    },
+
+    {
+        id: "SALTO_004",
+        action: "salto",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["gauche", "droite"],
+            trajectoire: ["rotation_laterale"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue un salto latéral vers la droite à 1,5m de hauteur sur 2m pour éviter Sasuke",
+            "Goku réalise un salto latéral vers la gauche à 2m de hauteur sur 3m pour esquiver Vegeta",
+            "Luffy fait une rotation latérale vers la droite à 2,5m de hauteur sur 2m pour contourner Zoro",
+            "Ichigo exécute un salto sur le côté gauche à 1,5m de hauteur sur 2,5m pour se décaler d'Ulquiorra",
+            "Yamato effectue un salto latéral vers la droite à 3m de hauteur sur 4m pour passer à côté de Madara"
+        ]
+    },
+
+    {
+        id: "SALTO_005",
+        action: "salto",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+            trajectoire: ["rotation_diagonale"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue un salto diagonal vers l'avant droite à 2m de hauteur sur 3m pour atteindre Sasuke",
+            "Goku réalise un salto en diagonale vers l'avant gauche à 2,5m de hauteur sur 4m pour intercepter Vegeta",
+            "Luffy fait un salto diagonal vers l'arrière droite à 1,5m de hauteur sur 2,5m pour éviter Zoro",
+            "Ichigo exécute un salto en diagonale vers l'avant gauche à 3m de hauteur sur 5m pour rejoindre Ulquiorra",
+            "Yamato se propulse dans un salto diagonal vers l'arrière gauche à 2m de hauteur sur 3,5m pour s'éloigner de Madara"
+        ]
+    }
+
+],        
             
-                            
+vrille: [
+
+    {
+        id: "VRILLE_001",
+        action: "vrille",
+        maniere: "sur_place",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: ["rotation_verticale", "vrille"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato effectue une vrille sur place de 360° vers la droite à 2m de hauteur pour esquiver Naruto",
+            "Goku réalise une vrille de 180° vers la gauche sur place à 3m de hauteur pour éviter Vegeta",
+            "Luffy effectue une rotation de 540° vers la droite sur place à 2,5m de hauteur pour impressionner Zoro",
+            "Ichigo réalise une vrille de 720° vers la gauche à 3m de hauteur pour esquiver Ulquiorra",
+            "Sasuke tourne sur lui-même de 360° vers la droite à 2m de hauteur pour éviter Naruto"
+        ]
+    },
+
+    {
+        id: "VRILLE_002",
+        action: "vrille",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["avant"],
+            trajectoire: ["rotation_verticale", "vrille"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto avance en vrille de 360° vers la droite à 2m de hauteur sur 3m pour atteindre Sasuke",
+            "Goku effectue une vrille frontale de 180° vers la gauche à 2,5m de hauteur sur 4m pour intercepter Vegeta",
+            "Luffy se déplace vers l'avant en tournant de 540° vers la droite à 1,5m de hauteur sur 2m pour rejoindre Zoro",
+            "Ichigo traverse les airs en vrille de 360° vers la gauche à 3m de hauteur sur 5m pour atteindre Ulquiorra",
+            "Yamato fonce vers Madara en vrille de 720° vers la droite à 2m de hauteur sur 3,5m pour l'attaquer"
+        ]
+    },
+
+    {
+        id: "VRILLE_003",
+        action: "vrille",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["arriere"],
+            trajectoire: ["rotation_verticale", "vrille"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke recule en vrille de 360° vers la droite à 2m de hauteur sur 3m pour s'éloigner de Naruto",
+            "Goku effectue une vrille arrière de 180° vers la gauche à 2,5m de hauteur sur 4m pour éviter Vegeta",
+            "Ichigo se déplace vers l'arrière en tournant de 540° vers la droite à 1,5m de hauteur sur 2,5m pour esquiver Ulquiorra",
+            "Luffy part en arrière avec une vrille de 360° vers la gauche à 2m de hauteur sur 3m pour éviter Zoro",
+            "Yamato se retire en vrille de 720° vers la droite à 3m de hauteur sur 4m pour sortir de portée de Madara"
+        ]
+    },
+
+    {
+        id: "VRILLE_004",
+        action: "vrille",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["gauche", "droite"],
+            trajectoire: ["rotation_laterale", "vrille"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue une vrille latérale de 360° vers la droite à 1,5m de hauteur sur 2m pour éviter Sasuke",
+            "Goku se déplace vers la gauche en vrille de 180° vers la gauche à 2m de hauteur sur 3m pour esquiver Vegeta",
+            "Luffy réalise une vrille latérale de 540° vers la droite à 2,5m de hauteur sur 2m pour contourner Zoro",
+            "Ichigo part sur le côté gauche avec une vrille de 360° vers la gauche à 2m de hauteur sur 2,5m pour se décaler d'Ulquiorra",
+            "Yamato effectue une vrille latérale de 720° vers la droite à 3m de hauteur sur 4m pour passer à côté de Madara"
+        ]
+    },
+
+    {
+        id: "VRILLE_005",
+        action: "vrille",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+            trajectoire: ["rotation_diagonale", "vrille"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto avance en diagonale avec une vrille de 360° vers la droite à 2m de hauteur sur 3m pour atteindre Sasuke",
+            "Goku effectue une vrille diagonale de 180° vers la gauche à 2,5m de hauteur sur 4m pour intercepter Vegeta",
+            "Luffy se déplace en diagonale avec une rotation de 540° vers la droite à 1,5m de hauteur sur 2,5m pour éviter Zoro",
+            "Ichigo traverse les airs en diagonale avec une vrille de 360° vers la gauche à 3m de hauteur sur 5m pour rejoindre Ulquiorra",
+            "Yamato fonce en diagonale avec une vrille de 720° vers la droite à 2m de hauteur sur 3,5m pour s'éloigner de Madara"
+        ]
+    }
+
+],
+
+pirouette: [
+
+    {
+        id: "PIROUETTE_001",
+        action: "pirouette",
+        maniere: "sur_place",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: ["rotation_verticale", "pirouette"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato effectue une pirouette sur place de 360° vers la droite à 1m de hauteur pour esquiver Naruto",
+            "Goku réalise une pirouette de 180° vers la gauche sur place à 1,5m de hauteur pour éviter Vegeta",
+            "Luffy effectue une pirouette de 540° vers la droite sur place à 2m de hauteur pour contourner Zoro",
+            "Ichigo réalise une pirouette de 720° vers la gauche sur place à 2,5m de hauteur pour esquiver Ulquiorra",
+            "Sasuke tourne sur lui-même de 360° vers la droite à 1,5m de hauteur pour éviter Naruto"
+        ]
+    },
+
+    {
+        id: "PIROUETTE_002",
+        action: "pirouette",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["avant"],
+            trajectoire: ["rotation_verticale", "pirouette"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto avance avec une pirouette de 360° vers la droite à 1m de hauteur sur 3m pour atteindre Sasuke",
+            "Goku effectue une pirouette frontale de 180° vers la gauche à 1,5m de hauteur sur 4m pour intercepter Vegeta",
+            "Luffy se déplace vers l'avant en pirouette de 540° vers la droite à 2m de hauteur sur 2m pour rejoindre Zoro",
+            "Ichigo traverse les airs avec une pirouette de 360° vers la gauche à 2,5m de hauteur sur 5m pour atteindre Ulquiorra",
+            "Yamato fonce vers Madara avec une pirouette de 720° vers la droite à 2m de hauteur sur 3,5m pour l'attaquer"
+        ]
+    },
+
+    {
+        id: "PIROUETTE_003",
+        action: "pirouette",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["arriere"],
+            trajectoire: ["rotation_verticale", "pirouette"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke recule avec une pirouette de 360° vers la droite à 1m de hauteur sur 3m pour s'éloigner de Naruto",
+            "Goku effectue une pirouette arrière de 180° vers la gauche à 1,5m de hauteur sur 4m pour éviter Vegeta",
+            "Ichigo se déplace vers l'arrière en pirouette de 540° vers la droite à 2m de hauteur sur 2,5m pour esquiver Ulquiorra",
+            "Luffy part en arrière avec une pirouette de 360° vers la gauche à 2m de hauteur sur 3m pour éviter Zoro",
+            "Yamato se retire avec une pirouette de 720° vers la droite à 2,5m de hauteur sur 4m pour sortir de portée de Madara"
+        ]
+    },
+
+    {
+        id: "PIROUETTE_004",
+        action: "pirouette",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["gauche", "droite"],
+            trajectoire: ["rotation_laterale", "pirouette"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue une pirouette latérale de 360° vers la droite à 1m de hauteur sur 2m pour éviter Sasuke",
+            "Goku se déplace vers la gauche avec une pirouette de 180° vers la gauche à 1,5m de hauteur sur 3m pour esquiver Vegeta",
+            "Luffy réalise une pirouette latérale de 540° vers la droite à 2m de hauteur sur 2,5m pour contourner Zoro",
+            "Ichigo part sur le côté gauche avec une pirouette de 360° vers la gauche à 1,5m de hauteur sur 2m pour se décaler d'Ulquiorra",
+            "Yamato effectue une pirouette latérale de 720° vers la droite à 2,5m de hauteur sur 4m pour passer à côté de Madara"
+        ]
+    },
+
+    {
+        id: "PIROUETTE_005",
+        action: "pirouette",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+            trajectoire: ["rotation_diagonale", "pirouette"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto avance en diagonale avec une pirouette de 360° vers la droite à 1,5m de hauteur sur 3m pour atteindre Sasuke",
+            "Goku effectue une pirouette diagonale de 180° vers la gauche à 2m de hauteur sur 4m pour intercepter Vegeta",
+            "Luffy se déplace en diagonale avec une pirouette de 540° vers la droite à 1m de hauteur sur 2,5m pour éviter Zoro",
+            "Ichigo traverse les airs en diagonale avec une pirouette de 360° vers la gauche à 2,5m de hauteur sur 5m pour rejoindre Ulquiorra",
+            "Yamato fonce en diagonale avec une pirouette de 720° vers la droite à 2m de hauteur sur 3,5m pour s'éloigner de Madara"
+        ]
+    }    
+],
+
+flip: [
+
+    {
+        id: "FLIP_001",
+        action: "flip",
+        maniere: "sur_place",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            trajectoire: ["rotation_avant", "rotation_arriere"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["avant", "arriere"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Yamato effectue un flip avant sur place de 360° à 2m de hauteur pour esquiver Naruto",
+            "Goku réalise un flip arrière sur place de 360° à 3m de hauteur pour éviter Vegeta",
+            "Luffy fait un frontflip sur place de 540° à 2m de hauteur pour contourner Zoro",
+            "Ichigo réalise un backflip sur place de 360° à 2,5m de hauteur pour esquiver Ulquiorra",
+            "Sasuke effectue un flip arrière de 720° sur place à 3m de hauteur pour éviter Naruto"
+        ]
+    },
+
+    {
+        id: "FLIP_002",
+        action: "flip",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["avant"],
+            trajectoire: ["rotation_avant"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["avant"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue un frontflip de 360° vers Sasuke à 2m de hauteur sur 3m pour l'atteindre",
+            "Goku réalise un flip avant vers Vegeta de 540° à 2,5m de hauteur sur 4m pour l'intercepter",
+            "Luffy fait un frontflip vers l'avant de 360° à 1,5m de hauteur sur 2m pour rejoindre Zoro",
+            "Ichigo se propulse en flip avant de 720° à 3m de hauteur sur 5m pour atteindre Ulquiorra",
+            "Yamato fonce vers Madara avec un frontflip de 360° à 2m de hauteur sur 3,5m pour l'attaquer"
+        ]
+    },
+
+    {
+        id: "FLIP_003",
+        action: "flip",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["arriere"],
+            trajectoire: ["rotation_arriere"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["arriere"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke effectue un backflip de 360° vers l'arrière à 2m de hauteur sur 3m pour s'éloigner de Naruto",
+            "Goku réalise un flip arrière de 540° à 2,5m de hauteur sur 4m pour éviter Vegeta",
+            "Ichigo fait un backflip vers l'arrière de 360° à 1,5m de hauteur sur 2,5m pour esquiver Ulquiorra",
+            "Luffy se propulse en flip arrière de 720° à 2m de hauteur sur 3m pour sortir de portée de Zoro",
+            "Yamato recule avec un backflip de 360° à 3m de hauteur sur 4m pour éviter Madara"
+        ]
+    },
+
+    {
+        id: "FLIP_004",
+        action: "flip",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: ["gauche", "droite"],
+            trajectoire: ["rotation_laterale"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["gauche", "droite"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue un flip latéral de 360° vers la droite à 1,5m de hauteur sur 2m pour éviter Sasuke",
+            "Goku réalise un flip latéral vers la gauche de 540° à 2m de hauteur sur 3m pour esquiver Vegeta",
+            "Luffy fait une rotation latérale de 360° vers la droite à 2,5m de hauteur sur 2m pour contourner Zoro",
+            "Ichigo exécute un flip latéral de 720° vers la gauche à 2m de hauteur sur 3m pour se décaler d'Ulquiorra",
+            "Yamato effectue un flip sur le côté droit de 360° à 3m de hauteur sur 4m pour passer à côté de Madara"
+        ]
+    },
+
+    {
+        id: "FLIP_005",
+        action: "flip",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "ROTATION",
+            "SENS_ROTATION",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+            trajectoire: ["rotation_diagonale"],
+            rotation: {
+                type: "angle",
+                unite: ["°"]
+            },
+            sensRotation: ["avant", "arriere"],
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto effectue un flip diagonal avant de 360° vers la droite à 2m de hauteur sur 3m pour atteindre Sasuke",
+            "Goku réalise un flip diagonal arrière de 540° vers la gauche à 2,5m de hauteur sur 4m pour éviter Vegeta",
+            "Luffy fait un flip en diagonale vers l'avant droite de 360° à 1,5m de hauteur sur 2,5m pour rejoindre Zoro",
+            "Ichigo se propulse en flip diagonal arrière de 720° vers la gauche à 3m de hauteur sur 5m pour esquiver Ulquiorra",
+            "Yamato fonce en diagonale avec un flip avant de 360° à 2m de hauteur sur 3,5m pour atteindre Madara"
+        ]
+    }
+
+],
+
+            
+            
+            
                            
                                     
  // ==================================================
