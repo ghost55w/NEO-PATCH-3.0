@@ -3650,480 +3650,1868 @@ armes: {
     }
 
 },
-    
-    
-// ==================================================
-// ESQUIVES
-// ==================================================
+
+
+ // ==================================================
+ // BLOC DES ACTIONS DÉFENSIVES 🛡️ 
+ // ==================================================      
+  defense: {
+
+    categorie: "defense",  
 
 esquive: [
 
-    // ==================================================
-    // ESQUIVE — LATÉRALE
-    // ==================================================
+// ==================================================
+// ESQUIVE 001 — RETRAIT DE LA TÊTE
+// ==================================================
 
-    {
-        id: "ESQ_001",
-        categorie: "esquive",
-        famille: "esquive_laterale",
+{
+    id: "ESQUIVE_001",
+    action: "esquive",
+    maniere: "retrait_tete",
 
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION"
+    structure: [
+        "SUJET",
+        "ACTION",
+        "PARTIE_CORPS",
+        "MOUVEMENT",
+        "DIRECTION",
+        "VITESSE",
+        "DISTANCE",
+        "AMPLITUDE",
+        "CIBLE",
+        "INTENTION"
+    ],
+
+    params: {
+        partieCorps: [
+            "tête",
+            "tête entière",
+            "visage",
+            "menton"
         ],
 
-        exemples: [
-            "Naruto esquive vers la droite",
-            "Naruto esquive vers la gauche",
-            "Naruto évite l'attaque en allant sur le côté droit",
-            "Naruto évite l'attaque en allant sur le côté gauche",
-            "Naruto se déporte vers la droite",
-            "Naruto se déporte vers la gauche",
-            "Naruto fait un pas sur le côté droit pour éviter le coup",
-            "Naruto fait un pas sur le côté gauche pour éviter le coup",
-            "Naruto se décale rapidement vers la droite",
-            "Naruto se décale rapidement vers la gauche"
+        mouvement: [
+            "retirer",
+            "ramener",
+            "reculer",
+            "incliner"
+        ],
+
+        direction: [
+            "arrière",
+            "gauche",
+            "droite"
+        ],
+
+        vitesse: [
+            "vmax",
+            "vitesse_maximale",
+            "a_grande_vitesse",
+            "a_pleine_vitesse",
+            "rapidement",
+            "tres_rapidement"
+        ],
+
+        distance: {
+            type: "distance",
+            unite: [
+                "cm",
+                "m"
+            ],
+            max: 50
+        },
+
+        amplitude: {
+            type: "angle",
+            unite: [
+                "°"
+            ],
+            max: 90
+        }
+    },
+
+    aliases: [
+        "retrait de la tête",
+        "retrait de tete",
+        "retirer la tête",
+        "retirer la tete",
+        "reculer la tête",
+        "reculer la tete",
+        "ramener la tête",
+        "ramener la tete",
+        "esquive de tête",
+        "esquive de tete"
+    ],
+
+    exemples: [
+        "Yamato ramène sa tête vers l'arrière à VMax de 50cm pour laisser passer le coup de poing de Naruto dans le vide",
+        "Goku retire sa tête vers l'arrière à pleine vitesse de 40cm pour esquiver le poing de Vegeta visant son visage",
+        "Luffy incline sa tête vers la droite à grande vitesse de 30cm et 35° pour éviter le coup de poing de Zoro",
+        "Ichigo recule sa tête vers l'arrière à VMax de 45cm pour laisser passer le crochet d'Ulquiorra",
+        "Sasuke ramène sa tête vers la gauche à vitesse maximale de 25cm pour esquiver le coup de Naruto visant son menton"
+    ]
+},
+
+
+// ==================================================
+// ESQUIVE 002 — INCLINAISON DU BUSTE
+// ==================================================
+
+{
+    id: "ESQUIVE_002",
+    action: "esquive",
+    maniere: "inclinaison",
+
+    structure: [
+        "SUJET",
+        "ACTION",
+        "PARTIE_CORPS",
+        "MOUVEMENT",
+        "DIRECTION",
+        "VITESSE",
+        "DISTANCE",
+        "AMPLITUDE",
+        "CIBLE",
+        "INTENTION"
+    ],
+
+    params: {
+        partieCorps: [
+            "buste",
+            "torse",
+            "épaule gauche",
+            "épaule droite"
+        ],
+
+        mouvement: [
+            "incliner",
+            "pencher",
+            "courber",
+            "dévier"
+        ],
+
+        direction: [
+            "gauche",
+            "droite",
+            "arrière"
+        ],
+
+        vitesse: [
+            "vmax",
+            "vitesse_maximale",
+            "a_grande_vitesse",
+            "a_pleine_vitesse",
+            "rapidement",
+            "tres_rapidement"
+        ],
+
+        distance: {
+            type: "distance",
+            unite: [
+                "cm",
+                "m"
+            ],
+            max: 50
+        },
+
+        amplitude: {
+            type: "angle",
+            unite: [
+                "°"
+            ],
+            max: 90
+        }
+    },
+
+    aliases: [
+        "inclinaison du buste",
+        "incliner le buste",
+        "pencher le buste",
+        "esquive par inclinaison",
+        "se penche",
+        "se courbe",
+        "dévier le buste",
+        "devié le buste"
+    ],
+
+    exemples: [
+        "Yamato incline son buste vers la gauche à VMax de 40cm et 45° pour esquiver le coup visant son torse",
+        "Goku penche son torse vers la droite à pleine vitesse de 50cm pour laisser passer le crochet de Vegeta",
+        "Luffy incline son buste vers l'arrière à grande vitesse de 35cm et 40° pour éviter le coup de Zoro",
+        "Ichigo courbe son buste vers la gauche à VMax de 45cm et 50° pour esquiver le coup d'Ulquiorra visant son flanc",
+        "Sasuke dévie son torse vers la droite à vitesse maximale de 30cm pour éviter l'attaque de Naruto"
+    ]
+},
+
+
+// ==================================================
+// ESQUIVE 003 — PIVOT
+// ==================================================
+
+{
+    id: "ESQUIVE_003",
+    action: "esquive",
+    maniere: "pivot",
+
+    structure: [
+        "SUJET",
+        "ACTION",
+        "PARTIE_CORPS",
+        "MOUVEMENT",
+        "DIRECTION",
+        "VITESSE",
+        "DISTANCE",
+        "AMPLITUDE",
+        "CIBLE",
+        "INTENTION"
+    ],
+
+    params: {
+        partieCorps: [
+            "buste",
+            "torse",
+            "bassin",
+            "épaules"
+        ],
+
+        mouvement: [
+            "pivoter",
+            "tourner",
+            "faire pivoter"
+        ],
+
+        direction: [
+            "gauche",
+            "droite"
+        ],
+
+        vitesse: [
+            "vmax",
+            "vitesse_maximale",
+            "a_grande_vitesse",
+            "a_pleine_vitesse",
+            "rapidement",
+            "tres_rapidement"
+        ],
+
+        distance: {
+            type: "distance",
+            unite: [
+                "cm",
+                "m"
+            ],
+            max: 50
+        },
+
+        amplitude: {
+            type: "angle",
+            unite: [
+                "°"
+            ],
+            max: 90
+        }
+    },
+
+    aliases: [
+        "pivot",
+        "esquive par pivot",
+        "pivoter le buste",
+        "tourner le buste",
+        "rotation du buste",
+        "rotation des épaules",
+        "faire pivoter le corps"
+    ],
+
+    exemples: [
+        "Yamato pivote son buste vers la gauche à VMax de 30cm et 60° pour laisser passer le coup de poing de Naruto",
+        "Goku fait pivoter ses épaules vers la droite à pleine vitesse de 40cm et 70° pour esquiver le crochet de Vegeta",
+        "Luffy tourne son torse vers la gauche à grande vitesse de 35cm et 60° pour éviter le coup circulaire de Zoro",
+        "Ichigo pivote son buste vers la droite à VMax de 45cm et 80° pour laisser passer l'attaque d'Ulquiorra",
+        "Sasuke fait pivoter son bassin et son buste vers la gauche à vitesse maximale de 30cm et 45° pour esquiver le coup de Naruto"
+    ]
+},
+
+
+// ==================================================
+// ESQUIVE 004 — DÉCALAGE CORPOREL
+// ==================================================
+
+{
+    id: "ESQUIVE_004",
+    action: "esquive",
+    maniere: "decalage",
+
+    structure: [
+        "SUJET",
+        "ACTION",
+        "PARTIE_CORPS",
+        "MOUVEMENT",
+        "DIRECTION",
+        "VITESSE",
+        "DISTANCE",
+        "CIBLE",
+        "INTENTION"
+    ],
+
+    params: {
+        partieCorps: [
+            "corps",
+            "buste",
+            "torse",
+            "bassin",
+            "épaule gauche",
+            "épaule droite"
+        ],
+
+        mouvement: [
+            "décaler",
+            "déplacer",
+            "faire glisser",
+            "écarter"
+        ],
+
+        direction: [
+            "gauche",
+            "droite"
+        ],
+
+        vitesse: [
+            "vmax",
+            "vitesse_maximale",
+            "a_grande_vitesse",
+            "a_pleine_vitesse",
+            "rapidement",
+            "tres_rapidement"
+        ],
+
+        distance: {
+            type: "distance",
+            unite: [
+                "cm",
+                "m"
+            ],
+            max: 50
+        }
+    },
+
+    aliases: [
+        "décalage",
+        "decalage",
+        "esquive par décalage",
+        "se décaler",
+        "se decaler",
+        "décaler le corps",
+        "decaler le corps",
+        "déplacement latéral du corps"
+    ],
+
+    exemples: [
+        "Yamato décale son corps vers la gauche à VMax de 40cm pour laisser passer le coup de poing de Naruto",
+        "Goku déplace son buste vers la droite à pleine vitesse de 35cm pour esquiver l'attaque de Vegeta",
+        "Luffy décale son torse vers la gauche à grande vitesse de 50cm pour éviter le coup de Zoro",
+        "Ichigo fait glisser son corps vers la droite à VMax de 45cm pour sortir de la trajectoire du coup d'Ulquiorra",
+        "Sasuke décale son épaule droite vers la gauche à vitesse maximale de 30cm pour esquiver le poing de Naruto"
+    ]
+},
+
+
+// ==================================================
+// ESQUIVE 005 — SAUT JAMBES PLIÉES
+// ==================================================
+
+{
+    id: "ESQUIVE_005",
+    action: "esquive",
+    maniere: "saute_jambes_pliees",
+
+    structure: [
+        "SUJET",
+        "ACTION",
+        "PARTIE_CORPS",
+        "MOUVEMENT",
+        "TRAJECTOIRE",
+        "VITESSE",
+        "HAUTEUR",
+        "CIBLE",
+        "PARTIE_CORPS_CIBLE",
+        "INTENTION"
+    ],
+
+    params: {
+        partieCorps: [
+            "jambes",
+            "genoux",
+            "corps"
+        ],
+
+        mouvement: [
+            "sauter",
+            "bondir",
+            "se propulser"
+        ],
+
+        trajectoire: [
+            "verticale"
+        ],
+
+        vitesse: [
+            "vmax",
+            "vitesse_maximale",
+            "a_grande_vitesse",
+            "a_pleine_vitesse",
+            "rapidement",
+            "tres_rapidement"
+        ],
+
+        hauteur: {
+            type: "distance",
+            unite: [
+                "cm",
+                "m"
+            ],
+            max: 50
+        },
+
+        partieCorpsCible: [
+            "jambes",
+            "genoux",
+            "chevilles",
+            "pieds"
         ]
     },
 
-    // ==================================================
-    // ESQUIVE — LATÉRALE + VMAX
-    // ==================================================
+    aliases: [
+        "esquive sautée jambes pliées",
+        "esquive sautee jambes pliees",
+        "saut jambes pliées",
+        "saut jambes pliees",
+        "saute par-dessus l'attaque",
+        "bondit jambes pliées",
+        "saut pour éviter les jambes",
+        "saut pour eviter les jambes"
+    ],
 
-    {
-        id: "ESQ_002",
-        categorie: "esquive",
-        famille: "esquive_laterale_vmax",
+    exemples: [
+        "Yamato saute à VMax avec les jambes pliées à 40cm de hauteur pour éviter le coup de pied de Naruto visant ses jambes",
+        "Goku bondit rapidement jambes pliées à 50cm de hauteur pour esquiver le balayage de Vegeta visant ses chevilles",
+        "Luffy se propulse à pleine vitesse avec les genoux pliés à 45cm de hauteur pour éviter le coup de pied de Zoro visant ses jambes",
+        "Ichigo saute à grande vitesse jambes repliées à 50cm de hauteur pour laisser passer l'attaque d'Ulquiorra sous ses pieds",
+        "Sasuke bondit à VMax avec les jambes pliées à 40cm de hauteur pour esquiver le balayage de Naruto"
+    ]
+}
 
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "VITESSE"
-        ],
-
-        exemples: [
-            "Naruto esquive le coup vers la droite à VMAX",
-            "Naruto esquive le coup vers la gauche à VMAX",
-            "Naruto se déporte à VMAX vers la droite pour éviter le coup",
-            "Naruto se déporte à VMAX vers la gauche pour éviter le coup",
-            "Naruto esquive latéralement à VMAX vers la droite",
-            "Naruto esquive latéralement à VMAX vers la gauche",
-            "Naruto part sur le côté droit à VMAX pour éviter l'attaque",
-            "Naruto part sur le côté gauche à VMAX pour éviter l'attaque",
-            "Naruto se décale à vitesse maximale vers la droite",
-            "Naruto se décale à vitesse maximale vers la gauche"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — ABAISSEMENT
-    // ==================================================
-
-    {
-        id: "ESQ_003",
-        categorie: "esquive",
-        famille: "esquive_basse",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MANIERE",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto esquive le coup en se baissant",
-            "Naruto évite le coup en se baissant",
-            "Naruto se baisse pour laisser passer le coup",
-            "Naruto fléchit les jambes pour éviter l'attaque",
-            "Naruto s'accroupit pour esquiver le coup",
-            "Naruto se penche vers le bas pour éviter le coup",
-            "Naruto abaisse son corps pour laisser passer l'attaque au-dessus de lui",
-            "Naruto se baisse pour laisser passer le poing au-dessus de sa tête",
-            "Naruto descend sous le coup pour l'éviter",
-            "Naruto plonge vers le bas pour éviter l'attaque"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — ABAISSEMENT + VMAX
-    // ==================================================
-
-    {
-        id: "ESQ_004",
-        categorie: "esquive",
-        famille: "esquive_basse_vmax",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MANIERE",
-            "VITESSE",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto esquive le coup en se baissant VMAX pour laisser passer le coup au-dessus de sa tête",
-            "Naruto se baisse à VMAX pour éviter le poing visant sa tête",
-            "Naruto s'accroupit à VMAX pour laisser passer l'attaque au-dessus de lui",
-            "Naruto fléchit les jambes à VMAX pour esquiver le coup",
-            "Naruto abaisse son corps à VMAX pour éviter l'attaque",
-            "Naruto plonge vers le bas à VMAX pour esquiver le coup",
-            "Naruto se penche vers le bas à VMAX pour éviter le poing",
-            "Naruto descend sous l'attaque à VMAX pour la laisser passer",
-            "Naruto baisse rapidement la tête à VMAX pour éviter le coup",
-            "Naruto se baisse à vitesse maximale pour laisser passer le coup au-dessus de sa tête"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — ARRIÈRE
-    // ==================================================
-
-    {
-        id: "ESQ_005",
-        categorie: "esquive",
-        famille: "esquive_arriere",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto recule pour éviter le coup",
-            "Naruto fait un pas en arrière pour esquiver",
-            "Naruto se déplace vers l'arrière pour éviter l'attaque",
-            "Naruto se replie pour laisser passer le coup",
-            "Naruto s'éloigne de l'attaque",
-            "Naruto recule hors de portée du poing",
-            "Naruto recule pour éviter le coup visant son visage",
-            "Naruto fait un pas en arrière pour laisser passer le coup",
-            "Naruto se retire vers l'arrière pour esquiver",
-            "Naruto se dégage en reculant"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — ARRIÈRE + VMAX
-    // ==================================================
-
-    {
-        id: "ESQ_006",
-        categorie: "esquive",
-        famille: "esquive_arriere_vmax",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "VITESSE",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto recule à VMAX pour éviter le coup",
-            "Naruto se déplace vers l'arrière à VMAX pour esquiver",
-            "Naruto fait un pas en arrière à VMAX pour éviter l'attaque",
-            "Naruto se replie à VMAX pour laisser passer le poing",
-            "Naruto s'éloigne à VMAX du coup visant son visage",
-            "Naruto recule à vitesse maximale pour sortir de portée",
-            "Naruto se retire à VMAX pour éviter le coup",
-            "Naruto recule rapidement à VMAX pour esquiver l'attaque",
-            "Naruto se dégage vers l'arrière à VMAX",
-            "Naruto recule à VMAX pour laisser passer l'attaque devant lui"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — PENCHÉE
-    // ==================================================
-
-    {
-        id: "ESQ_007",
-        categorie: "esquive",
-        famille: "esquive_penchee",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto penche la tête vers la gauche pour éviter le coup",
-            "Naruto penche la tête vers la droite pour éviter le coup",
-            "Naruto incline son corps vers la gauche pour esquiver",
-            "Naruto incline son corps vers la droite pour esquiver",
-            "Naruto se penche à gauche pour laisser passer le poing",
-            "Naruto se penche à droite pour laisser passer le poing",
-            "Naruto dévie son buste vers la gauche pour éviter l'attaque",
-            "Naruto dévie son buste vers la droite pour éviter l'attaque",
-            "Naruto incline son visage vers la gauche pour éviter le coup",
-            "Naruto incline son visage vers la droite pour éviter le coup"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — SAUT
-    // ==================================================
-
-    {
-        id: "ESQ_008",
-        categorie: "esquive",
-        famille: "esquive_saut",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MANIERE",
-            "HAUTEUR",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto saute pour éviter le coup",
-            "Naruto bondit pour esquiver l'attaque",
-            "Naruto saute au-dessus du coup",
-            "Naruto bondit au-dessus du poing",
-            "Naruto s'élève dans les airs pour éviter l'attaque",
-            "Naruto fait un bond pour laisser passer le coup sous lui",
-            "Naruto saute à 1m de hauteur pour éviter le coup",
-            "Naruto bondit à 2m de hauteur pour esquiver l'attaque",
-            "Naruto saute pour laisser passer le coup sous ses pieds",
-            "Naruto s'élève pour éviter l'attaque visant ses jambes"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — DISTANCE
-    // ==================================================
-
-    {
-        id: "ESQ_009",
-        categorie: "esquive",
-        famille: "esquive_distance",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DISTANCE",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto recule de 2m pour éviter le coup",
-            "Naruto se décale de 1m vers la droite pour esquiver",
-            "Naruto se déplace de 2m vers la gauche pour éviter l'attaque",
-            "Naruto recule de 3m pour sortir de portée",
-            "Naruto se déporte de 2m vers la droite pour éviter le poing",
-            "Naruto se déporte de 2m vers la gauche pour éviter le poing",
-            "Naruto bondit de 2m en arrière pour esquiver",
-            "Naruto fait un déplacement de 1m vers la droite pour éviter le coup",
-            "Naruto s'éloigne de 3m pour laisser passer l'attaque",
-            "Naruto se retire de 2m pour éviter le coup"
-        ]
-    },
-
-    // ==================================================
-    // ESQUIVE — COMPLÈTE
-    // ==================================================
-
-    {
-        id: "ESQ_010",
-        categorie: "esquive",
-        famille: "esquive_complete",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "DIRECTION",
-            "VITESSE",
-            "HAUTEUR",
-            "DISTANCE",
-            "CIBLE"
-        ],
-
-        exemples: [
-            "Naruto esquive le coup vers la droite à VMAX sur 2m",
-            "Naruto esquive le coup vers la gauche à VMAX sur 2m",
-            "Naruto se baisse à VMAX pour laisser passer le coup au-dessus de sa tête",
-            "Naruto recule à VMAX sur 2m pour sortir de portée",
-            "Naruto saute à 2m de hauteur pour éviter le coup",
-            "Naruto bondit à VMAX sur 2m pour éviter l'attaque",
-            "Naruto se déporte à VMAX de 2m vers la droite pour esquiver",
-            "Naruto se déporte à VMAX de 2m vers la gauche pour esquiver",
-            "Naruto recule de 3m à VMAX pour éviter le coup visant son visage",
-            "Naruto saute à 1m de hauteur à VMAX pour laisser passer l'attaque sous lui"
-        ]
-    }
 ],
 
 
+blocage: [
+
+    // ==================================================
+    // BLOCAGE 001 — PAUME
+    // ==================================================
+
+    {
+        id: "BLOCAGE_001",
+        action: "blocage",
+        maniere: "paume",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "main gauche",
+                "main droite",
+                "deux mains"
+            ],
+
+            zoneContact: [
+                "paume gauche",
+                "paume droite",
+                "deux paumes"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le visage",
+                "devant la tête",
+                "devant le torse",
+                "devant l'abdomen",
+                "devant le corps"
+            ],
+
+            mouvement: [
+                "lever",
+                "ramener",
+                "avancer",
+                "interposer",
+                "placer"
+            ]
+        },
+
+        aliases: [
+            "blocage avec la paume",
+            "bloquer avec la paume",
+            "paume en opposition",
+            "paume ouverte",
+            "main ouverte en opposition",
+            "interposer la paume"
+        ],
+
+        exemples: [
+            "Yamato oppose sa paume droite devant son visage pour bloquer le poing de Naruto",
+            "Goku place sa paume gauche devant son torse pour arrêter le coup de Vegeta",
+            "Luffy interpose ses deux paumes devant son visage pour bloquer l'attaque de Zoro",
+            "Ichigo avance sa paume droite pour stopper le poing d'Ulquiorra",
+            "Sasuke ramène sa main gauche paume ouverte devant son visage pour bloquer le coup de Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 002 — DOS DE LA MAIN
+    // ==================================================
+
+    {
+        id: "BLOCAGE_002",
+        action: "blocage",
+        maniere: "dos_de_la_main",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "main gauche",
+                "main droite"
+            ],
+
+            zoneContact: [
+                "dos de la main gauche",
+                "dos de la main droite"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le visage",
+                "devant le torse",
+                "sur le côté"
+            ],
+
+            mouvement: [
+                "lever",
+                "ramener",
+                "avancer",
+                "interposer",
+                "placer"
+            ]
+        },
+
+        aliases: [
+            "blocage avec le dos de la main",
+            "bloquer avec le dos de la main",
+            "dos de la main en opposition"
+        ],
+
+        exemples: [
+            "Yamato place le dos de sa main droite devant son visage pour bloquer le coup de Naruto",
+            "Goku interpose le dos de sa main gauche devant son torse pour arrêter l'attaque de Vegeta",
+            "Luffy lève le dos de sa main droite pour bloquer le poing de Zoro",
+            "Ichigo ramène le dos de sa main gauche devant son visage pour stopper l'attaque d'Ulquiorra",
+            "Sasuke place le dos de sa main droite en opposition devant son visage pour bloquer Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 003 — AVANT-BRAS
+    // ==================================================
+
+    {
+        id: "BLOCAGE_003",
+        action: "blocage",
+        maniere: "avant_bras",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "bras gauche",
+                "bras droit"
+            ],
+
+            zoneContact: [
+                "avant-bras gauche",
+                "avant-bras droit"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le visage",
+                "devant le torse",
+                "devant l'abdomen",
+                "sur le côté"
+            ],
+
+            mouvement: [
+                "lever",
+                "ramener",
+                "plier",
+                "avancer",
+                "interposer",
+                "placer"
+            ]
+        },
+
+        aliases: [
+            "blocage avec l'avant-bras",
+            "bloquer avec l'avant-bras",
+            "avant-bras en opposition",
+            "interposer l'avant-bras"
+        ],
+
+        exemples: [
+            "Yamato lève son avant-bras droit devant son visage pour bloquer le poing de Naruto",
+            "Goku place son avant-bras gauche devant son torse pour arrêter le coup de Vegeta",
+            "Luffy interpose son avant-bras droit devant son visage pour bloquer Zoro",
+            "Ichigo ramène son avant-bras gauche devant son torse pour stopper l'attaque d'Ulquiorra",
+            "Sasuke place son avant-bras droit en opposition devant son abdomen pour bloquer Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 004 — BRAS EN L
+    // ==================================================
+
+    {
+        id: "BLOCAGE_004",
+        action: "blocage",
+        maniere: "bras_en_L",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "bras gauche",
+                "bras droit"
+            ],
+
+            zoneContact: [
+                "avant-bras",
+                "coude",
+                "avant-bras et coude"
+            ],
+
+            position: [
+                "en L",
+                "bras en L",
+                "devant le visage",
+                "devant le torse"
+            ],
+
+            mouvement: [
+                "lever",
+                "plier",
+                "ramener",
+                "interposer"
+            ]
+        },
+
+        aliases: [
+            "bras en L",
+            "garde en L",
+            "bloquer en L",
+            "bras plié en L"
+        ],
+
+        exemples: [
+            "Yamato place son bras droit en L devant son visage pour bloquer le poing de Naruto avec son avant-bras",
+            "Goku plie son bras gauche en L devant son torse pour arrêter le coup de Vegeta",
+            "Luffy ramène son bras droit en L pour bloquer le crochet de Zoro",
+            "Ichigo lève son bras gauche en L devant son visage pour bloquer l'attaque d'Ulquiorra",
+            "Sasuke positionne son bras droit en L devant son torse pour protéger son corps contre Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 005 — BRAS EN X
+    // ==================================================
+
+    {
+        id: "BLOCAGE_005",
+        action: "blocage",
+        maniere: "bras_en_X",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "deux bras"
+            ],
+
+            zoneContact: [
+                "deux avant-bras",
+                "avant-bras gauche et avant-bras droit"
+            ],
+
+            position: [
+                "en X",
+                "croisés devant le visage",
+                "croisés devant le torse"
+            ],
+
+            mouvement: [
+                "croiser",
+                "ramener",
+                "refermer"
+            ]
+        },
+
+        aliases: [
+            "bras en X",
+            "blocage en X",
+            "croiser les bras",
+            "croiser les avant-bras",
+            "garde en X",
+            "bras croisés devant le visage",
+            "bras croisés devant le torse"
+        ],
+
+        exemples: [
+            "Yamato passe ses deux bras en X devant son visage pour bloquer le coup de Naruto avec ses avant-bras",
+            "Goku croise ses deux avant-bras en X devant son torse pour arrêter l'attaque de Vegeta",
+            "Luffy ramène ses deux bras en X devant son visage pour bloquer le coup de Zoro",
+            "Ichigo croise ses avant-bras devant son torse pour bloquer l'attaque d'Ulquiorra",
+            "Sasuke passe ses deux bras en X devant son visage pour bloquer le coup de Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 006 — COUDE
+    // ==================================================
+
+    {
+        id: "BLOCAGE_006",
+        action: "blocage",
+        maniere: "coude",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "bras gauche",
+                "bras droit"
+            ],
+
+            zoneContact: [
+                "coude gauche",
+                "coude droit"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le visage",
+                "devant le torse",
+                "sur le côté"
+            ],
+
+            mouvement: [
+                "lever",
+                "ramener",
+                "plier",
+                "interposer"
+            ]
+        },
+
+        aliases: [
+            "blocage avec le coude",
+            "bloquer avec le coude",
+            "coude en opposition",
+            "interposer le coude"
+        ],
+
+        exemples: [
+            "Yamato place son coude droit en opposition devant son torse pour bloquer le coup de Naruto",
+            "Goku ramène son coude gauche devant son visage pour arrêter le crochet de Vegeta",
+            "Luffy lève son coude droit pour bloquer l'attaque de Zoro",
+            "Ichigo interpose son coude gauche devant son visage pour stopper le poing d'Ulquiorra",
+            "Sasuke place son coude droit sur le côté pour bloquer le coup de Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 007 — TIBIA
+    // ==================================================
+
+    {
+        id: "BLOCAGE_007",
+        action: "blocage",
+        maniere: "tibia",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "jambe gauche",
+                "jambe droite"
+            ],
+
+            zoneContact: [
+                "tibia gauche",
+                "tibia droit"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le corps",
+                "sur le côté"
+            ],
+
+            mouvement: [
+                "lever",
+                "plier",
+                "interposer",
+                "ramener"
+            ]
+        },
+
+        aliases: [
+            "blocage avec le tibia",
+            "bloquer avec le tibia",
+            "tibia en opposition",
+            "interposer le tibia"
+        ],
+
+        exemples: [
+            "Yamato lève son tibia gauche en opposition pour bloquer le coup de pied de Naruto",
+            "Goku interpose son tibia droit pour arrêter le kick de Vegeta",
+            "Luffy plie sa jambe gauche et place son tibia en opposition pour bloquer le coup de Zoro",
+            "Ichigo ramène son tibia droit pour bloquer l'attaque d'Ulquiorra",
+            "Sasuke lève son tibia droit en opposition pour bloquer le kick de Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 008 — GENOU
+    // ==================================================
+
+    {
+        id: "BLOCAGE_008",
+        action: "blocage",
+        maniere: "genou",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "jambe gauche",
+                "jambe droite"
+            ],
+
+            zoneContact: [
+                "genou gauche",
+                "genou droit"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le corps",
+                "sur le côté"
+            ],
+
+            mouvement: [
+                "lever",
+                "plier",
+                "remonter",
+                "interposer"
+            ]
+        },
+
+        aliases: [
+            "blocage avec le genou",
+            "bloquer avec le genou",
+            "genou en opposition",
+            "interposer le genou"
+        ],
+
+        exemples: [
+            "Yamato lève son genou gauche en opposition pour bloquer le coup de pied de Naruto",
+            "Goku remonte son genou droit pour arrêter le kick de Vegeta",
+            "Luffy interpose son genou gauche pour bloquer le coup de Zoro",
+            "Ichigo place son genou droit en opposition pour arrêter l'attaque d'Ulquiorra",
+            "Sasuke lève son genou droit pour bloquer le coup de Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 009 — SEMELLE / PLANTE DU PIED
+    // ==================================================
+
+    {
+        id: "BLOCAGE_009",
+        action: "blocage",
+        maniere: "semelle",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "pied gauche",
+                "pied droit"
+            ],
+
+            zoneContact: [
+                "semelle",
+                "plante du pied",
+                "semelle gauche",
+                "semelle droite"
+            ],
+
+            position: [
+                "en opposition",
+                "face à l'attaque",
+                "devant le corps"
+            ],
+
+            mouvement: [
+                "lever",
+                "avancer",
+                "interposer",
+                "ramener"
+            ]
+        },
+
+        aliases: [
+            "blocage avec la semelle",
+            "bloquer avec la semelle",
+            "plante du pied en opposition",
+            "semelle en opposition",
+            "interposer la semelle"
+        ],
+
+        exemples: [
+            "Yamato lève son pied gauche, semelle en opposition, pour bloquer le coup de pied de Naruto",
+            "Goku interpose la plante de son pied droit pour arrêter le kick de Vegeta",
+            "Luffy place sa semelle gauche face à l'attaque pour bloquer le coup de Zoro",
+            "Ichigo avance son pied droit, semelle en opposition, pour stopper l'attaque d'Ulquiorra",
+            "Sasuke lève sa semelle droite pour bloquer le coup de Naruto"
+        ]
+    },
+
+
+    // ==================================================
+    // BLOCAGE 010 — TALON
+    // ==================================================
+
+    {
+        id: "BLOCAGE_010",
+        action: "blocage",
+        maniere: "talon",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "MEMBRE",
+            "ZONE_CONTACT",
+            "POSITION",
+            "MOUVEMENT",
+            "PARTIE_CORPS_CIBLE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            membre: [
+                "pied gauche",
+                "pied droit"
+            ],
+
+            zoneContact: [
+                "talon gauche",
+                "talon droit",
+                "talon"
+            ],
+
+            position: [
+                "en opposition",
+                "devant le corps",
+                "sur le côté"
+            ],
+
+            mouvement: [
+                "lever",
+                "ramener",
+                "interposer",
+                "placer"
+            ]
+        },
+
+        aliases: [
+            "blocage avec le talon",
+            "bloquer avec le talon",
+            "talon en opposition",
+            "interposer le talon"
+        ],
+
+        exemples: [
+            "Yamato ramène son pied gauche, talon en opposition, pour bloquer le coup de Naruto",
+            "Goku interpose son talon droit pour arrêter l'attaque de Vegeta",
+            "Luffy place son talon gauche en opposition pour bloquer le coup de Zoro",
+            "Ichigo lève son talon droit pour arrêter l'attaque d'Ulquiorra",
+            "Sasuke ramène son talon gauche pour bloquer le coup de Naruto"
+        ]
+    }, 
 // ==================================================
-// PARADES
+// BLOCAGE 011 — DEUX MAINS JOINTES
 // ==================================================
 
-parade: [
+{
+    id: "BLOCAGE_011",
+    action: "blocage",
+    maniere: "deux_mains_jointes",
 
-    // ==================================================
-    // PARADE — BRAS / AVANT-BRAS
-    // ==================================================
+    structure: [
+        "SUJET",
+        "ACTION",
+        "MEMBRE",
+        "ZONE_CONTACT",
+        "POSITION",
+        "MOUVEMENT",
+        "ARME",
+        "PARTIE_CORPS_CIBLE",
+        "CIBLE",
+        "INTENTION"
+    ],
 
-    {
-        id: "PAR_001",
-        categorie: "parade",
-        famille: "blocage_bras",
-
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MEMBRE",
-            "PARTIE_CORPS",
-            "CIBLE"
+    params: {
+        membre: [
+            "deux mains"
         ],
 
-        exemples: [
-            "Naruto bloque le coup avec son bras",
-            "Naruto bloque l'attaque avec son avant-bras",
-            "Naruto pare le coup avec son avant-bras droit",
-            "Naruto pare le coup avec son avant-bras gauche",
-            "Naruto bloque le poing avec son bras droit",
-            "Naruto bloque le poing avec son bras gauche",
-            "Naruto place son avant-bras droit en opposition au coup",
-            "Naruto place son avant-bras gauche en opposition à l'attaque",
-            "Naruto interpose son bras droit devant le coup",
-            "Naruto interpose son avant-bras gauche devant son visage"
+        zoneContact: [
+            "deux paumes",
+            "paumes jointes"
+        ],
+
+        position: [
+            "jointes en opposition",
+            "devant le visage",
+            "devant le torse",
+            "devant le corps"
+        ],
+
+        mouvement: [
+            "joindre",
+            "lever",
+            "interposer",
+            "ramener",
+            "placer"
+        ],
+
+        arme: [
+            "aucune",
+            "katana",
+            "épée",
+            "lance",
+            "arme"
         ]
     },
 
-    // ==================================================
-    // PARADE — PAUME
-    // ==================================================
+    aliases: [
+        "blocage avec les deux mains",
+        "bloquer avec les deux mains",
+        "deux mains jointes",
+        "paumes jointes",
+        "deux paumes jointes",
+        "bloquer une arme avec les deux mains",
+        "bloquer un coup avec les deux mains"
+    ],
 
-    {
-        id: "PAR_002",
-        categorie: "parade",
-        famille: "blocage_paume",
+    exemples: [
+        "Yamato joint ses deux mains, paumes en opposition, pour stopper le coup de poing de Naruto",
+        "Goku place ses deux paumes jointes devant son visage pour bloquer le coup d'épée de Vegeta",
+        "Luffy interpose ses deux paumes jointes devant son torse pour arrêter le coup de katana de Zoro",
+        "Ichigo joint ses deux mains devant son corps pour stopper la lame d'Ulquiorra",
+        "Sasuke lève ses deux paumes jointes pour bloquer le coup de Naruto"
+    ]
+}
 
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MEMBRE",
-            "PARTIE_CORPS",
-            "CIBLE"
-        ],
+], 
 
-        exemples: [
-            "Naruto bloque le coup avec sa paume",
-            "Naruto pare l'attaque avec sa paume",
-            "Naruto bloque le coup avec sa paume droite",
-            "Naruto bloque le coup avec sa paume gauche",
-            "Naruto met sa paume droite en opposition au coup",
-            "Naruto met sa paume gauche en opposition au coup",
-            "Naruto place sa paume droite devant l'attaque",
-            "Naruto place sa paume gauche devant l'attaque",
-            "Naruto interpose sa paume droite entre lui et le poing",
-            "Naruto interpose sa paume gauche entre lui et le coup"
-        ]
-    },
+  parade: {
 
     // ==================================================
-    // PARADE — MAIN / POING
+    // PARADES AVEC LES MAINS
     // ==================================================
 
-    {
-        id: "PAR_003",
-        categorie: "parade",
-        famille: "blocage_main",
+    mains: [
 
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MEMBRE",
-            "CIBLE"
-        ],
+        {
+            id: "PARADE_MAIN_001",
+            action: "parade",
+            maniere: "poussee_paume",
 
-        exemples: [
-            "Naruto bloque le coup avec sa main droite",
-            "Naruto bloque le coup avec sa main gauche",
-            "Naruto pare l'attaque avec sa main droite",
-            "Naruto pare l'attaque avec sa main gauche",
-            "Naruto utilise sa main droite pour bloquer le poing",
-            "Naruto utilise sa main gauche pour bloquer le poing",
-            "Naruto lève sa main droite pour bloquer le coup",
-            "Naruto lève sa main gauche pour bloquer l'attaque",
-            "Naruto place sa main droite en opposition au coup",
-            "Naruto place sa main gauche en opposition à l'attaque"
-        ]
-    },
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["main gauche", "main droite"],
+                zoneContact: ["paume"],
+                mouvement: [
+                    "poussee laterale",
+                    "poussee vers l'exterieur"
+                ],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["devier", "repousser", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie le coup de poing de Naruto avec sa paume gauche par une poussée vers la gauche pour écarter son attaque",
+                "Goku repousse le bras de Vegeta avec sa paume droite en poussant vers la droite pour dévier le coup",
+                "Luffy dévie la main de Zoro avec sa paume gauche en la repoussant vers la gauche pour faire manquer l'attaque",
+                "Ichigo repousse le coup de poing d'Ulquiorra avec sa paume droite vers la droite pour l'écarter de son visage",
+                "Sasuke dévie le coup de Naruto avec sa paume gauche en poussant vers l'extérieur pour le faire passer à côté"
+            ]
+        },
+
+        {
+            id: "PARADE_MAIN_002",
+            action: "parade",
+            maniere: "revers_dos_main",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["main gauche", "main droite"],
+                zoneContact: ["dos de la main"],
+                mouvement: ["revers", "revers lateral"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["devier", "ecarter", "repousser"]
+            },
+
+            exemples: [
+                "Yamato dévie le coup de poing de Naruto avec le revers de sa main gauche vers la gauche pour l'écarter",
+                "Goku repousse la main de Vegeta avec le revers de sa main droite vers la droite pour dévier son attaque",
+                "Luffy dévie le poing de Zoro avec le dos de sa main gauche en revers vers la gauche",
+                "Ichigo repousse le bras d'Ulquiorra avec le revers de sa main droite vers la droite pour protéger son visage",
+                "Sasuke dévie le coup de Naruto avec le dos de sa main gauche en revers vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_MAIN_003",
+            action: "parade",
+            maniere: "balayage_avant_bras",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["avant-bras gauche", "avant-bras droit"],
+                zoneContact: ["avant-bras"],
+                mouvement: ["balayage", "balayage lateral"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["devier", "repousser", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato balaie le bras de Naruto avec son avant-bras gauche vers la gauche pour dévier son coup",
+                "Goku repousse l'avant-bras de Vegeta avec son avant-bras droit vers la droite",
+                "Luffy balaie le poing de Zoro avec son avant-bras gauche vers la gauche pour écarter l'attaque",
+                "Ichigo dévie le bras d'Ulquiorra avec son avant-bras droit vers la droite",
+                "Sasuke repousse le coup de Naruto avec un balayage de son avant-bras gauche vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_MAIN_004",
+            action: "parade",
+            maniere: "mouvement_circulaire",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "ROTATION",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: [
+                    "main gauche",
+                    "main droite",
+                    "avant-bras gauche",
+                    "avant-bras droit"
+                ],
+                zoneContact: ["paume", "avant-bras", "dos de la main"],
+                mouvement: ["rotation circulaire", "balayage circulaire"],
+                sensMouvement: ["gauche", "droite"],
+                rotation: {
+                    type: "angle",
+                    unite: ["°"]
+                },
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "rediriger", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie le bras de Naruto avec sa main gauche dans un mouvement circulaire vers la gauche pour rediriger son attaque",
+                "Goku dévie le coup de Vegeta avec sa main droite par une rotation circulaire vers la droite",
+                "Luffy balaie le poing de Zoro avec son avant-bras gauche dans un mouvement circulaire vers la gauche",
+                "Ichigo dévie le bras d'Ulquiorra avec sa main droite dans un mouvement circulaire vers l'extérieur",
+                "Sasuke redirige le coup de Naruto avec son avant-bras droit dans une rotation vers la droite"
+            ]
+        },
+
+        {
+            id: "PARADE_MAIN_005",
+            action: "parade",
+            maniere: "accompagnement",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["main gauche", "main droite"],
+                zoneContact: ["paume", "dos de la main"],
+                mouvement: [
+                    "accompagnement lateral",
+                    "accompagnement vers l'exterieur"
+                ],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "rediriger", "faire manquer"]
+            },
+
+            exemples: [
+                "Yamato accompagne le poing de Naruto avec sa main gauche vers la gauche pour le faire passer à côté de son visage",
+                "Goku accompagne le bras de Vegeta avec sa main droite vers la droite pour dévier son attaque",
+                "Luffy accompagne le coup de Zoro vers l'extérieur avec sa paume gauche",
+                "Ichigo accompagne le poing d'Ulquiorra avec sa main droite vers la droite pour le faire manquer",
+                "Sasuke accompagne le bras de Naruto vers la gauche pour rediriger son attaque"
+            ]
+        }
+    ],
+
 
     // ==================================================
-    // PARADE — DEUX MAINS
+    // PARADES AVEC LES PIEDS
     // ==================================================
 
-    {
-        id: "PAR_004",
-        categorie: "parade",
-        famille: "blocage_deux_mains",
+    pieds: [
 
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MEMBRE",
-            "CIBLE"
-        ],
+        {
+            id: "PARADE_PIED_001",
+            action: "parade",
+            maniere: "poussee_semelle",
 
-        exemples: [
-            "Naruto bloque le coup à deux mains",
-            "Naruto bloque le poing avec ses deux mains",
-            "Naruto pare l'attaque avec ses deux mains",
-            "Naruto interpose ses deux mains devant le coup",
-            "Naruto utilise ses deux mains pour bloquer le poing",
-            "Naruto place ses deux paumes en opposition au coup",
-            "Naruto bloque l'attaque avec ses deux avant-bras",
-            "Naruto croise ses deux bras pour bloquer le coup",
-            "Naruto protège son visage avec ses deux mains",
-            "Naruto ferme sa garde avec ses deux bras"
-        ]
-    },
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["pied gauche", "pied droit"],
+                zoneContact: ["semelle", "plante du pied"],
+                mouvement: ["poussee", "poussee laterale"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["repousser", "devier", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato repousse le bras de Naruto avec la semelle de son pied gauche vers la gauche",
+                "Goku dévie le coup de pied de Vegeta avec la semelle de son pied droit vers la droite",
+                "Luffy repousse la jambe de Zoro avec son pied gauche vers la gauche pour écarter l'attaque",
+                "Ichigo dévie le coup bas d'Ulquiorra avec la plante de son pied droit vers la droite",
+                "Sasuke repousse le tibia de Naruto avec la semelle de son pied gauche vers l'extérieur"
+            ]
+        },
+
+        {
+            id: "PARADE_PIED_002",
+            action: "parade",
+            maniere: "revers_du_pied",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["pied gauche", "pied droit"],
+                zoneContact: ["dos du pied"],
+                mouvement: ["revers", "revers lateral"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["devier", "ecarter", "repousser"]
+            },
+
+            exemples: [
+                "Yamato dévie le coup de pied de Naruto avec le revers de son pied gauche vers la gauche",
+                "Goku repousse la jambe de Vegeta avec le revers de son pied droit vers la droite",
+                "Luffy dévie le tibia de Zoro avec le dos de son pied gauche vers la gauche",
+                "Ichigo repousse le coup bas d'Ulquiorra avec le revers de son pied droit vers la droite",
+                "Sasuke dévie la jambe de Naruto avec le revers de son pied gauche vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_PIED_003",
+            action: "parade",
+            maniere: "balayage_circulaire_interieur",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["pied gauche", "pied droit"],
+                zoneContact: ["plante du pied", "bord interieur du pied"],
+                mouvement: ["balayage circulaire interieur"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["devier", "rediriger", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie la jambe de Naruto avec son pied gauche dans un balayage circulaire intérieur vers la gauche",
+                "Goku redirige le coup de pied de Vegeta avec son pied droit dans un mouvement circulaire intérieur vers la droite",
+                "Luffy écarte la jambe de Zoro avec un balayage intérieur de son pied gauche vers la gauche",
+                "Ichigo dévie le tibia d'Ulquiorra avec son pied droit dans un mouvement circulaire intérieur vers la droite",
+                "Sasuke redirige le pied de Naruto avec son pied gauche dans un balayage circulaire intérieur"
+            ]
+        },
+
+        {
+            id: "PARADE_PIED_004",
+            action: "parade",
+            maniere: "balayage_circulaire_exterieur",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["pied gauche", "pied droit"],
+                zoneContact: ["bord exterieur du pied", "dos du pied"],
+                mouvement: ["balayage circulaire exterieur"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "ecarter", "repousser"]
+            },
+
+            exemples: [
+                "Yamato écarte le coup de pied de Naruto avec son pied gauche dans un balayage circulaire extérieur vers la gauche",
+                "Goku dévie la jambe de Vegeta avec son pied droit dans un mouvement circulaire extérieur vers la droite",
+                "Luffy repousse le tibia de Zoro avec le bord extérieur de son pied gauche vers la gauche",
+                "Ichigo dévie le coup bas d'Ulquiorra avec son pied droit dans un balayage extérieur vers la droite",
+                "Sasuke écarte la jambe de Naruto avec son pied gauche dans un mouvement circulaire extérieur"
+            ]
+        },
+
+        {
+            id: "PARADE_PIED_005",
+            action: "parade",
+            maniere: "deviation_talon",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["pied gauche", "pied droit"],
+                zoneContact: ["talon"],
+                mouvement: ["poussee du talon", "balayage du talon"],
+                sensMouvement: ["gauche", "droite", "arriere"],
+                directionDeviation: ["gauche", "droite", "arriere"],
+                effet: ["devier", "repousser", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie la jambe de Naruto avec le talon de son pied gauche vers la gauche",
+                "Goku repousse le tibia de Vegeta avec son talon droit vers la droite",
+                "Luffy écarte le coup bas de Zoro avec le talon de son pied gauche vers l'extérieur",
+                "Ichigo dévie la jambe d'Ulquiorra avec son talon droit vers la droite",
+                "Sasuke repousse le pied de Naruto avec son talon gauche vers l'arrière"
+            ]
+        },
+
+        {
+            id: "PARADE_PIED_006",
+            action: "parade",
+            maniere: "deviation_plante",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                membre: ["pied gauche", "pied droit"],
+                zoneContact: ["plante du pied"],
+                mouvement: ["accompagnement", "poussee", "balayage"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "rediriger", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato accompagne le coup de pied de Naruto avec la plante de son pied gauche vers la gauche",
+                "Goku dévie la jambe de Vegeta avec la plante de son pied droit vers la droite",
+                "Luffy repousse le tibia de Zoro avec la plante de son pied gauche vers l'extérieur",
+                "Ichigo redirige le coup bas d'Ulquiorra avec la plante de son pied droit vers la droite",
+                "Sasuke dévie le pied de Naruto avec la plante de son pied gauche vers la gauche"
+            ]
+        }
+    ],
+
 
     // ==================================================
-    // PARADE — JAMBES
+    // PARADES AVEC DES ARMES
     // ==================================================
 
-    {
-        id: "PAR_005",
-        categorie: "parade",
-        famille: "blocage_jambe",
+    armes: [
 
-        structure: [
-            "SUJET",
-            "ACTION",
-            "MEMBRE",
-            "PARTIE_CORPS",
-            "CIBLE"
-        ],
+        {
+            id: "PARADE_ARME_001",
+            action: "parade",
+            maniere: "revers_arme",
 
-        exemples: [
-            "Naruto bloque le coup avec sa jambe droite",
-            "Naruto bloque le coup avec sa jambe gauche",
-            "Naruto pare le coup de pied avec son tibia droit",
-            "Naruto pare le coup de pied avec son tibia gauche",
-            "Naruto lève sa jambe droite pour bloquer le kick",
-            "Naruto lève sa jambe gauche pour bloquer le coup",
-            "Naruto interpose son tibia droit devant le pied",
-            "Naruto interpose son tibia gauche devant le pied",
-            "Naruto utilise son genou droit pour bloquer le coup",
-            "Naruto utilise son genou gauche pour bloquer l'attaque"
-        ]
-    },
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
 
+            params: {
+                arme: ["katana", "epee", "lance", "nunchaku"],
+                membre: ["main gauche", "main droite", "deux mains"],
+                mouvement: ["revers", "balayage", "poussee"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "repousser", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie le katana de Naruto avec son katana tenu de la main gauche dans un mouvement de revers vers la gauche",
+                "Goku repousse l'épée de Vegeta avec son katana tenu de la main droite par un revers vers la droite",
+                "Luffy dévie la lance de Zoro avec son épée tenue à deux mains dans un balayage vers la gauche",
+                "Ichigo repousse le katana d'Ulquiorra avec son épée tenue de la main droite vers la droite",
+                "Sasuke dévie l'arme de Naruto avec son katana tenu de la main gauche dans un mouvement de revers vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_ARME_002",
+            action: "parade",
+            maniere: "poussee_arme",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: ["katana", "epee", "lance"],
+                membre: ["main gauche", "main droite", "deux mains"],
+                mouvement: ["poussee laterale", "poussee vers l'exterieur"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite"],
+                effet: ["repousser", "devier", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato repousse le katana de Naruto avec son épée tenue de la main gauche par une poussée vers la gauche",
+                "Goku écarte la lame de Vegeta avec son katana tenu de la main droite vers la droite",
+                "Luffy repousse la lance de Zoro avec son épée tenue à deux mains vers la gauche",
+                "Ichigo dévie l'épée d'Ulquiorra avec son katana de la main droite vers la droite",
+                "Sasuke repousse l'arme de Naruto avec son katana tenu de la main gauche vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_ARME_003",
+            action: "parade",
+            maniere: "balayage_arme",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: ["katana", "epee", "lance", "nunchaku"],
+                membre: ["main gauche", "main droite", "deux mains"],
+                mouvement: ["balayage lateral", "balayage circulaire"],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "rediriger", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie l'épée de Naruto avec son katana de la main gauche par un balayage vers la gauche",
+                "Goku redirige le katana de Vegeta avec son épée de la main droite par un balayage vers la droite",
+                "Luffy écarte la lance de Zoro avec son arme tenue à deux mains dans un balayage circulaire vers la gauche",
+                "Ichigo dévie l'arme d'Ulquiorra avec son katana de la main droite par un balayage vers la droite",
+                "Sasuke repousse l'épée de Naruto avec son katana tenu de la main gauche par un balayage vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_ARME_004",
+            action: "parade",
+            maniere: "rotation_arme",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "ROTATION",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: ["katana", "epee", "nunchaku"],
+                membre: ["main gauche", "main droite", "deux mains"],
+                mouvement: ["rotation", "rotation circulaire"],
+                sensMouvement: ["gauche", "droite"],
+                rotation: {
+                    type: "angle",
+                    unite: ["°"]
+                },
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "rediriger", "ecarter"]
+            },
+
+            exemples: [
+                "Yamato dévie le katana de Naruto avec son épée tenue de la main gauche dans une rotation vers la gauche",
+                "Goku redirige l'épée de Vegeta avec son katana de la main droite dans une rotation vers la droite",
+                "Luffy dévie la lame de Zoro avec son épée tenue à deux mains dans une rotation circulaire vers la gauche",
+                "Ichigo écarte l'arme d'Ulquiorra avec son katana de la main droite dans une rotation vers la droite",
+                "Sasuke redirige l'épée de Naruto avec son katana tenu de la main gauche dans une rotation vers la gauche"
+            ]
+        },
+
+        {
+            id: "PARADE_ARME_005",
+            action: "parade",
+            maniere: "accompagnement_arme",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MEMBRE",
+                "ZONE_CONTACT",
+                "COTE_ATTAQUE",
+                "POSITION_DEPART",
+                "MOUVEMENT",
+                "SENS_MOUVEMENT",
+                "DIRECTION_DEVIATION",
+                "EFFET",
+                "PARTIE_CORPS_CIBLE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            params: {
+                arme: ["katana", "epee", "lance"],
+                membre: ["main gauche", "main droite", "deux mains"],
+                mouvement: [
+                    "accompagnement",
+                    "accompagnement lateral",
+                    "accompagnement circulaire"
+                ],
+                sensMouvement: ["gauche", "droite"],
+                directionDeviation: ["gauche", "droite", "exterieur"],
+                effet: ["devier", "rediriger", "faire manquer"]
+            },
+
+            exemples: [
+                "Yamato accompagne la lame du katana de Naruto avec son épée vers la gauche pour la faire passer à côté",
+                "Goku accompagne l'épée de Vegeta avec son katana vers la droite pour rediriger son attaque",
+                "Luffy accompagne la lance de Zoro avec son épée tenue à deux mains vers l'extérieur",
+                "Ichigo accompagne la lame d'Ulquiorra avec son katana de la main droite vers la droite",
+                "Sasuke accompagne l'arme de Naruto avec son katana tenu de la main gauche vers la gauche"
+            ]
+        }
+    ]
+}    
+            
     // ==================================================
     // PARADE — TÊTE / CORPS
     // ==================================================
