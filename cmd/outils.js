@@ -1573,9 +1573,8 @@ function neoDetecterPartieCorps(texte) {
 }
 
 //==============================================================
-// 🧭 DIRECTION / TRAJECTOIRE
+// 🧭 TRAJECTOIRE
 //==============================================================
-
 function neoDetecterTrajectoire(texte) {
 
   const t =
@@ -1586,7 +1585,6 @@ function neoDetecterTrajectoire(texte) {
   //============================================================
   // 🌀 CIRCULAIRE
   //============================================================
-
   if (
     /\bcirculaire\b/iu.test(t) ||
     /\bcirculairement\b/iu.test(t) ||
@@ -1597,26 +1595,26 @@ function neoDetecterTrajectoire(texte) {
   }
 
   //============================================================
-  // 🌀 ZIGZAG
+  // 🌀 ZIG-ZAG
   //============================================================
-
   if (
     /\bzig[\s-]?zag\b/iu.test(t) ||
     /\bzigzaguant\b/iu.test(t) ||
     /\ben\s+zig[\s-]?zag\b/iu.test(t)
   ) {
-    return "zigzag";
+    return "zig_zag";
   }
 
   //============================================================
   // ➡️ FRONTALE
   //============================================================
-
   if (
     /\bfrontal\b/iu.test(t) ||
     /\bfrontale\b/iu.test(t) ||
     /\bfrontalement\b/iu.test(t) ||
-    /\bde\s+face\b/iu.test(t)
+    /\bde\s+face\b/iu.test(t) ||
+    /\ben\s+ligne\s+droite\b/iu.test(t) ||
+    /\ben\s+ligne\s+directe\b/iu.test(t)
   ) {
     return "frontale";
   }
@@ -1624,7 +1622,6 @@ function neoDetecterTrajectoire(texte) {
   //============================================================
   // ↔️ LATÉRALE
   //============================================================
-
   if (
     /\blatéral(?:e|ement)?\s+(?:gauche|à\s+gauche)\b/iu.test(t) ||
     /\b(?:côté|cote)\s+gauche\b/iu.test(t) ||
@@ -1642,7 +1639,10 @@ function neoDetecterTrajectoire(texte) {
   }
 
   if (
-    /\blatéral\b|\blaterale\b|\blatéralement\b|\blateralement\b/iu.test(t)
+    /\blatéral\b/iu.test(t) ||
+    /\blaterale\b/iu.test(t) ||
+    /\blatéralement\b/iu.test(t) ||
+    /\blateralement\b/iu.test(t)
   ) {
     return "laterale";
   }
@@ -1650,7 +1650,6 @@ function neoDetecterTrajectoire(texte) {
   //============================================================
   // ↗️ DIAGONALE
   //============================================================
-
   if (
     /\bdiagonal(?:e|ement)?\b/iu.test(t)
   ) {
@@ -1660,7 +1659,6 @@ function neoDetecterTrajectoire(texte) {
   //============================================================
   // ⬅️ ARRIÈRE
   //============================================================
-
   if (
     /\barrière\b/iu.test(t) ||
     /\ben\s+arrière\b/iu.test(t) ||
@@ -1675,45 +1673,136 @@ function neoDetecterTrajectoire(texte) {
   //============================================================
   // ⬆️ AÉRIENNE
   //============================================================
-
   if (
     /\ben\s+l['’]air\b/iu.test(t) ||
     /\baérien(?:ne)?\b/iu.test(t) ||
     /\baérienne\b/iu.test(t) ||
-    /\bsaute\b/iu.test(t) ||
-    /\bsautant\b/iu.test(t) ||
-    /\bbondit\b/iu.test(t) ||
-    /\ben\s+sautant\b/iu.test(t)
+    /\bsaut(?:e|ant)?\b/iu.test(t) ||
+    /\bbond(?:it|issant)?\b/iu.test(t)
   ) {
     return "aerienne";
   }
 
   //============================================================
-  // ➡️ LIGNE DROITE
+  // ❌ IMPORTANT
+  //
+  // "vers" n'est PAS une trajectoire.
+  //
+  // Exemple :
+  // "Yamato court vers Naruto"
+  //
+  // vers = direction
+  // Naruto = cible
+  // trajectoire = à déterminer séparément
   //============================================================
 
+  return null;
+}
+
+//==============================================================
+// 🧭 DIRECTION
+//==============================================================
+function neoDetecterDirection(texte) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  //============================================================
+  // ⬆️ AVANT
+  //============================================================
   if (
-    /\ben\s+ligne\s+droite\b/iu.test(t) ||
-    /\ben\s+ligne\s+directe\b/iu.test(t)
+    /\bvers\s+l['’]avant\b/iu.test(t) ||
+    /\bvers\s+avant\b/iu.test(t) ||
+    /\ben\s+avant\b/iu.test(t) ||
+    /\bdroit\s+vers\b/iu.test(t) ||
+    /\bvers\b/iu.test(t)
   ) {
-    return "ligne_droite";
+    return "avant";
   }
 
   //============================================================
-  // 🎯 "VERS" = DIRECTION GÉNÉRIQUE
-  //
-  // On ne retourne "vers" que si aucune trajectoire
-  // plus précise n'a été trouvée.
+  // ⬇️ ARRIÈRE
   //============================================================
-
   if (
-    /\bvers\b/iu.test(t)
+    /\bvers\s+l['’]arrière\b/iu.test(t) ||
+    /\bvers\s+arrière\b/iu.test(t) ||
+    /\ben\s+arrière\b/iu.test(t) ||
+    /\ben\s+reculant\b/iu.test(t)
   ) {
-    return "vers";
+    return "arriere";
+  }
+
+  //============================================================
+  // ⬅️ GAUCHE
+  //============================================================
+  if (
+    /\bvers\s+la\s+gauche\b/iu.test(t) ||
+    /\bà\s+gauche\b/iu.test(t) ||
+    /\bgauche\b/iu.test(t)
+  ) {
+    return "gauche";
+  }
+
+  //============================================================
+  // ➡️ DROITE
+  //============================================================
+  if (
+    /\bvers\s+la\s+droite\b/iu.test(t) ||
+    /\bà\s+droite\b/iu.test(t) ||
+    /\bdroite\b/iu.test(t)
+  ) {
+    return "droite";
   }
 
   return null;
+}
 
+//==============================================================
+// 🎯 INTENTION
+//==============================================================
+function neoDetecterIntention(texte) {
+
+  const t =
+    neoNormaliserTexteLocal(
+      texte
+    ).toLowerCase();
+
+  //============================================================
+  // 🎯 ATTEINDRE / REJOINDRE
+  //============================================================
+  if (
+    /\bpour\s+l['’]atteindre\b/iu.test(t) ||
+    /\bpour\s+atteindre\b/iu.test(t) ||
+    /\bpour\s+le\s+rejoindre\b/iu.test(t) ||
+    /\bpour\s+la\s+rejoindre\b/iu.test(t) ||
+    /\bpour\s+rejoindre\b/iu.test(t)
+  ) {
+    return "atteindre";
+  }
+
+  //============================================================
+  // 🎯 INTERCEPTER
+  //============================================================
+  if (
+    /\bpour\s+l['’]intercepter\b/iu.test(t) ||
+    /\bpour\s+intercepter\b/iu.test(t)
+  ) {
+    return "intercepter";
+  }
+
+  //============================================================
+  // 🎯 RAPPROCHER
+  //============================================================
+  if (
+    /\bpour\s+se\s+rapprocher\b/iu.test(t) ||
+    /\bafin\s+de\s+se\s+rapprocher\b/iu.test(t)
+  ) {
+    return "rapprocher";
+  }
+
+  return null;
 }
 
 //==============================================================
@@ -4647,10 +4736,20 @@ function neoAnalyserAction(
       texte
     );
 
-  const trajectoire =
-    neoDetecterTrajectoire(
-      texte
-    );
+  const direction =
+  neoDetecterDirection(
+    texte
+  );
+
+const trajectoire =
+  neoDetecterTrajectoire(
+    texte
+  );
+
+const intention =
+  neoDetecterIntention(
+    texte
+  );
 
   //============================================================
   // 🔧 RÉCUPÉRATION PROPRE DE L'ACTION
