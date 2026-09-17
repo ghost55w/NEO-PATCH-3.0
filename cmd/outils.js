@@ -3019,9 +3019,7 @@ function neoGetModeles() {
         NeoAI?.MODELES_ACTIONS,
 
         // IMPORTANT :
-        // Dans NeoAI.js, NEO_ACTIONS_COMBAT est directement
-        // disponible et contient les modèles regroupés par
-        // action canonique.
+        // Ancienne source éventuelle
         typeof NEO_ACTIONS_COMBAT !== "undefined"
             ? NEO_ACTIONS_COMBAT
             : null
@@ -3055,12 +3053,9 @@ function neoGetModeles() {
                 modeles.push({
                     ...modele,
 
-                    // Si le modèle possède déjà une action,
-                    // on la conserve.
                     action:
                         modele.action ||
                         modele.nomAction ||
-                        modele.categorie ||
                         null
                 });
             }
@@ -3082,25 +3077,232 @@ function neoGetModeles() {
 
         // ============================================================
         // 📚 SOURCE SOUS FORME D'OBJET
-        //
-        // Exemple :
-        //
-        // NEO_ACTIONS_COMBAT = {
-        //     frapper: [ ATT_001, ATT_002 ],
-        //     courir:  [ DEP_001, DEP_002 ],
-        //     sauter:  [ SAUT_001 ]
-        // }
-        //
-        // La clé "frapper" doit devenir :
-        //
-        // modele.action = "frapper"
         // ============================================================
 
         if (
-            typeof source === "object"
+            typeof source === "object" &&
+            !Array.isArray(source)
         ) {
 
             const modeles = [];
+
+
+            // ========================================================
+            // 🔎 PARCOURS DES CATÉGORIES
+            //
+            // Nouvelle architecture :
+            //
+            // NEO_ACTION_MODELS = {
+            //
+            //     deplacement: {
+            //
+            //         categorie: "deplacement",
+            //
+            //         course: [
+            //             COURSE_001,
+            //             COURSE_002
+            //         ],
+            //
+            //         saut: [
+            //             SAUT_001
+            //         ]
+            //     }
+            // }
+            //
+            // On doit donc descendre :
+            //
+            // CATÉGORIE
+            //      ↓
+            // ACTION
+            //      ↓
+            // MODÈLE
+            // ========================================================
+
+            for (
+                const [categorie, groupe]
+                of Object.entries(source)
+            ) {
+
+                if (
+                    !groupe ||
+                    typeof groupe !== "object" ||
+                    Array.isArray(groupe)
+                ) {
+                    continue;
+                }
+
+
+                // ====================================================
+                // 🔎 PARCOURS DES ACTIONS
+                // ====================================================
+
+                for (
+                    const [actionCanonique, valeur]
+                    of Object.entries(groupe)
+                ) {
+
+                    // ------------------------------------------------
+                    // "categorie" est une propriété descriptive,
+                    // pas une action.
+                    // ------------------------------------------------
+
+                    if (
+                        actionCanonique === "categorie"
+                    ) {
+                        continue;
+                    }
+
+
+                    // ------------------------------------------------
+                    // ACTION → plusieurs modèles
+                    //
+                    // Exemple :
+                    //
+                    // course: [
+                    //     COURSE_001,
+                    //     COURSE_002
+                    // ]
+                    // ------------------------------------------------
+
+                    if (Array.isArray(valeur)) {
+
+                        for (const modele of valeur) {
+
+                            if (
+                                !modele ||
+                                typeof modele !== "object"
+                            ) {
+                                continue;
+                            }
+
+
+                            modeles.push({
+
+                                // On conserve toutes les
+                                // propriétés du modèle
+                                ...modele,
+
+                                // ==================================================
+                                // ACTION CANONIQUE
+                                //
+                                // Priorité au nom de l'action dans
+                                // la hiérarchie.
+                                //
+                                // Exemple :
+                                //
+                                // deplacement
+                                //      ↓
+                                // course
+                                //
+                                // devient :
+                                //
+                                // action: "course"
+                                // ==================================================
+
+                                action:
+                                    actionCanonique,
+
+                                // ==================================================
+                                // CATÉGORIE
+                                //
+                                // Exemple :
+                                //
+                                // categorie: "deplacement"
+                                // ==================================================
+
+                                categorie:
+                                    modele.categorie ||
+                                    categorie
+                            });
+                        }
+
+                        continue;
+                    }
+
+
+                    // ------------------------------------------------
+                    // ACTION → un seul modèle
+                    // ------------------------------------------------
+
+                    if (
+                        valeur &&
+                        typeof valeur === "object"
+                    ) {
+
+                        modeles.push({
+
+                            ...valeur,
+
+                            action:
+                                actionCanonique,
+
+                            categorie:
+                                valeur.categorie ||
+                                categorie
+                        });
+                    }
+                }
+            }
+
+
+            // ========================================================
+            // ✅ MODÈLES TROUVÉS
+            // ========================================================
+
+            if (modeles.length) {
+
+                console.log(
+                    "📚 [NeoAI MODELES] Source hiérarchique :",
+                    modeles.length
+                );
+
+                console.log(
+                    "🎯 [NeoAI CATÉGORIES DISPONIBLES] :",
+                    [
+                        ...new Set(
+                            modeles
+                                .map(
+                                    modele =>
+                                        modele.categorie
+                                )
+                                .filter(Boolean)
+                        )
+                    ]
+                );
+
+                console.log(
+                    "🎯 [NeoAI ACTIONS CANONIQUES] :",
+                    [
+                        ...new Set(
+                            modeles
+                                .map(
+                                    modele =>
+                                        modele.action
+                                )
+                                .filter(Boolean)
+                        )
+                    ]
+                );
+
+                return modeles;
+            }
+
+
+            // ========================================================
+            // 🔄 COMPATIBILITÉ AVEC ANCIEN FORMAT
+            //
+            // Exemple :
+            //
+            // {
+            //     course: [ ... ],
+            //     saut: [ ... ]
+            // }
+            //
+            // Si l'objet n'a pas de sous-catégorie, on le traite
+            // directement comme un groupe d'actions.
+            // ========================================================
+
+            const anciensModeles = [];
 
 
             for (
@@ -3108,9 +3310,10 @@ function neoGetModeles() {
                 of Object.entries(source)
             ) {
 
-                // ----------------------------------------------------
-                // Groupe contenant plusieurs modèles
-                // ----------------------------------------------------
+                if (actionCanonique === "categorie") {
+                    continue;
+                }
+
 
                 if (Array.isArray(valeur)) {
 
@@ -3123,28 +3326,17 @@ function neoGetModeles() {
                             continue;
                         }
 
+                        anciensModeles.push({
 
-                        modeles.push({
-
-                            // On place le modèle en premier
                             ...modele,
 
-                            // Puis on FORCE l'action provenant
-                            // de la clé du groupe.
-                            //
-                            // Exemple :
-                            // frapper: [ATT_001]
-                            //
-                            // devient :
-                            // action: "frapper"
-                            // ------------------------------------------------
                             action:
                                 modele.action ||
                                 actionCanonique,
 
                             categorie:
                                 modele.categorie ||
-                                actionCanonique
+                                null
                         });
                     }
 
@@ -3152,16 +3344,12 @@ function neoGetModeles() {
                 }
 
 
-                // ----------------------------------------------------
-                // Groupe contenant un seul modèle
-                // ----------------------------------------------------
-
                 if (
                     valeur &&
                     typeof valeur === "object"
                 ) {
 
-                    modeles.push({
+                    anciensModeles.push({
 
                         ...valeur,
 
@@ -3171,32 +3359,34 @@ function neoGetModeles() {
 
                         categorie:
                             valeur.categorie ||
-                            actionCanonique
+                            null
                     });
                 }
             }
 
 
-            if (modeles.length) {
+            if (anciensModeles.length) {
 
                 console.log(
-                    "📚 [NeoAI MODELES] Source objet :",
-                    modeles.length
+                    "📚 [NeoAI MODELES] Ancien format :",
+                    anciensModeles.length
                 );
 
                 console.log(
                     "🎯 [NeoAI ACTIONS DISPONIBLES] :",
                     [
                         ...new Set(
-                            modeles.map(
-                                modele =>
-                                    modele.action
-                            )
+                            anciensModeles
+                                .map(
+                                    modele =>
+                                        modele.action
+                                )
+                                .filter(Boolean)
                         )
                     ]
                 );
 
-                return modeles;
+                return anciensModeles;
             }
         }
     }
@@ -3212,7 +3402,6 @@ function neoGetModeles() {
 
     return [];
 }
-
 
 
 //==============================================================
