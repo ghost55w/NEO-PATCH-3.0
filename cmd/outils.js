@@ -5251,7 +5251,11 @@ const analyseModele = {
       texte,
       analyseModele
     );
-
+    
+    const actionFinale =
+  modele?.actionCanonique ||
+  actionNom;
+    
 //============================================================
 // 🧩 VALIDATION DE LA STRUCTURE DU MODÈLE RECONNU
 //============================================================
@@ -5297,53 +5301,7 @@ if (
 
   };
 
-  const valeurs = {
-
-    SUJET:
-      acteur ||
-      null,
-
-    ACTION:
-      actionNom ||
-      null,
-
-    CIBLE:
-      cible ||
-      null,
-
-    MEMBRE:
-      membre ||
-      null,
-
-    PARTIE_CORPS:
-      partieCorps ||
-      null,
-
-    MANIERE:
-      maniere ||
-      null,
-
-    DISTANCE:
-      distance?.valeur ??
-      null,
-
-    HAUTEUR:
-      hauteur?.valeur ??
-      null,
-
-    VITESSE:
-      vitesse?.valeur ??
-      null,
-
-    DIRECTION:
-      trajectoire ||
-      null,
-
-    TRAJECTOIRE:
-      trajectoire ||
-      null
-
-  };
+  
 
   for (
     const element of structureModele
@@ -5504,8 +5462,7 @@ const structureSemantique = {
     null,
 
   action:
-    actionNom ||
-    null,
+  actionFinale || null,
 
   cible:
     cible ||
