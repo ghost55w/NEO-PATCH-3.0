@@ -3497,10 +3497,16 @@ function neoGetModeles() {
 // 🧩 COMPARAISON SÉMANTIQUE D'UN MODÈLE
 //==============================================================
 //
-// Le score sert uniquement à sélectionner le modèle.
-// Il ne sert PLUS à valider ou refuser le pavé.
+// 🎯 RÔLES :
 //
-// VALIDATION = structure sémantique complète.
+// EXEMPLES  = reconnaissance du modèle
+// STRUCTURE = validation de l'action
+//
+// Le modèle est choisi principalement grâce à la phrase
+// d'exemple qui ressemble le plus au texte reçu.
+//
+// 30% = candidat
+// 70% = correspondance forte
 //==============================================================
 
 function neoCalculerSimilariteModele(
@@ -3513,25 +3519,9 @@ function neoCalculerSimilariteModele(
         return 0;
     }
 
-
-    const existe = valeur => {
-
-        if (
-            valeur === null ||
-            valeur === undefined
-        ) {
-            return false;
-        }
-
-        if (
-            typeof valeur === "string"
-        ) {
-            return valeur.trim() !== "";
-        }
-
-        return true;
-    };
-
+    //============================================================
+    // 🔧 OUTILS
+    //============================================================
 
     const normaliser = valeur => {
 
@@ -3542,17 +3532,43 @@ function neoCalculerSimilariteModele(
             return "";
         }
 
-        return neoNormaliserMotLocal(
+        return neoNormaliserTexteLocal(
             String(valeur)
         )
             .toLowerCase()
+            .replace(/[.,!?;:()[\]{}"'`]/gu, " ")
+            .replace(/\s+/g, " ")
             .trim();
     };
 
+    const normaliserMot = valeur => {
+
+        return neoNormaliserMotLocal(
+            String(valeur || "")
+        )
+            .toLowerCase()
+            .trim();
+
+    };
+
+    const texteNormalise =
+        normaliser(texte);
 
     //============================================================
     // 📦 VALEURS ANALYSÉES
     //============================================================
+
+    const actionAnalysee =
+        typeof analyse.action === "object"
+            ? (
+                analyse.action.action ||
+                analyse.action.verbe ||
+                ""
+            )
+            : (
+                analyse.action ||
+                ""
+            );
 
     const valeurs = {
 
@@ -3562,16 +3578,7 @@ function neoCalculerSimilariteModele(
             null,
 
         ACTION:
-            typeof analyse.action === "object"
-                ? (
-                    analyse.action.action ||
-                    analyse.action.verbe ||
-                    null
-                )
-                : (
-                    analyse.action ||
-                    null
-                ),
+            actionAnalysee,
 
         CIBLE:
             analyse.cible ||
@@ -3616,191 +3623,661 @@ function neoCalculerSimilariteModele(
         INTENTION:
             analyse.intention ||
             null
+
     };
 
+    //============================================================
+    // 🧠 SYNONYMES → ACTION CANONIQUE
+    //============================================================
+
+    const synonymes =
+        NeoAI?.NEO_SYNONYMES ||
+        {};
+
+    const canoniserMot =
+        mot => {
+
+            const recherche =
+                normaliserMot(mot);
+
+            if (!recherche) {
+                return "";
+            }
+
+            for (
+                const groupe of Object.values(
+                    synonymes
+                )
+            ) {
+
+                if (
+                    !groupe ||
+                    typeof groupe !== "object" ||
+                    Array.isArray(groupe)
+                ) {
+                    continue;
+                }
+
+                for (
+                    const [canonique, aliases]
+                    of Object.entries(groupe)
+                ) {
+
+                    const canoniqueNormalise =
+                        normaliserMot(
+                            canonique
+                        );
+
+                    if (
+                        recherche ===
+                        canoniqueNormalise
+                    ) {
+                        return canoniqueNormalise;
+                    }
+
+                    if (
+                        Array.isArray(aliases) &&
+                        aliases.some(
+                            alias =>
+                                normaliserMot(alias) ===
+                                recherche
+                        )
+                    ) {
+                        return canoniqueNormalise;
+                    }
+
+                }
+
+            }
+
+            return recherche;
+
+        };
 
     //============================================================
-    // 📐 STRUCTURE DU MODÈLE
+    // 🚫 MOTS VIDES
+    //============================================================
+
+    const motsVides = new Set([
+
+        "a",
+        "au",
+        "aux",
+        "de",
+        "des",
+        "du",
+        "en",
+        "et",
+        "la",
+        "le",
+        "les",
+        "un",
+        "une",
+        "vers",
+        "pour",
+        "sur",
+        "dans",
+        "avec",
+        "par",
+        "se",
+        "sa",
+        "son",
+        "ses",
+        "leur",
+        "leurs",
+        "à",
+        "d",
+        "l"
+
+    ]);
+
+    //============================================================
+    // 🔎 TOKENISATION
+    //============================================================
+
+    const extraireTokens =
+        valeur => {
+
+            return normaliser(valeur)
+                .split(/\s+/u)
+                .map(
+                    mot =>
+                        mot.replace(
+                            /[^a-z0-9_-]/giu,
+                            ""
+                        )
+                )
+                .filter(Boolean);
+
+        };
+
+    //============================================================
+    // 🧠 NORMALISATION INTELLIGENTE D'UNE PHRASE
+    //============================================================
+
+    const preparerPhrase =
+        valeur => {
+
+            const tokens =
+                extraireTokens(valeur);
+
+            const resultat = [];
+
+            for (
+                const token of tokens
+            ) {
+
+                if (
+                    motsVides.has(token)
+                ) {
+                    continue;
+                }
+
+                const canonique =
+                    canoniserMot(token);
+
+                if (
+                    canonique
+                ) {
+
+                    resultat.push(
+                        canonique
+                    );
+
+                }
+
+            }
+
+            return resultat;
+
+        };
+
+    //============================================================
+    // 🎯 TOKENS DU TEXTE REÇU
+    //============================================================
+
+    const tokensTexte =
+        preparerPhrase(
+            texteNormalise
+        );
+
+    const ensembleTexte =
+        new Set(
+            tokensTexte
+        );
+
+    //============================================================
+    // 🎯 MOTS IMPORTANTS DÉTECTÉS PAR NEOAI
+    //============================================================
+
+    const elementsImportants = [];
+
+    const ajouterImportant =
+        valeur => {
+
+            if (
+                valeur === null ||
+                valeur === undefined ||
+                valeur === ""
+            ) {
+                return;
+            }
+
+            const morceaux =
+                preparerPhrase(
+                    String(valeur)
+                );
+
+            for (
+                const mot of morceaux
+            ) {
+
+                if (
+                    !elementsImportants.includes(
+                        mot
+                    )
+                ) {
+
+                    elementsImportants.push(
+                        mot
+                    );
+
+                }
+
+            }
+
+        };
+
+    ajouterImportant(
+        valeurs.TRAJECTOIRE
+    );
+
+    ajouterImportant(
+        valeurs.DIRECTION
+    );
+
+    ajouterImportant(
+        valeurs.VITESSE
+    );
+
+    ajouterImportant(
+        valeurs.MANIERE
+    );
+
+    ajouterImportant(
+        valeurs.INTENTION
+    );
+
+    ajouterImportant(
+        valeurs.DISTANCE
+    );
+
+    ajouterImportant(
+        valeurs.HAUTEUR
+    );
+
+    ajouterImportant(
+        valeurs.ACTION
+    );
+
+    //============================================================
+    // 📚 EXEMPLES DU MODÈLE
+    //============================================================
+
+    const exemples =
+        Array.isArray(
+            modele.exemples
+        )
+            ? modele.exemples.filter(
+                exemple =>
+                    typeof exemple === "string" &&
+                    exemple.trim() !== ""
+            )
+            : [];
+
+    //============================================================
+    // ❌ MODÈLE SANS EXEMPLES
+    //============================================================
+
+    if (
+        !exemples.length
+    ) {
+
+        console.log(
+            "⚠️ [NeoAI EXEMPLES] Aucun exemple pour :",
+            modele.id
+        );
+
+        return 0;
+
+    }
+
+    //============================================================
+    // 🧠 COMPARAISON D'UN EXEMPLE
+    //============================================================
+
+    const calculerScoreExemple =
+        exemple => {
+
+            const tokensExemple =
+                preparerPhrase(
+                    exemple
+                );
+
+            if (
+                !tokensExemple.length
+            ) {
+                return 0;
+            }
+
+            const ensembleExemple =
+                new Set(
+                    tokensExemple
+                );
+
+            //====================================================
+            // 🔹 1. SIMILARITÉ DES MOTS
+            //====================================================
+
+            let communs = 0;
+
+            for (
+                const mot of ensembleTexte
+            ) {
+
+                if (
+                    ensembleExemple.has(mot)
+                ) {
+
+                    communs++;
+
+                }
+
+            }
+
+            const union =
+                new Set([
+                    ...ensembleTexte,
+                    ...ensembleExemple
+                ]).size;
+
+            const scoreMots =
+                union > 0
+                    ? (
+                        communs /
+                        union
+                    ) * 100
+                    : 0;
+
+            //====================================================
+            // 🔹 2. MOTS IMPORTANTS
+            //====================================================
+
+            let importantsTrouves = 0;
+
+            for (
+                const mot of elementsImportants
+            ) {
+
+                if (
+                    ensembleExemple.has(mot)
+                ) {
+
+                    importantsTrouves++;
+
+                }
+
+            }
+
+            const scoreImportants =
+                elementsImportants.length > 0
+                    ? (
+                        importantsTrouves /
+                        elementsImportants.length
+                    ) * 100
+                    : 0;
+
+            //====================================================
+            // 🔹 3. PHRASE / SÉQUENCE
+            //====================================================
+
+            let sequencesCommunes = 0;
+
+            for (
+                let i = 0;
+                i < tokensTexte.length - 1;
+                i++
+            ) {
+
+                const a =
+                    tokensTexte[i];
+
+                const b =
+                    tokensTexte[i + 1];
+
+                for (
+                    let j = 0;
+                    j < tokensExemple.length - 1;
+                    j++
+                ) {
+
+                    if (
+                        tokensExemple[j] === a &&
+                        tokensExemple[j + 1] === b
+                    ) {
+
+                        sequencesCommunes++;
+                        break;
+
+                    }
+
+                }
+
+            }
+
+            const totalSequences =
+                Math.max(
+                    tokensTexte.length - 1,
+                    1
+                );
+
+            const scoreSequence =
+                (
+                    sequencesCommunes /
+                    totalSequences
+                ) * 100;
+
+            //====================================================
+            // 🏆 SCORE DE L'EXEMPLE
+            //====================================================
+            //
+            // Les mots importants ont le plus de poids.
+            // La ressemblance générale vient ensuite.
+            // La séquence départage les phrases proches.
+            //====================================================
+
+            const score =
+                Math.round(
+
+                    (
+                        scoreImportants *
+                        0.50
+                    ) +
+
+                    (
+                        scoreMots *
+                        0.35
+                    ) +
+
+                    (
+                        scoreSequence *
+                        0.15
+                    )
+
+                );
+
+            return Math.min(
+                100,
+                score
+            );
+
+        };
+
+    //============================================================
+    // 📊 COMPARER TOUS LES EXEMPLES
+    //============================================================
+
+    let meilleurExemple =
+        null;
+
+    let meilleurScoreExemple =
+        0;
+
+    for (
+        const exemple of exemples
+    ) {
+
+        const scoreExemple =
+            calculerScoreExemple(
+                exemple
+            );
+
+        console.log(
+            "📝 [NeoAI EXEMPLE]",
+            modele.id,
+            "|",
+            scoreExemple + "%",
+            "|",
+            exemple
+        );
+
+        if (
+            scoreExemple >
+            meilleurScoreExemple
+        ) {
+
+            meilleurScoreExemple =
+                scoreExemple;
+
+            meilleurExemple =
+                exemple;
+
+        }
+
+    }
+
+    //============================================================
+    // 📐 STRUCTURE
+    //
+    // Elle ne sert PLUS à choisir le modèle.
+    // Elle sert uniquement à savoir si le modèle retenu
+    // pourra ensuite être validé.
     //============================================================
 
     const structureModele =
-        Array.isArray(modele.structure)
+        Array.isArray(
+            modele.structure
+        )
             ? modele.structure
             : [];
-
-
-    if (!structureModele.length) {
-        return 0;
-    }
-
-
-    const normaliserSlot = valeur => {
-
-        return normaliser(valeur)
-            .toUpperCase()
-            .replace(/\s+/g, "_");
-    };
-
 
     let attendus = 0;
     let trouves = 0;
 
-
     const slotsTrouves = [];
     const slotsManquants = [];
 
+    const existe =
+        valeur => {
 
-    //============================================================
-    // 🔎 VÉRIFICATION DES SLOTS
-    //============================================================
+            if (
+                valeur === null ||
+                valeur === undefined
+            ) {
+                return false;
+            }
+
+            return String(
+                valeur
+            ).trim() !== "";
+
+        };
+
+    const normaliserSlot =
+        valeur =>
+            normaliserMot(
+                valeur
+            )
+                .toUpperCase()
+                .replace(
+                    /\s+/g,
+                    "_"
+                );
 
     for (
         const element of structureModele
     ) {
 
         const slot =
-            normaliserSlot(element);
-
+            normaliserSlot(
+                element
+            );
 
         if (!slot) {
             continue;
         }
 
-
         attendus++;
 
-
-        let valeur = null;
-
+        let valeur =
+            null;
 
         switch (slot) {
 
             case "SUJET":
             case "ACTEUR":
-
                 valeur =
                     valeurs.SUJET;
-
                 break;
-
 
             case "ACTION":
             case "VERBE":
-
                 valeur =
                     valeurs.ACTION;
-
                 break;
-
 
             case "CIBLE":
             case "OBJET":
-
                 valeur =
                     valeurs.CIBLE;
-
                 break;
-
 
             case "MEMBRE":
-
                 valeur =
                     valeurs.MEMBRE;
-
                 break;
-
 
             case "PARTIE_CORPS":
             case "PARTIECORPS":
-
                 valeur =
                     valeurs.PARTIE_CORPS;
-
                 break;
-
 
             case "MANIERE":
-
                 valeur =
                     valeurs.MANIERE;
-
                 break;
-
 
             case "DISTANCE":
-
                 valeur =
                     valeurs.DISTANCE;
-
                 break;
-
 
             case "HAUTEUR":
-
                 valeur =
                     valeurs.HAUTEUR;
-
                 break;
-
 
             case "VITESSE":
-
                 valeur =
                     valeurs.VITESSE;
-
                 break;
-
 
             case "DIRECTION":
-
                 valeur =
                     valeurs.DIRECTION;
-
                 break;
-
 
             case "TRAJECTOIRE":
-
                 valeur =
                     valeurs.TRAJECTOIRE;
-
                 break;
-
 
             case "COURBE":
-
                 valeur =
                     valeurs.COURBE;
-
                 break;
-
 
             case "INTENTION":
-
                 valeur =
                     valeurs.INTENTION;
-
                 break;
-
 
             default:
-
                 valeur = null;
-
                 break;
+
         }
 
-
-        if (existe(valeur)) {
+        if (
+            existe(valeur)
+        ) {
 
             trouves++;
 
-
             slotsTrouves.push({
-
                 slot,
                 valeur
-
             });
 
         } else {
@@ -3808,13 +4285,10 @@ function neoCalculerSimilariteModele(
             slotsManquants.push(
                 slot
             );
+
         }
+
     }
-
-
-    //============================================================
-    // 📊 SCORE STRUCTURE
-    //============================================================
 
     const scoreStructure =
         attendus > 0
@@ -3826,22 +4300,45 @@ function neoCalculerSimilariteModele(
             )
             : 0;
 
+    const structureComplete =
+        slotsManquants.length === 0;
+
+    //============================================================
+    // 📦 INFORMATIONS POUR NEORECONNAITREMODELE
+    //============================================================
 
     analyse.scoreStructure =
         scoreStructure;
 
-
     analyse.slotsTrouves =
         slotsTrouves;
-
 
     analyse.slotsManquants =
         slotsManquants;
 
-
     analyse.structureComplete =
-        slotsManquants.length === 0;
+        structureComplete;
 
+    analyse.scoreExemple =
+        meilleurScoreExemple;
+
+    analyse.meilleurExemple =
+        meilleurExemple;
+
+    //============================================================
+    // 🎯 SCORE FINAL
+    //
+    // IMPORTANT :
+    //
+    // Le score final représente maintenant principalement
+    // la ressemblance avec les exemples.
+    //
+    // La structure ne sert plus à départager COURSE_001,
+    // COURSE_004, etc.
+    //============================================================
+
+    const scoreFinal =
+        meilleurScoreExemple;
 
     console.log(
         "🧩 [NeoAI STRUCTURE]",
@@ -3854,177 +4351,41 @@ function neoCalculerSimilariteModele(
         slotsManquants
     );
 
+    console.log(
+        "📝 [NeoAI MEILLEUR EXEMPLE]",
+        modele.id,
+        "|",
+        `${meilleurScoreExemple}%`,
+        "|",
+        meilleurExemple
+    );
 
-    //============================================================
-    // 🎯 SCORE ACTION
-    //============================================================
-
-    let scoreAction = 0;
-
-
-    const actionModele =
-        normaliser(
-            modele.action
-        );
-
-
-    const actionTexte =
-        normaliser(
-            valeurs.ACTION
-        );
-
-
-    if (
-        actionModele &&
-        actionTexte
-    ) {
-
-        if (
-            actionModele ===
-            actionTexte
-        ) {
-
-            scoreAction = 100;
-
-        } else if (
-            actionModele.includes(
-                actionTexte
-            ) ||
-            actionTexte.includes(
-                actionModele
-            )
-        ) {
-
-            scoreAction = 80;
-        }
-    }
-
-
-    //============================================================
-    // 🏷️ SCORE CATÉGORIE
-    //============================================================
-
-    let scoreCategorie = 0;
-
-
-    const categorieModele =
-        normaliser(
-            modele.categorie
-        );
-
-
-    const categorieAnalyse =
-        normaliser(
-            analyse.categorie
-        );
-
-
-    if (
-        categorieModele &&
-        categorieAnalyse &&
-        categorieModele ===
-        categorieAnalyse
-    ) {
-
-        scoreCategorie = 100;
-    }
-
-
-    //============================================================
-    // 🧩 SCORE FAMILLE
-    //============================================================
-
-    let scoreFamille = 0;
-
-
-    const familleModele =
-        normaliser(
-            modele.famille
-        );
-
-
-    const familleAnalyse =
-        normaliser(
-            analyse.famille
-        );
-
-
-    if (
-        familleModele &&
-        familleAnalyse &&
-        familleModele ===
-        familleAnalyse
-    ) {
-
-        scoreFamille = 100;
-    }
-
-
-    //============================================================
-    // 📊 SCORE FINAL
-    //============================================================
-
-    const scoreFinal =
-        Math.round(
-
-            (
-                scoreStructure *
-                0.60
-            ) +
-
-            (
-                scoreAction *
-                0.25
-            ) +
-
-            (
-                scoreCategorie *
-                0.10
-            ) +
-
-            (
-                scoreFamille *
-                0.05
-            )
-
-        );
-
-
-    analyse.scoreReconnaissance =
-        scoreFinal;
-
+    console.log(
+        "📊 [NeoAI SCORE MODÈLE]",
+        modele.id,
+        "|",
+        `${scoreFinal}%`
+    );
 
     return Math.min(
         100,
         scoreFinal
     );
 }
-
+            
 
 //==============================================================
 // 📚 RECONNAISSANCE DU MEILLEUR MODÈLE
+//==============================================================
 //
-// FLUX :
+// 🎯 PRIORITÉ :
 //
-// 1. Détecter l'action brute.
-// 2. Chercher cette action dans NEO_SYNONYMES.
-// 3. Obtenir l'action canonique.
-// 4. Chercher uniquement cette action dans les modèles.
-// 5. Comparer les modèles.
-// 6. Sélectionner le meilleur.
-// 7. La structure complète décide ensuite de la validation.
+// 1. ACTION CANONIQUE
+// 2. PHRASES D'EXEMPLES
+// 3. STRUCTURE = validation uniquement
 //
-// EXEMPLE :
-//
-// "Naruto fonce vers Sasuke à VMax sur 5m"
-//
-// fonce
-//   ↓
-// NEO_SYNONYMES
-//   ↓
-// course
-//   ↓
-// COURSE_001 ... COURSE_005
+// 30% = modèle candidat
+// 70% = correspondance forte
 //==============================================================
 
 function neoReconnaitreModele(
@@ -4039,7 +4400,6 @@ function neoReconnaitreModele(
     const tousLesModeles =
         neoGetModeles();
 
-
     if (
         !Array.isArray(
             tousLesModeles
@@ -4051,25 +4411,17 @@ function neoReconnaitreModele(
             "⚠️ [NeoAI MODEL] Aucun modèle disponible."
         );
 
-
         return {
-
             modele: null,
-
             score: 0,
-
             scoreStructure: 0,
-
             structureComplete: false,
-
             slotsTrouves: [],
-
             slotsManquants: [],
-
             actionCanonique: null
         };
-    }
 
+    }
 
     //============================================================
     // 🎯 ACTION BRUTE
@@ -4081,18 +4433,14 @@ function neoReconnaitreModele(
             texte
         );
 
-
     const actionBrute =
         typeof actionDetectee === "string"
-
             ? actionDetectee
-
             : (
                 actionDetectee?.action ||
                 actionDetectee?.verbe ||
                 ""
             );
-
 
     const actionBruteNormalisee =
         neoNormaliserMotLocal(
@@ -4103,65 +4451,16 @@ function neoReconnaitreModele(
             .toLowerCase()
             .trim();
 
-
     //============================================================
-    // 🧠 RECHERCHE DANS NEO_SYNONYMES
-    //
-    // Architecture attendue :
-    //
-    // NEO_SYNONYMES = {
-    //
-    //     deplacement: {
-    //
-    //         course: [
-    //             "courir",
-    //             "foncer",
-    //             "fonce",
-    //             "sprinter",
-    //             "filer"
-    //         ]
-    //
-    //     }
-    //
-    // }
+    // 🧠 RECHERCHE SYNONYMES
     //============================================================
 
     let actionCanonique =
         actionBruteNormalisee;
 
-
     const synonymes =
         NeoAI?.NEO_SYNONYMES ||
         {};
-
-
-    //============================================================
-    // 🔎 FONCTION LOCALE DE COMPARAISON
-    //============================================================
-
-    const estEquivalent =
-        (valeur, recherche) => {
-
-            const valeurNormalisee =
-                neoNormaliserMotLocal(
-                    String(
-                        valeur
-                    )
-                )
-                    .toLowerCase()
-                    .trim();
-
-
-            return (
-                valeurNormalisee ===
-                recherche
-            );
-        };
-
-
-    //============================================================
-    // 📚 PARCOURS DES SYNONYMES
-    //============================================================
 
     for (
         const [categorie, groupe]
@@ -4177,7 +4476,6 @@ function neoReconnaitreModele(
         ) {
             continue;
         }
-
 
         for (
             const [canonique, aliases]
@@ -4195,11 +4493,6 @@ function neoReconnaitreModele(
                     .toLowerCase()
                     .trim();
 
-
-            //====================================================
-            // ACTION DÉJÀ CANONIQUE
-            //====================================================
-
             if (
                 actionBruteNormalisee ===
                 canoniqueNormalisee
@@ -4209,23 +4502,19 @@ function neoReconnaitreModele(
                     canonique;
 
                 break;
+
             }
 
-
-            //====================================================
-            // ACTION = SYNONYME
-            //====================================================
-
             if (
-                Array.isArray(
-                    aliases
-                ) &&
+                Array.isArray(aliases) &&
                 aliases.some(
                     alias =>
-                        estEquivalent(
-                            alias,
-                            actionBruteNormalisee
+                        neoNormaliserMotLocal(
+                            String(alias)
                         )
+                            .toLowerCase()
+                            .trim() ===
+                        actionBruteNormalisee
                 )
             ) {
 
@@ -4242,9 +4531,10 @@ function neoReconnaitreModele(
                 );
 
                 break;
-            }
-        }
 
+            }
+
+        }
 
         if (
             actionCanonique !==
@@ -4252,11 +4542,11 @@ function neoReconnaitreModele(
         ) {
             break;
         }
+
     }
 
-
     //============================================================
-    // 📌 SI L'ACTION EST DÉJÀ CANONIQUE
+    // 📌 LOGS ACTION
     //============================================================
 
     console.log(
@@ -4264,32 +4554,21 @@ function neoReconnaitreModele(
         actionBruteNormalisee
     );
 
-
     console.log(
         "🎯 [NeoAI ACTION CANONIQUE] :",
         actionCanonique
     );
 
-
-    //============================================================
-    // 🔄 MISE À JOUR DE L'ANALYSE
-    //============================================================
-
     analyse.action =
         actionCanonique;
 
-
     //============================================================
-    // 🎯 DÉTECTION DE LA CATÉGORIE
-    //
-    // On cherche la catégorie correspondant
-    // à l'action canonique.
+    // 🏷️ CATÉGORIE
     //============================================================
 
     let categorieCanonique =
         analyse.categorie ||
         null;
-
 
     for (
         const [categorie, groupe]
@@ -4306,7 +4585,6 @@ function neoReconnaitreModele(
             continue;
         }
 
-
         if (
             Object.prototype.hasOwnProperty.call(
                 groupe,
@@ -4318,12 +4596,13 @@ function neoReconnaitreModele(
                 categorie;
 
             break;
+
         }
+
     }
 
-
     //============================================================
-    // 📌 FALLBACK : CATÉGORIE DU MODÈLE
+    // 📌 FALLBACK CATÉGORIE DU MODÈLE
     //============================================================
 
     if (
@@ -4346,30 +4625,37 @@ function neoReconnaitreModele(
                         .trim()
             );
 
-
         if (
             modeleCategorie?.categorie
         ) {
 
             categorieCanonique =
                 modeleCategorie.categorie;
-        }
-    }
 
+        }
+
+    }
 
     analyse.categorie =
         categorieCanonique;
-
 
     console.log(
         "🏷️ [NeoAI CATÉGORIE] :",
         categorieCanonique
     );
 
+    //============================================================
+    // 🔒 FILTRE ACTION CANONIQUE
+    //============================================================
 
-    //============================================================
-    // 🔒 FILTRE STRICT PAR ACTION CANONIQUE
-    //============================================================
+    const actionNormalisee =
+        neoNormaliserMotLocal(
+            String(
+                actionCanonique
+            )
+        )
+            .toLowerCase()
+            .trim();
 
     const modelesCompatibles =
         tousLesModeles.filter(
@@ -4385,24 +4671,18 @@ function neoReconnaitreModele(
                         .toLowerCase()
                         .trim();
 
-
                 return (
                     actionModele ===
-                    String(
-                        actionCanonique
-                    )
-                        .toLowerCase()
-                        .trim()
+                    actionNormalisee
                 );
+
             }
         );
-
 
     console.log(
         "📚 [NeoAI MODÈLES COMPATIBLES] :",
         modelesCompatibles.length
     );
-
 
     //============================================================
     // ❌ AUCUN MODÈLE
@@ -4413,48 +4693,42 @@ function neoReconnaitreModele(
     ) {
 
         console.log(
-            "⚠️ [NeoAI MODEL] Aucun modèle pour l'action canonique :",
+            "⚠️ [NeoAI MODEL] Aucun modèle pour :",
             actionCanonique
         );
 
-
         return {
-
             modele: null,
-
             score: 0,
-
             scoreStructure: 0,
-
             structureComplete: false,
-
             slotsTrouves: [],
-
             slotsManquants: [],
-
             actionCanonique,
-
             categorie:
                 categorieCanonique
         };
+
     }
 
-
     //============================================================
-    // 🧠 RECHERCHE DU MEILLEUR MODÈLE
+    // 🧠 RECHERCHE DU MEILLEUR EXEMPLE
     //============================================================
 
     let meilleur =
         null;
 
-
     let meilleurScore =
         -1;
-
 
     let meilleureAnalyse =
         null;
 
+    //============================================================
+    // 🎯 MODÈLES CANDIDATS ≥ 30%
+    //============================================================
+
+    const candidats = [];
 
     for (
         const modele
@@ -4468,11 +4742,6 @@ function neoReconnaitreModele(
             "sans-id"
         );
 
-
-        //========================================================
-        // Analyse isolée
-        //========================================================
-
         const analyseModele = {
 
             ...analyse,
@@ -4482,8 +4751,8 @@ function neoReconnaitreModele(
 
             categorie:
                 categorieCanonique
-        };
 
+        };
 
         const score =
             neoCalculerSimilariteModele(
@@ -4492,51 +4761,104 @@ function neoReconnaitreModele(
                 analyseModele
             );
 
+        console.log(
+            "📊 [NeoAI EXEMPLE SCORE]",
+            modele?.id,
+            ":",
+            `${score}%`
+        );
+
+        //========================================================
+        // 30% = CANDIDAT
+        //========================================================
 
         if (
-            score >
+            score >= 30
+        ) {
+
+            candidats.push({
+
+                modele,
+
+                score,
+
+                analyse:
+                    analyseModele
+
+            });
+
+        }
+
+    }
+
+    //============================================================
+    // 📚 LOG DES CANDIDATS
+    //============================================================
+
+    console.log(
+        "📚 [NeoAI MODÈLES CANDIDATS ≥30%] :",
+        candidats.map(
+            candidat => ({
+                id:
+                    candidat.modele?.id,
+                score:
+                    candidat.score
+            })
+        )
+    );
+
+    //============================================================
+    // 🏆 CHOIX DU MEILLEUR EXEMPLE
+    //============================================================
+
+    for (
+        const candidat
+        of candidats
+    ) {
+
+        if (
+            candidat.score >
             meilleurScore
         ) {
 
             meilleurScore =
-                score;
+                candidat.score;
 
             meilleur =
-                modele;
+                candidat.modele;
 
             meilleureAnalyse =
-                analyseModele;
+                candidat.analyse;
+
         }
+
     }
 
-
     //============================================================
-    // ❌ SÉCURITÉ
+    // ❌ AUCUN CANDIDAT
     //============================================================
 
-    if (!meilleur) {
+    if (
+        !meilleur
+    ) {
+
+        console.log(
+            "❌ [NeoAI] Aucun exemple suffisamment proche."
+        );
 
         return {
-
             modele: null,
-
             score: 0,
-
             scoreStructure: 0,
-
             structureComplete: false,
-
             slotsTrouves: [],
-
             slotsManquants: [],
-
             actionCanonique,
-
             categorie:
                 categorieCanonique
         };
-    }
 
+    }
 
     //============================================================
     // 📊 INFORMATIONS DU MODÈLE RETENU
@@ -4549,13 +4871,11 @@ function neoReconnaitreModele(
             ? meilleur.structure
             : [];
 
-
     const scoreStructure =
         Number(
             meilleureAnalyse?.scoreStructure ??
             0
         );
-
 
     const slotsTrouves =
         Array.isArray(
@@ -4564,7 +4884,6 @@ function neoReconnaitreModele(
             ? meilleureAnalyse.slotsTrouves
             : [];
 
-
     const slotsManquants =
         Array.isArray(
             meilleureAnalyse?.slotsManquants
@@ -4572,34 +4891,44 @@ function neoReconnaitreModele(
             ? meilleureAnalyse.slotsManquants
             : [];
 
-
     const structureComplete =
         slotsManquants.length === 0;
 
+    //============================================================
+    // 🧠 SCORE FORT
+    //============================================================
+
+    const correspondanceForte =
+        meilleurScore >= 70;
 
     //============================================================
-    // 📌 SYNCHRONISATION DE L'ANALYSE PRINCIPALE
+    // 📌 SYNCHRONISATION
     //============================================================
 
     analyse.scoreStructure =
         scoreStructure;
 
-
     analyse.slotsTrouves =
         slotsTrouves;
-
 
     analyse.slotsManquants =
         slotsManquants;
 
-
     analyse.structureComplete =
         structureComplete;
-
 
     analyse.scoreReconnaissance =
         meilleurScore;
 
+    analyse.scoreExemple =
+        meilleurScore;
+
+    analyse.correspondanceForte =
+        correspondanceForte;
+
+    analyse.meilleurExemple =
+        meilleureAnalyse?.meilleurExemple ||
+        null;
 
     //============================================================
     // 📤 LOGS
@@ -4612,54 +4941,41 @@ function neoReconnaitreModele(
         "sans-id"
     );
 
-
     console.log(
-        "🎯 [NeoAI ACTION CANONIQUE] :",
-        actionCanonique
+        "📝 [NeoAI EXEMPLE RETENU] :",
+        meilleureAnalyse?.meilleurExemple ||
+        "aucun"
     );
 
-
     console.log(
-        "🏷️ [NeoAI CATÉGORIE] :",
-        categorieCanonique
+        "📊 [NeoAI SCORE EXEMPLE] :",
+        meilleurScore + "%"
     );
 
-
     console.log(
-        "📊 [NeoAI SCORE RECONNAISSANCE] :",
-        meilleurScore
+        "🟢 [NeoAI CORRESPONDANCE FORTE ≥70%] :",
+        correspondanceForte
     );
-
 
     console.log(
         "📐 [NeoAI SCORE STRUCTURE] :",
-        scoreStructure
+        scoreStructure + "%"
     );
-
-
-    console.log(
-        "🧩 [NeoAI STRUCTURE] :",
-        structure
-    );
-
 
     console.log(
         "📦 [NeoAI SLOTS TROUVÉS] :",
         slotsTrouves
     );
 
-
     console.log(
         "⚠️ [NeoAI SLOTS MANQUANTS] :",
         slotsManquants
     );
 
-
     console.log(
         "✅ [NeoAI STRUCTURE COMPLÈTE] :",
         structureComplete
     );
-
 
     //============================================================
     // 📤 RETOUR
@@ -4686,10 +5002,21 @@ function neoReconnaitreModele(
         categorie:
             categorieCanonique,
 
-        structure
+        structure,
+
+        scoreExemple:
+            meilleurScore,
+
+        correspondanceForte,
+
+        meilleurExemple:
+            meilleureAnalyse?.meilleurExemple ||
+            null
+
     };
+
 }
-                   
+                                                            
 
 //==============================================================
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
