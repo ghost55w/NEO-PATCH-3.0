@@ -5301,7 +5301,44 @@ if (
 
   };
 
-  
+const valeurs = {
+
+  SUJET:
+    acteur || null,
+
+  ACTION:
+    actionFinale || null,
+
+  CIBLE:
+    cible || null,
+
+  MEMBRE:
+    membre || null,
+
+  PARTIE_CORPS:
+    partieCorps || null,
+
+  MANIERE:
+    maniere || null,
+
+  DISTANCE:
+    distance?.valeur ?? null,
+
+  HAUTEUR:
+    hauteur?.valeur ?? null,
+
+  VITESSE:
+    vitesse?.valeur ?? null,
+
+  DIRECTION:
+    direction || null,
+
+  TRAJECTOIRE:
+    trajectoire || null,
+
+  INTENTION:
+    intention || null
+};  
 
   for (
     const element of structureModele
@@ -5330,6 +5367,13 @@ if (
 
         break;
 
+case "INTENTION":
+
+  valeur =
+    valeurs.INTENTION;
+
+  break;
+            
       case "ACTION":
       case "VERBE":
 
@@ -5492,8 +5536,16 @@ const structureSemantique = {
     vitesse?.valeur ??
     null,
 
-  trajectoire:
+  direction:
+    direction ||
+    null,
+
+trajectoire:
     trajectoire ||
+    null,
+
+intention:
+    intention ||
     null
 
 };
