@@ -5191,8 +5191,7 @@ const intention =
   //============================================================
   // 📦 ANALYSE UTILISÉE POUR LE MODÈLE
   //============================================================
-
-  const analyseModele = {
+const analyseModele = {
 
     texte,
 
@@ -5201,9 +5200,9 @@ const intention =
     sujet: acteur,
 
     action: {
-      action: actionNom,
-      categorie,
-      famille
+        action: actionNom,
+        categorie,
+        famille
     },
 
     categorie,
@@ -5217,31 +5216,32 @@ const intention =
     membre,
 
     vitesse:
-      vitesse?.valeur ?? null,
+        vitesse?.valeur ?? null,
 
     distance:
-      distance?.valeur ?? null,
+        distance?.valeur ?? null,
 
     distanceUnite:
-      distance?.unite ?? null,
+        distance?.unite ?? null,
 
     hauteur:
-      hauteur?.valeur ?? null,
+        hauteur?.valeur ?? null,
 
     hauteurUnite:
-      hauteur?.unite ?? null,
+        hauteur?.unite ?? null,
 
-    direction:
-      trajectoire,
+    direction,
 
     trajectoire,
+
+    intention,
 
     partieCorps,
 
     structure
 
-  };
-
+};
+  
   //============================================================
   // 📚 RECONNAISSANCE DU MODÈLE
   //============================================================
