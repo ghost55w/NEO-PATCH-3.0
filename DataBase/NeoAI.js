@@ -414,75 +414,56 @@ const NEO_DISTANCES = {
 // ======================================================
 // SYNONYMES
 // ======================================================
-
 const NEO_SYNONYMES = {
 
-    foncer: [
-        "courir",
-        "se précipiter",
-        "se ruer",
-        "s'élancer",
-        "charger",
-        "foncer"
-    ],
+    // ==============================================
+    // DÉPLACEMENTS
+    // ==============================================
 
-    courir: [
-        "foncer",
-        "charger",
-        "s'élancer",
-        "se ruer"
-    ],
+    deplacement: {
 
-    frapper: [
-        "attaquer",
-        "cogner",
-        "asséner",
-        "porter un coup",
-        "donner un coup",
-        "frapper"
-    ],
+        course: [
+            "courir",
+            "court",
+            "foncer",
+            "fonce",
+            "fonçant",
+            "sprinter",
+            "sprint",
+            "sprinte",
+            "se précipiter",
+            "se précipite",
+            "filer",
+            "file",
+            "accélérer",
+            "accélère"
+        ],
 
-    attaquer: [
-        "frapper",
-        "cogner",
-        "asséner",
-        "porter un coup"
-    ],
+        saut: [
+            "sauter",
+            "saute",
+            "bondir",
+            "bondit",
+            "s'élancer",
+            "s'élance"
+        ],
 
-    sauter: [
-        "bondir",
-        "faire un bond",
-        "effectuer un saut",
-        "sauter"
-    ],
+        bond: [
+            "bondir",
+            "bondit",
+            "faire un bond",
+            "bond"
+        ],
 
-    avancer: [
-        "progresser",
-        "se déplacer",
-        "marcher",
-        "aller vers",
-        "avancer"
-    ],
-
-    esquiver: [
-        "éviter",
-        "se dérober",
-        "éviter l'attaque",
-        "esquiver"
-    ],
-
-    bloquer: [
-        "parer",
-        "intercepter",
-        "bloquer"
-    ],
-
-    saisir: [
-        "attraper",
-        "agripper",
-        "empoigner",
-        "saisir"
-    ]
+        vol: [
+            "voler",
+            "vole",
+            "s'envoler",
+            "s'envole",
+            "planer",
+            "plane"
+        ]
+    }
 };
 
 
