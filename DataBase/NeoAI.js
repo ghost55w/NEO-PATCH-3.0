@@ -550,14 +550,76 @@ const NEO_ACTIONS = {
 };
 
 
+// ======================================================
+// CATÉGORIES GÉNÉRALES
+// ======================================================
 
+const NEO_CATEGORIES = {
+
+    voyages: [
+        "voyage",
+        "route",
+        "transport",
+        "destination",
+        "déplacement"
+    ],
+
+    vie_courante: [
+        "maison",
+        "travail",
+        "école",
+        "manger",
+        "boire",
+        "dormir",
+        "acheter",
+        "vendre"
+    ],
+
+    combats: [
+        "combat",
+        "attaque",
+        "défense",
+        "esquive",
+        "parade",
+        "saisie",
+        "projection"
+    ],
+
+    deplacements: [
+        "courir",
+        "marcher",
+        "sauter",
+        "voler",
+        "avancer",
+        "reculer"
+    ]
+};
+
+
+// ======================================================
+// EXPORT
+// ======================================================
+
+module.exports = {
+
+    NEOAI_CONFIG,
+
+    NEO_VERBES,
+    NEO_NOMS,
+    NEO_ADJECTIFS,
+    NEO_ADVERBES,
+    NEO_CONNECTEURS,
+    NEO_PREPOSITIONS,
+
+    NEO_PARTIES_CORPS,
+    NEO_MANIERES,
+    NEO_VITESSES,
+    NEO_DISTANCES,
+
+    NEO_SYNONYMES,
+    NEO_ACTIONS,
+    NEO_ACTION_MODELS,
+    NEO_CATEGORIES
+};
                 
-        
-                                                
-            
-        
-        
-                    
-                                                   
-                            
-                                                    
+                                                                                     
