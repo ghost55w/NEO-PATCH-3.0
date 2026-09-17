@@ -1232,75 +1232,305 @@ function neoTrouverCollection(
 
 function neoDetecterDistance(texte) {
 
-  const match =
-    String(texte || "").match(
-      /(\d+(?:[.,]\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu
-    );
+  const normal =
+    String(texte || "")
+      .toLowerCase()
+      .replace(/,/g, ".")
+      .replace(/\s+/g, " ")
+      .trim();
 
-  if (!match) {
+  //============================================================
+  // 📏 DISTANCE EXPLICITE
+  //============================================================
+
+  const patterns = [
+
+    // "sur une distance de 5m"
+    /sur\s+(?:une\s+)?distance\s+de\s+(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu,
+
+    // "sur 5m"
+    /sur\s+(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu,
+
+    // "sur une distance de 5 mètres"
+    /distance\s+de\s+(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu,
+
+    // "parcourir 5m"
+    /(?:parcourir|parcourt|parcourant|avance|avancer|court|courir|fonce|foncer)\s+(?:sur\s+)?(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu
+
+  ];
+
+  for (
+    const pattern of patterns
+  ) {
+
+    const match =
+      normal.match(pattern);
+
+    if (!match) {
+      continue;
+    }
+
+    const valeur =
+      Number(
+        match[1]
+      );
+
+    let unite =
+      match[2].toLowerCase();
+
+    if (
+      unite.startsWith("cm") ||
+      unite.startsWith("cent")
+    ) {
+
+      unite = "cm";
+
+    } else {
+
+      unite = "m";
+
+    }
+
     return {
-      valeur: null,
-      unite: null
+      valeur,
+      unite
     };
+
   }
 
-  const valeur =
-    Number(
-      match[1]
-        .replace(",", ".")
-    );
+  //============================================================
+  // 📏 FALLBACK
+  //============================================================
+  //
+  // Seulement s'il n'existe aucun contexte "hauteur",
+  // "courbe", etc.
+  //============================================================
 
-  let unite =
-    match[2].toLowerCase();
+  const matches = [
+    ...normal.matchAll(
+      /(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/giu
+    )
+  ];
 
-  if (
-    unite.startsWith("cm") ||
-    unite.startsWith("cent")
+  for (
+    const match of matches
   ) {
-    unite = "cm";
-  } else {
-    unite = "m";
+
+    const debut =
+      Math.max(
+        0,
+        match.index - 30
+      );
+
+    const contexte =
+      normal.slice(
+        debut,
+        match.index
+      );
+
+    // Ne pas prendre une hauteur
+    if (
+      /\b(?:hauteur|haut|altitude)\s*(?:de|à)?\s*$/iu.test(
+        contexte
+      )
+    ) {
+      continue;
+    }
+
+    // Ne pas prendre une courbe
+    if (
+      /\b(?:courbe|courbure)\s*(?:de|à)?\s*$/iu.test(
+        contexte
+      )
+    ) {
+      continue;
+    }
+
+    const valeur =
+      Number(
+        match[1]
+      );
+
+    let unite =
+      match[2].toLowerCase();
+
+    if (
+      unite.startsWith("cm") ||
+      unite.startsWith("cent")
+    ) {
+
+      unite = "cm";
+
+    } else {
+
+      unite = "m";
+
+    }
+
+    return {
+      valeur,
+      unite
+    };
+
   }
 
   return {
-    valeur,
-    unite
+    valeur: null,
+    unite: null
   };
 
 }
 
-
 //==============================================================
 // 📏 HAUTEUR
 //==============================================================
-
 function neoDetecterHauteur(texte) {
 
   const t =
-    String(texte || "");
+    String(texte || "")
+      .replace(/,/g, ".")
+      .replace(/\s+/g, " ")
+      .trim();
 
-  const regex =
-    /(?:hauteur|haut(?:eur)?|monte(?:r)?|montant|saut(?:e|ant)?|en\s+l['’]air)\D{0,20}(\d+(?:[.,]\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu;
+  //============================================================
+  // 1️⃣ "hauteur de 10m"
+  //    "hauteur : 10m"
+  //    "hauteur 10m"
+  //============================================================
 
-  const match =
-    t.match(regex);
+  const regexHauteurAvant =
+    /(?:hauteur|haut(?:eur)?)\s*(?:de|à|:)?\s*(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu;
 
-  if (!match) {
+  let match =
+    t.match(
+      regexHauteurAvant
+    );
+
+  if (match) {
+
     return {
-      valeur: null,
-      unite: null
+      valeur:
+        Number(match[1]),
+
+      unite:
+        /cm|centim/i.test(match[2])
+          ? "cm"
+          : "m"
     };
+
+  }
+
+  //============================================================
+  // 2️⃣ "5m de hauteur"
+  //    "5 mètres de haut"
+  //============================================================
+
+  const regexHauteurApres =
+    /(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)\s+(?:de\s+)?(?:hauteur|haut(?:eur)?)/iu;
+
+  match =
+    t.match(
+      regexHauteurApres
+    );
+
+  if (match) {
+
+    return {
+      valeur:
+        Number(match[1]),
+
+      unite:
+        /cm|centim/i.test(match[2])
+          ? "cm"
+          : "m"
+    };
+
+  }
+
+  //============================================================
+  // 3️⃣ "monte de 5m"
+  //    "montant de 5m"
+  //    "monte 5m"
+  //============================================================
+
+  const regexMontee =
+    /(?:monte(?:r)?|montant)\s*(?:de|à)?\s*(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu;
+
+  match =
+    t.match(
+      regexMontee
+    );
+
+  if (match) {
+
+    return {
+      valeur:
+        Number(match[1]),
+
+      unite:
+        /cm|centim/i.test(match[2])
+          ? "cm"
+          : "m"
+    };
+
+  }
+
+  //============================================================
+  // 4️⃣ "saute de 5m"
+  //    "saute à 5m"
+  //============================================================
+
+  const regexSaut =
+    /(?:saut(?:e|er|ant)?|bond(?:it|ir|issant)?)\s*(?:de|à)?\s*(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)/iu;
+
+  match =
+    t.match(
+      regexSaut
+    );
+
+  if (match) {
+
+    return {
+      valeur:
+        Number(match[1]),
+
+      unite:
+        /cm|centim/i.test(match[2])
+          ? "cm"
+          : "m"
+    };
+
+  }
+
+  //============================================================
+  // 5️⃣ "5m en l'air"
+  //============================================================
+
+  const regexAir =
+    /(\d+(?:\.\d+)?)\s*(mètres?|metres?|m|cm|centimètres?|centimetres?)\s+(?:en\s+l['’]air|dans\s+l['’]air)/iu;
+
+  match =
+    t.match(
+      regexAir
+    );
+
+  if (match) {
+
+    return {
+      valeur:
+        Number(match[1]),
+
+      unite:
+        /cm|centim/i.test(match[2])
+          ? "cm"
+          : "m"
+    };
+
   }
 
   return {
-    valeur: Number(
-      match[1]
-        .replace(",", ".")
-    ),
-    unite:
-      /cm|centim/i.test(match[2])
-        ? "cm"
-        : "m"
+    valeur: null,
+    unite: null
   };
 
 }
