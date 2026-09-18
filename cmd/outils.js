@@ -2055,6 +2055,8 @@ function neoDetecterCible(texte) {
     "cible",
     "direction",
     "maximum",
+
+    // Articles / déterminants
     "le",
     "la",
     "les",
@@ -2068,17 +2070,46 @@ function neoDetecterCible(texte) {
     "son",
     "sa",
     "ses",
+
+    // Directions
     "avant",
     "arrière",
     "arriere",
     "gauche",
     "droite",
+
+    // Articles isolés pouvant apparaître
+    // dans "l'avant" / "l'arrière"
+    "l",
+
+    // Unités
     "m",
+    "cm",
+    "km",
     "mètre",
     "mètres",
     "metre",
     "metres"
   ]);
+
+  //============================================================
+  // 🚫 EXPRESSIONS QUI NE SONT PAS DES CIBLES
+  //============================================================
+
+  const expressionsDirection = [
+    /\bvers\s+l['’]?\s*avant\b/iu,
+    /\bvers\s+l['’]?\s*arrière\b/iu,
+    /\bvers\s+l['’]?\s*arriere\b/iu,
+
+    /\bvers\s+avant\b/iu,
+    /\bvers\s+arrière\b/iu,
+    /\bvers\s+arriere\b/iu,
+
+    /\bvers\s+la\s+gauche\b/iu,
+    /\bvers\s+la\s+droite\b/iu,
+    /\bvers\s+gauche\b/iu,
+    /\bvers\s+droite\b/iu
+  ];
 
   //============================================================
   // 🎯 PATTERNS DE CIBLE
@@ -2090,7 +2121,6 @@ function neoDetecterCible(texte) {
     /\bvisant\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
 
     // "visant le visage de Sarutobi"
-    // On cherche directement la cible située après "de".
     /\bvisant\s+(?:le|la|les|un|une|des)\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*(?:\s+[A-Za-zÀ-ÿ]+)*\s+\bde\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu,
 
     // "vers Sarutobi"
@@ -2112,6 +2142,10 @@ function neoDetecterCible(texte) {
     /\bson\s+([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*)/iu
 
   ];
+
+  //============================================================
+  // 🔎 ANALYSE DES PATTERNS
+  //============================================================
 
   for (
     const pattern of patterns
@@ -2135,6 +2169,24 @@ function neoDetecterCible(texte) {
         mot
       );
 
+    //==========================================================
+    // 🚫 CAS "vers l'avant", "vers la gauche", etc.
+    //==========================================================
+
+    if (
+      pattern.source.includes("\\bvers\\s+") &&
+      expressionsDirection.some(
+        expression =>
+          expression.test(t)
+      )
+    ) {
+      continue;
+    }
+
+    //==========================================================
+    // 🚫 MOT EXCLU
+    //==========================================================
+
     if (
       motsExclus.has(
         motNormalise
@@ -2142,6 +2194,10 @@ function neoDetecterCible(texte) {
     ) {
       continue;
     }
+
+    //==========================================================
+    // 🚫 NOMBRE / DISTANCE
+    //==========================================================
 
     if (
       /^\d+(?:[.,]\d+)?(?:m|cm|km)?$/iu.test(
@@ -2158,7 +2214,6 @@ function neoDetecterCible(texte) {
   return null;
 
 }
-      
 
 //==============================================================
 // 👤 ACTEUR
