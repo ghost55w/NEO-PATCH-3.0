@@ -425,8 +425,7 @@ const valide =
 //================================================
 // 🎮 RENDU VISUEL DU PAVÉ NEOAI🌀🧠 
 //================================================
-
-async function envoyerResultatPaveNeoAI(
+  async function envoyerResultatPaveNeoAI(
     ovl,
     chat,
     resultat,
@@ -449,125 +448,61 @@ async function envoyerResultatPaveNeoAI(
         }
 
 
-        //================================================
-        // ❌ PAVÉ INVALIDE
-        //================================================
-
-        if (!resultat.paveValide) {
-
-            const erreurs =
-                Array.isArray(resultat.erreurs)
-                    ? resultat.erreurs
-                        .map(e => `- ${e}`)
-                        .join("\n")
-                    : "Pavé invalide";
-
-
-            const texte =
-
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-❌ *PAVÉ REFUSÉ*
-
-${resultat.verdict || "Le pavé est invalide."}
-
-${erreurs}
-
-📊 *Note du pavé :* ${resultat.note ?? 0}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *Joueur actuel :*
-➡️ Le tour reste au joueur actuel.
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
-
-            await ovl.sendMessage(
-                chat,
-                {
-                    text: texte
-                }
-            );
-
-            return;
-
-        }
-
-
-        //================================================
-        // ✅ ACTIONS VALIDÉES
-        //================================================
-
-        const resume =
-            resultat.resume ||
-            "Actions validées.";
-
-
-        const note =
-            Number(resultat.note) || 0;
-
-
-        //================================================
-        // 👤 JOUEUR SUIVANT
-        //================================================
+        // ==================================================
+        // 🔎 RÉCUPÉRATION DU JOUEUR SUIVANT
+        // ==================================================
 
         const joueurSuivant =
-            resultat.joueurSuivant || {};
-
+            resultat.joueurSuivant ||
+            {};
 
         const prochainJid =
-            joueurSuivant.jid || null;
-
+            joueurSuivant.jid ||
+            null;
 
         let prochainNom =
-            joueurSuivant.nom || null;
+            joueurSuivant.nom ||
+            null;
 
 
-        if (
-            !prochainNom &&
-            prochainJid &&
-            Array.isArray(match.joueurs)
-        ) {
-
-            const joueur =
-                match.joueurs.find(
-                    j =>
-                        j?.jid === prochainJid
-                );
-
-
-            if (joueur) {
-
-                prochainNom =
-                    joueur.nom ||
-                    joueur.name ||
-                    joueur.pseudo ||
-                    null;
-
-            }
-
-        }
-
+        // ==================================================
+        // 🔎 RECHERCHE DU JOUEUR DANS LE MATCH
+        // ==================================================
 
         if (
             !prochainNom &&
-            prochainJid &&
-            match.players
+            prochainJid
         ) {
 
-            for (
-                const equipe of
-                Object.values(match.players)
+            const joueurs =
+                match.joueurs ||
+                match.players ||
+                [];
+
+            if (Array.isArray(joueurs)) {
+
+                const joueur =
+                    joueurs.find(
+                        j =>
+                            j?.jid === prochainJid ||
+                            j?.id === prochainJid
+                    );
+
+                if (joueur) {
+                    prochainNom =
+                        joueur.nom ||
+                        joueur.name ||
+                        joueur.pseudo ||
+                        null;
+                }
+
+            } else if (
+                joueurs &&
+                typeof joueurs === "object"
             ) {
 
                 const joueur =
-                    equipe?.find?.(
-                        j =>
-                            j?.jid === prochainJid
-                    );
-
+                    joueurs[prochainJid];
 
                 if (joueur) {
 
@@ -577,8 +512,6 @@ ${erreurs}
                         joueur.pseudo ||
                         null;
 
-                    break;
-
                 }
 
             }
@@ -586,31 +519,329 @@ ${erreurs}
         }
 
 
-        if (!prochainNom) {
+        // ==================================================
+        // 👤 FALLBACK NOM
+        // ==================================================
 
-            prochainNom =
-                prochainJid ||
-                "Joueur suivant";
+        if (!prochainNom) {
+            prochainNom = "ADVERSAIRE";
+        }
+
+
+        // ==================================================
+        // 📊 NOTE
+        // ==================================================
+
+        const note =
+            Number(resultat.note) || 0;
+
+
+        // ==================================================
+        // ❌ PAVÉ REFUSÉ
+        // ==================================================
+
+        if (!resultat.paveValide) {
+
+            // ----------------------------------------------
+            // 🔎 INFORMATIONS MANQUANTES
+            // ----------------------------------------------
+
+            const labelsManquants = {
+
+                SUJET:
+                    "le sujet n'est pas précisé",
+
+                ACTEUR:
+                    "le sujet n'est pas précisé",
+
+                ACTION:
+                    "l'action n'est pas précisée",
+
+                VERBE:
+                    "l'action n'est pas précisée",
+
+                CIBLE:
+                    "la cible n'est pas précisée",
+
+                MEMBRE:
+                    "le membre utilisé n'est pas précisé",
+
+                PARTIE_CORPS:
+                    "la partie du corps ciblée n'est pas précisée",
+
+                PARTIECORPS:
+                    "la partie du corps ciblée n'est pas précisée",
+
+                MANIERE:
+                    "la manière d'effectuer l'action n'est pas précisée",
+
+                DISTANCE:
+                    "la distance n'est pas précisée",
+
+                HAUTEUR:
+                    "la hauteur n'est pas précisée",
+
+                VITESSE:
+                    "la vitesse n'est pas précisée",
+
+                DIRECTION:
+                    "la direction n'est pas précisée",
+
+                TRAJECTOIRE:
+                    "la trajectoire n'est pas précisée",
+
+                INTENTION:
+                    "l'intention n'est pas précisée",
+
+                COURBE:
+                    "la courbe n'est pas précisée"
+
+            };
+
+
+            // ----------------------------------------------
+            // 🧠 CONSTRUCTION DES ERREURS
+            // ----------------------------------------------
+
+            let erreursTexte = [];
+
+            if (
+                Array.isArray(
+                    resultat.requisManquants
+                ) &&
+                resultat.requisManquants.length
+            ) {
+
+                erreursTexte =
+                    resultat.requisManquants
+                        .map(
+                            slot =>
+                                labelsManquants[slot] ||
+                                `l'information ${slot} n'est pas précisée`
+                        );
+
+            }
+
+
+            // ----------------------------------------------
+            // 🔎 FALLBACK SUR resultat.erreurs
+            // ----------------------------------------------
+
+            if (
+                !erreursTexte.length &&
+                Array.isArray(resultat.erreurs)
+            ) {
+
+                erreursTexte =
+                    resultat.erreurs
+                        .map(erreur => {
+
+                            if (
+                                typeof erreur === "string"
+                            ) {
+                                return erreur;
+                            }
+
+                            if (
+                                erreur &&
+                                typeof erreur === "object"
+                            ) {
+
+                                return (
+                                    erreur.message ||
+                                    erreur.texte ||
+                                    erreur.description ||
+                                    erreur.raison ||
+                                    "Structure sémantique incomplète."
+                                );
+
+                            }
+
+                            return String(erreur);
+
+                        })
+                        .filter(Boolean);
+
+            }
+
+
+            if (!erreursTexte.length) {
+
+                erreursTexte = [
+                    "Structure sémantique incomplète."
+                ];
+
+            }
+
+
+            // ----------------------------------------------
+            // 📝 MESSAGE DE REFUS
+            // ----------------------------------------------
+
+            const phraseErreur =
+                erreursTexte
+                    .join(", ")
+                    .replace(
+                        /,\s*$/,
+                        ""
+                    );
+
+
+            // ----------------------------------------------
+            // ⚖️ PÉNALITÉ
+            // ----------------------------------------------
+
+            const penalite =
+                resultat.penalite ||
+                resultat["pénalité"] ||
+                null;
+
+
+            let penaliteTexte = "";
+
+
+            if (penalite) {
+
+                if (
+                    typeof penalite === "string"
+                ) {
+
+                    penaliteTexte =
+                        penalite;
+
+                } else if (
+                    typeof penalite === "object"
+                ) {
+
+                    penaliteTexte =
+                        penalite.message ||
+                        penalite.texte ||
+                        penalite.description ||
+                        penalite.nom ||
+                        "Pénalité système appliquée.";
+
+                }
+
+            }
+
+
+            // ----------------------------------------------
+            // ⚠️ BLOC PÉNALITÉ
+            // ----------------------------------------------
+
+            let blocPenalite = "";
+
+            if (penaliteTexte) {
+
+                blocPenalite =
+`
+⚖️ *PÉNALITÉ SYSTEM:*
+🌀 ${penaliteTexte}
+`;
+
+            }
+
+
+            // ----------------------------------------------
+            // 🎮 MESSAGE FINAL
+            // ----------------------------------------------
+
+            const texte =
+`░▒░   *🎮COMBAT ♨️🌀* ░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+❌ *PAVÉ REFUSÉ*
+
+Pavé refusé : ${phraseErreur}.
+${blocPenalite}
+📊 *Note du pavé :* ${note}/10 ⭐
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🔆 *Joueur suivant :*
+➡️ @${prochainNom} *NEXT!!* 🔥
+
+╰───────────────────
+               *JUMP BATTLE ARENA 🌀🔆*`;
+
+
+            // ----------------------------------------------
+            // 📤 ENVOI
+            // ----------------------------------------------
+
+            await ovl.sendMessage(
+                chat,
+                {
+                    text: texte,
+                    mentions:
+                        prochainJid
+                            ? [prochainJid]
+                            : []
+                }
+            );
+
+
+            // ----------------------------------------------
+            // 🔄 TRANSFERT DU TOUR
+            // ----------------------------------------------
+
+            if (prochainJid) {
+
+                match.joueurTour =
+                    prochainJid;
+
+                match.currentPlayer =
+                    prochainJid;
+
+                match.joueurActuel =
+                    prochainJid;
+
+            }
+
+
+            // ----------------------------------------------
+            // ⏱️ TIMER JOUEUR SUIVANT
+            // ----------------------------------------------
+
+            if (
+                prochainJid &&
+                typeof startTimerPourJoueur === "function"
+            ) {
+
+                startTimerPourJoueur(
+                    match,
+                    prochainJid,
+                    ovl,
+                    chat
+                );
+
+            }
+
+            return;
 
         }
 
 
-        //================================================
-        // 📤 MESSAGE VISUEL
-        //================================================
+        // ==================================================
+        // ✅ PAVÉ VALIDÉ
+        // ==================================================
+
+        const resume =
+            resultat.resume ||
+            "Actions validées.";
+
 
         const texte =
-
 `░▒░   *🎮COMBAT ♨️🌀* ░▒░
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-✅ *ACTIONS VALIDÉES :*
-- ${resume}
+✅ *PAVÉ VALIDÉ*
+
+${resume}
 
 📊 *Note du pavé :* ${note}/10 ⭐
 
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *joueur suivant:*
+▔▔▔▔▔▔▔▔▔▔
+🔆 *Joueur suivant :*
 ➡️ @${prochainNom} *NEXT!!* 🔥
 
 ╰───────────────────
@@ -621,36 +852,19 @@ ${erreurs}
             chat,
             {
                 text: texte,
-
                 mentions:
                     prochainJid
                         ? [prochainJid]
                         : []
-
             }
         );
 
 
-        console.log(
-            "🎮 RENDU PAVÉ NEOAI ENVOYÉ"
-        );
-
-        console.log(
-            "➡️ PROCHAIN JOUEUR :",
-            prochainNom,
-            "|",
-            prochainJid
-        );
-
-
-        //================================================
+        // ==================================================
         // 🔄 TRANSFERT DU TOUR
-        //================================================
+        // ==================================================
 
-        if (
-            match &&
-            prochainJid
-        ) {
+        if (prochainJid) {
 
             match.joueurTour =
                 prochainJid;
@@ -661,28 +875,23 @@ ${erreurs}
             match.joueurActuel =
                 prochainJid;
 
-
-            console.log(
-                "🔄 TOUR TRANSFÉRÉ À :",
-                prochainJid
-            );
-
         }
 
 
-        //================================================
-        // ⏱️ RELANCE DU TIMER
-        //================================================
+        // ==================================================
+        // ⏱️ TIMER
+        // ==================================================
 
         if (
-            typeof startTimerPourJoueur === "function" &&
-            prochainJid
+            prochainJid &&
+            typeof startTimerPourJoueur === "function"
         ) {
 
-            await startTimerPourJoueur(
-                chat,
+            startTimerPourJoueur(
+                match,
                 prochainJid,
-                match
+                ovl,
+                chat
             );
 
         }
@@ -690,13 +899,14 @@ ${erreurs}
     } catch (error) {
 
         console.error(
-            "❌ ERREUR RENDU PAVÉ NEOAI :",
+            "❌ [NeoAI RENDU]",
             error
         );
 
     }
 
-}
+}          
+                
                                        
 
 //-------- UTILITAIRES
@@ -1970,7 +2180,150 @@ Lorsqu'un pavé est analysé :
 15. Ne jamais inventer une information absente du pavé.
 
 ============================================================
-18. RÈGLE ABSOLUE DE L'ARBITRE
+18. ERREURS DE STRUCTURE ET PÉNALITÉS 🎮❌
+============================================================
+
+Une erreur structurelle dans un pavé entraîne automatiquement
+le REFUS DE L'ENSEMBLE DU PAVÉ.
+
+Une erreur structurelle signifie qu'au moins un élément obligatoire
+nécessaire à une action n'est pas présent ou n'est pas identifiable.
+
+Exemples :
+- main utilisée non précisée ;
+- direction non précisée ;
+- cible non précisée ;
+- distance obligatoire non précisée ;
+- hauteur obligatoire non précisée ;
+- vitesse obligatoire non précisée ;
+- trajectoire obligatoire non précisée ;
+- partie du corps obligatoire non précisée ;
+- intention obligatoire non précisée ;
+- ou tout autre élément exigé par la structure du modèle reconnu.
+
+IMPORTANT :
+
+Une seule erreur suffit à invalider l'intégralité du pavé.
+
+Si un pavé contient 4 actions et que la première action comporte
+une erreur structurelle, les 4 actions du pavé sont refusées.
+
+Ne valide jamais partiellement un pavé.
+
+============================================================
+19. PÉNALITÉ SYSTEM ALÉATOIRE 🎲
+============================================================
+
+Lorsqu'un pavé est refusé pour une erreur structurelle,
+une seule pénalité SYSTEM doit être appliquée aléatoirement.
+
+La pénalité doit être choisie uniquement dans la liste officielle
+ci-dessous.
+
+PÉNALITÉS POSSIBLES :
+
+1. 🌀 TECHNIQUE BLOQUÉE
+   - Une technique du personnage est bloquée pendant 2 tours.
+
+2. 🫀 STAMINA ×2
+   - Les coûts en Stamina sont multipliés par 2 pendant 3 tours.
+
+3. 💥 PERTE DE PUISSANCE
+   - Le personnage perd 2 points de puissance pendant 3 tours.
+
+4. 💀 DÉGÂTS SUBIS ×2
+   - Les dégâts reçus par le personnage sont multipliés par 2
+     pendant 3 tours.
+
+5. ⚡ ATTAQUE ADVERSE INSTANTANÉE
+   - La prochaine attaque lancée par l'adversaire devient instantanée.
+   - Elle ne peut pas être empêchée avant son lancement.
+   - Le personnage pénalisé ne peut tenter qu'une esquive après
+     le lancement de l'attaque.
+   - Cette pénalité dure jusqu'à l'application de cette attaque.
+
+6. 🩸 PERTE DE STAMINA SUPPLÉMENTAIRE
+   - Une perte supplémentaire de Stamina est appliquée selon
+     les règles définies par le système.
+   - Durée : 3 tours.
+
+7. 🎯 PRÉCISION RÉDUITE
+   - La précision des actions offensives est réduite pendant 3 tours.
+
+8. 🛡️ DÉFENSE RÉDUITE
+   - L'efficacité défensive est réduite pendant 3 tours.
+
+9. 🔥 DÉGÂTS INFLIGÉS RÉDUITS
+   - Les dégâts infligés par le personnage sont réduits pendant 3 tours.
+
+10. 🌀 RÉCUPÉRATION RALENTIE
+    - La récupération de Stamina ou d'énergie est réduite pendant
+      3 tours.
+
+============================================================
+RÈGLE DE DURÉE
+============================================================
+
+Sauf lorsqu'une pénalité possède une durée explicitement indiquée,
+la durée standard d'une pénalité est de 3 tours.
+
+Ne jamais inventer une durée différente.
+
+============================================================
+RÈGLE DE SÉLECTION
+============================================================
+
+Une seule pénalité doit être appliquée pour un pavé refusé.
+
+Ne jamais appliquer plusieurs pénalités simultanément.
+
+La pénalité doit être choisie aléatoirement parmi les pénalités
+autorisées.
+
+L'erreur structurelle elle-même ne doit jamais être ignorée
+simplement parce qu'une pénalité est appliquée.
+
+Le pavé reste REFUSÉ.
+
+============================================================
+RÈGLE SPÉCIALE : ATTAQUE INSTANTANÉE
+============================================================
+
+Si la pénalité sélectionnée est :
+
+⚡ ATTAQUE ADVERSE INSTANTANÉE
+
+alors la prochaine attaque de l'adversaire est lancée
+instantanément.
+
+Le personnage pénalisé ne peut pas empêcher le lancement
+de cette attaque.
+
+Il peut uniquement tenter une esquive après le lancement.
+
+============================================================
+RÈGLE DE TOUR
+============================================================
+
+Lorsqu'un pavé est refusé :
+
+1. Le pavé entier est annulé.
+2. La pénalité SYSTEM est appliquée.
+3. Le tour passe immédiatement à l'adversaire.
+4. Le joueur ayant fait l'erreur ne peut pas renvoyer immédiatement
+   un nouveau pavé pour le même tour.
+
+============================================================
+RÈGLE MC
+============================================================
+
+Ces pénalités concernent les erreurs de pavé de combat normales quand un élément de la structure est manquant. 
+
+Un MC ne doit pas être traité comme une erreur structurelle normale
+et ne doit pas déclencher automatiquement cette mécanique de pénalité.
+
+============================================================
+20. RÈGLE ABSOLUE DE L'ARBITRE
 ============================================================
 
 Tu ne dois pas décider selon ce qui semble logique dans un anime ou dans un combat réel.
