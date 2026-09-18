@@ -6312,18 +6312,19 @@ function neoArbitrer(
   }
 
   //============================================================
-  // MODÈLE
+  // ⚠️ IMPORTANT
   //============================================================
-
-  if (
-    !analyse?.modele
-  ) {
-
-    raisons.push(
-      "Aucun modèle d'action reconnu."
-    );
-
-  }
+  // Le modèle / exemple NE participe PLUS à la validation.
+  //
+  // Un modèle peut être :
+  // - null
+  // - différent
+  // - reconnu avec une faible similarité
+  // - totalement absent
+  //
+  // Tant que la structure réelle de l'action est complète,
+  // l'action peut être VALIDÉE.
+  //============================================================
 
   //============================================================
   // STRUCTURE
@@ -6381,6 +6382,10 @@ function neoArbitrer(
       analyse?.scoreStructure
     ) || 0;
 
+  //============================================================
+  // RETOUR
+  //============================================================
+
   return {
 
     valide,
@@ -6404,7 +6409,6 @@ function neoArbitrer(
   };
 
 }
-
 
 
 //==============================================================
