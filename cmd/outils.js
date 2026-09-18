@@ -6186,42 +6186,46 @@ return {
     partieCorps,
 
     // 🧠 MODÈLE SÉLECTIONNÉ
-    modele:
-        modele?.modele || null,
+modele:
+    modele?.modele || null,
 
-    // 🔎 SCORE DE RECONNAISSANCE DU MODÈLE
-    score:
-        modele?.score || 0,
+// 🔎 SCORE DE RECONNAISSANCE DU MODÈLE
+score:
+    modele?.score || 0,
 
-    // 🧩 SCORE DE STRUCTURE
-    scoreStructure:
-        modele?.structure?.scoreStructure ?? 0,
+// 🧩 SCORE DE STRUCTURE RÉEL
+scoreStructure,
 
-    // ✅ STRUCTURE COMPLÈTE ?
-    structureComplete:
-        modele?.structure?.structureComplete === true,
+// ✅ STRUCTURE COMPLÈTE ?
+structureComplete,
 
-    // ❌ CHAMPS MANQUANTS
-    slotsManquants:
-        modele?.structure?.slotsManquants || [],
+// ❌ CHAMPS MANQUANTS
+slotsManquants,
 
-    // ✅ CHAMPS TROUVÉS
-    slotsTrouves:
-        modele?.structure?.slotsTrouves || [],
+// ✅ CHAMPS TROUVÉS
+slotsTrouves,
 
-    // Alias utilisé par l'arbitrage
-    requisManquants:
-        modele?.structure?.slotsManquants || [],
+// Alias utilisé par l'arbitrage
+requisManquants:
+    slotsManquants,
 
-    // 🧱 STRUCTURE GRAMMATICALE EXISTANTE
-    structure,
+// 🧱 STRUCTURE GRAMMATICALE EXISTANTE
+structure,
 
-    // 🧠 STRUCTURE SÉMANTIQUE DU MODÈLE
-    structureSemantique:
-        modele?.structure?.structure || []
+// 🧠 STRUCTURE SÉMANTIQUE EXTRAITE
+structureSemantique,
+
+// 🔎 SCORE DE SIMILARITÉ AVEC L'EXEMPLE
+// Informatif uniquement — NE VALIDE PAS et NE REFUSE PAS l'action
+scoreExemple:
+    modele?.scoreExemple || 0,
+
+// 🧠 ACTION CANONIQUE RECONNUE
+actionCanonique:
+    actionFinale
 
 };
-}  
+}
 
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
