@@ -410,7 +410,6 @@ const NEO_DISTANCES = {
     ]
 };
 
-
 // ======================================================
 // SYNONYMES
 // ======================================================
@@ -421,6 +420,10 @@ const NEO_SYNONYMES = {
     // ==============================================
 
     deplacement: {
+
+        // ----------------------------------------------
+        // ACTIONS
+        // ----------------------------------------------
 
         course: [
             "courir",
@@ -442,8 +445,6 @@ const NEO_SYNONYMES = {
         saut: [
             "sauter",
             "saute",
-            "bondir",
-            "bondit",
             "s'élancer",
             "s'élance"
         ],
@@ -463,73 +464,137 @@ const NEO_SYNONYMES = {
             "planer",
             "plane"
         ]
+    },
+
+
+    // ==============================================
+    // DIRECTIONS
+    // ==============================================
+
+    direction: {
+
+        avant: [
+            "avant",
+            "frontal",
+            "frontale",
+            "frontalement",
+            "vers l'avant",
+            "vers l’avant",
+            "en avant",
+            "droit devant",
+            "devant"
+        ],
+
+        arriere: [
+            "arrière",
+            "arriere",
+            "vers l'arrière",
+            "vers l’arrière",
+            "en arrière",
+            "en arriere",
+            "derrière",
+            "derriere"
+        ],
+
+        gauche: [
+            "gauche",
+            "à gauche",
+            "a gauche",
+            "vers la gauche",
+            "sur la gauche"
+        ],
+
+        droite: [
+            "droite",
+            "à droite",
+            "a droite",
+            "vers la droite",
+            "sur la droite"
+        ]
+    },
+
+
+    // ==============================================
+    // TRAJECTOIRES
+    // ==============================================
+
+    trajectoire: {
+
+        frontale: [
+            "frontale",
+            "frontal",
+            "frontalement",
+            "en ligne droite",
+            "ligne droite",
+            "tout droit"
+        ],
+
+        laterale: [
+            "latérale",
+            "laterale",
+            "latéral",
+            "lateral",
+            "latéralement",
+            "lateralement",
+            "sur le côté",
+            "sur le cote"
+        ],
+
+        diagonale: [
+            "diagonale",
+            "diagonal",
+            "en diagonale",
+            "diagonalement"
+        ],
+
+        circulaire: [
+            "circulaire",
+            "circulairement",
+            "en cercle",
+            "en rond"
+        ],
+
+        courbe: [
+            "courbe",
+            "en courbe",
+            "courbée",
+            "courbee"
+        ],
+
+        aerienne: [
+            "aérienne",
+            "aerienne",
+            "aérien",
+            "aerien",
+            "dans les airs",
+            "par les airs"
+        ]
+    },
+
+
+    // ==============================================
+    // VITESSES
+    // ==============================================
+
+    vitesse: {
+
+        vitesse_maximale: [
+            "vmax",
+            "v max",
+            "vitesse max",
+            "vitesse maximale",
+            "à vitesse maximale",
+            "a vitesse maximale",
+            "à pleine vitesse",
+            "a pleine vitesse",
+            "à grande vitesse",
+            "a grande vitesse",
+            "rapidement",
+            "très rapidement",
+            "tres rapidement"
+        ]
     }
 };
-
-
-// ======================================================
-// ACTIONS NORMALISÉES
-// ======================================================
-
-const NEO_ACTIONS = {
-
-    deplacement: [
-        "avancer",
-        "reculer",
-        "courir",
-        "foncer",
-        "marcher",
-        "s'approcher",
-        "s'éloigner",
-        "sauter",
-        "bondir",
-        "voler",
-        "grimper",
-        "descendre",
-        "tourner",
-        "pivoter",
-        "glisser",
-        "ramper"
-    ],
-
-    attaque: [
-        "frapper",
-        "attaquer",
-        "cogner",
-        "asséner",
-        "tirer"
-    ],
-
-    esquive: [
-        "esquiver",
-        "éviter"
-    ],
-
-    parade: [
-        "bloquer",
-        "parer",
-        "intercepter"
-    ],
-
-    contre: [
-        "contrer",
-        "riposter"
-    ],
-
-    saisie: [
-        "saisir",
-        "attraper",
-        "agripper",
-        "empoigner"
-    ],
-
-    projection: [
-        "projeter",
-        "lancer",
-        "repousser"
-    ]
-};
-
 
 // ======================================================
 // CATÉGORIES GÉNÉRALES
