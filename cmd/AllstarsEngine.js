@@ -401,6 +401,25 @@ return arbitreNeoAI(
     contexteMatch
 );
 
+} catch (error) {
+
+    console.error(
+        "❌ ERREUR ANALYSE PAVÉ NEOAI :",
+        error
+    );
+
+    return {
+        ok: false,
+        paveDetecte: true,
+        erreur:
+            error?.message ||
+            "Erreur inconnue NeoAI"
+    };
+
+}
+
+}
+
 
 //================================================
 // ⚖️ ARBITRE NEOAI 🧠⚖️
