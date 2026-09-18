@@ -301,123 +301,976 @@ const valide =
 
         }
 
+//================================================
+// 9️⃣ RETOUR VERS L'ARBITRE
+//================================================
 
-        //================================================
-        // 9️⃣ RETOUR FINAL
-        //================================================
+const resultatAnalyse = {
 
-        return {
+    ok: true,
 
-            ok: true,
+    paveDetecte: true,
 
-            paveDetecte: true,
+    user,
 
-            user,
+    actionsTexte,
 
-            actionsTexte,
+    paveValide: valide,
 
-            paveValide: valide,
+    nombreActions: 1,
 
-            nombreActions: 1,
+    actions: [
+        action
+    ],
 
-            actions: [
-                action
+    note:
+        Math.round(score / 10),
+
+    verdict:
+        valide
+            ? "Pavé compris et validé par NeoAI."
+            : (
+                analyse.requisManquants?.length
+                    ? `Pavé refusé : informations manquantes (${analyse.requisManquants.join(", ")}).`
+                    : "Pavé refusé : structure sémantique incomplète."
+            ),
+
+    resume:
+        analyse.resume ||
+        actionsTexte,
+
+    joueurSuivant,
+
+    consequences: {
+
+        touche: false,
+        contre: false,
+        mauvaisContre: false,
+        degats: 0,
+        effets: []
+
+    },
+
+    erreurs:
+        valide
+            ? []
+            : [
+                analyse.comprehension ||
+                "NeoAI n'a pas pu valider le pavé."
             ],
 
-            note:
-                Math.round(score / 10),
+    neoAI: {
 
-            verdict:
-                valide
-                    ? "Pavé compris et validé par NeoAI."
-                    : (
-                        analyse.requisManquants?.length
-                            ? `Pavé refusé : informations manquantes (${analyse.requisManquants.join(", ")}).`
-                            : "Pavé refusé : structure sémantique incomplète."
-                    ),
+        score,
 
-            resume:
-                analyse.resume ||
-                actionsTexte,
+        categorie:
+            analyse.categorie,
 
-            joueurSuivant,
+        famille:
+            analyse.famille,
 
-            consequences: {
+        modele:
+            analyse.modele,
 
-                touche: false,
-                contre: false,
-                mauvaisContre: false,
-                degats: 0,
-                effets: []
+        structure:
+            analyse.structure,
 
-            },
+        slots:
+            analyse.slots,
 
-            erreurs:
-                valide
-                    ? []
-                    : [
-                        analyse.comprehension ||
-                        "NeoAI n'a pas pu valider le pavé."
-                    ],
+        comprehension:
+            analyse.comprehension,
 
-            //================================================
-            // 🧠 DONNÉES NATIVES NEOAI
-            //================================================
+        resume:
+            analyse.resume,
 
-            neoAI: {
+        requisManquants:
+            analyse.requisManquants || []
 
-                score,
+    }
 
-                categorie:
-                    analyse.categorie,
+};
 
-                famille:
-                    analyse.famille,
 
-                modele:
-                    analyse.modele,
+//================================================
+// ⚖️ ARBITRAGE NEOAI
+//================================================
 
-                structure:
-                    analyse.structure,
+return arbitreNeoAI(
+    resultatAnalyse,
+    contexteMatch
+);
 
-                slots:
-                    analyse.slots,
 
-                comprehension:
-                    analyse.comprehension,
+//================================================
+// ⚖️ ARBITRE NEOAI 🧠⚖️
+//================================================
+//
+// Rôle :
+// - reçoit UNIQUEMENT le JSON produit par
+//   analysePaveAvecNeoAI()
+// - applique les règles du système
+// - valide ou refuse le pavé
+// - applique UNE pénalité en cas d'erreur structurelle
+//
+// IMPORTANT :
+// - aucun Gemini
+// - aucun Ollama
+// - aucune nouvelle analyse linguistique
+// - aucune modification de analysePaveAvecNeoAI()
+// - envoyerResultatPaveNeoAI() reste uniquement visuel
+//================================================
 
-                resume:
-                    analyse.resume,
+function arbitreNeoAI(
+    resultatAnalyse = {},
+    contexteMatch = {}
+) {
 
-                requisManquants:
-                    analyse.requisManquants || []
+    try {
+
+        //================================================
+        // 1️⃣ PROTECTION
+        //================================================
+
+        if (
+            !resultatAnalyse ||
+            typeof resultatAnalyse !== "object"
+        ) {
+
+            return {
+                ok: false,
+                paveDetecte: false,
+                paveValide: false,
+                verdict: "PAVÉ REFUSÉ",
+                erreurs: [
+                    "Résultat d'analyse NeoAI invalide."
+                ],
+                penalite: null
+            };
+
+        }
+
+
+        //================================================
+        // 2️⃣ SI CE N'EST PAS UN PAVÉ
+        //================================================
+
+        if (
+            resultatAnalyse.paveDetecte === false
+        ) {
+
+            return resultatAnalyse;
+
+        }
+
+
+        //================================================
+        // 3️⃣ COPIE DU JSON ORIGINAL
+        //================================================
+        //
+        // On conserve toutes les données déjà produites
+        // par analysePaveAvecNeoAI().
+        //
+        // L'arbitre ajoute seulement ses propres données.
+        //================================================
+
+        const resultat = {
+            ...resultatAnalyse,
+
+            paveValide: false,
+
+            verdict: "PAVÉ REFUSÉ",
+
+            erreurs: Array.isArray(
+                resultatAnalyse.erreurs
+            )
+                ? [...resultatAnalyse.erreurs]
+                : [],
+
+            penalite: null,
+
+            arbitrage: {
+
+                moteur: "NEOAI",
+
+                valide: false,
+
+                erreurs: [],
+
+                controles: [],
+
+                penalite: null
 
             }
 
         };
 
 
+        //================================================
+        // 4️⃣ RÉCUPÉRATION DES DONNÉES NEOAI
+        //================================================
+
+        const neoAI =
+            resultatAnalyse.neoAI ||
+            {};
+
+        const slots =
+            neoAI.slots ||
+            {};
+
+        const requisManquants =
+            Array.isArray(
+                neoAI.requisManquants
+            )
+                ? neoAI.requisManquants
+                : (
+                    Array.isArray(
+                        resultatAnalyse.requisManquants
+                    )
+                        ? resultatAnalyse.requisManquants
+                        : []
+                );
+
+
+        //================================================
+        // 5️⃣ NOMBRE D'ACTIONS
+        //================================================
+
+        const actions =
+            Array.isArray(resultatAnalyse.actions)
+                ? resultatAnalyse.actions
+                : [];
+
+        const nombreActions =
+            Number(
+                resultatAnalyse.nombreActions
+            ) ||
+            actions.length;
+
+
+        resultat.nombreActions =
+            nombreActions;
+
+
+        //================================================
+        // 6️⃣ MAXIMUM 4 ACTIONS
+        //================================================
+
+        if (
+            nombreActions > MAX_ACTIONS_PAVE
+        ) {
+
+            resultat.arbitrage.erreurs.push(
+                `Le pavé contient ${nombreActions} actions. Maximum autorisé : ${MAX_ACTIONS_PAVE}.`
+            );
+
+        }
+
+
+        //================================================
+        // 7️⃣ STRUCTURE NEOAI
+        //================================================
+
+        //
+        // NeoAI a déjà déterminé si le modèle reconnu
+        // possède sa structure complète.
+        //
+        // L'arbitre utilise cette information comme
+        // première condition officielle.
+        //================================================
+
+        if (
+            neoAI.trouve === false
+        ) {
+
+            resultat.arbitrage.erreurs.push(
+                "Aucun modèle d'action reconnu."
+            );
+
+        }
+
+
+        if (
+            neoAI.valide === false
+        ) {
+
+            resultat.arbitrage.erreurs.push(
+                "Le modèle d'action n'est pas valide."
+            );
+
+        }
+
+
+        if (
+            neoAI.structureComplete === false
+        ) {
+
+            resultat.arbitrage.erreurs.push(
+                "La structure obligatoire du modèle n'est pas complète."
+            );
+
+        }
+
+
+        //================================================
+        // 8️⃣ INFORMATIONS OBLIGATOIRES MANQUANTES
+        //================================================
+
+        if (
+            requisManquants.length > 0
+        ) {
+
+            for (
+                const champ
+                of requisManquants
+            ) {
+
+                resultat.arbitrage.erreurs.push(
+                    `Information obligatoire manquante : ${champ}.`
+                );
+
+            }
+
+        }
+
+
+        //================================================
+        // 9️⃣ VÉRIFICATION DES ACTIONS
+        //================================================
+
+        for (
+            let i = 0;
+            i < actions.length;
+            i++
+        ) {
+
+            const action =
+                actions[i] ||
+                {};
+
+            const numero =
+                Number(action.ordre) ||
+                i + 1;
+
+
+            //================================================
+            // SUJET
+            //================================================
+
+            const acteur =
+                action.acteur ||
+                slots.SUJET ||
+                "";
+
+            if (!String(acteur).trim()) {
+
+                resultat.arbitrage.erreurs.push(
+                    `Action ${numero} : sujet/acteur manquant.`
+                );
+
+            }
+
+
+            //================================================
+            // ACTION
+            //================================================
+
+            const type =
+                action.type ||
+                slots.ACTION ||
+                "";
+
+            if (!String(type).trim()) {
+
+                resultat.arbitrage.erreurs.push(
+                    `Action ${numero} : action manquante.`
+                );
+
+            }
+
+
+            //================================================
+            // CIBLE
+            //================================================
+            //
+            // La cible n'est pas imposée à toutes les
+            // catégories.
+            //================================================
+
+            const categorie =
+                String(
+                    neoAI.categorie ||
+                    ""
+                )
+                    .toLowerCase()
+                    .trim();
+
+
+            const cible =
+                action.cible ||
+                slots.CIBLE ||
+                "";
+
+
+            const actionNecessiteCible = [
+                "attaque",
+                "attaques",
+                "saisie",
+                "contre",
+                "parade",
+                "bloc",
+                "frappe"
+            ].some(
+                valeur =>
+                    categorie.includes(valeur)
+            );
+
+
+            if (
+                actionNecessiteCible &&
+                !String(cible).trim()
+            ) {
+
+                resultat.arbitrage.erreurs.push(
+                    `Action ${numero} : cible obligatoire manquante.`
+                );
+
+            }
+
+
+            //================================================
+            // ACTION DÉJÀ REFUSÉE PAR NEOAI
+            //================================================
+
+            if (
+                action.valide === false
+            ) {
+
+                resultat.arbitrage.erreurs.push(
+
+                    action.raison ||
+                    `Action ${numero} refusée par l'analyse structurelle NeoAI.`
+
+                );
+
+            }
+
+        }
+
+
+        //================================================
+        // 🔟 CONTRÔLE DU VMAX
+        //================================================
+        //
+        // Le règlement dit :
+        //
+        // "La vitesse de déplacement doit toujours être
+        // précisée lorsqu'un déplacement est effectué
+        // à vitesse maximale."
+        //
+        // L'arbitre ne rejette donc PAS un déplacement
+        // normal simplement parce qu'aucune VMAX n'est
+        // présente.
+        //================================================
+
+        const slotsTexte =
+            JSON.stringify(slots)
+                .toUpperCase();
+
+
+        const mouvementVMAX =
+            slotsTexte.includes("VMAX") ||
+            slotsTexte.includes("V MAX");
+
+
+        if (
+            mouvementVMAX
+        ) {
+
+            const vitesse =
+                slots.VITESSE ||
+                slots.vitesse ||
+                null;
+
+            if (
+                !vitesse
+            ) {
+
+                resultat.arbitrage.erreurs.push(
+                    "Déplacement VMAX : vitesse obligatoire non précisée."
+                );
+
+            }
+
+        }
+
+
+        //================================================
+        // 1️⃣1️⃣ SÉQUENCES
+        //================================================
+        //
+        // analysePaveAvecNeoAI() actuelle retourne une
+        // seule action structurée.
+        //
+        // Si NeoAI fournit plus tard les séquences,
+        // l'arbitre les contrôlera sans casser
+        // l'ancien format.
+        //================================================
+
+        const sequences =
+            Array.isArray(
+                resultatAnalyse.sequences
+            )
+                ? resultatAnalyse.sequences
+                : null;
+
+
+        if (
+            sequences
+        ) {
+
+            for (
+                let i = 0;
+                i < sequences.length;
+                i++
+            ) {
+
+                const sequence =
+                    sequences[i];
+
+                if (
+                    Array.isArray(sequence) &&
+                    sequence.length > 2
+                ) {
+
+                    resultat.arbitrage.erreurs.push(
+                        `Séquence ${i + 1} : maximum 2 actions autorisées.`
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        //================================================
+        // 1️⃣2️⃣ CONTRÔLE DU MATCH
+        //================================================
+
+        const match =
+            contexteMatch?.match ||
+            contexteMatch ||
+            {};
+
+
+        const tour =
+            Number(
+                match.tour
+            ) ||
+            Number(
+                match.turn
+            ) ||
+            0;
+
+
+        if (
+            tour > 10
+        ) {
+
+            resultat.arbitrage.erreurs.push(
+                "Le match a atteint la limite de 10 tours."
+            );
+
+        }
+
+
+        //================================================
+        // 1️⃣3️⃣ MC
+        //================================================
+        //
+        // IMPORTANT :
+        // Un MC ne doit PAS déclencher automatiquement
+        // la pénalité structurelle.
+        //
+        // On reconnaît donc les informations MC présentes
+        // dans le résultat NeoAI et on les conserve.
+        //================================================
+
+        const categorieNorm =
+            String(
+                neoAI.categorie ||
+                ""
+            )
+                .toLowerCase()
+                .trim();
+
+
+        const familleNorm =
+            String(
+                neoAI.famille ||
+                ""
+            )
+                .toLowerCase()
+                .trim();
+
+
+        const estMC =
+            categorieNorm === "mc" ||
+            familleNorm === "mc" ||
+            categorieNorm.includes("mouvement_continue") ||
+            familleNorm.includes("mouvement_continue");
+
+
+        if (
+            estMC
+        ) {
+
+            resultat.arbitrage.controles.push(
+                "MC : traité selon sa règle spéciale."
+            );
+
+        }
+
+
+        //================================================
+        // 1️⃣4️⃣ DÉCISION
+        //================================================
+
+        const erreurs =
+            resultat.arbitrage.erreurs;
+
+
+        if (
+            erreurs.length > 0
+        ) {
+
+            //================================================
+            // ❌ REFUS TOTAL
+            //================================================
+            //
+            // Une seule erreur structurelle suffit
+            // à refuser tout le pavé.
+            //================================================
+
+            resultat.paveValide = false;
+
+            resultat.verdict =
+                "PAVÉ REFUSÉ";
+
+            resultat.arbitrage.valide =
+                false;
+
+
+            //================================================
+            // 🔄 ERREURS POUR LE RENDU VISUEL
+            //================================================
+
+            resultat.erreurs =
+                erreurs.map(
+                    erreur => ({
+                        type: "ARBITRAGE",
+                        message: erreur
+                    })
+                );
+
+
+            //================================================
+            // 🎲 UNE SEULE PÉNALITÉ
+            //================================================
+
+            const penalite =
+                choisirPenaliteNeoAI();
+
+
+            resultat.penalite =
+                penalite;
+
+
+            resultat.arbitrage.penalite =
+                penalite;
+
+
+            //================================================
+            // ⚠️ PAVÉ ENTIÈREMENT ANNULÉ
+            //================================================
+
+            resultat.actions =
+                [];
+
+
+            resultat.consequences = {
+
+                touche: false,
+
+                contre: false,
+
+                mauvaisContre: false,
+
+                degats: 0,
+
+                effets: [],
+
+                paveAnnule: true,
+
+                penaliteSystem:
+                    penalite
+
+            };
+
+
+            return resultat;
+
+        }
+
+
+        //================================================
+        // ✅ PAVÉ VALIDÉ
+        //================================================
+
+        resultat.paveValide =
+            true;
+
+        resultat.verdict =
+            "PAVÉ VALIDÉ";
+
+        resultat.arbitrage.valide =
+            true;
+
+
+        resultat.arbitrage.controles.push(
+            "Structure conforme."
+        );
+
+
+        resultat.arbitrage.controles.push(
+            "Nombre d'actions conforme."
+        );
+
+
+        resultat.arbitrage.controles.push(
+            "Conditions obligatoires vérifiées."
+        );
+
+
+        resultat.consequences = {
+
+            ...(resultat.consequences || {}),
+
+            paveAnnule: false,
+
+            arbitreValide: true
+
+        };
+
+
+        return resultat;
+
+
     } catch (error) {
 
         console.error(
-            "❌ ERREUR ANALYSE PAVÉ NEOAI :",
+            "❌ [ARBITRE NEOAI]",
             error
         );
 
 
         return {
 
+            ...resultatAnalyse,
+
             ok: false,
 
-            paveDetecte: true,
+            paveDetecte:
+                resultatAnalyse?.paveDetecte !== false,
 
-            erreur:
-                error?.message ||
-                "Erreur inconnue NeoAI"
+            paveValide: false,
+
+            verdict:
+                "ERREUR ARBITRE NEOAI",
+
+            erreurs: [
+                {
+                    type: "ARBITRE",
+                    message:
+                        error?.message ||
+                        "Erreur interne de l'arbitre NeoAI."
+                }
+            ],
+
+            penalite: null,
+
+            arbitrage: {
+
+                moteur: "NEOAI",
+
+                valide: false,
+
+                erreurs: [
+                    error?.message ||
+                    "Erreur interne de l'arbitre NeoAI."
+                ],
+
+                controles: [],
+
+                penalite: null
+
+            }
 
         };
 
     }
+
+}
+
+
+//================================================
+// 🎲 PÉNALITÉS SYSTEM OFFICIELLES
+//================================================
+
+function choisirPenaliteNeoAI() {
+
+    const penalites = [
+
+        {
+            id: "TECHNIQUE_BLOQUEE",
+
+            nom: "🌀 TECHNIQUE BLOQUÉE",
+
+            duree: 2,
+
+            description:
+                "Une technique du personnage est bloquée pendant 2 tours."
+
+        },
+
+        {
+            id: "STAMINA_X2",
+
+            nom: "🫀 STAMINA ×2",
+
+            duree: 3,
+
+            description:
+                "Les coûts en Stamina sont multipliés par 2 pendant 3 tours."
+
+        },
+
+        {
+            id: "PERTE_PUISSANCE",
+
+            nom: "💥 PERTE DE PUISSANCE",
+
+            duree: 3,
+
+            description:
+                "Le personnage perd 2 points de puissance pendant 3 tours."
+
+        },
+
+        {
+            id: "DEGATS_SUBIS_X2",
+
+            nom: "💀 DÉGÂTS SUBIS ×2",
+
+            duree: 3,
+
+            description:
+                "Les dégâts reçus sont multipliés par 2 pendant 3 tours."
+
+        },
+
+        {
+            id: "ATTAQUE_ADVERSE_INSTANTANEE",
+
+            nom: "⚡ ATTAQUE ADVERSE INSTANTANÉE",
+
+            duree: null,
+
+            description:
+                "La prochaine attaque lancée par l'adversaire devient instantanée."
+
+        },
+
+        {
+            id: "PERTE_STAMINA_SUPPLEMENTAIRE",
+
+            nom: "🩸 PERTE DE STAMINA SUPPLÉMENTAIRE",
+
+            duree: 3,
+
+            description:
+                "Une perte supplémentaire de Stamina est appliquée selon les règles du système."
+
+        },
+
+        {
+            id: "PRECISION_REDUITE",
+
+            nom: "🎯 PRÉCISION RÉDUITE",
+
+            duree: 3,
+
+            description:
+                "La précision des actions offensives est réduite pendant 3 tours."
+
+        },
+
+        {
+            id: "DEFENSE_REDUITE",
+
+            nom: "🛡️ DÉFENSE RÉDUITE",
+
+            duree: 3,
+
+            description:
+                "L'efficacité défensive est réduite pendant 3 tours."
+
+        },
+
+        {
+            id: "DEGATS_INFLIGES_REDUITS",
+
+            nom: "🔥 DÉGÂTS INFLIGÉS RÉDUITS",
+
+            duree: 3,
+
+            description:
+                "Les dégâts infligés sont réduits pendant 3 tours."
+
+        },
+
+        {
+            id: "RECUPERATION_RALENTIE",
+
+            nom: "🌀 RÉCUPÉRATION RALENTIE",
+
+            duree: 3,
+
+            description:
+                "La récupération de Stamina ou d'énergie est réduite pendant 3 tours."
+
+        }
+
+    ];
+
+
+    const index =
+        Math.floor(
+            Math.random() *
+            penalites.length
+        );
+
+
+    return {
+
+        ...penalites[index],
+
+        appliquee: true,
+
+        source: "NEOAI_RULES"
+
+    };
 
 }
 
