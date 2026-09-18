@@ -1854,9 +1854,9 @@ const ACTIONS_MAP = {
 
 
 //================================================
-// 🤖 RÈGLES ARBITRE GEMINI
+// 🤖 RÈGLES ARBITRE NEOAI
 //================================================
-const GEMINI_RULES_PROMPT = `
+const NEOAI_RULES_PROMPT = `
 TU ES L'ARBITRE D'UN SYSTÈME DE COMBAT DYNAMIQUE.
 
 Ton rôle est UNIQUEMENT de parcourir et appliquer les règles ci-dessous
