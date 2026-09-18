@@ -6082,7 +6082,7 @@ scoreStructure =
 structureComplete =
   totalSlots > 0 &&
   slotsManquants.length === 0;
-}
+
 
 //============================================================
 // 🧠 STRUCTURE SÉMANTIQUE FINALE
