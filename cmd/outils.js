@@ -7679,37 +7679,7 @@ ${resultat.nombreActions || 0}
 
                 texte +=
 `
-*Action ${index + 1}*
-├ 🧍 Sujet : ${action.acteur || "—"}
-├ ⚔️ Action : ${action.action || "—"}
-├ 🎯 Cible : ${action.cible || "—"}
-├ 🌀 Catégorie : ${action.categorie || "—"}
-├ 🎯 Famille : ${action.famille || "—"}
-├ 💨 Manière : ${action.maniere || "—"}
-├ ⚡ Vitesse : ${action.vitesse || "—"}
-├ 📐 Distance : ${
-          action.distance !== null &&
-          action.distance !== undefined
-            ? `${action.distance}${action.distanceUnite || "m"}`
-            : "—"
-        }
-├ 📏 Hauteur : ${
-          action.hauteur !== null &&
-          action.hauteur !== undefined
-            ? `${action.hauteur}${action.hauteurUnite || "m"}`
-            : "—"
-        }
-├ 🧭 Trajectoire : ${action.trajectoire || "—"}
-├ 🦾 Membre utilisé : ${action.membre || "—"}
-├ 🦵 Partie du corps : ${action.partieCorps || "—"}
-├ 📚 Modèle : ${
-          action.modele?.id ||
-          action.modele?.nom ||
-          action.modele ||
-          "—"
-        }
-╰ 📊 Similarité : ${action.score || 0}%
-`;
+*Action ${index + 1}* ├ 🧍 Sujet : ${action.acteur || "—"} ├ ⚔️ Action : ${action.action || "—"} ├ 🎯 Cible : ${action.cible || "—"} ├ 🌀 Catégorie : ${action.categorie || "—"} ├ 🎯 Famille : ${action.famille || "—"} ├ 💨 Manière : ${action.maniere || "—"} ├ ⚡ Vitesse : ${action.vitesse || "—"} ├ 📐 Distance : ${action.distance !== null && action.distance !== undefined ?${action.distance}${action.distanceUnite || "m"}: "—"} ├ 📏 Hauteur : ${action.hauteur !== null && action.hauteur !== undefined ?${action.hauteur}${action.hauteurUnite || "m"}: "—"} ├ 🧭 Trajectoire : ${action.trajectoire || "—"} ├ 🦾 Membre utilisé : ${action.membre || "—"} ├ 🦵 Partie du corps : ${action.partieCorps || "—"} ├ 📚 Modèle : ${action.modele?.id || action.modele?.nom || action.modele || "—"} ├ 🧩 Structure : ${Array.isArray(action.structure) ?${action.structure.length - (action.slotsManquants?.length || 0)}/${action.structure.length} ${action.structureComplete ? "✅" : "❌"}: "—"} ╰ 📊 Similarité : ${action.score || 0}%;
 
       }
     );
