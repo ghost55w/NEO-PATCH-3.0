@@ -1638,7 +1638,6 @@ module.exports = {
     NEO_DISTANCES,
 
     NEO_SYNONYMES,
-    NEO_ACTIONS,
     NEO_ACTION_MODELS,
     NEO_CATEGORIES
 };
