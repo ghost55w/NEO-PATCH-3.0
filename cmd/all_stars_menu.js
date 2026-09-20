@@ -131,7 +131,7 @@ ovlcmd(
 🌀🎮:  
 
 ╰───────────────────
-                 *R A Z O R X™⚡*`;
+                        *R A Z O R X™⚡*`;
 
     await ovl.sendMessage(ms_org, { text: texte }, { quoted: ms });
   }
