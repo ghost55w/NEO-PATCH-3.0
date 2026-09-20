@@ -1,5 +1,6 @@
 const { ovlcmd } = require("../lib/ovlcmd");
 const { getData, setfiche, getAllFiches, add_id, del_fiche } = require('../DataBase/allstars_divs_fiches');
+const axios = require("axios");
 
 const registeredFiches = new Set();
 
@@ -14,6 +15,65 @@ function countCards(cardsRaw) {
     .split("\n")
     .map(c => c.trim())
     .filter(Boolean).length;
+}
+
+// ===============================================================
+// 🖼️ TÉLÉCHARGEMENT DE L'IMAGE DE FICHE
+// ===============================================================
+
+async function telechargerImageFiche(url) {
+
+  if (!url || url === "aucun") {
+    return null;
+  }
+
+  console.log(
+    "🌐 Téléchargement image fiche :",
+    url
+  );
+
+  try {
+
+    const response = await axios.get(url, {
+      responseType: "arraybuffer",
+      timeout: 15000,
+      maxContentLength: 15 * 1024 * 1024,
+      maxBodyLength: 15 * 1024 * 1024,
+      validateStatus: status =>
+        status >= 200 && status < 300
+    });
+
+    const contentType =
+      response.headers["content-type"] || "";
+
+    console.log(
+      "📦 Image reçue :",
+      contentType,
+      "|",
+      response.data.length,
+      "octets"
+    );
+
+    if (!contentType.startsWith("image/")) {
+
+      console.error(
+        "❌ Catbox n'a pas renvoyé une image."
+      );
+
+      return null;
+    }
+
+    return Buffer.from(response.data);
+
+  } catch (err) {
+
+    console.error(
+      "❌ Erreur téléchargement image :",
+      err.code || err.message
+    );
+
+    return null;
+  }
 }
 
 function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
@@ -71,7 +131,7 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 ◇ *Rank 🎖️*: ${data.rang || 'aucun'}
 ◇ *Classe🎖️*: ${data.classe || 'aucun'}
 
-▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds || 0} ©🧭
 ◇ *Fans👥*: ${data.fans || 0} 👥
 ◇ *Archetype ⚖️*: ${data.archetype || 'aucun'}
@@ -158,7 +218,7 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
         }
 
         // ==========================================================
-        // 🖼️ TENTATIVE D'ENVOI AVEC IMAGE
+        // 🖼️ TÉLÉCHARGEMENT + ENVOI DE L'IMAGE
         // ==========================================================
 
         try {
@@ -168,12 +228,33 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
             imageUrl
           );
 
+          const imageBuffer =
+            await telechargerImageFiche(imageUrl);
+
+          // Si le téléchargement échoue,
+          // on passe directement à la fiche texte.
+          if (!imageBuffer) {
+
+            console.log(
+              `↩️ Fallback → fiche texte pour ${nom_joueur}`
+            );
+
+            return await ovl.sendMessage(
+              ms_org,
+              {
+                text: fiche
+              },
+              {
+                quoted: ms
+              }
+            );
+          }
+
+          // Envoi du Buffer à WhatsApp
           return await ovl.sendMessage(
             ms_org,
             {
-              image: {
-                url: imageUrl
-              },
+              image: imageBuffer,
               caption: fiche
             },
             {
@@ -183,12 +264,8 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 
         } catch (imageError) {
 
-          // ========================================================
-          // ⚠️ FALLBACK IMAGE
-          // ========================================================
-
           console.error(
-            `⚠️ Image invalide/timeout pour ${nom_joueur}:`,
+            `⚠️ Erreur envoi image ${nom_joueur}:`,
             imageError
           );
 
