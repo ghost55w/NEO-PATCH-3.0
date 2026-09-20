@@ -464,20 +464,77 @@ ovlcmd(
     }
 );
 
-async function uploadToCatbox(filePath) {
+async function uploadToCatbox(fileBuffer, fileName = "upload.jpg") {
   try {
+    if (!Buffer.isBuffer(fileBuffer) || !fileBuffer.length) {
+      throw new Error("Buffer média invalide ou vide.");
+    }
+
+    console.log(
+      "☁️ [Catbox] Upload du buffer :",
+      fileBuffer.length,
+      "octets"
+    );
+
     const form = new FormData();
-    form.append('reqtype', 'fileupload');
-    form.append('fileToUpload', fs.createReadStream(filePath));
 
-    const res = await axios.post('https://catbox.moe/user/api.php', form, {
-      headers: form.getHeaders()
-    });
+    form.append("reqtype", "fileupload");
 
-    return res.data;
+    form.append(
+      "fileToUpload",
+      fileBuffer,
+      {
+        filename: fileName,
+        contentType: "application/octet-stream"
+      }
+    );
+
+    const res = await axios.post(
+      "https://catbox.moe/user/api.php",
+      form,
+      {
+        headers: {
+          ...form.getHeaders()
+        },
+        timeout: 30000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      }
+    );
+
+    console.log(
+      "📡 [Catbox] Réponse :",
+      res.status,
+      res.data
+    );
+
+    const link = String(res.data || "").trim();
+
+    if (
+      !link ||
+      !link.startsWith("https://files.catbox.moe/")
+    ) {
+      throw new Error(
+        `Catbox n'a retourné aucun lien valide : ${link || "réponse vide"}`
+      );
+    }
+
+    console.log("✅ [Catbox] Upload réussi :", link);
+
+    return link;
+
   } catch (error) {
-    console.error("Erreur lors de l'upload sur Catbox:", error);
-    throw new Error("Une erreur est survenue lors de l'upload du fichier.");
+
+    console.error(
+      "❌ [Catbox] Erreur upload :",
+      error.response?.data ||
+      error.message ||
+      error
+    );
+
+    throw new Error(
+      "Une erreur est survenue lors de l'upload du fichier sur Catbox."
+    );
   }
 }
 
