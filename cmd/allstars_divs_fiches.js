@@ -316,7 +316,7 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 ░▒░░ PALMARÈS🏆
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ✅ Victoires: ${data.victoires || 0} - ❌ Défaites: ${data.defaites || 0}
-*◇🏆Championnats MVP*: ${data.championnants || 0}
+*◇🏆Championnats MVP*: ${data.championnats || 0}
 *◇🏆NEO cup💫*: ${data.neo_cup || 0}
 *◇🏆EVO💠*: ${data.evo || 0}
 *◇🏆WORLDS🌟*: ${data.worlds || 0}
