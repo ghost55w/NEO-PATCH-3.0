@@ -2216,7 +2216,7 @@ function neoDetecterCible(texte) {
 }
 
 //==============================================================
-// 👤 ACTEUR
+// 👤 ACTEUR / SUJET
 //==============================================================
 
 function neoDetecterActeur(
@@ -2239,7 +2239,7 @@ function neoDetecterActeur(
     );
 
   // ------------------------------------------------------------
-  // Cherche un nom propre placé juste avant une action connue
+  // Récupération des actions connues
   // ------------------------------------------------------------
 
   const modeles =
@@ -2247,6 +2247,10 @@ function neoDetecterActeur(
 
   const actionsConnues =
     new Set();
+
+  // ------------------------------------------------------------
+  // Actions présentes dans les modèles
+  // ------------------------------------------------------------
 
   for (
     const modele of modeles
@@ -2270,27 +2274,18 @@ function neoDetecterActeur(
 
       const mots =
         String(exemple)
-          .split(/\s+/u);
+          .toLowerCase()
+          .match(
+            /[a-zà-ÿ][a-zà-ÿ0-9_-]*/giu
+          ) || [];
 
       for (
         const mot of mots
       ) {
 
-        const propre =
-          mot
-            .replace(
-              /^[^A-Za-zÀ-ÿ_-]+|[^A-Za-zÀ-ÿ0-9_-]+$/gu,
-              ""
-            )
-            .toLowerCase();
-
-        if (
-          propre
-        ) {
-          actionsConnues.add(
-            propre
-          );
-        }
+        actionsConnues.add(
+          mot.toLowerCase()
+        );
 
       }
 
@@ -2299,7 +2294,7 @@ function neoDetecterActeur(
   }
 
   // ------------------------------------------------------------
-  // Actions principales connues de NeoAI
+  // Actions principales NeoAI
   // ------------------------------------------------------------
 
   const actions =
@@ -2326,13 +2321,7 @@ function neoDetecterActeur(
   }
 
   // ------------------------------------------------------------
-  // Cherche :
-  //
-  // "Yamato fonce"
-  // "Naruto frappe"
-  // "Goku esquive"
-  //
-  // même si une introduction existe avant.
+  // Liste des mots
   // ------------------------------------------------------------
 
   const mots =
@@ -2340,57 +2329,126 @@ function neoDetecterActeur(
       /[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*/gu
     ) || [];
 
+  // ------------------------------------------------------------
+  // RÈGLE PRINCIPALE
+  //
+  // Le sujet est TOUJOURS le nom qui fait l'action.
+  //
+  // Exemple :
+  //
+  // "Début du combat, Yamato fonce vers Naruto"
+  //
+  //            ↑
+  //          sujet
+  //
+  // "Yamato fonce"
+  //
+  // => Yamato
+  //
+  // Tout ce qui précède "Yamato" est ignoré.
+  // ------------------------------------------------------------
+
   for (
     let i = 0;
     i < mots.length - 1;
     i++
   ) {
 
-    const mot =
+    const candidat =
       mots[i];
 
-    const suivant =
+    const action =
       mots[i + 1];
 
+    // ----------------------------------------------------------
+    // Le candidat doit être un nom propre
+    // ----------------------------------------------------------
+
     if (
-      !/^[A-ZÀ-Ý]/u.test(mot)
+      !/^[A-ZÀ-Ý]/u.test(candidat)
     ) {
       continue;
     }
 
+    // ----------------------------------------------------------
+    // Le mot suivant doit être une action connue
+    // ----------------------------------------------------------
+
     if (
-      actionsConnues.has(
-        suivant.toLowerCase()
+      !actionsConnues.has(
+        action.toLowerCase()
       )
     ) {
+      continue;
+    }
 
-      return mot;
+    // ----------------------------------------------------------
+    // C'est le sujet :
+    // le nom qui effectue l'action.
+    // ----------------------------------------------------------
+
+    return candidat;
+
+  }
+
+  // ------------------------------------------------------------
+  // Recherche plus souple :
+  //
+  // Permet de gérer une action composée ou une formulation
+  // où plusieurs mots séparent légèrement le sujet de l'action.
+  //
+  // Exemple :
+  //
+  // "Yamato se met à foncer"
+  //
+  // ------------------------------------------------------------
+
+  for (
+    let i = 0;
+    i < mots.length - 1;
+    i++
+  ) {
+
+    const candidat =
+      mots[i];
+
+    if (
+      !/^[A-ZÀ-Ý]/u.test(candidat)
+    ) {
+      continue;
+    }
+
+    // Cherche une action dans les 3 mots suivants maximum.
+    for (
+      let j = i + 1;
+      j <= Math.min(
+        i + 3,
+        mots.length - 1
+      );
+      j++
+    ) {
+
+      const mot =
+        mots[j].toLowerCase();
+
+      if (
+        actionsConnues.has(mot)
+      ) {
+
+        return candidat;
+
+      }
 
     }
 
   }
 
   // ------------------------------------------------------------
-  // Fallback : si le texte commence directement
-  // par un nom propre.
-  // ------------------------------------------------------------
-
-  const premier =
-    t.match(
-      /^([A-ZÀ-Ý][A-Za-zÀ-ÿ0-9_-]*)\b/u
-    );
-
-  if (
-    premier &&
-    premier[1]
-  ) {
-
-    return premier[1];
-
-  }
-
-  // ------------------------------------------------------------
-  // Sinon contexte précédent.
+  // Dernier recours :
+  // contexte précédent.
+  //
+  // IMPORTANT :
+  // On ne prend JAMAIS arbitrairement le premier mot du texte.
   // ------------------------------------------------------------
 
   if (
@@ -2403,8 +2461,7 @@ function neoDetecterActeur(
 
   return null;
 }
-
-  
+    
 
 //==============================================================
 // ⚔️ DÉTECTION ACTION
