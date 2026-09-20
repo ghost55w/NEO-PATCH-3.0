@@ -310,7 +310,7 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds || 0} ©🧭
-◇ *Exp⏫*: ${data.exp || 0/3000} XP
+◇ *Exp⏫*: ${data.exp || 0}/3000 XP
 ◇ *Archetype ⚖️*: ${data.archetype || 'aucun'}
 
 ░▒░░ PALMARÈS🏆
