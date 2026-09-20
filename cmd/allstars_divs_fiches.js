@@ -338,7 +338,7 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 🎴 ${cardsFormatted}
 
 ╰───────────────────
-░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
+                          *R A Z O R X™⚡*`;
 
         // ==========================================================
         // 🎬 VIDÉO D'INTRO
