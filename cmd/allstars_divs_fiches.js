@@ -76,6 +76,183 @@ async function telechargerImageFiche(url) {
   }
 }
 
+// ===============================================================
+// 🏆 GESTION AUTOMATIQUE DU NIVEAU XP
+// ===============================================================
+
+function calculerNiveauXP(exp) {
+  exp = Number(exp) || 0;
+
+  // 0-99 XP  = niveau 1
+  // 100-199  = niveau 2
+  // 200-299  = niveau 3
+  // etc.
+  return Math.floor(exp / 100) + 1;
+}
+
+
+// ===============================================================
+// 🔄 VÉRIFICATION AUTOMATIQUE DU NIVEAU
+// ===============================================================
+
+async function verifierNiveauXP(jid, ovl, chat) {
+
+  try {
+
+    const data = await getData({ jid });
+
+    if (!data) {
+      console.error("❌ Impossible de vérifier le niveau : fiche introuvable.");
+      return;
+    }
+
+    const exp = Number(data.exp) || 0;
+
+    const ancienNiveau =
+      Number(data.niveau) || 1;
+
+    const nouveauNiveau =
+      calculerNiveauXP(exp);
+
+    // Aucun changement
+    if (ancienNiveau === nouveauNiveau) {
+      return;
+    }
+
+    // ==========================================================
+    // 💾 SAUVEGARDE DU NOUVEAU NIVEAU
+    // ==========================================================
+
+    await setfiche(
+      "niveau",
+      nouveauNiveau,
+      jid
+    );
+
+    const mention =
+      `@${jid.split("@")[0]}`;
+
+    // ==========================================================
+    // 🎉 LEVEL UP
+    // ==========================================================
+
+    if (nouveauNiveau > ancienNiveau) {
+
+      const texte =
+`🎉🎉🎉 ✨ *LEVEL UP* ✨ 🎉🎉🎉
+
+🏆 *FÉLICITATIONS !* 🏆
+👤 ${mention} vient d'atteindre le niveau supérieur !
+⚡ Continue comme ça vers le sommet ! 🏆🏆🏆
+
+🎖️ *Niveau :*
+${ancienNiveau} ➜ 🌟 *${nouveauNiveau}*
+
+⏫ *XP :*
+${exp}/3000 XP
+
+░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
+
+      // Image de fiche disponible
+      if (data.oc_url && data.oc_url !== "aucun") {
+
+        const image =
+          await telechargerImageFiche(data.oc_url);
+
+        if (image) {
+
+          await ovl.sendMessage(
+            chat,
+            {
+              image,
+              caption: texte,
+              mentions: [jid]
+            },
+            {
+              quoted: null
+            }
+          );
+
+          return;
+        }
+      }
+
+      // Fallback texte
+      await ovl.sendMessage(
+        chat,
+        {
+          text: texte,
+          mentions: [jid]
+        }
+      );
+
+      return;
+    }
+
+    // ==========================================================
+    // 🔻 LEVEL DOWN
+    // ==========================================================
+
+    if (nouveauNiveau < ancienNiveau) {
+
+      const texte =
+`🔻 *LEVEL DOWN* 🔻
+
+👤 ${mention}
+
+⚠️ Ton niveau a diminué.
+
+🎖️ *Niveau :*
+${ancienNiveau} ➜ *${nouveauNiveau}*
+
+⏫ *XP :*
+${exp}/3000 XP
+
+░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
+
+      // Image disponible
+      if (data.oc_url && data.oc_url !== "aucun") {
+
+        const image =
+          await telechargerImageFiche(data.oc_url);
+
+        if (image) {
+
+          await ovl.sendMessage(
+            chat,
+            {
+              image,
+              caption: texte,
+              mentions: [jid]
+            },
+            {
+              quoted: null
+            }
+          );
+
+          return;
+        }
+      }
+
+      // Fallback texte
+      await ovl.sendMessage(
+        chat,
+        {
+          text: texte,
+          mentions: [jid]
+        }
+      );
+    }
+
+  } catch (error) {
+
+    console.error(
+      "❌ Erreur verifierNiveauXP :",
+      error
+    );
+  }
+}
+
 function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 
   if (registeredFiches.has(nom_joueur)) return;
@@ -309,12 +486,33 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
         );
       }
 
-      const updates = await processUpdates(arg, playerJid);
+      const updates = await processUpdates(
+  arg,
+  playerJid
+);
 
-      await updatePlayerData(
-        updates,
-        playerJid
-      );
+await updatePlayerData(
+  updates,
+  playerJid
+);
+
+// ==========================================================
+// 🏆 VÉRIFICATION AUTOMATIQUE XP → NIVEAU
+// ==========================================================
+
+const modificationXP =
+  updates.find(
+    update => update.colonne === "exp"
+  );
+
+if (modificationXP) {
+
+  await verifierNiveauXP(
+    playerJid,
+    ovl,
+    ms_org.chat
+  );
+}
 
       const message = updates
         .map(u =>
