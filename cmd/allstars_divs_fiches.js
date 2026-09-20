@@ -133,21 +133,21 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds || 0} ©🧭
-◇ *Fans👥*: ${data.fans || 0} 👥
+◇ *Exp⏫*: ${data.exp || 0/3000} XP
 ◇ *Archetype ⚖️*: ${data.archetype || 'aucun'}
 
 ░▒░░ PALMARÈS🏆
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ✅ Victoires: ${data.victoires || 0} - ❌ Défaites: ${data.defaites || 0}
-*◇🏆Championnats*: ${data.championnants || 0}
+*◇🏆Championnats MVP*: ${data.championnants || 0}
 *◇🏆NEO cup💫*: ${data.neo_cup || 0}
-*◇🏆WORLDS💠*: ${data.evo || 0}
+*◇🏆EVO💠*: ${data.evo || 0}
+*◇🏆WORLDS🌟*: ${data.worlds || 0}
 *◇🏆GrandSlam🅰️*: ${data.grandslam || 0}
 *◇🌟TOS*: ${data.tos || 0}
 *◇👑The BEST🏆*: ${data.the_best || 0}
 *◇🗿Laureat🏆*: ${data.sigma || 0}
 *◇🎖️Neo Globes*: ${data.neo_globes || 0}
-*◇🏵️Golden Rookie🏆*: ${data.golden_boy || 0}
 
 ░▒░▒░ STATS 📊
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
