@@ -464,77 +464,20 @@ ovlcmd(
     }
 );
 
-async function uploadToCatbox(fileBuffer, fileName = "upload.jpg") {
+async function uploadToCatbox(filePath) {
   try {
-    if (!Buffer.isBuffer(fileBuffer) || !fileBuffer.length) {
-      throw new Error("Buffer média invalide ou vide.");
-    }
-
-    console.log(
-      "☁️ [Catbox] Upload du buffer :",
-      fileBuffer.length,
-      "octets"
-    );
-
     const form = new FormData();
+    form.append('reqtype', 'fileupload');
+    form.append('fileToUpload', fs.createReadStream(filePath));
 
-    form.append("reqtype", "fileupload");
+    const res = await axios.post('https://catbox.moe/user/api.php', form, {
+      headers: form.getHeaders()
+    });
 
-    form.append(
-      "fileToUpload",
-      fileBuffer,
-      {
-        filename: fileName,
-        contentType: "application/octet-stream"
-      }
-    );
-
-    const res = await axios.post(
-      "https://catbox.moe/user/api.php",
-      form,
-      {
-        headers: {
-          ...form.getHeaders()
-        },
-        timeout: 30000,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity
-      }
-    );
-
-    console.log(
-      "📡 [Catbox] Réponse :",
-      res.status,
-      res.data
-    );
-
-    const link = String(res.data || "").trim();
-
-    if (
-      !link ||
-      !link.startsWith("https://files.catbox.moe/")
-    ) {
-      throw new Error(
-        `Catbox n'a retourné aucun lien valide : ${link || "réponse vide"}`
-      );
-    }
-
-    console.log("✅ [Catbox] Upload réussi :", link);
-
-    return link;
-
+    return res.data;
   } catch (error) {
-
-    console.error(
-      "❌ [Catbox] Erreur upload :",
-      error.response?.data ||
-      error.message ||
-      error
-    );
-
-    throw new Error(
-      "Une erreur est survenue lors de l'upload du fichier sur Catbox."
-    );
+    console.error("Erreur lors de l'upload sur Catbox:", error);
+    throw new Error("Une erreur est survenue lors de l'upload du fichier.");
   }
 }
 
@@ -546,153 +489,27 @@ ovlcmd(
     desc: "Upload un fichier (image, vidéo, audio) sur Catbox et renvoie le lien"
   },
   async (ms_org, ovl, cmd_options) => {
+    const { msg_Repondu, ms } = cmd_options;
 
-    const {
-      msg_Repondu,
-      ms
-    } = cmd_options;
+    if (!msg_Repondu) {
+      return ovl.sendMessage(ms_org, { text: "Veuillez mentionner un fichier (image, vidéo, audio ou document)." }, { quoted: ms });
+    }
+
+    const mediaMessage = msg_Repondu.imageMessage || msg_Repondu.videoMessage || msg_Repondu.audioMessage;
+    if (!mediaMessage) {
+      return ovl.sendMessage(ms_org, { text: "Type de fichier non supporté. Veuillez mentionner une image, vidéo ou audio." }, { quoted: ms });
+    }
 
     try {
-
-      if (!msg_Repondu) {
-        return await ovl.sendMessage(
-          ms_org,
-          {
-            text: "Veuillez mentionner un fichier (image, vidéo, audio ou document)."
-          },
-          {
-            quoted: ms
-          }
-        );
-      }
-
-      console.log(
-        "📦 [URL] Message répondu reçu :",
-        JSON.stringify(msg_Repondu, null, 2)
-      );
-
-      // ==================================================
-      // 🔎 RECHERCHE DU MÉDIA
-      // ==================================================
-
-      const mediaMessage =
-        msg_Repondu.imageMessage ||
-        msg_Repondu.videoMessage ||
-        msg_Repondu.audioMessage ||
-        msg_Repondu.documentMessage ||
-        msg_Repondu.viewOnceMessage?.message?.imageMessage ||
-        msg_Repondu.viewOnceMessage?.message?.videoMessage ||
-        msg_Repondu.viewOnceMessage?.message?.audioMessage ||
-        msg_Repondu.viewOnceMessageV2?.message?.imageMessage ||
-        msg_Repondu.viewOnceMessageV2?.message?.videoMessage ||
-        msg_Repondu.viewOnceMessageV2?.message?.audioMessage;
-
-      if (!mediaMessage) {
-
-        console.log(
-          "❌ [URL] Aucun média trouvé dans msg_Repondu."
-        );
-
-        return await ovl.sendMessage(
-          ms_org,
-          {
-            text: "Type de fichier non supporté. Veuillez mentionner une image, vidéo ou audio."
-          },
-          {
-            quoted: ms
-          }
-        );
-      }
-
-      console.log(
-        "✅ [URL] Média détecté :",
-        mediaMessage.mimetype || "mimetype inconnu"
-      );
-
-      console.log(
-        "📏 [URL] Taille annoncée :",
-        mediaMessage.fileLength || "inconnue"
-      );
-
-      // ==================================================
-      // 📥 TÉLÉCHARGEMENT
-      // ==================================================
-
-      console.log(
-        "⬇️ [URL] Téléchargement du média..."
-      );
-
-      const media =
-        await ovl.dl_save_media_ms(
-          mediaMessage
-        );
-
-      if (!media) {
-        throw new Error(
-          "Le téléchargement du média a retourné une valeur vide."
-        );
-      }
-
-      console.log(
-        "✅ [URL] Média téléchargé."
-      );
-
-      // ==================================================
-      // ☁️ UPLOAD CATBOX
-      // ==================================================
-
-      console.log(
-        "☁️ [URL] Upload vers Catbox..."
-      );
-
-      const link =
-        await uploadToCatbox(media);
-
-      if (!link) {
-        throw new Error(
-          "Catbox n'a retourné aucun lien."
-        );
-      }
-
-      console.log(
-        "🔗 [URL] Lien Catbox :",
-        link
-      );
-
-      // ==================================================
-      // 📤 RÉPONSE
-      // ==================================================
-
-      return await ovl.sendMessage(
-        ms_org,
-        {
-          text: link
-        },
-        {
-          quoted: ms
-        }
-      );
-
+      const media = await ovl.dl_save_media_ms(mediaMessage);
+      const link = await uploadToCatbox(media);
+      await ovl.sendMessage(ms_org, { text: link }, { quoted: ms });
     } catch (error) {
-
-      console.error(
-        "❌ [URL] Erreur lors de l'upload sur Catbox:",
-        error
-      );
-
-      return await ovl.sendMessage(
-        ms_org,
-        {
-          text: "❌ Erreur lors de la création du lien Catbox."
-        },
-        {
-          quoted: ms
-        }
-      );
+      console.error("Erreur lors de l'upload sur Catbox:", error);
+      await ovl.sendMessage(ms_org, { text: "Erreur lors de la création du lien Catbox." }, { quoted: ms });
     }
   }
 );
-
 
 //==============================================================
 // 🌀🧠 NEOAI - BUILD
