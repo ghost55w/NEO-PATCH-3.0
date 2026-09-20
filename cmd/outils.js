@@ -2239,8 +2239,140 @@ function neoDetecterActeur(
     );
 
   // ------------------------------------------------------------
-  // Si le texte commence par un nom propre,
-  // on privilégie celui-ci.
+  // Cherche un nom propre placé juste avant une action connue
+  // ------------------------------------------------------------
+
+  const modeles =
+    neoGetModeles();
+
+  const actionsConnues =
+    new Set();
+
+  for (
+    const modele of modeles
+  ) {
+
+    if (
+      !modele ||
+      typeof modele !== "object"
+    ) {
+      continue;
+    }
+
+    const exemples =
+      Array.isArray(modele.exemples)
+        ? modele.exemples
+        : [];
+
+    for (
+      const exemple of exemples
+    ) {
+
+      const mots =
+        String(exemple)
+          .split(/\s+/u);
+
+      for (
+        const mot of mots
+      ) {
+
+        const propre =
+          mot
+            .replace(
+              /^[^A-Za-zÀ-ÿ_-]+|[^A-Za-zÀ-ÿ0-9_-]+$/gu,
+              ""
+            )
+            .toLowerCase();
+
+        if (
+          propre
+        ) {
+          actionsConnues.add(
+            propre
+          );
+        }
+
+      }
+
+    }
+
+  }
+
+  // ------------------------------------------------------------
+  // Actions principales connues de NeoAI
+  // ------------------------------------------------------------
+
+  const actions =
+    Array.isArray(
+      NeoAI?.NEO_ACTIONS
+    )
+      ? NeoAI.NEO_ACTIONS
+      : [];
+
+  for (
+    const action of actions
+  ) {
+
+    if (
+      typeof action === "string"
+    ) {
+
+      actionsConnues.add(
+        action.toLowerCase()
+      );
+
+    }
+
+  }
+
+  // ------------------------------------------------------------
+  // Cherche :
+  //
+  // "Yamato fonce"
+  // "Naruto frappe"
+  // "Goku esquive"
+  //
+  // même si une introduction existe avant.
+  // ------------------------------------------------------------
+
+  const mots =
+    t.match(
+      /[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9_-]*/gu
+    ) || [];
+
+  for (
+    let i = 0;
+    i < mots.length - 1;
+    i++
+  ) {
+
+    const mot =
+      mots[i];
+
+    const suivant =
+      mots[i + 1];
+
+    if (
+      !/^[A-ZÀ-Ý]/u.test(mot)
+    ) {
+      continue;
+    }
+
+    if (
+      actionsConnues.has(
+        suivant.toLowerCase()
+      )
+    ) {
+
+      return mot;
+
+    }
+
+  }
+
+  // ------------------------------------------------------------
+  // Fallback : si le texte commence directement
+  // par un nom propre.
   // ------------------------------------------------------------
 
   const premier =
@@ -2252,7 +2384,9 @@ function neoDetecterActeur(
     premier &&
     premier[1]
   ) {
+
     return premier[1];
+
   }
 
   // ------------------------------------------------------------
@@ -2262,12 +2396,15 @@ function neoDetecterActeur(
   if (
     contexte.dernierActeur
   ) {
+
     return contexte.dernierActeur;
+
   }
 
   return null;
 }
 
+  
 
 //==============================================================
 // ⚔️ DÉTECTION ACTION
