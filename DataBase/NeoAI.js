@@ -1383,239 +1383,235 @@ const NEO_ACTION_MODELS = {
                 ]
             }
         ],
+// ==============================================
+// VOL
+// ==============================================
 
+vol: [
 
-        // ==============================================
-        // VOL
-        // ==============================================
+    {
+        id: "VOL_001",
+        action: "vol",
+        maniere: "vertical",
 
-        vol: [
+        structure: [
+            "SUJET",
+            "ACTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "CIBLE",
+            "INTENTION"
+        ],
 
-            {
-                id: "VOL_001",
-                action: "vol",
-                maniere: "vertical",
+        params: {
+            trajectoire: [
+                "verticale"
+            ],
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                params: {
-                    trajectoire: [
-                        "verticale"
-                    ],
-
-                    hauteur: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    }
-                },
-
-                exemples: [
-                    "Yamato vole verticalement jusqu'à 5m de hauteur pour prendre de la hauteur face à Naruto",
-                    "Goku s'élève dans les airs jusqu'à une hauteur de 10m pour éviter Vegeta",
-                    "Luffy monte verticalement à 3m de hauteur pour atteindre Zoro",
-                    "Ichigo prend de l'altitude jusqu'à 7m de hauteur pour esquiver Ulquiorra",
-                    "Sasuke se maintient en vol à 4m de hauteur pour observer Naruto"
-                ]
-            },
-
-
-            {
-                id: "VOL_002",
-                action: "vol",
-                maniere: "frontal",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "DIRECTION",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "DISTANCE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                params: {
-                    direction: [
-                        "avant"
-                    ],
-
-                    trajectoire: [
-                        "frontale"
-                    ],
-
-                    hauteur: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    },
-
-                    distance: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    }
-                },
-
-                exemples: [
-                    "Naruto vole vers l'avant à 5m de hauteur sur 10m pour atteindre Sasuke",
-                    "Goku se déplace dans les airs vers Vegeta à 8m de hauteur sur 15m pour l'intercepter",
-                    "Luffy vole droit devant lui à 3m de hauteur sur 6m pour rejoindre Zoro",
-                    "Ichigo traverse les airs à 7m de hauteur sur 12m pour atteindre Ulquiorra",
-                    "Yamato fonce dans les airs vers Madara à 10m de hauteur sur 20m pour l'attaquer"
-                ]
-            },
-
-
-            {
-                id: "VOL_003",
-                action: "vol",
-                maniere: "arriere",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "DIRECTION",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "DISTANCE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                params: {
-                    direction: [
-                        "arriere"
-                    ],
-
-                    trajectoire: [
-                        "arriere"
-                    ],
-
-                    hauteur: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    },
-
-                    distance: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    }
-                },
-
-                exemples: [
-                    "Sasuke vole vers l'arrière à 4m de hauteur sur 5m pour s'éloigner de Naruto",
-                    "Goku recule dans les airs à 8m de hauteur sur 10m pour éviter l'attaque de Vegeta",
-                    "Ichigo se déplace en volant vers l'arrière à 6m de hauteur sur 7m pour prendre ses distances avec Ulquiorra",
-                    "Luffy vole en arrière à 3m de hauteur sur 5m pour esquiver Zoro",
-                    "Yamato se retire dans les airs à 10m de hauteur sur 12m pour sortir de portée de Madara"
-                ]
-            },
-
-
-            {
-                id: "VOL_004",
-                action: "vol",
-                maniere: "laterale",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "DIRECTION",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "DISTANCE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                params: {
-                    direction: [
-                        "gauche",
-                        "droite"
-                    ],
-
-                    trajectoire: [
-                        "laterale"
-                    ],
-
-                    hauteur: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    },
-
-                    distance: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    }
-                },
-
-                exemples: [
-                    "Naruto vole vers la droite à 5m de hauteur sur 6m pour éviter Sasuke",
-                    "Goku se déplace dans les airs vers la gauche à 8m de hauteur sur 10m pour esquiver Vegeta",
-                    "Luffy vole sur le côté droit à 3m de hauteur sur 5m pour contourner Zoro",
-                    "Ichigo se déplace latéralement dans les airs vers la gauche à 7m de hauteur sur 8m pour se décaler d'Ulquiorra",
-                    "Yamato vole vers la droite à 10m de hauteur sur 12m pour passer à côté de Madara"
-                ]
-            },
-
-
-            {
-                id: "VOL_005",
-                action: "vol",
-                maniere: "diagonal",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "DIRECTION",
-                    "TRAJECTOIRE",
-                    "HAUTEUR",
-                    "DISTANCE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                params: {
-                    direction: [
-                        "avant_gauche",
-                        "avant_droite",
-                        "arriere_gauche",
-                        "arriere_droite"
-                    ],
-
-                    trajectoire: [
-                        "diagonale"
-                    ],
-
-                    hauteur: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    },
-
-                    distance: {
-                        type: "distance",
-                        unite: ["cm", "m"]
-                    }
-                },
-
-                exemples: [
-                    "Naruto vole en diagonale vers l'avant droite à 5m de hauteur sur 8m pour atteindre Sasuke",
-                    "Goku se déplace dans les airs en diagonale vers l'avant gauche à 10m de hauteur sur 12m pour intercepter Vegeta",
-                    "Luffy vole en diagonale vers l'arrière droite à 3m de hauteur sur 6m pour éviter Zoro",
-                    "Ichigo traverse les airs en diagonale vers l'avant gauche à 7m de hauteur sur 10m pour rejoindre Ulquiorra",
-                    "Yamato vole en diagonale vers l'arrière gauche à 12m de hauteur sur 15m pour s'éloigner de Madara"
-                ]
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
             }
-        ]
-    }
-};
+        },
 
+        exemples: [
+            "Yamato vole verticalement jusqu'à 5m de hauteur pour prendre de la hauteur face à Naruto",
+            "Goku s'élève dans les airs jusqu'à une hauteur de 10m pour éviter Vegeta",
+            "Luffy monte verticalement à 3m de hauteur pour atteindre Zoro",
+            "Ichigo prend de l'altitude jusqu'à 7m de hauteur pour esquiver Ulquiorra",
+            "Sasuke se maintient en vol à 4m de hauteur pour observer Naruto"
+        ]
+    },
+
+
+    {
+        id: "VOL_002",
+        action: "vol",
+        maniere: "frontal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant"
+            ],
+
+            trajectoire: [
+                "frontale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto vole vers l'avant à 5m de hauteur sur 10m pour atteindre Sasuke",
+            "Goku se déplace dans les airs vers Vegeta à 8m de hauteur sur 15m pour l'intercepter",
+            "Luffy vole droit devant lui à 3m de hauteur sur 6m pour rejoindre Zoro",
+            "Ichigo traverse les airs à 7m de hauteur sur 12m pour atteindre Ulquiorra",
+            "Yamato fonce dans les airs vers Madara à 10m de hauteur sur 20m pour l'attaquer"
+        ]
+    },
+
+
+    {
+        id: "VOL_003",
+        action: "vol",
+        maniere: "arriere",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "arriere"
+            ],
+
+            trajectoire: [
+                "arriere"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Sasuke vole vers l'arrière à 4m de hauteur sur 5m pour s'éloigner de Naruto",
+            "Goku recule dans les airs à 8m de hauteur sur 10m pour éviter l'attaque de Vegeta",
+            "Ichigo se déplace en volant vers l'arrière à 6m de hauteur sur 7m pour prendre ses distances avec Ulquiorra",
+            "Luffy vole en arrière à 3m de hauteur sur 5m pour esquiver Zoro",
+            "Yamato se retire dans les airs à 10m de hauteur sur 12m pour sortir de portée de Madara"
+        ]
+    },
+
+
+    {
+        id: "VOL_004",
+        action: "vol",
+        maniere: "laterale",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "gauche",
+                "droite"
+            ],
+
+            trajectoire: [
+                "laterale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto vole vers la droite à 5m de hauteur sur 6m pour éviter Sasuke",
+            "Goku se déplace dans les airs vers la gauche à 8m de hauteur sur 10m pour esquiver Vegeta",
+            "Luffy vole sur le côté droit à 3m de hauteur sur 5m pour contourner Zoro",
+            "Ichigo se déplace latéralement dans les airs vers la gauche à 7m de hauteur sur 8m pour se décaler d'Ulquiorra",
+            "Yamato vole vers la droite à 10m de hauteur sur 12m pour passer à côté de Madara"
+        ]
+    },
+
+
+    {
+        id: "VOL_005",
+        action: "vol",
+        maniere: "diagonal",
+
+        structure: [
+            "SUJET",
+            "ACTION",
+            "DIRECTION",
+            "TRAJECTOIRE",
+            "HAUTEUR",
+            "DISTANCE",
+            "CIBLE",
+            "INTENTION"
+        ],
+
+        params: {
+            direction: [
+                "avant_gauche",
+                "avant_droite",
+                "arriere_gauche",
+                "arriere_droite"
+            ],
+
+            trajectoire: [
+                "diagonale"
+            ],
+
+            hauteur: {
+                type: "distance",
+                unite: ["cm", "m"]
+            },
+
+            distance: {
+                type: "distance",
+                unite: ["cm", "m"]
+            }
+        },
+
+        exemples: [
+            "Naruto vole en diagonale vers l'avant droite à 5m de hauteur sur 8m pour atteindre Sasuke",
+            "Goku se déplace dans les airs en diagonale vers l'avant gauche à 10m de hauteur sur 12m pour intercepter Vegeta",
+            "Luffy vole en diagonale vers l'arrière droite à 3m de hauteur sur 6m pour éviter Zoro",
+            "Ichigo traverse les airs en diagonale vers l'avant gauche à 7m de hauteur sur 10m pour rejoindre Ulquiorra",
+            "Yamato vole en diagonale vers l'arrière gauche à 12m de hauteur sur 15m pour s'éloigner de Madara"
+        ]
+    }, 
+
+                   
 
 // ======================================================
 // EXPORT
