@@ -4,32 +4,31 @@
  * ║                  MODULE PRINCIPAL                  ║
  * ╚══════════════════════════════════════════════════════╝
  *
- * ÉTAPE 3
+ * ÉTAPE 4
  *
  * Objectif :
  *
- * Installer/configurer plusieurs IA via OpenRouter
- * avec un relais automatique entre les modèles.
+ * Créer une fonction générique permettant d'envoyer
+ * n'importe quel message à OpenRouter.
  *
- * ORDRE ACTUEL :
+ * Cette étape permet ensuite de tester :
  *
- * 1. GPT-5 Mini
- * 2. Claude Sonnet
- * 3. Gemini
- * 4. DeepSeek
- * 5. Qwen
+ * - un pavé
+ * - une question
+ * - un prompt
+ * - une conversation
+ * - n'importe quel texte
  *
- * OpenRouter gère automatiquement le fallback
- * entre les modèles.
+ * OpenRouter reste responsable du fallback entre
+ * les modèles configurés.
  *
  * Pour cette étape :
  *
- * - aucun fallback manuel dans le code
- * - aucune analyse de pavé
+ * - aucune analyse NEOAI
+ * - aucune analyse de combat
  * - aucune intégration avec outils.js
  * - aucune intégration avec AllstarsEngine.js
  * - aucune utilisation d'Ollama
- * - aucune logique NEOAI
  */
 
 
@@ -65,45 +64,16 @@ const OPENROUTER_APP_NAME =
 //==============================================================
 // 🤖 MODÈLES
 //==============================================================
-//
-// L'ordre est important.
-//
-// OpenRouter utilise cette liste comme chaîne de fallback.
-//
-// Si le modèle principal échoue,
-// OpenRouter peut essayer les modèles suivants.
-//
-//==============================================================
 
 const OPENROUTER_MODELS = [
 
-  //============================================================
-  // 1️⃣ GPT
-  //============================================================
-
   "openai/gpt-5-mini",
-
-  //============================================================
-  // 2️⃣ CLAUDE
-  //============================================================
 
   "anthropic/claude-sonnet-4.5",
 
-  //============================================================
-  // 3️⃣ GEMINI
-  //============================================================
-
   "google/gemini-2.5-flash",
 
-  //============================================================
-  // 4️⃣ DEEPSEEK
-  //============================================================
-
   "deepseek/deepseek-chat",
-
-  //============================================================
-  // 5️⃣ QWEN
-  //============================================================
 
   "qwen/qwen3-30b-a3b"
 
@@ -113,44 +83,41 @@ const OPENROUTER_MODELS = [
 //==============================================================
 // 🎯 MODÈLE PRINCIPAL
 //==============================================================
-//
-// Le premier modèle de la liste est le modèle principal.
-//
-// Les autres sont les modèles de secours.
-//
-//==============================================================
 
 const OPENROUTER_PRIMARY_MODEL =
   OPENROUTER_MODELS[0];
 
 
 //==============================================================
-// ⏱️ TIMEOUT
+// ⏱️ TIMEOUT PAR DÉFAUT
 //==============================================================
 
-const OPENROUTER_TEST_TIMEOUT =
-  15000;
+const OPENROUTER_TIMEOUT =
+  30000;
 
 
 //==============================================================
-// 🧪 TEST OPENROUTER
+// 🌐 APPEL GÉNÉRIQUE OPENROUTER
 //==============================================================
 //
-// Cette fonction vérifie que :
+// Cette fonction ne sait rien de NEOAI.
 //
-// - la clé API fonctionne
-// - OpenRouter est accessible
-// - la liste des modèles est correctement envoyée
-// - une réponse est reçue
+// Elle reçoit simplement :
 //
-// Elle ne fait aucune analyse.
+// messages
+// options
+//
+// puis retourne la réponse d'OpenRouter.
 //
 //==============================================================
 
-async function testerConnexionOpenRouter() {
+async function openRouterChat(
+  messages,
+  options = {}
+) {
 
   //============================================================
-  // 🔑 Vérification de la clé
+  // 🔑 Vérification API
   //============================================================
 
   if (!OPENROUTER_API_KEY) {
@@ -163,23 +130,92 @@ async function testerConnexionOpenRouter() {
 
 
   //============================================================
-  // ⏱️ Contrôleur timeout
+  // 💬 Vérification messages
+  //============================================================
+
+  if (!Array.isArray(messages)) {
+
+    throw new Error(
+      "openRouterChat() attend un tableau de messages."
+    );
+
+  }
+
+
+  if (messages.length === 0) {
+
+    throw new Error(
+      "openRouterChat() nécessite au moins un message."
+    );
+
+  }
+
+
+  //============================================================
+  // 🎯 MODÈLE
+  //============================================================
+
+  const modele =
+    options.model ||
+    OPENROUTER_PRIMARY_MODEL;
+
+
+  //============================================================
+  // 🔄 MODÈLES DE FALLBACK
+  //============================================================
+
+  const models =
+    Array.isArray(options.models) &&
+    options.models.length > 0
+
+      ? [...options.models]
+
+      : [...OPENROUTER_MODELS];
+
+
+  //============================================================
+  // 🌡️ TEMPÉRATURE
+  //============================================================
+
+  const temperature =
+    typeof options.temperature === "number"
+
+      ? options.temperature
+
+      : 0;
+
+
+  //============================================================
+  // ⏱️ TIMEOUT
+  //============================================================
+
+  const timeoutMs =
+    Number.isFinite(options.timeout)
+
+      ? options.timeout
+
+      : OPENROUTER_TIMEOUT;
+
+
+  //============================================================
+  // 🎛️ ABORT CONTROLLER
   //============================================================
 
   const controller =
     new AbortController();
 
+
   const timeout =
     setTimeout(
       () => controller.abort(),
-      OPENROUTER_TEST_TIMEOUT
+      timeoutMs
     );
 
 
   try {
 
     //==========================================================
-    // 🌐 Appel OpenRouter
+    // 🌐 REQUÊTE
     //==========================================================
 
     const response =
@@ -216,43 +252,31 @@ async function testerConnexionOpenRouter() {
                 //================================================
 
                 model:
-                  OPENROUTER_PRIMARY_MODEL,
+                  modele,
 
 
                 //================================================
-                // 🔄 Chaîne de fallback OpenRouter
+                // 🔄 Chaîne OpenRouter
                 //================================================
 
                 models:
-                  OPENROUTER_MODELS,
+                  models,
 
 
                 //================================================
-                // 💬 Message de test
+                // 💬 Messages
                 //================================================
 
                 messages:
-                  [
-
-                    {
-
-                      role:
-                        "user",
-
-                      content:
-                        "Réponds simplement : OpenRouter multi-IA fonctionne."
-
-                    }
-
-                  ],
+                  messages,
 
 
                 //================================================
-                // 🎯 Test déterministe
+                // 🌡️ Température
                 //================================================
 
                 temperature:
-                  0
+                  temperature
 
               }
             ),
@@ -265,7 +289,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // 📥 Récupération de la réponse
+    // 📥 RÉPONSE BRUTE
     //==========================================================
 
     const texte =
@@ -273,7 +297,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // 🔄 Conversion JSON
+    // 🔄 JSON
     //==========================================================
 
     let data;
@@ -293,7 +317,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // ❌ Gestion des erreurs HTTP
+    // ❌ ERREUR HTTP
     //==========================================================
 
     if (!response.ok) {
@@ -310,7 +334,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // 💬 Extraction de la réponse
+    // 💬 CONTENU
     //==========================================================
 
     const contenu =
@@ -328,53 +352,16 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // 🤖 Identification du modèle réellement utilisé
+    // 🤖 MODÈLE RÉELLEMENT UTILISÉ
     //==========================================================
 
     const modeleUtilise =
       data?.model ||
-      OPENROUTER_PRIMARY_MODEL;
+      modele;
 
 
     //==========================================================
-    // ✅ Succès
-    //==========================================================
-
-    console.log(
-      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    );
-
-    console.log(
-      "🌐 OPENROUTER"
-    );
-
-    console.log(
-      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    );
-
-    console.log(
-      "✅ Connexion OpenRouter réussie"
-    );
-
-    console.log(
-      `🎯 Modèle principal : ${OPENROUTER_PRIMARY_MODEL}`
-    );
-
-    console.log(
-      `🔄 Modèle utilisé : ${modeleUtilise}`
-    );
-
-    console.log(
-      `💬 Réponse : ${contenu}`
-    );
-
-    console.log(
-      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    );
-
-
-    //==========================================================
-    // 📤 Résultat
+    // 📤 RÉSULTAT
     //==========================================================
 
     return {
@@ -382,19 +369,41 @@ async function testerConnexionOpenRouter() {
       ok:
         true,
 
-      primaryModel:
-        OPENROUTER_PRIMARY_MODEL,
-
       model:
         modeleUtilise,
 
+      primaryModel:
+        modele,
+
       models:
-        OPENROUTER_MODELS,
+        models,
 
       response:
-        contenu
+        contenu,
+
+      raw:
+        data
 
     };
+
+  } catch (error) {
+
+    //==========================================================
+    // ⏱️ TIMEOUT
+    //==========================================================
+
+    if (
+      error?.name === "AbortError"
+    ) {
+
+      throw new Error(
+        `OpenRouter timeout après ${timeoutMs} ms.`
+      );
+
+    }
+
+
+    throw error;
 
   } finally {
 
@@ -451,7 +460,9 @@ module.exports = {
 
   OPENROUTER_PRIMARY_MODEL,
 
-  testerConnexionOpenRouter,
+  OPENROUTER_TIMEOUT,
+
+  openRouterChat,
 
   openRouterEstConfigure,
 
