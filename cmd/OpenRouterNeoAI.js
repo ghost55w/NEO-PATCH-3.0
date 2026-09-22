@@ -1,25 +1,37 @@
 /**
  * ╔══════════════════════════════════════════════════════╗
- * ║                 NEOAI OPENROUTER                   ║
+ * ║                    OPENROUTER                      ║
  * ║                  MODULE PRINCIPAL                  ║
  * ╚══════════════════════════════════════════════════════╝
  *
- * ÉTAPE 2
+ * ÉTAPE 3
  *
  * Objectif :
- * Vérifier que NEO-BOT peut communiquer avec OpenRouter.
+ *
+ * Installer/configurer plusieurs IA via OpenRouter
+ * avec un relais automatique entre les modèles.
+ *
+ * ORDRE ACTUEL :
+ *
+ * 1. GPT-5 Mini
+ * 2. Claude Sonnet
+ * 3. Gemini
+ * 4. DeepSeek
+ * 5. Qwen
+ *
+ * OpenRouter gère automatiquement le fallback
+ * entre les modèles.
  *
  * Pour cette étape :
- * - un seul modèle de TEST
- * - aucun système de fallback
+ *
+ * - aucun fallback manuel dans le code
  * - aucune analyse de pavé
  * - aucune intégration avec outils.js
  * - aucune intégration avec AllstarsEngine.js
  * - aucune utilisation d'Ollama
- *
- * Le modèle utilisé ici sert UNIQUEMENT à tester
- * la connexion OpenRouter.
+ * - aucune logique NEOAI
  */
+
 
 //==============================================================
 // 🌐 OPENROUTER
@@ -51,21 +63,65 @@ const OPENROUTER_APP_NAME =
 
 
 //==============================================================
-// 🧪 MODÈLE DE TEST
+// 🤖 MODÈLES
 //==============================================================
 //
-// IMPORTANT :
-// Ce modèle n'est PAS encore le modèle principal de NEOAI.
+// L'ordre est important.
 //
-// Il sert uniquement à vérifier que la connexion
-// OpenRouter fonctionne.
+// OpenRouter utilise cette liste comme chaîne de fallback.
 //
-// Nous choisirons les vrais modèles à l'étape
-// du système multi-IA.
+// Si le modèle principal échoue,
+// OpenRouter peut essayer les modèles suivants.
+//
 //==============================================================
 
-const OPENROUTER_TEST_MODEL =
-  "openai/gpt-5-mini";
+const OPENROUTER_MODELS = [
+
+  //============================================================
+  // 1️⃣ GPT
+  //============================================================
+
+  "openai/gpt-5-mini",
+
+  //============================================================
+  // 2️⃣ CLAUDE
+  //============================================================
+
+  "anthropic/claude-sonnet-4.5",
+
+  //============================================================
+  // 3️⃣ GEMINI
+  //============================================================
+
+  "google/gemini-2.5-flash",
+
+  //============================================================
+  // 4️⃣ DEEPSEEK
+  //============================================================
+
+  "deepseek/deepseek-chat",
+
+  //============================================================
+  // 5️⃣ QWEN
+  //============================================================
+
+  "qwen/qwen3-30b-a3b"
+
+];
+
+
+//==============================================================
+// 🎯 MODÈLE PRINCIPAL
+//==============================================================
+//
+// Le premier modèle de la liste est le modèle principal.
+//
+// Les autres sont les modèles de secours.
+//
+//==============================================================
+
+const OPENROUTER_PRIMARY_MODEL =
+  OPENROUTER_MODELS[0];
 
 
 //==============================================================
@@ -77,13 +133,24 @@ const OPENROUTER_TEST_TIMEOUT =
 
 
 //==============================================================
-// 🧪 TEST DE CONNEXION
+// 🧪 TEST OPENROUTER
+//==============================================================
+//
+// Cette fonction vérifie que :
+//
+// - la clé API fonctionne
+// - OpenRouter est accessible
+// - la liste des modèles est correctement envoyée
+// - une réponse est reçue
+//
+// Elle ne fait aucune analyse.
+//
 //==============================================================
 
 async function testerConnexionOpenRouter() {
 
   //============================================================
-  // Vérification de la clé
+  // 🔑 Vérification de la clé
   //============================================================
 
   if (!OPENROUTER_API_KEY) {
@@ -96,7 +163,7 @@ async function testerConnexionOpenRouter() {
 
 
   //============================================================
-  // Contrôleur timeout
+  // ⏱️ Contrôleur timeout
   //============================================================
 
   const controller =
@@ -112,7 +179,7 @@ async function testerConnexionOpenRouter() {
   try {
 
     //==========================================================
-    // Appel OpenRouter
+    // 🌐 Appel OpenRouter
     //==========================================================
 
     const response =
@@ -144,21 +211,45 @@ async function testerConnexionOpenRouter() {
             JSON.stringify(
               {
 
+                //================================================
+                // 🎯 Modèle principal
+                //================================================
+
                 model:
-                  OPENROUTER_TEST_MODEL,
+                  OPENROUTER_PRIMARY_MODEL,
+
+
+                //================================================
+                // 🔄 Chaîne de fallback OpenRouter
+                //================================================
+
+                models:
+                  OPENROUTER_MODELS,
+
+
+                //================================================
+                // 💬 Message de test
+                //================================================
 
                 messages:
                   [
 
                     {
+
                       role:
                         "user",
 
                       content:
-                        "Réponds simplement : NEOAI fonctionne."
+                        "Réponds simplement : OpenRouter multi-IA fonctionne."
+
                     }
 
                   ],
+
+
+                //================================================
+                // 🎯 Test déterministe
+                //================================================
 
                 temperature:
                   0
@@ -174,7 +265,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // Récupération de la réponse
+    // 📥 Récupération de la réponse
     //==========================================================
 
     const texte =
@@ -182,7 +273,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // Conversion JSON
+    // 🔄 Conversion JSON
     //==========================================================
 
     let data;
@@ -202,7 +293,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // Gestion des erreurs HTTP
+    // ❌ Gestion des erreurs HTTP
     //==========================================================
 
     if (!response.ok) {
@@ -219,7 +310,7 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // Extraction réponse
+    // 💬 Extraction de la réponse
     //==========================================================
 
     const contenu =
@@ -237,7 +328,16 @@ async function testerConnexionOpenRouter() {
 
 
     //==========================================================
-    // Succès
+    // 🤖 Identification du modèle réellement utilisé
+    //==========================================================
+
+    const modeleUtilise =
+      data?.model ||
+      OPENROUTER_PRIMARY_MODEL;
+
+
+    //==========================================================
+    // ✅ Succès
     //==========================================================
 
     console.log(
@@ -245,7 +345,7 @@ async function testerConnexionOpenRouter() {
     );
 
     console.log(
-      "🌐 NEOAI OPENROUTER"
+      "🌐 OPENROUTER"
     );
 
     console.log(
@@ -257,7 +357,11 @@ async function testerConnexionOpenRouter() {
     );
 
     console.log(
-      `🤖 Modèle de test : ${data.model || OPENROUTER_TEST_MODEL}`
+      `🎯 Modèle principal : ${OPENROUTER_PRIMARY_MODEL}`
+    );
+
+    console.log(
+      `🔄 Modèle utilisé : ${modeleUtilise}`
     );
 
     console.log(
@@ -269,20 +373,28 @@ async function testerConnexionOpenRouter() {
     );
 
 
+    //==========================================================
+    // 📤 Résultat
+    //==========================================================
+
     return {
 
       ok:
         true,
 
+      primaryModel:
+        OPENROUTER_PRIMARY_MODEL,
+
       model:
-        data.model ||
-        OPENROUTER_TEST_MODEL,
+        modeleUtilise,
+
+      models:
+        OPENROUTER_MODELS,
 
       response:
         contenu
 
     };
-
 
   } finally {
 
@@ -299,11 +411,24 @@ async function testerConnexionOpenRouter() {
 // 📊 ÉTAT DE CONFIGURATION
 //==============================================================
 
-function neoOpenRouterEstConfigure() {
+function openRouterEstConfigure() {
 
   return Boolean(
     OPENROUTER_API_KEY
   );
+
+}
+
+
+//==============================================================
+// 📋 RÉCUPÉRER LES MODÈLES
+//==============================================================
+
+function openRouterGetModels() {
+
+  return [
+    ...OPENROUTER_MODELS
+  ];
 
 }
 
@@ -322,10 +447,14 @@ module.exports = {
 
   OPENROUTER_APP_NAME,
 
-  OPENROUTER_TEST_MODEL,
+  OPENROUTER_MODELS,
+
+  OPENROUTER_PRIMARY_MODEL,
 
   testerConnexionOpenRouter,
 
-  neoOpenRouterEstConfigure
+  openRouterEstConfigure,
+
+  openRouterGetModels
 
 };
