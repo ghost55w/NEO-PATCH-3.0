@@ -1,3 +1,6 @@
+const axios = require("axios");
+const { ovlcmd } = require("../lib/ovlcmd");
+
 /**
  * ╔══════════════════════════════════════════════════════╗
  * ║              OPENROUTER TEST COMMAND               ║
