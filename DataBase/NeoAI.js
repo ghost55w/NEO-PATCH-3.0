@@ -699,17 +699,31 @@ const NEO_RELATIONS = {
 // de devoir les déduire par recherche dans les exemples des autres modèles.
 
 const NEO_ACTION_MODELS = [
+
+    //DÉPLACEMENTS 🏃 
     {
-        id: 'COURSE',
-        action: 'foncer',
+        action: 'course frontale',
         categorie: 'deplacement',
-        famille: 'deplacement',
-        structure: ['SUJET', 'ACTION', 'DIRECTION', 'TRAJECTOIRE', 'VITESSE', 'DISTANCE', 'CIBLE', 'INTENTION'],
+
+        structure: [
+            'SUJET',
+            'ACTION',
+            'MANIERE',
+            'DISTANCE',
+            'INTENTION'
+        ],
+
+        optionnels: [
+            'CIBLE',
+            'VITESSE',
+            'DIRECTION'
+        ],
+
         exemples: [
-            'Yamato fonce vers Naruto.',
-            'Yamato se precipite sur Naruto.',
-            'Yamato charge frontalement Naruto a pleine vitesse.',
-            'Yamato court droit sur Naruto en parcourant cinq metres.'
+            'Yamato fonce en course frontale vers Naruto sur 10m afin de l\'atteindre.',
+            'Yamato se precipite en course frontale sur Naruto sur 5m pour arriver a close distance.',
+            'Yamato charge frontalement Naruto a pleine vitesse sur 10m afin de le percuter.',
+            'Yamato court droit vers Naruto sur 8m pour se rapprocher de lui.'
         ]
     },
     {
