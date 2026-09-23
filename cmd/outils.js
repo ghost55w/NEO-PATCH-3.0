@@ -7985,9 +7985,6 @@ ${resultat.texte || "—"}
 🏷️ *Catégorie :*
 ${actions[0]?.categorie || "—"}
 
-🎯 *Famille :*
-${actions[0]?.famille || "—"}
-
 📊 *Actions détectées :*
 ${resultat.nombreActions || 0}
 
@@ -8002,48 +7999,234 @@ ${resultat.nombreActions || 0}
     actions.forEach(
       (action, index) => {
 
+        const modele =
+          action.modele && typeof action.modele === "object"
+            ? action.modele
+            : null;
+
+        const affichage =
+          Array.isArray(modele?.affichage)
+            ? modele.affichage
+            : [
+                "SUJET",
+                "ACTION",
+                "CIBLE",
+                "CATEGORIE",
+                "MANIERE",
+                "VITESSE",
+                "DISTANCE"
+              ];
+
+        const structure =
+          Array.isArray(modele?.structure)
+            ? modele.structure
+            : Array.isArray(action.structure)
+              ? action.structure
+              : [];
+
+        const slotsManquants =
+          Array.isArray(action.slotsManquants)
+            ? action.slotsManquants
+            : [];
+
+        const structureRemplie =
+          structure.length
+            ? structure.filter(
+                champ =>
+                  !slotsManquants.includes(champ)
+              ).length
+            : 0;
+
+        const structureComplete =
+          structure.length > 0 &&
+          structureRemplie === structure.length;
+
+        const lignes = [];
+
+        // ------------------------------------------------------
+        // 🧍 SUJET
+        // ------------------------------------------------------
+
+        if (affichage.includes("SUJET")) {
+          lignes.push(
+            `├ 🧍 Sujet : ${action.acteur || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // ⚔️ ACTION
+        // ------------------------------------------------------
+
+        if (affichage.includes("ACTION")) {
+          lignes.push(
+            `├ ⚔️ Action : ${action.action || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🎯 CIBLE
+        // ------------------------------------------------------
+
+        if (affichage.includes("CIBLE")) {
+          lignes.push(
+            `├ 🎯 Cible : ${action.cible || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🌀 CATEGORIE
+        // ------------------------------------------------------
+
+        if (affichage.includes("CATEGORIE")) {
+          lignes.push(
+            `├ 🌀 Catégorie : ${action.categorie || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 💨 MANIERE
+        // ------------------------------------------------------
+
+        if (affichage.includes("MANIERE")) {
+          lignes.push(
+            `├ 💨 Manière : ${action.maniere || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // ⚡ VITESSE
+        // ------------------------------------------------------
+
+        if (affichage.includes("VITESSE")) {
+          lignes.push(
+            `├ ⚡ Vitesse : ${action.vitesse || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 📐 DISTANCE
+        // ------------------------------------------------------
+
+        if (affichage.includes("DISTANCE")) {
+
+          const distance =
+            action.distance !== null &&
+            action.distance !== undefined
+              ? `${action.distance}${action.distanceUnite || "m"}`
+              : "—";
+
+          lignes.push(
+            `├ 📐 Distance : ${distance}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 📏 HAUTEUR
+        // ------------------------------------------------------
+
+        if (affichage.includes("HAUTEUR")) {
+
+          const hauteur =
+            action.hauteur !== null &&
+            action.hauteur !== undefined
+              ? `${action.hauteur}${action.hauteurUnite || "m"}`
+              : "—";
+
+          lignes.push(
+            `├ 📏 Hauteur : ${hauteur}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🧭 DIRECTION
+        // ------------------------------------------------------
+
+        if (affichage.includes("DIRECTION")) {
+          lignes.push(
+            `├ 🧭 Direction : ${action.direction || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🧭 TRAJECTOIRE
+        // ------------------------------------------------------
+
+        if (affichage.includes("TRAJECTOIRE")) {
+          lignes.push(
+            `├ 🧭 Trajectoire : ${action.trajectoire || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🦾 MEMBRE
+        // ------------------------------------------------------
+
+        if (affichage.includes("MEMBRE")) {
+          lignes.push(
+            `├ 🦾 Membre utilisé : ${action.membre || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🦵 PARTIE CORPS
+        // ------------------------------------------------------
+
+        if (affichage.includes("PARTIE_CORPS")) {
+          lignes.push(
+            `├ 🦵 Partie du corps : ${action.partieCorps || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 🎯 INTENTION
+        // ------------------------------------------------------
+
+        if (affichage.includes("INTENTION")) {
+          lignes.push(
+            `├ 🎯 Intention : ${action.intention || "—"}`
+          );
+        }
+
+        // ------------------------------------------------------
+        // 📚 MODELE
+        // ------------------------------------------------------
+
+        lignes.push(
+          `├ 📚 Modèle : ${
+            modele?.id ||
+            modele?.nom ||
+            action.modele ||
+            "—"
+          }`
+        );
+
+        // ------------------------------------------------------
+        // 🧩 STRUCTURE
+        // ------------------------------------------------------
+
+        lignes.push(
+          `├ 🧩 Structure : ${
+            structure.length
+              ? `${structureRemplie}/${structure.length} ${structureComplete ? "✅" : "❌"}`
+              : "—"
+          }`
+        );
+
+        // ------------------------------------------------------
+        // 📊 SIMILARITE
+        // ------------------------------------------------------
+
+        lignes.push(
+          `╰ 📊 Similarité : ${action.score || 0}%`
+        );
+
         texte +=
 `
 *Action ${index + 1}*
-├ 🧍 Sujet : ${action.acteur || "—"}
-├ ⚔️ Action : ${action.action || "—"}
-├ 🎯 Cible : ${action.cible || "—"}
-├ 🌀 Catégorie : ${action.categorie || "—"}
-├ 🎯 Famille : ${action.famille || "—"}
-├ 💨 Manière : ${action.maniere || "—"}
-├ ⚡ Vitesse : ${action.vitesse || "—"}
-├ 📐 Distance : ${
-  action.distance !== null &&
-  action.distance !== undefined
-    ? `${action.distance}${action.distanceUnite || "m"}`
-    : "—"
-}
-├ 📏 Hauteur : ${
-  action.hauteur !== null &&
-  action.hauteur !== undefined
-    ? `${action.hauteur}${action.hauteurUnite || "m"}`
-    : "—"
-}
-├ 🧭 Trajectoire : ${action.trajectoire || "—"}
-├ 🦾 Membre utilisé : ${action.membre || "—"}
-├ 🦵 Partie du corps : ${action.partieCorps || "—"}
-├ 📚 Modèle : ${
-  action.modele?.id ||
-  action.modele?.nom ||
-  action.modele ||
-  "—"
-}
-├ 🧩 Structure : ${
-  Array.isArray(action.structure)
-    ? `${action.structure.length - (action.slotsManquants?.length || 0)}/${action.structure.length} ${action.structureComplete ? "✅" : "❌"}`
-    : "—"
-}
-╰ 📊 Similarité : ${action.score || 0}%
+${lignes.join("\n")}
 `;
-
       }
     );
-
   }
 
   texte +=
