@@ -7714,7 +7714,7 @@ const cards = [
     attacks: 0
   },
   Moves: {
-    basic: [],
+    basic: [ 🌀PREMIÈRE FORME ENTAILLE D’EAU: l’eau recouvre le katana de Tanjiro puis il effectue une unique frappe horizontale dirigée vers sa cible afin de la décapiter, avec une portée de 2 m. 🌀DEUXIÈME FORME ROUE À EAU: l’eau recouvre le katana de Tanjiro puis il saute à 1 m de hauteur en effectuant un salto avant et libère une unique entaille verticale dans un mouvement circulaire avec une portée de 2 m. 🌀QUATRIÈME FORME MARÉE FRAPPANTE: l’eau recouvre le katana de Tanjiro puis il effectue une multitude d’entailles obliques de manière fluide afin de libérer plusieurs entailles consécutives avec une portée de 2 m. 🌀HUITIÈME FORME BASSIN DE CASCADE: l’eau recouvre le katana de Tanjiro puis il effectue une coupe verticale descendante vers sa cible créant une petite cascade d’eau de 3 m de diamètre qui descend dans la même direction que le mouvement de sa frappe avec une portée de 2 m.],
     special: [],
     ultime: []
   },
