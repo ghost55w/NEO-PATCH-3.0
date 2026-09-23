@@ -2305,23 +2305,20 @@ const cards = [
 {
   name: "Giyu",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S",
   univers: "Demon Slayer",
   images: [],
   card: "https://files.catbox.moe/7ehtyz.jpg",
-  Price: "300k",
+  Price: "200k",
   specs: {
-    force: 0,
-    speed: 0,
-    attacks: 0
+    force: 1,
+    speed: 1,
+    attacks: 1
   },
-  Moves: {
-    basic: [],
-    special: [],
-    ultime: []
+  Moves: "🟢 BASIC: 🌀PREMIÈRE FORME TRANQUILLITÉ: de l’eau recouvre le katana de Giyu puis il effectue une unique entaille horizontale extrêmement rapide vers sa cible afin de la décapiter, avec une portée de 2 m. 🌀CINQUIÈME FORME PLUIE BIENFAISANTE APRÈS LA SÉCHERESSE: de l’eau recouvre le katana de Giyu puis il effectue une décapitation extrêmement rapide et douce d'une cible qui ne souhaite plus combattre, avec une portée de 2 m. 🌀SEPTIÈME FORME POUSSÉE D’ONDULATION DE CHUTE: de l’eau recouvre le katana de Giyu puis il effectue une estoc extrêmement précise accompagnée d’un mouvement d’eau permettant de dévier ou de neutraliser une attaque venant directement vers lui, avec une portée de 2 m. 🌀NEUVIÈME FORME ÉCLABOUSSURE D’EAU TURBULENTE: de l’eau recouvre le katana de Giyu puis il modifie rapidement son jeu de jambes afin de se déplacer sur des surfaces instables tout en maintenant son équilibre et sa capacité à combattre, avec une portée de 2 m. 🟡 SPECIAL: 🌀DEUXIÈME FORME ROUE À EAU: de l’eau recouvre le katana de Giyu puis il saute dans les airs en effectuant une rotation avant de libérer une puissante entaille circulaire descendante vers sa cible, avec une portée de 2 m. 🌀TROISIÈME FORME DANSE DES COURANTS RAPIDES: de l’eau recouvre le katana de Giyu puis il se déplace rapidement en effectuant plusieurs mouvements fluides et continus tout en enchaînant plusieurs entailles successives vers sa cible, avec une portée de 2 m. 🌀QUATRIÈME FORME MARÉE FRAPPANTE: de l’eau recouvre le katana de Giyu puis il effectue une succession d’entailles fluides et précises dans plusieurs directions afin de frapper sa cible à plusieurs reprises, avec une portée de 2 m. 🌀SIXIÈME FORME TOURBILLON: de l’eau recouvre le katana de Giyu puis il fait tourner son corps avec son katana afin de générer un puissant tourbillon capable de repousser et de trancher ce qui se trouve autour de lui, avec une portée de 2 m. 🌀HUITIÈME FORME BASSIN DE CASCADE: de l’eau recouvre le katana de Giyu puis il effectue une puissante coupe verticale descendante vers sa cible en utilisant tout son poids dans le mouvement, avec une portée de 2 m. 🔴 ULTIME: 🌀DIXIÈME FORME DRAGON DU CHANGEMENT: de l’eau recouvre le katana de Giyu puis il fonce vers sa cible en effectuant plusieurs mouvements de découpe successifs qui s’enchaînent comme un dragon d’eau, chaque mouvement augmentant progressivement la puissance de l’attaque, avec une portée de 2 m. 🌀ONZIÈME FORME ACCALMIE: Giyu adopte une posture immobile et extrêmement calme puis il neutralise instantanément les attaques qui pénètrent dans sa zone de défense en effectuant des mouvements minimaux et extrêmement rapides avec son katana, avec une portée de 2 m."
   },
-  Patterns: []
+  Patterns: "1️⃣ Concentration intégrale: l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale, ce qui augmente sa vitesse de +1 pendant 3 tours. 2️⃣ Marque des Pourfendeurs: une fois activée à 20% 🌀, une marque apparaît sur le front de Giyu, ce qui augmente son niveau de combat à S+ et sa force de +1." 
 },
 {
   name: "Gogeta(Dbz)",
@@ -7709,9 +7706,9 @@ const cards = [
   card: "https://files.catbox.moe/aq59kx.jpg",
   Price: "100k",
   specs: {
-    force: 0,
+    force: 1,
     speed: 0,
-    attacks: 0
+    attacks: 1
   },
   Moves: "🟢 BASIC: 🌀PREMIÈRE FORME ENTAILLE D’EAU: l’eau recouvre le katana de Tanjiro puis il effectue une unique frappe horizontale dirigée vers sa cible afin de la décapiter, avec une portée de 2 m. 🌀DEUXIÈME FORME ROUE À EAU: l’eau recouvre le katana de Tanjiro puis il saute à 1 m de hauteur en effectuant un salto avant et libère une unique entaille verticale dans un mouvement circulaire, avec une portée de 2 m. 🌀QUATRIÈME FORME MARÉE FRAPPANTE: l’eau recouvre le katana de Tanjiro puis il effectue une multitude d’entailles obliques de manière fluide afin de libérer plusieurs entailles consécutives, avec une portée de 2 m. 🌀HUITIÈME FORME BASSIN DE CASCADE: l’eau recouvre le katana de Tanjiro puis il effectue une coupe verticale descendante vers sa cible, créant une petite cascade d’eau de 3 m de diamètre qui descend dans la même direction que le mouvement de sa frappe, avec une portée de 2 m. 🟡 SPECIAL: 🌀TROISIÈME FORME DANSE FLUIDE: l’eau recouvre le katana de Tanjiro puis il balance et plie sa lame dans un mouvement sinueux avec son corps tout en se déplaçant en zigzags fluides semblables à un serpent afin de couper tout ce qui se trouve sur son passage, avec une portée de 2 m. 🌀SIXIÈME FORME TOURBILLON: l’eau recouvre le katana de Tanjiro puis il fait tourner son corps en utilisant sa lame pour effectuer un mouvement tourbillonnant féroce qui génère un tourbillon d’air capable de déchiqueter tout ce qui est pris dans son courant, avec une portée de 2 m, son effet et son efficacité étant améliorés sous l’eau. 🌀SEPTIÈME FORME POUSSÉE D’ONDULATION DE CHUTE: l’eau recouvre le katana de Tanjiro puis il effectue une poussée précise, rapide et exacte avec son épée, créant des ondulations capables de bloquer les attaques projectiles ainsi que les attaques fonçant directement sur lui, avec une portée de 2 m. 🌀NEUVIÈME FORME ÉCOULEMENT D’EAU ÉCLABOUSSANT, TURBULENT: l’eau recouvre le katana de Tanjiro puis de l’eau se manifeste sous ses pieds au contact du sol, lui permettant de modifier son jeu de jambes afin de minimiser son temps d’atterrissage et la surface nécessaire lors de celui-ci, ce qui lui permet de se déplacer librement et de combattre efficacement dans des endroits sans assise solide, avec une portée de 2 m. 🔴 ULTIME: 🌀DIXIÈME FORME DRAGON DU CHANGEMENT: l’eau recouvre le katana de Tanjiro puis il fonce vers son adversaire en effectuant un mouvement de découpe vers le bas, manifestant un dragon d’eau de 3 m de diamètre qui fonce directement vers l’adversaire, avec une portée de 2 m.",
   Patterns: "1️⃣ Concentration intégrale: l'utilisateur prend une grande inspiration puis active la concentration intégrale, ce qui augmente sa vitesse de +1 pendant 3 tours. 2️⃣ Arme: l'utilisateur possède un katana de 1 m."
