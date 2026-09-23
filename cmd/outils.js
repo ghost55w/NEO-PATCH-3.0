@@ -7443,7 +7443,6 @@ function neoGenererResume(
 //==============================================================
 // 🧠 NOUVEAU ANALYSER NEOAI
 //==============================================================
-
 function AnalyserNeoAI(
   texte,
   options = {}
@@ -7551,29 +7550,100 @@ function AnalyserNeoAI(
       );
 
     //==========================================================
-    // Héritage de contexte
+    // 🎯 ACTEUR RÉEL DE L'ACTION
+    //==========================================================
+    //
+    // L'acteur doit être le personnage qui accomplit le verbe.
+    //
+    // Exemple :
+    //
+    // "Début de combat, Yamato fonce vers Naruto"
+    //
+    // ❌ Début de combat
+    // ❌ combat
+    // ✅ Yamato
+    //
+    //==========================================================
+
+    const acteurDetecte =
+      analyse.acteur ||
+      analyse.sujet ||
+      null;
+
+    if (acteurDetecte) {
+
+      const acteur =
+        String(
+          acteurDetecte
+        ).trim();
+
+      // Mots qui ne peuvent jamais être
+      // considérés comme un personnage.
+      const fauxActeurs =
+        /^(début|fin|combat|action|tour|phase|round|match|combatant|attaquant|défenseur)$/iu;
+
+      if (
+        acteur &&
+        !fauxActeurs.test(acteur)
+      ) {
+
+        analyse.acteur =
+          acteur;
+
+        analyse.sujet =
+          acteur;
+
+      } else {
+
+        analyse.acteur =
+          contexte.dernierActeur ||
+          null;
+
+        analyse.sujet =
+          contexte.dernierActeur ||
+          null;
+
+      }
+
+    }
+
+    //==========================================================
+    // 🔁 HÉRITAGE ACTEUR
     //==========================================================
 
     if (
       !analyse.acteur &&
       contexte.dernierActeur
     ) {
+
       analyse.acteur =
         contexte.dernierActeur;
 
       analyse.sujet =
         contexte.dernierActeur;
+
     }
+
+    //==========================================================
+    // 🎯 HÉRITAGE CIBLE
+    //==========================================================
 
     if (
       !analyse.cible &&
       contexte.derniereCible
     ) {
+
       analyse.cible =
         contexte.derniereCible;
+
     }
 
+    //==========================================================
+    // 🧠 CONTEXTE
+    //==========================================================
+
     contexte = {
+
       dernierActeur:
         analyse.acteur ||
         contexte.dernierActeur,
@@ -7585,6 +7655,7 @@ function AnalyserNeoAI(
       derniereAction:
         analyse.action ||
         contexte.derniereAction
+
     };
 
     actions.push(
@@ -7593,22 +7664,23 @@ function AnalyserNeoAI(
 
   }
 
-//============================================================
-// ⚖️ ARBITRAGE GLOBAL
-//============================================================
-const premiereAction =
-  actions[0] || {};
+  //============================================================
+  // ⚖️ ARBITRAGE GLOBAL
+  //============================================================
 
-const arbitre =
-  neoArbitrer(
-    premiereAction,
-    {
-      ...options,
+  const premiereAction =
+    actions[0] || {};
 
-      nombreActions:
-        actions.length
-    }
-  );
+  const arbitre =
+    neoArbitrer(
+      premiereAction,
+      {
+        ...options,
+
+        nombreActions:
+          actions.length
+      }
+    );
 
   //============================================================
   // RAISONS ACTIONS
@@ -7642,7 +7714,7 @@ const arbitre =
     raisons.length === 0;
 
   //============================================================
-  // RÉSUMÉ
+  // 📝 RÉSUMÉ
   //============================================================
 
   const resume =
@@ -7653,7 +7725,7 @@ const arbitre =
       .join(" puis ");
 
   //============================================================
-  // COMPRÉHENSION GLOBALE
+  // 🧠 COMPRÉHENSION GLOBALE
   //============================================================
 
   const premiere =
@@ -7671,7 +7743,8 @@ const arbitre =
         ? "VALIDÉ"
         : "REFUSÉ",
 
-    texte: brut,
+    texte:
+      brut,
 
     texteNormalise:
       normalise,
@@ -7681,123 +7754,164 @@ const arbitre =
 
     actions,
 
-    // Compatibilité ancienne architecture
+    //==========================================================
+    // COMPATIBILITÉ ANCIENNE ARCHITECTURE
+    //==========================================================
+
     action:
-      premiere.action || null,
+      premiere.action ||
+      null,
 
     modele:
-      premiere.modele || null,
+      premiere.modele ||
+      null,
 
     score:
-      premiere.score || 0,
-      scoreStructure:
-    premiere.scoreStructure || 0,
+      premiere.score ||
+      0,
 
-structureComplete:
-    premiere.structureComplete === true,
+    scoreStructure:
+      premiere.scoreStructure ||
+      0,
 
-slotsManquants:
-    premiere.slotsManquants || [],
+    structureComplete:
+      premiere.structureComplete === true,
 
-requisManquants:
-    premiere.requisManquants || [],
+    slotsManquants:
+      premiere.slotsManquants ||
+      [],
+
+    requisManquants:
+      premiere.requisManquants ||
+      [],
 
     structure:
-    premiere.structure || null,
+      premiere.structure ||
+      null,
 
-structureSemantique:
-    premiere.structureSemantique || null,
+    structureSemantique:
+      premiere.structureSemantique ||
+      null,
+
+    //==========================================================
+    // 🎯 SLOTS
+    //==========================================================
 
     slots: {
+
       acteur:
-        premiere.acteur || null,
+        premiere.acteur ||
+        null,
 
       cible:
-        premiere.cible || null,
+        premiere.cible ||
+        null,
 
       action:
-        premiere.action || null,
+        premiere.action ||
+        null,
 
       maniere:
-        premiere.maniere || null,
+        premiere.maniere ||
+        null,
 
       vitesse:
-        premiere.vitesse || null,
+        premiere.vitesse ||
+        null,
 
       distance:
-        premiere.distance ?? null,
+        premiere.distance ??
+        null,
 
       distanceUnite:
-        premiere.distanceUnite || null,
+        premiere.distanceUnite ||
+        null,
 
       hauteur:
-        premiere.hauteur ?? null,
+        premiere.hauteur ??
+        null,
 
       hauteurUnite:
-        premiere.hauteurUnite || null,
+        premiere.hauteurUnite ||
+        null,
 
       trajectoire:
-        premiere.trajectoire || null,
+        premiere.trajectoire ||
+        null,
 
       partieCorps:
-        premiere.partieCorps || null
+        premiere.partieCorps ||
+        null
+
     },
 
     motsConnus,
 
     motsInconnus,
 
+    //==========================================================
+    // 🧠 COMPRÉHENSION
+    //==========================================================
+
     comprehension: {
 
-    sujet:
+      sujet:
         premiere.acteur ||
         null,
 
-    action:
+      action:
         premiere.action ||
         null,
 
-    maniere:
+      maniere:
         premiere.maniere ||
         null,
 
-    cible:
+      cible:
         premiere.cible ||
         null,
 
-    membre:
+      membre:
         premiere.membre ||
         null,
 
-    partieCorps:
+      partieCorps:
         premiere.partieCorps ||
         null,
 
-    trajectoire:
+      trajectoire:
         premiere.trajectoire ||
         null,
 
-    distance:
+      distance:
         premiere.distance ??
         null,
 
-    hauteur:
+      hauteur:
         premiere.hauteur ??
         null,
 
-    vitesse:
+      vitesse:
         premiere.vitesse ||
         null
 
-},
+    },
+
+    //==========================================================
+    // ⚖️ ARBITRAGE
+    //==========================================================
+
     arbitrage: {
+
       valide,
+
       verdict:
         valide
           ? "VALIDÉ"
           : "REFUSÉ",
 
       raisons
+
     },
 
     raisons,
@@ -7809,6 +7923,23 @@ structureSemantique:
 }
 
 
+//==============================================================
+// 🔄 COMPATIBILITÉ ANCIEN NOM
+//==============================================================
+
+function analyserNeoAI(
+  texte,
+  options = {}
+) {
+
+  return AnalyserNeoAI(
+    texte,
+    options
+  );
+
+}
+        
+   
 //==============================================================
 // 🔄 COMPATIBILITÉ ANCIEN NOM
 //==============================================================
