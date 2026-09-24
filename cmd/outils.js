@@ -4921,6 +4921,10 @@ function neoCalculerSimilariteModele(
 //==============================================================
 // 📚 RECONNAISSANCE DU MODÈLE STRUCTUREL
 //==============================================================
+//==============================================================
+// 🧠 RECONNAÎTRE LE MODÈLE NEOAI
+// Compatible avec NEO_ACTION_MODELS hiérarchique
+//==============================================================
 
 function neoReconnaitreModele(
     texte,
@@ -4935,12 +4939,7 @@ function neoReconnaitreModele(
         !tousLesModeles.length
     ) {
 
-        console.log(
-            "⚠️ [NeoAI MODEL] Aucun modèle disponible."
-        );
-
         return {
-
             modele: null,
             score: 0,
             scoreStructure: 0,
@@ -4951,21 +4950,31 @@ function neoReconnaitreModele(
                 analyse?.action || null,
             categorie:
                 analyse?.categorie || null,
+            maniere:
+                analyse?.maniere || null,
+            trajectoire:
+                analyse?.trajectoire || null,
             structure: []
-
         };
-
     }
 
-    //============================================================
-    // 🎯 ACTION BRUTE
-    //============================================================
+    const normaliser = valeur =>
+        neoNormaliserMotLocal(
+            String(valeur ?? "")
+        )
+        .toLowerCase()
+        .trim();
+
+    const texteNormalise =
+        normaliser(texte);
+
+    //==========================================================
+    // 1️⃣ ACTION DÉTECTÉE
+    //==========================================================
 
     const actionDetectee =
         analyse?.action ||
-        neoDetecterAction(
-            texte
-        );
+        neoDetecterAction(texte);
 
     const actionBrute =
         typeof actionDetectee === "string"
@@ -4976,23 +4985,39 @@ function neoReconnaitreModele(
                 ""
             );
 
-    const actionBruteNormalisee =
-        neoNormaliserMotLocal(
-            String(actionBrute)
-        )
-            .toLowerCase()
-            .trim();
+    const actionBruteNorm =
+        normaliser(actionBrute);
 
-    //============================================================
-    // 🧠 SYNONYMES
-    //============================================================
+    //==========================================================
+    // 2️⃣ DÉTERMINER L'ACTION SÉMANTIQUE
+    //
+    // Exemple :
+    //
+    // fonce
+    //   → course si présence d'un modèle COURSE
+    //
+    // court
+    //   → course
+    //
+    // saute
+    //   → sauter
+    //
+    // rush
+    //   → rush
+    //==========================================================
 
     let actionCanonique =
-        actionBruteNormalisee;
+        actionBruteNorm;
 
     const synonymes =
-        NeoAI?.NEO_SYNONYMES ||
-        {};
+        NeoAI?.NEO_SYNONYMES || {};
+
+    //==========================================================
+    // Recherche exacte dans les synonymes
+    //==========================================================
+
+    let actionTrouvee =
+        false;
 
     for (
         const [categorie, groupe]
@@ -5012,148 +5037,471 @@ function neoReconnaitreModele(
             of Object.entries(groupe)
         ) {
 
-            const canoniqueNormalisee =
-                neoNormaliserMotLocal(
-                    String(canonique)
-                )
-                    .toLowerCase()
-                    .trim();
+            const canoniqueNorm =
+                normaliser(canonique);
 
             if (
-                actionBruteNormalisee ===
-                canoniqueNormalisee
+                actionBruteNorm ===
+                canoniqueNorm
             ) {
 
                 actionCanonique =
                     canonique;
 
-                break;
+                actionTrouvee =
+                    true;
 
+                break;
             }
 
             if (
                 Array.isArray(aliases) &&
-                aliases.some(
-                    alias =>
-                        neoNormaliserMotLocal(
-                            String(alias)
-                        )
-                            .toLowerCase()
-                            .trim() ===
-                        actionBruteNormalisee
+                aliases.some(alias =>
+                    normaliser(alias) ===
+                    actionBruteNorm
                 )
             ) {
 
                 actionCanonique =
                     canonique;
 
-                console.log(
-                    "🔄 [NeoAI SYNONYME]",
-                    actionBruteNormalisee,
-                    "→",
-                    canonique,
-                    "| catégorie:",
-                    categorie
-                );
+                actionTrouvee =
+                    true;
 
                 break;
-
             }
-
         }
 
-        if (
-            actionCanonique !==
-            actionBruteNormalisee
-        ) {
+        if (actionTrouvee) {
             break;
         }
-
     }
 
-    //============================================================
-    // 🏷️ CATÉGORIE
-    //============================================================
+    //==========================================================
+    // 3️⃣ CATÉGORIE
+    //==========================================================
 
     let categorieCanonique =
         analyse?.categorie ||
         null;
 
-    for (
-        const [categorie, groupe]
-        of Object.entries(synonymes)
-    ) {
+    if (!categorieCanonique) {
 
-        if (
-            !groupe ||
-            typeof groupe !== "object" ||
-            Array.isArray(groupe)
-        ) {
-            continue;
-        }
+        const actionDB =
+            Array.isArray(NeoAI?.NEO_ACTIONS)
+                ? NeoAI.NEO_ACTIONS.find(
+                    item =>
+                        normaliser(item?.action) ===
+                        normaliser(actionCanonique)
+                )
+                : null;
 
-        if (
-            Object.prototype.hasOwnProperty.call(
-                groupe,
-                actionCanonique
-            )
-        ) {
-
-            categorieCanonique =
-                categorie;
-
-            break;
-
-        }
-
+        categorieCanonique =
+            actionDB?.categorie ||
+            null;
     }
 
-    //============================================================
-    // 📌 FALLBACK CATÉGORIE PAR MODÈLE
-    //============================================================
+    //==========================================================
+    // 4️⃣ FONCTIONS DE DÉTECTION DES PARAMÈTRES
+    //==========================================================
 
-    if (
-        !categorieCanonique
-    ) {
+    const trouverValeurTexte =
+        valeur => {
 
-        const modeleCategorie =
-            tousLesModeles.find(
-                modele => {
+            const valeurNorm =
+                normaliser(valeur);
 
-                    const actionModele =
-                        neoNormaliserMotLocal(
-                            String(
-                                modele?.action ||
-                                ""
-                            )
-                        )
-                            .toLowerCase()
-                            .trim();
+            if (!valeurNorm) {
+                return false;
+            }
 
-                    return (
-                        actionModele ===
-                        neoNormaliserMotLocal(
-                            String(
-                                actionCanonique
-                            )
-                        )
-                            .toLowerCase()
-                            .trim()
-                    );
-
-                }
+            return texteNormalise.includes(
+                valeurNorm
             );
+        };
 
-        if (
-            modeleCategorie?.categorie
-        ) {
+    //==========================================================
+    // MANIÈRE
+    //==========================================================
 
-            categorieCanonique =
-                modeleCategorie.categorie;
+    const trouverManiere =
+        modele => {
 
-        }
+            const maniere =
+                normaliser(
+                    modele?.maniere
+                );
 
-    }
+            if (!maniere) {
+                return null;
+            }
+
+            const variantes = [
+                maniere
+            ];
+
+            // Course
+            if (maniere === "course") {
+
+                variantes.push(
+                    "courir",
+                    "court",
+                    "courant",
+                    "course",
+                    "en course",
+                    "de manière course",
+                    "de maniere course"
+                );
+            }
+
+            // Marche
+            if (maniere === "marche") {
+
+                variantes.push(
+                    "marcher",
+                    "marche",
+                    "à pied",
+                    "au pas"
+                );
+            }
+
+            // Dash
+            if (maniere === "dash") {
+
+                variantes.push(
+                    "dash",
+                    "en dash"
+                );
+            }
+
+            // Rush
+            if (maniere === "rush") {
+
+                variantes.push(
+                    "rush",
+                    "en rush"
+                );
+            }
+
+            // Saut
+            if (maniere === "saut") {
+
+                variantes.push(
+                    "saut",
+                    "sauter",
+                    "bondir",
+                    "en saut"
+                );
+            }
+
+            // Roulade
+            if (maniere === "roulade") {
+
+                variantes.push(
+                    "roulade",
+                    "rouler",
+                    "en roulade"
+                );
+            }
+
+            // Vol
+            if (maniere === "vol") {
+
+                variantes.push(
+                    "vol",
+                    "voler",
+                    "en vol",
+                    "dans les airs"
+                );
+            }
+
+            // Pivot
+            if (maniere === "pivot") {
+
+                variantes.push(
+                    "pivot",
+                    "pivoter"
+                );
+            }
+
+            // Vrille
+            if (maniere === "vrille") {
+
+                variantes.push(
+                    "vrille",
+                    "vriller"
+                );
+            }
+
+            // Salto
+            if (maniere === "salto") {
+
+                variantes.push(
+                    "salto"
+                );
+            }
+
+            // Flip
+            if (maniere === "flip") {
+
+                variantes.push(
+                    "flip"
+                );
+            }
+
+            for (
+                const variante
+                of variantes
+            ) {
+
+                if (
+                    trouverValeurTexte(
+                        variante
+                    )
+                ) {
+
+                    return maniere;
+                }
+            }
+
+            return null;
+        };
+
+    //==========================================================
+    // TRAJECTOIRE
+    //==========================================================
+
+    const trouverTrajectoire =
+        modele => {
+
+            const trajectoire =
+                normaliser(
+                    modele?.trajectoire
+                );
+
+            if (!trajectoire) {
+                return null;
+            }
+
+            const variantes = [
+                trajectoire
+            ];
+
+            if (
+                trajectoire ===
+                "frontale"
+            ) {
+
+                variantes.push(
+                    "frontal",
+                    "frontalement",
+                    "frontale",
+                    "en ligne droite",
+                    "de face"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "circulaire"
+            ) {
+
+                variantes.push(
+                    "circulaire",
+                    "circulairement",
+                    "en cercle",
+                    "en mouvement circulaire",
+                    "trajectoire circulaire"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "zig_zag"
+            ) {
+
+                variantes.push(
+                    "zig zag",
+                    "zigzag",
+                    "zig-zag",
+                    "en zig zag",
+                    "en zigzag",
+                    "trajectoire zig zag"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "diagonale"
+            ) {
+
+                variantes.push(
+                    "diagonale",
+                    "diagonalement",
+                    "en diagonale",
+                    "trajectoire diagonale"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "laterale"
+            ) {
+
+                variantes.push(
+                    "latérale",
+                    "lateralement",
+                    "latéralement",
+                    "sur le côté"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "verticale"
+            ) {
+
+                variantes.push(
+                    "verticale",
+                    "verticalement"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "ascendante"
+            ) {
+
+                variantes.push(
+                    "ascendante",
+                    "en montant",
+                    "vers le haut"
+                );
+            }
+
+            if (
+                trajectoire ===
+                "descendante"
+            ) {
+
+                variantes.push(
+                    "descendante",
+                    "en descendant",
+                    "vers le bas"
+                );
+            }
+
+            for (
+                const variante
+                of variantes
+            ) {
+
+                if (
+                    trouverValeurTexte(
+                        variante
+                    )
+                ) {
+
+                    return trajectoire;
+                }
+            }
+
+            return null;
+        };
+
+    //==========================================================
+    // CÔTÉ
+    //==========================================================
+
+    const trouverCote =
+        () => {
+
+            const variantes = {
+
+                droite: [
+                    "droite",
+                    "sa droite",
+                    "sur la droite",
+                    "à droite"
+                ],
+
+                gauche: [
+                    "gauche",
+                    "sa gauche",
+                    "sur la gauche",
+                    "à gauche"
+                ]
+            };
+
+            for (
+                const [cote, mots]
+                of Object.entries(variantes)
+            ) {
+
+                for (
+                    const mot
+                    of mots
+                ) {
+
+                    if (
+                        trouverValeurTexte(
+                            mot
+                        )
+                    ) {
+
+                        return cote;
+                    }
+                }
+            }
+
+            return null;
+        };
+
+    //==========================================================
+    // COURBE
+    //==========================================================
+
+    const trouverCourbe =
+        () => {
+
+            const match =
+                texteNormalise.match(
+                    /courbe\s*(?:de)?\s*(\d+(?:[.,]\d+)?)\s*m\b/i
+                );
+
+            if (!match) {
+                return analyse?.courbe ?? null;
+            }
+
+            return Number(
+                String(match[1])
+                    .replace(",", ".")
+            );
+        };
+
+    //==========================================================
+    // 5️⃣ DÉTERMINER LES PARAMÈTRES DÉTECTÉS
+    //==========================================================
+
+    const maniereDetectee =
+        analyse?.maniere ||
+        null;
+
+    const trajectoireDetectee =
+        analyse?.trajectoire ||
+        null;
+
+    const coteDetecte =
+        analyse?.cote ||
+        trouverCote();
+
+    const courbeDetectee =
+        analyse?.courbe ??
+        trouverCourbe();
+
+    //==========================================================
+    // 6️⃣ METTRE À JOUR L'ANALYSE
+    //==========================================================
 
     analyse.action =
         actionCanonique;
@@ -5161,207 +5509,32 @@ function neoReconnaitreModele(
     analyse.categorie =
         categorieCanonique;
 
-    //============================================================
-    // 🧩 FAMILLE
-    //============================================================
-
-    const famille =
-        analyse?.famille ||
-        null;
-
-    //============================================================
-    // 🔎 NORMALISATION
-    //============================================================
-
-    const normaliser =
-        valeur =>
-            neoNormaliserMotLocal(
-                String(
-                    valeur ?? ""
-                )
-            )
-                .toLowerCase()
-                .trim();
-
-    const actionNorm =
-        normaliser(
-            actionCanonique
-        );
-
-    const categorieNorm =
-        normaliser(
-            categorieCanonique
-        );
-
-    const familleNorm =
-        normaliser(
-            famille
-        );
-
-    //============================================================
-// 📚 1. CANDIDATS
-//============================================================
-//
-// Un modèle peut être :
-//
-// "course"
-// "course frontale"
-// "course zigzag"
-// "course latérale"
-//
-// L'action canonique sert de base.
-// Les mots supplémentaires du modèle sont
-// recherchés dans le texte.
-//
-// Exemple :
-//
-// foncer
-//   ↓
-// course
-//
-// "course frontale"
-//   ↓
-// course + frontale
-//
-//============================================================
-
-const texteRecherche =
-    normaliser(
-        texte
-    );
-
-let modelesCompatibles =
-    tousLesModeles.filter(
-        modele => {
-
-            const actionModele =
-                normaliser(
-                    modele?.action
-                );
-
-            if (
-                !actionModele ||
-                !actionNorm
-            ) {
-                return false;
-            }
-
-            //======================================================
-            // 1️⃣ MODÈLE EXACT
-            //======================================================
-
-            if (
-                actionModele ===
-                actionNorm
-            ) {
-                return true;
-            }
-
-            //======================================================
-            // 2️⃣ MODÈLE SPÉCIALISÉ
-            //
-            // course
-            // course frontale
-            // course zigzag
-            //======================================================
-
-            if (
-                !actionModele.startsWith(
-                    actionNorm + " "
-                )
-            ) {
-                return false;
-            }
-
-            //======================================================
-            // Mots spécifiques du modèle
-            //======================================================
-
-            const motsModele =
-                actionModele
-                    .split(/\s+/u)
-                    .filter(Boolean);
-
-            const indices =
-                motsModele.filter(
-                    mot =>
-                        mot !== actionNorm
-                );
-
-            //======================================================
-            // Modèle spécialisé sans indice
-            //======================================================
-
-            if (
-                !indices.length
-            ) {
-                return true;
-            }
-
-            //======================================================
-            // Tous les indices doivent être présents
-            // dans le texte du joueur
-            //======================================================
-
-            return indices.every(
-                indice =>
-                    texteRecherche.includes(
-                        indice
-                    )
-            );
-
-        }
-    );
-
-console.log(
-    "📚 [NeoAI MODÈLES CANDIDATS] :",
-    modelesCompatibles.length
-);
-
-console.log(
-    "🎯 [NeoAI MODÈLES RETENUS] :",
-    modelesCompatibles.map(
-        modele =>
-            modele?.id ||
-            modele?.nom ||
-            modele?.action ||
-            "?"
-    )
-);
-
-    //============================================================
-    // ❌ AUCUN CANDIDAT
-    //============================================================
-
-    if (
-        !modelesCompatibles.length
-    ) {
-
-        console.log(
-            "⚠️ [NeoAI MODEL] Aucun modèle compatible pour :",
-            actionCanonique
-        );
-
-        return {
-
-            modele: null,
-            score: 0,
-            scoreStructure: 0,
-            structureComplete: false,
-            slotsTrouves: [],
-            slotsManquants: [],
-            actionCanonique,
-            categorie:
-                categorieCanonique,
-            structure: []
-
-        };
-
+    if (maniereDetectee) {
+        analyse.maniere =
+            maniereDetectee;
     }
 
-    //============================================================
-    // 🧠 OUTILS DE COMPARAISON
-    //============================================================
+    if (trajectoireDetectee) {
+        analyse.trajectoire =
+            trajectoireDetectee;
+    }
+
+    if (coteDetecte) {
+        analyse.cote =
+            coteDetecte;
+    }
+
+    if (
+        courbeDetectee !== null &&
+        courbeDetectee !== undefined
+    ) {
+        analyse.courbe =
+            courbeDetectee;
+    }
+
+    //==========================================================
+    // 7️⃣ VALEUR PRÉSENTE
+    //==========================================================
 
     const valeurPresente =
         valeur => {
@@ -5376,185 +5549,346 @@ console.log(
             if (
                 typeof valeur === "string"
             ) {
-                return valeur.trim().length > 0;
+
+                return (
+                    valeur.trim().length > 0
+                );
             }
 
             if (
                 Array.isArray(valeur)
             ) {
+
                 return valeur.length > 0;
             }
 
             return true;
-
         };
 
-    const contientValeur =
+    //==========================================================
+    // 8️⃣ VALEUR D'UN SLOT
+    //==========================================================
+
+    const valeurSlot =
         (
-            valeurAnalyse,
-            valeurModele
+            slot,
+            modele
         ) => {
 
-            if (
-                !valeurPresente(
-                    valeurAnalyse
-                )
+            switch (
+                String(slot || "")
+                    .toUpperCase()
             ) {
+
+                case "SUJET":
+                    return (
+                        analyse?.acteur ??
+                        analyse?.sujet
+                    );
+
+                case "ACTION":
+                    return (
+                        analyse?.action ||
+                        actionCanonique
+                    );
+
+                case "CIBLE":
+                    return analyse?.cible;
+
+                case "MANIERE":
+                    return (
+                        analyse?.maniere ||
+                        modele?.maniere ||
+                        trouverManiere(
+                            modele
+                        )
+                    );
+
+                case "TRAJECTOIRE":
+                    return (
+                        analyse?.trajectoire ||
+                        modele?.trajectoire ||
+                        trouverTrajectoire(
+                            modele
+                        )
+                    );
+
+                case "COURBE":
+                    return (
+                        analyse?.courbe ??
+                        courbeDetectee
+                    );
+
+                case "COTE":
+                    return (
+                        analyse?.cote ??
+                        coteDetecte
+                    );
+
+                case "VITESSE":
+                    return analyse?.vitesse;
+
+                case "DISTANCE":
+                    return analyse?.distance;
+
+                case "HAUTEUR":
+                    return analyse?.hauteur;
+
+                case "DIRECTION":
+                    return analyse?.direction;
+
+                case "INTENTION":
+                    return analyse?.intention;
+
+                case "MEMBRE":
+                    return analyse?.membre;
+
+                case "PARTIE_CORPS":
+                    return analyse?.partieCorps;
+
+                case "ANGLE":
+                    return analyse?.angle;
+
+                case "NOMBRE_TOURS":
+                    return analyse?.nombreTours;
+
+                default:
+                    return null;
+            }
+        };
+
+    //==========================================================
+    // 9️⃣ COMPATIBILITÉ ACTION
+    //==========================================================
+
+    const actionCompatible =
+        modele => {
+
+            const actionModele =
+                normaliser(
+                    modele?.action
+                );
+
+            if (!actionModele) {
                 return false;
             }
 
-            const analyseNorm =
+            const actionAnalyse =
                 normaliser(
-                    valeurAnalyse
+                    actionCanonique
                 );
 
+            // Correspondance directe
             if (
-                Array.isArray(
-                    valeurModele
+                actionModele ===
+                actionAnalyse
+            ) {
+
+                return true;
+            }
+
+            // Vérifier les synonymes du modèle
+            for (
+                const groupe
+                of Object.values(
+                    synonymes
                 )
             ) {
 
-                return valeurModele.some(
-                    valeur =>
-                        normaliser(
-                            valeur
-                        ) ===
-                        analyseNorm
-                );
+                if (
+                    !groupe ||
+                    typeof groupe !== "object" ||
+                    Array.isArray(groupe)
+                ) {
+                    continue;
+                }
 
-            }
+                for (
+                    const [
+                        canonique,
+                        aliases
+                    ]
+                    of Object.entries(groupe)
+                ) {
 
-            if (
-                typeof valeurModele === "string"
-            ) {
+                    if (
+                        normaliser(canonique) !==
+                        actionModele
+                    ) {
+                        continue;
+                    }
 
-                return (
-                    normaliser(
-                        valeurModele
-                    ) ===
-                    analyseNorm
-                );
+                    if (
+                        Array.isArray(aliases) &&
+                        aliases.some(alias =>
+                            normaliser(alias) ===
+                            actionBruteNorm
+                        )
+                    ) {
 
+                        return true;
+                    }
+                }
             }
 
             return false;
-
         };
 
-    //============================================================
-    // 🔑 MOTS DISCRIMINANTS DU MODÈLE
-    //============================================================
-    //
-    // Ces éléments servent à distinguer des modèles très proches.
-    //
-    // Exemple :
-    //
-    // frontale  → modèle frontal
-    // circulaire → modèle circulaire
-    // diagonale → modèle diagonal
-    // latérale  → modèle latéral
-    //============================================================
+    //==========================================================
+    // 🔟 FILTRER LES MODÈLES COMPATIBLES
+    //==========================================================
 
-    const scoreDiscrimination =
-        modele => {
+    const modelesCompatibles =
+        tousLesModeles.filter(
+            modele => {
 
-            let score = 0;
+                //================================================
+                // ACTION
+                //================================================
 
-            const params =
-                modele?.params || {};
+                if (
+                    !actionCompatible(
+                        modele
+                    )
+                ) {
 
-            // --------------------------------------------
-            // TRAJECTOIRE
-            // --------------------------------------------
+                    return false;
+                }
 
-            if (
-                contientValeur(
-                    analyse?.trajectoire,
-                    params?.trajectoire
-                )
-            ) {
+                //================================================
+                // CATÉGORIE
+                //================================================
 
-                score += 100;
+                if (
+                    categorieCanonique &&
+                    modele.categorie &&
+                    normaliser(
+                        modele.categorie
+                    ) !==
+                    normaliser(
+                        categorieCanonique
+                    )
+                ) {
 
+                    return false;
+                }
+
+                //================================================
+                // MANIÈRE
+                //================================================
+
+                const maniereModele =
+                    normaliser(
+                        modele?.maniere
+                    );
+
+                if (maniereModele) {
+
+                    const maniere =
+                        maniereDetectee ||
+                        trouverManiere(
+                            modele
+                        );
+
+                    if (!maniere) {
+                        return false;
+                    }
+
+                    if (
+                        normaliser(maniere) !==
+                        maniereModele
+                    ) {
+
+                        return false;
+                    }
+                }
+
+                //================================================
+                // TRAJECTOIRE
+                //================================================
+
+                const trajectoireModele =
+                    normaliser(
+                        modele?.trajectoire
+                    );
+
+                if (
+                    trajectoireModele
+                ) {
+
+                    const trajectoire =
+                        trajectoireDetectee ||
+                        trouverTrajectoire(
+                            modele
+                        );
+
+                    if (!trajectoire) {
+                        return false;
+                    }
+
+                    if (
+                        normaliser(
+                            trajectoire
+                        ) !==
+                        trajectoireModele
+                    ) {
+
+                        return false;
+                    }
+                }
+
+                return true;
             }
+        );
 
-            // --------------------------------------------
-            // DIRECTION
-            // --------------------------------------------
+    console.log(
+        "🎯 [NeoAI MODÈLES COMPATIBLES]",
+        modelesCompatibles.map(
+            modele => ({
+                id:
+                    modele.id,
 
-            if (
-                contientValeur(
-                    analyse?.direction,
-                    params?.direction
-                )
-            ) {
+                action:
+                    modele.action,
 
-                score += 80;
+                maniere:
+                    modele.maniere,
 
-            }
+                trajectoire:
+                    modele.trajectoire
+            })
+        )
+    );
 
-            // --------------------------------------------
-            // MANIÈRE
-            // --------------------------------------------
+    //==========================================================
+    // 1️⃣1️⃣ AUCUN MODÈLE
+    //==========================================================
 
-            if (
-                contientValeur(
-                    analyse?.maniere,
-                    params?.maniere
-                )
-            ) {
+    if (
+        !modelesCompatibles.length
+    ) {
 
-                score += 60;
-
-            }
-
-            // --------------------------------------------
-            // VITESSE
-            // --------------------------------------------
-
-            if (
-                contientValeur(
-                    analyse?.vitesse,
-                    params?.vitesse
-                )
-            ) {
-
-                score += 30;
-
-            }
-
-            // --------------------------------------------
-            // INTENTION
-            // --------------------------------------------
-
-            if (
-                contientValeur(
-                    analyse?.intention,
-                    params?.intention
-                )
-            ) {
-
-                score += 20;
-
-            }
-
-            return score;
-
+        return {
+            modele: null,
+            score: 0,
+            scoreStructure: 0,
+            structureComplete: false,
+            slotsTrouves: [],
+            slotsManquants: [],
+            actionCanonique,
+            categorie:
+                categorieCanonique,
+            maniere:
+                maniereDetectee || null,
+            trajectoire:
+                trajectoireDetectee || null,
+            structure: []
         };
+    }
 
-    //============================================================
-    // 🏆 ÉVALUATION DES CANDIDATS
-    //============================================================
-    //
-    // ORDRE DE PRIORITÉ :
-    //
-    // 1. Action canonique
-    // 2. Mots discriminants structurels
-    // 3. Similarité des exemples
-    //
-    // La similarité ne valide PAS le pavé.
-    // Elle départage uniquement les modèles proches.
-    //============================================================
+    //==========================================================
+    // 1️⃣2️⃣ SÉLECTION DU MEILLEUR MODÈLE
+    //==========================================================
 
     const candidats = [];
 
@@ -5567,9 +5901,23 @@ console.log(
         const modele =
             modelesCompatibles[index];
 
-        let scoreExemple = 0;
+        const maniere =
+            maniereDetectee ||
+            trouverManiere(
+                modele
+            );
 
-        let meilleurExemple = null;
+        const trajectoire =
+            trajectoireDetectee ||
+            trouverTrajectoire(
+                modele
+            );
+
+        let scoreExemple =
+            0;
+
+        let meilleurExemple =
+            null;
 
         try {
 
@@ -5581,8 +5929,19 @@ console.log(
                     actionCanonique,
 
                 categorie:
-                    categorieCanonique
+                    categorieCanonique,
 
+                maniere:
+                    maniere,
+
+                trajectoire:
+                    trajectoire,
+
+                cote:
+                    coteDetecte,
+
+                courbe:
+                    courbeDetectee
             };
 
             scoreExemple =
@@ -5601,95 +5960,85 @@ console.log(
         } catch (error) {
 
             console.log(
-                "⚠️ [NeoAI SCORE] Erreur similarité :",
+                "⚠️ [NeoAI SCORE]",
                 error?.message
             );
-
         }
-
-        const discrimination =
-            scoreDiscrimination(
-                modele
-            );
-
-        const actionModele =
-            normaliser(
-                modele?.action
-            );
-
-        const actionExacte =
-            actionModele ===
-            actionNorm;
-
-        const categorieModele =
-            normaliser(
-                modele?.categorie
-            );
-
-        const familleModele =
-            normaliser(
-                modele?.famille
-            );
-
-        const categorieExacte =
-            categorieModele &&
-            categorieNorm &&
-            categorieModele ===
-            categorieNorm;
-
-        const familleExacte =
-            familleModele &&
-            familleNorm &&
-            familleModele ===
-            familleNorm;
-
-        // --------------------------------------------
-        // SCORE DE SÉLECTION
-        // --------------------------------------------
-        //
-        // IMPORTANT :
-        //
-        // Ce score sert uniquement à CHOISIR LE MODÈLE.
-        //
-        // Il ne sera jamais utilisé comme score de validation.
-        // --------------------------------------------
 
         let selectionScore =
-            discrimination;
+            0;
 
+        // Action
         if (
-            actionExacte
+            normaliser(modele.action) ===
+            normaliser(actionCanonique)
         ) {
 
-            selectionScore += 1000;
-
+            selectionScore +=
+                1000;
         }
 
+        // Catégorie
         if (
-            categorieExacte
+            normaliser(modele.categorie) ===
+            normaliser(categorieCanonique)
         ) {
 
-            selectionScore += 100;
-
+            selectionScore +=
+                100;
         }
 
+        // Manière
         if (
-            familleExacte
+            maniere &&
+            normaliser(maniere) ===
+            normaliser(modele.maniere)
         ) {
 
-            selectionScore += 50;
-
+            selectionScore +=
+                500;
         }
 
-        // --------------------------------------------
-        // Similarité comme départage
-        // --------------------------------------------
-        //
-        // Elle intervient après les indices structurels.
-        // Elle ne peut donc pas remplacer une trajectoire
-        // ou une direction explicitement détectée.
-        // --------------------------------------------
+        // Trajectoire
+        if (
+            trajectoire &&
+            normaliser(trajectoire) ===
+            normaliser(modele.trajectoire)
+        ) {
 
+            selectionScore +=
+                500;
+        }
+
+        // Côté
+        if (
+            modele.structure?.includes(
+                "COTE"
+            ) &&
+            valeurPresente(
+                coteDetecte
+            )
+        ) {
+
+            selectionScore +=
+                300;
+        }
+
+        // Courbe
+        if (
+            modele.structure?.includes(
+                "COURBE"
+            ) &&
+            valeurPresente(
+                courbeDetectee
+            )
+        ) {
+
+            selectionScore +=
+                300;
+        }
+
+        // Similarité = uniquement départage
         selectionScore +=
             scoreExemple / 1000;
 
@@ -5699,27 +6048,16 @@ console.log(
 
             selectionScore,
 
-            discrimination,
-
             scoreExemple,
 
             meilleurExemple,
 
             index
-
         });
-
     }
 
-    //============================================================
-    // 🥇 MODÈLE FINAL
-    //============================================================
-
     candidats.sort(
-        (
-            a,
-            b
-        ) => {
+        (a, b) => {
 
             if (
                 b.selectionScore !==
@@ -5730,11 +6068,7 @@ console.log(
                     b.selectionScore -
                     a.selectionScore
                 );
-
             }
-
-            // Dernier départage :
-            // similarité des exemples
 
             if (
                 b.scoreExemple !==
@@ -5745,17 +6079,12 @@ console.log(
                     b.scoreExemple -
                     a.scoreExemple
                 );
-
             }
-
-            // Stabilité :
-            // ordre original des modèles
 
             return (
                 a.index -
                 b.index
             );
-
         }
     );
 
@@ -5766,12 +6095,13 @@ console.log(
         meilleurCandidat?.modele ||
         null;
 
-    if (
-        !meilleur
-    ) {
+    //==========================================================
+    // 1️⃣3️⃣ AUCUN MEILLEUR MODÈLE
+    //==========================================================
+
+    if (!meilleur) {
 
         return {
-
             modele: null,
             score: 0,
             scoreStructure: 0,
@@ -5781,85 +6111,73 @@ console.log(
             actionCanonique,
             categorie:
                 categorieCanonique,
+            maniere:
+                maniereDetectee || null,
+            trajectoire:
+                trajectoireDetectee || null,
             structure: []
-
         };
-
     }
 
-    //============================================================
-    // 📐 STRUCTURE DU MODÈLE RETENU
-    //============================================================
+    //==========================================================
+    // 1️⃣4️⃣ PARAMÈTRES FINAUX
+    //==========================================================
+
+    const maniereFinale =
+        maniereDetectee ||
+        trouverManiere(
+            meilleur
+        );
+
+    const trajectoireFinale =
+        trajectoireDetectee ||
+        trouverTrajectoire(
+            meilleur
+        );
+
+    analyse.action =
+        actionCanonique;
+
+    analyse.categorie =
+        categorieCanonique;
+
+    analyse.maniere =
+        maniereFinale;
+
+    analyse.trajectoire =
+        trajectoireFinale;
+
+    if (coteDetecte) {
+
+        analyse.cote =
+            coteDetecte;
+    }
+
+    if (
+        courbeDetectee !== null &&
+        courbeDetectee !== undefined
+    ) {
+
+        analyse.courbe =
+            courbeDetectee;
+    }
+
+    //==========================================================
+    // 1️⃣5️⃣ STRUCTURE DU MODÈLE
+    //==========================================================
 
     const structure =
         Array.isArray(
-            meilleur?.structure
+            meilleur.structure
         )
             ? meilleur.structure
             : [];
 
-    const valeurSlot =
-        slot => {
+    const slotsTrouves =
+        [];
 
-            switch (
-                String(
-                    slot || ""
-                )
-                    .toUpperCase()
-            ) {
-
-                case "SUJET":
-                    return (
-                        analyse?.acteur ??
-                        analyse?.sujet
-                    );
-
-                case "ACTION":
-                    return analyse?.action;
-
-                case "CIBLE":
-                    return analyse?.cible;
-
-                case "MEMBRE":
-                    return analyse?.membre;
-
-                case "PARTIE_CORPS":
-                    return analyse?.partieCorps;
-
-                case "MANIERE":
-                    return analyse?.maniere;
-
-                case "VITESSE":
-                    return analyse?.vitesse;
-
-                case "DISTANCE":
-                    return analyse?.distance;
-
-                case "HAUTEUR":
-                    return analyse?.hauteur;
-
-                case "DIRECTION":
-                    return analyse?.direction;
-
-                case "TRAJECTOIRE":
-                    return analyse?.trajectoire;
-
-                case "INTENTION":
-                    return analyse?.intention;
-
-                case "COURBE":
-                    return analyse?.courbe;
-
-                default:
-                    return null;
-
-            }
-
-        };
-
-    const slotsTrouves = [];
-
-    const slotsManquants = [];
+    const slotsManquants =
+        [];
 
     for (
         const slot
@@ -5868,7 +6186,10 @@ console.log(
 
         if (
             valeurPresente(
-                valeurSlot(slot)
+                valeurSlot(
+                    slot,
+                    meilleur
+                )
             )
         ) {
 
@@ -5881,20 +6202,21 @@ console.log(
             slotsManquants.push(
                 slot
             );
-
         }
-
     }
+
+    //==========================================================
+    // 1️⃣6️⃣ SCORE STRUCTUREL
+    //
+    // IMPORTANT :
+    // Les optionnels ne sont JAMAIS comptés ici.
+    //==========================================================
 
     const totalSlots =
         structure.length;
 
     const totalTrouves =
         slotsTrouves.length;
-
-    //============================================================
-    // 📊 STRUCTURE
-    //============================================================
 
     const scoreStructure =
         totalSlots > 0
@@ -5910,19 +6232,23 @@ console.log(
         totalSlots > 0 &&
         slotsManquants.length === 0;
 
-    //============================================================
-    // 📤 RETOUR
-    //============================================================
+    //==========================================================
+    // 1️⃣7️⃣ RÉSULTAT
+    //==========================================================
 
     console.log(
         "🏆 [NeoAI MODEL]",
-        meilleur?.id ||
-        meilleur?.nom ||
-        "—",
-        "| discrimination:",
-        meilleurCandidat.discrimination,
-        "| similarité:",
-        `${meilleurCandidat.scoreExemple}%`,
+        meilleur.id || "—",
+        "| action:",
+        actionCanonique,
+        "| manière:",
+        maniereFinale || "—",
+        "| trajectoire:",
+        trajectoireFinale || "—",
+        "| côté:",
+        coteDetecte || "—",
+        "| courbe:",
+        courbeDetectee ?? "—",
         "| structure:",
         `${totalTrouves}/${totalSlots}`,
         structureComplete
@@ -5935,10 +6261,6 @@ console.log(
         modele:
             meilleur,
 
-        // -------------------------------------------------------
-        // Similarité = INFORMATION / DÉPARTAGE UNIQUEMENT
-        // -------------------------------------------------------
-
         score:
             meilleurCandidat.scoreExemple,
 
@@ -5947,10 +6269,6 @@ console.log(
 
         meilleurExemple:
             meilleurCandidat.meilleurExemple,
-
-        // -------------------------------------------------------
-        // Structure = VALIDATION
-        // -------------------------------------------------------
 
         scoreStructure,
 
@@ -5963,27 +6281,42 @@ console.log(
         requisManquants:
             slotsManquants,
 
-        // -------------------------------------------------------
-        // Informations générales
-        // -------------------------------------------------------
-
         actionCanonique,
 
         categorie:
             categorieCanonique,
 
+        maniere:
+            maniereFinale,
+
+        trajectoire:
+            trajectoireFinale,
+
+        cote:
+            coteDetecte,
+
+        courbe:
+            courbeDetectee,
+
         structure,
 
-        // Conservé pour compatibilité avec le code existant.
-        // Ce champ ne doit PAS servir au verdict.
+        optionnels:
+            Array.isArray(
+                meilleur.optionnels
+            )
+                ? meilleur.optionnels
+                : [],
+
+        contraintes:
+            meilleur.contraintes ||
+            null,
+
         correspondanceForte:
-            false
-
+            structureComplete
     };
+}
 
-}                        
-            
-                                                                                  
+                                                                                                 
 
 //==============================================================
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
