@@ -3578,38 +3578,110 @@ function neoFusionnerSegments(
 //==============================================================
 // 📚 MODÈLES D'ACTIONS
 //==============================================================
+//==============================================================
+// 📚 RÉCUPÉRER LES MODÈLES NEOAI
+// Compatible avec NEO_ACTION_MODELS hiérarchique
+//==============================================================
+
 function neoGetModeles() {
 
-    const sources = [
-        NeoAI?.NEO_ACTION_MODELS,
-        NeoAI?.NEO_COMBAT_MODELS,
-        NeoAI?.ACTION_MODELS,
-        NeoAI?.MODELES_ACTIONS,
+    const source =
+        NeoAI?.NEO_ACTION_MODELS;
 
-        // IMPORTANT :
-        // Ancienne source éventuelle
-        typeof NEO_ACTIONS_COMBAT !== "undefined"
-            ? NEO_ACTIONS_COMBAT
-            : null
-    ];
+    if (
+        !source ||
+        typeof source !== "object" ||
+        Array.isArray(source)
+    ) {
 
+        console.log(
+            "⚠️ [NeoAI MODELES] NEO_ACTION_MODELS introuvable ou vide."
+        );
 
-    for (const source of sources) {
+        return [];
+    }
 
-        if (!source) {
+    const normaliser = valeur =>
+        neoNormaliserMotLocal(
+            String(valeur ?? "")
+        )
+        .toLowerCase()
+        .trim();
+
+    const modeles = [];
+
+    //==========================================================
+    // 🔎 PARCOURIR :
+    //
+    // deplacement
+    //   └── course
+    //        └── modeles
+    //             ├── COURSE_001
+    //             ├── COURSE_002
+    //             ├── COURSE_003
+    //             └── COURSE_004
+    //==========================================================
+
+    for (
+        const [
+            categorieCle,
+            groupeCategorie
+        ]
+        of Object.entries(source)
+    ) {
+
+        if (
+            !groupeCategorie ||
+            typeof groupeCategorie !== "object" ||
+            Array.isArray(groupeCategorie)
+        ) {
             continue;
         }
 
+        //======================================================
+        // ACTION
+        //======================================================
 
-        // ============================================================
-        // 📦 SOURCE SOUS FORME DE TABLEAU
-        // ============================================================
+        for (
+            const [
+                actionCle,
+                configuration
+            ]
+            of Object.entries(groupeCategorie)
+        ) {
 
-        if (Array.isArray(source)) {
+            if (
+                !configuration ||
+                typeof configuration !== "object" ||
+                Array.isArray(configuration)
+            ) {
+                continue;
+            }
 
-            const modeles = [];
+            const actionConfiguration =
+                String(
+                    configuration.action ||
+                    actionCle ||
+                    ""
+                ).trim();
 
-            for (const modele of source) {
+            const categorieConfiguration =
+                configuration.categorie ||
+                categorieCle;
+
+            //==================================================
+            // MODÈLES
+            //==================================================
+
+            const listeModeles =
+                Array.isArray(configuration.modeles)
+                    ? configuration.modeles
+                    : [];
+
+            for (
+                const modele
+                of listeModeles
+            ) {
 
                 if (
                     !modele ||
@@ -3618,244 +3690,238 @@ function neoGetModeles() {
                     continue;
                 }
 
-                modeles.push({
-                    ...modele,
+                //================================================
+                // ACTION
+                //================================================
 
-                    action:
+                const actionBrute =
+                    String(
                         modele.action ||
-                        modele.nomAction ||
-                        null
-                });
-            }
+                        actionConfiguration ||
+                        actionCle ||
+                        ""
+                    ).trim();
 
-
-            if (modeles.length) {
-
-                console.log(
-                    "📚 [NeoAI MODELES] Source tableau :",
-                    modeles.length
-                );
-
-                return modeles;
-            }
-
-            continue;
-        }
-
-
-        // ============================================================
-        // 📚 SOURCE SOUS FORME D'OBJET
-        // ============================================================
-
-        if (
-            typeof source === "object" &&
-            !Array.isArray(source)
-        ) {
-
-            const modeles = [];
-
-
-            // ========================================================
-            // 🔎 PARCOURS DES CATÉGORIES
-            //
-            // Nouvelle architecture :
-            //
-            // NEO_ACTION_MODELS = {
-            //
-            //     deplacement: {
-            //
-            //         categorie: "deplacement",
-            //
-            //         course: [
-            //             COURSE_001,
-            //             COURSE_002
-            //         ],
-            //
-            //         saut: [
-            //             SAUT_001
-            //         ]
-            //     }
-            // }
-            //
-            // On doit donc descendre :
-            //
-            // CATÉGORIE
-            //      ↓
-            // ACTION
-            //      ↓
-            // MODÈLE
-            // ========================================================
-
-            for (
-                const [categorie, groupe]
-                of Object.entries(source)
-            ) {
-
-                if (
-                    !groupe ||
-                    typeof groupe !== "object" ||
-                    Array.isArray(groupe)
-                ) {
+                if (!actionBrute) {
                     continue;
                 }
 
+                const actionNorm =
+                    normaliser(actionBrute);
 
-                // ====================================================
-                // 🔎 PARCOURS DES ACTIONS
-                // ====================================================
+                let actionCanonique =
+                    actionNorm;
+
+                //================================================
+                // 1️⃣ CHERCHER L'ACTION DANS LES SYNONYMES
+                //================================================
+
+                const synonymes =
+                    NeoAI?.NEO_SYNONYMES || {};
 
                 for (
-                    const [actionCanonique, valeur]
-                    of Object.entries(groupe)
+                    const [
+                        categorieSynonyme,
+                        groupeSynonyme
+                    ]
+                    of Object.entries(synonymes)
                 ) {
 
-                    // ------------------------------------------------
-                    // "categorie" est une propriété descriptive,
-                    // pas une action.
-                    // ------------------------------------------------
-
                     if (
-                        actionCanonique === "categorie"
+                        !groupeSynonyme ||
+                        typeof groupeSynonyme !== "object" ||
+                        Array.isArray(groupeSynonyme)
                     ) {
                         continue;
                     }
 
+                    let trouve =
+                        false;
 
-                    // ------------------------------------------------
-                    // ACTION → plusieurs modèles
-                    //
-                    // Exemple :
-                    //
-                    // course: [
-                    //     COURSE_001,
-                    //     COURSE_002
-                    // ]
-                    // ------------------------------------------------
+                    for (
+                        const [
+                            canonique,
+                            aliases
+                        ]
+                        of Object.entries(groupeSynonyme)
+                    ) {
 
-                    if (Array.isArray(valeur)) {
+                        const canoniqueNorm =
+                            normaliser(canonique);
 
-                        for (const modele of valeur) {
+                        // Action canonique exacte
+                        if (
+                            actionNorm ===
+                            canoniqueNorm
+                        ) {
 
-                            if (
-                                !modele ||
-                                typeof modele !== "object"
-                            ) {
-                                continue;
-                            }
+                            actionCanonique =
+                                canonique;
 
-
-                            modeles.push({
-
-                                // On conserve toutes les
-                                // propriétés du modèle
-                                ...modele,
-
-                                // ==================================================
-                                // ACTION CANONIQUE
-                                //
-                                // Priorité au nom de l'action dans
-                                // la hiérarchie.
-                                //
-                                // Exemple :
-                                //
-                                // deplacement
-                                //      ↓
-                                // course
-                                //
-                                // devient :
-                                //
-                                // action: "course"
-                                // ==================================================
-
-                                action:
-                                    actionCanonique,
-
-                                // ==================================================
-                                // CATÉGORIE
-                                //
-                                // Exemple :
-                                //
-                                // categorie: "deplacement"
-                                // ==================================================
-
-                                categorie:
-                                    modele.categorie ||
-                                    categorie
-                            });
+                            trouve = true;
+                            break;
                         }
 
-                        continue;
+                        // Action = alias
+                        if (
+                            Array.isArray(aliases) &&
+                            aliases.some(alias =>
+                                normaliser(alias) ===
+                                actionNorm
+                            )
+                        ) {
+
+                            actionCanonique =
+                                canonique;
+
+                            trouve = true;
+                            break;
+                        }
                     }
 
-
-                    // ------------------------------------------------
-                    // ACTION → un seul modèle
-                    // ------------------------------------------------
-
-                    if (
-                        valeur &&
-                        typeof valeur === "object"
-                    ) {
-
-                        modeles.push({
-
-                            ...valeur,
-
-                            action:
-                                actionCanonique,
-
-                            categorie:
-                                valeur.categorie ||
-                                categorie
-                        });
+                    if (trouve) {
+                        break;
                     }
                 }
+
+                //================================================
+                // 2️⃣ FALLBACK NEO_ACTIONS
+                //================================================
+
+                if (
+                    actionCanonique ===
+                    actionNorm &&
+                    Array.isArray(NeoAI?.NEO_ACTIONS)
+                ) {
+
+                    const actionDB =
+                        NeoAI.NEO_ACTIONS.find(item => {
+
+                            if (!item) {
+                                return false;
+                            }
+
+                            if (
+                                normaliser(item.action) ===
+                                actionNorm
+                            ) {
+                                return true;
+                            }
+
+                            if (
+                                normaliser(item.nom) ===
+                                actionNorm
+                            ) {
+                                return true;
+                            }
+
+                            return Array.isArray(
+                                item.synonymes
+                            ) &&
+                            item.synonymes.some(alias =>
+                                normaliser(alias) ===
+                                actionNorm
+                            );
+                        });
+
+                    if (actionDB?.action) {
+
+                        actionCanonique =
+                            actionDB.action;
+                    }
+                }
+
+                //================================================
+                // 3️⃣ CATÉGORIE
+                //================================================
+
+                const categorie =
+                    modele.categorie ||
+                    categorieConfiguration ||
+                    null;
+
+                //================================================
+                // 4️⃣ CONSTRUIRE LE MODÈLE NORMALISÉ
+                //================================================
+
+                modeles.push({
+
+                    ...modele,
+
+                    // Identité
+                    id:
+                        modele.id ||
+                        modele.nom ||
+                        null,
+
+                    // Action sémantique
+                    action:
+                        actionCanonique,
+
+                    // Action définie dans NEO_ACTION_MODELS
+                    actionModele:
+                        actionBrute,
+
+                    // Manière
+                    maniere:
+                        modele.maniere ||
+                        null,
+
+                    // Trajectoire
+                    trajectoire:
+                        modele.trajectoire ||
+                        null,
+
+                    // Catégorie
+                    categorie,
+
+                    // Paramètres obligatoires
+                    structure:
+                        Array.isArray(modele.structure)
+                            ? modele.structure
+                            : [],
+
+                    // Paramètres facultatifs
+                    optionnels:
+                        Array.isArray(modele.optionnels)
+                            ? modele.optionnels
+                            : [],
+
+                    // Contraintes éventuelles
+                    contraintes:
+                        modele.contraintes ||
+                        null
+                });
             }
+        }
+    }
 
+    //==========================================================
+    // 📊 LOGS
+    //==========================================================
 
-            // ========================================================
-            // ✅ MODÈLES TROUVÉS
-            // ========================================================
+    console.log(
+        "📚 [NeoAI MODELES] Modèles chargés :",
+        modeles.length
+    );
 
-            if (modeles.length) {
+    console.log(
+        "🎯 [NeoAI MODELES]",
+        modeles.map(modele => ({
+            id: modele.id,
+            action: modele.action,
+            actionModele: modele.actionModele,
+            maniere: modele.maniere,
+            trajectoire: modele.trajectoire,
+            categorie: modele.categorie,
+            structure: modele.structure,
+            optionnels: modele.optionnels
+        }))
+    );
 
-                console.log(
-                    "📚 [NeoAI MODELES] Source hiérarchique :",
-                    modeles.length
-                );
-
-                console.log(
-                    "🎯 [NeoAI CATÉGORIES DISPONIBLES] :",
-                    [
-                        ...new Set(
-                            modeles
-                                .map(
-                                    modele =>
-                                        modele.categorie
-                                )
-                                .filter(Boolean)
-                        )
-                    ]
-                );
-
-                console.log(
-                    "🎯 [NeoAI ACTIONS CANONIQUES] :",
-                    [
-                        ...new Set(
-                            modeles
-                                .map(
-                                    modele =>
-                                        modele.action
-                                )
-                                .filter(Boolean)
-                        )
-                    ]
-                );
-
-                return modeles;
-            }
-
-
+    return modeles;
+}
+                    
             // ========================================================
             // 🔄 COMPATIBILITÉ AVEC ANCIEN FORMAT
             //
