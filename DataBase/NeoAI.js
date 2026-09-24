@@ -681,173 +681,590 @@ const NEO_RELATIONS = {
     ]
 };
 
-/* ============================================================================
- * 8. MODELES SEMANTIQUES LEGERS
- * ----------------------------------------------------------------------------
- * Guides structurels uniquement. Ne pas transformer en base de phrases.
- * Chaque modèle liste : sa famille, sa structure de champs attendus, et
- * quelques exemples représentatifs (3 à 5) à visée d'aide/désambiguïsation.
- * ========================================================================== */
 
-// NOTE SUR "structure" : la liste des slots reconnus par le moteur de scoring
-// (neoCalculerSimilariteModele dans cmd/outils.js) est fixe :
-// SUJET, ACTION, CIBLE, MEMBRE, PARTIE_CORPS, MANIERE, DISTANCE, HAUTEUR,
-// VITESSE, DIRECTION, TRAJECTOIRE, COURBE, INTENTION.
-// Un slot hors de cette liste (ex: "MOUVEMENT", "ZONE") n'est jamais résolu
-// par le moteur : on n'utilise donc ici que les slots reconnus.
-// "action" et "categorie" sont fournis explicitement pour éviter au moteur
-// de devoir les déduire par recherche dans les exemples des autres modèles.
+//==============================================================
+// 🎮 NEO ACTION MODELS
+//==============================================================
+// Chaque action possède ses propres paramètres.
+// SUJET  = personnage qui exécute l'action
+// CIBLE  = personnage visé / concerné par l'action
+//
+// Les champs de "structure" sont OBLIGATOIRES.
+// Les champs de "optionnels" sont facultatifs.
+//==============================================================
 
-const NEO_ACTION_MODELS = [
-    //DÉPLACEMENTS 🏃 
-    {
-        id: 'COURSE_001',
-        action: 'course frontale',
-        categorie: 'deplacement',
+const NEO_ACTION_MODELS = {
 
-        structure: [
-            'SUJET',
-            'ACTION',
-            'MANIERE',
-            'DISTANCE',
-            'INTENTION'
-        ],
-        optionnels: [
-            'CIBLE',
-            'VITESSE',
-            'DIRECTION'
-        ],
-        exemples: [
-    '{SUJET} fonce de manière frontale vers {CIBLE} sur {DISTANCE} pour arriver à close distance.',
-    '{SUJET} se precipite frontalement vers {CIBLE} sur {DISTANCE} pour se rapprocher.',
-    '{SUJET} charge frontalement {CIBLE} à pleine vitesse sur {DISTANCE} afin de le percuter.',
-    '{SUJET} court droit vers {CIBLE} en parcourant {DISTANCE} pour atteindre sa cible.'
-]
-    },
-    {
-        id: 'SAUT',
-        action: 'sauter',
-        categorie: 'deplacement',
-        famille: 'deplacement',
-        structure: ['SUJET', 'ACTION', 'DIRECTION', 'HAUTEUR', 'TRAJECTOIRE', 'CIBLE'],
-        exemples: [
-            'Yamato saute tres haut.',
-            'Yamato bondit vers le haut.',
-            'Yamato saute par-dessus Naruto.'
-        ]
-    },
-    {
-        id: 'BOND',
-        action: 'bondir',
-        categorie: 'deplacement',
-        famille: 'deplacement',
-        structure: ['SUJET', 'ACTION', 'DIRECTION', 'DISTANCE', 'VITESSE'],
-        exemples: [
-            'Yamato bondit en avant.',
-            'Yamato fait un bond en arriere pour esquiver.'
-        ]
-    },
-    {
-        id: 'VOL',
-        action: 'voler',
-        categorie: 'deplacement',
-        famille: 'deplacement',
-        structure: ['SUJET', 'ACTION', 'DIRECTION', 'HAUTEUR', 'TRAJECTOIRE', 'VITESSE'],
-        exemples: [
-            'Yamato s\'envole vers le ciel.',
-            'Yamato vole en direction de Naruto.'
-        ]
-    },
-    {
-        id: 'FRAPPE',
-        action: 'frapper',
-        categorie: 'attaque',
-        famille: 'attaque',
-        structure: ['SUJET', 'ACTION', 'PARTIE_CORPS', 'MEMBRE', 'TRAJECTOIRE', 'CIBLE'],
-        exemples: [
-            'Yamato frappe Naruto au visage.',
-            'Yamato frappe Naruto avec son pied gauche en circulaire.'
-        ]
-    },
-    {
-        id: 'COUP_POING',
-        action: 'crochet_gauche',
-        categorie: 'attaque',
-        famille: 'attaque',
-        structure: ['SUJET', 'ACTION', 'MEMBRE', 'CIBLE', 'PARTIE_CORPS', 'TRAJECTOIRE'],
-        exemples: [
-            'Yamato donne un crochet gauche au visage de Naruto.',
-            'Yamato decoche un hook avec son poing gauche vers la face de Naruto.',
-            'Yamato lance un direct sur Naruto.'
-        ]
-    },
-    {
-        id: 'COUP_PIED',
-        action: 'coup_pied_circulaire',
-        categorie: 'attaque',
-        famille: 'attaque',
-        structure: ['SUJET', 'ACTION', 'PARTIE_CORPS', 'MEMBRE', 'DIRECTION', 'TRAJECTOIRE', 'CIBLE'],
-        exemples: [
-            'Yamato frappe Naruto avec son pied gauche en circulaire.',
-            'Yamato envoie un coup de pied retourne sur Naruto.'
-        ]
-    },
-    {
-        id: 'ESQUIVE',
-        action: 'esquiver',
-        categorie: 'defense',
-        famille: 'defense',
-        structure: ['SUJET', 'ACTION', 'DIRECTION', 'CIBLE'],
-        exemples: [
-            'Yamato esquive vers la gauche.',
-            'Yamato evite le coup de Naruto en se decalant.'
-        ]
-    },
-    {
-        id: 'PARADE',
-        action: 'parer',
-        categorie: 'defense',
-        famille: 'defense',
-        structure: ['SUJET', 'ACTION', 'PARTIE_CORPS', 'CIBLE'],
-        exemples: [
-            'Yamato pare le coup de Naruto avec son bras.',
-            'Yamato bloque l\'attaque de Naruto.'
-        ]
-    },
-    {
-        id: 'CONTRE',
-        action: 'contrer',
-        categorie: 'defense',
-        famille: 'defense',
-        structure: ['SUJET', 'ACTION', 'CIBLE'],
-        exemples: [
-            'Yamato contre l\'attaque de Naruto.',
-            'Yamato riposte immediatement apres avoir pare.'
-        ]
-    },
-    {
-        id: 'SAISIE',
-        action: 'saisir',
-        categorie: 'saisie',
-        famille: 'saisie',
-        structure: ['SUJET', 'ACTION', 'PARTIE_CORPS', 'MEMBRE', 'CIBLE', 'INTENTION'],
-        exemples: [
-            'Yamato saisit le bras de Naruto.',
-            'Yamato agrippe Naruto par le col pour l\'immobiliser.'
-        ]
-    },
-    {
-        id: 'PROJECTION',
-        action: 'projeter',
-        categorie: 'projection',
-        famille: 'projection',
-        structure: ['SUJET', 'ACTION', 'DIRECTION', 'CIBLE', 'DISTANCE'],
-        exemples: [
-            'Yamato projette Naruto au sol.',
-            'Yamato balance Naruto en arriere de toutes ses forces.'
-        ]
+    //==========================================================
+    // 🔆 DEPLACEMENTS / MOUVEMENTS
+    //==========================================================
+
+    deplacement: {
+
+        //======================================================
+        // 🚶 MARCHE
+        //======================================================
+
+        marche: {
+
+            categorie: "deplacement",
+            action: "marche",
+
+            modeles: [
+
+                {
+                    id: "MARCHE_001",
+
+                    maniere: "marche",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "Yamato marche vers Naruto sur 5m pour l'atteindre",
+                        "Yamato avance à pied vers Naruto sur 5m pour se rapprocher",
+                        "Yamato se déplace au pas vers Naruto sur 5m pour arriver à proximité"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🏃 COURSE
+        //======================================================
+
+        course: {
+
+            categorie: "deplacement",
+            action: "course",
+
+            modeles: [
+
+                //================================================
+                // 🏃 COURSE FRONTALE
+                //================================================
+
+                {
+                    id: "COURSE_001",
+
+                    maniere: "course",
+                    trajectoire: "frontale",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "TRAJECTOIRE",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "VITESSE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "Yamato fonce en course frontale vers Naruto sur 10m pour l'atteindre",
+                        "Yamato court frontalement vers Naruto sur 10m pour arriver à close distance",
+                        "Yamato se rue vers Naruto en course frontale à vitesse maximale sur 10m"
+                    ]
+                },
+
+
+                //================================================
+                // 🔄 COURSE CIRCULAIRE
+                //================================================
+
+                {
+                    id: "COURSE_002",
+
+                    maniere: "course",
+                    trajectoire: "circulaire",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "TRAJECTOIRE",
+                        "COURBE",
+                        "COTE",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "Yamato court de manière circulaire par sa droite avec une courbe de 1m vmax parcourant 10m pour atteindre Naruto",
+                        "Yamato fonce sur la droite autour de Naruto avec une courbe de 1m à vitesse maximale sur 10m pour l'atteindre",
+                        "Yamato se rue en trajectoire circulaire par sa gauche avec une courbe de 2m à vitesse maximale parcourant 10m pour atteindre Naruto"
+                    ]
+                },
+
+
+                //================================================
+                // 🐍 COURSE ZIG ZAG
+                //================================================
+
+                {
+                    id: "COURSE_003",
+
+                    maniere: "course",
+                    trajectoire: "zig_zag",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "TRAJECTOIRE",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "VITESSE",
+                        "DIRECTION",
+                        "COTE"
+                    ],
+
+                    exemples: [
+                        "Yamato court en zig zag vers Naruto sur 10m pour l'atteindre",
+                        "Yamato fonce vers Naruto en trajectoire zig zag sur 10m à vitesse maximale pour le rejoindre",
+                        "Yamato se rue vers Naruto en zigzag sur 10m pour éviter ses attaques"
+                    ]
+                },
+
+
+                //================================================
+                // ↗️ COURSE DIAGONALE
+                //================================================
+
+                {
+                    id: "COURSE_004",
+
+                    maniere: "course",
+                    trajectoire: "diagonale",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "TRAJECTOIRE",
+                        "DIRECTION",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "Yamato court en diagonale vers Naruto sur 10m pour l'atteindre",
+                        "Yamato fonce diagonalement vers Naruto sur 10m à vitesse maximale pour le rejoindre",
+                        "Yamato se rue vers Naruto en trajectoire diagonale sur 10m pour arriver à close distance"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // ⚡ DASH
+        //======================================================
+
+        dash: {
+
+            categorie: "deplacement",
+            action: "dash",
+
+            modeles: [
+
+                {
+                    id: "DASH_001",
+
+                    maniere: "dash",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DISTANCE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    contraintes: {
+                        distance_max: 5,
+                        unite: "m"
+                    },
+
+                    optionnels: [
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "Yamato dash de 5m vers Naruto pour l'atteindre",
+                        "Yamato effectue un dash vers Naruto sur 5m pour se rapprocher",
+                        "Yamato dash instantanément de 3m vers l'avant pour atteindre Naruto"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 💨 RUSH
+        //======================================================
+
+        rush: {
+
+            categorie: "deplacement",
+            action: "rush",
+
+            modeles: [
+
+                {
+                    id: "RUSH_001",
+
+                    maniere: "rush",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "VITESSE",
+                        "TRAJECTOIRE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "Yamato rush vers Naruto sur 10m pour l'atteindre",
+                        "Yamato fonce rapidement sur Naruto pour arriver au contact",
+                        "Yamato se rue brutalement vers Naruto pour réduire la distance"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🦘 SAUT
+        //======================================================
+
+        saut: {
+
+            categorie: "deplacement",
+            action: "sauter",
+
+            modeles: [
+
+                {
+                    id: "SAUT_001",
+
+                    maniere: "saut",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "HAUTEUR",
+                        "TRAJECTOIRE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "DISTANCE",
+                        "CIBLE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "Yamato saute vers l'avant à 2m de hauteur pour atteindre Naruto",
+                        "Yamato bondit vers Naruto en trajectoire ascendante à 2m pour l'atteindre",
+                        "Yamato quitte le sol en sautant vers l'avant pour rejoindre Naruto"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🔄 ROULADE
+        //======================================================
+
+        roulade: {
+
+            categorie: "deplacement",
+            action: "rouler",
+
+            modeles: [
+
+                {
+                    id: "ROULADE_001",
+
+                    maniere: "roulade",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "VITESSE",
+                        "COTE"
+                    ],
+
+                    exemples: [
+                        "Yamato effectue une roulade vers la droite sur 3m pour esquiver Naruto",
+                        "Yamato roule au sol vers sa gauche sur 3m pour éviter l'attaque",
+                        "Yamato fait une roulade vers l'avant sur 2m pour se rapprocher de Naruto"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🪽 VOL
+        //======================================================
+
+        vol: {
+
+            categorie: "deplacement",
+            action: "voler",
+
+            modeles: [
+
+                {
+                    id: "VOL_001",
+
+                    maniere: "vol",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "HAUTEUR",
+                        "TRAJECTOIRE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "DISTANCE",
+                        "VITESSE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "Yamato vole vers Naruto à 5m de hauteur en trajectoire frontale pour l'atteindre",
+                        "Yamato s'envole vers Naruto à 5m de hauteur pour le rejoindre",
+                        "Yamato plane en diagonale à 5m de hauteur vers Naruto"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🔄 PIROUETTE / PIVOT
+        //======================================================
+
+        pirouette_pivot: {
+
+            categorie: "deplacement",
+            action: "pivoter",
+
+            modeles: [
+
+                {
+                    id: "PIVOT_001",
+
+                    maniere: "pivot",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "COTE",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "DIRECTION",
+                        "ANGLE"
+                    ],
+
+                    exemples: [
+                        "Yamato pivote vers sa droite pour faire face à Naruto",
+                        "Yamato effectue un pivot sur sa gauche pour changer d'orientation",
+                        "Yamato tourne son corps vers la droite pour se placer face à Naruto"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🌀 VRILLE
+        //======================================================
+
+        vrille: {
+
+            categorie: "deplacement",
+            action: "vriller",
+
+            modeles: [
+
+                {
+                    id: "VRILLE_001",
+
+                    maniere: "vrille",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "COTE",
+                        "NOMBRE_TOURS",
+                        "HAUTEUR",
+                        "TRAJECTOIRE"
+                    ],
+
+                    exemples: [
+                        "Yamato effectue une vrille vers la droite dans les airs pour éviter Naruto",
+                        "Yamato vrille sur lui-même en avançant pour esquiver l'attaque de Naruto",
+                        "Yamato réalise une vrille aérienne vers la gauche pour changer de trajectoire"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🤸 SALTO
+        //======================================================
+
+        salto: {
+
+            categorie: "deplacement",
+            action: "salto",
+
+            modeles: [
+
+                {
+                    id: "SALTO_001",
+
+                    maniere: "salto",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "HAUTEUR",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "Yamato fait un salto avant pour atterrir derrière Naruto",
+                        "Yamato effectue un salto arrière pour éviter Naruto",
+                        "Yamato réalise un salto vers l'avant pour se repositionner"
+                    ]
+                }
+
+            ]
+        },
+
+
+        //======================================================
+        // 🤸 FLIP
+        //======================================================
+
+        flip: {
+
+            categorie: "deplacement",
+            action: "flip",
+
+            modeles: [
+
+                {
+                    id: "FLIP_001",
+
+                    maniere: "flip",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    optionnels: [
+                        "CIBLE",
+                        "HAUTEUR",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "Yamato fait un flip avant pour passer au-dessus de Naruto",
+                        "Yamato effectue un flip vers l'avant pour esquiver Naruto",
+                        "Yamato réalise un flip arrière pour retomber derrière Naruto"
+                    ]
+                }
+
+            ]
+        }
+
     }
-];
+};
 
 /* ============================================================================
  * 9. EXPORT
