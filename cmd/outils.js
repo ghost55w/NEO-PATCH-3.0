@@ -5133,91 +5133,135 @@ function neoReconnaitreModele(
         );
 
     //============================================================
-    // 📚 1. CANDIDATS
-    //============================================================
-    //
-    // On commence par l'action canonique.
-    //
-    // Exemple :
-    //
-    // fonce
-    //   ↓
-    // course
-    //
-    // Tous les modèles "course" deviennent candidats.
-    //============================================================
+// 📚 1. CANDIDATS
+//============================================================
+//
+// Un modèle peut être :
+//
+// "course"
+// "course frontale"
+// "course zigzag"
+// "course latérale"
+//
+// L'action canonique sert de base.
+// Les mots supplémentaires du modèle sont
+// recherchés dans le texte.
+//
+// Exemple :
+//
+// foncer
+//   ↓
+// course
+//
+// "course frontale"
+//   ↓
+// course + frontale
+//
+//============================================================
 
-    let modelesCompatibles =
-        tousLesModeles.filter(
-            modele => {
+const texteRecherche =
+    normaliser(
+        texte
+    );
 
-                const actionModele =
-                    normaliser(
-                        modele?.action
-                    );
+let modelesCompatibles =
+    tousLesModeles.filter(
+        modele => {
 
-                return (
-                    actionModele &&
-                    actionNorm &&
-                    actionModele ===
-                    actionNorm
+            const actionModele =
+                normaliser(
+                    modele?.action
                 );
 
+            if (
+                !actionModele ||
+                !actionNorm
+            ) {
+                return false;
             }
-        );
 
-    //============================================================
-    // 📌 FALLBACK CATÉGORIE / FAMILLE
-    //============================================================
+            //======================================================
+            // 1️⃣ MODÈLE EXACT
+            //======================================================
 
-    if (
-        !modelesCompatibles.length
-    ) {
+            if (
+                actionModele ===
+                actionNorm
+            ) {
+                return true;
+            }
 
-        modelesCompatibles =
-            tousLesModeles.filter(
-                modele => {
+            //======================================================
+            // 2️⃣ MODÈLE SPÉCIALISÉ
+            //
+            // course
+            // course frontale
+            // course zigzag
+            //======================================================
 
-                    const categorieModele =
-                        normaliser(
-                            modele?.categorie
-                        );
+            if (
+                !actionModele.startsWith(
+                    actionNorm + " "
+                )
+            ) {
+                return false;
+            }
 
-                    const familleModele =
-                        normaliser(
-                            modele?.famille
-                        );
+            //======================================================
+            // Mots spécifiques du modèle
+            //======================================================
 
-                    const categorieOK =
-                        !categorieModele ||
-                        !categorieNorm ||
-                        categorieModele ===
-                        categorieNorm;
+            const motsModele =
+                actionModele
+                    .split(/\s+/u)
+                    .filter(Boolean);
 
-                    const familleOK =
-                        !familleModele ||
-                        !familleNorm ||
-                        familleModele ===
-                        familleNorm;
+            const indices =
+                motsModele.filter(
+                    mot =>
+                        mot !== actionNorm
+                );
 
-                    return (
-                        categorieOK &&
-                        familleOK &&
-                        (
-                            !!categorieModele ||
-                            !!familleModele
-                        )
-                    );
+            //======================================================
+            // Modèle spécialisé sans indice
+            //======================================================
 
-                }
+            if (
+                !indices.length
+            ) {
+                return true;
+            }
+
+            //======================================================
+            // Tous les indices doivent être présents
+            // dans le texte du joueur
+            //======================================================
+
+            return indices.every(
+                indice =>
+                    texteRecherche.includes(
+                        indice
+                    )
             );
 
-    }
-
-    console.log(
-        "📚 [NeoAI MODÈLES CANDIDATS] :",
-        modelesCompatibles.length
+        }
     );
+
+console.log(
+    "📚 [NeoAI MODÈLES CANDIDATS] :",
+    modelesCompatibles.length
+);
+
+console.log(
+    "🎯 [NeoAI MODÈLES RETENUS] :",
+    modelesCompatibles.map(
+        modele =>
+            modele?.id ||
+            modele?.nom ||
+            modele?.action ||
+            "?"
+    )
+);
 
     //============================================================
     // ❌ AUCUN CANDIDAT
