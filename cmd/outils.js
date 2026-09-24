@@ -7874,40 +7874,236 @@ ${resultat.nombreActions || 0}
         texte +=
 `
 *Action ${index + 1}*
-├ 🧍 Sujet : ${action.acteur || "—"}
-├ ⚔️ Action : ${action.action || "—"}
-├ 🎯 Cible : ${action.cible || "—"}
-├ 🌀 Catégorie : ${action.categorie || "—"}
-├ 🎯 Famille : ${action.famille || "—"}
-├ 💨 Manière : ${action.maniere || "—"}
-├ ⚡ Vitesse : ${action.vitesse || "—"}
-├ 📐 Distance : ${
-  action.distance !== null &&
-  action.distance !== undefined
-    ? `${action.distance}${action.distanceUnite || "m"}`
-    : "—"
-}
-├ 📏 Hauteur : ${
-  action.hauteur !== null &&
-  action.hauteur !== undefined
-    ? `${action.hauteur}${action.hauteurUnite || "m"}`
-    : "—"
-}
-├ 🧭 Trajectoire : ${action.trajectoire || "—"}
-├ 🦾 Membre utilisé : ${action.membre || "—"}
-├ 🦵 Partie du corps : ${action.partieCorps || "—"}
-├ 📚 Modèle : ${
+`;
+
+        //==========================================================
+        // 🧩 PARAMÈTRES À AFFICHER
+        // Basés uniquement sur la structure du modèle
+        //==========================================================
+
+        const structure =
+          Array.isArray(action.structure)
+            ? action.structure
+            : [];
+
+        const afficher =
+          (slot, ligne) => {
+
+            if (
+              structure.includes(slot)
+            ) {
+              texte += ligne;
+            }
+
+          };
+
+        //==========================================================
+        // 🧍 SUJET
+        //==========================================================
+
+        afficher(
+          "SUJET",
+          `├ 🧍 Sujet : ${action.acteur || action.sujet || "—"}\n`
+        );
+
+        //==========================================================
+        // ⚔️ ACTION
+        //==========================================================
+
+        afficher(
+          "ACTION",
+          `├ ⚔️ Action : ${action.action || "—"}\n`
+        );
+
+        //==========================================================
+        // 🎯 CIBLE
+        //==========================================================
+
+        afficher(
+          "CIBLE",
+          `├ 🎯 Cible : ${action.cible || "—"}\n`
+        );
+
+        //==========================================================
+        // 💨 MANIÈRE
+        //==========================================================
+
+        afficher(
+          "MANIERE",
+          `├ 💨 Manière : ${action.maniere || "—"}\n`
+        );
+
+        //==========================================================
+        // ⚡ VITESSE
+        //==========================================================
+
+        afficher(
+          "VITESSE",
+          `├ ⚡ Vitesse : ${action.vitesse || "—"}\n`
+        );
+
+        //==========================================================
+        // 📐 DISTANCE
+        //==========================================================
+
+        if (
+          structure.includes("DISTANCE")
+        ) {
+
+          const distance =
+            action.distance !== null &&
+            action.distance !== undefined
+              ? `${action.distance}${action.distanceUnite || "m"}`
+              : "—";
+
+          texte +=
+`├ 📐 Distance : ${distance}
+`;
+        }
+
+        //==========================================================
+        // 📏 HAUTEUR
+        //==========================================================
+
+        if (
+          structure.includes("HAUTEUR")
+        ) {
+
+          const hauteur =
+            action.hauteur !== null &&
+            action.hauteur !== undefined
+              ? `${action.hauteur}${action.hauteurUnite || "m"}`
+              : "—";
+
+          texte +=
+`├ 📏 Hauteur : ${hauteur}
+`;
+        }
+
+        //==========================================================
+        // 🧭 TRAJECTOIRE
+        //==========================================================
+
+        afficher(
+          "TRAJECTOIRE",
+          `├ 🧭 Trajectoire : ${action.trajectoire || "—"}\n`
+        );
+
+        //==========================================================
+        // 🧭 DIRECTION
+        //==========================================================
+
+        afficher(
+          "DIRECTION",
+          `├ 🧭 Direction : ${action.direction || "—"}\n`
+        );
+
+        //==========================================================
+        // ↪️ CÔTÉ
+        //==========================================================
+
+        afficher(
+          "COTE",
+          `├ ↔️ Côté : ${action.cote || "—"}\n`
+        );
+
+        //==========================================================
+        // 📏 COURBE
+        //==========================================================
+
+        if (
+          structure.includes("COURBE")
+        ) {
+
+          const courbe =
+            action.courbe !== null &&
+            action.courbe !== undefined
+              ? `${action.courbe}m`
+              : "—";
+
+          texte +=
+`├ 🌀 Courbe : ${courbe}
+`;
+        }
+
+        //==========================================================
+        // 🦾 MEMBRE
+        //==========================================================
+
+        afficher(
+          "MEMBRE",
+          `├ 🦾 Membre utilisé : ${action.membre || "—"}\n`
+        );
+
+        //==========================================================
+        // 🦵 PARTIE DU CORPS
+        //==========================================================
+
+        afficher(
+          "PARTIE_CORPS",
+          `├ 🦵 Partie du corps : ${action.partieCorps || "—"}\n`
+        );
+
+        //==========================================================
+        // 🎯 INTENTION
+        //==========================================================
+
+        afficher(
+          "INTENTION",
+          `├ 🎯 Intention : ${action.intention || "—"}\n`
+        );
+
+        //==========================================================
+        // 📐 ANGLE
+        //==========================================================
+
+        afficher(
+          "ANGLE",
+          `├ 📐 Angle : ${action.angle || "—"}\n`
+        );
+
+        //==========================================================
+        // 🔄 NOMBRE DE TOURS
+        //==========================================================
+
+        afficher(
+          "NOMBRE_TOURS",
+          `├ 🔄 Nombre de tours : ${action.nombreTours || "—"}\n`
+        );
+
+        //==========================================================
+        // 📚 MODÈLE
+        // Toujours affiché
+        //==========================================================
+
+        texte +=
+`├ 📚 Modèle : ${
   action.modele?.id ||
   action.modele?.nom ||
   action.modele ||
   "—"
 }
-├ 🧩 Structure : ${
+`;
+
+        //==========================================================
+        // 🧩 STRUCTURE
+        // Toujours affichée
+        //==========================================================
+
+        texte +=
+`├ 🧩 Structure : ${
   Array.isArray(action.structure)
     ? `${action.structure.length - (action.slotsManquants?.length || 0)}/${action.structure.length} ${action.structureComplete ? "✅" : "❌"}`
     : "—"
 }
-╰ 📊 Similarité : ${action.score || 0}%
+`;
+
+        //==========================================================
+        // 📊 SIMILARITÉ
+        //==========================================================
+
+        texte +=
+`╰ 📊 Similarité : ${action.score || 0}%
 `;
 
       }
