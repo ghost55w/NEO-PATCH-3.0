@@ -3578,391 +3578,185 @@ function neoFusionnerSegments(
 //==============================================================
 // 📚 MODÈLES D'ACTIONS
 //==============================================================
+//==============================================================
+// 📚 RÉCUPÉRATION DES MODÈLES NEOAI
+//==============================================================
+
 function neoGetModeles() {
 
     const sources = [
+
         NeoAI?.NEO_ACTION_MODELS,
         NeoAI?.NEO_COMBAT_MODELS,
         NeoAI?.ACTION_MODELS,
         NeoAI?.MODELES_ACTIONS,
 
-        // IMPORTANT :
-        // Ancienne source éventuelle
         typeof NEO_ACTIONS_COMBAT !== "undefined"
             ? NEO_ACTIONS_COMBAT
             : null
     ];
 
+    //============================================================
+    // 🔎 PARCOURIR UNE SOURCE
+    //============================================================
 
     for (const source of sources) {
 
-        if (!source) {
-            continue;
-        }
-
-
-        // ============================================================
-        // 📦 SOURCE SOUS FORME DE TABLEAU
-        // ============================================================
-
-        if (Array.isArray(source)) {
-
-            const modeles = [];
-
-            for (const modele of source) {
-
-                if (
-                    !modele ||
-                    typeof modele !== "object"
-                ) {
-                    continue;
-                }
-
-                modeles.push({
-                    ...modele,
-
-                    action:
-                        modele.action ||
-                        modele.nomAction ||
-                        null
-                });
-            }
-
-
-            if (modeles.length) {
-
-                console.log(
-                    "📚 [NeoAI MODELES] Source tableau :",
-                    modeles.length
-                );
-
-                return modeles;
-            }
-
-            continue;
-        }
-
-
-        // ============================================================
-        // 📚 SOURCE SOUS FORME D'OBJET
-        // ============================================================
-
         if (
-            typeof source === "object" &&
-            !Array.isArray(source)
+            !source ||
+            typeof source !== "object"
+        ) {
+            continue;
+        }
+
+        const modeles = [];
+
+        //========================================================
+        // 📚 CATÉGORIES
+        //========================================================
+
+        for (
+            const [categorieNom, categorie]
+            of Object.entries(source)
         ) {
 
-            const modeles = [];
+            if (
+                !categorie ||
+                typeof categorie !== "object" ||
+                Array.isArray(categorie)
+            ) {
+                continue;
+            }
 
-
-            // ========================================================
-            // 🔎 PARCOURS DES CATÉGORIES
-            //
-            // Nouvelle architecture :
-            //
-            // NEO_ACTION_MODELS = {
-            //
-            //     deplacement: {
-            //
-            //         categorie: "deplacement",
-            //
-            //         course: [
-            //             COURSE_001,
-            //             COURSE_002
-            //         ],
-            //
-            //         saut: [
-            //             SAUT_001
-            //         ]
-            //     }
-            // }
-            //
-            // On doit donc descendre :
-            //
-            // CATÉGORIE
-            //      ↓
-            // ACTION
-            //      ↓
-            // MODÈLE
-            // ========================================================
+            //====================================================
+            // 🎯 ACTIONS
+            //====================================================
 
             for (
-                const [categorie, groupe]
-                of Object.entries(source)
+                const [actionNom, actionData]
+                of Object.entries(categorie)
             ) {
 
                 if (
-                    !groupe ||
-                    typeof groupe !== "object" ||
-                    Array.isArray(groupe)
+                    actionNom === "categorie"
                 ) {
                     continue;
                 }
 
+                if (
+                    !actionData ||
+                    typeof actionData !== "object" ||
+                    Array.isArray(actionData)
+                ) {
+                    continue;
+                }
 
-                // ====================================================
-                // 🔎 PARCOURS DES ACTIONS
-                // ====================================================
+                //================================================
+                // 📦 MODÈLES
+                //================================================
+
+                if (
+                    !Array.isArray(
+                        actionData.modeles
+                    )
+                ) {
+                    continue;
+                }
 
                 for (
-                    const [actionCanonique, valeur]
-                    of Object.entries(groupe)
+                    const modele
+                    of actionData.modeles
                 ) {
 
-                    // ------------------------------------------------
-                    // "categorie" est une propriété descriptive,
-                    // pas une action.
-                    // ------------------------------------------------
-
                     if (
-                        actionCanonique === "categorie"
+                        !modele ||
+                        typeof modele !== "object"
                     ) {
                         continue;
                     }
 
+                    modeles.push({
 
-                    // ------------------------------------------------
-                    // ACTION → plusieurs modèles
-                    //
-                    // Exemple :
-                    //
-                    // course: [
-                    //     COURSE_001,
-                    //     COURSE_002
-                    // ]
-                    // ------------------------------------------------
+                        ...modele,
 
-                    if (Array.isArray(valeur)) {
-
-                        for (const modele of valeur) {
-
-                            if (
-                                !modele ||
-                                typeof modele !== "object"
-                            ) {
-                                continue;
-                            }
-
-
-                            modeles.push({
-
-                                // On conserve toutes les
-                                // propriétés du modèle
-                                ...modele,
-
-                                // ==================================================
-                                // ACTION CANONIQUE
-                                //
-                                // Priorité au nom de l'action dans
-                                // la hiérarchie.
-                                //
-                                // Exemple :
-                                //
-                                // deplacement
-                                //      ↓
-                                // course
-                                //
-                                // devient :
-                                //
-                                // action: "course"
-                                // ==================================================
-
-                                action:
-                                    actionCanonique,
-
-                                // ==================================================
-                                // CATÉGORIE
-                                //
-                                // Exemple :
-                                //
-                                // categorie: "deplacement"
-                                // ==================================================
-
-                                categorie:
-                                    modele.categorie ||
-                                    categorie
-                            });
-                        }
-
-                        continue;
-                    }
-
-
-                    // ------------------------------------------------
-                    // ACTION → un seul modèle
-                    // ------------------------------------------------
-
-                    if (
-                        valeur &&
-                        typeof valeur === "object"
-                    ) {
-
-                        modeles.push({
-
-                            ...valeur,
-
-                            action:
-                                actionCanonique,
-
-                            categorie:
-                                valeur.categorie ||
-                                categorie
-                        });
-                    }
-                }
-            }
-
-
-            // ========================================================
-            // ✅ MODÈLES TROUVÉS
-            // ========================================================
-
-            if (modeles.length) {
-
-                console.log(
-                    "📚 [NeoAI MODELES] Source hiérarchique :",
-                    modeles.length
-                );
-
-                console.log(
-                    "🎯 [NeoAI CATÉGORIES DISPONIBLES] :",
-                    [
-                        ...new Set(
-                            modeles
-                                .map(
-                                    modele =>
-                                        modele.categorie
-                                )
-                                .filter(Boolean)
-                        )
-                    ]
-                );
-
-                console.log(
-                    "🎯 [NeoAI ACTIONS CANONIQUES] :",
-                    [
-                        ...new Set(
-                            modeles
-                                .map(
-                                    modele =>
-                                        modele.action
-                                )
-                                .filter(Boolean)
-                        )
-                    ]
-                );
-
-                return modeles;
-            }
-
-
-            // ========================================================
-            // 🔄 COMPATIBILITÉ AVEC ANCIEN FORMAT
-            //
-            // Exemple :
-            //
-            // {
-            //     course: [ ... ],
-            //     saut: [ ... ]
-            // }
-            //
-            // Si l'objet n'a pas de sous-catégorie, on le traite
-            // directement comme un groupe d'actions.
-            // ========================================================
-
-            const anciensModeles = [];
-
-
-            for (
-                const [actionCanonique, valeur]
-                of Object.entries(source)
-            ) {
-
-                if (actionCanonique === "categorie") {
-                    continue;
-                }
-
-
-                if (Array.isArray(valeur)) {
-
-                    for (const modele of valeur) {
-
-                        if (
-                            !modele ||
-                            typeof modele !== "object"
-                        ) {
-                            continue;
-                        }
-
-                        anciensModeles.push({
-
-                            ...modele,
-
-                            action:
-                                modele.action ||
-                                actionCanonique,
-
-                            categorie:
-                                modele.categorie ||
-                                null
-                        });
-                    }
-
-                    continue;
-                }
-
-
-                if (
-                    valeur &&
-                    typeof valeur === "object"
-                ) {
-
-                    anciensModeles.push({
-
-                        ...valeur,
+                        // --------------------------------------
+                        // 🎯 Action
+                        // --------------------------------------
 
                         action:
-                            valeur.action ||
-                            actionCanonique,
+                            modele.action ||
+                            actionData.action ||
+                            actionNom,
+
+                        // --------------------------------------
+                        // 🏷️ Catégorie
+                        // --------------------------------------
 
                         categorie:
-                            valeur.categorie ||
-                            null
+                            modele.categorie ||
+                            actionData.categorie ||
+                            categorieNom
                     });
                 }
             }
+        }
 
+        //========================================================
+        // ✅ SOURCE TROUVÉE
+        //========================================================
 
-            if (anciensModeles.length) {
+        if (
+            modeles.length
+        ) {
 
-                console.log(
-                    "📚 [NeoAI MODELES] Ancien format :",
-                    anciensModeles.length
-                );
+            console.log(
+                "📚 [NeoAI MODELES] Chargés :",
+                modeles.length
+            );
 
-                console.log(
-                    "🎯 [NeoAI ACTIONS DISPONIBLES] :",
-                    [
-                        ...new Set(
-                            anciensModeles
-                                .map(
-                                    modele =>
-                                        modele.action
-                                )
-                                .filter(Boolean)
-                        )
-                    ]
-                );
+            console.log(
+                "🎯 [NeoAI CATÉGORIES] :",
+                [
+                    ...new Set(
+                        modeles
+                            .map(
+                                modele =>
+                                    modele.categorie
+                            )
+                            .filter(Boolean)
+                    )
+                ]
+            );
 
-                return anciensModeles;
-            }
+            console.log(
+                "🎯 [NeoAI ACTIONS] :",
+                [
+                    ...new Set(
+                        modeles
+                            .map(
+                                modele =>
+                                    modele.action
+                            )
+                            .filter(Boolean)
+                    )
+                ]
+            );
+
+            console.log(
+                "🆔 [NeoAI MODÈLES] :",
+                modeles.map(
+                    modele =>
+                        modele.id
+                )
+            );
+
+            return modeles;
         }
     }
 
-
-    // ================================================================
+    //============================================================
     // ❌ AUCUN MODÈLE
-    // ================================================================
+    //============================================================
 
     console.log(
         "⚠️ [NeoAI MODELES] Aucun modèle trouvé."
@@ -3970,24 +3764,11 @@ function neoGetModeles() {
 
     return [];
 }
-
+                                
 
 //==============================================================
 // 🧩 COMPARAISON SÉMANTIQUE D'UN MODÈLE
 //==============================================================
-//
-// 🎯 RÔLES :
-//
-// EXEMPLES  = reconnaissance du modèle
-// STRUCTURE = validation de l'action
-//
-// Le modèle est choisi principalement grâce à la phrase
-// d'exemple qui ressemble le plus au texte reçu.
-//
-// 30% = candidat
-// 70% = correspondance forte
-//==============================================================
-
 function neoCalculerSimilariteModele(
     texte,
     modele,
