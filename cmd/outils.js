@@ -6055,6 +6055,8 @@ const normalManiere =
     texte
   ).toLowerCase();
 
+    const normal = normalManiere;
+
 for (
   const definition
   of manieres
