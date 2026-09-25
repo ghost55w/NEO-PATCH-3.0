@@ -5809,111 +5809,311 @@ const intention =
 
   }
 
-  //============================================================
-  // 💨 MANIÈRE
-  //============================================================
+//============================================================
+// 💨 MANIÈRE
+//============================================================
+// La manière décrit COMMENT l'action est exécutée.
 
-  const manieres = [
+let maniere = null;
 
-    "course",
-    "sprint",
-    "bond",
-    "bondissant",
-    "saut",
-    "sautant",
-    "zigzag",
-    "zigzagant",
+const manieres = [
 
-    "direct",
-    "directe",
-    "circulaire",
-    "circulairement",
-    "revers",
-    "retourné",
-    "retourne",
-    "crochet",
-    "uppercut",
-    "frontal",
-    "latéral",
-    "laterale",
-    "latérale",
+  //==========================================================
+  // 🏃 COURSE / DÉPLACEMENT
+  //==========================================================
 
-    "vrille",
-    "rotation",
-    "tournant",
-    "pivot",
-    "pivôt",
-    "diagonale",
-    "diagonal",
-    "latéralement",
-    "lateralement",
-    "frontalement",
+  {
+    valeur: "frontale",
 
-    "esquive",
-    "déviation",
-    "deviation",
-    "écart",
-    "écartement",
+    variantes: [
+      "frontale",
+      "frontal",
+      "frontalement",
+      "de manière frontale",
+      "de maniere frontale",
+      "en course frontale",
+      "en trajectoire frontale"
+    ]
+  },
 
-    "violemment",
-    "violent",
-    "violente",
-    "rapidement",
-    "brutalement",
-    "brutal",
-    "brutale",
-    "furtivement",
-    "précipitamment",
-    "precipitamment",
-    "doucement"
+  {
+    valeur: "circulaire",
 
-  ];
+    variantes: [
+      "circulaire",
+      "circulairement",
+      "de manière circulaire",
+      "de maniere circulaire",
+      "en trajectoire circulaire"
+    ]
+  },
 
-  let maniere = null;
+  {
+    valeur: "zig_zag",
 
-  const normal =
-    neoNormaliserTexteLocal(
-      texte
-    ).toLowerCase();
+    variantes: [
+      "zig zag",
+      "zigzag",
+      "zig-zag",
+      "zigzagant",
+      "en zig zag",
+      "en zigzag",
+      "en zig-zag",
+      "de manière zig zag",
+      "de manière zigzag"
+    ]
+  },
+
+  {
+    valeur: "diagonale",
+
+    variantes: [
+      "diagonale",
+      "diagonal",
+      "diagonalement",
+      "en diagonale",
+      "de manière diagonale",
+      "de maniere diagonale",
+      "en trajectoire diagonale"
+    ]
+  },
+
+  //==========================================================
+  // 👊 FRAPPES MAINS
+  //==========================================================
+
+  {
+    valeur: "jab",
+
+    variantes: [
+      "jab"
+    ]
+  },
+
+  {
+    valeur: "direct",
+
+    variantes: [
+      "direct",
+      "directe",
+      "coup direct"
+    ]
+  },
+
+  {
+    valeur: "crochet",
+
+    variantes: [
+      "crochet"
+    ]
+  },
+
+  {
+    valeur: "uppercut",
+
+    variantes: [
+      "uppercut"
+    ]
+  },
+
+  {
+    valeur: "backfist",
+
+    variantes: [
+      "backfist",
+      "back fist"
+    ]
+  },
+
+  {
+    valeur: "overhand",
+
+    variantes: [
+      "overhand"
+    ]
+  },
+
+  {
+    valeur: "hammerfist",
+
+    variantes: [
+      "hammerfist",
+      "hammer fist"
+    ]
+  },
+
+  //==========================================================
+  // 🦵 COUPS DE PIED
+  //==========================================================
+
+  {
+    valeur: "frontal",
+
+    variantes: [
+      "coup de pied frontal",
+      "kick frontal"
+    ]
+  },
+
+  {
+    valeur: "latéral",
+
+    variantes: [
+      "coup de pied latéral",
+      "coup de pied lateral",
+      "kick latéral",
+      "kick lateral"
+    ]
+  },
+
+  {
+    valeur: "circulaire",
+
+    variantes: [
+      "coup de pied circulaire",
+      "kick circulaire"
+    ]
+  },
+
+  {
+    valeur: "retourné",
+
+    variantes: [
+      "coup de pied retourné",
+      "coup de pied retourne",
+      "kick retourné",
+      "kick retourne"
+    ]
+  },
+
+  //==========================================================
+  // 🔄 ROTATIONS / MOUVEMENTS
+  //==========================================================
+
+  {
+    valeur: "vrille",
+
+    variantes: [
+      "vrille",
+      "en vrille"
+    ]
+  },
+
+  {
+    valeur: "rotation",
+
+    variantes: [
+      "rotation",
+      "en rotation"
+    ]
+  },
+
+  {
+    valeur: "pivot",
+
+    variantes: [
+      "pivot",
+      "en pivot"
+    ]
+  },
+
+  {
+    valeur: "roulade",
+
+    variantes: [
+      "roulade",
+      "en roulade"
+    ]
+  },
+
+  {
+    valeur: "pirouette",
+
+    variantes: [
+      "pirouette",
+      "en pirouette"
+    ]
+  },
+
+  {
+    valeur: "salto",
+
+    variantes: [
+      "salto",
+      "en salto"
+    ]
+  }
+
+];
+
+//============================================================
+// 🔎 DÉTECTION
+//============================================================
+
+const normalManiere =
+  neoNormaliserTexteLocal(
+    texte
+  ).toLowerCase();
+
+for (
+  const definition
+  of manieres
+) {
+
+  // Les formulations les plus longues
+  // sont testées en premier.
+  const variantes =
+    [...definition.variantes]
+      .sort(
+        (a, b) =>
+          b.length - a.length
+      );
 
   for (
-    const mot of manieres
+    const variante
+    of variantes
   ) {
 
-    const motNormalise =
-      neoNormaliserMotLocal(
-        mot
-      );
+    const varianteNormalisee =
+      neoNormaliserTexteLocal(
+        variante
+      ).toLowerCase()
+      .trim();
+
+    if (!varianteNormalisee) {
+      continue;
+    }
 
     const regex =
       new RegExp(
-        `\\b${motNormalise.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+        )}(?![A-Za-zÀ-ÿ0-9_-])`,
         "iu"
       );
 
     if (
-      regex.test(normal)
+      regex.test(normalManiere)
     ) {
 
-      maniere = mot;
+      maniere =
+        definition.valeur;
+
       break;
 
     }
 
   }
 
+  if (maniere) {
+    break;
+  }
+
+}
+    
   //============================================================
   // 🦾 MEMBRE UTILISÉ
-  //============================================================
-  // Le membre appartient à L'ACTEUR.
-  //
-  // Exemple :
-  // "Naruto frappe du droit visant la mâchoire"
-  //
-  // membre      = main droite
-  // partieCorps = mâchoire
-  //
-  // On cherche d'abord les membres explicitement écrits.
   //============================================================
 
   let membre = null;
@@ -6024,14 +6224,7 @@ const intention =
   //============================================================
   // 🧠 INTERPRÉTATION DE "DU DROIT / DU GAUCHE"
   //============================================================
-  // Exemple :
-  //
-  // "Naruto frappe un uppercut du droit"
-  //
-  // "du droit" ne contient pas "main droite".
-  // On déduit donc le membre selon le type d'action.
-  //============================================================
-
+  
   if (!membre) {
 
     const droit =
@@ -6223,16 +6416,6 @@ const analyseModele = {
 
 //============================================================
 // 🧩 VALIDATION STRUCTURELLE
-//============================================================
-//
-// IMPORTANT :
-//
-// La structure est validée indépendamment du score
-// de similarité de l'exemple.
-//
-// Le modèle sert uniquement à fournir la structure
-// requise de l'action.
-//
 //============================================================
 
 const modeleReconnu =
@@ -6632,20 +6815,6 @@ actionCanonique:
 
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
-//==============================================================
-//
-// IMPORTANT :
-// AUCUN seuil de similarité 50 % / 70 %.
-//
-// Le modèle peut être reconnu avec une faible similarité.
-//
-// La seule vraie condition de validation est :
-//
-//     structureComplete === true
-//
-// Donc :
-//     modèle trouvé + structure complète = VALIDÉ
-//
 //==============================================================
 
 function neoArbitrer(
