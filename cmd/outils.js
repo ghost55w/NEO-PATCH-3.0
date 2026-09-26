@@ -2042,45 +2042,140 @@ function neoDetecterDirection(texte) {
 //==============================================================
 function neoDetecterIntention(texte) {
 
+  const brut = String(texte || "").trim();
+
+  if (!brut) {
+    return null;
+  }
+
   const t =
     neoNormaliserTexteLocal(
-      texte
+      brut
     ).toLowerCase();
 
   //============================================================
-  // 🎯 ATTEINDRE / REJOINDRE
+  // 🧠 MARQUEURS D'INTENTION
+  //
+  // Le moteur ne cherche PAS une intention prédéfinie.
+  // Il cherche une construction qui exprime un objectif.
   //============================================================
-  if (
-    /\bpour\s+l['’]atteindre\b/iu.test(t) ||
-    /\bpour\s+atteindre\b/iu.test(t) ||
-    /\bpour\s+le\s+rejoindre\b/iu.test(t) ||
-    /\bpour\s+la\s+rejoindre\b/iu.test(t) ||
-    /\bpour\s+rejoindre\b/iu.test(t)
-  ) {
-    return "atteindre";
+
+  const marqueurs = [
+    /\bafin\s+de\s+/iu,
+    /\bdans\s+le\s+but\s+de\s+/iu,
+    /\bdans\s+l['’]objectif\s+de\s+/iu,
+    /\bdans\s+l['’]intention\s+de\s+/iu,
+    /\bavec\s+l['’]objectif\s+de\s+/iu,
+    /\bavec\s+pour\s+objectif\s+de\s+/iu,
+    /\bde\s+façon\s+à\s+/iu,
+    /\bde\s+manière\s+à\s+/iu,
+    /\bde\s+maniere\s+a\s+/iu,
+    /\bpour\s+pouvoir\s+/iu,
+    /\bpour\s+/iu
+  ];
+
+  //============================================================
+  // 🔎 RECHERCHE DU PREMIER MARQUEUR
+  //============================================================
+
+  let match = null;
+
+  for (const regex of marqueurs) {
+
+    const resultat =
+      regex.exec(t);
+
+    if (!resultat) {
+      continue;
+    }
+
+    if (
+      !match ||
+      resultat.index < match.index
+    ) {
+      match = resultat;
+    }
+  }
+
+  if (!match) {
+    return null;
   }
 
   //============================================================
-  // 🎯 INTERCEPTER
+  // ✂️ EXTRACTION DE LA PROPOSITION
   //============================================================
-  if (
-    /\bpour\s+l['’]intercepter\b/iu.test(t) ||
-    /\bpour\s+intercepter\b/iu.test(t)
-  ) {
-    return "intercepter";
+
+  let intention =
+    t.slice(
+      match.index + match[0].length
+    ).trim();
+
+  if (!intention) {
+    return null;
   }
 
   //============================================================
-  // 🎯 RAPPROCHER
+  // 🧹 NETTOYAGE PONCTUATION
   //============================================================
-  if (
-    /\bpour\s+se\s+rapprocher\b/iu.test(t) ||
-    /\bafin\s+de\s+se\s+rapprocher\b/iu.test(t)
-  ) {
-    return "rapprocher";
+
+  intention =
+    intention
+      .replace(/^[,;:.\-–—]+/u, "")
+      .replace(/[,;:.\-–—]+$/u, "")
+      .trim();
+
+  if (!intention) {
+    return null;
   }
 
-  return null;
+  //============================================================
+  // 🚫 ÉVITER DE PRENDRE UNE NOUVELLE ACTION POUR L'INTENTION
+  //
+  // Exemple :
+  // "pour atteindre Naruto puis frapper"
+  //
+  // On conserve seulement la première proposition.
+  //============================================================
+
+  const separateur =
+    intention.search(
+      /\s+(?:puis|ensuite|avant\s+de|après\s+avoir|et\s+ensuite)\s+/iu
+    );
+
+  if (separateur > 0) {
+
+    intention =
+      intention
+        .slice(0, separateur)
+        .trim();
+
+  }
+
+  //============================================================
+  // 🧠 RESTAURATION DE LA CASSE DU TEXTE ORIGINAL
+  //
+  // On récupère la portion correspondante dans le texte brut
+  // lorsque c'est possible.
+  //============================================================
+
+  const indexBrut =
+    brut.toLowerCase().indexOf(
+      intention.toLowerCase()
+    );
+
+  if (indexBrut >= 0) {
+
+    intention =
+      brut
+        .slice(
+          indexBrut,
+          indexBrut + intention.length
+        )
+        .trim();
+
+  }
+
+  return intention || null;
 }
 
 //==============================================================
