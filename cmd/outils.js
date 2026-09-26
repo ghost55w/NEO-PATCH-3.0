@@ -6887,38 +6887,40 @@ return {
     categorie,
     famille,
 
-    // 🎯 CIBLE
-    cible,
+   // 🎯 CIBLE
+cible,
 
-    // 🧩 COMPLÉMENTS
-    maniere,
-    membre,
+// 🧩 COMPLÉMENTS
+maniere,
+membre,
 
-    vitesse:
-        vitesse?.valeur ?? null,
+vitesse:
+    vitesse?.valeur ?? null,
 
-    distance:
-        distance?.valeur ?? null,
+distance:
+    distance?.valeur ?? null,
 
-    distanceUnite:
-        distance?.unite ?? null,
+distanceUnite:
+    distance?.unite ?? null,
 
-    hauteur:
-        hauteur?.valeur ?? null,
+hauteur:
+    hauteur?.valeur ?? null,
 
-    hauteurUnite:
-        hauteur?.unite ?? null,
+hauteurUnite:
+    hauteur?.unite ?? null,
 
-    direction:
-        trajectoire,
+direction,
 
-    trajectoire,
+trajectoire,
 
-    partieCorps,
+partieCorps,
 
-    // 🧠 MODÈLE SÉLECTIONNÉ
+// 🧠 INTENTION
+intention,
+
+// 🧠 MODÈLE SÉLECTIONNÉ
 modele:
-    modele?.modele || null,
+    modele?.modele || null, 
 
 // 🔎 SCORE DE RECONNAISSANCE DU MODÈLE
 score:
