@@ -1548,32 +1548,80 @@ function neoDetecterVitesse(texte) {
     ).toLowerCase();
 
   const valeurs = [
-    "vmax",
-    "v max",
-    "vitesse maximale",
-    "pleine vitesse",
-    "à pleine vitesse",
-    "a pleine vitesse",
-    "très vite",
-    "tres vite",
-    "rapidement",
-    "lentement"
+    {
+      valeur: "maximale",
+      variantes: [
+        "vmax",
+        "v max",
+        "vitesse maximale",
+        "a vitesse maximale",
+        "à vitesse maximale",
+        "pleine vitesse",
+        "a pleine vitesse",
+        "à pleine vitesse",
+        "maximum",
+        "max"
+      ]
+    },
+
+    {
+      valeur: "très rapide",
+      variantes: [
+        "tres vite",
+        "très vite",
+        "tres rapidement",
+        "très rapidement",
+        "rapidement"
+      ]
+    },
+
+    {
+      valeur: "lente",
+      variantes: [
+        "lentement",
+        "a faible vitesse",
+        "à faible vitesse"
+      ]
+    }
   ];
 
-  for (const valeur of valeurs) {
+  for (const definition of valeurs) {
 
-    if (
-      t.includes(valeur)
-    ) {
+    const variantes =
+      [...definition.variantes]
+        .sort(
+          (a, b) =>
+            b.length - a.length
+        );
 
-      return {
-        valeur:
-          valeur.includes("vmax") ||
-          valeur.includes("v max") ||
-          valeur.includes("maximale")
-            ? "maximale"
-            : valeur
-      };
+    for (const variante of variantes) {
+
+      const normalisee =
+        neoNormaliserTexteLocal(
+          variante
+        ).toLowerCase();
+
+      if (!normalisee) {
+        continue;
+      }
+
+      const regex =
+        new RegExp(
+          `(?<![A-Za-zÀ-ÿ0-9_-])${normalisee.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+          )}(?![A-Za-zÀ-ÿ0-9_-])`,
+          "iu"
+        );
+
+      if (regex.test(t)) {
+
+        return {
+          valeur:
+            definition.valeur
+        };
+
+      }
 
     }
 
