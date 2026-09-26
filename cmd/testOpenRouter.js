@@ -1,6 +1,11 @@
 const axios = require("axios");
 const { ovlcmd } = require("../lib/ovlcmd");
 
+const {
+    openRouterChat,
+    neoOpenRouterEstConfigure
+} = require("./OpenRouterNeoAI");
+
 /**
  * ╔══════════════════════════════════════════════════════╗
  * ║              OPENROUTER TEST COMMAND               ║
