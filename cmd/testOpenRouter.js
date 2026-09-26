@@ -1,4 +1,3 @@
-const axios = require("axios");
 const { ovlcmd } = require("../lib/ovlcmd");
 
 const {
@@ -26,12 +25,6 @@ const {
  * la réponse du modèle sélectionné.
  */
 
-const {
-    openRouterChat,
-    neoOpenRouterEstConfigure
-} = require("../cmd/NeoAI-OpenRouter");
-
-
 //==============================================================
 // 🧪 COMMANDE TEST OPENROUTER
 //==============================================================
@@ -57,13 +50,11 @@ ovlcmd({
             );
         }
 
-
         //==========================================================
         // 📝 RÉCUPÉRATION DU PAVÉ
         //==========================================================
 
         const pave = String(match || "").trim();
-
 
         if (!pave) {
 
@@ -76,7 +67,6 @@ ovlcmd({
             );
         }
 
-
         //==========================================================
         // ⏳ MESSAGE D'ATTENTE
         //==========================================================
@@ -86,7 +76,6 @@ ovlcmd({
             "━━━━━━━━━━━━━━━━━━\n" +
             "🧠 Analyse du pavé en cours..."
         );
-
 
         //==========================================================
         // 🚀 APPEL OPENROUTER
@@ -111,7 +100,6 @@ ovlcmd({
             }
         );
 
-
         //==========================================================
         // 📊 RÉCUPÉRATION RÉPONSE
         //==========================================================
@@ -123,7 +111,6 @@ ovlcmd({
             resultat.model ||
             resultat.primaryModel ||
             "inconnu";
-
 
         //==========================================================
         // 📤 RÉSULTAT
@@ -144,7 +131,6 @@ ovlcmd({
             "💬 *RÉPONSE :*\n" +
             reponse
         );
-
 
         console.log(
             "✅ OpenRouter test réussi | modèle :",
