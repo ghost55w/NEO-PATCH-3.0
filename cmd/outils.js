@@ -5802,7 +5802,8 @@ function neoReconnaitreModele(
 //==============================================================
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
 //==============================================================
-   function neoAnalyserAction(
+     
+ function neoAnalyserAction(
 texte,
 contexte = {}
 ) {
@@ -5902,7 +5903,7 @@ const normal =
     .trim();
 
 const mots =
-  normal.split(/\s+/u);
+normal.split(/\s+/u);
 
 const premiersMotsAction = [
   "avance",
@@ -5929,27 +5930,88 @@ const premiersMotsAction = [
   "pivote",
   "pivoter",
   "tourne",
-  "tourner"
+  "tourner",
+  "esquive",
+  "esquiver",
+  "évite",
+  "evite",
+  "éviter",
+  "eviter",
+  "bloque",
+  "bloquer",
+  "pare",
+  "parer",
+  "recule",
+  "se baisse",
+  "baisse"
 ];
 
 const indexAction =
-  mots.findIndex(
-    mot =>
-      premiersMotsAction.includes(
-        neoNormaliserMotLocal(mot)
-      )
-  );
+mots.findIndex(
+mot =>
+premiersMotsAction.includes(
+neoNormaliserMotLocal(mot)
+)
+);
 
 if (
-  indexAction > 0
+indexAction > 0
 ) {
 
-  acteur =
-    mots[0];
+acteur =
+mots[0];
 
 }
 
 }
+
+//============================================================
+// 🧠 DÉTECTION DU TYPE DE PAVÉ
+//============================================================
+//
+// Un pavé peut être :
+//
+// ACTION
+// → action normale
+//
+// REACTION
+// → action exécutée en réponse à un événement.
+//
+// La réaction ne supprime PAS le modèle,
+// la structure ou la similarité.
+//
+//============================================================
+
+const texteRelation =
+neoNormaliserTexteLocal(
+texte
+)
+.replace(/\s+/g, " ")
+.trim();
+
+const marqueurReaction =
+  /\b(
+    voyant|
+    voyant\s+que|
+    en\s+voyant|
+    apercevant|
+    apercevant\s+que|
+    constatant|
+    constatant\s+que|
+    face\s+à|
+    face\s+au|
+    face\s+aux|
+    en\s+réaction\s+à|
+    réagit\s+à|
+    réagissant\s+à|
+    lorsqu['’]il\s+voit|
+    lorsqu['’]elle\s+voit|
+    quand\s+il\s+voit|
+    quand\s+elle\s+voit
+  )\b/ixu
+  .test(
+    texteRelation
+  );
 
 //============================================================
 // 💨 MANIÈRE
@@ -5959,10 +6021,6 @@ if (
 let maniere = null;
 
 const manieres = [
-
-//==========================================================
-// 🏃 COURSE / DÉPLACEMENT
-//==========================================================
 
 {
 valeur: "frontale",
@@ -6030,69 +6088,55 @@ variantes: [
 
 {
 valeur: "jab",
-
 variantes: [
   "jab"
 ]
-
 },
 
 {
 valeur: "direct",
-
 variantes: [
   "direct",
   "directe",
   "coup direct"
 ]
-
 },
 
 {
 valeur: "crochet",
-
 variantes: [
   "crochet"
 ]
-
 },
 
 {
 valeur: "uppercut",
-
 variantes: [
   "uppercut"
 ]
-
 },
 
 {
 valeur: "backfist",
-
 variantes: [
   "backfist",
   "back fist"
 ]
-
 },
 
 {
 valeur: "overhand",
-
 variantes: [
   "overhand"
 ]
-
 },
 
 {
 valeur: "hammerfist",
-
 variantes: [
   "hammerfist",
   "hammer fist"
 ]
-
 },
 
 //==========================================================
@@ -6101,46 +6145,38 @@ variantes: [
 
 {
 valeur: "frontal",
-
 variantes: [
   "coup de pied frontal",
   "kick frontal"
 ]
-
 },
 
 {
 valeur: "latéral",
-
 variantes: [
   "coup de pied latéral",
   "coup de pied lateral",
   "kick latéral",
   "kick lateral"
 ]
-
 },
 
 {
 valeur: "circulaire",
-
 variantes: [
   "coup de pied circulaire",
   "kick circulaire"
 ]
-
 },
 
 {
 valeur: "retourné",
-
 variantes: [
   "coup de pied retourné",
   "coup de pied retourne",
   "kick retourné",
   "kick retourne"
 ]
-
 },
 
 //==========================================================
@@ -6149,62 +6185,74 @@ variantes: [
 
 {
 valeur: "vrille",
-
 variantes: [
   "vrille",
   "en vrille"
 ]
-
 },
 
 {
 valeur: "rotation",
-
 variantes: [
   "rotation",
   "en rotation"
 ]
-
 },
 
 {
 valeur: "pivot",
-
 variantes: [
   "pivot",
   "en pivot"
 ]
-
 },
 
 {
 valeur: "roulade",
-
 variantes: [
   "roulade",
   "en roulade"
 ]
-
 },
 
 {
 valeur: "pirouette",
-
 variantes: [
   "pirouette",
   "en pirouette"
 ]
-
 },
 
 {
 valeur: "salto",
-
 variantes: [
   "salto",
   "en salto"
 ]
+},
 
+//==========================================================
+// 🛡️ DÉFENSE / RÉACTION
+//==========================================================
+
+{
+valeur: "se baisser",
+variantes: [
+  "se baisse",
+  "se baissant",
+  "se baisser",
+  "en se baissant",
+  "en baissant"
+]
+},
+
+{
+valeur: "esquive",
+variantes: [
+  "esquive",
+  "esquiver",
+  "en esquivant"
+]
 }
 
 ];
@@ -6218,15 +6266,14 @@ neoNormaliserTexteLocal(
 texte
 ).toLowerCase();
 
-const normal = normalManiere;
+const normal =
+normalManiere;
 
 for (
 const definition
 of manieres
 ) {
 
-// Les formulations les plus longues
-// sont testées en premier.
 const variantes =
 [...definition.variantes]
 .sort(
@@ -6240,32 +6287,35 @@ of variantes
 ) {
 
 const varianteNormalisee =
-  neoNormaliserTexteLocal(
-    variante
-  ).toLowerCase()
-  .trim();
+neoNormaliserTexteLocal(
+variante
+)
+.toLowerCase()
+.trim();
 
 if (!varianteNormalisee) {
-  continue;
+continue;
 }
 
 const regex =
-  new RegExp(
-    `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      "\\$&"
-    )}(?![A-Za-zÀ-ÿ0-9_-])`,
-    "iu"
-  );
+new RegExp(
+`(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
+/[.*+?^${}()|[\]\\]/g,
+"\\$&"
+)}(?![A-Za-zÀ-ÿ0-9_-])`,
+"iu"
+);
 
 if (
-  regex.test(normalManiere)
+regex.test(
+normalManiere
+)
 ) {
 
-  maniere =
-    definition.valeur;
+maniere =
+definition.valeur;
 
-  break;
+break;
 
 }
 
@@ -6285,10 +6335,6 @@ let membre = null;
 
 const membres = [
 
-// ─────────────────────────────────────────────
-// ✋ MAINS / POINGS
-// ─────────────────────────────────────────────
-
 "main droite",
 "main gauche",
 "poing droit",
@@ -6297,10 +6343,6 @@ const membres = [
 "paume gauche",
 "dos de la main droite",
 "dos de la main gauche",
-
-// ─────────────────────────────────────────────
-// 💪 BRAS
-// ─────────────────────────────────────────────
 
 "bras droit",
 "bras gauche",
@@ -6311,10 +6353,6 @@ const membres = [
 "poignet droit",
 "poignet gauche",
 
-// ─────────────────────────────────────────────
-// 🦵 JAMBES
-// ─────────────────────────────────────────────
-
 "cuisse droite",
 "cuisse gauche",
 "genou droit",
@@ -6323,10 +6361,6 @@ const membres = [
 "tibia gauche",
 "mollet droit",
 "mollet gauche",
-
-// ─────────────────────────────────────────────
-// 🦶 PIEDS
-// ─────────────────────────────────────────────
 
 "pied droit",
 "pied gauche",
@@ -6352,8 +6386,6 @@ const membres = [
 
 ];
 
-// Les expressions longues doivent être testées
-// avant les expressions courtes.
 const membresTries =
 [...membres].sort(
 (a, b) =>
@@ -6365,149 +6397,148 @@ const partie of membresTries
 ) {
 
 const partieNormalisee =
-  neoNormaliserTexteLocal(
-    partie
-  ).toLowerCase();
+neoNormaliserTexteLocal(
+partie
+).toLowerCase();
 
 const regex =
-  new RegExp(
-    `(?<![A-Za-zÀ-ÿ0-9_-])${partieNormalisee.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-zÀ-ÿ0-9_-])`,
-    "iu"
-  );
+new RegExp(
+`(?<![A-Za-zÀ-ÿ0-9_-])${partieNormalisee.replace(
+/[.*+?^${}()|[\]\\]/g,
+"\\$&"
+)}(?![A-Za-zÀ-ÿ0-9_-])`,
+"iu"
+);
 
 if (
 regex.test(normal)
 ) {
 
-  membre = partie;
-  break;
+membre =
+partie;
+
+break;
 
 }
 
 }
 
 //============================================================
-// 🧠 INTERPRÉTATION DE "DU DROIT / DU GAUCHE"
+// 🧠 INTERPRÉTATION DU CÔTÉ
 //============================================================
 
 if (!membre) {
 
 const droit =
-  /\bdu\s+droit\b/iu.test(normal) ||
-  /\bde\s+la\s+droite\b/iu.test(normal) ||
-  /\bà\s+droite\b/iu.test(normal);
+/\bdu\s+droit\b/iu.test(normal) ||
+/\bde\s+la\s+droite\b/iu.test(normal) ||
+/\bà\s+droite\b/iu.test(normal);
 
 const gauche =
-  /\bdu\s+gauche\b/iu.test(normal) ||
-  /\bde\s+la\s+gauche\b/iu.test(normal) ||
-  /\bà\s+gauche\b/iu.test(normal);
+/\bdu\s+gauche\b/iu.test(normal) ||
+/\bde\s+la\s+gauche\b/iu.test(normal) ||
+/\bà\s+gauche\b/iu.test(normal);
 
 if (
 droit ||
 gauche
 ) {
 
-  const cote =
-    droit
-      ? "droite"
-      : "gauche";
+const cote =
+droit
+? "droite"
+: "gauche";
 
-  // 👊 Poings
-  if (
-    /\b(poing|uppercut|crochet|frappe|frapper|coup de poing)\b/iu.test(normal)
-  ) {
+if (
+/\b(poing|uppercut|crochet|frappe|frapper|coup de poing)\b/iu.test(normal)
+) {
 
-    membre =
-      `main ${cote}`;
+membre =
+`main ${cote}`;
 
-  }
+}
 
-  // 🦵 Genou
-  else if (
-    /\b(genou|coup de genou)\b/iu.test(normal)
-  ) {
+else if (
+/\b(genou|coup de genou)\b/iu.test(normal)
+) {
 
-    membre =
-      `genou ${cote}`;
+membre =
+`genou ${cote}`;
 
-  }
+}
 
-  // 🦶 Pied
-  else if (
-    /\b(pied|coup de pied|kick|semelle|plante du pied)\b/iu.test(normal)
-  ) {
+else if (
+/\b(pied|coup de pied|kick|semelle|plante du pied)\b/iu.test(normal)
+) {
 
-    membre =
-      `pied ${cote}`;
+membre =
+`pied ${cote}`;
 
-  }
+}
 
-  // 💪 Coude
-  else if (
-    /\b(coude|coup de coude)\b/iu.test(normal)
-  ) {
+else if (
+/\b(coude|coup de coude)\b/iu.test(normal)
+) {
 
-    membre =
-      `coude ${cote}`;
+membre =
+`coude ${cote}`;
 
-  }
+}
 
-  // 🦵 Jambe
-  else if (
-    /\b(jambe|cuisse|tibia|mollet)\b/iu.test(normal)
-  ) {
+else if (
+/\b(jambe|cuisse|tibia|mollet)\b/iu.test(normal)
+) {
 
-    membre =
-      `jambe ${cote}`;
+membre =
+`jambe ${cote}`;
 
-  }
+}
 
-  // 💪 Bras
-  else if (
-    /\b(bras|avant-bras|poignet)\b/iu.test(normal)
-  ) {
+else if (
+/\b(bras|avant-bras|poignet)\b/iu.test(normal)
+) {
 
-    membre =
-      `bras ${cote}`;
+membre =
+`bras ${cote}`;
 
-  }
+}
 
 }
 
 }
 
 //============================================================
-// 🧱 STRUCTURE
+// 🧱 STRUCTURE GRAMMATICALE
 //============================================================
 
 const structure = {
 
 sujet:
-  acteur
-    ? "S"
-    : null,
+acteur
+? "S"
+: null,
 
 verbe:
-  actionNom
-    ? "V"
-    : null,
+actionNom
+? "V"
+: null,
 
 objet:
-  cible
-    ? "O"
-    : null,
+cible
+? "O"
+: null,
 
 complement:
-  (
-    distance?.valeur !== null ||
-    hauteur?.valeur !== null ||
-    maniere ||
-    vitesse?.valeur !== null ||
-    membre ||
-    partieCorps
-  )
-    ? "C"
-    : null
+(
+distance?.valeur !== null ||
+hauteur?.valeur !== null ||
+maniere ||
+vitesse?.valeur !== null ||
+membre ||
+partieCorps
+)
+? "C"
+: null
 
 };
 
@@ -6521,12 +6552,13 @@ texte,
 
 acteur,
 
-sujet: acteur,
+sujet:
+acteur,
 
 action: {
-    action: actionNom,
-    categorie,
-    famille
+action: actionNom,
+categorie,
+famille
 },
 
 categorie,
@@ -6540,19 +6572,19 @@ maniere,
 membre,
 
 vitesse:
-    vitesse?.valeur ?? null,
+vitesse?.valeur ?? null,
 
 distance:
-    distance?.valeur ?? null,
+distance?.valeur ?? null,
 
 distanceUnite:
-    distance?.unite ?? null,
+distance?.unite ?? null,
 
 hauteur:
-    hauteur?.valeur ?? null,
+hauteur?.valeur ?? null,
 
 hauteurUnite:
-    hauteur?.unite ?? null,
+hauteur?.unite ?? null,
 
 direction,
 
@@ -6562,12 +6594,25 @@ intention,
 
 partieCorps,
 
-structure
+structure,
+
+reaction:
+marqueurReaction
 
 };
 
 //============================================================
 // 📚 RECONNAISSANCE DU MODÈLE
+//============================================================
+//
+// IMPORTANT :
+// La réaction passe AUSSI ici.
+//
+// Donc elle conserve :
+// → modèle
+// → score / similarité
+// → structure
+//
 //============================================================
 
 const modele =
@@ -6577,16 +6622,286 @@ analyseModele
 );
 
 const actionFinale =
-
 modele?.actionCanonique ||
 actionNom;
+
+//============================================================
+// 🧠 RELATIONS SÉMANTIQUES
+//============================================================
+
+let reaction = null;
+let declencheur = null;
+let cause = null;
+let objectif = null;
+let consequence = null;
+let relation = null;
+
+//============================================================
+// ⚡ DÉCLENCHEUR
+//============================================================
+
+if (
+marqueurReaction
+) {
+
+reaction = {
+active: true,
+type: "REACTION"
+};
+
+const matchDeclencheur =
+texteRelation.match(
+/\b(?:voyant|en voyant|apercevant|constatant)\s+(.+?)(?=\s+(?:esquive|esquiver|évite|evite|éviter|eviter|réagit|reagit|se baisse|se baissant|baisse|abaissant|recule|reculant|avance|avançant|fonce|courant|court|saute|sautant|bloque|bloquant|pare|parant|contre|contre-attaque)\b)/iu
+);
+
+if (
+matchDeclencheur?.[1]
+) {
+
+const brut =
+matchDeclencheur[1]
+.trim()
+.replace(/[,.]+$/u, "");
+
+declencheur = {
+texte: brut,
+type: "EVENEMENT_ENTRANT"
+};
+
+}
+
+if (!declencheur) {
+
+const matchFace =
+texteRelation.match(
+/\bface\s+(?:à|au|aux)\s+(.+?)(?=\s+(?:il|elle|le|la|les|se|son|sa|ses)\b|$)/iu
+);
+
+if (
+matchFace?.[1]
+) {
+
+declencheur = {
+texte:
+matchFace[1]
+.trim()
+.replace(/[,.]+$/u, ""),
+type: "MENACE_OU_EVENEMENT"
+};
+
+}
+
+}
+
+if (
+declencheur
+) {
+
+cause = {
+concept: "EVENEMENT_DECLENCHEUR",
+texte: declencheur.texte
+};
+
+}
+
+}
+
+//============================================================
+// 🎯 FINALITÉ
+//============================================================
+//
+// "pour arriver à 1m"
+// → FINALITÉ
+//
+// "pour laisser passer le coup"
+// → dans une réaction : CONSÉQUENCE / EFFET
+//
+// Mais surtout :
+// "pour" ne devient JAMAIS automatiquement
+// une conséquence dans un pavé normal.
+//
+//============================================================
+
+const matchObjectif =
+texteRelation.match(
+/\b(?:pour|afin de|dans le but de|avec pour objectif de|de façon à|de maniere a|de manière à)\s+(.+?)(?=[,.]|$)/iu
+);
+
+if (
+matchObjectif?.[1]
+) {
+
+objectif = {
+texte:
+matchObjectif[1]
+.trim()
+.replace(/[,.]+$/u, ""),
+
+intention:
+intention || null
+};
+
+}
+else if (
+intention
+) {
+
+objectif = {
+texte: null,
+intention
+};
+
+}
+
+//============================================================
+// ➡️ CONSÉQUENCE
+//============================================================
+//
+// IMPORTANT :
+// On ne considère plus "pour" comme une conséquence
+// générale.
+//
+// Il faut :
+// → une réaction
+// OU
+// → un marqueur explicite de conséquence.
+//
+//============================================================
+
+if (
+marqueurReaction
+) {
+
+const matchEffetReaction =
+texteRelation.match(
+/\b(?:pour|afin de)\s+(.+?)(?:[,.]|$)/iu
+);
+
+if (
+matchEffetReaction?.[1]
+) {
+
+const texteEffet =
+matchEffetReaction[1]
+.trim()
+.replace(/[,.]+$/u, "");
+
+if (
+texteEffet
+) {
+
+consequence = {
+texte:
+texteEffet,
+type:
+"EFFET_RECHERCHE"
+};
+
+}
+
+}
+
+}
+
+if (
+!consequence
+) {
+
+const matchConsequence =
+texteRelation.match(
+/\b(?:donc|ainsi|si bien que|de sorte que|ce qui permet de|ce qui provoque|ce qui entraîne|entraînant|provoquant|se retrouve)\s+(.+?)(?:[,.]|$)/iu
+);
+
+if (
+matchConsequence?.[1]
+) {
+
+const texteConsequence =
+matchConsequence[1]
+.trim()
+.replace(/[,.]+$/u, "");
+
+if (
+texteConsequence
+) {
+
+consequence = {
+texte:
+texteConsequence,
+type:
+"CONSEQUENCE_EXPLICITE"
+};
+
+}
+
+}
+
+}
+
+//============================================================
+// 🔗 TYPE DE RELATION
+//============================================================
+
+if (
+reaction
+) {
+
+relation = {
+
+type:
+"REACTION",
+
+declencheur:
+declencheur || null,
+
+cause:
+cause || null,
+
+objectif:
+objectif || null,
+
+consequence:
+consequence || null
+
+};
+
+}
+else if (
+objectif
+) {
+
+relation = {
+
+type:
+"FINALITE",
+
+objectif
+
+};
+
+}
+else if (
+consequence
+) {
+
+relation = {
+
+type:
+"CONSEQUENCE",
+
+consequence
+
+};
+
+}
 
 //============================================================
 // 🧩 VALIDATION STRUCTURELLE
 //============================================================
 
 const modeleReconnu =
-modele?.modele || null;
+modele?.modele ||
+null;
 
 let scoreStructure = 0;
 
@@ -6695,96 +7010,97 @@ switch (slot) {
 case "SUJET":
 case "ACTEUR":
 
-  valeur =
-    valeurs.SUJET;
+valeur =
+valeurs.SUJET;
 
-  break;
+break;
 
 case "ACTION":
 case "VERBE":
 
-  valeur =
-    valeurs.ACTION;
+valeur =
+valeurs.ACTION;
 
-  break;
+break;
 
 case "CIBLE":
 case "OBJET":
 
-  valeur =
-    valeurs.CIBLE;
+valeur =
+valeurs.CIBLE;
 
-  break;
+break;
 
 case "MEMBRE":
 
-  valeur =
-    valeurs.MEMBRE;
+valeur =
+valeurs.MEMBRE;
 
-  break;
+break;
 
 case "PARTIE_CORPS":
 case "PARTIECORPS":
 
-  valeur =
-    valeurs.PARTIE_CORPS;
+valeur =
+valeurs.PARTIE_CORPS;
 
-  break;
+break;
 
 case "MANIERE":
 
-  valeur =
-    valeurs.MANIERE;
+valeur =
+valeurs.MANIERE;
 
-  break;
+break;
 
 case "DISTANCE":
 
-  valeur =
-    valeurs.DISTANCE;
+valeur =
+valeurs.DISTANCE;
 
-  break;
+break;
 
 case "HAUTEUR":
 
-  valeur =
-    valeurs.HAUTEUR;
+valeur =
+valeurs.HAUTEUR;
 
-  break;
+break;
 
 case "VITESSE":
 
-  valeur =
-    valeurs.VITESSE;
+valeur =
+valeurs.VITESSE;
 
-  break;
+break;
 
 case "DIRECTION":
 
-  valeur =
-    valeurs.DIRECTION;
+valeur =
+valeurs.DIRECTION;
 
-  break;
+break;
 
 case "TRAJECTOIRE":
 
-  valeur =
-    valeurs.TRAJECTOIRE;
+valeur =
+valeurs.TRAJECTOIRE;
 
-  break;
+break;
 
 case "INTENTION":
 
-  valeur =
-    valeurs.INTENTION;
+valeur =
+valeurs.INTENTION;
 
-  break;
+break;
 
 default:
 
-  valeur = null;
+valeur =
+null;
 
-  break;
+break;
 
 }
 
@@ -6794,16 +7110,17 @@ existe(valeur)
 
 slotsTrouves.push({
 
-  slot,
+slot,
 
-  valeur
+valeur
 
 });
 
-} else {
+}
+else {
 
 slotsManquants.push(
-  slot
+slot
 );
 
 }
@@ -6812,6 +7129,14 @@ slotsManquants.push(
 
 //============================================================
 // 📊 SCORE STRUCTURE
+//============================================================
+//
+// Pour une réaction, on utilise la structure du modèle
+// ESQUIVE comme pour n'importe quelle autre action.
+//
+// Le fait qu'il s'agisse d'une réaction ne rajoute PAS
+// artificiellement SUJET/CIBLE/DISTANCE/etc.
+//
 //============================================================
 
 const totalSlots =
@@ -6824,11 +7149,11 @@ scoreStructure =
 totalSlots > 0
 
 ? Math.round(
-    (
-      totalTrouves /
-      totalSlots
-    ) * 100
-  )
+(
+totalTrouves /
+totalSlots
+) * 100
+)
 
 : 0;
 
@@ -6843,27 +7168,22 @@ slotsManquants.length === 0;
 const structureSemantique = {
 
 sujet:
-acteur ||
-null,
+acteur || null,
 
 action:
 actionFinale || null,
 
 cible:
-cible ||
-null,
+cible || null,
 
 membre:
-membre ||
-null,
+membre || null,
 
 partieCorps:
-partieCorps ||
-null,
+partieCorps || null,
 
 maniere:
-maniere ||
-null,
+maniere || null,
 
 distance:
 distance?.valeur ??
@@ -6887,348 +7207,43 @@ null,
 
 intention:
 intention ||
-null
+null,
+
+reaction,
+
+declencheur,
+
+cause,
+
+objectif,
+
+consequence,
+
+relation
 
 };
 
 //============================================================
-// 🧠 NOUVEAU : RELATIONS SÉMANTIQUES
-//============================================================
-// IMPORTANT :
-// Cette couche ne remplace aucune détection existante.
-// Elle ajoute uniquement des informations lorsqu'elles
-// sont réellement présentes dans le texte.
-//
-// Elle reste générique : aucune action précise n'est imposée.
-//
-// Les relations servent à représenter :
-//
-// événement précédent
-//       ↓
-// déclencheur / cause
-//       ↓
-// réaction
-//       ↓
-// objectif
-//       ↓
-// conséquence
-//
-//============================================================
-
-let reaction = null;
-let declencheur = null;
-let cause = null;
-let objectif = null;
-let consequence = null;
-let relation = null;
-
-//------------------------------------------------------------
-// Normalisation locale utilisée uniquement ici
-//------------------------------------------------------------
-
-const texteRelation =
-  neoNormaliserTexteLocal(
-    texte
-  )
-  .replace(/\s+/g, " ")
-  .trim();
-
-//------------------------------------------------------------
-// 🔎 INDICES DE RÉACTION
-//------------------------------------------------------------
-//
-// On ne cherche pas une action particulière.
-// On cherche une relation grammaticale/causale indiquant
-// qu'un sujet agit en réponse à quelque chose.
-//
-//------------------------------------------------------------
-
-const marqueurReaction =
-  /\b(voyant|voyant que|en voyant|apercevant|apercevant que|constatant|constatant que|face à|face au|face aux|en réaction à|réagit à|réagissant à|lorsqu['’]il voit|lorsqu['’]elle voit|quand il voit|quand elle voit|pour éviter|afin d['’]éviter|pour esquiver|afin d['’]esquiver)\b/iu
-  .test(
-    texteRelation
-  );
-
-//------------------------------------------------------------
-// ⚡ DÉCLENCHEUR / CAUSE
-//------------------------------------------------------------
-//
-// Ici on récupère le segment introduisant l'événement
-// précédent lorsqu'il est explicitement présent.
-//
-// Exemple :
-// "voyant le coup de Goku arriver vers son visage"
-//                     ↑
-//                 déclencheur
-//
-//------------------------------------------------------------
-
-if (
-marqueurReaction
-) {
-
-  reaction = {
-    active: true,
-    type: "REACTION"
-  };
-
-  relation = {
-    type: "REACTION"
-  };
-
-  //----------------------------------------------------------
-  // Extraction générique du segment déclencheur
-  //----------------------------------------------------------
-
-  const matchDeclencheur =
-    texteRelation.match(
-      /\b(?:voyant|en voyant|apercevant|constatant)\s+(.+?)(?=\s+(?:esquive|esquiver|évite|evite|éviter|eviter|réagit|reagit|se baisse|se baissant|recule|reculant|avance|avançant|fonce|courant|court|saute|sautant|bloque|bloquant|pare|parant|contre|contre-attaque)\b)/iu
-    );
-
-  if (
-    matchDeclencheur?.[1]
-  ) {
-
-    const brut =
-      matchDeclencheur[1]
-        .trim()
-        .replace(/[,.]+$/u, "");
-
-    declencheur = {
-      texte: brut,
-      type: "EVENEMENT_ENTRANT"
-    };
-
-  }
-
-  //----------------------------------------------------------
-  // Fallback : "face à ..."
-  //----------------------------------------------------------
-
-  if (
-    !declencheur
-  ) {
-
-    const matchFace =
-      texteRelation.match(
-        /\bface\s+(?:à|au|aux)\s+(.+?)(?=\s+(?:il|elle|le|la|les|se|son|sa|ses)\b|$)/iu
-      );
-
-    if (
-      matchFace?.[1]
-    ) {
-
-      declencheur = {
-        texte:
-          matchFace[1]
-            .trim()
-            .replace(/[,.]+$/u, ""),
-        type: "MENACE_OU_EVENEMENT"
-      };
-
-    }
-
-  }
-
-  //----------------------------------------------------------
-  // Cause
-  //----------------------------------------------------------
-
-  if (
-    declencheur
-  ) {
-
-    cause = {
-      concept: "EVENEMENT_DECLENCHEUR",
-      texte: declencheur.texte
-    };
-
-  }
-
-}
-
-//============================================================
-// 🎯 OBJECTIF / FINALITÉ
-//============================================================
-//
-// On réutilise l'intention déjà détectée.
-//
-// Mais on ajoute aussi la formulation complète de finalité
-// lorsqu'elle existe explicitement.
-//
-//============================================================
-
-const matchObjectif =
-texteRelation.match(
-  /\b(?:pour|afin de|dans le but de|avec pour objectif de|de façon à|de maniere a|de manière à)\s+(.+?)(?=[,.]|$)/iu
-);
-
-if (
-matchObjectif?.[1]
-) {
-
-  objectif = {
-    texte:
-      matchObjectif[1]
-        .trim()
-        .replace(/[,.]+$/u, ""),
-
-    intention:
-      intention || null
-  };
-
-} else if (
-intention
-) {
-
-  objectif = {
-    texte: null,
-    intention
-  };
-
-}
-
-//============================================================
-// ➡️ CONSÉQUENCE EXPLICITE
-//============================================================
-//
-// Détecte uniquement les conséquences explicitement exprimées.
-//
-// Exemples :
-//
-// "pour laisser passer le coup"
-// "de sorte que le coup passe"
-// "afin de laisser passer..."
-//
-// On ne fabrique pas une conséquence si elle n'est pas
-// exprimée dans le texte.
-//
-//============================================================
-
-const matchConsequence =
-texteRelation.match(
-  /\b(?:pour|afin de|de sorte que|si bien que|ainsi|ce qui permet de|permettant de|laissant)\s+(.+?)(?:[,.]|$)/iu
-);
-
-if (
-matchConsequence?.[1]
-) {
-
-  const texteConsequence =
-    matchConsequence[1]
-      .trim()
-      .replace(/[,.]+$/u, "");
-
-  if (
-    texteConsequence
-  ) {
-
-    consequence = {
-      texte:
-        texteConsequence,
-
-      type:
-        "CONSEQUENCE_EXPLICITE"
-    };
-
-  }
-
-}
-
-//============================================================
-// 🔗 TYPE DE RELATION
-//============================================================
-
-if (
-reaction
-) {
-
-  relation = {
-    type: "REACTION",
-
-    declencheur:
-      declencheur || null,
-
-    cause:
-      cause || null,
-
-    objectif:
-      objectif || null,
-
-    consequence:
-      consequence || null
-  };
-
-} else if (
-consequence
-) {
-
-  relation = {
-    type: "CONSEQUENCE",
-
-    consequence
-  };
-
-} else if (
-objectif
-) {
-
-  relation = {
-    type: "FINALITE",
-
-    objectif
-  };
-
-}
-
-//============================================================
-// 🧠 AJOUT DES RELATIONS À LA STRUCTURE SÉMANTIQUE
-//============================================================
-
-structureSemantique.reaction =
-  reaction;
-
-structureSemantique.declencheur =
-  declencheur;
-
-structureSemantique.cause =
-  cause;
-
-structureSemantique.objectif =
-  objectif;
-
-structureSemantique.consequence =
-  consequence;
-
-structureSemantique.relation =
-  relation;
-
-//============================================================
-// 🔎 INFORMATIONS SUPPLÉMENTAIRES DANS L'ANALYSE MODÈLE
-//============================================================
-// On les ajoute après la reconnaissance du modèle afin de NE
-// PAS modifier le fonctionnement actuel de
-// neoReconnaitreModele() ni son score structurel.
-//
+// 📦 INFORMATIONS MODÈLE
 //============================================================
 
 analyseModele.reaction =
-  reaction;
+reaction;
 
 analyseModele.declencheur =
-  declencheur;
+declencheur;
 
 analyseModele.cause =
-  cause;
+cause;
 
 analyseModele.objectif =
-  objectif;
+objectif;
 
 analyseModele.consequence =
-  consequence;
+consequence;
 
 analyseModele.relation =
-  relation;
+relation;
 
 //============================================================
 // ✅ FORMAT DE SORTIE
@@ -7279,47 +7294,35 @@ partieCorps,
 // 🧠 INTENTION
 intention,
 
-// 🧠 MODÈLE SÉLECTIONNÉ
+// 🧠 MODÈLE
 modele:
 modele?.modele || null,
 
-// 🔎 SCORE DE RECONNAISSANCE DU MODÈLE
+// 📈 SIMILARITÉ
 score:
 modele?.score || 0,
 
-// 🧩 SCORE DE STRUCTURE RÉEL
-scoreStructure,
-
-// ✅ STRUCTURE COMPLÈTE ?
-structureComplete,
-
-// ❌ CHAMPS MANQUANTS
-slotsManquants,
-
-// ✅ CHAMPS TROUVÉS
-slotsTrouves,
-
-// Alias utilisé par l'arbitrage
-requisManquants:
-slotsManquants,
-
-// 🧱 STRUCTURE GRAMMATICALE EXISTANTE
-structure,
-
-// 🧠 STRUCTURE SÉMANTIQUE EXTRAITE
-structureSemantique,
-
-// 🔎 SCORE DE SIMILARITÉ AVEC L'EXEMPLE
-// Informatif uniquement — NE VALIDE PAS et NE REFUSE PAS l'action
 scoreExemple:
 modele?.scoreExemple || 0,
 
-// 🧠 ACTION CANONIQUE RECONNUE
-actionCanonique:
-actionFinale,
+// 🧩 STRUCTURE
+scoreStructure,
+
+structureComplete,
+
+slotsManquants,
+
+slotsTrouves,
+
+requisManquants:
+slotsManquants,
+
+structure,
+
+structureSemantique,
 
 //==========================================================
-// 🆕 RELATIONS SÉMANTIQUES
+// 🆕 RELATIONS
 //==========================================================
 
 reaction,
@@ -7336,8 +7339,7 @@ relation
 
 };
 
-}         
-    
+}   
           
                   
 //==============================================================
