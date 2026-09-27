@@ -8306,7 +8306,7 @@ function analyserNeoAI(
 //==============================================================
 // 📤 AFFICHAGE DU RÉSULTAT NEOAI
 //==============================================================
-async function envoyerResultatNeoAI(
+ async function envoyerResultatNeoAI(
   ovl,
   ms_org,
   resultat,
@@ -8591,6 +8591,117 @@ ${resultat.nombreActions || actions.length || 0}
         );
 
         //======================================================
+        // 🧠 RELATIONS SÉMANTIQUES
+        //======================================================
+        // Ajout uniquement si les informations existent.
+        // Cela ne modifie pas l'affichage des analyses
+        // classiques.
+
+        if (
+          action.reaction?.active
+        ) {
+
+          texte +=
+`├ ⚠️ Réaction : OUI
+`;
+
+        }
+
+        if (
+          action.declencheur
+        ) {
+
+          const declencheur =
+            typeof action.declencheur === "object"
+              ? (
+                  action.declencheur.texte ||
+                  action.declencheur.action ||
+                  "—"
+                )
+              : action.declencheur;
+
+          texte +=
+`├ ⚡ Déclencheur : ${declencheur}
+`;
+
+        }
+
+        if (
+          action.cause
+        ) {
+
+          const cause =
+            typeof action.cause === "object"
+              ? (
+                  action.cause.texte ||
+                  action.cause.concept ||
+                  "—"
+                )
+              : action.cause;
+
+          texte +=
+`├ 🔗 Cause : ${cause}
+`;
+
+        }
+
+        if (
+          action.objectif
+        ) {
+
+          const objectif =
+            typeof action.objectif === "object"
+              ? (
+                  action.objectif.texte ||
+                  action.objectif.intention ||
+                  "—"
+                )
+              : action.objectif;
+
+          texte +=
+`├ 🎯 Objectif : ${objectif}
+`;
+
+        }
+
+        if (
+          action.consequence
+        ) {
+
+          const consequence =
+            typeof action.consequence === "object"
+              ? (
+                  action.consequence.texte ||
+                  action.consequence.concept ||
+                  "—"
+                )
+              : action.consequence;
+
+          texte +=
+`├ ➡️ Conséquence : ${consequence}
+`;
+
+        }
+
+        if (
+          action.relation
+        ) {
+
+          const typeRelation =
+            typeof action.relation === "object"
+              ? (
+                  action.relation.type ||
+                  "—"
+                )
+              : action.relation;
+
+          texte +=
+`├ 🔗 Relation : ${typeRelation}
+`;
+
+        }
+
+        //======================================================
         // 📚 MODÈLE
         //======================================================
 
@@ -8701,8 +8812,8 @@ ${resultat.resume || "—"}
     }
   );
 
-}
-          
+}       
+  
 
 //==============================================================
 // 🌀 TRAITER MESSAGE NEOAI
