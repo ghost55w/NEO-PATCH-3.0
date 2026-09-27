@@ -692,30 +692,26 @@ const NEO_RELATIONS = {
 // Les champs de "structure" sont OBLIGATOIRES.
 // Les champs de "optionnels" sont facultatifs.
 //==============================================================
-
 const NEO_ACTION_MODELS = {
-
-    //==========================================================
-    // 🔆 DEPLACEMENTS / MOUVEMENTS
-    //==========================================================
 
     deplacement: {
 
-        //======================================================
-        // 🚶 MARCHE
-        //======================================================
+        // ==========================================================
+        // MARCHE
+        // ==========================================================
 
         marche: {
-
             categorie: "deplacement",
-            action: "marche",
+            id: "MARCHE",
 
-            modeles: [
+            concept:
+                "Déplacement volontaire d'un sujet à pied, généralement à vitesse normale ou modérée.",
 
-                {
-                    id: "MARCHE_001",
+            manieres: {
 
-                    maniere: "marche",
+                normale: {
+                    concept:
+                        "Déplacement au sol effectué à pied avec une progression régulière.",
 
                     structure: [
                         "SUJET",
@@ -726,189 +722,202 @@ const NEO_ACTION_MODELS = {
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "CIBLE",
-                        "VITESSE"
-                    ],
-
                     exemples: [
-                        "Yamato marche vers Naruto sur 5m pour l'atteindre",
-                        "Yamato avance à pied vers Naruto sur 5m pour se rapprocher",
-                        "Yamato se déplace au pas vers Naruto sur 5m pour arriver à proximité"
+                        "{Sujet} marche vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} avance à pied vers {Cible} sur {Distance} pour se rapprocher",
+                        "{Sujet} se déplace au pas vers {Cible} sur {Distance} pour arriver à proximité",
+                        "{Sujet} progresse tranquillement vers {Cible} sur {Distance} pour rejoindre sa position"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🏃 COURSE
-        //======================================================
+        // ==========================================================
+        // COURSE
+        // ==========================================================
 
         course: {
-
             categorie: "deplacement",
-            action: "course",
+            id: "COURSE",
 
-            modeles: [
+            concept:
+                "Déplacement volontaire rapide d'un sujet par la course afin de progresser vers une position, une cible ou un objectif.",
 
-                //================================================
-                // 🏃 COURSE FRONTALE
-                //================================================
+            manieres: {
 
-                {
-                    id: "COURSE_001",
+                // --------------------------------------------------
+                // COURSE FRONTALE
+                // --------------------------------------------------
 
-                    maniere: "course",
-                    trajectoire: "frontale",
+                frontale: {
+                    concept:
+                        "Course effectuée selon une progression directe et principalement linéaire vers l'avant ou vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "MANIERE",
-                        "TRAJECTOIRE",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    optionnels: [
+                        "DIRECTION",
+                        "INTENTION",
                         "CIBLE",
-                        "VITESSE",
-                        "DIRECTION"
+                        "DISTANCE",
+                        "VITESSE"
                     ],
 
                     exemples: [
-                        "Yamato fonce en course frontale vers Naruto sur 10m pour l'atteindre",
-                        "Yamato court frontalement vers Naruto sur 10m pour arriver à close distance",
-                        "Yamato se rue vers Naruto en course frontale à vitesse maximale sur 10m"
+                        "{Sujet} court en course frontale vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} fonce frontalement vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
+                        "{Sujet} se rue droit vers {Cible} sur {Distance} pour le rejoindre",
+                        "{Sujet} s'élance directement vers {Cible} à {Vitesse} pour atteindre sa position",
+                        "{Sujet} file droit vers {Cible} sur {Distance} pour arriver jusqu'à lui"
                     ]
                 },
 
 
-                //================================================
-                // 🔄 COURSE CIRCULAIRE
-                //================================================
+                // --------------------------------------------------
+                // COURSE CIRCULAIRE
+                // --------------------------------------------------
 
-                {
-                    id: "COURSE_002",
-
-                    maniere: "course",
-                    trajectoire: "circulaire",
+                circulaire: {
+                    concept:
+                        "Course effectuée autour d'une cible ou selon une trajectoire courbe. Le côté indique vers quel côté le sujet se déplace autour de la cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "MANIERE",
-                        "TRAJECTOIRE",
-                        "COURBE",
+                        "DIRECTION",
                         "COTE",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    optionnels: [
+                        "INTENTION",
                         "CIBLE",
-                        "VITESSE"
-                    ],
-
-                    exemples: [
-                        "Yamato court de manière circulaire par sa droite avec une courbe de 1m vmax parcourant 10m pour atteindre Naruto",
-                        "Yamato fonce sur la droite autour de Naruto avec une courbe de 1m à vitesse maximale sur 10m pour l'atteindre",
-                        "Yamato se rue en trajectoire circulaire par sa gauche avec une courbe de 2m à vitesse maximale parcourant 10m pour atteindre Naruto"
-                    ]
-                },
-
-
-                //================================================
-                // 🐍 COURSE ZIG ZAG
-                //================================================
-
-                {
-                    id: "COURSE_003",
-
-                    maniere: "course",
-                    trajectoire: "zig_zag",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "TRAJECTOIRE",
                         "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    optionnels: [
-                        "CIBLE",
                         "VITESSE",
-                        "DIRECTION",
-                        "COTE"
+                        "COURBE"
                     ],
 
                     exemples: [
-                        "Yamato court en zig zag vers Naruto sur 10m pour l'atteindre",
-                        "Yamato fonce vers Naruto en trajectoire zig zag sur 10m à vitesse maximale pour le rejoindre",
-                        "Yamato se rue vers Naruto en zigzag sur 10m pour éviter ses attaques"
+                        "{Sujet} court autour de {Cible} par sa gauche avec une courbe de {Courbe} pour se placer derrière lui",
+                        "{Sujet} court autour de {Cible} par sa droite avec une courbe de {Courbe} pour le contourner",
+                        "{Sujet} contourne {Cible} en courant sur sa gauche pour atteindre sa position",
+                        "{Sujet} fonce autour de {Cible} par sa droite pour se positionner derrière lui",
+                        "{Sujet} effectue une course circulaire autour de {Cible} vers sa gauche pour changer de position"
                     ]
                 },
 
 
-                //================================================
-                // ↗️ COURSE DIAGONALE
-                //================================================
+                // --------------------------------------------------
+                // COURSE DIAGONALE
+                // --------------------------------------------------
 
-                {
-                    id: "COURSE_004",
-
-                    maniere: "course",
-                    trajectoire: "diagonale",
+                diagonale: {
+                    concept:
+                        "Course effectuée selon une trajectoire oblique vers une cible ou une position. Le côté indique si le sujet se déplace en diagonale vers sa gauche ou vers sa droite.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "MANIERE",
-                        "TRAJECTOIRE",
                         "DIRECTION",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    optionnels: [
+                        "COTE",
+                        "INTENTION",
                         "CIBLE",
+                        "DISTANCE",
                         "VITESSE"
                     ],
 
                     exemples: [
-                        "Yamato court en diagonale vers Naruto sur 10m pour l'atteindre",
-                        "Yamato fonce diagonalement vers Naruto sur 10m à vitesse maximale pour le rejoindre",
-                        "Yamato se rue vers Naruto en trajectoire diagonale sur 10m pour arriver à close distance"
+                        "{Sujet} court en diagonale sur sa gauche vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} court en diagonale sur sa droite vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} fonce diagonalement vers sa gauche en direction de {Cible} à {Vitesse}",
+                        "{Sujet} se rue en diagonale sur sa droite vers {Cible} pour le rejoindre",
+                        "{Sujet} s'élance en diagonale vers sa gauche à {Vitesse} pour atteindre {Cible}"
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COURSE ZIGZAG
+                // --------------------------------------------------
+
+                zig_zag: {
+                    concept:
+                        "Course durant laquelle le sujet alterne successivement ses déplacements vers la gauche et vers la droite tout en progressant vers son objectif.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} court en zigzag vers {Cible} sur {Distance} pour éviter ses attaques et l'atteindre",
+                        "{Sujet} fonce en zigzag vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
+                        "{Sujet} se rue vers {Cible} en zigzag sur {Distance} pour éviter ses attaques et le rejoindre",
+                        "{Sujet} serpente rapidement vers {Cible} à {Vitesse} pour parvenir jusqu'à lui",
+                        "{Sujet} avance en alternant ses déplacements de gauche à droite vers {Cible} pour l'atteindre"
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COURSE LATERALE
+                // --------------------------------------------------
+
+                laterale: {
+                    concept:
+                        "Course effectuée principalement vers un côté par rapport à l'orientation actuelle du sujet. Le côté indique obligatoirement la direction latérale du déplacement.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
+                        "INTENTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} court latéralement sur sa gauche sur {Distance}",
+                        "{Sujet} court latéralement sur sa droite sur {Distance}",
+                        "{Sujet} se déplace rapidement vers sa gauche pour atteindre {Cible}",
+                        "{Sujet} fonce sur le côté droit vers {Cible} à {Vitesse}",
+                        "{Sujet} se rue latéralement sur sa gauche pour esquiver {Cible}"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // ⚡ DASH
-        //======================================================
+        // ==========================================================
+        // DASH
+        // ==========================================================
 
         dash: {
-
             categorie: "deplacement",
-            action: "dash",
+            id: "DASH",
 
-            modeles: [
+            concept:
+                "Déplacement extrêmement rapide et bref permettant au sujet de parcourir instantanément ou presque une courte distance.",
 
-                {
-                    id: "DASH_001",
+            manieres: {
 
-                    maniere: "dash",
+                rapide: {
+                    concept:
+                        "Accélération brutale produisant un déplacement très rapide sur une courte distance.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DISTANCE",
                         "DIRECTION",
                         "INTENTION"
@@ -919,353 +928,529 @@ const NEO_ACTION_MODELS = {
                         unite: "m"
                     },
 
-                    optionnels: [
-                        "CIBLE"
-                    ],
-
                     exemples: [
-                        "Yamato dash de 5m vers Naruto pour l'atteindre",
-                        "Yamato effectue un dash vers Naruto sur 5m pour se rapprocher",
-                        "Yamato dash instantanément de 3m vers l'avant pour atteindre Naruto"
+                        "{Sujet} effectue un dash de {Distance} vers {Cible} pour l'atteindre",
+                        "{Sujet} dash rapidement sur {Distance} vers {Cible} pour se rapprocher",
+                        "{Sujet} accélère brutalement sur {Distance} vers l'avant pour atteindre {Cible}",
+                        "{Sujet} réalise une accélération instantanée de {Distance} pour rejoindre {Cible}",
+                        "{Sujet} bondit rapidement sur {Distance} vers {Cible} pour arriver au contact"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 💨 RUSH
-        //======================================================
+        // ==========================================================
+        // RUSH
+        // ==========================================================
 
         rush: {
-
             categorie: "deplacement",
-            action: "rush",
+            id: "RUSH",
 
-            modeles: [
+            concept:
+                "Déplacement offensif ou agressif rapide vers une cible afin de réduire rapidement la distance qui les sépare.",
 
-                {
-                    id: "RUSH_001",
+            manieres: {
 
-                    maniere: "rush",
+                directe: {
+                    concept:
+                        "Progression rapide et agressive directement vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "CIBLE",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "VITESSE",
-                        "TRAJECTOIRE",
-                        "DIRECTION"
-                    ],
-
                     exemples: [
-                        "Yamato rush vers Naruto sur 10m pour l'atteindre",
-                        "Yamato fonce rapidement sur Naruto pour arriver au contact",
-                        "Yamato se rue brutalement vers Naruto pour réduire la distance"
+                        "{Sujet} rush vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} fonce rapidement sur {Cible} pour arriver au contact",
+                        "{Sujet} se rue brutalement vers {Cible} pour réduire la distance",
+                        "{Sujet} se précipite sur {Cible} à grande vitesse pour l'atteindre",
+                        "{Sujet} charge vers {Cible} pour parvenir immédiatement au contact"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🦘 SAUT
-        //======================================================
+        // ==========================================================
+        // SAUT
+        // ==========================================================
 
         saut: {
-
             categorie: "deplacement",
-            action: "sauter",
+            id: "SAUT",
 
-            modeles: [
+            concept:
+                "Déplacement durant lequel le sujet quitte temporairement le sol grâce à une impulsion verticale ou orientée.",
 
-                {
-                    id: "SAUT_001",
+            manieres: {
 
-                    maniere: "saut",
+                avant: {
+                    concept:
+                        "Saut orienté vers l'avant permettant de progresser dans cette direction pendant la phase aérienne.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
                         "HAUTEUR",
                         "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "DISTANCE",
-                        "CIBLE",
-                        "VITESSE"
+                    exemples: [
+                        "{Sujet} saute vers l'avant à {Hauteur} de hauteur pour atteindre {Cible}",
+                        "{Sujet} bondit vers {Cible} en trajectoire ascendante à {Hauteur} pour l'atteindre",
+                        "{Sujet} quitte le sol en sautant vers l'avant pour rejoindre {Cible}",
+                        "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}"
+                    ]
+                },
+
+
+                arriere: {
+                    concept:
+                        "Saut orienté vers l'arrière permettant au sujet de s'éloigner ou de se repositionner.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "HAUTEUR",
+                        "TRAJECTOIRE",
+                        "INTENTION"
                     ],
 
                     exemples: [
-                        "Yamato saute vers l'avant à 2m de hauteur pour atteindre Naruto",
-                        "Yamato bondit vers Naruto en trajectoire ascendante à 2m pour l'atteindre",
-                        "Yamato quitte le sol en sautant vers l'avant pour rejoindre Naruto"
+                        "{Sujet} saute vers l'arrière à {Hauteur} pour s'éloigner de {Cible}",
+                        "{Sujet} bondit en arrière pour éviter {Cible} et se repositionner",
+                        "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}"
+                    ]
+                },
+
+
+                vertical: {
+                    concept:
+                        "Saut principalement orienté vers le haut avec une progression horizontale minimale.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "HAUTEUR",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} saute verticalement à {Hauteur} pour éviter {Cible}",
+                        "{Sujet} bondit directement vers le haut pour prendre de la hauteur",
+                        "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner"
+                    ]
+                },
+
+
+                laterale: {
+                    concept:
+                        "Saut effectué vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
+                        "HAUTEUR",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} saute latéralement sur sa gauche pour éviter {Cible}",
+                        "{Sujet} bondit sur sa droite pour esquiver {Cible}",
+                        "{Sujet} saute vers son côté gauche pour se repositionner",
+                        "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🔄 ROULADE
-        //======================================================
+        // ==========================================================
+        // ROULADE
+        // ==========================================================
 
         roulade: {
-
             categorie: "deplacement",
-            action: "rouler",
+            id: "ROULADE",
 
-            modeles: [
+            concept:
+                "Déplacement au sol réalisé par rotation du corps autour de lui-même.",
 
-                {
-                    id: "ROULADE_001",
+            manieres: {
 
-                    maniere: "roulade",
+                avant: {
+                    concept:
+                        "Roulade au sol orientée vers l'avant.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "CIBLE",
-                        "VITESSE",
-                        "COTE"
-                    ],
-
                     exemples: [
-                        "Yamato effectue une roulade vers la droite sur 3m pour esquiver Naruto",
-                        "Yamato roule au sol vers sa gauche sur 3m pour éviter l'attaque",
-                        "Yamato fait une roulade vers l'avant sur 2m pour se rapprocher de Naruto"
+                        "{Sujet} effectue une roulade vers l'avant sur {Distance} pour se rapprocher de {Cible}",
+                        "{Sujet} roule au sol vers l'avant sur {Distance} pour éviter {Cible}",
+                        "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}"
                     ]
-                }
-
-            ]
-        },
+                },
 
 
-        //======================================================
-        // 🪽 VOL
-        //======================================================
-
-        vol: {
-
-            categorie: "deplacement",
-            action: "voler",
-
-            modeles: [
-
-                {
-                    id: "VOL_001",
-
-                    maniere: "vol",
+                arriere: {
+                    concept:
+                        "Roulade au sol orientée vers l'arrière.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue une roulade arrière sur {Distance} pour s'éloigner de {Cible}",
+                        "{Sujet} roule vers l'arrière pour éviter l'attaque de {Cible}",
+                        "{Sujet} fait une roulade arrière pour se repositionner"
+                    ]
+                },
+
+
+                laterale: {
+                    concept:
+                        "Roulade au sol effectuée latéralement. Le côté indique obligatoirement vers lequel le sujet roule.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue une roulade latérale sur sa gauche sur {Distance} pour esquiver {Cible}",
+                        "{Sujet} effectue une roulade latérale sur sa droite sur {Distance} pour esquiver {Cible}",
+                        "{Sujet} roule au sol vers sa gauche pour éviter l'attaque",
+                        "{Sujet} réalise une roulade sur son côté droit pour se repositionner"
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // VOL
+        // ==========================================================
+
+        vol: {
+            categorie: "deplacement",
+            id: "VOL",
+
+            concept:
+                "Déplacement aérien continu d'un sujet sans contact permanent avec le sol.",
+
+            manieres: {
+
+                frontale: {
+                    concept:
+                        "Déplacement aérien principalement direct vers l'avant ou vers une cible.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
                         "DIRECTION",
                         "HAUTEUR",
                         "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "DISTANCE",
-                        "VITESSE",
-                        "CIBLE"
+                    exemples: [
+                        "{Sujet} vole vers {Cible} à {Hauteur} de hauteur en trajectoire frontale pour l'atteindre",
+                        "{Sujet} s'envole vers {Cible} à {Hauteur} pour le rejoindre",
+                        "{Sujet} plane directement vers {Cible} pour arriver au contact"
+                    ]
+                },
+
+
+                diagonale: {
+                    concept:
+                        "Déplacement aérien oblique vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
+                        "HAUTEUR",
+                        "TRAJECTOIRE",
+                        "INTENTION"
                     ],
 
                     exemples: [
-                        "Yamato vole vers Naruto à 5m de hauteur en trajectoire frontale pour l'atteindre",
-                        "Yamato s'envole vers Naruto à 5m de hauteur pour le rejoindre",
-                        "Yamato plane en diagonale à 5m de hauteur vers Naruto"
+                        "{Sujet} vole en diagonale sur sa gauche vers {Cible} à {Hauteur}",
+                        "{Sujet} vole en diagonale sur sa droite vers {Cible} à {Hauteur}",
+                        "{Sujet} s'élève en diagonale vers sa gauche pour se positionner au-dessus de {Cible}",
+                        "{Sujet} plane obliquement vers sa droite à {Hauteur} pour rejoindre {Cible}"
+                    ]
+                },
+
+
+                laterale: {
+                    concept:
+                        "Déplacement aérien principalement latéral. Le côté indique obligatoirement vers lequel le sujet vole.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
+                        "HAUTEUR",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} vole latéralement sur sa gauche à {Hauteur}",
+                        "{Sujet} vole latéralement sur sa droite à {Hauteur}",
+                        "{Sujet} se déplace dans les airs vers sa gauche pour éviter {Cible}",
+                        "{Sujet} plane vers son côté droit pour se repositionner"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🔄 PIROUETTE / PIVOT
-        //======================================================
+        // ==========================================================
+        // PIVOT
+        // ==========================================================
 
         pirouette_pivot: {
-
             categorie: "deplacement",
-            action: "pivoter",
+            id: "PIVOT",
 
-            modeles: [
+            concept:
+                "Rotation du corps autour d'un axe ou d'un point d'appui afin de changer son orientation ou sa position.",
 
-                {
-                    id: "PIVOT_001",
+            manieres: {
 
-                    maniere: "pivot",
+                droite: {
+                    concept:
+                        "Rotation du corps vers le côté droit.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "COTE",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "CIBLE",
-                        "DIRECTION",
-                        "ANGLE"
+                    exemples: [
+                        "{Sujet} pivote vers sa droite pour faire face à {Cible}",
+                        "{Sujet} effectue un pivot sur sa droite pour changer d'orientation",
+                        "{Sujet} tourne son corps vers la droite pour se placer face à {Cible}"
+                    ]
+                },
+
+
+                gauche: {
+                    concept:
+                        "Rotation du corps vers le côté gauche.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "COTE",
+                        "INTENTION"
                     ],
 
                     exemples: [
-                        "Yamato pivote vers sa droite pour faire face à Naruto",
-                        "Yamato effectue un pivot sur sa gauche pour changer d'orientation",
-                        "Yamato tourne son corps vers la droite pour se placer face à Naruto"
+                        "{Sujet} pivote vers sa gauche pour faire face à {Cible}",
+                        "{Sujet} effectue un pivot sur sa gauche pour changer d'orientation",
+                        "{Sujet} tourne son corps vers la gauche pour se placer face à {Cible}"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🌀 VRILLE
-        //======================================================
+        // ==========================================================
+        // VRILLE
+        // ==========================================================
 
         vrille: {
-
             categorie: "deplacement",
-            action: "vriller",
+            id: "VRILLE",
 
-            modeles: [
+            concept:
+                "Rotation répétée du corps autour de son propre axe pendant un déplacement ou une phase aérienne.",
 
-                {
-                    id: "VRILLE_001",
+            manieres: {
 
-                    maniere: "vrille",
+                rotation: {
+                    concept:
+                        "Rotation du corps autour de son axe avec une ou plusieurs rotations successives.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "CIBLE",
-                        "COTE",
-                        "NOMBRE_TOURS",
-                        "HAUTEUR",
-                        "TRAJECTOIRE"
-                    ],
-
                     exemples: [
-                        "Yamato effectue une vrille vers la droite dans les airs pour éviter Naruto",
-                        "Yamato vrille sur lui-même en avançant pour esquiver l'attaque de Naruto",
-                        "Yamato réalise une vrille aérienne vers la gauche pour changer de trajectoire"
+                        "{Sujet} effectue une vrille vers la droite dans les airs pour éviter {Cible}",
+                        "{Sujet} vrille sur lui-même en avançant pour esquiver l'attaque de {Cible}",
+                        "{Sujet} réalise une vrille aérienne vers la gauche pour changer de trajectoire",
+                        "{Sujet} tourne sur lui-même plusieurs fois pour éviter {Cible}"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🤸 SALTO
-        //======================================================
+        // ==========================================================
+        // SALTO
+        // ==========================================================
 
         salto: {
-
             categorie: "deplacement",
-            action: "salto",
+            id: "SALTO",
 
-            modeles: [
+            concept:
+                "Rotation aérienne du corps autour d'un axe horizontal permettant d'effectuer une rotation complète pendant un saut.",
 
-                {
-                    id: "SALTO_001",
+            manieres: {
 
-                    maniere: "salto",
+                avant: {
+                    concept:
+                        "Rotation aérienne vers l'avant.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "CIBLE",
-                        "HAUTEUR",
-                        "DISTANCE",
-                        "VITESSE"
+                    exemples: [
+                        "{Sujet} fait un salto avant pour atterrir derrière {Cible}",
+                        "{Sujet} effectue un salto vers l'avant pour éviter {Cible}",
+                        "{Sujet} réalise un salto avant pour se repositionner",
+                        "{Sujet} effectue une rotation aérienne vers l'avant pour passer au-dessus de {Cible}"
+                    ]
+                },
+
+
+                arriere: {
+                    concept:
+                        "Rotation aérienne vers l'arrière.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
                     ],
 
                     exemples: [
-                        "Yamato fait un salto avant pour atterrir derrière Naruto",
-                        "Yamato effectue un salto arrière pour éviter Naruto",
-                        "Yamato réalise un salto vers l'avant pour se repositionner"
+                        "{Sujet} fait un salto arrière pour éviter {Cible}",
+                        "{Sujet} effectue un salto vers l'arrière pour se repositionner",
+                        "{Sujet} réalise une rotation aérienne arrière pour s'éloigner de {Cible}"
                     ]
                 }
-
-            ]
+            }
         },
 
 
-        //======================================================
-        // 🤸 FLIP
-        //======================================================
+        // ==========================================================
+        // FLIP
+        // ==========================================================
 
         flip: {
-
             categorie: "deplacement",
-            action: "flip",
+            id: "FLIP",
 
-            modeles: [
+            concept:
+                "Mouvement acrobatique aérien impliquant une rotation du corps afin de changer de position ou de franchir un obstacle.",
 
-                {
-                    id: "FLIP_001",
+            manieres: {
 
-                    maniere: "flip",
+                avant: {
+                    concept:
+                        "Flip réalisé vers l'avant.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
                         "INTENTION"
                     ],
 
-                    optionnels: [
-                        "CIBLE",
-                        "HAUTEUR",
-                        "DISTANCE",
-                        "VITESSE"
+                    exemples: [
+                        "{Sujet} fait un flip avant pour passer au-dessus de {Cible}",
+                        "{Sujet} effectue un flip vers l'avant pour esquiver {Cible}",
+                        "{Sujet} réalise un flip avant pour franchir l'obstacle",
+                        "{Sujet} effectue une rotation avant pour retomber derrière {Cible}"
+                    ]
+                },
+
+
+                arriere: {
+                    concept:
+                        "Flip réalisé vers l'arrière.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
                     ],
 
                     exemples: [
-                        "Yamato fait un flip avant pour passer au-dessus de Naruto",
-                        "Yamato effectue un flip vers l'avant pour esquiver Naruto",
-                        "Yamato réalise un flip arrière pour retomber derrière Naruto"
+                        "{Sujet} fait un flip arrière pour retomber derrière {Cible}",
+                        "{Sujet} effectue un flip vers l'arrière pour éviter {Cible}",
+                        "{Sujet} réalise un flip arrière pour se repositionner"
                     ]
                 }
-
-            ]
+            }
         }
-
     }
 };
-
+                                
+      
 /* ============================================================================
  * 9. EXPORT
  * ========================================================================== */
