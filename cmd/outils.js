@@ -5803,1526 +5803,1678 @@ function neoReconnaitreModele(
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
 //==============================================================
      
- function neoAnalyserAction(
-texte,
-contexte = {}
+function neoAnalyserAction(
+    texte,
+    contexte = {}
 ) {
 
-const action =
-neoDetecterAction(
-texte
-);
+    const action =
+        neoDetecterAction(
+            texte
+        );
 
-let acteur =
-neoDetecterActeur(
-texte,
-contexte
-);
+    let acteur =
+        neoDetecterActeur(
+            texte,
+            contexte
+        );
 
-const cible =
-neoDetecterCible(
-texte
-);
+    const cible =
+        neoDetecterCible(
+            texte
+        );
 
-const distance =
-neoDetecterDistance(
-texte
-);
+    const distance =
+        neoDetecterDistance(
+            texte
+        );
 
-const hauteur =
-neoDetecterHauteur(
-texte
-);
+    const hauteur =
+        neoDetecterHauteur(
+            texte
+        );
 
-const vitesse =
-neoDetecterVitesse(
-texte
-);
+    const vitesse =
+        neoDetecterVitesse(
+            texte
+        );
 
-const partieCorps =
-neoDetecterPartieCorps(
-texte
-);
+    const partieCorps =
+        neoDetecterPartieCorps(
+            texte
+        );
 
-const direction =
-neoDetecterDirection(
-texte
-);
+    const direction =
+        neoDetecterDirection(
+            texte
+        );
 
-const trajectoire =
-neoDetecterTrajectoire(
-texte
-);
+    const trajectoireDetectee =
+        neoDetecterTrajectoire(
+            texte
+        );
 
-const intention =
-neoDetecterIntention(
-texte
-);
+    const intention =
+        neoDetecterIntention(
+            texte
+        );
 
-//============================================================
-// 🔧 RÉCUPÉRATION PROPRE DE L'ACTION
-//============================================================
+    //============================================================
+    // 🔧 RÉCUPÉRATION PROPRE DE L'ACTION
+    //============================================================
 
-const actionNom =
-typeof action === "string"
-? action
-: (
-action?.action ||
-action?.verbe ||
-null
-);
+    const actionNom =
+        typeof action === "string"
+            ? action
+            : (
+                action?.action ||
+                action?.verbe ||
+                null
+            );
 
-const categorie =
-typeof action === "object"
-? (
-action?.categorie ||
-null
-)
-: null;
+    const categorie =
+        typeof action === "object"
+            ? (
+                action?.categorie ||
+                null
+            )
+            : null;
 
-const famille =
-typeof action === "object"
-? (
-action?.famille ||
-null
-)
-: null;
+    const famille =
+        typeof action === "object"
+            ? (
+                action?.famille ||
+                null
+            )
+            : null;
 
-//============================================================
-// 👤 FALLBACK SUJET
-//============================================================
+    //============================================================
+    // 👤 FALLBACK SUJET
+    //============================================================
 
-if (!acteur) {
+    if (!acteur) {
 
-const normal =
-  neoNormaliserTexteLocal(
-    texte
-  )
-    .replace(/^🌀\s*:\s*/u, "")
-    .replace(/^:\s*/u, "")
-    .trim();
+        const normal =
+            neoNormaliserTexteLocal(
+                texte
+            )
+            .replace(/^🌀\s*:\s*/u, "")
+            .replace(/^:\s*/u, "")
+            .trim();
 
-const mots =
-normal.split(/\s+/u);
+        const mots =
+            normal.split(/\s+/u);
 
-const premiersMotsAction = [
-  "avance",
-  "avancer",
-  "progresse",
-  "recule",
-  "reculer",
-  "fonce",
-  "foncer",
-  "court",
-  "courir",
-  "charge",
-  "charger",
-  "bondit",
-  "bondir",
-  "saute",
-  "sauter",
-  "frappe",
-  "frapper",
-  "donne",
-  "donner",
-  "porte",
-  "porter",
-  "pivote",
-  "pivoter",
-  "tourne",
-  "tourner",
-  "esquive",
-  "esquiver",
-  "évite",
-  "evite",
-  "éviter",
-  "eviter",
-  "bloque",
-  "bloquer",
-  "pare",
-  "parer",
-  "recule",
-  "se baisse",
-  "baisse"
-];
+        const premiersMotsAction = [
+            "avance",
+            "avancer",
+            "progresse",
+            "recule",
+            "reculer",
+            "fonce",
+            "foncer",
+            "court",
+            "courir",
+            "charge",
+            "charger",
+            "bondit",
+            "bondir",
+            "saute",
+            "sauter",
+            "frappe",
+            "frapper",
+            "donne",
+            "donner",
+            "porte",
+            "porter",
+            "pivote",
+            "pivoter",
+            "tourne",
+            "tourner",
+            "esquive",
+            "esquiver",
+            "évite",
+            "evite",
+            "éviter",
+            "eviter",
+            "bloque",
+            "bloquer",
+            "pare",
+            "parer",
+            "se baisse",
+            "baisse"
+        ];
 
-const indexAction =
-mots.findIndex(
-mot =>
-premiersMotsAction.includes(
-neoNormaliserMotLocal(mot)
-)
-);
+        const indexAction =
+            mots.findIndex(
+                mot =>
+                    premiersMotsAction.includes(
+                        neoNormaliserMotLocal(mot)
+                    )
+            );
 
-if (
-indexAction > 0
-) {
+        if (
+            indexAction > 0
+        ) {
 
-acteur =
-mots[0];
+            acteur =
+                mots[0];
+
+        }
+
+    }
+
+    //============================================================
+    // 🧠 TYPE DU PAVÉ
+    //============================================================
+
+    const texteRelation =
+        neoNormaliserTexteLocal(
+            texte
+        )
+        .replace(/\s+/g, " ")
+        .trim();
+
+    const marqueurReaction =
+        /\b(voyant|voyant\s+que|en\s+voyant|apercevant|apercevant\s+que|constatant|constatant\s+que|face\s+à|face\s+au|face\s+aux|en\s+réaction\s+à|réagit\s+à|réagissant\s+à|lorsqu['’]il\s+voit|lorsqu['’]elle\s+voit|quand\s+il\s+voit|quand\s+elle\s+voit)\b/iu
+        .test(
+            texteRelation
+        );
+
+    //============================================================
+    // 💨 MANIÈRE
+    //============================================================
+    //
+    // MANIÈRE = type d'exécution
+    //
+    // foncer en course frontale
+    //
+    // ACTION      = foncer
+    // MANIÈRE     = course
+    // TRAJECTOIRE = frontale
+    //
+    //============================================================
+
+    let maniere = null;
+
+    const manieres = [
+
+        //========================================================
+        // 🏃 DÉPLACEMENTS
+        //========================================================
+
+        {
+            valeur: "marche",
+            variantes: [
+                "marche",
+                "à pied",
+                "au pas",
+                "en marchant",
+                "en marche"
+            ]
+        },
+
+        {
+            valeur: "course",
+            variantes: [
+                "course",
+                "en course",
+                "à la course",
+                "en courant"
+            ]
+        },
+
+        {
+            valeur: "dash",
+            variantes: [
+                "dash",
+                "en dash"
+            ]
+        },
+
+        {
+            valeur: "rush",
+            variantes: [
+                "rush",
+                "en rush"
+            ]
+        },
+
+        {
+            valeur: "saut",
+            variantes: [
+                "saut",
+                "en saut",
+                "bond",
+                "en bond"
+            ]
+        },
+
+        {
+            valeur: "roulade",
+            variantes: [
+                "roulade",
+                "en roulade"
+            ]
+        },
+
+        {
+            valeur: "vol",
+            variantes: [
+                "vol",
+                "en vol",
+                "en volant"
+            ]
+        },
+
+        {
+            valeur: "pirouette",
+            variantes: [
+                "pirouette",
+                "en pirouette"
+            ]
+        },
+
+        {
+            valeur: "pivot",
+            variantes: [
+                "pivot",
+                "en pivot"
+            ]
+        },
+
+        {
+            valeur: "vrille",
+            variantes: [
+                "vrille",
+                "en vrille"
+            ]
+        },
+
+        {
+            valeur: "salto",
+            variantes: [
+                "salto",
+                "en salto"
+            ]
+        },
+
+        {
+            valeur: "flip",
+            variantes: [
+                "flip",
+                "en flip"
+            ]
+        },
+
+        //========================================================
+        // 👊 FRAPPES
+        //========================================================
+
+        {
+            valeur: "jab",
+            variantes: [
+                "jab"
+            ]
+        },
+
+        {
+            valeur: "direct",
+            variantes: [
+                "direct",
+                "coup direct"
+            ]
+        },
+
+        {
+            valeur: "crochet",
+            variantes: [
+                "crochet"
+            ]
+        },
+
+        {
+            valeur: "uppercut",
+            variantes: [
+                "uppercut"
+            ]
+        },
+
+        {
+            valeur: "backfist",
+            variantes: [
+                "backfist",
+                "back fist"
+            ]
+        },
+
+        {
+            valeur: "overhand",
+            variantes: [
+                "overhand"
+            ]
+        },
+
+        {
+            valeur: "hammerfist",
+            variantes: [
+                "hammerfist",
+                "hammer fist"
+            ]
+        },
+
+        //========================================================
+        // 🦵 COUPS DE PIED
+        //========================================================
+
+        {
+            valeur: "coup_de_pied_frontal",
+            variantes: [
+                "coup de pied frontal",
+                "kick frontal"
+            ]
+        },
+
+        {
+            valeur: "coup_de_pied_lateral",
+            variantes: [
+                "coup de pied latéral",
+                "coup de pied lateral",
+                "kick latéral",
+                "kick lateral"
+            ]
+        },
+
+        {
+            valeur: "coup_de_pied_circulaire",
+            variantes: [
+                "coup de pied circulaire",
+                "kick circulaire"
+            ]
+        },
+
+        {
+            valeur: "coup_de_pied_retourne",
+            variantes: [
+                "coup de pied retourné",
+                "coup de pied retourne",
+                "kick retourné",
+                "kick retourne"
+            ]
+        },
+
+        //========================================================
+        // 🔄 ROTATIONS
+        //========================================================
+
+        {
+            valeur: "rotation",
+            variantes: [
+                "rotation",
+                "en rotation"
+            ]
+        },
+
+        //========================================================
+        // 🛡️ DÉFENSE
+        //========================================================
+
+        {
+            valeur: "se_baisser",
+            variantes: [
+                "se baisse",
+                "se baissant",
+                "se baisser",
+                "en se baissant",
+                "en baissant"
+            ]
+        },
+
+        {
+            valeur: "esquive",
+            variantes: [
+                "esquive",
+                "esquiver",
+                "en esquivant"
+            ]
+        }
+
+    ];
+
+    const normalManiere =
+        neoNormaliserTexteLocal(
+            texte
+        )
+        .toLowerCase();
+
+    for (
+        const definition of manieres
+    ) {
+
+        const variantes =
+            [...definition.variantes]
+            .sort(
+                (a, b) =>
+                    b.length - a.length
+            );
+
+        for (
+            const variante of variantes
+        ) {
+
+            const varianteNormalisee =
+                neoNormaliserTexteLocal(
+                    variante
+                )
+                .toLowerCase()
+                .trim();
+
+            if (!varianteNormalisee) {
+                continue;
+            }
+
+            const regex =
+                new RegExp(
+                    `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
+                        /[.*+?^${}()|[\]\\]/g,
+                        "\\$&"
+                    )}(?![A-Za-zÀ-ÿ0-9_-])`,
+                    "iu"
+                );
+
+            if (
+                regex.test(
+                    normalManiere
+                )
+            ) {
+
+                maniere =
+                    definition.valeur;
+
+                break;
+            }
+
+        }
+
+        if (maniere) {
+            break;
+        }
+
+    }
+
+    //============================================================
+    // 🧭 TRAJECTOIRE
+    //============================================================
+    //
+    // La trajectoire est indépendante de la manière.
+    //
+    // course + frontale
+    // course + circulaire
+    // course + diagonale
+    // course + zig_zag
+    //
+    //============================================================
+
+    let trajectoire =
+        trajectoireDetectee || null;
+
+    // Détection générique de trajectoire
+    // uniquement si neoDetecterTrajectoire() n'a rien trouvé.
+
+    if (!trajectoire) {
+
+        const trajectoires = [
+
+            {
+                valeur: "frontale",
+                variantes: [
+                    "frontale",
+                    "frontal",
+                    "frontalement",
+                    "en trajectoire frontale",
+                    "de manière frontale",
+                    "de maniere frontale"
+                ]
+            },
+
+            {
+                valeur: "circulaire",
+                variantes: [
+                    "circulaire",
+                    "circulairement",
+                    "en trajectoire circulaire",
+                    "de manière circulaire",
+                    "de maniere circulaire"
+                ]
+            },
+
+            {
+                valeur: "diagonale",
+                variantes: [
+                    "diagonale",
+                    "diagonal",
+                    "diagonalement",
+                    "en diagonale",
+                    "en trajectoire diagonale",
+                    "de manière diagonale",
+                    "de maniere diagonale"
+                ]
+            },
+
+            {
+                valeur: "zig_zag",
+                variantes: [
+                    "zig zag",
+                    "zigzag",
+                    "zig-zag",
+                    "en zig zag",
+                    "en zigzag",
+                    "en zig-zag"
+                ]
+            },
+
+            {
+                valeur: "laterale",
+                variantes: [
+                    "latérale",
+                    "lateral",
+                    "latéralement",
+                    "lateralement",
+                    "en latéral",
+                    "en lateral"
+                ]
+            },
+
+            {
+                valeur: "vers_le_bas",
+                variantes: [
+                    "vers le bas",
+                    "vers le bas",
+                    "en baissant",
+                    "vers le bas"
+                ]
+            },
+
+            {
+                valeur: "vers_le_haut",
+                variantes: [
+                    "vers le haut",
+                    "en montant"
+                ]
+            }
+
+        ];
+
+        const normalTrajectoire =
+            neoNormaliserTexteLocal(
+                texte
+            )
+            .toLowerCase();
+
+        for (
+            const definition of trajectoires
+        ) {
+
+            const variantes =
+                [...definition.variantes]
+                .sort(
+                    (a, b) =>
+                        b.length - a.length
+                );
+
+            for (
+                const variante of variantes
+            ) {
+
+                const varianteNormalisee =
+                    neoNormaliserTexteLocal(
+                        variante
+                    )
+                    .toLowerCase()
+                    .trim();
+
+                if (!varianteNormalisee) {
+                    continue;
+                }
+
+                const regex =
+                    new RegExp(
+                        `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
+                            /[.*+?^${}()|[\]\\]/g,
+                            "\\$&"
+                        )}(?![A-Za-zÀ-ÿ0-9_-])`,
+                        "iu"
+                    );
+
+                if (
+                    regex.test(
+                        normalTrajectoire
+                    )
+                ) {
+
+                    trajectoire =
+                        definition.valeur;
+
+                    break;
+                }
+
+            }
+
+            if (trajectoire) {
+                break;
+            }
+
+        }
+
+    }
+
+    //============================================================
+    // 🦾 MEMBRE UTILISÉ
+    //============================================================
+
+    let membre = null;
+
+    const membres = [
+
+        "main droite",
+        "main gauche",
+        "poing droit",
+        "poing gauche",
+        "paume droite",
+        "paume gauche",
+        "dos de la main droite",
+        "dos de la main gauche",
+
+        "bras droit",
+        "bras gauche",
+        "avant-bras droit",
+        "avant-bras gauche",
+        "coude droit",
+        "coude gauche",
+        "poignet droit",
+        "poignet gauche",
+
+        "cuisse droite",
+        "cuisse gauche",
+        "genou droit",
+        "genou gauche",
+        "tibia droit",
+        "tibia gauche",
+        "mollet droit",
+        "mollet gauche",
+
+        "pied droit",
+        "pied gauche",
+        "talon droit",
+        "talon gauche",
+        "cheville droite",
+        "cheville gauche",
+
+        "dessus du pied droit",
+        "dessus du pied gauche",
+
+        "plante du pied droit",
+        "plante du pied gauche",
+
+        "semelle du pied droit",
+        "semelle du pied gauche",
+
+        "semelle droite",
+        "semelle gauche",
+
+        "gros orteil droit",
+        "gros orteil gauche"
+
+    ];
+
+    const membresTries =
+        [...membres].sort(
+            (a, b) =>
+                b.length - a.length
+        );
+
+    for (
+        const partie of membresTries
+    ) {
+
+        const partieNormalisee =
+            neoNormaliserTexteLocal(
+                partie
+            )
+            .toLowerCase();
+
+        const regex =
+            new RegExp(
+                `(?<![A-Za-zÀ-ÿ0-9_-])${partieNormalisee.replace(
+                    /[.*+?^${}()|[\]\\]/g,
+                    "\\$&"
+                )}(?![A-Za-zÀ-ÿ0-9_-])`,
+                "iu"
+            );
+
+        if (
+            regex.test(
+                normalManiere
+            )
+        ) {
+
+            membre =
+                partie;
+
+            break;
+        }
+
+    }
+
+    //============================================================
+    // 🧠 INTERPRÉTATION DU CÔTÉ
+    //============================================================
+
+    if (!membre) {
+
+        const droit =
+            /\bdu\s+droit\b/iu.test(normalManiere) ||
+            /\bde\s+la\s+droite\b/iu.test(normalManiere) ||
+            /\bà\s+droite\b/iu.test(normalManiere);
+
+        const gauche =
+            /\bdu\s+gauche\b/iu.test(normalManiere) ||
+            /\bde\s+la\s+gauche\b/iu.test(normalManiere) ||
+            /\bà\s+gauche\b/iu.test(normalManiere);
+
+        if (
+            droit ||
+            gauche
+        ) {
+
+            const cote =
+                droit
+                    ? "droite"
+                    : "gauche";
+
+            if (
+                /\b(poing|uppercut|crochet|frappe|frapper|coup de poing)\b/iu.test(
+                    normalManiere
+                )
+            ) {
+
+                membre =
+                    `main ${cote}`;
+
+            }
+
+            else if (
+                /\b(genou|coup de genou)\b/iu.test(
+                    normalManiere
+                )
+            ) {
+
+                membre =
+                    `genou ${cote}`;
+
+            }
+
+            else if (
+                /\b(pied|coup de pied|kick|semelle|plante du pied)\b/iu.test(
+                    normalManiere
+                )
+            ) {
+
+                membre =
+                    `pied ${cote}`;
+
+            }
+
+            else if (
+                /\b(coude|coup de coude)\b/iu.test(
+                    normalManiere
+                )
+            ) {
+
+                membre =
+                    `coude ${cote}`;
+
+            }
+
+            else if (
+                /\b(jambe|cuisse|tibia|mollet)\b/iu.test(
+                    normalManiere
+                )
+            ) {
+
+                membre =
+                    `jambe ${cote}`;
+
+            }
+
+            else if (
+                /\b(bras|avant-bras|poignet)\b/iu.test(
+                    normalManiere
+                )
+            ) {
+
+                membre =
+                    `bras ${cote}`;
+
+            }
+
+        }
+
+    }
+
+    //============================================================
+    // 🧱 STRUCTURE GRAMMATICALE
+    //============================================================
+
+    const structure = {
+
+        sujet:
+            acteur
+                ? "S"
+                : null,
+
+        verbe:
+            actionNom
+                ? "V"
+                : null,
+
+        objet:
+            cible
+                ? "O"
+                : null,
+
+        complement:
+            (
+                distance?.valeur !== null ||
+                hauteur?.valeur !== null ||
+                maniere ||
+                vitesse?.valeur !== null ||
+                membre ||
+                partieCorps ||
+                trajectoire
+            )
+                ? "C"
+                : null
+
+    };
+
+    //============================================================
+    // 📦 ANALYSE UTILISÉE POUR LE MODÈLE
+    //============================================================
+
+    const analyseModele = {
+
+        texte,
+
+        acteur,
+
+        sujet:
+            acteur,
+
+        action: {
+            action: actionNom,
+            categorie,
+            famille
+        },
+
+        categorie,
+
+        famille,
+
+        cible,
+
+        maniere,
+
+        membre,
+
+        vitesse:
+            vitesse?.valeur ?? null,
+
+        distance:
+            distance?.valeur ?? null,
+
+        distanceUnite:
+            distance?.unite ?? null,
+
+        hauteur:
+            hauteur?.valeur ?? null,
+
+        hauteurUnite:
+            hauteur?.unite ?? null,
+
+        direction,
+
+        trajectoire,
+
+        intention,
+
+        partieCorps,
+
+        reaction:
+            marqueurReaction
+
+    };
+
+    //============================================================
+    // 📚 RECONNAISSANCE DU MODÈLE
+    //============================================================
+
+    const modele =
+        neoReconnaitreModele(
+            texte,
+            analyseModele
+        );
+
+    const actionFinale =
+        modele?.actionCanonique ||
+        actionNom;
+
+    //============================================================
+    // 🧠 RELATIONS SÉMANTIQUES
+    //============================================================
+
+    let reaction = null;
+    let declencheur = null;
+    let cause = null;
+    let objectif = null;
+    let consequence = null;
+    let relation = null;
+
+    //============================================================
+    // ⚡ DÉCLENCHEUR
+    //============================================================
+
+    if (
+        marqueurReaction
+    ) {
+
+        reaction = {
+            active: true,
+            type: "REACTION"
+        };
+
+        const matchDeclencheur =
+            texteRelation.match(
+                /\b(?:voyant|en voyant|apercevant|constatant)\s+(.+?)(?=\s+(?:esquive|esquiver|évite|evite|éviter|eviter|réagit|reagit|se baisse|se baissant|baisse|abaissant|recule|reculant|avance|avançant|fonce|courant|court|saute|sautant|bloque|bloquant|pare|parant|contre|contre-attaque)\b)/iu
+            );
+
+        if (
+            matchDeclencheur?.[1]
+        ) {
+
+            const brut =
+                matchDeclencheur[1]
+                .trim()
+                .replace(/[,.]+$/u, "");
+
+            declencheur = {
+                texte: brut,
+                type: "EVENEMENT_ENTRANT"
+            };
+
+        }
+
+        if (!declencheur) {
+
+            const matchFace =
+                texteRelation.match(
+                    /\bface\s+(?:à|au|aux)\s+(.+?)(?=\s+(?:il|elle|le|la|les|se|son|sa|ses)\b|$)/iu
+                );
+
+            if (
+                matchFace?.[1]
+            ) {
+
+                declencheur = {
+                    texte:
+                        matchFace[1]
+                        .trim()
+                        .replace(/[,.]+$/u, ""),
+                    type: "MENACE_OU_EVENEMENT"
+                };
+
+            }
+
+        }
+
+        if (
+            declencheur
+        ) {
+
+            cause = {
+                concept:
+                    "EVENEMENT_DECLENCHEUR",
+                texte:
+                    declencheur.texte
+            };
+
+        }
+
+    }
+
+    //============================================================
+    // 🎯 FINALITÉ
+    //============================================================
+
+    const matchObjectif =
+        texteRelation.match(
+            /\b(?:pour|afin de|dans le but de|avec pour objectif de|de façon à|de maniere a|de manière à)\s+(.+?)(?=[,.]|$)/iu
+        );
+
+    if (
+        matchObjectif?.[1]
+    ) {
+
+        objectif = {
+            texte:
+                matchObjectif[1]
+                .trim()
+                .replace(/[,.]+$/u, ""),
+
+            intention:
+                intention || null
+        };
+
+    }
+    else if (
+        intention
+    ) {
+
+        objectif = {
+            texte: null,
+            intention
+        };
+
+    }
+
+    //============================================================
+    // ➡️ CONSÉQUENCE
+    //============================================================
+
+    if (
+        marqueurReaction
+    ) {
+
+        const matchEffetReaction =
+            texteRelation.match(
+                /\b(?:pour|afin de)\s+(.+?)(?:[,.]|$)/iu
+            );
+
+        if (
+            matchEffetReaction?.[1]
+        ) {
+
+            const texteEffet =
+                matchEffetReaction[1]
+                .trim()
+                .replace(/[,.]+$/u, "");
+
+            if (
+                texteEffet
+            ) {
+
+                consequence = {
+                    texte:
+                        texteEffet,
+                    type:
+                        "EFFET_RECHERCHE"
+                };
+
+            }
+
+        }
+
+    }
+
+    if (
+        !consequence
+    ) {
+
+        const matchConsequence =
+            texteRelation.match(
+                /\b(?:donc|ainsi|si bien que|de sorte que|ce qui permet de|ce qui provoque|ce qui entraîne|entraînant|provoquant|se retrouve)\s+(.+?)(?:[,.]|$)/iu
+            );
+
+        if (
+            matchConsequence?.[1]
+        ) {
+
+            const texteConsequence =
+                matchConsequence[1]
+                .trim()
+                .replace(/[,.]+$/u, "");
+
+            if (
+                texteConsequence
+            ) {
+
+                consequence = {
+                    texte:
+                        texteConsequence,
+                    type:
+                        "CONSEQUENCE_EXPLICITE"
+                };
+
+            }
+
+        }
+
+    }
+
+    //============================================================
+    // 🔗 TYPE DE RELATION
+    //============================================================
+
+    if (
+        reaction
+    ) {
+
+        relation = {
+
+            type:
+                "REACTION",
+
+            declencheur:
+                declencheur || null,
+
+            cause:
+                cause || null,
+
+            objectif:
+                objectif || null,
+
+            consequence:
+                consequence || null
+
+        };
+
+    }
+    else if (
+        objectif
+    ) {
+
+        relation = {
+
+            type:
+                "FINALITE",
+
+            objectif
+
+        };
+
+    }
+    else if (
+        consequence
+    ) {
+
+        relation = {
+
+            type:
+                "CONSEQUENCE",
+
+            consequence
+
+        };
+
+    }
+
+    //============================================================
+    // 🧩 VALIDATION STRUCTURELLE
+    //============================================================
+
+    const modeleReconnu =
+        modele?.modele ||
+        null;
+
+    let scoreStructure = 0;
+
+    let structureComplete = false;
+
+    let slotsManquants = [];
+
+    let slotsTrouves = [];
+
+    const structureModele =
+        Array.isArray(
+            modeleReconnu?.structure
+        )
+            ? modeleReconnu.structure
+            : [];
+
+    //============================================================
+    // 🔎 TEST EXISTENCE SLOT
+    //============================================================
+
+    const existe =
+        valeur => {
+
+            if (
+                valeur === null ||
+                valeur === undefined
+            ) {
+
+                return false;
+
+            }
+
+            return String(
+                valeur
+            )
+            .trim() !== "";
+
+        };
+
+    //============================================================
+    // 📦 VALEURS SÉMANTIQUES
+    //============================================================
+
+    const valeurs = {
+
+        SUJET:
+            acteur || null,
+
+        ACTION:
+            actionFinale || null,
+
+        CIBLE:
+            cible || null,
+
+        MEMBRE:
+            membre || null,
+
+        PARTIE_CORPS:
+            partieCorps || null,
+
+        MANIERE:
+            maniere || null,
+
+        DISTANCE:
+            distance?.valeur ?? null,
+
+        HAUTEUR:
+            hauteur?.valeur ?? null,
+
+        VITESSE:
+            vitesse?.valeur ?? null,
+
+        DIRECTION:
+            direction || null,
+
+        TRAJECTOIRE:
+            trajectoire || null,
+
+        INTENTION:
+            intention || null
+
+    };
+
+    //============================================================
+    // 🧠 COMPARAISON STRUCTURELLE
+    //============================================================
+
+    for (
+        const element of structureModele
+    ) {
+
+        const slot =
+            neoNormaliserMotLocal(
+                String(element)
+            )
+            .toUpperCase()
+            .replace(/\s+/g, "_");
+
+        if (!slot) {
+            continue;
+        }
+
+        let valeur = null;
+
+        switch (slot) {
+
+            case "SUJET":
+            case "ACTEUR":
+
+                valeur =
+                    valeurs.SUJET;
+
+                break;
+
+            case "ACTION":
+            case "VERBE":
+
+                valeur =
+                    valeurs.ACTION;
+
+                break;
+
+            case "CIBLE":
+            case "OBJET":
+
+                valeur =
+                    valeurs.CIBLE;
+
+                break;
+
+            case "MEMBRE":
+
+                valeur =
+                    valeurs.MEMBRE;
+
+                break;
+
+            case "PARTIE_CORPS":
+            case "PARTIECORPS":
+
+                valeur =
+                    valeurs.PARTIE_CORPS;
+
+                break;
+
+            case "MANIERE":
+
+                valeur =
+                    valeurs.MANIERE;
+
+                break;
+
+            case "DISTANCE":
+
+                valeur =
+                    valeurs.DISTANCE;
+
+                break;
+
+            case "HAUTEUR":
+
+                valeur =
+                    valeurs.HAUTEUR;
+
+                break;
+
+            case "VITESSE":
+
+                valeur =
+                    valeurs.VITESSE;
+
+                break;
+
+            case "DIRECTION":
+
+                valeur =
+                    valeurs.DIRECTION;
+
+                break;
+
+            case "TRAJECTOIRE":
+
+                valeur =
+                    valeurs.TRAJECTOIRE;
+
+                break;
+
+            case "INTENTION":
+
+                valeur =
+                    valeurs.INTENTION;
+
+                break;
+
+            default:
+
+                valeur =
+                    null;
+
+                break;
+
+        }
+
+        if (
+            existe(valeur)
+        ) {
+
+            slotsTrouves.push({
+
+                slot,
+
+                valeur
+
+            });
+
+        }
+        else {
+
+            slotsManquants.push(
+                slot
+            );
+
+        }
+
+    }
+
+    //============================================================
+    // 📊 SCORE STRUCTURE
+    //============================================================
+
+    const totalSlots =
+        structureModele.length;
+
+    const totalTrouves =
+        slotsTrouves.length;
+
+    scoreStructure =
+        totalSlots > 0
+            ? Math.round(
+                (
+                    totalTrouves /
+                    totalSlots
+                ) * 100
+            )
+            : 0;
+
+    structureComplete =
+        totalSlots > 0 &&
+        slotsManquants.length === 0;
+
+    //============================================================
+    // 🧠 STRUCTURE SÉMANTIQUE FINALE
+    //============================================================
+
+    const structureSemantique = {
+
+        sujet:
+            acteur || null,
+
+        action:
+            actionFinale || null,
+
+        cible:
+            cible || null,
+
+        membre:
+            membre || null,
+
+        partieCorps:
+            partieCorps || null,
+
+        maniere:
+            maniere || null,
+
+        distance:
+            distance?.valeur ??
+            null,
+
+        hauteur:
+            hauteur?.valeur ??
+            null,
+
+        vitesse:
+            vitesse?.valeur ??
+            null,
+
+        direction:
+            direction ||
+            null,
+
+        trajectoire:
+            trajectoire ||
+            null,
+
+        intention:
+            intention ||
+            null,
+
+        reaction,
+
+        declencheur,
+
+        cause,
+
+        objectif,
+
+        consequence,
+
+        relation
+
+    };
+
+    //============================================================
+    // 📦 INFORMATIONS MODÈLE
+    //============================================================
+
+    analyseModele.reaction =
+        reaction;
+
+    analyseModele.declencheur =
+        declencheur;
+
+    analyseModele.cause =
+        cause;
+
+    analyseModele.objectif =
+        objectif;
+
+    analyseModele.consequence =
+        consequence;
+
+    analyseModele.relation =
+        relation;
+
+    //============================================================
+    // 📚 MODÈLE CANONIQUE
+    //============================================================
+
+    const modeleCanonique =
+        modele?.actionCanonique ||
+        actionFinale ||
+        null;
+
+    //============================================================
+    // ✅ FORMAT DE SORTIE
+    //============================================================
+
+    return {
+
+        texte,
+
+        // 👤 SUJET
+        acteur,
+
+        sujet:
+            acteur,
+
+        // ⚔️ ACTION
+        action:
+            actionFinale,
+
+        categorie,
+
+        famille,
+
+        // 🎯 CIBLE
+        cible,
+
+        // 🧩 COMPLÉMENTS
+        maniere,
+
+        membre,
+
+        vitesse:
+            vitesse?.valeur ??
+            null,
+
+        distance:
+            distance?.valeur ??
+            null,
+
+        distanceUnite:
+            distance?.unite ??
+            null,
+
+        hauteur:
+            hauteur?.valeur ??
+            null,
+
+        hauteurUnite:
+            hauteur?.unite ??
+            null,
+
+        direction,
+
+        trajectoire,
+
+        partieCorps,
+
+        // 🧠 INTENTION
+        intention,
+
+        // 🧠 MODÈLE
+        modele:
+            modeleCanonique,
+
+        // 📈 SIMILARITÉ
+        score:
+            modele?.score ||
+            0,
+
+        scoreExemple:
+            modele?.scoreExemple ||
+            0,
+
+        // 🧩 STRUCTURE
+        scoreStructure,
+
+        structureComplete,
+
+        slotsManquants,
+
+        slotsTrouves,
+
+        requisManquants:
+            slotsManquants,
+
+        structure,
+
+        structureSemantique,
+
+        //==========================================================
+        // 🆕 RELATIONS
+        //==========================================================
+
+        reaction,
+
+        declencheur,
+
+        cause,
+
+        objectif,
+
+        consequence,
+
+        relation
+
+    };
 
 }
-
-}
-
-//============================================================
-// 🧠 DÉTECTION DU TYPE DE PAVÉ
-//============================================================
-//
-// Un pavé peut être :
-//
-// ACTION
-// → action normale
-//
-// REACTION
-// → action exécutée en réponse à un événement.
-//
-// La réaction ne supprime PAS le modèle,
-// la structure ou la similarité.
-//
-//============================================================
-
-const texteRelation =
-neoNormaliserTexteLocal(
-texte
-)
-.replace(/\s+/g, " ")
-.trim();
-
-const marqueurReaction =
-  /\b(voyant|voyant\s+que|en\s+voyant|apercevant|apercevant\s+que|constatant|constatant\s+que|face\s+à|face\s+au|face\s+aux|en\s+réaction\s+à|réagit\s+à|réagissant\s+à|lorsqu['’]il\s+voit|lorsqu['’]elle\s+voit|quand\s+il\s+voit|quand\s+elle\s+voit)\b/iu
-  .test(
-    texteRelation
-  );
-
-//============================================================
-// 💨 MANIÈRE
-//============================================================
-// La manière décrit COMMENT l'action est exécutée.
-
-let maniere = null;
-
-const manieres = [
-
-{
-valeur: "frontale",
-
-variantes: [
-  "frontale",
-  "frontal",
-  "frontalement",
-  "de manière frontale",
-  "de maniere frontale",
-  "en course frontale",
-  "en trajectoire frontale"
-]
-
-},
-
-{
-valeur: "circulaire",
-
-variantes: [
-  "circulaire",
-  "circulairement",
-  "de manière circulaire",
-  "de maniere circulaire",
-  "en trajectoire circulaire"
-]
-
-},
-
-{
-valeur: "zig_zag",
-
-variantes: [
-  "zig zag",
-  "zigzag",
-  "zig-zag",
-  "zigzagant",
-  "en zig zag",
-  "en zigzag",
-  "en zig-zag",
-  "de manière zig zag",
-  "de manière zigzag"
-]
-
-},
-
-{
-valeur: "diagonale",
-
-variantes: [
-  "diagonale",
-  "diagonal",
-  "diagonalement",
-  "en diagonale",
-  "de manière diagonale",
-  "de maniere diagonale",
-  "en trajectoire diagonale"
-]
-
-},
-
-//==========================================================
-// 👊 FRAPPES MAINS
-//==========================================================
-
-{
-valeur: "jab",
-variantes: [
-  "jab"
-]
-},
-
-{
-valeur: "direct",
-variantes: [
-  "direct",
-  "directe",
-  "coup direct"
-]
-},
-
-{
-valeur: "crochet",
-variantes: [
-  "crochet"
-]
-},
-
-{
-valeur: "uppercut",
-variantes: [
-  "uppercut"
-]
-},
-
-{
-valeur: "backfist",
-variantes: [
-  "backfist",
-  "back fist"
-]
-},
-
-{
-valeur: "overhand",
-variantes: [
-  "overhand"
-]
-},
-
-{
-valeur: "hammerfist",
-variantes: [
-  "hammerfist",
-  "hammer fist"
-]
-},
-
-//==========================================================
-// 🦵 COUPS DE PIED
-//==========================================================
-
-{
-valeur: "frontal",
-variantes: [
-  "coup de pied frontal",
-  "kick frontal"
-]
-},
-
-{
-valeur: "latéral",
-variantes: [
-  "coup de pied latéral",
-  "coup de pied lateral",
-  "kick latéral",
-  "kick lateral"
-]
-},
-
-{
-valeur: "circulaire",
-variantes: [
-  "coup de pied circulaire",
-  "kick circulaire"
-]
-},
-
-{
-valeur: "retourné",
-variantes: [
-  "coup de pied retourné",
-  "coup de pied retourne",
-  "kick retourné",
-  "kick retourne"
-]
-},
-
-//==========================================================
-// 🔄 ROTATIONS / MOUVEMENTS
-//==========================================================
-
-{
-valeur: "vrille",
-variantes: [
-  "vrille",
-  "en vrille"
-]
-},
-
-{
-valeur: "rotation",
-variantes: [
-  "rotation",
-  "en rotation"
-]
-},
-
-{
-valeur: "pivot",
-variantes: [
-  "pivot",
-  "en pivot"
-]
-},
-
-{
-valeur: "roulade",
-variantes: [
-  "roulade",
-  "en roulade"
-]
-},
-
-{
-valeur: "pirouette",
-variantes: [
-  "pirouette",
-  "en pirouette"
-]
-},
-
-{
-valeur: "salto",
-variantes: [
-  "salto",
-  "en salto"
-]
-},
-
-//==========================================================
-// 🛡️ DÉFENSE / RÉACTION
-//==========================================================
-
-{
-valeur: "se baisser",
-variantes: [
-  "se baisse",
-  "se baissant",
-  "se baisser",
-  "en se baissant",
-  "en baissant"
-]
-},
-
-{
-valeur: "esquive",
-variantes: [
-  "esquive",
-  "esquiver",
-  "en esquivant"
-]
-}
-
-];
-
-//============================================================
-// 🔎 DÉTECTION
-//============================================================
-
-const normalManiere =
-neoNormaliserTexteLocal(
-texte
-).toLowerCase();
-
-const normal =
-normalManiere;
-
-for (
-const definition
-of manieres
-) {
-
-const variantes =
-[...definition.variantes]
-.sort(
-(a, b) =>
-b.length - a.length
-);
-
-for (
-const variante
-of variantes
-) {
-
-const varianteNormalisee =
-neoNormaliserTexteLocal(
-variante
-)
-.toLowerCase()
-.trim();
-
-if (!varianteNormalisee) {
-continue;
-}
-
-const regex =
-new RegExp(
-`(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
-/[.*+?^${}()|[\]\\]/g,
-"\\$&"
-)}(?![A-Za-zÀ-ÿ0-9_-])`,
-"iu"
-);
-
-if (
-regex.test(
-normalManiere
-)
-) {
-
-maniere =
-definition.valeur;
-
-break;
-
-}
-
-}
-
-if (maniere) {
-break;
-}
-
-}
-
-//============================================================
-// 🦾 MEMBRE UTILISÉ
-//============================================================
-
-let membre = null;
-
-const membres = [
-
-"main droite",
-"main gauche",
-"poing droit",
-"poing gauche",
-"paume droite",
-"paume gauche",
-"dos de la main droite",
-"dos de la main gauche",
-
-"bras droit",
-"bras gauche",
-"avant-bras droit",
-"avant-bras gauche",
-"coude droit",
-"coude gauche",
-"poignet droit",
-"poignet gauche",
-
-"cuisse droite",
-"cuisse gauche",
-"genou droit",
-"genou gauche",
-"tibia droit",
-"tibia gauche",
-"mollet droit",
-"mollet gauche",
-
-"pied droit",
-"pied gauche",
-"talon droit",
-"talon gauche",
-"cheville droite",
-"cheville gauche",
-
-"dessus du pied droit",
-"dessus du pied gauche",
-
-"plante du pied droit",
-"plante du pied gauche",
-
-"semelle du pied droit",
-"semelle du pied gauche",
-
-"semelle droite",
-"semelle gauche",
-
-"gros orteil droit",
-"gros orteil gauche"
-
-];
-
-const membresTries =
-[...membres].sort(
-(a, b) =>
-b.length - a.length
-);
-
-for (
-const partie of membresTries
-) {
-
-const partieNormalisee =
-neoNormaliserTexteLocal(
-partie
-).toLowerCase();
-
-const regex =
-new RegExp(
-`(?<![A-Za-zÀ-ÿ0-9_-])${partieNormalisee.replace(
-/[.*+?^${}()|[\]\\]/g,
-"\\$&"
-)}(?![A-Za-zÀ-ÿ0-9_-])`,
-"iu"
-);
-
-if (
-regex.test(normal)
-) {
-
-membre =
-partie;
-
-break;
-
-}
-
-}
-
-//============================================================
-// 🧠 INTERPRÉTATION DU CÔTÉ
-//============================================================
-
-if (!membre) {
-
-const droit =
-/\bdu\s+droit\b/iu.test(normal) ||
-/\bde\s+la\s+droite\b/iu.test(normal) ||
-/\bà\s+droite\b/iu.test(normal);
-
-const gauche =
-/\bdu\s+gauche\b/iu.test(normal) ||
-/\bde\s+la\s+gauche\b/iu.test(normal) ||
-/\bà\s+gauche\b/iu.test(normal);
-
-if (
-droit ||
-gauche
-) {
-
-const cote =
-droit
-? "droite"
-: "gauche";
-
-if (
-/\b(poing|uppercut|crochet|frappe|frapper|coup de poing)\b/iu.test(normal)
-) {
-
-membre =
-`main ${cote}`;
-
-}
-
-else if (
-/\b(genou|coup de genou)\b/iu.test(normal)
-) {
-
-membre =
-`genou ${cote}`;
-
-}
-
-else if (
-/\b(pied|coup de pied|kick|semelle|plante du pied)\b/iu.test(normal)
-) {
-
-membre =
-`pied ${cote}`;
-
-}
-
-else if (
-/\b(coude|coup de coude)\b/iu.test(normal)
-) {
-
-membre =
-`coude ${cote}`;
-
-}
-
-else if (
-/\b(jambe|cuisse|tibia|mollet)\b/iu.test(normal)
-) {
-
-membre =
-`jambe ${cote}`;
-
-}
-
-else if (
-/\b(bras|avant-bras|poignet)\b/iu.test(normal)
-) {
-
-membre =
-`bras ${cote}`;
-
-}
-
-}
-
-}
-
-//============================================================
-// 🧱 STRUCTURE GRAMMATICALE
-//============================================================
-
-const structure = {
-
-sujet:
-acteur
-? "S"
-: null,
-
-verbe:
-actionNom
-? "V"
-: null,
-
-objet:
-cible
-? "O"
-: null,
-
-complement:
-(
-distance?.valeur !== null ||
-hauteur?.valeur !== null ||
-maniere ||
-vitesse?.valeur !== null ||
-membre ||
-partieCorps
-)
-? "C"
-: null
-
-};
-
-//============================================================
-// 📦 ANALYSE UTILISÉE POUR LE MODÈLE
-//============================================================
-
-const analyseModele = {
-
-texte,
-
-acteur,
-
-sujet:
-acteur,
-
-action: {
-action: actionNom,
-categorie,
-famille
-},
-
-categorie,
-
-famille,
-
-cible,
-
-maniere,
-
-membre,
-
-vitesse:
-vitesse?.valeur ?? null,
-
-distance:
-distance?.valeur ?? null,
-
-distanceUnite:
-distance?.unite ?? null,
-
-hauteur:
-hauteur?.valeur ?? null,
-
-hauteurUnite:
-hauteur?.unite ?? null,
-
-direction,
-
-trajectoire,
-
-intention,
-
-partieCorps,
-
-structure,
-
-reaction:
-marqueurReaction
-
-};
-
-//============================================================
-// 📚 RECONNAISSANCE DU MODÈLE
-//============================================================
-//
-// IMPORTANT :
-// La réaction passe AUSSI ici.
-//
-// Donc elle conserve :
-// → modèle
-// → score / similarité
-// → structure
-//
-//============================================================
-
-const modele =
-neoReconnaitreModele(
-texte,
-analyseModele
-);
-
-const actionFinale =
-modele?.actionCanonique ||
-actionNom;
-
-//============================================================
-// 🧠 RELATIONS SÉMANTIQUES
-//============================================================
-
-let reaction = null;
-let declencheur = null;
-let cause = null;
-let objectif = null;
-let consequence = null;
-let relation = null;
-
-//============================================================
-// ⚡ DÉCLENCHEUR
-//============================================================
-
-if (
-marqueurReaction
-) {
-
-reaction = {
-active: true,
-type: "REACTION"
-};
-
-const matchDeclencheur =
-texteRelation.match(
-/\b(?:voyant|en voyant|apercevant|constatant)\s+(.+?)(?=\s+(?:esquive|esquiver|évite|evite|éviter|eviter|réagit|reagit|se baisse|se baissant|baisse|abaissant|recule|reculant|avance|avançant|fonce|courant|court|saute|sautant|bloque|bloquant|pare|parant|contre|contre-attaque)\b)/iu
-);
-
-if (
-matchDeclencheur?.[1]
-) {
-
-const brut =
-matchDeclencheur[1]
-.trim()
-.replace(/[,.]+$/u, "");
-
-declencheur = {
-texte: brut,
-type: "EVENEMENT_ENTRANT"
-};
-
-}
-
-if (!declencheur) {
-
-const matchFace =
-texteRelation.match(
-/\bface\s+(?:à|au|aux)\s+(.+?)(?=\s+(?:il|elle|le|la|les|se|son|sa|ses)\b|$)/iu
-);
-
-if (
-matchFace?.[1]
-) {
-
-declencheur = {
-texte:
-matchFace[1]
-.trim()
-.replace(/[,.]+$/u, ""),
-type: "MENACE_OU_EVENEMENT"
-};
-
-}
-
-}
-
-if (
-declencheur
-) {
-
-cause = {
-concept: "EVENEMENT_DECLENCHEUR",
-texte: declencheur.texte
-};
-
-}
-
-}
-
-//============================================================
-// 🎯 FINALITÉ
-//============================================================
-//
-// "pour arriver à 1m"
-// → FINALITÉ
-//
-// "pour laisser passer le coup"
-// → dans une réaction : CONSÉQUENCE / EFFET
-//
-// Mais surtout :
-// "pour" ne devient JAMAIS automatiquement
-// une conséquence dans un pavé normal.
-//
-//============================================================
-
-const matchObjectif =
-texteRelation.match(
-/\b(?:pour|afin de|dans le but de|avec pour objectif de|de façon à|de maniere a|de manière à)\s+(.+?)(?=[,.]|$)/iu
-);
-
-if (
-matchObjectif?.[1]
-) {
-
-objectif = {
-texte:
-matchObjectif[1]
-.trim()
-.replace(/[,.]+$/u, ""),
-
-intention:
-intention || null
-};
-
-}
-else if (
-intention
-) {
-
-objectif = {
-texte: null,
-intention
-};
-
-}
-
-//============================================================
-// ➡️ CONSÉQUENCE
-//============================================================
-//
-// IMPORTANT :
-// On ne considère plus "pour" comme une conséquence
-// générale.
-//
-// Il faut :
-// → une réaction
-// OU
-// → un marqueur explicite de conséquence.
-//
-//============================================================
-
-if (
-marqueurReaction
-) {
-
-const matchEffetReaction =
-texteRelation.match(
-/\b(?:pour|afin de)\s+(.+?)(?:[,.]|$)/iu
-);
-
-if (
-matchEffetReaction?.[1]
-) {
-
-const texteEffet =
-matchEffetReaction[1]
-.trim()
-.replace(/[,.]+$/u, "");
-
-if (
-texteEffet
-) {
-
-consequence = {
-texte:
-texteEffet,
-type:
-"EFFET_RECHERCHE"
-};
-
-}
-
-}
-
-}
-
-if (
-!consequence
-) {
-
-const matchConsequence =
-texteRelation.match(
-/\b(?:donc|ainsi|si bien que|de sorte que|ce qui permet de|ce qui provoque|ce qui entraîne|entraînant|provoquant|se retrouve)\s+(.+?)(?:[,.]|$)/iu
-);
-
-if (
-matchConsequence?.[1]
-) {
-
-const texteConsequence =
-matchConsequence[1]
-.trim()
-.replace(/[,.]+$/u, "");
-
-if (
-texteConsequence
-) {
-
-consequence = {
-texte:
-texteConsequence,
-type:
-"CONSEQUENCE_EXPLICITE"
-};
-
-}
-
-}
-
-}
-
-//============================================================
-// 🔗 TYPE DE RELATION
-//============================================================
-
-if (
-reaction
-) {
-
-relation = {
-
-type:
-"REACTION",
-
-declencheur:
-declencheur || null,
-
-cause:
-cause || null,
-
-objectif:
-objectif || null,
-
-consequence:
-consequence || null
-
-};
-
-}
-else if (
-objectif
-) {
-
-relation = {
-
-type:
-"FINALITE",
-
-objectif
-
-};
-
-}
-else if (
-consequence
-) {
-
-relation = {
-
-type:
-"CONSEQUENCE",
-
-consequence
-
-};
-
-}
-
-//============================================================
-// 🧩 VALIDATION STRUCTURELLE
-//============================================================
-
-const modeleReconnu =
-modele?.modele ||
-null;
-
-let scoreStructure = 0;
-
-let structureComplete = false;
-
-let slotsManquants = [];
-
-let slotsTrouves = [];
-
-const structureModele =
-Array.isArray(
-modeleReconnu?.structure
-)
-? modeleReconnu.structure
-: [];
-
-//============================================================
-// 🔎 TEST EXISTENCE SLOT
-//============================================================
-
-const existe = valeur => {
-
-if (
-valeur === null ||
-valeur === undefined
-) {
-
-return false;
-
-}
-
-return String(
-valeur
-).trim() !== "";
-
-};
-
-//============================================================
-// 📦 VALEURS SÉMANTIQUES
-//============================================================
-
-const valeurs = {
-
-SUJET:
-acteur || null,
-
-ACTION:
-actionFinale || null,
-
-CIBLE:
-cible || null,
-
-MEMBRE:
-membre || null,
-
-PARTIE_CORPS:
-partieCorps || null,
-
-MANIERE:
-maniere || null,
-
-DISTANCE:
-distance?.valeur ?? null,
-
-HAUTEUR:
-hauteur?.valeur ?? null,
-
-VITESSE:
-vitesse?.valeur ?? null,
-
-DIRECTION:
-direction || null,
-
-TRAJECTOIRE:
-trajectoire || null,
-
-INTENTION:
-intention || null
-
-};
-
-//============================================================
-// 🧠 COMPARAISON STRUCTURELLE
-//============================================================
-
-for (
-const element
-of structureModele
-) {
-
-const slot =
-neoNormaliserMotLocal(
-String(element)
-)
-.toUpperCase()
-.replace(/\s+/g, "_");
-
-if (!slot) {
-continue;
-}
-
-let valeur = null;
-
-switch (slot) {
-
-case "SUJET":
-case "ACTEUR":
-
-valeur =
-valeurs.SUJET;
-
-break;
-
-case "ACTION":
-case "VERBE":
-
-valeur =
-valeurs.ACTION;
-
-break;
-
-case "CIBLE":
-case "OBJET":
-
-valeur =
-valeurs.CIBLE;
-
-break;
-
-case "MEMBRE":
-
-valeur =
-valeurs.MEMBRE;
-
-break;
-
-case "PARTIE_CORPS":
-case "PARTIECORPS":
-
-valeur =
-valeurs.PARTIE_CORPS;
-
-break;
-
-case "MANIERE":
-
-valeur =
-valeurs.MANIERE;
-
-break;
-
-case "DISTANCE":
-
-valeur =
-valeurs.DISTANCE;
-
-break;
-
-case "HAUTEUR":
-
-valeur =
-valeurs.HAUTEUR;
-
-break;
-
-case "VITESSE":
-
-valeur =
-valeurs.VITESSE;
-
-break;
-
-case "DIRECTION":
-
-valeur =
-valeurs.DIRECTION;
-
-break;
-
-case "TRAJECTOIRE":
-
-valeur =
-valeurs.TRAJECTOIRE;
-
-break;
-
-case "INTENTION":
-
-valeur =
-valeurs.INTENTION;
-
-break;
-
-default:
-
-valeur =
-null;
-
-break;
-
-}
-
-if (
-existe(valeur)
-) {
-
-slotsTrouves.push({
-
-slot,
-
-valeur
-
-});
-
-}
-else {
-
-slotsManquants.push(
-slot
-);
-
-}
-
-}
-
-//============================================================
-// 📊 SCORE STRUCTURE
-//============================================================
-//
-// Pour une réaction, on utilise la structure du modèle
-// ESQUIVE comme pour n'importe quelle autre action.
-//
-// Le fait qu'il s'agisse d'une réaction ne rajoute PAS
-// artificiellement SUJET/CIBLE/DISTANCE/etc.
-//
-//============================================================
-
-const totalSlots =
-structureModele.length;
-
-const totalTrouves =
-slotsTrouves.length;
-
-scoreStructure =
-totalSlots > 0
-
-? Math.round(
-(
-totalTrouves /
-totalSlots
-) * 100
-)
-
-: 0;
-
-structureComplete =
-totalSlots > 0 &&
-slotsManquants.length === 0;
-
-//============================================================
-// 🧠 STRUCTURE SÉMANTIQUE FINALE
-//============================================================
-
-const structureSemantique = {
-
-sujet:
-acteur || null,
-
-action:
-actionFinale || null,
-
-cible:
-cible || null,
-
-membre:
-membre || null,
-
-partieCorps:
-partieCorps || null,
-
-maniere:
-maniere || null,
-
-distance:
-distance?.valeur ??
-null,
-
-hauteur:
-hauteur?.valeur ??
-null,
-
-vitesse:
-vitesse?.valeur ??
-null,
-
-direction:
-direction ||
-null,
-
-trajectoire:
-trajectoire ||
-null,
-
-intention:
-intention ||
-null,
-
-reaction,
-
-declencheur,
-
-cause,
-
-objectif,
-
-consequence,
-
-relation
-
-};
-
-//============================================================
-// 📦 INFORMATIONS MODÈLE
-//============================================================
-
-analyseModele.reaction =
-reaction;
-
-analyseModele.declencheur =
-declencheur;
-
-analyseModele.cause =
-cause;
-
-analyseModele.objectif =
-objectif;
-
-analyseModele.consequence =
-consequence;
-
-analyseModele.relation =
-relation;
-
-//============================================================
-// ✅ FORMAT DE SORTIE
-//============================================================
-
-return {
-
-texte,
-
-// 👤 SUJET
-acteur,
-sujet: acteur,
-
-// ⚔️ ACTION
-action: actionNom,
-
-categorie,
-famille,
-
-// 🎯 CIBLE
-cible,
-
-// 🧩 COMPLÉMENTS
-maniere,
-membre,
-
-vitesse:
-vitesse?.valeur ?? null,
-
-distance:
-distance?.valeur ?? null,
-
-distanceUnite:
-distance?.unite ?? null,
-
-hauteur:
-hauteur?.valeur ?? null,
-
-hauteurUnite:
-hauteur?.unite ?? null,
-
-direction,
-
-trajectoire,
-
-partieCorps,
-
-// 🧠 INTENTION
-intention,
-
-// 🧠 MODÈLE
-modele:
-modele?.modele || null,
-
-// 📈 SIMILARITÉ
-score:
-modele?.score || 0,
-
-scoreExemple:
-modele?.scoreExemple || 0,
-
-// 🧩 STRUCTURE
-scoreStructure,
-
-structureComplete,
-
-slotsManquants,
-
-slotsTrouves,
-
-requisManquants:
-slotsManquants,
-
-structure,
-
-structureSemantique,
-
-//==========================================================
-// 🆕 RELATIONS
-//==========================================================
-
-reaction,
-
-declencheur,
-
-cause,
-
-objectif,
-
-consequence,
-
-relation
-
-};
-
-}   
-          
                   
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
