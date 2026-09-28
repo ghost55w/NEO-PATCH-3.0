@@ -5990,25 +5990,7 @@ texte
 .trim();
 
 const marqueurReaction =
-  /\b(
-    voyant|
-    voyant\s+que|
-    en\s+voyant|
-    apercevant|
-    apercevant\s+que|
-    constatant|
-    constatant\s+que|
-    face\s+à|
-    face\s+au|
-    face\s+aux|
-    en\s+réaction\s+à|
-    réagit\s+à|
-    réagissant\s+à|
-    lorsqu['’]il\s+voit|
-    lorsqu['’]elle\s+voit|
-    quand\s+il\s+voit|
-    quand\s+elle\s+voit
-  )\b/ixu
+  /\b(voyant|voyant\s+que|en\s+voyant|apercevant|apercevant\s+que|constatant|constatant\s+que|face\s+à|face\s+au|face\s+aux|en\s+réaction\s+à|réagit\s+à|réagissant\s+à|lorsqu['’]il\s+voit|lorsqu['’]elle\s+voit|quand\s+il\s+voit|quand\s+elle\s+voit)\b/iu
   .test(
     texteRelation
   );
