@@ -8442,7 +8442,7 @@ function analyserNeoAI(
 //==============================================================
 // 📤 AFFICHAGE DU RÉSULTAT NEOAI
 //==============================================================
- async function envoyerResultatNeoAI(
+async function envoyerResultatNeoAI(
   ovl,
   ms_org,
   resultat,
@@ -8500,7 +8500,6 @@ ${resultat.nombreActions || actions.length || 0}
 
         //======================================================
         // 🧩 STRUCTURE DU MODÈLE
-        // Le modèle est la source de vérité
         //======================================================
 
         const structure =
@@ -8511,14 +8510,18 @@ ${resultat.nombreActions || actions.length || 0}
               : [];
 
         //======================================================
-        // 🧩 FONCTION D'AFFICHAGE D'UN SLOT
+        // 🧩 AFFICHAGE D'UN SLOT
         //======================================================
 
         const afficher =
           (slot, ligne) => {
 
-            if (structure.includes(slot)) {
+            if (
+              structure.includes(slot)
+            ) {
+
               texte += ligne;
+
             }
 
           };
@@ -8543,7 +8546,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "ACTION",
           `├ ⚔️ Action : ${
-            action.action || "—"
+            action.action ||
+            "—"
           }\n`
         );
 
@@ -8554,30 +8558,32 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "CIBLE",
           `├ 🎯 Cible : ${
-            action.cible || "—"
+            action.cible ||
+            "—"
           }\n`
         );
 
         //======================================================
         // 💨 MANIÈRE
-        // Comment l'action est exécutée
         //======================================================
 
         afficher(
           "MANIERE",
           `├ 💨 Manière : ${
-            action.maniere || "—"
+            action.maniere ||
+            "—"
           }\n`
         );
 
         //======================================================
-        // ⚡ VITESSE
+        // 🏃 VITESSE
         //======================================================
 
         afficher(
           "VITESSE",
-          `├ ⚡ Vitesse : ${
-            action.vitesse || "—"
+          `├ 🏃 Vitesse : ${
+            action.vitesse ||
+            "—"
           }\n`
         );
 
@@ -8586,7 +8592,9 @@ ${resultat.nombreActions || actions.length || 0}
         //======================================================
 
         if (
-          structure.includes("DISTANCE")
+          structure.includes(
+            "DISTANCE"
+          )
         ) {
 
           const distance =
@@ -8598,6 +8606,7 @@ ${resultat.nombreActions || actions.length || 0}
           texte +=
 `├ 📐 Distance : ${distance}
 `;
+
         }
 
         //======================================================
@@ -8605,7 +8614,9 @@ ${resultat.nombreActions || actions.length || 0}
         //======================================================
 
         if (
-          structure.includes("HAUTEUR")
+          structure.includes(
+            "HAUTEUR"
+          )
         ) {
 
           const hauteur =
@@ -8617,6 +8628,7 @@ ${resultat.nombreActions || actions.length || 0}
           texte +=
 `├ 📏 Hauteur : ${hauteur}
 `;
+
         }
 
         //======================================================
@@ -8626,7 +8638,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "TRAJECTOIRE",
           `├ 🧭 Trajectoire : ${
-            action.trajectoire || "—"
+            action.trajectoire ||
+            "—"
           }\n`
         );
 
@@ -8637,7 +8650,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "DIRECTION",
           `├ 🧭 Direction : ${
-            action.direction || "—"
+            action.direction ||
+            "—"
           }\n`
         );
 
@@ -8648,7 +8662,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "COTE",
           `├ ↔️ Côté : ${
-            action.cote || "—"
+            action.cote ||
+            "—"
           }\n`
         );
 
@@ -8657,7 +8672,9 @@ ${resultat.nombreActions || actions.length || 0}
         //======================================================
 
         if (
-          structure.includes("COURBE")
+          structure.includes(
+            "COURBE"
+          )
         ) {
 
           const courbe =
@@ -8669,6 +8686,7 @@ ${resultat.nombreActions || actions.length || 0}
           texte +=
 `├ 🌀 Courbe : ${courbe}
 `;
+
         }
 
         //======================================================
@@ -8678,7 +8696,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "MEMBRE",
           `├ 🦾 Membre utilisé : ${
-            action.membre || "—"
+            action.membre ||
+            "—"
           }\n`
         );
 
@@ -8689,7 +8708,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "PARTIE_CORPS",
           `├ 🦵 Partie du corps : ${
-            action.partieCorps || "—"
+            action.partieCorps ||
+            "—"
           }\n`
         );
 
@@ -8700,7 +8720,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "INTENTION",
           `├ 🎯 Intention : ${
-            action.intention || "—"
+            action.intention ||
+            "—"
           }\n`
         );
 
@@ -8711,7 +8732,8 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "ANGLE",
           `├ 📐 Angle : ${
-            action.angle || "—"
+            action.angle ||
+            "—"
           }\n`
         );
 
@@ -8722,26 +8744,39 @@ ${resultat.nombreActions || actions.length || 0}
         afficher(
           "NOMBRE_TOURS",
           `├ 🔄 Nombre de tours : ${
-            action.nombreTours || "—"
+            action.nombreTours ||
+            "—"
           }\n`
         );
 
         //======================================================
         // 🧠 RELATIONS SÉMANTIQUES
         //======================================================
-        // Ajout uniquement si les informations existent.
-        // Cela ne modifie pas l'affichage des analyses
-        // classiques.
+        //
+        // IMPORTANT :
+        // Ces informations sont AJOUTÉES à l'analyse.
+        // Elles ne remplacent jamais l'action principale.
+        //
+        //======================================================
 
-        if (
-          action.reaction?.active
-        ) {
+        const estReaction =
+          action.reaction?.active === true;
 
-          texte +=
-`├ ⚠️ Réaction : OUI
+        //======================================================
+        // ⚠️ RÉACTION
+        //======================================================
+
+        texte +=
+`├ ⚠️ Réaction : ${
+  estReaction
+    ? "OUI"
+    : "NON"
+}
 `;
 
-        }
+        //======================================================
+        // ⚡ DÉCLENCHEUR
+        //======================================================
 
         if (
           action.declencheur
@@ -8762,6 +8797,10 @@ ${resultat.nombreActions || actions.length || 0}
 
         }
 
+        //======================================================
+        // 🔗 CAUSE
+        //======================================================
+
         if (
           action.cause
         ) {
@@ -8776,48 +8815,14 @@ ${resultat.nombreActions || actions.length || 0}
               : action.cause;
 
           texte +=
-`├ 🔗 Cause : ${cause}
+`├ 💡 Cause : ${cause}
 `;
 
         }
 
-        if (
-          action.objectif
-        ) {
-
-          const objectif =
-            typeof action.objectif === "object"
-              ? (
-                  action.objectif.texte ||
-                  action.objectif.intention ||
-                  "—"
-                )
-              : action.objectif;
-
-          texte +=
-`├ 🎯 Objectif : ${objectif}
-`;
-
-        }
-
-        if (
-          action.consequence
-        ) {
-
-          const consequence =
-            typeof action.consequence === "object"
-              ? (
-                  action.consequence.texte ||
-                  action.consequence.concept ||
-                  "—"
-                )
-              : action.consequence;
-
-          texte +=
-`├ ➡️ Conséquence : ${consequence}
-`;
-
-        }
+        //======================================================
+        // 🔗 RELATION
+        //======================================================
 
         if (
           action.relation
@@ -8838,16 +8843,70 @@ ${resultat.nombreActions || actions.length || 0}
         }
 
         //======================================================
+        // 🎯 OBJECTIF
+        //======================================================
+
+        if (
+          action.objectif
+        ) {
+
+          const objectif =
+            typeof action.objectif === "object"
+              ? (
+                  action.objectif.texte ||
+                  action.objectif.intention ||
+                  "—"
+                )
+              : action.objectif;
+
+          texte +=
+`├ 💡 Objectif : ${objectif}
+`;
+
+        }
+
+        //======================================================
+        // ➡️ CONSÉQUENCE
+        //======================================================
+
+        if (
+          action.consequence
+        ) {
+
+          const consequence =
+            typeof action.consequence === "object"
+              ? (
+                  action.consequence.texte ||
+                  action.consequence.concept ||
+                  "—"
+                )
+              : action.consequence;
+
+          texte +=
+`└ ➡️ Conséquence : ${consequence}
+`;
+
+        }
+
+        //======================================================
         // 📚 MODÈLE
         //======================================================
 
+        const nomModele =
+          typeof action.modele === "object"
+            ? (
+                action.modele.id ||
+                action.modele.nom ||
+                action.modele.actionCanonique ||
+                "—"
+              )
+            : (
+                action.modele ||
+                "—"
+              );
+
         texte +=
-`├ 📚 Modèle : ${
-  action.modele?.id ||
-  action.modele?.nom ||
-  action.modele ||
-  "—"
-}
+`📚 Modèle : ${nomModele}
 `;
 
         //======================================================
@@ -8858,14 +8917,17 @@ ${resultat.nombreActions || actions.length || 0}
           structure.length;
 
         const slotsManquants =
-          Array.isArray(action.slotsManquants)
+          Array.isArray(
+            action.slotsManquants
+          )
             ? action.slotsManquants
             : [];
 
         const remplis =
           Math.max(
             0,
-            totalSlots - slotsManquants.length
+            totalSlots -
+            slotsManquants.length
           );
 
         const structureComplete =
@@ -8873,9 +8935,13 @@ ${resultat.nombreActions || actions.length || 0}
           slotsManquants.length === 0;
 
         texte +=
-`├ 🧩 Structure : ${
+`🧩 Structure : ${
   totalSlots
-    ? `${remplis}/${totalSlots} ${structureComplete ? "✅" : "❌"}`
+    ? (
+        structureComplete
+          ? "complète"
+          : `${remplis}/${totalSlots}`
+      )
     : "—"
 }
 `;
@@ -8885,8 +8951,9 @@ ${resultat.nombreActions || actions.length || 0}
         //======================================================
 
         texte +=
-`╰ 📊 Similarité : ${
-  action.score || 0
+`📈 Similarité : ${
+  action.score ||
+  0
 }%
 `;
 
@@ -8926,7 +8993,9 @@ ${
 ${
     resultat.raisons?.length
       ? resultat.raisons
-          .map(r => `• ${r}`)
+          .map(
+            r => `• ${r}`
+          )
           .join("\n")
       : "Aucune"
   }
@@ -8948,8 +9017,7 @@ ${resultat.resume || "—"}
     }
   );
 
-}       
-  
+}                               
 
 //==============================================================
 // 🌀 TRAITER MESSAGE NEOAI
