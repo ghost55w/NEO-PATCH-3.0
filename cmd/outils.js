@@ -8442,7 +8442,7 @@ function analyserNeoAI(
 //==============================================================
 // 📤 AFFICHAGE DU RÉSULTAT NEOAI
 //==============================================================
-async function envoyerResultatNeoAI(
+  async function envoyerResultatNeoAI(
   ovl,
   ms_org,
   resultat,
@@ -8499,134 +8499,88 @@ ${resultat.nombreActions || actions.length || 0}
 `;
 
         //======================================================
-        // 🧩 STRUCTURE DU MODÈLE
-        //======================================================
-
-        const structure =
-          Array.isArray(action.modele?.structure)
-            ? action.modele.structure
-            : Array.isArray(action.structure)
-              ? action.structure
-              : [];
-
-        //======================================================
-        // 🧩 AFFICHAGE D'UN SLOT
-        //======================================================
-
-        const afficher =
-          (slot, ligne) => {
-
-            if (
-              structure.includes(slot)
-            ) {
-
-              texte += ligne;
-
-            }
-
-          };
-
-        //======================================================
         // 🧍 SUJET
         //======================================================
 
-        afficher(
-          "SUJET",
-          `├ 🧍 Sujet : ${
-            action.acteur ||
-            action.sujet ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ 🧍 Sujet : ${
+  action.sujet ||
+  action.acteur ||
+  "—"
+}
+`;
 
         //======================================================
         // ⚔️ ACTION
         //======================================================
 
-        afficher(
-          "ACTION",
-          `├ ⚔️ Action : ${
-            action.action ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ ⚔️ Action : ${
+  action.action ||
+  "—"
+}
+`;
 
         //======================================================
         // 🎯 CIBLE
         //======================================================
 
-        afficher(
-          "CIBLE",
-          `├ 🎯 Cible : ${
-            action.cible ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ 🎯 Cible : ${
+  action.cible ||
+  "—"
+}
+`;
 
         //======================================================
         // 💨 MANIÈRE
         //======================================================
 
-        afficher(
-          "MANIERE",
-          `├ 💨 Manière : ${
-            action.maniere ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ 💨 Manière : ${
+  action.maniere ||
+  "—"
+}
+`;
 
         //======================================================
         // 🏃 VITESSE
         //======================================================
 
-        afficher(
-          "VITESSE",
-          `├ 🏃 Vitesse : ${
-            action.vitesse ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ 🏃 Vitesse : ${
+  action.vitesse ||
+  "—"
+}
+`;
 
         //======================================================
         // 📐 DISTANCE
         //======================================================
 
-        if (
-          structure.includes(
-            "DISTANCE"
-          )
-        ) {
+        const distance =
+          action.distance !== null &&
+          action.distance !== undefined
+            ? `${action.distance}${action.distanceUnite || "m"}`
+            : "—";
 
-          const distance =
-            action.distance !== null &&
-            action.distance !== undefined
-              ? `${action.distance}${action.distanceUnite || "m"}`
-              : "—";
-
-          texte +=
+        texte +=
 `├ 📐 Distance : ${distance}
 `;
-
-        }
 
         //======================================================
         // 📏 HAUTEUR
         //======================================================
 
         if (
-          structure.includes(
-            "HAUTEUR"
-          )
+          action.hauteur !== null &&
+          action.hauteur !== undefined
         ) {
 
-          const hauteur =
-            action.hauteur !== null &&
-            action.hauteur !== undefined
-              ? `${action.hauteur}${action.hauteurUnite || "m"}`
-              : "—";
-
           texte +=
-`├ 📏 Hauteur : ${hauteur}
+`├ 📏 Hauteur : ${
+  action.hauteur
+}${action.hauteurUnite || "m"}
 `;
 
         }
@@ -8635,56 +8589,60 @@ ${resultat.nombreActions || actions.length || 0}
         // 🧭 TRAJECTOIRE
         //======================================================
 
-        afficher(
-          "TRAJECTOIRE",
-          `├ 🧭 Trajectoire : ${
-            action.trajectoire ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ 🧭 Trajectoire : ${
+  action.trajectoire ||
+  "—"
+}
+`;
 
         //======================================================
         // 🧭 DIRECTION
         //======================================================
 
-        afficher(
-          "DIRECTION",
-          `├ 🧭 Direction : ${
-            action.direction ||
-            "—"
-          }\n`
-        );
+        if (
+          action.direction
+        ) {
+
+          texte +=
+`├ 🧭 Direction : ${
+  action.direction
+}
+`;
+
+        }
 
         //======================================================
         // ↔️ CÔTÉ
         //======================================================
 
-        afficher(
-          "COTE",
-          `├ ↔️ Côté : ${
-            action.cote ||
-            "—"
-          }\n`
-        );
+        if (
+          action.cote ||
+          action.coteCorps
+        ) {
+
+          texte +=
+`├ ↔️ Côté : ${
+  action.cote ||
+  action.coteCorps
+}
+`;
+
+        }
 
         //======================================================
         // 🌀 COURBE
         //======================================================
 
         if (
-          structure.includes(
-            "COURBE"
-          )
+          action.courbe !== null &&
+          action.courbe !== undefined
         ) {
 
-          const courbe =
-            action.courbe !== null &&
-            action.courbe !== undefined
-              ? `${action.courbe}m`
-              : "—";
-
           texte +=
-`├ 🌀 Courbe : ${courbe}
+`├ 🌀 Courbe : ${
+  action.courbe
+}m
 `;
 
         }
@@ -8693,78 +8651,87 @@ ${resultat.nombreActions || actions.length || 0}
         // 🦾 MEMBRE
         //======================================================
 
-        afficher(
-          "MEMBRE",
-          `├ 🦾 Membre utilisé : ${
-            action.membre ||
-            "—"
-          }\n`
-        );
+        if (
+          action.membre
+        ) {
+
+          texte +=
+`├ 🦾 Membre utilisé : ${
+  action.membre
+}
+`;
+
+        }
 
         //======================================================
         // 🦵 PARTIE DU CORPS
         //======================================================
 
-        afficher(
-          "PARTIE_CORPS",
-          `├ 🦵 Partie du corps : ${
-            action.partieCorps ||
-            "—"
-          }\n`
-        );
+        if (
+          action.partieCorps
+        ) {
+
+          texte +=
+`├ 🦵 Partie du corps : ${
+  action.partieCorps
+}
+`;
+
+        }
 
         //======================================================
         // 🎯 INTENTION
         //======================================================
 
-        afficher(
-          "INTENTION",
-          `├ 🎯 Intention : ${
-            action.intention ||
-            "—"
-          }\n`
-        );
+        texte +=
+`├ 🎯 Intention : ${
+  action.intention ||
+  "—"
+}
+`;
 
         //======================================================
         // 📐 ANGLE
         //======================================================
 
-        afficher(
-          "ANGLE",
-          `├ 📐 Angle : ${
-            action.angle ||
-            "—"
-          }\n`
-        );
+        if (
+          action.angle
+        ) {
+
+          texte +=
+`├ 📐 Angle : ${
+  action.angle
+}
+`;
+
+        }
 
         //======================================================
         // 🔄 NOMBRE DE TOURS
         //======================================================
 
-        afficher(
-          "NOMBRE_TOURS",
-          `├ 🔄 Nombre de tours : ${
-            action.nombreTours ||
-            "—"
-          }\n`
-        );
+        if (
+          action.nombreTours
+        ) {
 
-        //======================================================
-        // 🧠 RELATIONS SÉMANTIQUES
-        //======================================================
-        //
-        // IMPORTANT :
-        // Ces informations sont AJOUTÉES à l'analyse.
-        // Elles ne remplacent jamais l'action principale.
-        //
-        //======================================================
+          texte +=
+`├ 🔄 Nombre de tours : ${
+  action.nombreTours
+}
+`;
 
-        const estReaction =
-          action.reaction?.active === true;
+        }
+
+        texte += `│
+`;
 
         //======================================================
         // ⚠️ RÉACTION
         //======================================================
+
+        const estReaction =
+          action.reaction === true ||
+          action.reaction?.active === true;
 
         texte +=
 `├ ⚠️ Réaction : ${
@@ -8798,7 +8765,7 @@ ${resultat.nombreActions || actions.length || 0}
         }
 
         //======================================================
-        // 🔗 CAUSE
+        // 💡 CAUSE
         //======================================================
 
         if (
@@ -8906,22 +8873,28 @@ ${resultat.nombreActions || actions.length || 0}
               );
 
         texte +=
-`📚 Modèle : ${nomModele}
+`\n📚 Modèle : ${nomModele}
 `;
 
         //======================================================
         // 🧩 STRUCTURE
         //======================================================
 
-        const totalSlots =
-          structure.length;
+        const structureComplete =
+          action.structureComplete === true;
+
+        const structure =
+          Array.isArray(action.structure)
+            ? action.structure
+            : [];
 
         const slotsManquants =
-          Array.isArray(
-            action.slotsManquants
-          )
+          Array.isArray(action.slotsManquants)
             ? action.slotsManquants
             : [];
+
+        const totalSlots =
+          structure.length;
 
         const remplis =
           Math.max(
@@ -8930,29 +8903,23 @@ ${resultat.nombreActions || actions.length || 0}
             slotsManquants.length
           );
 
-        const structureComplete =
-          totalSlots > 0 &&
-          slotsManquants.length === 0;
-
         texte +=
 `🧩 Structure : ${
-  totalSlots
-    ? (
-        structureComplete
-          ? "complète"
-          : `${remplis}/${totalSlots}`
-      )
-    : "—"
+  structureComplete
+    ? "complète"
+    : totalSlots > 0
+      ? `${remplis}/${totalSlots}`
+      : "—"
 }
 `;
 
         //======================================================
-        // 📊 SIMILARITÉ
+        // 📈 SIMILARITÉ
         //======================================================
 
         texte +=
 `📈 Similarité : ${
-  action.score ||
+  action.score ??
   0
 }%
 `;
@@ -8970,35 +8937,35 @@ ${resultat.nombreActions || actions.length || 0}
 `
 🧠 *Mots connus :*
 ${
-    resultat.motsConnus?.length
-      ? resultat.motsConnus.join(", ")
-      : "Aucun"
-  }
+  resultat.motsConnus?.length
+    ? resultat.motsConnus.join(", ")
+    : "Aucun"
+}
 
 ❓ *Mots inconnus :*
 ${
-    resultat.motsInconnus?.length
-      ? resultat.motsInconnus.join(", ")
-      : "Aucun"
-  }
+  resultat.motsInconnus?.length
+    ? resultat.motsInconnus.join(", ")
+    : "Aucun"
+}
 
 ⚖️ *Arbitrage :*
 ${
-    resultat.valide
-      ? "✅ *VALIDÉ*"
-      : "❌ *REFUSÉ*"
-  }
+  resultat.valide
+    ? "✅ *VALIDÉ*"
+    : "❌ *REFUSÉ*"
+}
 
 📌 *Raisons :*
 ${
-    resultat.raisons?.length
-      ? resultat.raisons
-          .map(
-            r => `• ${r}`
-          )
-          .join("\n")
-      : "Aucune"
-  }
+  resultat.raisons?.length
+    ? resultat.raisons
+        .map(
+          r => `• ${r}`
+        )
+        .join("\n")
+    : "Aucune"
+}
 
 💡 *Résumé :*
 ${resultat.resume || "—"}
@@ -9017,7 +8984,8 @@ ${resultat.resume || "—"}
     }
   );
 
-}                               
+}      
+                              
 
 //==============================================================
 // 🌀 TRAITER MESSAGE NEOAI
