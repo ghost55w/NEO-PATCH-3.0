@@ -3721,10 +3721,6 @@ function neoFusionnerSegments(
 //==============================================================
 // 📚 MODÈLES D'ACTIONS
 //==============================================================
-//==============================================================
-// 📚 RÉCUPÉRATION DES MODÈLES NEOAI
-//==============================================================
-
 function neoGetModeles() {
 
     const sources = [
@@ -3740,7 +3736,7 @@ function neoGetModeles() {
     ];
 
     //============================================================
-    // 🔎 PARCOURIR UNE SOURCE
+    // 🔎 PARCOURIR LES SOURCES
     //============================================================
 
     for (const source of sources) {
@@ -3795,53 +3791,246 @@ function neoGetModeles() {
                 }
 
                 //================================================
-                // 📦 MODÈLES
+                // 🆕 NOUVEAU FORMAT
+                //
+                // course: {
+                //     id: "COURSE",
+                //     concept: "...",
+                //     manieres: {
+                //         frontale: {...},
+                //         diagonale: {...}
+                //     }
+                // }
+                //================================================
+
+                const id =
+                    actionData?.id ||
+                    actionData?.action ||
+                    actionNom;
+
+                const categorieFinale =
+                    actionData?.categorie ||
+                    categorieNom;
+
+                //================================================
+                // 🧩 MODÈLE AVEC MANIÈRES
                 //================================================
 
                 if (
-                    !Array.isArray(
-                        actionData.modeles
-                    )
+                    actionData?.manieres &&
+                    typeof actionData.manieres === "object" &&
+                    !Array.isArray(actionData.manieres)
                 ) {
+
+                    for (
+                        const [
+                            maniereNom,
+                            maniereData
+                        ]
+                        of Object.entries(
+                            actionData.manieres
+                        )
+                    ) {
+
+                        if (
+                            !maniereData ||
+                            typeof maniereData !== "object" ||
+                            Array.isArray(maniereData)
+                        ) {
+                            continue;
+                        }
+
+                        modeles.push({
+
+                            // ------------------------------------
+                            // 🆔 IDENTITÉ DU MODÈLE
+                            // ------------------------------------
+
+                            id,
+
+                            action:
+                                id,
+
+                            categorie:
+                                categorieFinale,
+
+                            famille:
+                                actionData?.famille ||
+                                null,
+
+                            concept:
+                                actionData?.concept ||
+                                null,
+
+                            // ------------------------------------
+                            // 💨 MANIÈRE
+                            // ------------------------------------
+
+                            maniere:
+                                maniereNom,
+
+                            conceptManiere:
+                                maniereData?.concept ||
+                                null,
+
+                            // ------------------------------------
+                            // 📐 STRUCTURE
+                            // ------------------------------------
+
+                            structure:
+                                Array.isArray(
+                                    maniereData?.structure
+                                )
+                                    ? [
+                                        ...maniereData.structure
+                                    ]
+                                    : [],
+
+                            // ------------------------------------
+                            // 📝 EXEMPLES
+                            // ------------------------------------
+
+                            exemples:
+                                Array.isArray(
+                                    maniereData?.exemples
+                                )
+                                    ? [
+                                        ...maniereData.exemples
+                                    ]
+                                    : [],
+
+                            // ------------------------------------
+                            // 📦 PARAMÈTRES
+                            // ------------------------------------
+
+                            params:
+                                maniereData?.params ||
+                                {},
+
+                            // ------------------------------------
+                            // 🔗 RÉFÉRENCE
+                            // ------------------------------------
+
+                            actionNom,
+
+                            maniereData,
+
+                            actionData
+
+                        });
+
+                    }
+
+                    // On passe à l'action suivante.
                     continue;
                 }
 
-                for (
-                    const modele
-                    of actionData.modeles
-                ) {
+                //================================================
+                // 🆕 MODÈLE UNIQUE SANS MANIÈRES
+                //================================================
 
-                    if (
-                        !modele ||
-                        typeof modele !== "object"
-                    ) {
-                        continue;
-                    }
+                if (
+                    Array.isArray(
+                        actionData?.structure
+                    ) ||
+                    Array.isArray(
+                        actionData?.exemples
+                    )
+                ) {
 
                     modeles.push({
 
-                        ...modele,
+                        ...actionData,
 
-                        // --------------------------------------
-                        // 🎯 Action
-                        // --------------------------------------
+                        id,
 
                         action:
-                            modele.action ||
-                            actionData.action ||
-                            actionNom,
-
-                        // --------------------------------------
-                        // 🏷️ Catégorie
-                        // --------------------------------------
+                            id,
 
                         categorie:
-                            modele.categorie ||
-                            actionData.categorie ||
-                            categorieNom
+                            categorieFinale,
+
+                        famille:
+                            actionData?.famille ||
+                            null,
+
+                        structure:
+                            Array.isArray(
+                                actionData?.structure
+                            )
+                                ? [
+                                    ...actionData.structure
+                                ]
+                                : [],
+
+                        exemples:
+                            Array.isArray(
+                                actionData?.exemples
+                            )
+                                ? [
+                                    ...actionData.exemples
+                                ]
+                                : []
+
                     });
+
+                    continue;
                 }
+
+                //================================================
+                // 🔙 ANCIEN FORMAT
+                //
+                // actionData.modeles = [...]
+                //================================================
+
+                if (
+                    Array.isArray(
+                        actionData?.modeles
+                    )
+                ) {
+
+                    for (
+                        const modele
+                        of actionData.modeles
+                    ) {
+
+                        if (
+                            !modele ||
+                            typeof modele !== "object"
+                        ) {
+                            continue;
+                        }
+
+                        modeles.push({
+
+                            ...modele,
+
+                            id:
+                                modele?.id ||
+                                modele?.action ||
+                                id,
+
+                            action:
+                                modele?.action ||
+                                id,
+
+                            categorie:
+                                modele?.categorie ||
+                                categorieFinale,
+
+                            famille:
+                                modele?.famille ||
+                                actionData?.famille ||
+                                null
+
+                        });
+
+                    }
+
+                }
+
             }
+
         }
 
         //========================================================
@@ -3864,7 +4053,7 @@ function neoGetModeles() {
                         modeles
                             .map(
                                 modele =>
-                                    modele.categorie
+                                    modele?.categorie
                             )
                             .filter(Boolean)
                     )
@@ -3878,7 +4067,21 @@ function neoGetModeles() {
                         modeles
                             .map(
                                 modele =>
-                                    modele.action
+                                    modele?.action
+                            )
+                            .filter(Boolean)
+                    )
+                ]
+            );
+
+            console.log(
+                "💨 [NeoAI MANIÈRES] :",
+                [
+                    ...new Set(
+                        modeles
+                            .map(
+                                modele =>
+                                    modele?.maniere
                             )
                             .filter(Boolean)
                     )
@@ -3889,12 +4092,14 @@ function neoGetModeles() {
                 "🆔 [NeoAI MODÈLES] :",
                 modeles.map(
                     modele =>
-                        modele.id
+                        modele?.id
                 )
             );
 
             return modeles;
+
         }
+
     }
 
     //============================================================
@@ -3906,8 +4111,9 @@ function neoGetModeles() {
     );
 
     return [];
+
 }
-                                
+        
 
 //==============================================================
 // 🧩 COMPARAISON SÉMANTIQUE D'UN MODÈLE
