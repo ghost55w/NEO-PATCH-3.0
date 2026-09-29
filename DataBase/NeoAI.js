@@ -681,17 +681,24 @@ const NEO_RELATIONS = {
     ]
 };
 
-
+                                                                       ],
 //==============================================================
 // 🎮 NEO ACTION MODELS
 //==============================================================
-// Chaque action possède ses propres paramètres.
-// SUJET  = personnage qui exécute l'action
-// CIBLE  = personnage visé / concerné par l'action
+// ACTION      = concept d'action canonique
+// TRAJECTOIRE = manière géométrique / orientation d'exécution
+// CONCEPT     = définition sémantique de l'action
 //
 // Les champs de "structure" sont OBLIGATOIRES.
-// Les champs de "optionnels" sont facultatifs.
+// Les champs non présents dans la structure sont facultatifs.
+//
+// IMPORTANT :
+// - MANIERE n'est plus utilisé.
+// - Le moteur doit déduire ACTION à partir du concept,
+//   des synonymes et des formulations.
+// - TRAJECTOIRE décrit comment l'action se déroule.
 //==============================================================
+
 const NEO_ACTION_MODELS = {
 
     deplacement: {
@@ -707,16 +714,15 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement volontaire d'un sujet à pied, généralement à vitesse normale ou modérée.",
 
-            manieres: {
+            trajectoires: {
 
                 normale: {
                     concept:
-                        "Déplacement au sol effectué à pied avec une progression régulière.",
+                        "Progression régulière au sol à pied sans trajectoire particulière imposée.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
@@ -744,21 +750,17 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement volontaire rapide d'un sujet par la course afin de progresser vers une position, une cible ou un objectif.",
 
-            manieres: {
-
-                // --------------------------------------------------
-                // COURSE FRONTALE
-                // --------------------------------------------------
+            trajectoires: {
 
                 frontale: {
                     concept:
-                        "Course effectuée selon une progression directe et principalement linéaire vers l'avant ou vers une cible.",
+                        "Progression directe et principalement linéaire vers l'avant ou vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "INTENTION",
                         "CIBLE",
                         "DISTANCE",
@@ -766,7 +768,7 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court en course frontale vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} court vers {Cible} en trajectoire frontale sur {Distance} pour l'atteindre",
                         "{Sujet} fonce frontalement vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
                         "{Sujet} se rue droit vers {Cible} sur {Distance} pour le rejoindre",
                         "{Sujet} s'élance directement vers {Cible} à {Vitesse} pour atteindre sa position",
@@ -774,20 +776,15 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
-                // --------------------------------------------------
-                // COURSE CIRCULAIRE
-                // --------------------------------------------------
-
                 circulaire: {
                     concept:
-                        "Course effectuée autour d'une cible ou selon une trajectoire courbe. Le côté indique vers quel côté le sujet se déplace autour de la cible.",
+                        "Progression en course autour d'une cible ou selon une trajectoire courbe.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "INTENTION",
                         "CIBLE",
@@ -805,20 +802,15 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
-                // --------------------------------------------------
-                // COURSE DIAGONALE
-                // --------------------------------------------------
-
                 diagonale: {
                     concept:
-                        "Course effectuée selon une trajectoire oblique vers une cible ou une position. Le côté indique si le sujet se déplace en diagonale vers sa gauche ou vers sa droite.",
+                        "Progression en course selon une trajectoire oblique vers une cible ou une position.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "INTENTION",
                         "CIBLE",
@@ -835,20 +827,15 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
-                // --------------------------------------------------
-                // COURSE ZIGZAG
-                // --------------------------------------------------
-
                 zig_zag: {
                     concept:
-                        "Course durant laquelle le sujet alterne successivement ses déplacements vers la gauche et vers la droite tout en progressant vers son objectif.",
+                        "Progression en course avec alternance successive des déplacements vers la gauche et vers la droite.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "INTENTION",
                         "CIBLE",
                         "DISTANCE",
@@ -858,26 +845,21 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} court en zigzag vers {Cible} sur {Distance} pour éviter ses attaques et l'atteindre",
                         "{Sujet} fonce en zigzag vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
-                        "{Sujet} se rue vers {Cible} en zigzag sur {Distance} pour éviter ses attaques et le rejoindre",
+                        "{Sujet} se rue vers {Cible} en zigzag sur {Distance} pour éviter ses attaques",
                         "{Sujet} serpente rapidement vers {Cible} à {Vitesse} pour parvenir jusqu'à lui",
                         "{Sujet} avance en alternant ses déplacements de gauche à droite vers {Cible} pour l'atteindre"
                     ]
                 },
 
-
-                // --------------------------------------------------
-                // COURSE LATERALE
-                // --------------------------------------------------
-
                 laterale: {
                     concept:
-                        "Course effectuée principalement vers un côté par rapport à l'orientation actuelle du sujet. Le côté indique obligatoirement la direction latérale du déplacement.",
+                        "Progression en course principalement vers un côté par rapport à l'orientation du sujet.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "INTENTION",
                         "CIBLE",
@@ -908,16 +890,16 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement extrêmement rapide et bref permettant au sujet de parcourir instantanément ou presque une courte distance.",
 
-            manieres: {
+            trajectoires: {
 
-                rapide: {
+                frontale: {
                     concept:
-                        "Accélération brutale produisant un déplacement très rapide sur une courte distance.",
+                        "Accélération brutale produisant un déplacement très rapide et direct vers l'avant ou vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "DISTANCE",
                         "DIRECTION",
                         "INTENTION"
@@ -929,11 +911,33 @@ const NEO_ACTION_MODELS = {
                     },
 
                     exemples: [
-                        "{Sujet} effectue un dash de {Distance} vers {Cible} pour l'atteindre",
+                        "{Sujet} effectue un dash frontal de {Distance} vers {Cible} pour l'atteindre",
                         "{Sujet} dash rapidement sur {Distance} vers {Cible} pour se rapprocher",
                         "{Sujet} accélère brutalement sur {Distance} vers l'avant pour atteindre {Cible}",
                         "{Sujet} réalise une accélération instantanée de {Distance} pour rejoindre {Cible}",
-                        "{Sujet} bondit rapidement sur {Distance} vers {Cible} pour arriver au contact"
+                        "{Sujet} fonce instantanément vers {Cible} sur {Distance} pour arriver au contact"
+                    ]
+                },
+
+                diagonale: {
+                    concept:
+                        "Dash extrêmement rapide effectué selon une trajectoire oblique.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "TRAJECTOIRE",
+                        "COTE",
+                        "DISTANCE",
+                        "DIRECTION",
+                        "INTENTION",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} dash en diagonale vers sa gauche sur {Distance} pour rejoindre {Cible}",
+                        "{Sujet} effectue un dash diagonal vers sa droite pour atteindre {Cible}",
+                        "{Sujet} accélère brutalement en diagonale sur sa gauche vers {Cible}"
                     ]
                 }
             }
@@ -951,18 +955,19 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement offensif ou agressif rapide vers une cible afin de réduire rapidement la distance qui les sépare.",
 
-            manieres: {
+            trajectoires: {
 
-                directe: {
+                frontale: {
                     concept:
                         "Progression rapide et agressive directement vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "CIBLE",
                         "DISTANCE",
+                        "DIRECTION",
                         "INTENTION"
                     ],
 
@@ -989,7 +994,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement durant lequel le sujet quitte temporairement le sol grâce à une impulsion verticale ou orientée.",
 
-            manieres: {
+            trajectoires: {
 
                 avant: {
                     concept:
@@ -998,10 +1003,9 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
-                        "HAUTEUR",
                         "TRAJECTOIRE",
+                        "HAUTEUR",
                         "INTENTION"
                     ],
 
@@ -1013,7 +1017,6 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 arriere: {
                     concept:
                         "Saut orienté vers l'arrière permettant au sujet de s'éloigner ou de se repositionner.",
@@ -1021,10 +1024,9 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
-                        "HAUTEUR",
                         "TRAJECTOIRE",
+                        "HAUTEUR",
                         "INTENTION"
                     ],
 
@@ -1035,7 +1037,6 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 vertical: {
                     concept:
                         "Saut principalement orienté vers le haut avec une progression horizontale minimale.",
@@ -1043,8 +1044,8 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "HAUTEUR",
                         "INTENTION"
                     ],
@@ -1056,16 +1057,15 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 laterale: {
                     concept:
-                        "Saut effectué vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
+                        "Saut effectué vers un côté par rapport à l'orientation du sujet.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "HAUTEUR",
                         "INTENTION"
@@ -1093,7 +1093,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement au sol réalisé par rotation du corps autour de lui-même.",
 
-            manieres: {
+            trajectoires: {
 
                 avant: {
                     concept:
@@ -1102,8 +1102,8 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "DISTANCE",
                         "INTENTION"
                     ],
@@ -1115,7 +1115,6 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 arriere: {
                     concept:
                         "Roulade au sol orientée vers l'arrière.",
@@ -1123,8 +1122,8 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "DISTANCE",
                         "INTENTION"
                     ],
@@ -1136,16 +1135,15 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 laterale: {
                     concept:
-                        "Roulade au sol effectuée latéralement. Le côté indique obligatoirement vers lequel le sujet roule.",
+                        "Roulade au sol effectuée latéralement vers un côté.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "DISTANCE",
                         "INTENTION"
@@ -1173,7 +1171,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Déplacement aérien continu d'un sujet sans contact permanent avec le sol.",
 
-            manieres: {
+            trajectoires: {
 
                 frontale: {
                     concept:
@@ -1182,10 +1180,9 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
-                        "HAUTEUR",
                         "TRAJECTOIRE",
+                        "HAUTEUR",
                         "INTENTION"
                     ],
 
@@ -1196,19 +1193,17 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 diagonale: {
                     concept:
-                        "Déplacement aérien oblique vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
+                        "Déplacement aérien oblique vers un côté.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "HAUTEUR",
-                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
@@ -1220,16 +1215,15 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 laterale: {
                     concept:
-                        "Déplacement aérien principalement latéral. Le côté indique obligatoirement vers lequel le sujet vole.",
+                        "Déplacement aérien principalement latéral vers un côté.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "DIRECTION",
+                        "TRAJECTOIRE",
                         "COTE",
                         "HAUTEUR",
                         "INTENTION"
@@ -1257,7 +1251,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Rotation du corps autour d'un axe ou d'un point d'appui afin de changer son orientation ou sa position.",
 
-            manieres: {
+            trajectoires: {
 
                 droite: {
                     concept:
@@ -1266,8 +1260,8 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "COTE",
+                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
@@ -1278,7 +1272,6 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 gauche: {
                     concept:
                         "Rotation du corps vers le côté gauche.",
@@ -1286,8 +1279,8 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
                         "COTE",
+                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
@@ -1312,7 +1305,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Rotation répétée du corps autour de son propre axe pendant un déplacement ou une phase aérienne.",
 
-            manieres: {
+            trajectoires: {
 
                 rotation: {
                     concept:
@@ -1321,7 +1314,7 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "DIRECTION",
                         "INTENTION"
                     ],
@@ -1348,7 +1341,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Rotation aérienne du corps autour d'un axe horizontal permettant d'effectuer une rotation complète pendant un saut.",
 
-            manieres: {
+            trajectoires: {
 
                 avant: {
                     concept:
@@ -1357,7 +1350,7 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "DIRECTION",
                         "INTENTION"
                     ],
@@ -1370,7 +1363,6 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 arriere: {
                     concept:
                         "Rotation aérienne vers l'arrière.",
@@ -1378,7 +1370,7 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "DIRECTION",
                         "INTENTION"
                     ],
@@ -1404,7 +1396,7 @@ const NEO_ACTION_MODELS = {
             concept:
                 "Mouvement acrobatique aérien impliquant une rotation du corps afin de changer de position ou de franchir un obstacle.",
 
-            manieres: {
+            trajectoires: {
 
                 avant: {
                     concept:
@@ -1413,7 +1405,7 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "DIRECTION",
                         "INTENTION"
                     ],
@@ -1426,7 +1418,6 @@ const NEO_ACTION_MODELS = {
                     ]
                 },
 
-
                 arriere: {
                     concept:
                         "Flip réalisé vers l'arrière.",
@@ -1434,7 +1425,7 @@ const NEO_ACTION_MODELS = {
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "MANIERE",
+                        "TRAJECTOIRE",
                         "DIRECTION",
                         "INTENTION"
                     ],
@@ -1449,8 +1440,8 @@ const NEO_ACTION_MODELS = {
         }
     }
 };
+                    
                                 
-      
 /* ============================================================================
  * 9. EXPORT
  * ========================================================================== */
