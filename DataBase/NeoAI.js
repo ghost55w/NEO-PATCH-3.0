@@ -834,11 +834,28 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court vers {Cible} en trajectoire frontale sur {Distance}.",
-                        "{Sujet} fonce vers {Cible} en courant à {Vitesse}.",
-                        "{Sujet} court droit vers {Cible} pour {Intention}."
-                    ]
-                },
+                "{Sujet} court vers {Cible}.",
+                "{Sujet} court droit vers {Cible}.",
+                "{Sujet} fonce vers {Cible}.",
+                "{Sujet} avance en courant vers {Cible}.",
+                "{Sujet} se dirige rapidement vers {Cible}.",
+                "{Sujet} court en ligne droite vers {Cible}.",
+                "{Sujet} court directement en direction de {Cible}.",
+                "{Sujet} fonce droit devant lui vers {Cible}.",
+                "{Sujet} progresse rapidement vers {Cible} en courant.",
+                "{Sujet} accélère en courant vers {Cible}.",
+                "{Sujet} court à {Vitesse} vers {Cible}.",
+                "{Sujet} fonce à {Vitesse} en direction de {Cible}.",
+                "{Sujet} court en ligne droite sur {Distance} vers {Cible}.",
+                "{Sujet} parcourt {Distance} en courant vers {Cible}.",
+                "{Sujet} court droit sur {Distance} pour {Intention}.",
+                "{Sujet} fonce vers {Cible} sur {Distance} afin de {Intention}.",
+                "Pour {Intention}, {Sujet} court directement vers {Cible}.",
+                "Afin de {Intention}, {Sujet} accélère et court vers {Cible}.",
+                "{Sujet} se lance dans une course frontale vers {Cible} à {Vitesse}.",
+                "{Sujet} court à {Vitesse} en trajectoire frontale vers {Cible} sur {Distance} pour {Intention}."
+            ]
+        },
 
 
                 diagonale: {
@@ -859,11 +876,28 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court en diagonale vers {Cible}.",
-                        "{Sujet} court vers la droite en diagonale.",
-                        "{Sujet} fonce en diagonale vers {Cible}."
-                    ]
-                },
+                "{Sujet} court en diagonale vers {Cible}.",
+                "{Sujet} fonce en diagonale vers {Cible}.",
+                "{Sujet} court en diagonale vers la {Cote}.",
+                "{Sujet} avance en courant en diagonale vers {Cible}.",
+                "{Sujet} se déplace rapidement en diagonale.",
+                "{Sujet} court en direction diagonale vers {Cible}.",
+                "{Sujet} coupe sa trajectoire en courant vers la {Cote}.",
+                "{Sujet} progresse en diagonale vers {Cible}.",
+                "{Sujet} fonce vers la {Cote} en diagonale.",
+                "{Sujet} court diagonalement vers {Cible}.",
+                "{Sujet} court à {Vitesse} en diagonale vers {Cible}.",
+                "{Sujet} fonce à {Vitesse} vers la {Cote}.",
+                "{Sujet} parcourt {Distance} en diagonale vers {Cible}.",
+                "{Sujet} court sur {Distance} en direction de la {Cote}.",
+                "{Sujet} court en diagonale vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} court en diagonale vers {Cible}.",
+                "{Sujet} se lance en diagonale vers {Cible} à {Vitesse}.",
+                "{Sujet} change légèrement d'axe et court en diagonale vers {Cible}.",
+                "{Sujet} fonce en diagonale sur {Distance} vers la {Cote} afin de {Intention}.",
+                "{Sujet} court à {Vitesse} en trajectoire diagonale vers {Cible} sur {Distance} pour {Intention}."
+            ]
+        },
 
 
                 laterale: {
@@ -884,11 +918,28 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court latéralement vers la {Cote}.",
-                        "{Sujet} se déplace rapidement sur le côté.",
-                        "{Sujet} court vers la {Cote} pour {Intention}."
-                    ]
-                },
+                "{Sujet} court latéralement.",
+                "{Sujet} court vers la {Cote}.",
+                "{Sujet} se déplace rapidement sur le côté.",
+                "{Sujet} court sur le côté vers la {Cote}.",
+                "{Sujet} progresse latéralement.",
+                "{Sujet} se déplace en courant vers la {Cote}.",
+                "{Sujet} court parallèlement vers la {Cote}.",
+                "{Sujet} se décale en courant vers la {Cote}.",
+                "{Sujet} fonce latéralement vers la {Cote}.",
+                "{Sujet} court de côté en direction de {Cible}.",
+                "{Sujet} court latéralement à {Vitesse}.",
+                "{Sujet} fonce vers la {Cote} à {Vitesse}.",
+                "{Sujet} parcourt {Distance} latéralement vers la {Cote}.",
+                "{Sujet} court sur {Distance} vers la {Cote}.",
+                "{Sujet} court latéralement vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} se déplace rapidement vers la {Cote}.",
+                "{Sujet} court de côté vers {Cible} afin de {Intention}.",
+                "{Sujet} accélère latéralement en direction de {Cible}.",
+                "{Sujet} fonce sur {Distance} vers la {Cote} à {Vitesse}.",
+                "{Sujet} court à {Vitesse} latéralement sur {Distance} vers {Cible} pour {Intention}."
+            ]
+        },
 
 
                 circulaire: {
@@ -910,11 +961,28 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court en cercle autour de {Cible}.",
-                        "{Sujet} contourne {Cible} en courant.",
-                        "{Sujet} tourne autour de {Cible} pour {Intention}."
-                    ]
-                },
+                "{Sujet} court en cercle autour de {Cible}.",
+                "{Sujet} court autour de {Cible}.",
+                "{Sujet} contourne {Cible} en courant.",
+                "{Sujet} tourne autour de {Cible} en courant.",
+                "{Sujet} décrit un cercle autour de {Cible}.",
+                "{Sujet} progresse en arc de cercle autour de {Cible}.",
+                "{Sujet} suit une trajectoire courbe autour de {Cible}.",
+                "{Sujet} court en formant une courbe autour de {Cible}.",
+                "{Sujet} contourne {Cible} par la {Cote}.",
+                "{Sujet} tourne autour de {Cible} vers la {Cote}.",
+                "{Sujet} court autour de {Cible} à {Vitesse}.",
+                "{Sujet} contourne {Cible} rapidement en courant.",
+                "{Sujet} parcourt {Distance} autour de {Cible}.",
+                "{Sujet} court en arc de cercle sur {Distance}.",
+                "{Sujet} tourne autour de {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} contourne {Cible} en courant.",
+                "{Sujet} court autour de {Cible} en passant par la {Cote}.",
+                "{Sujet} décrit une trajectoire circulaire autour de {Cible}.",
+                "{Sujet} contourne {Cible} à {Vitesse} sur {Distance} afin de {Intention}.",
+                "{Sujet} court à {Vitesse} en trajectoire circulaire autour de {Cible} sur {Distance} pour {Intention}."
+            ]
+        },
 
 
                 zig_zag: {
@@ -934,10 +1002,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court en zigzag vers {Cible}.",
-                        "{Sujet} avance en changeant rapidement de direction.",
-                        "{Sujet} fonce en zigzag vers {Cible}."
-                    ]
+                "{Sujet} court en zigzag vers {Cible}.",
+                "{Sujet} fonce en zigzag vers {Cible}.",
+                "{Sujet} avance en changeant rapidement de direction.",
+                "{Sujet} court en alternant ses directions.",
+                "{Sujet} progresse en zigzag vers {Cible}.",
+                "{Sujet} change plusieurs fois de direction en courant.",
+                "{Sujet} court en effectuant des écarts successifs.",
+                "{Sujet} se déplace en zigzag pour atteindre {Cible}.",
+                "{Sujet} fonce en changeant continuellement de direction.",
+                "{Sujet} serpente en courant vers {Cible}.",
+                "{Sujet} court en zigzag à {Vitesse}.",
+                "{Sujet} fonce à {Vitesse} en zigzag vers {Cible}.",
+                "{Sujet} parcourt {Distance} en zigzag vers {Cible}.",
+                "{Sujet} court sur {Distance} en changeant de direction.",
+                "{Sujet} court en zigzag vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} avance en zigzag vers {Cible}.",
+                "{Sujet} alterne gauche et droite en courant vers {Cible}.",
+                "{Sujet} multiplie les changements de direction tout en courant.",
+                "{Sujet} fonce en zigzag sur {Distance} à {Vitesse} vers {Cible}.",
+                "{Sujet} court à {Vitesse} en trajectoire zigzag sur {Distance} vers {Cible} pour {Intention}."
+            ]
                 }
             }
         },
@@ -978,10 +1063,27 @@ const NEO_ACTION_MODELS = {
                     },
 
                     exemples: [
-                        "{Sujet} dash directement vers {Cible} sur {Distance}.",
-                        "{Sujet} effectue une accélération explosive vers {Cible}.",
-                        "{Sujet} dash à pleine vitesse vers {Cible}."
-                    ]
+                "{Sujet} dash directement vers {Cible}.",
+                "{Sujet} dash droit vers {Cible}.",
+                "{Sujet} effectue un dash vers {Cible}.",
+                "{Sujet} part brusquement en direction de {Cible}.",
+                "{Sujet} accélère brutalement vers {Cible}.",
+                "{Sujet} jaillit vers {Cible} en ligne droite.",
+                "{Sujet} bondit en avant sur une courte distance.",
+                "{Sujet} propulse son corps vers {Cible}.",
+                "{Sujet} effectue une accélération explosive vers {Cible}.",
+                "{Sujet} démarre instantanément vers {Cible}.",
+                "{Sujet} dash à {Vitesse} vers {Cible}.",
+                "{Sujet} accélère à {Vitesse} en direction de {Cible}.",
+                "{Sujet} effectue un dash sur {Distance} vers {Cible}.",
+                "{Sujet} parcourt rapidement {Distance} en ligne droite.",
+                "{Sujet} dash sur {Distance} pour {Intention}.",
+                "Pour {Intention}, {Sujet} déclenche un dash vers {Cible}.",
+                "{Sujet} jaillit vers {Cible} à {Vitesse}.",
+                "{Sujet} accélère brutalement sur {Distance} en direction de {Cible}.",
+                "{Sujet} effectue un dash frontal à {Vitesse} vers {Cible}.",
+                "{Sujet} dash à pleine vitesse sur {Distance} vers {Cible} afin de {Intention}."
+            ]
                 },
 
 
@@ -1007,9 +1109,27 @@ const NEO_ACTION_MODELS = {
                     },
 
                     exemples: [
-                        "{Sujet} dash en diagonale vers la {Cote}.",
-                        "{Sujet} effectue un dash diagonal vers {Cible}."
-                    ]
+                "{Sujet} dash en diagonale vers la {Cote}.",
+                "{Sujet} dash diagonal vers {Cible}.",
+                "{Sujet} effectue un dash en diagonale.",
+                "{Sujet} accélère brusquement en diagonale vers {Cible}.",
+                "{Sujet} jaillit en diagonale vers la {Cote}.",
+                "{Sujet} part en diagonale vers {Cible}.",
+                "{Sujet} se propulse en diagonale vers la {Cote}.",
+                "{Sujet} effectue une accélération diagonale vers {Cible}.",
+                "{Sujet} dash vers la {Cote} en direction de {Cible}.",
+                "{Sujet} bondit rapidement en diagonale vers {Cible}.",
+                "{Sujet} dash à {Vitesse} vers la {Cote}.",
+                "{Sujet} accélère à {Vitesse} en diagonale vers {Cible}.",
+                "{Sujet} effectue un dash sur {Distance} vers la {Cote}.",
+                "{Sujet} parcourt {Distance} en diagonale vers {Cible}.",
+                "{Sujet} dash en diagonale sur {Distance} pour {Intention}.",
+                "Pour {Intention}, {Sujet} déclenche un dash diagonal vers {Cible}.",
+                "{Sujet} jaillit à {Vitesse} en diagonale vers la {Cote}.",
+                "{Sujet} accélère brutalement sur {Distance} vers {Cible} en diagonale.",
+                "{Sujet} effectue un dash diagonal à {Vitesse} vers {Cible}.",
+                "{Sujet} dash à pleine vitesse sur {Distance} vers la {Cote} afin de {Intention}."
+            ]
                 }
             }
         },
@@ -1045,10 +1165,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} rush vers {Cible} pour {Intention}.",
-                        "{Sujet} charge directement {Cible}.",
-                        "{Sujet} fonce agressivement vers {Cible}."
-                    ]
+                "{Sujet} rush vers {Cible}.",
+                "{Sujet} fonce directement vers {Cible}.",
+                "{Sujet} charge vers {Cible}.",
+                "{Sujet} se précipite vers {Cible}.",
+                "{Sujet} se lance à l'assaut de {Cible}.",
+                "{Sujet} charge droit devant vers {Cible}.",
+                "{Sujet} fonce en ligne droite sur {Cible}.",
+                "{Sujet} se rue vers {Cible}.",
+                "{Sujet} réduit rapidement la distance avec {Cible}.",
+                "{Sujet} accélère droit vers {Cible} dans une charge continue.",
+                "{Sujet} rush à pleine vitesse vers {Cible}.",
+                "{Sujet} fonce à {Vitesse} vers {Cible}.",
+                "{Sujet} charge sur {Distance} vers {Cible}.",
+                "{Sujet} parcourt {Distance} en fonçant vers {Cible}.",
+                "{Sujet} rush vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} charge directement vers {Cible}.",
+                "{Sujet} se rue sur {Cible} afin de {Intention}.",
+                "{Sujet} accélère continuellement vers {Cible} pour {Intention}.",
+                "{Sujet} effectue une charge frontale sur {Distance} vers {Cible}.",
+                "{Sujet} fonce en charge directe sur {Distance} vers {Cible} afin de {Intention}."
+            ]
                 }
             }
         },
@@ -1080,10 +1217,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} saute vers l'avant.",
-                        "{Sujet} effectue un saut vers {Cible}.",
-                        "{Sujet} bondit vers l'avant."
-                    ]
+                "{Sujet} saute vers l'avant.",
+                "{Sujet} bondit vers l'avant.",
+                "{Sujet} effectue un saut en avant.",
+                "{Sujet} fait un bond vers l'avant.",
+                "{Sujet} se propulse vers l'avant en sautant.",
+                "{Sujet} quitte le sol et saute vers l'avant.",
+                "{Sujet} prend appui et bondit vers l'avant.",
+                "{Sujet} s'élance dans les airs vers l'avant.",
+                "{Sujet} effectue un bond en direction de {Cible}.",
+                "{Sujet} saute en direction de {Cible}.",
+                "{Sujet} saute à une hauteur de {Hauteur} vers l'avant.",
+                "{Sujet} bondit à {Hauteur} vers l'avant.",
+                "{Sujet} effectue un saut vers l'avant pour {Intention}.",
+                "Pour {Intention}, {Sujet} bondit vers l'avant.",
+                "{Sujet} se projette vers l'avant dans les airs afin de {Intention}.",
+                "{Sujet} prend son impulsion et saute vers {Cible}.",
+                "{Sujet} quitte le sol pour se projeter vers l'avant.",
+                "{Sujet} bondit vers {Cible} en prenant de la hauteur.",
+                "{Sujet} effectue un saut avant jusqu'à {Hauteur} afin de {Intention}.",
+                "{Sujet} se propulse vers {Cible} par un saut vers l'avant pour {Intention}."
+            ]
                 },
 
 
@@ -1099,9 +1253,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} saute vers l'arrière.",
-                        "{Sujet} bondit en arrière."
-                    ]
+                "{Sujet} saute vers l'arrière.",
+                "{Sujet} bondit en arrière.",
+                "{Sujet} effectue un saut arrière.",
+                "{Sujet} fait un bond vers l'arrière.",
+                "{Sujet} se propulse vers l'arrière en sautant.",
+                "{Sujet} quitte le sol et saute en arrière.",
+                "{Sujet} prend appui et bondit vers l'arrière.",
+                "{Sujet} s'élance dans les airs vers l'arrière.",
+                "{Sujet} recule dans les airs en effectuant un saut.",
+                "{Sujet} saute en direction de l'arrière.",
+                "{Sujet} saute à une hauteur de {Hauteur} vers l'arrière.",
+                "{Sujet} bondit à {Hauteur} en arrière.",
+                "{Sujet} effectue un saut arrière pour {Intention}.",
+                "Pour {Intention}, {Sujet} bondit vers l'arrière.",
+                "{Sujet} se projette vers l'arrière afin de {Intention}.",
+                "{Sujet} prend son impulsion et saute en arrière.",
+                "{Sujet} quitte le sol pour se projeter vers l'arrière.",
+                "{Sujet} bondit en arrière tout en prenant de la hauteur.",
+                "{Sujet} effectue un saut arrière jusqu'à {Hauteur} afin de {Intention}.",
+                "{Sujet} se propulse vers l'arrière par un saut pour {Intention}."
+            ]
                 },
 
 
@@ -1117,9 +1289,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} saute verticalement.",
-                        "{Sujet} bondit vers le haut."
-                    ]
+                "{Sujet} saute verticalement.",
+                "{Sujet} bondit vers le haut.",
+                "{Sujet} effectue un saut vertical.",
+                "{Sujet} fait un bond vers le haut.",
+                "{Sujet} se propulse directement vers le haut.",
+                "{Sujet} quitte le sol à la verticale.",
+                "{Sujet} prend appui et bondit vers le ciel.",
+                "{Sujet} s'élève dans les airs par un saut.",
+                "{Sujet} saute directement vers le haut.",
+                "{Sujet} effectue une impulsion verticale.",
+                "{Sujet} saute jusqu'à {Hauteur}.",
+                "{Sujet} bondit à une hauteur de {Hauteur}.",
+                "{Sujet} s'élève de {Hauteur} dans les airs.",
+                "{Sujet} effectue un saut vertical pour {Intention}.",
+                "Pour {Intention}, {Sujet} bondit verticalement.",
+                "{Sujet} se projette vers le haut afin de {Intention}.",
+                "{Sujet} prend une forte impulsion et s'élève verticalement.",
+                "{Sujet} quitte le sol pour atteindre {Hauteur}.",
+                "{Sujet} bondit jusqu'à {Hauteur} afin de {Intention}.",
+                "{Sujet} se propulse verticalement dans les airs pour {Intention}."
+            ]
                 },
 
 
@@ -1136,9 +1326,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} saute vers la gauche.",
-                        "{Sujet} bondit latéralement vers la droite."
-                    ]
+                "{Sujet} saute vers la gauche.",
+                "{Sujet} bondit vers la droite.",
+                "{Sujet} effectue un saut latéral vers la {Cote}.",
+                "{Sujet} fait un bond sur le côté.",
+                "{Sujet} se propulse latéralement vers la {Cote}.",
+                "{Sujet} quitte le sol en sautant vers la {Cote}.",
+                "{Sujet} prend appui et bondit sur le côté.",
+                "{Sujet} s'élance dans les airs vers la {Cote}.",
+                "{Sujet} saute de côté en direction de {Cible}.",
+                "{Sujet} bondit latéralement vers {Cible}.",
+                "{Sujet} saute à {Hauteur} vers la {Cote}.",
+                "{Sujet} bondit à une hauteur de {Hauteur} sur le côté.",
+                "{Sujet} effectue un saut latéral pour {Intention}.",
+                "Pour {Intention}, {Sujet} bondit vers la {Cote}.",
+                "{Sujet} se projette latéralement afin de {Intention}.",
+                "{Sujet} prend son impulsion et saute vers la {Cote}.",
+                "{Sujet} quitte le sol pour se déplacer latéralement.",
+                "{Sujet} bondit vers {Cible} en prenant de la hauteur sur la {Cote}.",
+                "{Sujet} effectue un saut latéral jusqu'à {Hauteur} afin de {Intention}.",
+                "{Sujet} se propulse vers {Cible} par un saut latéral vers la {Cote} pour {Intention}."
+            ]
                 }
             }
         },
@@ -1170,9 +1378,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} fait une roulade vers l'avant.",
-                        "{Sujet} roule au sol vers {Cible}."
-                    ]
+                "{Sujet} fait une roulade vers l'avant.",
+                "{Sujet} roule vers l'avant.",
+                "{Sujet} effectue une roulade avant.",
+                "{Sujet} se roule vers l'avant.",
+                "{Sujet} plonge au sol et roule vers l'avant.",
+                "{Sujet} prend appui et effectue une roulade avant.",
+                "{Sujet} se projette au sol en roulant vers l'avant.",
+                "{Sujet} enchaîne une roulade vers l'avant.",
+                "{Sujet} roule au sol en direction de {Cible}.",
+                "{Sujet} effectue une roulade vers {Cible}.",
+                "{Sujet} roule sur {Distance} vers l'avant.",
+                "{Sujet} parcourt {Distance} en roulade vers {Cible}.",
+                "{Sujet} effectue une roulade avant sur {Distance}.",
+                "{Sujet} roule rapidement vers {Cible}.",
+                "{Sujet} fait une roulade vers l'avant pour {Intention}.",
+                "Pour {Intention}, {Sujet} roule vers l'avant.",
+                "{Sujet} se projette au sol en roulade afin de {Intention}.",
+                "{Sujet} roule vers {Cible} sur {Distance} pour {Intention}.",
+                "{Sujet} effectue une roulade avant en direction de {Cible}.",
+                "{Sujet} se lance au sol et parcourt {Distance} en roulade vers {Cible} afin de {Intention}."
+            ]
                 },
 
 
@@ -1207,9 +1433,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} fait une roulade vers la gauche.",
-                        "{Sujet} roule latéralement vers la droite."
-                    ]
+                "{Sujet} fait une roulade arrière.",
+                "{Sujet} roule vers l'arrière.",
+                "{Sujet} effectue une roulade vers l'arrière.",
+                "{Sujet} se roule vers l'arrière.",
+                "{Sujet} plonge au sol et roule en arrière.",
+                "{Sujet} prend appui et effectue une roulade arrière.",
+                "{Sujet} se projette au sol en roulant vers l'arrière.",
+                "{Sujet} enchaîne une roulade vers l'arrière.",
+                "{Sujet} roule au sol en direction de l'arrière.",
+                "{Sujet} effectue une roulade arrière pour reculer.",
+                "{Sujet} roule sur {Distance} vers l'arrière.",
+                "{Sujet} parcourt {Distance} en roulade arrière.",
+                "{Sujet} effectue une roulade arrière sur {Distance}.",
+                "{Sujet} roule rapidement vers l'arrière.",
+                "{Sujet} fait une roulade arrière pour {Intention}.",
+                "Pour {Intention}, {Sujet} roule vers l'arrière.",
+                "{Sujet} se projette au sol en roulade afin de {Intention}.",
+                "{Sujet} roule vers l'arrière sur {Distance} pour {Intention}.",
+                "{Sujet} effectue une roulade arrière en s'éloignant de {Cible}.",
+                "{Sujet} se lance au sol et parcourt {Distance} en roulade arrière afin de {Intention}."
+            ]
                 }
             }
         },
@@ -1243,9 +1487,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} vole vers {Cible}.",
-                        "{Sujet} se déplace dans les airs vers {Cible}."
-                    ]
+                "{Sujet} vole vers {Cible}.",
+                "{Sujet} se déplace dans les airs vers {Cible}.",
+                "{Sujet} avance dans les airs en direction de {Cible}.",
+                "{Sujet} vole droit vers {Cible}.",
+                "{Sujet} se propulse dans les airs vers l'avant.",
+                "{Sujet} progresse dans les airs vers {Cible}.",
+                "{Sujet} traverse les airs en ligne droite.",
+                "{Sujet} avance en volant vers {Cible}.",
+                "{Sujet} se dirige dans les airs vers {Cible}.",
+                "{Sujet} fonce dans les airs vers {Cible}.",
+                "{Sujet} vole à {Vitesse} vers {Cible}.",
+                "{Sujet} se déplace dans les airs à {Vitesse}.",
+                "{Sujet} vole sur {Distance} vers {Cible}.",
+                "{Sujet} parcourt {Distance} dans les airs vers {Cible}.",
+                "{Sujet} vole à {Hauteur} vers {Cible}.",
+                "{Sujet} se maintient à {Hauteur} et avance vers {Cible}.",
+                "{Sujet} vole vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} se propulse dans les airs vers {Cible}.",
+                "{Sujet} vole à {Vitesse} sur {Distance} vers {Cible} afin de {Intention}.",
+                "{Sujet} se déplace à {Hauteur} et {Vitesse} en trajectoire frontale sur {Distance} vers {Cible} pour {Intention}."
+            ]
                 },
 
 
@@ -1264,9 +1526,27 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} vole en diagonale vers {Cible}.",
-                        "{Sujet} traverse les airs en diagonale."
-                    ]
+                "{Sujet} vole en diagonale vers {Cible}.",
+                "{Sujet} traverse les airs en diagonale.",
+                "{Sujet} se déplace dans les airs en diagonale vers {Cible}.",
+                "{Sujet} vole en diagonale vers la {Cote}.",
+                "{Sujet} se propulse en diagonale vers {Cible}.",
+                "{Sujet} avance dans les airs en direction de la {Cote}.",
+                "{Sujet} monte en diagonale vers {Cible}.",
+                "{Sujet} descend en diagonale vers {Cible}.",
+                "{Sujet} traverse les airs en suivant une trajectoire diagonale.",
+                "{Sujet} se dirige en diagonale vers {Cible}.",
+                "{Sujet} vole à {Vitesse} en diagonale vers {Cible}.",
+                "{Sujet} se déplace à {Vitesse} vers la {Cote}.",
+                "{Sujet} vole sur {Distance} en diagonale vers {Cible}.",
+                "{Sujet} parcourt {Distance} dans les airs vers la {Cote}.",
+                "{Sujet} vole à {Hauteur} en diagonale vers {Cible}.",
+                "{Sujet} se déplace à {Hauteur} vers la {Cote}.",
+                "{Sujet} vole en diagonale vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} se propulse en diagonale vers {Cible}.",
+                "{Sujet} vole à {Vitesse} sur {Distance} vers la {Cote} afin de {Intention}.",
+                "{Sujet} se déplace à {Hauteur} et {Vitesse} en trajectoire diagonale sur {Distance} vers {Cible} pour {Intention}."
+            ]
                 },
 
 
@@ -1284,150 +1564,259 @@ const NEO_ACTION_MODELS = {
                         "INTENTION"
                     ],
 
-                    exemples: [
-                        "{Sujet} vole latéralement vers la droite.",
-                        "{Sujet} se déplace dans les airs vers la gauche."
-                    ]
+                   exemples: [
+                "{Sujet} vole latéralement vers la droite.",
+                "{Sujet} vole vers la gauche.",
+                "{Sujet} se déplace dans les airs vers la {Cote}.",
+                "{Sujet} avance latéralement dans les airs.",
+                "{Sujet} se propulse sur le côté vers la {Cote}.",
+                "{Sujet} traverse les airs latéralement.",
+                "{Sujet} se déplace dans les airs en direction de la {Cote}.",
+                "{Sujet} vole de côté vers {Cible}.",
+                "{Sujet} progresse latéralement vers {Cible}.",
+                "{Sujet} se dirige dans les airs vers la {Cote}.",
+                "{Sujet} vole latéralement à {Vitesse}.",
+                "{Sujet} se déplace à {Vitesse} vers la {Cote}.",
+                "{Sujet} vole sur {Distance} vers la {Cote}.",
+                "{Sujet} parcourt {Distance} latéralement dans les airs.",
+                "{Sujet} vole à {Hauteur} vers la {Cote}.",
+                "{Sujet} maintient une hauteur de {Hauteur} en se déplaçant latéralement.",
+                "{Sujet} vole latéralement vers {Cible} pour {Intention}.",
+                "Pour {Intention}, {Sujet} se déplace dans les airs vers la {Cote}.",
+                "{Sujet} vole à {Vitesse} sur {Distance} vers {Cible} afin de {Intention}.",
+                "{Sujet} se déplace à {Hauteur} et {Vitesse} latéralement sur {Distance} vers la {Cote} pour {Intention}."
+            ] 
                 }
             }
         },
 
+// ==========================================================
+// PIVOT
+// ==========================================================
 
-        // ==========================================================
-        // PIVOT
-        // ==========================================================
+pivot: {
 
-        pivot: {
+    categorie: "deplacement",
+    id: "PIVOT",
 
-            categorie: "deplacement",
-            id: "PIVOT",
+    concept:
+        "Rotation du corps au sol autour d'un appui afin de modifier son orientation selon un angle déterminé.",
 
-            concept:
-                "Rotation du corps au sol autour d'un appui afin de modifier son orientation.",
+    trajectoires: {
 
-            trajectoires: {
+        droite: {
 
-                droite: {
+            structure: [
+                "SUJET",
+                "ACTION",
+                "COTE",
+                "TRAJECTOIRE",
+                "ANGLE",
+                "VITESSE",
+                "INTENTION"
+            ],
 
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "COTE",
-                        "TRAJECTOIRE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} pivote vers la droite.",
-                        "{Sujet} effectue un pivot à droite."
-                    ]
-                },
-
-
-                gauche: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "COTE",
-                        "TRAJECTOIRE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} pivote vers la gauche.",
-                        "{Sujet} effectue un pivot à gauche."
-                    ]
-                }
-            }
+            exemples: [
+                "{Sujet} pivote de {Angle}° vers la droite.",
+                "{Sujet} pivote rapidement de {Angle}° vers la droite.",
+                "{Sujet} pivote lentement de {Angle}° vers la droite.",
+                "{Sujet} effectue un pivot de {Angle}° à droite.",
+                "{Sujet} tourne de {Angle}° vers la droite à {Vitesse}.",
+                "{Sujet} pivote de 60° vers la droite à {Vitesse}.",
+                "{Sujet} pivote de 90° vers la droite à {Vitesse}.",
+                "{Sujet} effectue une rotation de 90° vers la droite.",
+                "{Sujet} tourne son corps de 60° vers la droite.",
+                "{Sujet} pivote à droite sur un angle de 90°.",
+                "{Sujet} effectue un pivot droit de 90° rapidement.",
+                "{Sujet} réalise une rotation de 180° vers la droite.",
+                "{Sujet} pivote brusquement de {Angle}° vers la droite.",
+                "{Sujet} tourne rapidement de {Angle}° à droite.",
+                "{Sujet} prend appui et pivote de {Angle}° vers la droite.",
+                "{Sujet} change son orientation de {Angle}° vers la droite à {Vitesse}.",
+                "{Sujet} pivote de {Angle}° à droite afin de faire face à {Cible}.",
+                "Pour {Intention}, {Sujet} pivote rapidement de {Angle}° vers la droite.",
+                "{Sujet} tourne de {Angle}° vers la droite à {Vitesse} pour {Intention}.",
+                "{Sujet} prend appui et effectue un pivot de {Angle}° vers la droite à {Vitesse} afin de {Intention}."
+            ]
         },
 
 
-        // ==========================================================
-        // VRILLE
-        // ==========================================================
+        gauche: {
 
-        vrille: {
+            structure: [
+                "SUJET",
+                "ACTION",
+                "COTE",
+                "TRAJECTOIRE",
+                "ANGLE",
+                "VITESSE",
+                "INTENTION"
+            ],
 
-            categorie: "deplacement",
-            id: "VRILLE",
-
-            concept:
-                "Rotation du corps autour de son axe longitudinal, généralement pendant un déplacement ou une phase aérienne.",
-
-            trajectoires: {
-
-                rotation: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une vrille.",
-                        "{Sujet} tourne sur lui-même pendant son déplacement."
-                    ]
-                }
-            }
-        },
-
-
-        // ==========================================================
-        // SALTO
-        // ==========================================================
-
-        salto: {
-
-            categorie: "deplacement",
-            id: "SALTO",
-
-            concept:
-                "Rotation aérienne du corps autour d'un axe horizontal.",
-
-            trajectoires: {
-
-                avant: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
-                        "HAUTEUR",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue un salto avant.",
-                        "{Sujet} réalise une rotation aérienne vers l'avant."
-                    ]
-                },
-
-
-                arriere: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
-                        "HAUTEUR",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue un salto arrière.",
-                        "{Sujet} réalise une rotation aérienne vers l'arrière."
-                    ]
-                }
-            }
+            exemples: [
+                "{Sujet} pivote de {Angle}° vers la gauche.",
+                "{Sujet} pivote rapidement de {Angle}° vers la gauche.",
+                "{Sujet} pivote lentement de {Angle}° vers la gauche.",
+                "{Sujet} effectue un pivot de {Angle}° à gauche.",
+                "{Sujet} tourne de {Angle}° vers la gauche à {Vitesse}.",
+                "{Sujet} pivote de 60° vers la gauche à {Vitesse}.",
+                "{Sujet} pivote de 90° vers la gauche à {Vitesse}.",
+                "{Sujet} effectue une rotation de 90° vers la gauche.",
+                "{Sujet} tourne son corps de 60° vers la gauche.",
+                "{Sujet} pivote à gauche sur un angle de 90°.",
+                "{Sujet} effectue un pivot gauche de 90° rapidement.",
+                "{Sujet} réalise une rotation de 180° vers la gauche.",
+                "{Sujet} pivote brusquement de {Angle}° vers la gauche.",
+                "{Sujet} tourne rapidement de {Angle}° à gauche.",
+                "{Sujet} prend appui et pivote de {Angle}° vers la gauche.",
+                "{Sujet} change son orientation de {Angle}° vers la gauche à {Vitesse}.",
+                "{Sujet} pivote de {Angle}° à gauche afin de faire face à {Cible}.",
+                "Pour {Intention}, {Sujet} pivote rapidement de {Angle}° vers la gauche.",
+                "{Sujet} tourne de {Angle}° vers la gauche à {Vitesse} pour {Intention}.",
+                "{Sujet} prend appui et effectue un pivot de {Angle}° vers la gauche à {Vitesse} afin de {Intention}."
+            ]
         }
-    },
+    }
+},
+        
+        // ==========================================================
+// VRILLE / PIROUETTE
+// ==========================================================
 
+vrille: {
+
+    categorie: "deplacement",
+    id: "VRILLE",
+
+    concept:
+        "Rotation du corps autour de son axe longitudinal, pouvant être réalisée au sol ou pendant un déplacement, avec un angle de rotation déterminé.",
+
+    trajectoires: {
+
+        rotation: {
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "TRAJECTOIRE",
+                "ANGLE",
+                "VITESSE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} effectue une vrille de {Angle}°.",
+                "{Sujet} effectue une pirouette de {Angle}°.",
+                "{Sujet} tourne sur lui-même de {Angle}°.",
+                "{Sujet} réalise une rotation de {Angle}° sur son axe.",
+                "{Sujet} pivote sur son axe de {Angle}°.",
+                "{Sujet} effectue une rotation à {Vitesse} de {Angle}°.",
+                "{Sujet} tourne rapidement de {Angle}° sur lui-même.",
+                "{Sujet} tourne lentement de {Angle}° sur son axe.",
+                "{Sujet} réalise une vrille de 180°.",
+                "{Sujet} réalise une vrille de 360°.",
+                "{Sujet} effectue une pirouette de 180°.",
+                "{Sujet} effectue une pirouette de 360°.",
+                "{Sujet} tourne de 90° sur son axe à {Vitesse}.",
+                "{Sujet} enchaîne une rotation de {Angle}° pendant son déplacement.",
+                "{Sujet} se met à tourner sur lui-même de {Angle}°.",
+                "{Sujet} effectue plusieurs rotations successives de {Angle}°.",
+                "Pour {Intention}, {Sujet} effectue une vrille de {Angle}°.",
+                "{Sujet} réalise une pirouette de {Angle}° afin de {Intention}.",
+                "{Sujet} tourne sur son axe de {Angle}° à {Vitesse} pour {Intention}.",
+                "{Sujet} se propulse tout en effectuant une rotation de {Angle}° à {Vitesse} afin de {Intention}."
+            ]
+        }
+    }
+},
+
+
+       // ==========================================================
+// SALTO
+// ==========================================================
+
+salto: {
+
+    categorie: "deplacement",
+    id: "SALTO",
+
+    concept:
+        "Rotation aérienne du corps autour d'un axe horizontal.",
+
+    trajectoires: {
+
+        avant: {
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "TRAJECTOIRE",
+                "DIRECTION",
+                "HAUTEUR",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} effectue un salto avant.",
+                "{Sujet} réalise un salto vers l'avant.",
+                "{Sujet} fait une rotation aérienne vers l'avant.",
+                "{Sujet} tourne dans les airs vers l'avant.",
+                "{Sujet} effectue une rotation avant en plein vol.",
+                "{Sujet} se projette dans les airs et réalise un salto avant.",
+                "{Sujet} prend appui et effectue un salto vers l'avant.",
+                "{Sujet} bondit puis réalise une rotation aérienne vers l'avant.",
+                "{Sujet} effectue une rotation complète vers l'avant.",
+                "{Sujet} enchaîne un salto avant dans les airs.",
+                "{Sujet} effectue un salto avant jusqu'à {Hauteur}.",
+                "{Sujet} réalise une rotation aérienne à {Hauteur}.",
+                "{Sujet} bondit à {Hauteur} avant d'effectuer un salto.",
+                "{Sujet} effectue un salto vers l'avant pour {Intention}.",
+                "Pour {Intention}, {Sujet} réalise un salto avant.",
+                "{Sujet} se projette dans les airs afin d'effectuer un salto vers l'avant.",
+                "{Sujet} prend son impulsion puis tourne vers l'avant dans les airs.",
+                "{Sujet} effectue une rotation avant en prenant de la hauteur.",
+                "{Sujet} réalise un salto avant jusqu'à {Hauteur} afin de {Intention}.",
+                "{Sujet} se propulse dans les airs, atteint {Hauteur} et effectue un salto avant pour {Intention}."
+            ]
+        },
+
+
+        arriere: {
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "TRAJECTOIRE",
+                "DIRECTION",
+                "HAUTEUR",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} effectue un salto arrière.",
+                "{Sujet} réalise un salto vers l'arrière.",
+                "{Sujet} fait une rotation aérienne vers l'arrière.",
+                "{Sujet} tourne dans les airs vers l'arrière.",
+                "{Sujet} effectue une rotation arrière en plein vol.",
+                "{Sujet} se projette dans les airs et réalise un salto arrière.",
+                "{Sujet} prend appui et effectue un salto vers l'arrière.",
+                "{Sujet} bondit puis réalise une rotation aérienne vers l'arrière.",
+                "{Sujet} effectue une rotation complète vers l'arrière.",
+                "{Sujet} enchaîne un salto arrière dans les airs.",
+                "{Sujet} effectue un salto arrière jusqu'à {Hauteur}.",
+                "{Sujet} réalise une rotation aérienne à {Hauteur}.",
+                "{Sujet} bondit à {Hauteur} avant d'effectuer un salto arrière.",
+                "{Sujet} effectue un salto vers l'arrière pour {Intention}.",
+                "Pour {Intention}, {Sujet} réalise un salto arrière.",
+                "{Sujet} se projette dans les airs afin d'effectuer un salto vers l'arrière.",
+                "{Sujet} prend son impulsion puis tourne vers l'arrière dans les airs.",
+                "{Sujet} effectue une rotation arrière en prenant de la hauteur.",
+                "{Sujet} réalise un salto arrière jusqu'à {Hauteur} afin de {Intention}.",
+                "{Sujet} se propulse dans les airs, atteint {Hauteur} et effectue un salto arrière pour {Intention}."
+            ]
+        }
+    }
+}, 
 
     // ============================================================
     // 👊 ATTAQUES — MAINS / BRAS / TÊTE
