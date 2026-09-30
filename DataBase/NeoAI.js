@@ -3097,108 +3097,170 @@ salto: {
     frappe_jambe: {
 
         // ==========================================================
-        // FRONT KICK
+// FRONT KICK
+// ==========================================================
+
+front_kick: {
+
+    categorie: "frappe_jambe",
+    id: "FRONT_KICK",
+
+    concept:
+        "Coup de pied direct et frontal utilisant principalement la poussée de la jambe vers l'avant, avec la semelle ou la plante du pied comme surface d'impact.",
+
+    trajectoires: {
+
+        frontale: {
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE"
+            ],
+
+            exemples: [
+                "{Sujet} donne un coup de pied direct avec la semelle de son pied droit au ventre de {Cible}.",
+                "{Sujet} frappe frontalement le ventre de {Cible} avec la semelle de son pied.",
+                "{Sujet} pousse la semelle de son pied droit directement vers le torse de {Cible}.",
+                "{Sujet} porte un coup de pied frontal avec la plante de son pied au plexus de {Cible}.",
+                "{Sujet} tend sa jambe gauche et envoie la semelle vers l'abdomen de {Cible}.",
+                "{Sujet} propulse son pied droit vers le ventre de {Cible}.",
+                "{Sujet} frappe {Cible} avec la semelle de son pied.",
+                "{Sujet} envoie son pied droit droit devant vers {Cible}.",
+                "{Sujet} pousse la plante de son pied contre le ventre de {Cible}.",
+                "{Sujet} lance un coup de pied frontal avec la semelle vers le torse de {Cible}.",
+                "{Sujet} frappe directement le buste de {Cible} avec la plante de son pied.",
+                "{Sujet} tend rapidement son pied droit, semelle en avant, vers {Cible}.",
+                "{Sujet} porte un front kick direct avec la semelle au ventre de {Cible}.",
+                "{Sujet} projette sa jambe vers l'avant pour toucher {Cible}.",
+                "{Sujet} pousse la plante de son pied gauche droit devant contre {Cible}.",
+                "{Sujet} effectue un coup de pied frontal avec la semelle de son pied droit.",
+                "{Sujet} frappe le plexus de {Cible} avec la plante de son pied.",
+                "{Sujet} avance sa jambe et percute {Cible} avec sa semelle.",
+                "{Sujet} envoie la semelle de son pied droit vers l'abdomen de {Cible}.",
+                "{Sujet} effectue un coup de pied direct et frontal avec la semelle contre {Cible}."
+            ]
+        }
+    }
+},
+
+
         // ==========================================================
+// LOW KICK
+// ==========================================================
 
-        front_kick: {
+low_kick: {
 
-            categorie: "frappe_jambe",
-            id: "FRONT_KICK",
+    categorie: "frappe_jambe",
+    id: "LOW_KICK",
 
-            concept:
-                "Coup de pied direct utilisant principalement la poussée de la jambe vers l'avant.",
+    concept:
+        "Coup de pied circulaire visant principalement les parties basses de la jambe ou de la cuisse de la cible.",
 
-            trajectoires: {
+    trajectoires: {
 
-                frontale: {
+        circulaire: {
 
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION"
+            ],
 
-                    exemples: [
-                        "{Sujet} donne un front kick du {Membre} au ventre de {Cible}.",
-                        "{Sujet} frappe directement avec son pied vers {Cible}."
-                    ]
+            exemples: [
+                "{Sujet} donne un low kick avec sa jambe droite à la cuisse de {Cible}.",
+                "{Sujet} frappe la cuisse de {Cible} avec un low kick circulaire.",
+                "{Sujet} balance sa jambe droite en cercle vers la cuisse de {Cible}.",
+                "{Sujet} frappe la jambe gauche de {Cible} avec son tibia.",
+                "{Sujet} porte un low kick circulaire à la cuisse droite de {Cible}.",
+                "{Sujet} fait tourner sa jambe gauche vers le mollet de {Cible}.",
+                "{Sujet} donne un coup de pied circulaire à la cuisse de {Cible}.",
+                "{Sujet} projette sa jambe droite en arc vers la cuisse de {Cible}.",
+                "{Sujet} frappe le mollet de {Cible} avec un low kick.",
+                "{Sujet} envoie son tibia droit contre la cuisse de {Cible}.",
+                "{Sujet} effectue un low kick vers la jambe droite de {Cible}.",
+                "{Sujet} fouette sa jambe gauche autour de sa cible pour atteindre la cuisse.",
+                "{Sujet} frappe la partie basse de la jambe de {Cible} avec un coup circulaire.",
+                "{Sujet} fait pivoter sa jambe droite pour frapper le mollet de {Cible}.",
+                "{Sujet} porte un low kick du tibia à la cuisse gauche de {Cible}.",
+                "{Sujet} balance sa jambe vers l'extérieur pour frapper la cuisse de {Cible}.",
+                "{Sujet} frappe latéralement la cuisse de {Cible} avec un mouvement circulaire.",
+                "{Sujet} donne un coup de pied circulaire au genou de {Cible}.",
+                "{Sujet} projette son tibia gauche vers la cuisse de {Cible}.",
+                "{Sujet} exécute un low kick circulaire avec sa jambe droite vers la jambe de {Cible}."
+            ]
+        }
+    }
+},
+
+// ==========================================================
+// ROUNDHOUSE KICK
+// ==========================================================
+
+roundhouse_kick: {
+
+    categorie: "frappe_jambe",
+    id: "ROUNDHOUSE_KICK",
+
+    concept:
+        "Coup de pied circulaire utilisant une rotation de la hanche et de la jambe, accompagné d'un pivot du pied d'appui.",
+
+    trajectoires: {
+
+        circulaire: {
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "PIVOT"
+            ],
+
+            contraintes: {
+                pivot: {
+                    obligatoire: true,
+                    angles: [60, 90],
+                    unite: "degrés"
                 }
-            }
-        },
+            },
 
-
-        // ==========================================================
-        // LOW KICK
-        // ==========================================================
-
-        low_kick: {
-
-            categorie: "frappe_jambe",
-            id: "LOW_KICK",
-
-            concept:
-                "Coup de pied circulaire ou latéral visant principalement la partie basse du corps.",
-
-            trajectoires: {
-
-                circulaire: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} donne un low kick du {Membre} à la cuisse de {Cible}.",
-                        "{Sujet} frappe la jambe de {Cible} avec un low kick."
-                    ]
-                }
-            }
-        },
-
-
-        // ==========================================================
-        // ROUNDHOUSE KICK
-        // ==========================================================
-
-        roundhouse_kick: {
-
-            categorie: "frappe_jambe",
-            id: "ROUNDHOUSE_KICK",
-
-            concept:
-                "Coup de pied circulaire utilisant une rotation de la hanche et de la jambe.",
-
-            trajectoires: {
-
-                circulaire: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} lance un roundhouse kick du {Membre} vers {Cible}.",
-                        "{Sujet} frappe circulairement les côtes de {Cible}."
-                    ]
-                }
-            }
-        },
-
+            exemples: [
+                "{Sujet} effectue un roundhouse kick avec sa jambe droite après un pivot de 60° vers {Cible}.",
+                "{Sujet} lance un roundhouse kick avec un pivot de 90° vers la gauche contre {Cible}.",
+                "{Sujet} pivote à 60° sur son pied d'appui puis frappe les côtes de {Cible}.",
+                "{Sujet} pivote à 90° et envoie sa jambe droite circulairement vers {Cible}.",
+                "{Sujet} frappe les côtes de {Cible} avec un roundhouse kick après un pivot de 60°.",
+                "{Sujet} effectue un pivot de 90° avant de lancer son coup de pied circulaire.",
+                "{Sujet} fait pivoter son pied d'appui de 60° puis frappe la cuisse de {Cible}.",
+                "{Sujet} tourne son pied d'appui à 90° et frappe le flanc de {Cible}.",
+                "{Sujet} lance un coup de pied circulaire avec sa jambe gauche après un pivot de 60°.",
+                "{Sujet} porte un roundhouse kick à la tête de {Cible} avec un pivot de 90°.",
+                "{Sujet} pivote de 60° sur sa jambe d'appui et frappe le torse de {Cible}.",
+                "{Sujet} pivote de 90° vers la droite avant de frapper les côtes de {Cible}.",
+                "{Sujet} fait tourner son pied d'appui de 60° et projette sa jambe vers {Cible}.",
+                "{Sujet} effectue un pivot de 90° puis frappe la cuisse de {Cible} avec son tibia.",
+                "{Sujet} frappe circulairement {Cible} après avoir pivoté de 60°.",
+                "{Sujet} lance sa jambe droite autour de son axe avec un pivot de 90°.",
+                "{Sujet} pivote de 60° vers la gauche puis frappe le flanc de {Cible}.",
+                "{Sujet} pivote de 90° vers la droite et envoie son tibia vers {Cible}.",
+                "{Sujet} exécute un roundhouse kick avec un pivot obligatoire de 60°.",
+                "{Sujet} exécute un roundhouse kick avec un pivot obligatoire de 90° vers {Cible}."
+            ]
+        }
+    }
+},
+        
 
         // ==========================================================
         // SIDE KICK
