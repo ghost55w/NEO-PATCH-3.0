@@ -79,9 +79,74 @@ async function getAllFiches() {
 
 async function getData(where = {}) {
 
+  // ==========================================================
+  // NORMALISATION DU JID
+  // ==========================================================
+
   if (where.jid) {
-    where.jid = where.jid.replace("@whatsapp.net", "@s.whatsapp.net");
+
+    let jid = String(where.jid).trim();
+
+    // Normalise les anciens formats WhatsApp
+    jid = jid
+      .replace("@whatsapp.net", "@s.whatsapp.net")
+      .replace("@c.us", "@s.whatsapp.net");
+
+    where.jid = jid;
+
+    // Recherche normale
+    let fiche = await AllStarsDivsFiche.findOne({
+      where: {
+        ...where,
+        jid
+      }
+    });
+
+    if (fiche) {
+      return fiche;
+    }
+
+    // ==========================================================
+    // SECOURS : RECHERCHE PAR NUMÉRO
+    // ==========================================================
+    //
+    // Permet de retrouver une fiche même si le suffixe
+    // du JID enregistré est différent.
+    //
+    // Exemple :
+    // 243843265126@s.whatsapp.net
+    // 243843265126@whatsapp.net
+    // ==========================================================
+
+    const numero = jid.split("@")[0];
+
+    if (numero) {
+
+      const fiches = await AllStarsDivsFiche.findAll();
+
+      fiche = fiches.find(f => {
+
+        if (!f.jid) return false;
+
+        const jidFiche = String(f.jid).trim();
+        const numeroFiche = jidFiche.split("@")[0];
+
+        return numeroFiche === numero;
+      });
+
+      if (fiche) {
+        console.log(
+          `🔄 Fiche retrouvée par numéro : ${numero}`
+        );
+
+        return fiche;
+      }
+    }
   }
+
+  // ==========================================================
+  // AUTRES RECHERCHES
+  // ==========================================================
 
   const fiche = await AllStarsDivsFiche.findOne({
     where
@@ -96,12 +161,63 @@ async function getData(where = {}) {
 }
 
 async function setfiche(colonne, valeur, jid) {
+
+  if (!jid) {
+    throw new Error("JID requis");
+  }
+
+  let normalizedJid = String(jid).trim()
+    .replace("@whatsapp.net", "@s.whatsapp.net")
+    .replace("@c.us", "@s.whatsapp.net");
+
   const updateData = {};
   updateData[colonne] = valeur;
 
-  const [updated] = await AllStarsDivsFiche.update(updateData, { where: { jid } });
+  let [updated] = await AllStarsDivsFiche.update(
+    updateData,
+    {
+      where: {
+        jid: normalizedJid
+      }
+    }
+  );
 
-  if (!updated) throw new Error(`❌ Aucun joueur trouvé pour jid : ${jid}`);
+  // ==========================================================
+  // SECOURS : RECHERCHE PAR NUMÉRO
+  // ==========================================================
+
+  if (!updated) {
+
+    const numero = normalizedJid.split("@")[0];
+
+    const fiches = await AllStarsDivsFiche.findAll();
+
+    const fiche = fiches.find(f => {
+      if (!f.jid) return false;
+
+      return String(f.jid).trim().split("@")[0] === numero;
+    });
+
+    if (fiche) {
+
+      fiche[colonne] = valeur;
+
+      await fiche.save();
+
+      updated = 1;
+
+      console.log(
+        `🔄 ${colonne} mis à jour par numéro → ${valeur}`
+      );
+    }
+  }
+
+  if (!updated) {
+    throw new Error(
+      `❌ Aucun joueur trouvé pour jid : ${normalizedJid}`
+    );
+  }
+
   console.log(`✔ ${colonne} mis à jour → ${valeur}`);
 }
 
