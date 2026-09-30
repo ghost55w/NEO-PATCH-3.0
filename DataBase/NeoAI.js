@@ -699,7 +699,16 @@ const NEO_RELATIONS = {
 // - TRAJECTOIRE décrit comment l'action se déroule.
 //==============================================================
 
+// ================================================================
+// 🧠 NEO ACTION MODELS
+// Base sémantique des actions de NEO
+// ================================================================
+
 const NEO_ACTION_MODELS = {
+
+    // ============================================================
+    // 🏃 DÉPLACEMENTS
+    // ============================================================
 
     deplacement: {
 
@@ -708,17 +717,19 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         marche: {
+
             categorie: "deplacement",
             id: "MARCHE",
 
             concept:
-                "Déplacement volontaire d'un sujet à pied, généralement à vitesse normale ou modérée.",
+                "Déplacement volontaire d'un sujet au sol à pied, généralement à vitesse normale ou modérée.",
 
             trajectoires: {
 
                 normale: {
+
                     concept:
-                        "Progression régulière au sol à pied sans trajectoire particulière imposée.",
+                        "Progression régulière au sol sans accélération explosive.",
 
                     structure: [
                         "SUJET",
@@ -729,10 +740,9 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} marche vers {Cible} sur {Distance} pour l'atteindre",
-                        "{Sujet} avance à pied vers {Cible} sur {Distance} pour se rapprocher",
-                        "{Sujet} se déplace au pas vers {Cible} sur {Distance} pour arriver à proximité",
-                        "{Sujet} progresse tranquillement vers {Cible} sur {Distance} pour rejoindre sa position"
+                        "{Sujet} marche vers {Cible} sur {Distance}.",
+                        "{Sujet} avance à pied vers {Cible} pour {Intention}.",
+                        "{Sujet} marche en direction de {Cible}."
                     ]
                 }
             }
@@ -744,17 +754,19 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         course: {
+
             categorie: "deplacement",
             id: "COURSE",
 
             concept:
-                "Déplacement volontaire rapide d'un sujet par la course afin de progresser vers une position, une cible ou un objectif.",
+                "Déplacement rapide au sol par course.",
 
             trajectoires: {
 
                 frontale: {
+
                     concept:
-                        "Progression directe et principalement linéaire vers l'avant ou vers une cible.",
+                        "Course suivant une trajectoire directe vers l'avant.",
 
                     structure: [
                         "SUJET",
@@ -768,43 +780,17 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court vers {Cible} en trajectoire frontale sur {Distance} pour l'atteindre",
-                        "{Sujet} fonce frontalement vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
-                        "{Sujet} se rue droit vers {Cible} sur {Distance} pour le rejoindre",
-                        "{Sujet} s'élance directement vers {Cible} à {Vitesse} pour atteindre sa position",
-                        "{Sujet} file droit vers {Cible} sur {Distance} pour arriver jusqu'à lui"
+                        "{Sujet} court vers {Cible} en trajectoire frontale sur {Distance}.",
+                        "{Sujet} fonce vers {Cible} en courant à {Vitesse}.",
+                        "{Sujet} court droit vers {Cible} pour {Intention}."
                     ]
                 },
 
-                circulaire: {
-                    concept:
-                        "Progression en course autour d'une cible ou selon une trajectoire courbe.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "DIRECTION",
-                        "TRAJECTOIRE",
-                        "COTE",
-                        "INTENTION",
-                        "CIBLE",
-                        "DISTANCE",
-                        "VITESSE",
-                        "COURBE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} court autour de {Cible} par sa gauche avec une courbe de {Courbe} pour se placer derrière lui",
-                        "{Sujet} court autour de {Cible} par sa droite avec une courbe de {Courbe} pour le contourner",
-                        "{Sujet} contourne {Cible} en courant sur sa gauche pour atteindre sa position",
-                        "{Sujet} fonce autour de {Cible} par sa droite pour se positionner derrière lui",
-                        "{Sujet} effectue une course circulaire autour de {Cible} vers sa gauche pour changer de position"
-                    ]
-                },
 
                 diagonale: {
+
                     concept:
-                        "Progression en course selon une trajectoire oblique vers une cible ou une position.",
+                        "Course suivant une trajectoire diagonale.",
 
                     structure: [
                         "SUJET",
@@ -819,41 +805,17 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court en diagonale sur sa gauche vers {Cible} sur {Distance} pour l'atteindre",
-                        "{Sujet} court en diagonale sur sa droite vers {Cible} sur {Distance} pour l'atteindre",
-                        "{Sujet} fonce diagonalement vers sa gauche en direction de {Cible} à {Vitesse}",
-                        "{Sujet} se rue en diagonale sur sa droite vers {Cible} pour le rejoindre",
-                        "{Sujet} s'élance en diagonale vers sa gauche à {Vitesse} pour atteindre {Cible}"
+                        "{Sujet} court en diagonale vers {Cible}.",
+                        "{Sujet} court vers la droite en diagonale.",
+                        "{Sujet} fonce en diagonale vers {Cible}."
                     ]
                 },
 
-                zig_zag: {
-                    concept:
-                        "Progression en course avec alternance successive des déplacements vers la gauche et vers la droite.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "DIRECTION",
-                        "TRAJECTOIRE",
-                        "INTENTION",
-                        "CIBLE",
-                        "DISTANCE",
-                        "VITESSE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} court en zigzag vers {Cible} sur {Distance} pour éviter ses attaques et l'atteindre",
-                        "{Sujet} fonce en zigzag vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
-                        "{Sujet} se rue vers {Cible} en zigzag sur {Distance} pour éviter ses attaques",
-                        "{Sujet} serpente rapidement vers {Cible} à {Vitesse} pour parvenir jusqu'à lui",
-                        "{Sujet} avance en alternant ses déplacements de gauche à droite vers {Cible} pour l'atteindre"
-                    ]
-                },
 
                 laterale: {
+
                     concept:
-                        "Progression en course principalement vers un côté par rapport à l'orientation du sujet.",
+                        "Course parallèle ou principalement orientée latéralement.",
 
                     structure: [
                         "SUJET",
@@ -868,11 +830,59 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} court latéralement sur sa gauche sur {Distance}",
-                        "{Sujet} court latéralement sur sa droite sur {Distance}",
-                        "{Sujet} se déplace rapidement vers sa gauche pour atteindre {Cible}",
-                        "{Sujet} fonce sur le côté droit vers {Cible} à {Vitesse}",
-                        "{Sujet} se rue latéralement sur sa gauche pour esquiver {Cible}"
+                        "{Sujet} court latéralement vers la {Cote}.",
+                        "{Sujet} se déplace rapidement sur le côté.",
+                        "{Sujet} court vers la {Cote} pour {Intention}."
+                    ]
+                },
+
+
+                circulaire: {
+
+                    concept:
+                        "Course suivant une trajectoire courbe autour d'un point ou d'une cible.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "TRAJECTOIRE",
+                        "COTE",
+                        "COURBE",
+                        "INTENTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} court en cercle autour de {Cible}.",
+                        "{Sujet} contourne {Cible} en courant.",
+                        "{Sujet} tourne autour de {Cible} pour {Intention}."
+                    ]
+                },
+
+
+                zig_zag: {
+
+                    concept:
+                        "Course composée de changements successifs de direction.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "DIRECTION",
+                        "TRAJECTOIRE",
+                        "INTENTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} court en zigzag vers {Cible}.",
+                        "{Sujet} avance en changeant rapidement de direction.",
+                        "{Sujet} fonce en zigzag vers {Cible}."
                     ]
                 }
             }
@@ -884,24 +894,27 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         dash: {
+
             categorie: "deplacement",
             id: "DASH",
 
             concept:
-                "Déplacement extrêmement rapide et bref permettant au sujet de parcourir instantanément ou presque une courte distance.",
+                "Accélération explosive et brève permettant de parcourir rapidement une courte distance.",
 
             trajectoires: {
 
                 frontale: {
+
                     concept:
-                        "Accélération brutale produisant un déplacement très rapide et direct vers l'avant ou vers une cible.",
+                        "Dash explosif en ligne directe.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "TRAJECTOIRE",
-                        "DISTANCE",
                         "DIRECTION",
+                        "DISTANCE",
+                        "VITESSE",
                         "INTENTION"
                     ],
 
@@ -911,33 +924,37 @@ const NEO_ACTION_MODELS = {
                     },
 
                     exemples: [
-                        "{Sujet} effectue un dash frontal de {Distance} vers {Cible} pour l'atteindre",
-                        "{Sujet} dash rapidement sur {Distance} vers {Cible} pour se rapprocher",
-                        "{Sujet} accélère brutalement sur {Distance} vers l'avant pour atteindre {Cible}",
-                        "{Sujet} réalise une accélération instantanée de {Distance} pour rejoindre {Cible}",
-                        "{Sujet} fonce instantanément vers {Cible} sur {Distance} pour arriver au contact"
+                        "{Sujet} dash directement vers {Cible} sur {Distance}.",
+                        "{Sujet} effectue une accélération explosive vers {Cible}.",
+                        "{Sujet} dash à pleine vitesse vers {Cible}."
                     ]
                 },
 
+
                 diagonale: {
+
                     concept:
-                        "Dash extrêmement rapide effectué selon une trajectoire oblique.",
+                        "Dash explosif suivant une trajectoire diagonale.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "COTE",
                         "DISTANCE",
-                        "DIRECTION",
-                        "INTENTION",
-                        "CIBLE"
+                        "VITESSE",
+                        "INTENTION"
                     ],
 
+                    contraintes: {
+                        distance_max: 5,
+                        unite: "m"
+                    },
+
                     exemples: [
-                        "{Sujet} dash en diagonale vers sa gauche sur {Distance} pour rejoindre {Cible}",
-                        "{Sujet} effectue un dash diagonal vers sa droite pour atteindre {Cible}",
-                        "{Sujet} accélère brutalement en diagonale sur sa gauche vers {Cible}"
+                        "{Sujet} dash en diagonale vers la {Cote}.",
+                        "{Sujet} effectue un dash diagonal vers {Cible}."
                     ]
                 }
             }
@@ -949,34 +966,34 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         rush: {
+
             categorie: "deplacement",
             id: "RUSH",
 
             concept:
-                "Déplacement offensif ou agressif rapide vers une cible afin de réduire rapidement la distance qui les sépare.",
+                "Charge offensive rapide et continue destinée à réduire rapidement la distance avec une cible.",
 
             trajectoires: {
 
                 frontale: {
+
                     concept:
-                        "Progression rapide et agressive directement vers une cible.",
+                        "Charge directe vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "TRAJECTOIRE",
                         "CIBLE",
-                        "DISTANCE",
                         "DIRECTION",
+                        "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} rush vers {Cible} sur {Distance} pour l'atteindre",
-                        "{Sujet} fonce rapidement sur {Cible} pour arriver au contact",
-                        "{Sujet} se rue brutalement vers {Cible} pour réduire la distance",
-                        "{Sujet} se précipite sur {Cible} à grande vitesse pour l'atteindre",
-                        "{Sujet} charge vers {Cible} pour parvenir immédiatement au contact"
+                        "{Sujet} rush vers {Cible} pour {Intention}.",
+                        "{Sujet} charge directement {Cible}.",
+                        "{Sujet} fonce agressivement vers {Cible}."
                     ]
                 }
             }
@@ -988,94 +1005,85 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         saut: {
+
             categorie: "deplacement",
             id: "SAUT",
 
             concept:
-                "Déplacement durant lequel le sujet quitte temporairement le sol grâce à une impulsion verticale ou orientée.",
+                "Action permettant au sujet de quitter momentanément le sol grâce à une impulsion.",
 
             trajectoires: {
 
                 avant: {
-                    concept:
-                        "Saut orienté vers l'avant permettant de progresser dans cette direction pendant la phase aérienne.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} saute vers l'avant à {Hauteur} de hauteur pour atteindre {Cible}",
-                        "{Sujet} bondit vers {Cible} en trajectoire ascendante à {Hauteur} pour l'atteindre",
-                        "{Sujet} quitte le sol en sautant vers l'avant pour rejoindre {Cible}",
-                        "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}"
+                        "{Sujet} saute vers l'avant.",
+                        "{Sujet} effectue un saut vers {Cible}.",
+                        "{Sujet} bondit vers l'avant."
                     ]
                 },
+
 
                 arriere: {
-                    concept:
-                        "Saut orienté vers l'arrière permettant au sujet de s'éloigner ou de se repositionner.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} saute vers l'arrière à {Hauteur} pour s'éloigner de {Cible}",
-                        "{Sujet} bondit en arrière pour éviter {Cible} et se repositionner",
-                        "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}"
+                        "{Sujet} saute vers l'arrière.",
+                        "{Sujet} bondit en arrière."
                     ]
                 },
+
 
                 vertical: {
-                    concept:
-                        "Saut principalement orienté vers le haut avec une progression horizontale minimale.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} saute verticalement à {Hauteur} pour éviter {Cible}",
-                        "{Sujet} bondit directement vers le haut pour prendre de la hauteur",
-                        "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner"
+                        "{Sujet} saute verticalement.",
+                        "{Sujet} bondit vers le haut."
                     ]
                 },
 
+
                 laterale: {
-                    concept:
-                        "Saut effectué vers un côté par rapport à l'orientation du sujet.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "COTE",
                         "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} saute latéralement sur sa gauche pour éviter {Cible}",
-                        "{Sujet} bondit sur sa droite pour esquiver {Cible}",
-                        "{Sujet} saute vers son côté gauche pour se repositionner",
-                        "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position"
+                        "{Sujet} saute vers la gauche.",
+                        "{Sujet} bondit latéralement vers la droite."
                     ]
                 }
             }
@@ -1087,73 +1095,66 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         roulade: {
+
             categorie: "deplacement",
             id: "ROULADE",
 
             concept:
-                "Déplacement au sol réalisé par rotation du corps autour de lui-même.",
+                "Déplacement au sol réalisé par rotation successive du corps.",
 
             trajectoires: {
 
                 avant: {
-                    concept:
-                        "Roulade au sol orientée vers l'avant.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} effectue une roulade vers l'avant sur {Distance} pour se rapprocher de {Cible}",
-                        "{Sujet} roule au sol vers l'avant sur {Distance} pour éviter {Cible}",
-                        "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}"
+                        "{Sujet} fait une roulade vers l'avant.",
+                        "{Sujet} roule au sol vers {Cible}."
                     ]
                 },
+
 
                 arriere: {
-                    concept:
-                        "Roulade au sol orientée vers l'arrière.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} effectue une roulade arrière sur {Distance} pour s'éloigner de {Cible}",
-                        "{Sujet} roule vers l'arrière pour éviter l'attaque de {Cible}",
-                        "{Sujet} fait une roulade arrière pour se repositionner"
+                        "{Sujet} fait une roulade arrière.",
+                        "{Sujet} roule vers l'arrière."
                     ]
                 },
 
+
                 laterale: {
-                    concept:
-                        "Roulade au sol effectuée latéralement vers un côté.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "COTE",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} effectue une roulade latérale sur sa gauche sur {Distance} pour esquiver {Cible}",
-                        "{Sujet} effectue une roulade latérale sur sa droite sur {Distance} pour esquiver {Cible}",
-                        "{Sujet} roule au sol vers sa gauche pour éviter l'attaque",
-                        "{Sujet} réalise une roulade sur son côté droit pour se repositionner"
+                        "{Sujet} fait une roulade vers la gauche.",
+                        "{Sujet} roule latéralement vers la droite."
                     ]
                 }
             }
@@ -1165,75 +1166,73 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         vol: {
+
             categorie: "deplacement",
             id: "VOL",
 
             concept:
-                "Déplacement aérien continu d'un sujet sans contact permanent avec le sol.",
+                "Déplacement aérien continu sans contact permanent avec le sol.",
 
             trajectoires: {
 
                 frontale: {
-                    concept:
-                        "Déplacement aérien principalement direct vers l'avant ou vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "HAUTEUR",
+                        "DISTANCE",
+                        "VITESSE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} vole vers {Cible} à {Hauteur} de hauteur en trajectoire frontale pour l'atteindre",
-                        "{Sujet} s'envole vers {Cible} à {Hauteur} pour le rejoindre",
-                        "{Sujet} plane directement vers {Cible} pour arriver au contact"
+                        "{Sujet} vole vers {Cible}.",
+                        "{Sujet} se déplace dans les airs vers {Cible}."
                     ]
                 },
+
 
                 diagonale: {
-                    concept:
-                        "Déplacement aérien oblique vers un côté.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "COTE",
                         "HAUTEUR",
+                        "DISTANCE",
+                        "VITESSE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} vole en diagonale sur sa gauche vers {Cible} à {Hauteur}",
-                        "{Sujet} vole en diagonale sur sa droite vers {Cible} à {Hauteur}",
-                        "{Sujet} s'élève en diagonale vers sa gauche pour se positionner au-dessus de {Cible}",
-                        "{Sujet} plane obliquement vers sa droite à {Hauteur} pour rejoindre {Cible}"
+                        "{Sujet} vole en diagonale vers {Cible}.",
+                        "{Sujet} traverse les airs en diagonale."
                     ]
                 },
 
+
                 laterale: {
-                    concept:
-                        "Déplacement aérien principalement latéral vers un côté.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "DIRECTION",
                         "TRAJECTOIRE",
+                        "DIRECTION",
                         "COTE",
                         "HAUTEUR",
+                        "DISTANCE",
+                        "VITESSE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} vole latéralement sur sa gauche à {Hauteur}",
-                        "{Sujet} vole latéralement sur sa droite à {Hauteur}",
-                        "{Sujet} se déplace dans les airs vers sa gauche pour éviter {Cible}",
-                        "{Sujet} plane vers son côté droit pour se repositionner"
+                        "{Sujet} vole latéralement vers la droite.",
+                        "{Sujet} se déplace dans les airs vers la gauche."
                     ]
                 }
             }
@@ -1244,18 +1243,17 @@ const NEO_ACTION_MODELS = {
         // PIVOT
         // ==========================================================
 
-        pirouette_pivot: {
+        pivot: {
+
             categorie: "deplacement",
             id: "PIVOT",
 
             concept:
-                "Rotation du corps autour d'un axe ou d'un point d'appui afin de changer son orientation ou sa position.",
+                "Rotation du corps au sol autour d'un appui afin de modifier son orientation.",
 
             trajectoires: {
 
                 droite: {
-                    concept:
-                        "Rotation du corps vers le côté droit.",
 
                     structure: [
                         "SUJET",
@@ -1266,15 +1264,13 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} pivote vers sa droite pour faire face à {Cible}",
-                        "{Sujet} effectue un pivot sur sa droite pour changer d'orientation",
-                        "{Sujet} tourne son corps vers la droite pour se placer face à {Cible}"
+                        "{Sujet} pivote vers la droite.",
+                        "{Sujet} effectue un pivot à droite."
                     ]
                 },
 
+
                 gauche: {
-                    concept:
-                        "Rotation du corps vers le côté gauche.",
 
                     structure: [
                         "SUJET",
@@ -1285,9 +1281,8 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} pivote vers sa gauche pour faire face à {Cible}",
-                        "{Sujet} effectue un pivot sur sa gauche pour changer d'orientation",
-                        "{Sujet} tourne son corps vers la gauche pour se placer face à {Cible}"
+                        "{Sujet} pivote vers la gauche.",
+                        "{Sujet} effectue un pivot à gauche."
                     ]
                 }
             }
@@ -1299,17 +1294,16 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         vrille: {
+
             categorie: "deplacement",
             id: "VRILLE",
 
             concept:
-                "Rotation répétée du corps autour de son propre axe pendant un déplacement ou une phase aérienne.",
+                "Rotation du corps autour de son axe longitudinal, généralement pendant un déplacement ou une phase aérienne.",
 
             trajectoires: {
 
                 rotation: {
-                    concept:
-                        "Rotation du corps autour de son axe avec une ou plusieurs rotations successives.",
 
                     structure: [
                         "SUJET",
@@ -1320,10 +1314,8 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                        "{Sujet} effectue une vrille vers la droite dans les airs pour éviter {Cible}",
-                        "{Sujet} vrille sur lui-même en avançant pour esquiver l'attaque de {Cible}",
-                        "{Sujet} réalise une vrille aérienne vers la gauche pour changer de trajectoire",
-                        "{Sujet} tourne sur lui-même plusieurs fois pour éviter {Cible}"
+                        "{Sujet} effectue une vrille.",
+                        "{Sujet} tourne sur lui-même pendant son déplacement."
                     ]
                 }
             }
@@ -1335,50 +1327,89 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         salto: {
+
             categorie: "deplacement",
             id: "SALTO",
 
             concept:
-                "Rotation aérienne du corps autour d'un axe horizontal permettant d'effectuer une rotation complète pendant un saut.",
+                "Rotation aérienne du corps autour d'un axe horizontal.",
 
             trajectoires: {
 
                 avant: {
-                    concept:
-                        "Rotation aérienne vers l'avant.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "TRAJECTOIRE",
                         "DIRECTION",
+                        "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} fait un salto avant pour atterrir derrière {Cible}",
-                        "{Sujet} effectue un salto vers l'avant pour éviter {Cible}",
-                        "{Sujet} réalise un salto avant pour se repositionner",
-                        "{Sujet} effectue une rotation aérienne vers l'avant pour passer au-dessus de {Cible}"
+                        "{Sujet} effectue un salto avant.",
+                        "{Sujet} réalise une rotation aérienne vers l'avant."
                     ]
                 },
 
+
                 arriere: {
-                    concept:
-                        "Rotation aérienne vers l'arrière.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
                         "TRAJECTOIRE",
                         "DIRECTION",
+                        "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} fait un salto arrière pour éviter {Cible}",
-                        "{Sujet} effectue un salto vers l'arrière pour se repositionner",
-                        "{Sujet} réalise une rotation aérienne arrière pour s'éloigner de {Cible}"
+                        "{Sujet} effectue un salto arrière.",
+                        "{Sujet} réalise une rotation aérienne vers l'arrière."
+                    ]
+                }
+            }
+        }
+    },
+
+
+    // ============================================================
+    // 👊 ATTAQUES — MAINS / BRAS / TÊTE
+    // ============================================================
+
+    attaque: {
+
+        // ==========================================================
+        // DIRECT
+        // ==========================================================
+
+        direct: {
+
+            categorie: "attaque",
+            id: "DIRECT",
+
+            concept:
+                "Frappe de poing directe exécutée en ligne relativement rectiligne vers la cible.",
+
+            trajectoires: {
+
+                frontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe un direct du {Membre} visant le {Zone} de {Cible}.",
+                        "{Sujet} porte un direct du {Membre} au visage de {Cible}.",
+                        "{Sujet} lance un direct vers {Cible}."
                     ]
                 }
             }
@@ -1386,60 +1417,2226 @@ const NEO_ACTION_MODELS = {
 
 
         // ==========================================================
-        // FLIP
+        // CROSS
         // ==========================================================
 
-        flip: {
-            categorie: "deplacement",
-            id: "FLIP",
+        cross: {
+
+            categorie: "attaque",
+            id: "CROSS",
 
             concept:
-                "Mouvement acrobatique aérien impliquant une rotation du corps afin de changer de position ou de franchir un obstacle.",
+                "Frappe de poing directe généralement exécutée avec le bras arrière, traversant la ligne centrale du corps.",
 
             trajectoires: {
 
-                avant: {
-                    concept:
-                        "Flip réalisé vers l'avant.",
+                frontale: {
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
-                        "INTENTION"
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
                     ],
 
                     exemples: [
-                        "{Sujet} fait un flip avant pour passer au-dessus de {Cible}",
-                        "{Sujet} effectue un flip vers l'avant pour esquiver {Cible}",
-                        "{Sujet} réalise un flip avant pour franchir l'obstacle",
-                        "{Sujet} effectue une rotation avant pour retomber derrière {Cible}"
+                        "{Sujet} porte un cross du {Membre} vers le visage de {Cible}.",
+                        "{Sujet} frappe un cross du droit visant les côtes de {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // JAB
+        // ==========================================================
+
+        jab: {
+
+            categorie: "attaque",
+            id: "JAB",
+
+            concept:
+                "Frappe de poing directe, rapide et généralement exécutée avec le membre avant.",
+
+            trajectoires: {
+
+                frontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un jab du {Membre} vers le visage de {Cible}.",
+                        "{Sujet} pique un jab au visage de {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // CROCHET
+        // ==========================================================
+
+        crochet: {
+
+            categorie: "attaque",
+            id: "CROCHET",
+
+            concept:
+                "Frappe circulaire du poing dont la trajectoire contourne partiellement l'axe central.",
+
+            trajectoires: {
+
+                horizontal: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} fait un crochet du {Membre} vers la {Direction} visant {Zone} de {Cible}.",
+                        "{Sujet} lance un crochet horizontal du droit vers les côtes de {Cible}."
                     ]
                 },
 
-                arriere: {
-                    concept:
-                        "Flip réalisé vers l'arrière.",
+
+                montant: {
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
-                        "INTENTION"
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
                     ],
 
                     exemples: [
-                        "{Sujet} fait un flip arrière pour retomber derrière {Cible}",
-                        "{Sujet} effectue un flip vers l'arrière pour éviter {Cible}",
-                        "{Sujet} réalise un flip arrière pour se repositionner"
+                        "{Sujet} lance un crochet montant vers {Cible}.",
+                        "{Sujet} frappe en crochet montant du {Membre}."
+                    ]
+                },
+
+
+                descendant: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un crochet descendant.",
+                        "{Sujet} frappe en crochet descendant vers {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // UPPERCUT
+        // ==========================================================
+
+        uppercut: {
+
+            categorie: "attaque",
+            id: "UPPERCUT",
+
+            concept:
+                "Frappe de poing ascendante visant généralement une cible située au-dessus de la ligne d'impact.",
+
+            trajectoires: {
+
+                ascendant: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} porte un uppercut du {Membre} au menton de {Cible}.",
+                        "{Sujet} remonte son poing sous le menton de {Cible}."
+                    ]
+                },
+
+
+                diagonal: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} porte un uppercut diagonal vers {Cible}.",
+                        "{Sujet} frappe en uppercut diagonal."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // OVERHAND
+        // ==========================================================
+
+        overhand: {
+
+            categorie: "attaque",
+            id: "OVERHAND",
+
+            concept:
+                "Frappe de poing arquée passant au-dessus de la garde avant de redescendre vers la cible.",
+
+            trajectoires: {
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un overhand du {Membre} vers le visage de {Cible}.",
+                        "{Sujet} frappe en overhand descendant."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // BACKFIST
+        // ==========================================================
+
+        backfist: {
+
+            categorie: "attaque",
+            id: "BACKFIST",
+
+            concept:
+                "Frappe utilisant le dos du poing avec un mouvement de rotation ou de balayage.",
+
+            trajectoires: {
+
+                horizontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe avec un backfist du {Membre}.",
+                        "{Sujet} effectue un backfist horizontal vers {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // HAMMERFIST
+        // ==========================================================
+
+        hammerfist: {
+
+            categorie: "attaque",
+            id: "HAMMERFIST",
+
+            concept:
+                "Frappe réalisée avec le côté inférieur ou externe du poing fermé.",
+
+            trajectoires: {
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat un hammerfist sur {Cible}.",
+                        "{Sujet} frappe avec le poing en marteau."
+                    ]
+                },
+
+
+                laterale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe latéralement avec un hammerfist.",
+                        "{Sujet} lance un hammerfist vers la {Direction}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // PAUME
+        // ==========================================================
+
+        paume: {
+
+            categorie: "attaque",
+            id: "PAUME",
+
+            concept:
+                "Frappe réalisée avec la paume ou le talon de la main.",
+
+            trajectoires: {
+
+                frontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe avec la paume vers le visage de {Cible}.",
+                        "{Sujet} pousse violemment sa paume vers {Cible}."
+                    ]
+                },
+
+
+                ascendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte sa paume sous le menton de {Cible}.",
+                        "{Sujet} frappe avec une paume ascendante."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // TRANCHANT
+        // ==========================================================
+
+        tranchant: {
+
+            categorie: "attaque",
+            id: "TRANCHANT",
+
+            concept:
+                "Frappe réalisée avec le tranchant de la main.",
+
+            trajectoires: {
+
+                horizontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe avec le tranchant de la main vers {Cible}.",
+                        "{Sujet} porte une frappe horizontale du tranchant."
+                    ]
+                },
+
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat le tranchant de sa main sur {Cible}.",
+                        "{Sujet} frappe de haut en bas avec le tranchant."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // COUDE
+        // ==========================================================
+
+        coude: {
+
+            categorie: "attaque",
+            id: "COUDE",
+
+            concept:
+                "Frappe effectuée avec le coude.",
+
+            trajectoires: {
+
+                horizontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe avec son coude vers {Cible}.",
+                        "{Sujet} lance un coude horizontal vers la tempe de {Cible}."
+                    ]
+                },
+
+
+                ascendant: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte son coude vers le menton de {Cible}.",
+                        "{Sujet} porte un coude ascendant."
+                    ]
+                },
+
+
+                descendant: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat son coude sur {Cible}.",
+                        "{Sujet} frappe avec un coude descendant."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // COUP DE TÊTE
+        // ==========================================================
+
+        coup_de_tete: {
+
+            categorie: "attaque",
+            id: "COUP_DE_TETE",
+
+            concept:
+                "Frappe utilisant la tête comme partie du corps d'impact.",
+
+            trajectoires: {
+
+                frontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} donne un coup de tête vers le visage de {Cible}.",
+                        "{Sujet} percute {Cible} avec son front."
+                    ]
+                },
+
+
+                laterale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} donne un coup de tête latéral.",
+                        "{Sujet} percute {Cible} avec sa tête sur le côté."
+                    ]
+                },
+
+
+                ascendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte la tête vers le visage de {Cible}.",
+                        "{Sujet} porte un coup de tête ascendant."
                     ]
                 }
             }
         }
+    },
+
+
+    // ============================================================
+    // 🦵 FRAPPES — JAMBES
+    // ============================================================
+
+    frappe_jambe: {
+
+        // ==========================================================
+        // FRONT KICK
+        // ==========================================================
+
+        front_kick: {
+
+            categorie: "frappe_jambe",
+            id: "FRONT_KICK",
+
+            concept:
+                "Coup de pied direct utilisant principalement la poussée de la jambe vers l'avant.",
+
+            trajectoires: {
+
+                frontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} donne un front kick du {Membre} au ventre de {Cible}.",
+                        "{Sujet} frappe directement avec son pied vers {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // LOW KICK
+        // ==========================================================
+
+        low_kick: {
+
+            categorie: "frappe_jambe",
+            id: "LOW_KICK",
+
+            concept:
+                "Coup de pied circulaire ou latéral visant principalement la partie basse du corps.",
+
+            trajectoires: {
+
+                circulaire: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} donne un low kick du {Membre} à la cuisse de {Cible}.",
+                        "{Sujet} frappe la jambe de {Cible} avec un low kick."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // ROUNDHOUSE KICK
+        // ==========================================================
+
+        roundhouse_kick: {
+
+            categorie: "frappe_jambe",
+            id: "ROUNDHOUSE_KICK",
+
+            concept:
+                "Coup de pied circulaire utilisant une rotation de la hanche et de la jambe.",
+
+            trajectoires: {
+
+                circulaire: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un roundhouse kick du {Membre} vers {Cible}.",
+                        "{Sujet} frappe circulairement les côtes de {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // SIDE KICK
+        // ==========================================================
+
+        side_kick: {
+
+            categorie: "frappe_jambe",
+            id: "SIDE_KICK",
+
+            concept:
+                "Coup de pied effectué latéralement avec extension de la jambe.",
+
+            trajectoires: {
+
+                laterale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} donne un side kick vers les côtes de {Cible}.",
+                        "{Sujet} frappe latéralement avec son pied."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // AXE KICK
+        // ==========================================================
+
+        axe_kick: {
+
+            categorie: "frappe_jambe",
+            id: "AXE_KICK",
+
+            concept:
+                "Coup de pied descendant utilisant une trajectoire montante puis descendante.",
+
+            trajectoires: {
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lève sa jambe puis l'abat sur {Cible}.",
+                        "{Sujet} porte un axe kick vers la tête de {Cible}."
+                         ]
+                }
+            }
+        }
+    },
+
+    // ============================================================
+    // ⚔️ FRAPPES AVEC ARMES
+    // ============================================================
+
+    arme: {
+
+        // ==========================================================
+        // KATANA
+        // ==========================================================
+
+        katana: {
+
+            categorie: "arme",
+            id: "KATANA",
+
+            concept:
+                "Action offensive réalisée avec une lame de type katana, permettant des frappes de coupe selon différentes trajectoires.",
+
+            trajectoires: {
+
+                // --------------------------------------------------
+                // FRAPPE FRONTALE
+                // --------------------------------------------------
+
+                frontale: {
+
+                    concept:
+                        "Frappe de coupe dirigée directement vers l'avant.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe frontalement avec son katana vers {Cible}.",
+                        "{Sujet} porte une coupe frontale vers {Zone} de {Cible}.",
+                        "{Sujet} dirige son katana droit vers {Cible}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // DESCENDANTE
+                // --------------------------------------------------
+
+                descendante: {
+
+                    concept:
+                        "Frappe de coupe dirigée de haut en bas.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat son katana verticalement sur {Cible}.",
+                        "{Sujet} porte une coupe descendante vers {Cible}.",
+                        "{Sujet} frappe de haut en bas avec son katana."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // ASCENDANTE
+                // --------------------------------------------------
+
+                ascendante: {
+
+                    concept:
+                        "Frappe de coupe dirigée de bas en haut.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte son katana vers {Cible}.",
+                        "{Sujet} porte une coupe ascendante.",
+                        "{Sujet} frappe de bas en haut avec son katana."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // OBLIQUE
+                // --------------------------------------------------
+
+                oblique: {
+
+                    concept:
+                        "Frappe de coupe suivant un angle diagonal entre une direction verticale et horizontale.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} porte une coupe oblique vers {Cible}.",
+                        "{Sujet} frappe diagonalement avec son katana.",
+                        "{Sujet} donne une coupe oblique vers la {Direction}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // REVERS
+                // --------------------------------------------------
+
+                revers: {
+
+                    concept:
+                        "Frappe exécutée dans le sens opposé au mouvement de coupe initial, généralement après une inversion de direction de la lame.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue un revers avec son katana vers {Cible}.",
+                        "{Sujet} revient avec une coupe en revers.",
+                        "{Sujet} frappe en revers vers la {Direction}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // CIRCULAIRE
+                // --------------------------------------------------
+
+                circulaire: {
+
+                    concept:
+                        "Frappe de coupe suivant un mouvement courbe autour du corps ou d'un axe.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue une coupe circulaire avec son katana.",
+                        "{Sujet} fait tournoyer sa lame vers {Cible}.",
+                        "{Sujet} frappe {Cible} avec une coupe circulaire."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // HORIZONTALE
+                // --------------------------------------------------
+
+                horizontale: {
+
+                    concept:
+                        "Frappe de coupe suivant principalement un axe horizontal.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue une coupe horizontale vers {Cible}.",
+                        "{Sujet} tranche horizontalement vers {Cible}.",
+                        "{Sujet} balaie avec son katana vers la {Direction}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // VERTICALE
+                // --------------------------------------------------
+
+                verticale: {
+
+                    concept:
+                        "Frappe de coupe suivant principalement un axe vertical.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} porte une coupe verticale sur {Cible}.",
+                        "{Sujet} tranche verticalement vers {Cible}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // ESTOC
+                // --------------------------------------------------
+
+                estoc: {
+
+                    concept:
+                        "Attaque utilisant principalement la pointe de la lame dans un mouvement de poussée directe.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} porte une estocade avec son katana vers {Cible}.",
+                        "{Sujet} plante la pointe de son katana vers {Cible}.",
+                        "{Sujet} pousse son katana directement vers {Cible}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // PIQUÉ
+                // --------------------------------------------------
+
+                pique: {
+
+                    concept:
+                        "Attaque descendante utilisant la pointe de la lame.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} pique avec la pointe de son katana vers {Cible}.",
+                        "{Sujet} plonge la lame vers {Cible}."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COUPE ASCENDANTE OBLIQUE
+                // --------------------------------------------------
+
+                gyaku_kesa: {
+
+                    concept:
+                        "Coupe ascendante oblique traversant le corps selon une diagonale.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte son katana en diagonale vers {Cible}.",
+                        "{Sujet} effectue une coupe ascendante oblique."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COUPE DESCENDANTE OBLIQUE
+                // --------------------------------------------------
+
+                kesa: {
+
+                    concept:
+                        "Coupe descendante oblique traversant le corps selon une diagonale.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat son katana en diagonale vers {Cible}.",
+                        "{Sujet} effectue une coupe descendante oblique."
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COUPE EN ROTATION
+                // --------------------------------------------------
+
+                rotation: {
+
+                    concept:
+                        "Coupe réalisée pendant une rotation du corps ou un changement circulaire de position.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "TRAJECTOIRE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} tourne sur lui-même et frappe avec son katana.",
+                        "{Sujet} effectue une coupe en rotation vers {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // COUTEAU
+        // ==========================================================
+
+        couteau: {
+
+            categorie: "arme",
+            id: "COUTEAU",
+
+            concept:
+                "Arme courte permettant principalement des frappes d'estoc, de coupe et de revers.",
+
+            trajectoires: {
+
+                estoc: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} donne un coup de couteau direct vers {Cible}.",
+                        "{Sujet} porte une estocade vers {Zone} de {Cible}."
+                    ]
+                },
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe de haut en bas avec son couteau."
+                    ]
+                },
+
+                ascendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe de bas en haut avec son couteau."
+                    ]
+                },
+
+                horizontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue une coupe horizontale avec son couteau."
+                    ]
+                },
+
+                revers: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe en revers avec son couteau."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // BÂTON / MATRAQUE
+        // ==========================================================
+
+        baton: {
+
+            categorie: "arme",
+            id: "BATON",
+
+            concept:
+                "Arme contondante allongée permettant des frappes directes, circulaires et descendantes.",
+
+            trajectoires: {
+
+                frontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} frappe frontalement avec son bâton vers {Cible}."
+                    ]
+                },
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat son bâton sur {Cible}."
+                    ]
+                },
+
+                ascendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte son bâton vers {Cible}."
+                    ]
+                },
+
+                horizontale: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} balaie horizontalement avec son bâton vers {Cible}."
+                    ]
+                },
+
+                circulaire: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} fait tournoyer son bâton vers {Cible}."
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // LANCE
+        // ==========================================================
+
+        lance: {
+
+            categorie: "arme",
+            id: "LANCE",
+
+            concept:
+                "Arme d'hast permettant principalement des attaques d'estoc et des frappes avec le manche.",
+
+            trajectoires: {
+
+                estoc: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DISTANCE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} pousse sa lance vers {Cible}.",
+                        "{Sujet} porte une estocade avec sa lance."
+                    ]
+                },
+
+                descendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} abat sa lance vers {Cible}."
+                    ]
+                },
+
+                ascendante: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} remonte sa lance vers {Cible}."
+                    ]
+                },
+
+                balayage: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} balaie avec le manche de sa lance vers {Cible}."
+                         ]
+                }
+            }
+        }
+    },
+    
+// ==========================================================
+// 🛡️ DEFENSE
+// ==========================================================
+
+defense: {
+
+    
+// ESQUIVE
+// ======================================================
+
+esquive: {
+
+    categorie: "defense",
+    id: "ESQUIVE",
+
+    concept:
+        "Action défensive consistant à éviter une attaque en déplaçant son corps hors de sa trajectoire.",
+
+    trajectoires: {
+
+        // ==================================================
+        // BAS
+        // ==================================================
+
+        bas: {
+
+            concept:
+                "Abaissement rapide du corps pour laisser une attaque passer au-dessus.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} se baisse rapidement pour éviter le coup de {Cible}.",
+                "{Sujet} abaisse rapidement son buste pour laisser passer le poing de {Cible}.",
+                "{Sujet} fléchit rapidement les genoux pour passer sous le coup de {Cible}."
+            ]
+        },
+
+        // ==================================================
+        // ACCROUPI
+        // ==================================================
+
+        accroupi: {
+
+            concept:
+                "Abaissement important du centre de gravité en position accroupie afin d'éviter une attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} s'accroupit rapidement pour éviter le crochet de {Cible}.",
+                "{Sujet} descend rapidement en position accroupie pour esquiver le coup de {Cible}.",
+                "{Sujet} se baisse rapidement en position accroupie pour laisser passer l'attaque."
+            ]
+        },
+
+        // ==================================================
+        // LATÉRALE
+        // ==================================================
+
+        laterale: {
+
+            concept:
+                "Déplacement latéral rapide du corps afin de sortir de la trajectoire d'une attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} se décale rapidement vers la gauche pour éviter le poing de {Cible}.",
+                "{Sujet} esquive rapidement vers la droite le coup de {Cible}.",
+                "{Sujet} se déplace rapidement sur le côté gauche pour sortir de la trajectoire du coup."
+            ]
+        },
+
+        // ==================================================
+        // RECUL
+        // ==================================================
+
+        recul: {
+
+            concept:
+                "Déplacement rapide vers l'arrière afin d'augmenter la distance et sortir de la portée de l'attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "DISTANCE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} recule rapidement de 2 mètres pour éviter le direct de {Cible}.",
+                "{Sujet} fait rapidement deux pas en arrière pour laisser passer le coup de {Cible}.",
+                "{Sujet} recule rapidement hors de portée de {Cible}."
+            ]
+        },
+
+        // ==================================================
+        // AVANCE
+        // ==================================================
+
+        avance: {
+
+            concept:
+                "Déplacement rapide vers l'avant permettant de sortir de la trajectoire d'une attaque ou de passer à l'intérieur de celle-ci.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} avance rapidement vers {Cible} pour passer sous son crochet.",
+                "{Sujet} entre rapidement vers l'avant pour éviter le poing de {Cible}.",
+                "{Sujet} avance rapidement à l'intérieur de la trajectoire du coup."
+            ]
+        },
+
+        // ==================================================
+        // PIVOT
+        // ==================================================
+
+        pivot: {
+
+            concept:
+                "Rotation rapide du corps autour d'un appui afin de sortir de la trajectoire d'une attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} pivote rapidement vers la gauche pour laisser passer le poing de {Cible}.",
+                "{Sujet} pivote rapidement vers la droite pour éviter le coup de {Cible}.",
+                "{Sujet} tourne rapidement sur son appui pour sortir de la trajectoire de l'attaque."
+            ]
+        },
+
+        // ==================================================
+        // PENCHÉE
+        // ==================================================
+
+        penche: {
+
+            concept:
+                "Inclinaison rapide du buste ou de la tête afin d'éviter une attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} penche rapidement la tête vers la gauche pour éviter le poing de {Cible}.",
+                "{Sujet} incline rapidement son buste vers l'arrière pour esquiver le coup.",
+                "{Sujet} penche rapidement son corps sur le côté pour éviter l'attaque."
+            ]
+        },
+
+        // ==================================================
+        // SAUT
+        // ==================================================
+
+        saut: {
+
+            concept:
+                "Élévation rapide du corps permettant d'éviter une attaque passant au niveau du sol ou des jambes.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "HAUTEUR",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} saute rapidement pour éviter le balayage de {Cible}.",
+                "{Sujet} bondit rapidement vers le haut pour éviter le coup de pied.",
+                "{Sujet} saute rapidement de 1 mètre pour laisser passer l'attaque."
+            ]
+        },
+
+        // ==================================================
+        // ROULADE
+        // ==================================================
+
+        roulade: {
+
+            concept:
+                "Rotation rapide du corps au sol permettant de sortir de la trajectoire d'une attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} fait rapidement une roulade vers la gauche pour éviter l'attaque.",
+                "{Sujet} roule rapidement vers l'avant sous le coup de {Cible}.",
+                "{Sujet} effectue rapidement une roulade vers l'arrière pour esquiver."
+            ]
+        },
+
+        // ==================================================
+        // PASSAGE
+        // ==================================================
+
+        passage: {
+
+            concept:
+                "Déplacement rapide permettant de passer autour ou à proximité de l'adversaire en sortant de la trajectoire de son attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "VITESSE",
+                "DIRECTION",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} passe rapidement sur le côté de {Cible} pour éviter son attaque.",
+                "{Sujet} se glisse rapidement derrière {Cible} en sortant de la trajectoire du coup.",
+                "{Sujet} passe rapidement sur la droite de {Cible} pour esquiver son attaque."
+            ]
+        }
     }
-};
+}, 
+                
+
+    // ======================================================
+    // GARDE
+    // ======================================================
+
+    garde: {
+        categorie: "defense",
+        id: "GARDE",
+
+        concept:
+            "Posture défensive destinée à protéger une ou plusieurs zones du corps.",
+
+        trajectoires: {
+
+            haute: {
+                concept: "Garde protégeant principalement la tête et le haut du corps.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "ZONE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} lève sa garde pour protéger son visage.",
+                    "{Sujet} place ses bras en garde haute."
+                ]
+            },
+
+            basse: {
+                concept: "Garde protégeant principalement le bas du corps.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "ZONE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} adopte une garde basse pour protéger ses jambes.",
+                    "{Sujet} descend sa garde pour protéger son abdomen."
+                ]
+            },
+
+            centrale: {
+                concept: "Garde centrée devant le corps pour protéger les zones vitales.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "ZONE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} place ses bras devant son corps.",
+                    "{Sujet} adopte une garde centrale pour protéger son torse."
+                ]
+            },
+
+            complete: {
+                concept: "Posture défensive couvrant plusieurs zones simultanément.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MANIERE",
+                    "ZONE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} se recroqueville pour protéger tout son corps.",
+                    "{Sujet} adopte une garde complète pour encaisser l'attaque."
+                ]
+            }
+        }
+    },
+
+
+    // ======================================================
+    // BLOCAGE
+    // ======================================================
+
+    blocage: {
+        categorie: "defense",
+        id: "BLOCAGE",
+
+        concept:
+            "Action défensive consistant à utiliser une partie du corps pour arrêter ou absorber directement une attaque.",
+
+        trajectoires: {
+
+            bras: {
+                concept:
+                    "Blocage effectué avec un membre supérieur.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} bloque le poing de {Cible} avec son avant-bras droit.",
+                    "{Sujet} interpose sa paume gauche devant le coup de {Cible}.",
+                    "{Sujet} bloque le direct avec son coude gauche."
+                ]
+            },
+
+            jambes: {
+                concept:
+                    "Blocage effectué avec un membre inférieur.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} bloque le coup de pied de {Cible} avec son tibia droit.",
+                    "{Sujet} lève sa jambe gauche pour bloquer l'attaque.",
+                    "{Sujet} arrête le coup avec la plante de son pied droit."
+                ]
+            },
+
+            corps: {
+                concept:
+                    "Blocage effectué directement avec une partie du corps.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} bloque le coup avec son épaule.",
+                    "{Sujet} absorbe l'impact avec son torse.",
+                    "{Sujet} encaisse le coup avec son flanc."
+                ]
+            }
+        }
+    },
+
+
+    // ======================================================
+    // PARADE
+    // ======================================================
+
+    parade: {
+        categorie: "defense",
+        id: "PARADE",
+
+        concept:
+            "Action défensive consistant à intercepter activement une attaque avec une partie du corps.",
+
+        trajectoires: {
+
+            intercepter: {
+                concept:
+                    "Interception directe de l'attaque avant qu'elle atteigne sa cible.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} intercepte le poing de {Cible} avec sa paume droite.",
+                    "{Sujet} arrête le coup avec son avant-bras gauche."
+                ]
+            },
+
+            exterieur: {
+                concept:
+                    "Parade dirigeant l'attaque vers l'extérieur du corps.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "DIRECTION",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} repousse le poing de {Cible} vers l'extérieur avec sa paume droite.",
+                    "{Sujet} détourne le bras de {Cible} vers la droite avec son avant-bras gauche."
+                ]
+            },
+
+            interieur: {
+                concept:
+                    "Parade dirigeant l'attaque vers l'intérieur du corps ou vers l'axe central.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "DIRECTION",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} ramène le poing de {Cible} vers l'intérieur avec sa paume gauche.",
+                    "{Sujet} dévie le bras de {Cible} vers son axe avec son avant-bras droit."
+                ]
+            },
+
+            bas: {
+                concept:
+                    "Parade dirigeant l'attaque vers le bas.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "DIRECTION",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} rabat le poing de {Cible} vers le bas avec sa paume droite.",
+                    "{Sujet} pousse le bras de {Cible} vers le bas avec son avant-bras gauche."
+                ]
+            },
+
+            haut: {
+                concept:
+                    "Parade dirigeant l'attaque vers le haut.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "DIRECTION",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} dévie le bras de {Cible} vers le haut avec sa paume droite.",
+                    "{Sujet} relève le poing de {Cible} avec son avant-bras gauche."
+                ]
+            }
+        }
+    },
+
+
+    // ======================================================
+// DÉVIATION
+// ======================================================
+
+deviation: {
+
+    categorie: "defense",
+    id: "DEVIATION",
+
+    concept:
+        "Action défensive consistant à modifier volontairement la trajectoire d'un membre, d'une arme ou d'une attaque adverse à l'aide d'une partie du corps.",
+
+    // ==================================================
+    // MEMBRES POUVANT ÊTRE UTILISÉS
+    // ==================================================
+
+    membres: {
+
+        superieurs: [
+            "main",
+            "paume",
+            "doigts",
+            "poignet",
+            "avant_bras",
+            "coude",
+            "epaule"
+        ],
+
+        inferieurs: [
+            "cuisse",
+            "genou",
+            "tibia",
+            "cheville",
+            "pied",
+            "talon",
+            "plante",
+            "semelle"
+        ]
+    },
+
+    trajectoires: {
+
+        // ==================================================
+        // LATÉRALE
+        // ==================================================
+
+        laterale: {
+
+            concept:
+                "Déviation d'une attaque vers un côté.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie le coude de {Cible} vers la gauche avec sa paume droite.",
+                "{Sujet} dévie le poing de {Cible} vers la droite avec son avant-bras gauche.",
+                "{Sujet} dévie le coup de pied de {Cible} vers la gauche avec son tibia droit.",
+                "{Sujet} dévie la jambe de {Cible} vers la droite avec la semelle de son pied gauche.",
+                "{Sujet} dévie le genou de {Cible} vers la gauche avec son genou droit.",
+                "{Sujet} dévie le bras de {Cible} vers l'extérieur avec son coude gauche."
+            ]
+        },
+
+        // ==================================================
+        // CIRCULAIRE
+        // ==================================================
+
+        circulaire: {
+
+            concept:
+                "Déviation suivant une trajectoire circulaire afin de modifier progressivement la trajectoire de l'attaque adverse.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie le poignet de {Cible} dans un mouvement circulaire avec sa paume droite.",
+                "{Sujet} accompagne le bras de {Cible} dans un mouvement circulaire avec son avant-bras gauche.",
+                "{Sujet} dévie la jambe de {Cible} dans un mouvement circulaire avec son tibia droit.",
+                "{Sujet} guide le pied de {Cible} dans une trajectoire circulaire avec la semelle de son pied gauche."
+            ]
+        },
+
+        // ==================================================
+        // VERS LE BAS
+        // ==================================================
+
+        bas: {
+
+            concept:
+                "Déviation dirigeant l'attaque adverse vers le bas.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie le poing de {Cible} vers le bas avec sa paume droite.",
+                "{Sujet} rabat le bras de {Cible} vers le bas avec son avant-bras gauche.",
+                "{Sujet} dévie le coup de pied de {Cible} vers le bas avec la semelle de son pied droit.",
+                "{Sujet} repousse la jambe de {Cible} vers le bas avec son tibia gauche.",
+                "{Sujet} pousse le genou de {Cible} vers le bas avec son genou droit."
+            ]
+        },
+
+        // ==================================================
+        // VERS LE HAUT
+        // ==================================================
+
+        haut: {
+
+            concept:
+                "Déviation dirigeant l'attaque adverse vers le haut.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie le poing de {Cible} vers le haut avec sa paume droite.",
+                "{Sujet} relève le bras de {Cible} avec son avant-bras gauche.",
+                "{Sujet} dévie le coup de pied de {Cible} vers le haut avec la semelle de son pied droit.",
+                "{Sujet} soulève la jambe de {Cible} avec son tibia gauche.",
+                "{Sujet} repousse le genou de {Cible} vers le haut avec son genou droit."
+            ]
+        }
+    }
+}, 
+            
+    // ======================================================
+    // SAISIE
+    // ======================================================
+
+    saisie: {
+        categorie: "defense",
+        id: "SAISIE",
+
+        concept:
+            "Action défensive consistant à saisir une partie du corps ou une arme adverse afin d'en contrôler le mouvement.",
+
+        trajectoires: {
+
+            bras: {
+                concept:
+                    "Capture et contrôle du bras adverse.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} saisit le poignet de {Cible} avec sa main droite.",
+                    "{Sujet} attrape l'avant-bras de {Cible} avec ses deux mains."
+                ]
+            },
+
+            poignet: {
+                concept:
+                    "Capture directe du poignet adverse.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} capture le poignet de {Cible} avec sa main gauche.",
+                    "{Sujet} verrouille le poignet de {Cible} avec ses deux mains."
+                ]
+            },
+
+            jambe: {
+                concept:
+                    "Capture d'une jambe adverse afin d'en limiter le mouvement.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} saisit la cheville de {Cible} avec ses deux mains.",
+                    "{Sujet} attrape la jambe de {Cible} sous le genou."
+                ]
+            },
+
+            arme: {
+                concept:
+                    "Capture ou contrôle d'une arme adverse.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} saisit le poignet armé de {Cible}.",
+                    "{Sujet} attrape le manche de l'arme de {Cible} avec sa main droite."
+                ]
+            }
+        }
+    }
+}
+                                                                                                
                     
                                 
 /* ============================================================================
