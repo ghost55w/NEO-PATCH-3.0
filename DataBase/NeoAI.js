@@ -718,36 +718,90 @@ const NEO_ACTION_MODELS = {
 
         marche: {
 
-            categorie: "deplacement",
-            id: "MARCHE",
+    categorie: "deplacement",
+    id: "MARCHE",
+
+    concept:
+        "Déplacement volontaire d'un sujet au sol à pied, généralement à vitesse normale ou modérée.",
+
+    trajectoires: {
+
+        normale: {
 
             concept:
-                "Déplacement volontaire d'un sujet au sol à pied, généralement à vitesse normale ou modérée.",
+                "Progression régulière au sol sans accélération explosive.",
 
-            trajectoires: {
+            structure: [
+                "SUJET",
+                "ACTION",
+                "DIRECTION",
+                "DISTANCE",
+                "INTENTION"
+            ],
 
-                normale: {
+            exemples: [
 
-                    concept:
-                        "Progression régulière au sol sans accélération explosive.",
+                // 1. Sujet + verbe simple
+                "{Sujet} marche.",
 
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "DIRECTION",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
+                // 2. Synonyme du verbe
+                "{Sujet} avance à pied.",
 
-                    exemples: [
-                        "{Sujet} marche vers {Cible} sur {Distance}.",
-                        "{Sujet} avance à pied vers {Cible} pour {Intention}.",
-                        "{Sujet} marche en direction de {Cible}."
-                    ]
-                }
-            }
-        },
+                // 3. Formulation naturelle
+                "{Sujet} se dirige tranquillement vers {Cible}.",
 
+                // 4. Formulation technique
+                "{Sujet} progresse au sol à pied en direction de {Cible}.",
+
+                // 5. Action + intention
+                "{Sujet} marche vers {Cible} pour {Intention}.",
+
+                // 6. Intention + action
+                "Pour {Intention}, {Sujet} avance à pied vers {Cible}.",
+
+                // 7. Description du mouvement
+                "{Sujet} progresse pas à pas vers {Cible}.",
+
+                // 8. Description du résultat recherché
+                "{Sujet} se déplace à pied afin de se rapprocher de {Cible}.",
+
+                // 9. Ordre des mots différent
+                "Vers {Cible}, {Sujet} avance à pied.",
+
+                // 10. Formulation courte
+                "{Sujet} avance vers {Cible}.",
+
+                // 11. Formulation détaillée
+                "{Sujet} avance calmement à pied sur {Distance} en direction de {Cible}.",
+
+                // 12. Avec cible
+                "{Sujet} marche en direction de {Cible} sur {Distance}.",
+
+                // 13. Sans cible
+                "{Sujet} marche sur {Distance}.",
+
+                // 14. Présence de vitesse
+                "{Sujet} marche lentement vers {Cible}.",
+
+                // 15. Présence de direction
+                "{Sujet} marche vers la gauche sur {Distance}.",
+
+                // 16. Présence de distance
+                "{Sujet} avance à pied sur {Distance}.",
+
+                // 17. Présence de manière
+                "{Sujet} marche d'un pas régulier vers {Cible}.",
+
+                // Combinaisons supplémentaires
+                "{Sujet} se rapproche de {Cible} en marchant sur {Distance}.",
+
+                "{Sujet} parcourt {Distance} à pied vers {Cible} afin de {Intention}.",
+
+                "{Sujet} avance progressivement vers {Cible}, sans accélération, pour {Intention}."
+            ]
+        }
+    }
+},
 
         // ==========================================================
         // COURSE
