@@ -1679,7 +1679,7 @@ pivot: {
     }
 },
         
-        // ==========================================================
+// ==========================================================
 // VRILLE / PIROUETTE
 // ==========================================================
 
@@ -1830,33 +1830,50 @@ salto: {
 
         direct: {
 
-            categorie: "attaque",
-            id: "DIRECT",
+    categorie: "attaque",
+    id: "DIRECT",
 
-            concept:
-                "Frappe de poing directe exécutée en ligne relativement rectiligne vers la cible.",
+    concept:
+        "Frappe de poing directe exécutée en ligne relativement rectiligne vers la cible.",
 
-            trajectoires: {
+    trajectoires: {
 
-                frontale: {
+        frontale: {
 
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE"
+            ],
 
-                    exemples: [
-                        "{Sujet} frappe un direct du {Membre} visant le {Zone} de {Cible}.",
-                        "{Sujet} porte un direct du {Membre} au visage de {Cible}.",
-                        "{Sujet} lance un direct vers {Cible}."
-                    ]
-                }
-            }
-        },
+            exemples: [
+                "{Sujet} frappe un direct du {Membre} visant le {Zone} de {Cible}.",
+                "{Sujet} porte un direct du {Membre} au visage de {Cible}.",
+                "{Sujet} lance un direct vers {Cible}.",
+                "{Sujet} envoie un direct du {Membre} dans la garde de {Cible}.",
+                "{Sujet} décoche un direct droit vers le {Zone} de {Cible}.",
+                "{Sujet} frappe rapidement en direct du {Membre} vers {Cible}.",
+                "{Sujet} porte un direct puissant du {Membre} au menton de {Cible}.",
+                "{Sujet} tend son poing en ligne droite vers le visage de {Cible}.",
+                "{Sujet} projette son {Membre} droit devant lui vers {Cible}.",
+                "{Sujet} envoie son poing directement vers le {Zone} de {Cible}.",
+                "{Sujet} frappe en ligne droite avec son {Membre}.",
+                "{Sujet} décoche un direct rapide au visage de {Cible}.",
+                "{Sujet} avance son {Membre} pour frapper directement {Cible}.",
+                "{Sujet} lance un direct à courte distance vers {Cible}.",
+                "{Sujet} porte un direct à longue portée vers le torse de {Cible}.",
+                "{Sujet} frappe du {Membre} à grande vitesse vers {Cible}.",
+                "Pour atteindre le {Zone} de {Cible}, {Sujet} lance un direct du {Membre}.",
+                "{Sujet} décoche rapidement un direct du {Membre} afin de toucher {Cible}.",
+                "Afin de repousser {Cible}, {Sujet} porte un direct puissant du {Membre}.",
+                "{Sujet} arme brièvement son {Membre} puis projette un direct rapide vers le {Zone} de {Cible}."
+            ]
+        }
+    }
+},
 
 
         // ==========================================================
@@ -1865,33 +1882,50 @@ salto: {
 
         cross: {
 
-            categorie: "attaque",
-            id: "CROSS",
+    categorie: "attaque",
+    id: "CROSS",
 
-            concept:
-                "Frappe de poing directe généralement exécutée avec le bras arrière, traversant la ligne centrale du corps.",
+    concept:
+        "Frappe de poing directe généralement exécutée avec le bras arrière, traversant la ligne centrale du corps.",
 
-            trajectoires: {
+    trajectoires: {
 
-                frontale: {
+        frontale: {
 
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE"
+            ],
 
-                    exemples: [
-                        "{Sujet} porte un cross du {Membre} vers le visage de {Cible}.",
-                        "{Sujet} frappe un cross du droit visant les côtes de {Cible}."
-                    ]
-                }
-            }
-        },
-
+            exemples: [
+                "{Sujet} porte un cross du {Membre} vers le visage de {Cible}.",
+                "{Sujet} frappe un cross du droit visant les côtes de {Cible}.",
+                "{Sujet} décoche un cross vers le menton de {Cible}.",
+                "{Sujet} envoie un cross puissant du {Membre} vers {Cible}.",
+                "{Sujet} lance rapidement un cross du bras arrière.",
+                "{Sujet} frappe en cross directement au visage de {Cible}.",
+                "{Sujet} traverse sa ligne centrale avec un cross du {Membre}.",
+                "{Sujet} projette son poing arrière vers le {Zone} de {Cible}.",
+                "{Sujet} décoche un cross rapide contre la garde de {Cible}.",
+                "{Sujet} porte un cross lourd du {Membre} au torse de {Cible}.",
+                "{Sujet} frappe à courte distance avec un cross du {Membre}.",
+                "{Sujet} lance un cross à distance vers {Cible}.",
+                "{Sujet} engage son épaule puis envoie un cross vers {Cible}.",
+                "{Sujet} tourne le bassin et frappe en cross du {Membre}.",
+                "{Sujet} transfère son poids vers l'avant pour porter un cross à {Cible}.",
+                "Pour toucher le visage de {Cible}, {Sujet} décoche un cross rapide.",
+                "{Sujet} lance un cross du {Membre} afin d'ouvrir la garde de {Cible}.",
+                "Afin de repousser {Cible}, {Sujet} frappe puissamment en cross.",
+                "{Sujet} accélère son mouvement et envoie un cross du {Membre} au menton de {Cible}.",
+                "{Sujet} tourne le bassin, engage le bras arrière et projette un cross puissant vers le {Zone} de {Cible}."
+            ]
+        }
+    }
+},
 
         // ==========================================================
         // JAB
@@ -1899,35 +1933,54 @@ salto: {
 
         jab: {
 
-            categorie: "attaque",
-            id: "JAB",
+    categorie: "attaque",
+    id: "JAB",
 
-            concept:
-                "Frappe de poing directe, rapide et généralement exécutée avec le membre avant.",
+    concept:
+        "Frappe de poing directe, rapide et généralement exécutée avec le membre avant.",
 
-            trajectoires: {
+    trajectoires: {
 
-                frontale: {
+        frontale: {
 
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE"
+            ],
 
-                    exemples: [
-                        "{Sujet} lance un jab du {Membre} vers le visage de {Cible}.",
-                        "{Sujet} pique un jab au visage de {Cible}."
-                    ]
-                }
-            }
-        },
+            exemples: [
+                "{Sujet} lance un jab du {Membre} vers le visage de {Cible}.",
+                "{Sujet} pique un jab au visage de {Cible}.",
+                "{Sujet} envoie rapidement un jab vers {Cible}.",
+                "{Sujet} frappe du {Membre} avec un jab direct.",
+                "{Sujet} décoche un jab rapide au menton de {Cible}.",
+                "{Sujet} tend son poing avant vers le {Zone} de {Cible}.",
+                "{Sujet} pique rapidement la garde de {Cible} avec un jab.",
+                "{Sujet} porte un jab léger vers le visage de {Cible}.",
+                "{Sujet} lance plusieurs jabs rapides vers {Cible}.",
+                "{Sujet} frappe en jab à courte distance.",
+                "{Sujet} utilise son {Membre} pour toucher directement le {Zone} de {Cible}.",
+                "{Sujet} avance légèrement son poing avant vers {Cible}.",
+                "{Sujet} projette rapidement son {Membre} vers le visage de {Cible}.",
+                "{Sujet} envoie un jab précis vers le {Zone} de {Cible}.",
+                "{Sujet} lance un jab à distance pour maintenir {Cible} à portée.",
+                "Pour tester la garde de {Cible}, {Sujet} lance un jab du {Membre}.",
+                "{Sujet} décoche rapidement un jab afin de toucher le visage de {Cible}.",
+                "Afin de maintenir la distance, {Sujet} pique un jab vers {Cible}.",
+                "{Sujet} avance son {Membre} rapidement pour atteindre le menton de {Cible}.",
+                "{Sujet} lance un jab court et rapide du {Membre} directement vers le {Zone} de {Cible}."
+            ]
+        }
+    }
+},
 
 
-        // ==========================================================
+        
+               // ==========================================================
         // CROCHET
         // ==========================================================
 
@@ -1954,11 +2007,64 @@ salto: {
                     ],
 
                     exemples: [
-                        "{Sujet} fait un crochet du {Membre} vers la {Direction} visant {Zone} de {Cible}.",
-                        "{Sujet} lance un crochet horizontal du droit vers les côtes de {Cible}."
+                        "{Sujet} fait un crochet du {Membre} vers la {Direction} visant le {Zone} de {Cible}.",
+                        "{Sujet} lance un crochet horizontal du {Membre} vers la {Direction} en visant {Cible}.",
+                        "{Sujet} frappe en crochet du {Membre} vers la {Direction}.",
+                        "{Sujet} décoche un crochet horizontal au visage de {Cible}.",
+                        "{Sujet} balance son poing en crochet vers la {Direction} au {Zone} de {Cible}.",
+                        "{Sujet} porte un crochet rapide du {Membre} vers {Cible}.",
+                        "{Sujet} frappe latéralement avec un crochet du {Membre} vers la {Direction}.",
+                        "{Sujet} fait tourner son poing vers la {Direction} pour atteindre {Cible}.",
+                        "{Sujet} lance un crochet puissant vers la {Direction} aux côtes de {Cible}.",
+                        "{Sujet} envoie un crochet court vers la tête de {Cible}.",
+                        "{Sujet} frappe en crochet à courte distance vers la {Direction}.",
+                        "{Sujet} décoche un crochet large vers {Cible}.",
+                        "{Sujet} pivote le bras et lance un crochet vers la {Direction}.",
+                        "{Sujet} contourne la garde de {Cible} avec un crochet du {Membre}.",
+                        "{Sujet} balaie horizontalement avec son {Membre} vers {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance un crochet vers la {Direction}.",
+                        "{Sujet} décoche rapidement un crochet afin de contourner la garde de {Cible}.",
+                        "Afin de frapper sur le côté, {Sujet} porte un crochet du {Membre} vers la {Direction}.",
+                        "{Sujet} engage son épaule et projette un crochet puissant vers le {Zone} de {Cible}.",
+                        "{Sujet} effectue un mouvement circulaire du {Membre} vers la {Direction} pour frapper {Cible}."
                     ]
                 },
 
+                oblique: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un crochet oblique du {Membre} vers la {Direction}.",
+                        "{Sujet} porte un crochet oblique vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe en crochet oblique du {Membre} vers {Cible}.",
+                        "{Sujet} décoche un crochet oblique vers la {Direction}.",
+                        "{Sujet} balance son poing en crochet oblique vers {Cible}.",
+                        "{Sujet} porte rapidement un crochet oblique vers la {Direction}.",
+                        "{Sujet} lance un crochet oblique puissant vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe en oblique avec son {Membre} vers {Cible}.",
+                        "{Sujet} incline sa trajectoire et lance un crochet vers la {Direction}.",
+                        "{Sujet} fait monter son crochet en oblique vers le {Zone} de {Cible}.",
+                        "{Sujet} fait descendre son crochet en oblique vers {Cible}.",
+                        "{Sujet} décoche un crochet oblique à courte distance.",
+                        "{Sujet} frappe diagonalement avec un crochet vers la {Direction}.",
+                        "{Sujet} contourne la garde de {Cible} avec un crochet oblique.",
+                        "{Sujet} projette son {Membre} en arc oblique vers {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance un crochet oblique vers la {Direction}.",
+                        "{Sujet} décoche rapidement un crochet oblique afin de contourner la garde de {Cible}.",
+                        "Afin de frapper en angle, {Sujet} porte un crochet oblique du {Membre} vers la {Direction}.",
+                        "{Sujet} engage son épaule et projette un crochet oblique vers le {Zone} de {Cible}.",
+                        "{Sujet} effectue un mouvement circulaire oblique du {Membre} vers la {Direction} pour frapper {Cible}."
+                    ]
+                },
 
                 montant: {
 
@@ -1968,16 +2074,32 @@ salto: {
                         "MEMBRE",
                         "MANIERE",
                         "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
+                        "CIBLE"
                     ],
 
                     exemples: [
                         "{Sujet} lance un crochet montant vers {Cible}.",
-                        "{Sujet} frappe en crochet montant du {Membre}."
+                        "{Sujet} frappe en crochet montant du {Membre}.",
+                        "{Sujet} remonte son poing en crochet vers le visage de {Cible}.",
+                        "{Sujet} porte un crochet montant au menton de {Cible}.",
+                        "{Sujet} décoche un crochet ascendant du {Membre}.",
+                        "{Sujet} frappe rapidement sous la garde de {Cible}.",
+                        "{Sujet} fait monter son poing vers le {Zone} de {Cible}.",
+                        "{Sujet} projette un crochet montant vers le menton de {Cible}.",
+                        "{Sujet} lance un crochet court en remontant vers {Cible}.",
+                        "{Sujet} frappe du {Membre} sous la ligne de défense de {Cible}.",
+                        "{Sujet} remonte brusquement son poing vers le visage de {Cible}.",
+                        "{Sujet} porte un crochet ascendant puissant.",
+                        "{Sujet} envoie son {Membre} vers le haut en crochet.",
+                        "{Sujet} frappe sous la garde avec un crochet montant.",
+                        "{Sujet} dégage la garde de {Cible} avec un crochet ascendant.",
+                        "Pour atteindre le menton de {Cible}, {Sujet} lance un crochet montant.",
+                        "{Sujet} remonte rapidement son {Membre} afin de toucher le {Zone} de {Cible}.",
+                        "Afin de passer sous la garde, {Sujet} porte un crochet montant.",
+                        "{Sujet} fléchit légèrement puis projette un crochet montant vers {Cible}.",
+                        "{Sujet} remonte son {Membre} avec puissance pour frapper le {Zone} de {Cible}."
                     ]
                 },
-
 
                 descendant: {
 
@@ -1987,20 +2109,37 @@ salto: {
                         "MEMBRE",
                         "MANIERE",
                         "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
+                        "CIBLE"
                     ],
 
                     exemples: [
                         "{Sujet} lance un crochet descendant.",
-                        "{Sujet} frappe en crochet descendant vers {Cible}."
+                        "{Sujet} frappe en crochet descendant vers {Cible}.",
+                        "{Sujet} abat son poing en crochet sur {Cible}.",
+                        "{Sujet} porte un crochet descendant au sommet de la garde de {Cible}.",
+                        "{Sujet} frappe du {Membre} en descendant vers {Cible}.",
+                        "{Sujet} rabat son poing vers le {Zone} de {Cible}.",
+                        "{Sujet} décoche un crochet descendant puissant.",
+                        "{Sujet} fait tomber son {Membre} en crochet vers {Cible}.",
+                        "{Sujet} frappe rapidement de haut en bas avec un crochet.",
+                        "{Sujet} porte un crochet descendant vers la tête de {Cible}.",
+                        "{Sujet} abat son poing vers le visage de {Cible}.",
+                        "{Sujet} lance un crochet descendant à courte distance.",
+                        "{Sujet} rabat brusquement son {Membre} vers {Cible}.",
+                        "{Sujet} frappe au-dessus de la garde avec un crochet descendant.",
+                        "{Sujet} projette son poing vers le {Zone} de {Cible} en suivant une trajectoire descendante.",
+                        "Pour frapper le haut du corps de {Cible}, {Sujet} lance un crochet descendant.",
+                        "{Sujet} abat rapidement son {Membre} afin d'atteindre {Cible}.",
+                        "Afin de passer au-dessus de la garde, {Sujet} porte un crochet descendant.",
+                        "{Sujet} charge son bras puis rabat son {Membre} vers le {Zone} de {Cible}.",
+                        "{Sujet} effectue un mouvement circulaire descendant du {Membre} pour frapper {Cible}."
                     ]
                 }
             }
-        },
+        }, 
 
 
-        // ==========================================================
+               // ==========================================================
         // UPPERCUT
         // ==========================================================
 
@@ -2027,12 +2166,29 @@ salto: {
 
                     exemples: [
                         "{Sujet} porte un uppercut du {Membre} au menton de {Cible}.",
-                        "{Sujet} remonte son poing sous le menton de {Cible}."
+                        "{Sujet} remonte son poing sous le menton de {Cible}.",
+                        "{Sujet} lance un uppercut vers le visage de {Cible}.",
+                        "{Sujet} frappe en uppercut du {Membre} vers {Cible}.",
+                        "{Sujet} remonte rapidement son {Membre} vers le menton de {Cible}.",
+                        "{Sujet} porte un uppercut puissant sous la garde de {Cible}.",
+                        "{Sujet} projette son poing vers le haut pour atteindre {Cible}.",
+                        "{Sujet} décoche un uppercut ascendant vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe sous la ligne de défense de {Cible}.",
+                        "{Sujet} fait remonter son {Membre} vers le visage de {Cible}.",
+                        "{Sujet} lance un uppercut court au menton de {Cible}.",
+                        "{Sujet} porte rapidement un uppercut vers {Cible}.",
+                        "{Sujet} remonte brusquement son poing vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe de bas en haut avec son {Membre}.",
+                        "{Sujet} glisse son poing sous la garde de {Cible} avec un uppercut.",
+                        "Pour atteindre le menton de {Cible}, {Sujet} lance un uppercut.",
+                        "{Sujet} remonte rapidement son {Membre} afin de frapper le {Zone} de {Cible}.",
+                        "Afin de passer sous la garde, {Sujet} porte un uppercut puissant.",
+                        "{Sujet} fléchit puis projette son {Membre} vers le haut pour atteindre {Cible}.",
+                        "{Sujet} concentre sa frappe vers le haut afin d'atteindre le {Zone} de {Cible}."
                     ]
                 },
 
-
-                diagonal: {
+                oblique: {
 
                     structure: [
                         "SUJET",
@@ -2045,12 +2201,30 @@ salto: {
                     ],
 
                     exemples: [
-                        "{Sujet} porte un uppercut diagonal vers {Cible}.",
-                        "{Sujet} frappe en uppercut diagonal."
+                        "{Sujet} porte un uppercut oblique vers la {Direction} sur {Cible}.",
+                        "{Sujet} frappe en uppercut oblique du {Membre} vers {Cible}.",
+                        "{Sujet} lance un uppercut oblique vers la {Direction}.",
+                        "{Sujet} décoche un uppercut oblique au {Zone} de {Cible}.",
+                        "{Sujet} remonte son poing en oblique vers la {Direction}.",
+                        "{Sujet} porte un uppercut oblique du {Membre} vers le visage de {Cible}.",
+                        "{Sujet} frappe obliquement vers la {Direction} pour atteindre {Cible}.",
+                        "{Sujet} projette son {Membre} en uppercut oblique vers {Cible}.",
+                        "{Sujet} lance un uppercut ascendant oblique vers la {Direction}.",
+                        "{Sujet} remonte son poing en angle vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe sous la garde avec un uppercut oblique vers {Cible}.",
+                        "{Sujet} décoche rapidement un uppercut oblique vers la {Direction}.",
+                        "{Sujet} porte un uppercut oblique puissant au visage de {Cible}.",
+                        "{Sujet} fait monter son {Membre} en diagonale vers la {Direction}.",
+                        "{Sujet} projette son poing vers le haut et la {Direction} pour atteindre {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance un uppercut oblique vers la {Direction}.",
+                        "{Sujet} remonte rapidement son {Membre} afin de frapper {Cible} sous un angle oblique.",
+                        "Afin de contourner la garde, {Sujet} porte un uppercut oblique vers la {Direction}.",
+                        "{Sujet} fléchit puis projette son {Membre} vers le haut et la {Direction}.",
+                        "{Sujet} concentre sa frappe vers le haut et la {Direction} pour atteindre le {Zone} de {Cible}."
                     ]
                 }
             }
-        },
+        }, 
 
 
         // ==========================================================
