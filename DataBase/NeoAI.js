@@ -2674,11 +2674,28 @@ salto: {
                     ],
 
                     exemples: [
-                        "{Sujet} frappe avec le tranchant de la main vers {Cible}.",
-                        "{Sujet} porte une frappe horizontale du tranchant."
+                        "{Sujet} frappe avec le tranchant de la main vers la {Direction}.",
+                        "{Sujet} porte une frappe horizontale du tranchant vers {Cible}.",
+                        "{Sujet} balaie horizontalement avec le tranchant vers {Cible}.",
+                        "{Sujet} lance une frappe du tranchant vers la {Direction}.",
+                        "{Sujet} frappe le {Zone} de {Cible} avec le tranchant.",
+                        "{Sujet} décoche rapidement une frappe horizontale vers {Cible}.",
+                        "{Sujet} porte un tranchant du {Membre} vers la {Direction}.",
+                        "{Sujet} balaie le {Zone} de {Cible} avec sa main.",
+                        "{Sujet} frappe latéralement avec le tranchant de sa main.",
+                        "{Sujet} projette son {Membre} horizontalement vers {Cible}.",
+                        "{Sujet} fait passer le tranchant de sa main vers la {Direction}.",
+                        "{Sujet} frappe de côté avec le tranchant vers {Cible}.",
+                        "{Sujet} lance un tranchant puissant vers le {Zone} de {Cible}.",
+                        "{Sujet} effectue un balayage horizontal du tranchant vers la {Direction}.",
+                        "{Sujet} porte une frappe rapide du tranchant au visage de {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance le tranchant vers la {Direction}.",
+                        "{Sujet} balaie rapidement avec son {Membre} afin de frapper {Cible}.",
+                        "Afin de toucher le côté de {Cible}, {Sujet} porte une frappe horizontale vers la {Direction}.",
+                        "{Sujet} engage son bras et projette le tranchant vers {Cible}.",
+                        "{Sujet} effectue un mouvement horizontal du {Membre} vers la {Direction} pour frapper {Cible}."
                     ]
                 },
-
 
                 descendante: {
 
@@ -2693,7 +2710,61 @@ salto: {
 
                     exemples: [
                         "{Sujet} abat le tranchant de sa main sur {Cible}.",
-                        "{Sujet} frappe de haut en bas avec le tranchant."
+                        "{Sujet} frappe de haut en bas avec le tranchant.",
+                        "{Sujet} porte une frappe descendante au {Zone} de {Cible}.",
+                        "{Sujet} rabat sa main vers {Cible}.",
+                        "{Sujet} abat son {Membre} vers le {Zone} de {Cible}.",
+                        "{Sujet} lance un tranchant descendant sur {Cible}.",
+                        "{Sujet} frappe rapidement de haut en bas.",
+                        "{Sujet} projette le tranchant de sa main vers le bas.",
+                        "{Sujet} porte un tranchant puissant sur {Cible}.",
+                        "{Sujet} rabat brusquement sa main vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe au-dessus de la garde avec le tranchant.",
+                        "{Sujet} abat sa main vers le visage de {Cible}.",
+                        "{Sujet} descend son {Membre} rapidement vers {Cible}.",
+                        "{Sujet} effectue une frappe descendante avec le tranchant.",
+                        "{Sujet} écrase sa trajectoire vers le {Zone} de {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} abat son tranchant.",
+                        "{Sujet} frappe rapidement vers le bas afin d'atteindre {Cible}.",
+                        "Afin de passer au-dessus de la garde, {Sujet} porte un tranchant descendant.",
+                        "{Sujet} arme son bras puis abat son {Membre} vers {Cible}.",
+                        "{Sujet} effectue un mouvement descendant puissant du {Membre} pour frapper {Cible}."
+                    ]
+                },
+
+                oblique: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance une frappe oblique du tranchant vers la {Direction}.",
+                        "{Sujet} frappe en tranchant oblique vers {Cible}.",
+                        "{Sujet} porte un tranchant oblique du {Membre} vers le {Zone} de {Cible}.",
+                        "{Sujet} projette le tranchant de sa main en oblique vers {Cible}.",
+                        "{Sujet} décoche une frappe oblique vers la {Direction}.",
+                        "{Sujet} frappe avec son {Membre} selon une trajectoire oblique.",
+                        "{Sujet} balaie son tranchant en oblique vers {Cible}.",
+                        "{Sujet} porte une frappe en angle vers le {Zone} de {Cible}.",
+                        "{Sujet} projette sa main en oblique vers la {Direction}.",
+                        "{Sujet} frappe diagonalement avec le tranchant vers {Cible}.",
+                        "{Sujet} fait monter son tranchant en oblique vers la {Direction}.",
+                        "{Sujet} fait descendre son tranchant en oblique vers {Cible}.",
+                        "{Sujet} porte rapidement un tranchant oblique au visage de {Cible}.",
+                        "{Sujet} contourne la garde de {Cible} avec une frappe oblique.",
+                        "{Sujet} balaie le {Zone} de {Cible} avec son tranchant en oblique.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance un tranchant oblique vers la {Direction}.",
+                        "{Sujet} projette rapidement son {Membre} afin de frapper {Cible} sous un angle oblique.",
+                        "Afin de contourner la garde, {Sujet} porte un tranchant oblique vers la {Direction}.",
+                        "{Sujet} engage son bras et projette son tranchant en oblique vers {Cible}.",
+                        "{Sujet} effectue un mouvement oblique du {Membre} vers la {Direction} pour frapper {Cible}."
                     ]
                 }
             }
@@ -2727,11 +2798,28 @@ salto: {
                     ],
 
                     exemples: [
-                        "{Sujet} frappe avec son coude vers {Cible}.",
-                        "{Sujet} lance un coude horizontal vers la tempe de {Cible}."
+                        "{Sujet} frappe avec son coude vers la {Direction} en visant {Cible}.",
+                        "{Sujet} lance un coude horizontal vers la tempe de {Cible}.",
+                        "{Sujet} porte un coude horizontal du {Membre} vers {Cible}.",
+                        "{Sujet} frappe latéralement avec son coude.",
+                        "{Sujet} projette son coude vers la {Direction}.",
+                        "{Sujet} balaie horizontalement avec son coude vers {Cible}.",
+                        "{Sujet} décoche un coude rapide vers la {Direction}.",
+                        "{Sujet} frappe le {Zone} de {Cible} avec son coude.",
+                        "{Sujet} pivote son corps et lance un coude horizontal.",
+                        "{Sujet} porte un coude puissant vers le visage de {Cible}.",
+                        "{Sujet} frappe de côté avec son coude vers la {Direction}.",
+                        "{Sujet} projette son {Membre} horizontalement vers {Cible}.",
+                        "{Sujet} lance un coude court vers la {Direction}.",
+                        "{Sujet} balaie le {Zone} de {Cible} avec son coude.",
+                        "{Sujet} effectue un mouvement horizontal du coude vers {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance son coude vers la {Direction}.",
+                        "{Sujet} pivote rapidement afin de frapper {Cible} avec un coude horizontal.",
+                        "Afin de toucher le côté de {Cible}, {Sujet} porte un coude vers la {Direction}.",
+                        "{Sujet} engage son épaule et projette son coude vers {Cible}.",
+                        "{Sujet} effectue une rotation du bras vers la {Direction} pour frapper {Cible}."
                     ]
                 },
-
 
                 ascendant: {
 
@@ -2746,10 +2834,27 @@ salto: {
 
                     exemples: [
                         "{Sujet} remonte son coude vers le menton de {Cible}.",
-                        "{Sujet} porte un coude ascendant."
+                        "{Sujet} porte un coude ascendant.",
+                        "{Sujet} lance un coude montant vers {Cible}.",
+                        "{Sujet} frappe de bas en haut avec son coude.",
+                        "{Sujet} projette son {Membre} vers le visage de {Cible}.",
+                        "{Sujet} remonte rapidement son coude vers le {Zone} de {Cible}.",
+                        "{Sujet} porte un coude ascendant puissant.",
+                        "{Sujet} frappe sous la garde de {Cible} avec son coude.",
+                        "{Sujet} fait monter son coude vers {Cible}.",
+                        "{Sujet} lance un coude montant au menton de {Cible}.",
+                        "{Sujet} remonte brusquement son {Membre} vers le visage de {Cible}.",
+                        "{Sujet} frappe rapidement de bas en haut.",
+                        "{Sujet} projette son coude sous la garde de {Cible}.",
+                        "{Sujet} porte une frappe ascendante avec son {Membre}.",
+                        "{Sujet} remonte son coude afin d'atteindre le {Zone} de {Cible}.",
+                        "Pour atteindre le menton de {Cible}, {Sujet} remonte son coude.",
+                        "{Sujet} remonte rapidement son {Membre} afin de frapper {Cible}.",
+                        "Afin de passer sous la garde, {Sujet} porte un coude ascendant.",
+                        "{Sujet} fléchit puis projette son coude vers le haut pour atteindre {Cible}.",
+                        "{Sujet} concentre sa frappe vers le haut afin d'atteindre le {Zone} de {Cible}."
                     ]
                 },
-
 
                 descendant: {
 
@@ -2764,7 +2869,61 @@ salto: {
 
                     exemples: [
                         "{Sujet} abat son coude sur {Cible}.",
-                        "{Sujet} frappe avec un coude descendant."
+                        "{Sujet} frappe avec un coude descendant.",
+                        "{Sujet} lance un coude descendant vers {Cible}.",
+                        "{Sujet} rabat son coude vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe de haut en bas avec son coude.",
+                        "{Sujet} porte un coude descendant puissant.",
+                        "{Sujet} projette son {Membre} vers le bas sur {Cible}.",
+                        "{Sujet} abat rapidement son coude vers le visage de {Cible}.",
+                        "{Sujet} frappe au-dessus de la garde avec son coude.",
+                        "{Sujet} rabat brusquement son {Membre} vers {Cible}.",
+                        "{Sujet} porte une frappe descendante au {Zone} de {Cible}.",
+                        "{Sujet} abat son coude vers le {Zone} de {Cible}.",
+                        "{Sujet} frappe rapidement de haut en bas.",
+                        "{Sujet} projette son coude vers le bas pour atteindre {Cible}.",
+                        "{Sujet} effectue une frappe descendante avec son {Membre}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} abat son coude.",
+                        "{Sujet} abat rapidement son {Membre} afin de frapper {Cible}.",
+                        "Afin de passer au-dessus de la garde, {Sujet} porte un coude descendant.",
+                        "{Sujet} arme son bras puis rabat son coude vers {Cible}.",
+                        "{Sujet} effectue un mouvement descendant puissant du {Membre} pour frapper {Cible}."
+                    ]
+                },
+
+                oblique: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un coude oblique vers la {Direction}.",
+                        "{Sujet} frappe en coude oblique vers {Cible}.",
+                        "{Sujet} porte un coude oblique du {Membre} vers le {Zone} de {Cible}.",
+                        "{Sujet} projette son coude en oblique vers {Cible}.",
+                        "{Sujet} décoche un coude oblique vers la {Direction}.",
+                        "{Sujet} frappe avec son coude selon une trajectoire oblique.",
+                        "{Sujet} balaie son coude en oblique vers {Cible}.",
+                        "{Sujet} porte un coude en angle vers le {Zone} de {Cible}.",
+                        "{Sujet} projette son {Membre} en oblique vers la {Direction}.",
+                        "{Sujet} frappe diagonalement avec son coude vers {Cible}.",
+                        "{Sujet} fait monter son coude en oblique vers la {Direction}.",
+                        "{Sujet} fait descendre son coude en oblique vers {Cible}.",
+                        "{Sujet} porte rapidement un coude oblique au visage de {Cible}.",
+                        "{Sujet} contourne la garde de {Cible} avec un coude oblique.",
+                        "{Sujet} balaie le {Zone} de {Cible} avec son coude en oblique.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} lance un coude oblique vers la {Direction}.",
+                        "{Sujet} projette rapidement son {Membre} afin de frapper {Cible} sous un angle oblique.",
+                        "Afin de contourner la garde, {Sujet} porte un coude oblique vers la {Direction}.",
+                        "{Sujet} engage son épaule et projette son coude en oblique vers {Cible}.",
+                        "{Sujet} effectue un mouvement oblique du {Membre} vers la {Direction} pour frapper {Cible}."
                     ]
                 }
             }
@@ -2798,10 +2957,27 @@ salto: {
 
                     exemples: [
                         "{Sujet} donne un coup de tête vers le visage de {Cible}.",
-                        "{Sujet} percute {Cible} avec son front."
+                        "{Sujet} percute {Cible} avec son front.",
+                        "{Sujet} porte un coup de tête frontal au {Zone} de {Cible}.",
+                        "{Sujet} projette son front vers le visage de {Cible}.",
+                        "{Sujet} frappe frontalement avec sa tête.",
+                        "{Sujet} avance sa tête pour percuter {Cible}.",
+                        "{Sujet} percute le {Zone} de {Cible} avec son front.",
+                        "{Sujet} lance un coup de tête rapide vers {Cible}.",
+                        "{Sujet} frappe directement avec son front.",
+                        "{Sujet} porte un coup de tête puissant au visage de {Cible}.",
+                        "{Sujet} projette sa tête contre {Cible}.",
+                        "{Sujet} percute {Cible} de face avec son front.",
+                        "{Sujet} avance brusquement la tête vers {Cible}.",
+                        "{Sujet} frappe le {Zone} de {Cible} avec son front.",
+                        "{Sujet} porte une percussion frontale avec sa tête.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} projette son front vers l'avant.",
+                        "{Sujet} avance rapidement sa tête afin de percuter {Cible}.",
+                        "Afin de surprendre {Cible}, {Sujet} porte un coup de tête frontal.",
+                        "{Sujet} rapproche son visage puis projette son front vers {Cible}.",
+                        "{Sujet} concentre son mouvement vers l'avant pour percuter le {Zone} de {Cible}."
                     ]
                 },
-
 
                 laterale: {
 
@@ -2816,11 +2992,28 @@ salto: {
                     ],
 
                     exemples: [
-                        "{Sujet} donne un coup de tête latéral.",
-                        "{Sujet} percute {Cible} avec sa tête sur le côté."
+                        "{Sujet} donne un coup de tête latéral vers la {Direction}.",
+                        "{Sujet} percute {Cible} avec sa tête sur le côté.",
+                        "{Sujet} porte un coup de tête latéral vers le {Zone} de {Cible}.",
+                        "{Sujet} projette sa tête vers la {Direction} pour atteindre {Cible}.",
+                        "{Sujet} frappe de côté avec son front.",
+                        "{Sujet} lance un coup de tête vers la {Direction}.",
+                        "{Sujet} percute le {Zone} de {Cible} avec le côté de sa tête.",
+                        "{Sujet} porte un coup de tête latéral puissant.",
+                        "{Sujet} balaie sa tête vers la {Direction} contre {Cible}.",
+                        "{Sujet} frappe latéralement le {Zone} de {Cible}.",
+                        "{Sujet} incline sa tête et percute {Cible} sur le côté.",
+                        "{Sujet} projette brusquement sa tête vers la {Direction}.",
+                        "{Sujet} porte une percussion latérale avec sa tête.",
+                        "{Sujet} frappe de côté vers le visage de {Cible}.",
+                        "{Sujet} effectue un mouvement latéral de la tête vers {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} projette sa tête vers la {Direction}.",
+                        "{Sujet} tourne rapidement la tête afin de percuter {Cible}.",
+                        "Afin de toucher le côté de {Cible}, {Sujet} porte un coup de tête vers la {Direction}.",
+                        "{Sujet} engage son cou et projette sa tête latéralement vers {Cible}.",
+                        "{Sujet} effectue un mouvement latéral de la tête vers la {Direction} pour frapper {Cible}."
                     ]
                 },
-
 
                 ascendante: {
 
@@ -2835,7 +3028,61 @@ salto: {
 
                     exemples: [
                         "{Sujet} remonte la tête vers le visage de {Cible}.",
-                        "{Sujet} porte un coup de tête ascendant."
+                        "{Sujet} porte un coup de tête ascendant.",
+                        "{Sujet} lance un coup de tête montant vers {Cible}.",
+                        "{Sujet} frappe de bas en haut avec son front.",
+                        "{Sujet} projette son front vers le visage de {Cible}.",
+                        "{Sujet} remonte rapidement sa tête vers le {Zone} de {Cible}.",
+                        "{Sujet} porte un coup de tête ascendant puissant.",
+                        "{Sujet} frappe sous la garde de {Cible} avec son front.",
+                        "{Sujet} fait monter sa tête vers {Cible}.",
+                        "{Sujet} lance un coup de tête montant au menton de {Cible}.",
+                        "{Sujet} remonte brusquement son front vers le visage de {Cible}.",
+                        "{Sujet} frappe rapidement de bas en haut.",
+                        "{Sujet} projette son front sous la garde de {Cible}.",
+                        "{Sujet} porte une percussion ascendante avec sa tête.",
+                        "{Sujet} remonte sa tête afin d'atteindre le {Zone} de {Cible}.",
+                        "Pour atteindre le menton de {Cible}, {Sujet} remonte sa tête.",
+                        "{Sujet} remonte rapidement sa tête afin de percuter {Cible}.",
+                        "Afin de passer sous la garde, {Sujet} porte un coup de tête ascendant.",
+                        "{Sujet} fléchit puis projette son front vers le haut pour atteindre {Cible}.",
+                        "{Sujet} concentre sa frappe vers le haut afin d'atteindre le {Zone} de {Cible}."
+                    ]
+                },
+
+                oblique: {
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MEMBRE",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} lance un coup de tête oblique vers la {Direction}.",
+                        "{Sujet} percute {Cible} avec sa tête en oblique.",
+                        "{Sujet} porte un coup de tête oblique vers le {Zone} de {Cible}.",
+                        "{Sujet} projette son front en oblique vers {Cible}.",
+                        "{Sujet} frappe avec sa tête selon une trajectoire oblique.",
+                        "{Sujet} lance son front vers la {Direction} pour atteindre {Cible}.",
+                        "{Sujet} percute le {Zone} de {Cible} avec un mouvement oblique de la tête.",
+                        "{Sujet} porte un coup de tête oblique puissant.",
+                        "{Sujet} balaie sa tête en oblique vers {Cible}.",
+                        "{Sujet} frappe en angle avec son front vers la {Direction}.",
+                        "{Sujet} projette sa tête vers le haut et la {Direction}.",
+                        "{Sujet} projette sa tête vers le bas et la {Direction}.",
+                        "{Sujet} frappe diagonalement avec son front vers {Cible}.",
+                        "{Sujet} incline sa tête et percute {Cible} selon un angle.",
+                        "{Sujet} porte une percussion oblique au {Zone} de {Cible}.",
+                        "Pour atteindre le {Zone} de {Cible}, {Sujet} projette son front en oblique vers la {Direction}.",
+                        "{Sujet} projette rapidement sa tête afin de percuter {Cible} sous un angle oblique.",
+                        "Afin de contourner la garde, {Sujet} porte un coup de tête oblique vers la {Direction}.",
+                        "{Sujet} engage son cou et projette son front en oblique vers {Cible}.",
+                        "{Sujet} effectue un mouvement oblique de la tête vers la {Direction} pour percuter {Cible}."
                     ]
                 }
             }
