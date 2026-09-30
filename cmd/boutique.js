@@ -226,22 +226,35 @@ Après cela attendez la validation de votre achat ou de votre vente.
                 const cardIcon = cardCurrency === "nc" ? "🔷" : "🧭"; 
 
                 let confirmPrice = basePrix;
-                const owners = await getCardOwners(card.name);
-                if (owners.length >= 2) {
-                    confirmPrice = Math.floor(confirmPrice * 1.5);
-                    const taggedOwners = owners
-                        .slice(0, 2)
-                        .map(jid => `@${jid.split("@")[0]}`)
-                        .join(" et ");
-                    await ovl.sendMessage(ms_org, {
-                        text:
-                            `⚠️ Les joueurs ${taggedOwners} possèdent déjà cette carte.\n` +
-                            `💹 Le prix devient ${formatNumber(confirmPrice)} ${cardIcon}
-                            ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-                              🔆🌀`,
-                        mentions: owners.slice(0, 2)
-                    }, { quoted: ms });
-                }
+
+// ==========================================================
+// LIMITE : MAXIMUM 2 POSSESSEURS PAR CARTE
+// ==========================================================
+
+const owners = await getCardOwners(card.name);
+
+if (
+    mode === "achat" &&
+    owners.filter(jid => jid !== auteur_Message).length >= 2
+) {
+    const taggedOwners = owners
+        .slice(0, 2)
+        .map(jid => `@${jid.split("@")[0]}`)
+        .join(" et ");
+
+    await ovl.sendMessage(ms_org, {
+        text:
+            `❌ Cette carte a déjà atteint sa limite de possession.\n\n` +
+            `🎴 Carte : *${card.name}*\n` +
+            `👥 Possesseurs : ${taggedOwners}\n` +
+            `🔒 Limite maximale : *2 utilisateurs*\n\n` +
+            `Cette carte n'est plus disponible à l'achat.`,
+        mentions: owners.slice(0, 2)
+    }, { quoted: ms });
+
+    userInput = await waitFor();
+    continue;
+}
 
                 let confirmOptions = "oui / non";
                 if (mode === "achat") confirmOptions += " / +coupon";
@@ -268,6 +281,28 @@ Après cela attendez la validation de votre achat ou de votre vente.
                 //================ ACHAT ================
                 if (mode === "achat") {
                     const playerLevel = parseInt(fiche?.data?.niveau ?? fiche?.niveau ?? 0);
+ // ==========================================================
+// VÉRIFICATION : LE JOUEUR POSSÈDE DÉJÀ LA CARTE
+// ==========================================================
+
+const playerCards = (fiche.cards || "")
+    .split(/\n|•/g)
+    .map(c => c.trim())
+    .filter(Boolean);
+
+const alreadyOwnsCard = playerCards.some(
+    c => normalize(c) === normalize(card.name)
+);
+
+if (alreadyOwnsCard) {
+    await repondre(
+        `❌ Tu possèdes déjà la carte *${card.name}*.\n` +
+        `Tu ne peux pas acheter deux fois la même carte.`
+    );
+
+    userInput = await waitFor();
+    continue;
+}
                     const levelCheck = checkLevelRequirement(playerLevel, card.category, card.grade.toLowerCase());
                     if (!levelCheck.ok) {
                         await repondre(levelCheck.message);
