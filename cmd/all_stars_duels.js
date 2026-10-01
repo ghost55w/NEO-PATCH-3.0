@@ -239,95 +239,254 @@ const s = clean.slice(idx + 1).trim();
 }
 
 /* ================= RAZORX AUTO ================= */
+
 ovlcmd({
     nom: "razorx_auto",
     isfunc: true
-}, async (ms_org, ovl, { texte, ms, getJid }) => {
-    if (!texte?.includes("⚡RAZORX™")) return;
+}, async (ms_org, ovl, { texte, ms }) => {
 
-    const { actions, results } = parseRazorX(texte);
+    if (!texte?.includes("RAZORX")) return;
 
-    let allStarsTouched = false;
+    try {
 
-    // ---------- MATCH LIVE (STRIKES & ATTAQUES) ----------
-    for (const act of actions) {
-        if (!['strikes','attaques'].includes(act.stat)) continue;
+        const duel = duelsEnCours[ms_org];
 
-        let jid;
-        try {
-            jid = await getJid(act.tag + "@lid", ms_org, ovl);
-        } catch {
-            continue;
+        // ======================================================
+        // VÉRIFICATION DU DUEL
+        // ======================================================
+
+        if (!duel) {
+            console.log("⚠️ Aucun duel actif pour ce groupe.");
+            return;
         }
 
-        const data = await getData({ jid });
-        if (!data) continue;
+        const {
+            actions,
+            results
+        } = parseRazorX(texte);
 
-        // Additionne toujours les valeurs existantes
-        const oldValue = Number(data[act.stat]) || 0;
-        const newValue = oldValue + Number(act.valeur);
+        // ======================================================
+        // VÉRIFICATION DU RESULTAT
+        // ======================================================
 
-        await setfiche(act.stat, newValue, jid);
-        allStarsTouched = true;
-    }
-
-    // ---------- RESULTAT VICTOIRE / DEFAITE ----------
-    for (const r of results) {
-        let jid;
-        try {
-            jid = await getJid(r.tag + "@lid", ms_org, ovl);
-        } catch {
-            continue;
+        if (!results.length) {
+            console.log("⚠️ Aucun résultat trouvé dans le pavé RazorX.");
+            return;
         }
 
-        const data = await getData({ jid });
-        if (!data) continue;
+        // ======================================================
+        // MATCH LIVE
+        // STRIKES + ATTAQUES
+        // ======================================================
 
-        let exp = Number(data.exp) || 0;
-        let fans = Number(data.fans) || 0;
-        let talent = Number(data.talent) || 0;
-        let victoires = Number(data.victoires) || 0;
-        let defaites = Number(data.defaites) || 0;
+        for (const act of actions) {
 
-        // ----- VICTOIRE -----
-        if (r.type === "victoire") {
-            if (r.symbol === "✅") {
-                victoires += 1;
-                talent += 10;
-                exp += 10;
-                fans += 100;
-            } else if (!r.symbol) {
-                victoires += 1;
+            if (!["strikes", "attaques"].includes(act.stat)) {
+                continue;
             }
-            // victoire ❌ => rien
+
+            const fiche = await getFicheByPseudo(act.tag);
+
+            if (!fiche) {
+
+                console.log(
+                    `⚠️ Joueur introuvable pour ${act.tag}`
+                );
+
+                continue;
+            }
+
+            const ancien = Number(fiche[act.stat]) || 0;
+
+            const nouveau =
+                ancien + Number(act.valeur);
+
+            await setfiche(
+                act.stat,
+                nouveau,
+                fiche.jid
+            );
+
+            console.log(
+                `📊 ${fiche.pseudo} | ${act.stat} : ${ancien} → ${nouveau}`
+            );
         }
 
-        // ----- DEFAITE -----
-        else {
-            if (r.symbol === "❌") {
-                exp = Math.max(0, exp - 5);
-            } else {
+        // ======================================================
+        // RESULTATS
+        // ======================================================
+
+        for (const r of results) {
+
+            const fiche = await getFicheByPseudo(r.tag);
+
+            if (!fiche) {
+
+                console.log(
+                    `⚠️ Joueur introuvable pour résultat : ${r.tag}`
+                );
+
+                continue;
+            }
+
+            let exp = Number(fiche.exp) || 0;
+            let talent = Number(fiche.talent) || 0;
+            let golds = Number(fiche.golds) || 0;
+
+            let victoires = Number(fiche.victoires) || 0;
+            let defaites = Number(fiche.defaites) || 0;
+
+            // ==================================================
+            // VICTOIRE
+            // ==================================================
+
+            if (r.type === "victoire") {
+
+                victoires += 1;
+
+                // ----------------------------------------------
+                // BONNE PERFORMANCE ✅
+                // ----------------------------------------------
+
+                if (r.symbol === "✅") {
+
+                    exp += 10;
+                    talent += 1;
+                    golds += 10000;
+
+                    console.log(
+                        `✅ Bonne performance : ${fiche.pseudo}`
+                    );
+                }
+
+                // ----------------------------------------------
+                // MAUVAISE PERFORMANCE ❌
+                // ----------------------------------------------
+
+                else if (r.symbol === "❌") {
+
+                    exp = Math.max(0, exp - 10);
+                    talent = Math.max(0, talent - 1);
+
+                    console.log(
+                        `❌ Mauvaise performance : ${fiche.pseudo}`
+                    );
+                }
+            }
+
+            // ==================================================
+            // DEFAITE
+            // ==================================================
+
+            else if (r.type === "defaite") {
+
                 defaites += 1;
+
+                // ----------------------------------------------
+                // BONNE PERFORMANCE ✅
+                // ----------------------------------------------
+
+                if (r.symbol === "✅") {
+
+                    exp += 10;
+                    talent += 1;
+                    golds += 10000;
+
+                    console.log(
+                        `✅ Bonne performance : ${fiche.pseudo}`
+                    );
+                }
+
+                // ----------------------------------------------
+                // MAUVAISE PERFORMANCE ❌
+                // ----------------------------------------------
+
+                else if (r.symbol === "❌") {
+
+                    exp = Math.max(0, exp - 10);
+                    talent = Math.max(0, talent - 1);
+
+                    console.log(
+                        `❌ Mauvaise performance : ${fiche.pseudo}`
+                    );
+                }
             }
+
+            // ==================================================
+            // SAUVEGARDE
+            // ==================================================
+
+            await setfiche(
+                "exp",
+                exp,
+                fiche.jid
+            );
+
+            await setfiche(
+                "talent",
+                talent,
+                fiche.jid
+            );
+
+            await setfiche(
+                "golds",
+                golds,
+                fiche.jid
+            );
+
+            await setfiche(
+                "victoires",
+                victoires,
+                fiche.jid
+            );
+
+            await setfiche(
+                "defaites",
+                defaites,
+                fiche.jid
+            );
+
+            console.log(
+                `🏆 ${fiche.pseudo} | ` +
+                `V:${victoires} D:${defaites} | ` +
+                `EXP:${exp} Talent:${talent} Golds:${golds}`
+            );
         }
 
-        await setfiche("exp", exp, jid);
-        await setfiche("fans", fans, jid);
-        await setfiche("talent", talent, jid);
-        await setfiche("victoires", victoires, jid);
-        await setfiche("defaites", defaites, jid);
+        // ======================================================
+        // FIN DU DUEL
+        // ======================================================
 
-        allStarsTouched = true;
-    }
+        delete duelsEnCours[ms_org];
 
-    // ---------- CONFIRMATION SI JOUEURS TOUCHÉS ----------
-    if (allStarsTouched) {
+        console.log(
+            `🏁 Duel terminé automatiquement dans ${ms_org}`
+        );
+
+        // ======================================================
+        // CONFIRMATION
+        // ======================================================
+
         await ovl.sendMessage(ms_org, {
-            text: "✅ Résultats mises à jour pour ce match !"
+            text:
+                `🏁 *FIN DU MATCH*\n` +
+                `▔▔▔▔▔▔▔▔▔▔▔▔\n` +
+                `✅ Résultats enregistrés.\n` +
+                `📊 Statistiques mises à jour.\n` +
+                `🏆 Victoire / défaite enregistrées.\n` +
+                `🎴 Strikes / attaques enregistrés.\n` +
+                `🎁 Performances récompensées.\n\n` +
+                `⚡ RAZORX™`
         }, { quoted: ms });
+
+    } catch (err) {
+
+        console.error(
+            "❌ Erreur RAZORX AUTO :",
+            err
+        );
     }
 });
-
 
 
 /* ================= +PAVEMODO (PAVÉ VIDE ATTENDU) ================= */
