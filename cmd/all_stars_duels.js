@@ -45,7 +45,7 @@ function normalizeName(n) {
 
 //================= FICHE DUEL =================
 function generateFicheDuel(duel) {
-    return `. ◥◣              🌀JUMP™🔆
+    return `. ◥◣              🌀JUMP ARENA™🔆
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 
 🔆🎴 *${j1.nom}* :
@@ -547,16 +547,17 @@ ovlcmd({
         // ======================================================
 
         await ovl.sendMessage(ms_org, {
-            text:
-                `🏁 *FIN DU MATCH*\n` +
-                `▔▔▔▔▔▔▔▔▔▔▔▔\n` +
-                `✅ Résultats enregistrés.\n` +
-                `📊 Statistiques mises à jour.\n` +
-                `🏆 Victoire / défaite enregistrées.\n` +
-                `🎴 Strikes / attaques enregistrés.\n` +
-                `🎁 Performances récompensées.\n\n` +
-                `⚡ RAZORX™`
-        }, { quoted: ms });
+    text:
+        `🏁 *FIN DU MATCH* | *JUMP™🔅🌀*\n` +
+        `▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n` +
+        `✅ Résultats enregistrés.\n` +
+        `📊 Statistiques mises à jour.\n` +
+        `🏆 Victoire / défaite enregistrées.\n` +
+        `🎴 Strikes / attaques enregistrés.\n` +
+        `🎁 Performances récompensées.\n\n` +
+        `╰───────────────────\n` +
+        `                                   *R A Z O R X™⚡*`
+}, { quoted: ms });
 
     } catch (err) {
 
