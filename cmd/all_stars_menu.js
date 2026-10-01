@@ -123,7 +123,7 @@ ovlcmd(
     );
     */
 
-    const texte = `. ◥◣       🌀JUMP™🔆
+    const texte = `. ◥◣              🌀JUMP™🔆
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 💬: 
 
