@@ -45,26 +45,37 @@ function normalizeName(n) {
 
 //================= FICHE DUEL =================
 function generateFicheDuel(duel) {
-    return `*🆚VERSUS ARENA BATTLE🏆🎮*
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔░▒▒░░▒░
-🔅 *${duel.equipe1[0].nom}*: 🫀:${duel.equipe1[0].stats.sta}% 🌀:${duel.equipe1[0].stats.energie}% ❤️:${duel.equipe1[0].stats.pv}%
-                                   ~  *🆚*  ~
-🔅 *${duel.equipe2[0].nom}*: 🫀:${duel.equipe2[0].stats.sta}% 🌀:${duel.equipe2[0].stats.energie}% ❤️:${duel.equipe2[0].stats.pv}%
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-*🌍 𝐀𝐫𝐞̀𝐧𝐞*: ${duel.arene.nom}
-*🚫 𝐇𝐚𝐧𝐝𝐢𝐜𝐚𝐩𝐞*: Boost 1 fois chaque 2 tours!
-*⚖️ 𝐒𝐭𝐚𝐭𝐬*: ${duel.statsCustom || "Aucune"}
-*🏞️ 𝐀𝐢𝐫 𝐝𝐞 𝐜𝐨𝐦𝐛𝐚𝐭*: illimitée
-*🦶🏼 𝐃𝐢𝐬𝐭𝐚𝐧𝐜𝐞 𝐢𝐧𝐢𝐭𝐢𝐚𝐥𝐞 📌*: 5m
-*⌚ 𝐋𝐚𝐭𝐞𝐧𝐜𝐞*: 6mins ⚠️
-*⭕ 𝐏𝐨𝐫𝐭𝐞́*: 10m
+    return `. ◥◣              🌀JUMP™🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+🔆🎴 *${j1.nom}* :
+🫀 Sta : ${j1.stats.sta}%
+🌀 En : ${j1.stats.energie}%
+❤️ Pv : ${j1.stats.pv}%
+
+                         ~  *🆚*  ~
+
+🔆🎴 *${j2.nom}* :
+🫀 Sta : ${j2.stats.sta}%
+🌀 En : ${j2.stats.energie}%
+❤️ Pv : ${j2.stats.pv}%
+
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 
-*⚠️ Vous avez 🔟 tours max pour finir votre Adversaire !*
-*Sinon la victoire sera donnée par décision selon l'offensive !*
+*🌍 𝐀𝐫𝐞̀𝐧𝐞* : ${duel.arene.nom}
+*🚫 𝐇𝐚𝐧𝐝𝐢𝐜𝐚𝐩𝐞* : Boost 1 fois chaque 2 tours!
+*⚖️ 𝐒𝐭𝐚𝐭𝐬* : ${stats}
+*🏞️ 𝐀𝐢𝐫 𝐝𝐞 𝐜𝐨𝐦𝐛𝐚𝐭* : illimitée
+*🦶🏼 𝐃𝐢𝐬𝐭𝐚𝐧𝐜𝐞 𝐢𝐧𝐢𝐭𝐢𝐚𝐥𝐞 📌* : 5m
+*⌚ 𝐋𝐚𝐭𝐞𝐧𝐜𝐞* : 7mins ⚠️
+*⭕ 𝐏𝐨𝐫𝐭𝐞́* : 10m
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+
+*⚠️ Vous avez 🔟 tours max pour finir votre Adversaire !* Sinon la victoire sera donnée par décision selon l'offensive !
 
 ╰───────────────────
-🏆NSL PRO ESPORT ARENA® | RAZORX⚡™ `;
+                                   *R A Z O R X™⚡*`;
 }
 
 //================= +DUEL =================
