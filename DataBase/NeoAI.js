@@ -3459,651 +3459,594 @@ axe_kick: {
     }
 }, 
         
-    // ============================================================
-    // ⚔️ FRAPPES AVEC ARMES
-    // ============================================================
-
-    arme: {
-
-        // ==========================================================
-        // KATANA
-        // ==========================================================
-
-        katana: {
-
-            categorie: "arme",
-            id: "KATANA",
-
-            concept:
-                "Action offensive réalisée avec une lame de type katana, permettant des frappes de coupe selon différentes trajectoires.",
-
-            trajectoires: {
-
-                // --------------------------------------------------
-                // FRAPPE FRONTALE
-                // --------------------------------------------------
-
-                frontale: {
-
-                    concept:
-                        "Frappe de coupe dirigée directement vers l'avant.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} frappe frontalement avec son katana vers {Cible}.",
-                        "{Sujet} porte une coupe frontale vers {Zone} de {Cible}.",
-                        "{Sujet} dirige son katana droit vers {Cible}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // DESCENDANTE
-                // --------------------------------------------------
-
-                descendante: {
-
-                    concept:
-                        "Frappe de coupe dirigée de haut en bas.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} abat son katana verticalement sur {Cible}.",
-                        "{Sujet} porte une coupe descendante vers {Cible}.",
-                        "{Sujet} frappe de haut en bas avec son katana."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // ASCENDANTE
-                // --------------------------------------------------
-
-                ascendante: {
-
-                    concept:
-                        "Frappe de coupe dirigée de bas en haut.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} remonte son katana vers {Cible}.",
-                        "{Sujet} porte une coupe ascendante.",
-                        "{Sujet} frappe de bas en haut avec son katana."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // OBLIQUE
-                // --------------------------------------------------
-
-                oblique: {
-
-                    concept:
-                        "Frappe de coupe suivant un angle diagonal entre une direction verticale et horizontale.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} porte une coupe oblique vers {Cible}.",
-                        "{Sujet} frappe diagonalement avec son katana.",
-                        "{Sujet} donne une coupe oblique vers la {Direction}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // REVERS
-                // --------------------------------------------------
-
-                revers: {
-
-                    concept:
-                        "Frappe exécutée dans le sens opposé au mouvement de coupe initial, généralement après une inversion de direction de la lame.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue un revers avec son katana vers {Cible}.",
-                        "{Sujet} revient avec une coupe en revers.",
-                        "{Sujet} frappe en revers vers la {Direction}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // CIRCULAIRE
-                // --------------------------------------------------
-
-                circulaire: {
-
-                    concept:
-                        "Frappe de coupe suivant un mouvement courbe autour du corps ou d'un axe.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une coupe circulaire avec son katana.",
-                        "{Sujet} fait tournoyer sa lame vers {Cible}.",
-                        "{Sujet} frappe {Cible} avec une coupe circulaire."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // HORIZONTALE
-                // --------------------------------------------------
-
-                horizontale: {
-
-                    concept:
-                        "Frappe de coupe suivant principalement un axe horizontal.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une coupe horizontale vers {Cible}.",
-                        "{Sujet} tranche horizontalement vers {Cible}.",
-                        "{Sujet} balaie avec son katana vers la {Direction}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // VERTICALE
-                // --------------------------------------------------
-
-                verticale: {
-
-                    concept:
-                        "Frappe de coupe suivant principalement un axe vertical.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} porte une coupe verticale sur {Cible}.",
-                        "{Sujet} tranche verticalement vers {Cible}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // ESTOC
-                // --------------------------------------------------
-
-                estoc: {
-
-                    concept:
-                        "Attaque utilisant principalement la pointe de la lame dans un mouvement de poussée directe.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} porte une estocade avec son katana vers {Cible}.",
-                        "{Sujet} plante la pointe de son katana vers {Cible}.",
-                        "{Sujet} pousse son katana directement vers {Cible}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // PIQUÉ
-                // --------------------------------------------------
-
-                pique: {
-
-                    concept:
-                        "Attaque descendante utilisant la pointe de la lame.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} pique avec la pointe de son katana vers {Cible}.",
-                        "{Sujet} plonge la lame vers {Cible}."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // COUPE ASCENDANTE OBLIQUE
-                // --------------------------------------------------
-
-                gyaku_kesa: {
-
-                    concept:
-                        "Coupe ascendante oblique traversant le corps selon une diagonale.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} remonte son katana en diagonale vers {Cible}.",
-                        "{Sujet} effectue une coupe ascendante oblique."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // COUPE DESCENDANTE OBLIQUE
-                // --------------------------------------------------
-
-                kesa: {
-
-                    concept:
-                        "Coupe descendante oblique traversant le corps selon une diagonale.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} abat son katana en diagonale vers {Cible}.",
-                        "{Sujet} effectue une coupe descendante oblique."
-                    ]
-                },
-
-
-                // --------------------------------------------------
-                // COUPE EN ROTATION
-                // --------------------------------------------------
-
-                rotation: {
-
-                    concept:
-                        "Coupe réalisée pendant une rotation du corps ou un changement circulaire de position.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "TRAJECTOIRE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} tourne sur lui-même et frappe avec son katana.",
-                        "{Sujet} effectue une coupe en rotation vers {Cible}."
-                    ]
-                }
-            }
-        },
-
-
-        // ==========================================================
-        // COUTEAU
-        // ==========================================================
-
-        couteau: {
-
-            categorie: "arme",
-            id: "COUTEAU",
-
-            concept:
-                "Arme courte permettant principalement des frappes d'estoc, de coupe et de revers.",
-
-            trajectoires: {
-
-                estoc: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} donne un coup de couteau direct vers {Cible}.",
-                        "{Sujet} porte une estocade vers {Zone} de {Cible}."
-                    ]
-                },
-
-                descendante: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} frappe de haut en bas avec son couteau."
-                    ]
-                },
-
-                ascendante: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} frappe de bas en haut avec son couteau."
-                    ]
-                },
-
-                horizontale: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une coupe horizontale avec son couteau."
-                    ]
-                },
-
-                revers: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} frappe en revers avec son couteau."
-                    ]
-                }
-            }
-        },
-
-
-        // ==========================================================
-        // BÂTON / MATRAQUE
-        // ==========================================================
-
-        baton: {
-
-            categorie: "arme",
-            id: "BATON",
-
-            concept:
-                "Arme contondante allongée permettant des frappes directes, circulaires et descendantes.",
-
-            trajectoires: {
-
-                frontale: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} frappe frontalement avec son bâton vers {Cible}."
-                    ]
-                },
-
-                descendante: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} abat son bâton sur {Cible}."
-                    ]
-                },
-
-                ascendante: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} remonte son bâton vers {Cible}."
-                    ]
-                },
-
-                horizontale: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} balaie horizontalement avec son bâton vers {Cible}."
-                    ]
-                },
-
-                circulaire: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} fait tournoyer son bâton vers {Cible}."
-                    ]
-                }
-            }
-        },
-
-
-        // ==========================================================
-        // LANCE
-        // ==========================================================
-
-        lance: {
-
-            categorie: "arme",
-            id: "LANCE",
-
-            concept:
-                "Arme d'hast permettant principalement des attaques d'estoc et des frappes avec le manche.",
-
-            trajectoires: {
-
-                estoc: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DISTANCE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} pousse sa lance vers {Cible}.",
-                        "{Sujet} porte une estocade avec sa lance."
-                    ]
-                },
-
-                descendante: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} abat sa lance vers {Cible}."
-                    ]
-                },
-
-                ascendante: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE"
-                    ],
-
-                    exemples: [
-                        "{Sujet} remonte sa lance vers {Cible}."
-                    ]
-                },
-
-                balayage: {
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MEMBRE",
-                        "MANIERE",
-                        "ZONE",
-                        "CIBLE",
-                        "DIRECTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} balaie avec le manche de sa lance vers {Cible}."
-                         ]
-                }
+   // ============================================================
+// ⚔️ FRAPPES AVEC ARMES
+// ============================================================
+
+arme: {
+
+    // ==========================================================
+    // KATANA
+    // ==========================================================
+
+    katana: {
+
+        categorie: "arme",
+        id: "KATANA",
+
+        concept:
+            "Action offensive réalisée avec une lame de type katana, permettant des frappes de coupe selon différentes trajectoires.",
+
+        trajectoires: {
+
+            // --------------------------------------------------
+            // FRAPPE FRONTALE
+            // --------------------------------------------------
+
+            frontale: {
+
+                concept:
+                    "Frappe de coupe dirigée directement vers l'avant.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE"
+                ],
+
+                exemples: [
+                    "{Sujet} frappe frontalement avec son katana vers {Cible}.",
+                    "{Sujet} porte une coupe frontale vers {Zone} de {Cible}.",
+                    "{Sujet} dirige son katana droit vers {Cible}.",
+                    "{Sujet} lance une coupe directe avec son katana vers {Cible}.",
+                    "{Sujet} attaque {Cible} avec une frappe frontale de son katana.",
+                    "{Sujet} projette sa lame directement vers {Cible}.",
+                    "{Sujet} porte son katana droit devant lui pour frapper {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe dirigée vers l'avant.",
+                    "{Sujet} effectue une coupe directe vers {Zone} de {Cible}.",
+                    "{Sujet} avance son katana directement vers {Cible}.",
+                    "{Sujet} porte une frappe frontale de lame contre {Cible}.",
+                    "{Sujet} dirige la lame de son katana vers {Cible} en ligne droite.",
+                    "{Sujet} frappe droit devant avec son katana vers {Cible}.",
+                    "{Sujet} effectue une attaque frontale avec son katana contre {Cible}.",
+                    "{Sujet} pousse sa lame vers l'avant pour atteindre {Cible}.",
+                    "{Sujet} donne une coupe directe en direction de {Cible}.",
+                    "{Sujet} abat son katana droit vers {Cible}.",
+                    "{Sujet} porte une frappe de face avec son katana vers {Cible}.",
+                    "{Sujet} dirige une coupe frontale vers {Zone} de {Cible}.",
+                    "{Sujet} attaque directement {Cible} avec son katana."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // DESCENDANTE
+            // --------------------------------------------------
+
+            descendante: {
+
+                concept:
+                    "Frappe de coupe dirigée de haut en bas.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE"
+                ],
+
+                exemples: [
+                    "{Sujet} abat son katana verticalement sur {Cible}.",
+                    "{Sujet} porte une coupe descendante vers {Cible}.",
+                    "{Sujet} frappe de haut en bas avec son katana.",
+                    "{Sujet} rabat son katana vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe descendante.",
+                    "{Sujet} fait tomber sa lame vers {Cible}.",
+                    "{Sujet} lève son katana puis l'abat sur {Cible}.",
+                    "{Sujet} dirige une coupe de haut en bas vers {Cible}.",
+                    "{Sujet} tranche vers le bas avec son katana.",
+                    "{Sujet} abat sa lame sur {Zone} de {Cible}.",
+                    "{Sujet} porte une frappe verticale descendante sur {Cible}.",
+                    "{Sujet} descend son katana directement vers {Cible}.",
+                    "{Sujet} frappe {Cible} en rabattant sa lame vers le bas.",
+                    "{Sujet} effectue une coupe descendante de son katana.",
+                    "{Sujet} fait passer son katana du haut vers le bas sur {Cible}.",
+                    "{Sujet} abat sa lame droit sur {Cible}.",
+                    "{Sujet} lance une coupe descendante vers {Zone} de {Cible}.",
+                    "{Sujet} frappe {Cible} avec un mouvement de lame descendant.",
+                    "{Sujet} rabat son katana verticalement contre {Cible}.",
+                    "{Sujet} termine son mouvement par une coupe descendante sur {Cible}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // ASCENDANTE
+            // --------------------------------------------------
+
+            ascendante: {
+
+                concept:
+                    "Frappe de coupe dirigée de bas en haut.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE"
+                ],
+
+                exemples: [
+                    "{Sujet} remonte son katana vers {Cible}.",
+                    "{Sujet} porte une coupe ascendante vers {Cible}.",
+                    "{Sujet} frappe de bas en haut avec son katana.",
+                    "{Sujet} relève sa lame vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe ascendante.",
+                    "{Sujet} fait remonter son katana vers {Cible}.",
+                    "{Sujet} lance une coupe du bas vers le haut.",
+                    "{Sujet} dirige sa lame vers le haut pour frapper {Cible}.",
+                    "{Sujet} tranche en remontant son katana vers {Cible}.",
+                    "{Sujet} porte une frappe ascendante vers {Zone} de {Cible}.",
+                    "{Sujet} soulève sa lame en direction de {Cible}.",
+                    "{Sujet} frappe {Cible} avec un mouvement de lame ascendant.",
+                    "{Sujet} effectue une coupe ascendante avec son katana.",
+                    "{Sujet} remonte rapidement sa lame vers {Cible}.",
+                    "{Sujet} dirige une coupe vers le haut contre {Cible}.",
+                    "{Sujet} frappe de bas en haut avec la lame vers {Cible}.",
+                    "{Sujet} fait monter son katana sous la garde de {Cible}.",
+                    "{Sujet} porte son katana vers le haut pour atteindre {Cible}.",
+                    "{Sujet} effectue une frappe ascendante vers {Zone} de {Cible}.",
+                    "{Sujet} termine son mouvement en remontant sa lame vers {Cible}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // OBLIQUE
+            // --------------------------------------------------
+
+            oblique: {
+
+                concept:
+                    "Frappe de coupe suivant un angle diagonal entre une direction verticale et horizontale.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} porte une coupe oblique vers {Cible}.",
+                    "{Sujet} frappe diagonalement avec son katana.",
+                    "{Sujet} donne une coupe oblique vers la {Direction}.",
+                    "{Sujet} frappe {Cible} avec une coupe diagonale.",
+                    "{Sujet} dirige son katana en diagonale vers {Cible}.",
+                    "{Sujet} porte une coupe oblique vers {Zone} de {Cible}.",
+                    "{Sujet} tranche en diagonale vers la {Direction}.",
+                    "{Sujet} effectue une frappe oblique avec son katana vers {Cible}.",
+                    "{Sujet} abat sa lame en diagonale vers {Cible}.",
+                    "{Sujet} remonte sa lame en diagonale vers {Cible}.",
+                    "{Sujet} frappe {Cible} selon une trajectoire oblique.",
+                    "{Sujet} dirige une coupe diagonale vers la {Direction}.",
+                    "{Sujet} fait passer son katana en oblique vers {Cible}.",
+                    "{Sujet} porte une frappe diagonale sur {Zone} de {Cible}.",
+                    "{Sujet} coupe en biais vers {Cible}.",
+                    "{Sujet} attaque {Cible} avec une coupe orientée vers la {Direction}.",
+                    "{Sujet} effectue un mouvement de coupe oblique vers {Cible}.",
+                    "{Sujet} tranche en biais avec son katana vers {Cible}.",
+                    "{Sujet} lance sa lame en diagonale vers {Cible}.",
+                    "{Sujet} porte une coupe oblique en direction de la {Direction}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // REVERS
+            // --------------------------------------------------
+
+            revers: {
+
+                concept:
+                    "Frappe exécutée dans le sens opposé au mouvement de coupe initial, généralement après une inversion de direction de la lame.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} effectue un revers avec son katana vers {Cible}.",
+                    "{Sujet} revient avec une coupe en revers.",
+                    "{Sujet} frappe en revers vers la {Direction}.",
+                    "{Sujet} renverse le mouvement de sa lame pour frapper {Cible}.",
+                    "{Sujet} porte un revers de katana vers {Cible}.",
+                    "{Sujet} inverse sa coupe et frappe {Cible} en revers.",
+                    "{Sujet} ramène sa lame en revers vers {Cible}.",
+                    "{Sujet} effectue une coupe en retour vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec le mouvement de retour de son katana.",
+                    "{Sujet} inverse la direction de sa lame vers la {Direction}.",
+                    "{Sujet} lance un revers vers {Zone} de {Cible}.",
+                    "{Sujet} revient avec sa lame pour frapper {Cible}.",
+                    "{Sujet} effectue un mouvement de revers vers la {Direction}.",
+                    "{Sujet} frappe {Cible} après avoir inversé la trajectoire de son katana.",
+                    "{Sujet} ramène son katana dans la direction opposée pour toucher {Cible}.",
+                    "{Sujet} porte une coupe de revers vers {Cible}.",
+                    "{Sujet} change brusquement la direction de sa lame et frappe en revers.",
+                    "{Sujet} fait revenir sa lame vers {Cible} avec un revers.",
+                    "{Sujet} effectue une coupe en retour vers la {Direction}.",
+                    "{Sujet} attaque {Cible} avec un revers de son katana."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // CIRCULAIRE
+            // --------------------------------------------------
+
+            circulaire: {
+
+                concept:
+                    "Frappe de coupe suivant un mouvement courbe autour du corps ou d'un axe.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} effectue une coupe circulaire avec son katana.",
+                    "{Sujet} fait tournoyer sa lame vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe circulaire.",
+                    "{Sujet} décrit un arc avec son katana vers {Cible}.",
+                    "{Sujet} fait tourner sa lame vers la {Direction}.",
+                    "{Sujet} porte une coupe circulaire vers {Cible}.",
+                    "{Sujet} frappe en arc de cercle vers {Cible}.",
+                    "{Sujet} fait pivoter son katana pour couper {Cible}.",
+                    "{Sujet} lance une frappe circulaire vers la {Direction}.",
+                    "{Sujet} fait passer sa lame autour de lui avant de frapper {Cible}.",
+                    "{Sujet} décrit un mouvement circulaire avec son katana vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une trajectoire courbe.",
+                    "{Sujet} fait tournoyer sa lame dans la direction de {Cible}.",
+                    "{Sujet} effectue une coupe en arc vers {Cible}.",
+                    "{Sujet} balaie avec son katana dans un mouvement circulaire.",
+                    "{Sujet} porte une frappe circulaire vers la {Direction}.",
+                    "{Sujet} fait tourner sa lame autour de son axe pour atteindre {Cible}.",
+                    "{Sujet} coupe {Cible} avec un mouvement courbe de son katana.",
+                    "{Sujet} lance sa lame dans un mouvement circulaire vers {Cible}.",
+                    "{Sujet} effectue une coupe tournoyante en direction de la {Direction}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // HORIZONTALE
+            // --------------------------------------------------
+
+            horizontale: {
+
+                concept:
+                    "Frappe de coupe suivant principalement un axe horizontal.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} effectue une coupe horizontale vers {Cible}.",
+                    "{Sujet} tranche horizontalement vers {Cible}.",
+                    "{Sujet} balaie avec son katana vers la {Direction}.",
+                    "{Sujet} frappe {Cible} avec une coupe horizontale.",
+                    "{Sujet} dirige sa lame horizontalement vers {Cible}.",
+                    "{Sujet} porte une coupe horizontale vers {Zone} de {Cible}.",
+                    "{Sujet} balance son katana horizontalement vers {Cible}.",
+                    "{Sujet} tranche de gauche à droite vers {Cible}.",
+                    "{Sujet} effectue une frappe horizontale vers la {Direction}.",
+                    "{Sujet} balaie sa lame devant lui pour frapper {Cible}.",
+                    "{Sujet} porte son katana horizontalement vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec un mouvement latéral de sa lame.",
+                    "{Sujet} coupe horizontalement dans la direction de {Cible}.",
+                    "{Sujet} dirige une coupe vers la {Direction}.",
+                    "{Sujet} effectue un balayage horizontal avec son katana.",
+                    "{Sujet} frappe {Cible} avec une lame lancée horizontalement.",
+                    "{Sujet} fait passer son katana horizontalement vers {Cible}.",
+                    "{Sujet} porte une coupe latérale vers {Zone} de {Cible}.",
+                    "{Sujet} balaie son katana vers {Cible} dans un mouvement horizontal.",
+                    "{Sujet} termine son mouvement par une coupe horizontale vers la {Direction}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // VERTICALE
+            // --------------------------------------------------
+
+            verticale: {
+
+                concept:
+                    "Frappe de coupe suivant principalement un axe vertical.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE"
+                ],
+
+                exemples: [
+                    "{Sujet} porte une coupe verticale sur {Cible}.",
+                    "{Sujet} tranche verticalement vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe verticale.",
+                    "{Sujet} dirige son katana verticalement vers {Cible}.",
+                    "{Sujet} abat sa lame dans un axe vertical sur {Cible}.",
+                    "{Sujet} remonte sa lame verticalement vers {Cible}.",
+                    "{Sujet} effectue une frappe verticale avec son katana.",
+                    "{Sujet} coupe verticalement vers {Zone} de {Cible}.",
+                    "{Sujet} frappe de manière verticale avec sa lame.",
+                    "{Sujet} porte son katana dans un mouvement vertical vers {Cible}.",
+                    "{Sujet} effectue une coupe droite verticale sur {Cible}.",
+                    "{Sujet} dirige une frappe verticale vers {Cible}.",
+                    "{Sujet} tranche {Cible} selon un axe vertical.",
+                    "{Sujet} abat son katana verticalement vers {Cible}.",
+                    "{Sujet} remonte son katana dans un mouvement vertical contre {Cible}.",
+                    "{Sujet} lance une coupe verticale vers {Zone} de {Cible}.",
+                    "{Sujet} frappe {Cible} avec un mouvement vertical de sa lame.",
+                    "{Sujet} effectue une coupe verticale directe vers {Cible}.",
+                    "{Sujet} porte une frappe de lame selon un axe vertical.",
+                    "{Sujet} dirige une coupe verticale directement vers {Cible}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // ESTOC
+            // --------------------------------------------------
+
+            estoc: {
+
+                concept:
+                    "Attaque utilisant principalement la pointe de la lame dans un mouvement de poussée directe.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE"
+                ],
+
+                exemples: [
+                    "{Sujet} porte une estocade avec son katana vers {Cible}.",
+                    "{Sujet} plante la pointe de son katana vers {Cible}.",
+                    "{Sujet} pousse son katana directement vers {Cible}.",
+                    "{Sujet} transperce vers {Cible} avec la pointe de sa lame.",
+                    "{Sujet} porte une attaque d'estoc vers {Cible}.",
+                    "{Sujet} tend son katana pour atteindre {Cible} avec la pointe.",
+                    "{Sujet} dirige la pointe de son katana vers {Cible}.",
+                    "{Sujet} pousse sa lame en ligne droite vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une estocade directe.",
+                    "{Sujet} projette la pointe de sa lame vers {Cible}.",
+                    "{Sujet} porte une estocade vers {Zone} de {Cible}.",
+                    "{Sujet} avance son katana pour piquer directement {Cible}.",
+                    "{Sujet} enfonce la pointe de sa lame vers {Cible}.",
+                    "{Sujet} effectue une poussée d'estoc vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec la pointe de son katana.",
+                    "{Sujet} tend sa lame droit devant {Cible} pour porter une estocade.",
+                    "{Sujet} dirige une poussée de lame vers {Cible}.",
+                    "{Sujet} lance une estocade directe vers {Cible}.",
+                    "{Sujet} pousse son arme vers {Zone} de {Cible}.",
+                    "{Sujet} attaque {Cible} en utilisant la pointe de son katana."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // PIQUÉ
+            // --------------------------------------------------
+
+            pique: {
+
+                concept:
+                    "Attaque descendante utilisant la pointe de la lame.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE"
+                ],
+
+                exemples: [
+                    "{Sujet} pique avec la pointe de son katana vers {Cible}.",
+                    "{Sujet} plonge la lame vers {Cible}.",
+                    "{Sujet} dirige la pointe de son katana vers le bas sur {Cible}.",
+                    "{Sujet} porte un piqué avec son katana vers {Cible}.",
+                    "{Sujet} abat la pointe de sa lame vers {Cible}.",
+                    "{Sujet} plonge son katana en direction de {Cible}.",
+                    "{Sujet} attaque {Cible} avec une pointe descendante.",
+                    "{Sujet} enfonce la pointe de son katana vers {Cible}.",
+                    "{Sujet} dirige son arme vers le bas pour atteindre {Cible}.",
+                    "{Sujet} frappe {Cible} avec un mouvement de piqué.",
+                    "{Sujet} fait descendre la pointe de sa lame vers {Cible}.",
+                    "{Sujet} porte une attaque en piqué vers {Zone} de {Cible}.",
+                    "{Sujet} plonge son katana directement vers {Cible}.",
+                    "{Sujet} rabat la pointe de sa lame sur {Cible}.",
+                    "{Sujet} effectue un piqué vertical avec son katana.",
+                    "{Sujet} descend son arme pointe en avant vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une attaque descendante de la pointe.",
+                    "{Sujet} dirige la pointe de sa lame vers {Cible} depuis le haut.",
+                    "{Sujet} lance son katana vers le bas pour atteindre {Cible}.",
+                    "{Sujet} effectue une attaque en piqué avec la pointe de son katana."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // COUPE ASCENDANTE OBLIQUE
+            // --------------------------------------------------
+
+            gyaku_kesa: {
+
+                concept:
+                    "Coupe ascendante oblique traversant le corps selon une diagonale.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} remonte son katana en diagonale vers {Cible}.",
+                    "{Sujet} effectue une coupe ascendante oblique vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe diagonale ascendante.",
+                    "{Sujet} dirige sa lame du bas vers le haut en diagonale.",
+                    "{Sujet} porte un gyaku kesa vers {Cible}.",
+                    "{Sujet} remonte sa lame obliquement vers la {Direction}.",
+                    "{Sujet} frappe en diagonale ascendante vers {Zone} de {Cible}.",
+                    "{Sujet} lance une coupe oblique montante vers {Cible}.",
+                    "{Sujet} fait remonter son katana en biais vers {Cible}.",
+                    "{Sujet} tranche de bas en haut selon une trajectoire oblique.",
+                    "{Sujet} porte une coupe ascendante vers la {Direction}.",
+                    "{Sujet} frappe {Cible} avec une lame remontant en diagonale.",
+                    "{Sujet} effectue une coupe montante oblique avec son katana.",
+                    "{Sujet} dirige une coupe ascendante vers {Cible}.",
+                    "{Sujet} remonte sa lame en biais pour frapper {Cible}.",
+                    "{Sujet} lance un gyaku kesa vers {Cible}.",
+                    "{Sujet} frappe de bas en haut dans une direction oblique.",
+                    "{Sujet} porte une coupe ascendante diagonale vers {Zone} de {Cible}.",
+                    "{Sujet} fait monter son katana en diagonale vers la {Direction}.",
+                    "{Sujet} termine son mouvement par une coupe ascendante oblique sur {Cible}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // COUPE DESCENDANTE OBLIQUE
+            // --------------------------------------------------
+
+            kesa: {
+
+                concept:
+                    "Coupe descendante oblique traversant le corps selon une diagonale.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} abat son katana en diagonale vers {Cible}.",
+                    "{Sujet} effectue une coupe descendante oblique vers {Cible}.",
+                    "{Sujet} frappe {Cible} avec une coupe diagonale descendante.",
+                    "{Sujet} dirige sa lame du haut vers le bas en diagonale.",
+                    "{Sujet} porte un kesa vers {Cible}.",
+                    "{Sujet} abat sa lame obliquement vers la {Direction}.",
+                    "{Sujet} frappe en diagonale descendante vers {Zone} de {Cible}.",
+                    "{Sujet} lance une coupe oblique descendante vers {Cible}.",
+                    "{Sujet} fait descendre son katana en biais vers {Cible}.",
+                    "{Sujet} tranche de haut en bas selon une trajectoire oblique.",
+                    "{Sujet} porte une coupe descendante vers la {Direction}.",
+                    "{Sujet} frappe {Cible} avec une lame descendant en diagonale.",
+                    "{Sujet} effectue une coupe descendante oblique avec son katana.",
+                    "{Sujet} dirige une coupe descendante vers {Cible}.",
+                    "{Sujet} abat sa lame en biais pour frapper {Cible}.",
+                    "{Sujet} lance un kesa vers {Cible}.",
+                    "{Sujet} frappe de haut en bas dans une direction oblique.",
+                    "{Sujet} porte une coupe descendante diagonale vers {Zone} de {Cible}.",
+                    "{Sujet} fait descendre son katana en diagonale vers la {Direction}.",
+                    "{Sujet} termine son mouvement par une coupe descendante oblique sur {Cible}."
+                ]
+            },
+
+
+            // --------------------------------------------------
+            // COUPE EN ROTATION
+            // --------------------------------------------------
+
+            rotation: {
+
+                concept:
+                    "Coupe réalisée pendant une rotation du corps ou un changement circulaire de position.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "MEMBRE",
+                    "MANIERE",
+                    "TRAJECTOIRE",
+                    "ZONE",
+                    "CIBLE",
+                    "DIRECTION"
+                ],
+
+                exemples: [
+                    "{Sujet} tourne sur lui-même et frappe avec son katana.",
+                    "{Sujet} effectue une coupe en rotation vers {Cible}.",
+                    "{Sujet} pivote et fait tournoyer son katana vers {Cible}.",
+                    "{Sujet} tourne avant de porter une coupe vers {Cible}.",
+                    "{Sujet} effectue une rotation du corps avec son katana vers {Cible}.",
+                    "{Sujet} frappe {Cible} pendant une rotation.",
+                    "{Sujet} fait tourner son corps et tranche vers la {Direction}.",
+                    "{Sujet} tourne sur lui-même avant de frapper {Cible}.",
+                    "{Sujet} porte une coupe tournoyante avec son katana.",
+                    "{Sujet} effectue une rotation et dirige sa lame vers {Cible}.",
+                    "{Sujet} tourne en entraînant son katana dans une trajectoire circulaire.",
+                    "{Sujet} frappe {Cible} après avoir effectué une rotation.",
+                    "{Sujet} fait pivoter son corps puis porte une coupe vers {Cible}.",
+                    "{Sujet} tourne avec son katana et frappe dans la direction de {Cible}.",
+                    "{Sujet} réalise une coupe en rotation vers la {Direction}.",
+                    "{Sujet} effectue un mouvement tournant avant de frapper {Cible}.",
+                    "{Sujet} fait tourner sa lame autour de lui pour atteindre {Cible}.",
+                    "{Sujet} pivote sur lui-même et porte une frappe tournoyante.",
+                    "{Sujet} tourne et dirige son katana vers {Zone} de {Cible}.",
+                    "{Sujet} effectue une coupe tournante avec son katana vers {Cible}."
+                ]
             }
         }
-    },
+    },                                                                      
+                                        
     
 // ==========================================================
 // 🛡️ DEFENSE
