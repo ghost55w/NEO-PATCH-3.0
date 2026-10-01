@@ -78,45 +78,113 @@ function generateFicheDuel(duel) {
                                    *R A Z O R X™⚡*`;
 }
 
-//================= +DUEL =================
-ovlcmd({
-    nom_cmd: "duel",
-    classe: "Duel",
-    react: "⚔️"
-}, async (ms_org, ovl, { arg, ms }) => {
-    if (!arg.length) return;
+//========================================
+// 🌀 MESSAGE DE CHARGEMENT
+//========================================
 
-    
-    const input = arg.join(' '); // ne pas remplacer ou nettoyer
-    const [players, statsCustom] = input.split('/').map(v => v.trim());
-    const [p1, p2] = players.split('vs').map(v => v.trim());
-    if (!p1 || !p2) return;
+const loading = await ovl.sendMessage(ms_org, {
+    text: "🏟️ Sélection de l'arène."
+}, { quoted: ms });
 
-    const equipe1 = [{ nom: p1, stats: { sta: 100, energie: 100, pv: 100 } }];
-    const equipe2 = [{ nom: p2, stats: { sta: 100, energie: 100, pv: 100 } }];
 
-    const arene = tirerAr();
+//========================================
+// 🏟️ ÉTAPE 1 — SÉLECTION DE L'ARÈNE
+// 7.5 secondes
+//========================================
 
-    duelsEnCours[ms_org] = {
-        equipe1,
-        equipe2,
-        arene,
-        statsCustom: statsCustom || null
-    };
+for (const txt of [
+    "🏟️ Sélection de l'arène..",
+    "🏟️ Sélection de l'arène...",
+    "🏟️ Sélection de l'arène."
+]) {
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 2500)
+    );
 
     await ovl.sendMessage(ms_org, {
-        video: { url: 'https://files.catbox.moe/yyxzt2.mp4' },
-        gifPlayback: true,
-        caption: `🌀Préparation de match...`
-    }, { quoted: ms });
+        text: txt,
+        edit: loading.key
+    });
+}
+
+
+//========================================
+// 🌀 ÉTAPE 2 — PRÉPARATION DU MATCH
+// 7.5 secondes
+//========================================
+
+for (const txt of [
+    "🌀 Préparation du match.",
+    "🌀 Préparation du match..",
+    "🌀 Préparation du match..."
+]) {
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 2500)
+    );
 
     await ovl.sendMessage(ms_org, {
-        image: { url: arene.image },
-        caption: generateFicheDuel(duelsEnCours[ms_org])
-    }, { quoted: ms });
-});
+        text: txt,
+        edit: loading.key
+    });
+}
 
 
+//========================================
+// 🔥 ÉTAPE 3 — INITIALISATION
+// 7.5 secondes
+//========================================
+
+for (const txt of [
+    "🔥 Initialisation du combat.",
+    "🔥 Initialisation du combat..",
+    "🔥 Initialisation du combat..."
+]) {
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 2500)
+    );
+
+    await ovl.sendMessage(ms_org, {
+        text: txt,
+        edit: loading.key
+    });
+}
+
+
+//========================================
+// ♨️ ÉTAPE 4 — DÉBUT DU COMBAT
+// 7.5 secondes
+//========================================
+
+for (const txt of [
+    "♨️ Le combat va commencer.",
+    "♨️ Le combat va commencer..",
+    "♨️ Le combat va commencer..."
+]) {
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 2500)
+    );
+
+    await ovl.sendMessage(ms_org, {
+        text: txt,
+        edit: loading.key
+    });
+}
+
+
+//========================================
+// 🏟️ AFFICHAGE DE LA FICHE DU DUEL
+//========================================
+
+await ovl.sendMessage(ms_org, {
+    image: {
+        url: arene.image
+    },
+    caption: generateFicheDuel(duelsEnCours[ms_org])
+}, { quoted: ms });
 
 
 //================= +STATS =================
