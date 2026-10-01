@@ -261,8 +261,9 @@ if (
 
                 await ovl.sendMessage(ms_org, {
                     image: { url: card.image },
-                    caption: `🎴 Carte: ${card.name}
+                    caption: `◥◣ 🎴 Carte: ${card.name}
 🔅 Grade: ${card.grade}
+🔅 Univers: ${card.univers}
 🔅 Catégorie: ${card.category}
 🔅 Placement: ${card.placement}
 🛍️ Prix: ${formatNumber(confirmPrice)} ${cardIcon}
