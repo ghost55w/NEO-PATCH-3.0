@@ -333,28 +333,28 @@ ovlcmd({
 /* ================= +PAVEMODO (PAVÉ VIDE ATTENDU) ================= */
 
 ovlcmd({
-    nom_cmd: "pavemodo",
+    nom_cmd: "pavemodo🌀",
     classe: "Duel",
     react: "📄",
     desc: "Envoie le pavé RazorX™ vide."
 }, async (ms_org, ovl) => {
     
-const pave = `
-. .                    ⚡RAZORX™
-▔▔▔▔▔▔▔▔▔░▒░▔▔▔
+const pave = `. ◥◣              🌀JUMP™🔆
+▔▔▔▔▔▔▔▔▔▔▔◥◣▔▔▔▔▔▔▔
                              
-▶️\`Match Live\`:
-@j1 : Strikes: 0 | attaques: 0
-@j2 : Strikes: 0 | attaques: 0
+▶️`Match Live`: 
+🎮j1 : Strikes: 0 | attaques: 0
+🎮j2 : Strikes: 0 | attaques: 0
 
-▔▔▔▔▔▔▔▔▔▔▔▔░▔▔▔▔▔▔▔▔▔▔▔▔
-🏆\`RESULTAT\`: 
-victoire :  
-défaite :   
+▔▔▔▔▔▔▔▔▔▔▔▔░▔▔▔▔▔▔▔▔
+🏆`RESULTAT`: 
+◥◣victoire :  
+◥◣défaite : 
+👤Arbitre:  
 ⏱️Durée: 
 
 ╰───────────────────
-🏆NSL PRO ESPORT ARENA® | RAZORX⚡™ `;
+                        *R A Z O R X™⚡*`;
 
     await ovl.sendMessage(ms_org, { text: pave });
 });
