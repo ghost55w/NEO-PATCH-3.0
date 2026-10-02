@@ -5799,187 +5799,186 @@ parade_arme: {
     }
 },
 
-
-// ==========================================================
+        // ==========================================================
 // DÉVIATION AVEC ARME
 // ==========================================================
 
-deviation_arme: {
+        deviation_arme: {
 
-    categorie: "defense",
+            categorie: "defense",
 
-    id: "DEVIATION_ARME",
-
-    concept:
-        "Action défensive consistant à utiliser une arme pour modifier volontairement la trajectoire d'une attaque adverse.",
-
-    trajectoires: {
-
-        laterale: {
+            id: "DEVIATION_ARME",
 
             concept:
-                "Déviation d'une attaque vers un côté à l'aide d'une arme.",
+                "Action défensive consistant à utiliser une arme pour modifier volontairement la trajectoire d'une attaque adverse.",
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "ARME",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "DIRECTION",
-                "INTENTION"
-            ],
+            trajectoires: {
 
-            exemples: [
-                "{Sujet} dévie la lame de {Cible} vers la droite avec son katana.",
-                "{Sujet} dévie le coup de {Cible} vers la gauche avec son katana.",
-                "{Sujet} détourne la frappe vers l'extérieur avec son katana.",
-                "{Sujet} guide la lame de {Cible} vers la droite avec son katana.",
-                "{Sujet} accompagne le coup de {Cible} vers la gauche avec sa lame.",
-                "{Sujet} repousse la lame adverse sur le côté avec son katana.",
-                "{Sujet} dévie horizontalement la frappe vers l'extérieur avec son katana.",
-                "{Sujet} fait glisser son katana contre la lame adverse pour la dévier.",
-                "{Sujet} détourne rapidement l'attaque de {Cible} vers la droite.",
-                "{Sujet} guide la frappe adverse vers la gauche avec son katana.",
-                "{Sujet} écarte la lame de {Cible} de son axe avec son katana.",
-                "{Sujet} dévie le coup vers l'extérieur en faisant glisser sa lame.",
-                "{Sujet} repousse la trajectoire de l'attaque vers la droite avec son katana.",
-                "{Sujet} accompagne la lame adverse vers la gauche avec son katana.",
-                "{Sujet} détourne le coup de {Cible} sur le côté avec sa lame.",
-                "{Sujet} modifie la trajectoire de la frappe vers l'extérieur avec son katana.",
-                "{Sujet} dévie la lame adverse latéralement avec son katana.",
-                "{Sujet} guide le coup de {Cible} hors de son axe avec sa lame.",
-                "{Sujet} écarte rapidement la frappe adverse vers la droite.",
-                "{Sujet} détourne la trajectoire du coup de {Cible} vers la gauche avec son katana."
-            ]
-        },
+                laterale: {
 
-        haut: {
+                    concept:
+                        "Déviation d'une attaque vers un côté à l'aide d'une arme.",
 
-            concept:
-                "Déviation d'une attaque vers le haut à l'aide d'une arme.",
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "ARME",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "ARME",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "DIRECTION",
-                "INTENTION"
-            ],
+                    exemples: [
+                        "{Sujet} dévie la lame de {Cible} vers la droite avec son katana.",
+                        "{Sujet} dévie le coup de {Cible} vers la gauche avec son katana.",
+                        "{Sujet} détourne la frappe vers l'extérieur avec son katana.",
+                        "{Sujet} guide la lame de {Cible} vers la droite avec son katana.",
+                        "{Sujet} accompagne le coup de {Cible} vers la gauche avec sa lame.",
+                        "{Sujet} repousse la lame adverse sur le côté avec son katana.",
+                        "{Sujet} dévie horizontalement la frappe vers l'extérieur avec son katana.",
+                        "{Sujet} fait glisser son katana contre la lame adverse pour la dévier.",
+                        "{Sujet} détourne rapidement l'attaque de {Cible} vers la droite.",
+                        "{Sujet} guide la frappe adverse vers la gauche avec son katana.",
+                        "{Sujet} écarte la lame de {Cible} de son axe avec son katana.",
+                        "{Sujet} dévie le coup vers l'extérieur en faisant glisser sa lame.",
+                        "{Sujet} repousse la trajectoire de l'attaque vers la droite avec son katana.",
+                        "{Sujet} accompagne la lame adverse vers la gauche avec son katana.",
+                        "{Sujet} détourne le coup de {Cible} sur le côté avec sa lame.",
+                        "{Sujet} modifie la trajectoire de la frappe vers l'extérieur avec son katana.",
+                        "{Sujet} dévie la lame adverse latéralement avec son katana.",
+                        "{Sujet} guide le coup de {Cible} hors de son axe avec sa lame.",
+                        "{Sujet} écarte rapidement la frappe adverse vers la droite.",
+                        "{Sujet} détourne la trajectoire du coup de {Cible} vers la gauche avec son katana."
+                    ]
+                },
 
-            exemples: [
-                "{Sujet} dévie la lame de {Cible} vers le haut avec son katana.",
-                "{Sujet} relève la frappe de {Cible} avec son katana.",
-                "{Sujet} guide le coup adverse vers le haut avec sa lame.",
-                "{Sujet} détourne la frappe vers le haut avec son katana.",
-                "{Sujet} soulève la trajectoire de la lame de {Cible} avec son katana.",
-                "{Sujet} dévie le coup montant avec sa lame vers le haut.",
-                "{Sujet} utilise son katana pour relever la trajectoire de l'attaque.",
-                "{Sujet} accompagne la lame adverse vers le haut avec son katana.",
-                "{Sujet} repousse la frappe de {Cible} vers le haut avec sa lame.",
-                "{Sujet} fait glisser son katana contre la lame adverse pour la relever.",
-                "{Sujet} dévie rapidement le coup vers le haut avec son katana.",
-                "{Sujet} détourne la trajectoire de la frappe vers le haut.",
-                "{Sujet} guide la lame de {Cible} vers le haut avec son katana.",
-                "{Sujet} écarte la frappe de son axe en la dirigeant vers le haut.",
-                "{Sujet} relève le coup descendant de {Cible} avec son katana.",
-                "{Sujet} modifie la trajectoire de l'attaque en la dirigeant vers le haut.",
-                "{Sujet} dévie la lame adverse vers le haut avec un mouvement de son katana.",
-                "{Sujet} accompagne le coup de {Cible} vers le haut avec sa lame.",
-                "{Sujet} détourne rapidement la frappe vers le haut avec son katana.",
-                "{Sujet} guide l'attaque adverse vers le haut afin de modifier sa trajectoire."
-            ]
-        },
+                haut: {
 
-        bas: {
+                    concept:
+                        "Déviation d'une attaque vers le haut à l'aide d'une arme.",
 
-            concept:
-                "Déviation d'une attaque vers le bas à l'aide d'une arme.",
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "ARME",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "ARME",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "DIRECTION",
-                "INTENTION"
-            ],
+                    exemples: [
+                        "{Sujet} dévie la lame de {Cible} vers le haut avec son katana.",
+                        "{Sujet} relève la frappe de {Cible} avec son katana.",
+                        "{Sujet} guide le coup adverse vers le haut avec sa lame.",
+                        "{Sujet} détourne la frappe vers le haut avec son katana.",
+                        "{Sujet} soulève la trajectoire de la lame de {Cible} avec son katana.",
+                        "{Sujet} dévie le coup montant avec sa lame vers le haut.",
+                        "{Sujet} utilise son katana pour relever la trajectoire de l'attaque.",
+                        "{Sujet} accompagne la lame adverse vers le haut avec son katana.",
+                        "{Sujet} repousse la frappe de {Cible} vers le haut avec sa lame.",
+                        "{Sujet} fait glisser son katana contre la lame adverse pour la relever.",
+                        "{Sujet} dévie rapidement le coup vers le haut avec son katana.",
+                        "{Sujet} détourne la trajectoire de la frappe vers le haut.",
+                        "{Sujet} guide la lame de {Cible} vers le haut avec son katana.",
+                        "{Sujet} écarte la frappe de son axe en la dirigeant vers le haut.",
+                        "{Sujet} relève le coup descendant de {Cible} avec son katana.",
+                        "{Sujet} modifie la trajectoire de l'attaque en la dirigeant vers le haut.",
+                        "{Sujet} dévie la lame adverse vers le haut avec un mouvement de son katana.",
+                        "{Sujet} accompagne le coup de {Cible} vers le haut avec sa lame.",
+                        "{Sujet} détourne rapidement la frappe vers le haut avec son katana.",
+                        "{Sujet} guide l'attaque adverse vers le haut afin de modifier sa trajectoire."
+                    ]
+                },
 
-            exemples: [
-                "{Sujet} dévie la lame de {Cible} vers le bas avec son katana.",
-                "{Sujet} guide la frappe de {Cible} vers le bas avec sa lame.",
-                "{Sujet} détourne le coup adverse vers le bas avec son katana.",
-                "{Sujet} abaisse la trajectoire de la lame de {Cible} avec son katana.",
-                "{Sujet} dévie la frappe vers le bas avec sa lame.",
-                "{Sujet} accompagne le coup de {Cible} vers le bas avec son katana.",
-                "{Sujet} repousse la lame adverse vers le bas avec son katana.",
-                "{Sujet} fait glisser son katana contre la lame pour la diriger vers le bas.",
-                "{Sujet} détourne rapidement l'attaque vers le bas avec son katana.",
-                "{Sujet} guide la trajectoire du coup vers le bas avec sa lame.",
-                "{Sujet} dévie la frappe descendante vers le bas avec son katana.",
-                "{Sujet} utilise sa lame pour abaisser la trajectoire de l'attaque.",
-                "{Sujet} modifie la trajectoire du coup de {Cible} en la dirigeant vers le bas.",
-                "{Sujet} écarte la lame adverse vers le bas avec son katana.",
-                "{Sujet} accompagne la frappe de {Cible} vers le bas avec sa lame.",
-                "{Sujet} détourne le coup de son axe en le dirigeant vers le bas.",
-                "{Sujet} dévie rapidement la lame adverse vers le bas.",
-                "{Sujet} guide la frappe vers le sol avec son katana.",
-                "{Sujet} repousse la trajectoire de l'attaque vers le bas avec sa lame.",
-                "{Sujet} modifie la direction du coup de {Cible} vers le bas avec son katana."
-            ]
-        },
+                bas: {
 
-        circulaire: {
+                    concept:
+                        "Déviation d'une attaque vers le bas à l'aide d'une arme.",
 
-            concept:
-                "Déviation suivant un mouvement circulaire afin de modifier progressivement la trajectoire de l'attaque adverse.",
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "ARME",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "ARME",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "DIRECTION",
-                "INTENTION"
-            ],
+                    exemples: [
+                        "{Sujet} dévie la lame de {Cible} vers le bas avec son katana.",
+                        "{Sujet} guide la frappe de {Cible} vers le bas avec sa lame.",
+                        "{Sujet} détourne le coup adverse vers le bas avec son katana.",
+                        "{Sujet} abaisse la trajectoire de la lame de {Cible} avec son katana.",
+                        "{Sujet} dévie la frappe vers le bas avec sa lame.",
+                        "{Sujet} accompagne le coup de {Cible} vers le bas avec son katana.",
+                        "{Sujet} repousse la lame adverse vers le bas avec son katana.",
+                        "{Sujet} fait glisser son katana contre la lame pour la diriger vers le bas.",
+                        "{Sujet} détourne rapidement l'attaque vers le bas avec son katana.",
+                        "{Sujet} guide la trajectoire du coup vers le bas avec sa lame.",
+                        "{Sujet} dévie la frappe descendante vers le bas avec son katana.",
+                        "{Sujet} utilise sa lame pour abaisser la trajectoire de l'attaque.",
+                        "{Sujet} modifie la trajectoire du coup de {Cible} en la dirigeant vers le bas.",
+                        "{Sujet} écarte la lame adverse vers le bas avec son katana.",
+                        "{Sujet} accompagne la frappe de {Cible} vers le bas avec sa lame.",
+                        "{Sujet} détourne le coup de son axe en le dirigeant vers le bas.",
+                        "{Sujet} dévie rapidement la lame adverse vers le bas.",
+                        "{Sujet} guide la frappe vers le sol avec son katana.",
+                        "{Sujet} repousse la trajectoire de l'attaque vers le bas avec sa lame.",
+                        "{Sujet} modifie la direction du coup de {Cible} vers le bas avec son katana."
+                    ]
+                },
 
-            exemples: [
-                "{Sujet} accompagne la lame de {Cible} dans un mouvement circulaire avec son katana.",
-                "{Sujet} dévie la frappe en faisant tourner sa lame autour de l'attaque.",
-                "{Sujet} détourne le coup de {Cible} avec un mouvement circulaire de son katana.",
-                "{Sujet} guide la lame adverse dans une trajectoire circulaire avec son katana.",
-                "{Sujet} fait glisser son katana autour de la lame de {Cible} pour dévier le coup.",
-                "{Sujet} accompagne progressivement la frappe vers l'extérieur avec un mouvement circulaire.",
-                "{Sujet} détourne la lame de {Cible} en effectuant un mouvement circulaire avec son katana.",
-                "{Sujet} utilise un mouvement circulaire de sa lame pour modifier la trajectoire du coup.",
-                "{Sujet} fait pivoter son katana autour de la lame adverse pour la dévier.",
-                "{Sujet} guide la frappe de {Cible} dans une trajectoire circulaire avec son katana.",
-                "{Sujet} dévie progressivement l'attaque en faisant glisser sa lame autour du coup.",
-                "{Sujet} accompagne le mouvement de la lame adverse avec une rotation circulaire de son katana.",
-                "{Sujet} détourne la frappe de {Cible} en décrivant un arc avec son katana.",
-                "{Sujet} modifie la trajectoire du coup avec un mouvement circulaire de sa lame.",
-                "{Sujet} fait glisser son katana autour de l'attaque pour la détourner.",
-                "{Sujet} dévie la lame adverse avec une rotation circulaire de son katana.",
-                "{Sujet} accompagne la frappe dans un mouvement circulaire vers l'extérieur.",
-                "{Sujet} guide le coup de {Cible} autour de son axe avec sa lame.",
-                "{Sujet} détourne progressivement la trajectoire de l'attaque avec son katana.",
-                "{Sujet} utilise un mouvement circulaire pour dévier la frappe de {Cible}."
-            ]
-        }
-    }
-} 
-};
-                                                                                                
-                    
-                                
+                circulaire: {
+
+                    concept:
+                        "Déviation suivant un mouvement circulaire afin de modifier progressivement la trajectoire de l'attaque adverse.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "ARME",
+                        "MANIERE",
+                        "ZONE",
+                        "CIBLE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} accompagne la lame de {Cible} dans un mouvement circulaire avec son katana.",
+                        "{Sujet} dévie la frappe en faisant tourner sa lame autour de l'attaque.",
+                        "{Sujet} détourne le coup de {Cible} avec un mouvement circulaire de son katana.",
+                        "{Sujet} guide la lame adverse dans une trajectoire circulaire avec son katana.",
+                        "{Sujet} fait glisser son katana autour de la lame de {Cible} pour dévier le coup.",
+                        "{Sujet} accompagne progressivement la frappe vers l'extérieur avec un mouvement circulaire.",
+                        "{Sujet} détourne la lame de {Cible} en effectuant un mouvement circulaire avec son katana.",
+                        "{Sujet} utilise un mouvement circulaire de sa lame pour modifier la trajectoire du coup.",
+                        "{Sujet} fait pivoter son katana autour de la lame adverse pour la dévier.",
+                        "{Sujet} guide la frappe de {Cible} dans une trajectoire circulaire avec son katana.",
+                        "{Sujet} dévie progressivement l'attaque en faisant glisser sa lame autour du coup.",
+                        "{Sujet} accompagne le mouvement de la lame adverse avec une rotation circulaire de son katana.",
+                        "{Sujet} détourne la frappe de {Cible} en décrivant un arc avec son katana.",
+                        "{Sujet} modifie la trajectoire du coup avec un mouvement circulaire de sa lame.",
+                        "{Sujet} fait glisser son katana autour de l'attaque pour la détourner.",
+                        "{Sujet} dévie la lame adverse avec une rotation circulaire de son katana.",
+                        "{Sujet} accompagne la frappe dans un mouvement circulaire vers l'extérieur.",
+                        "{Sujet} guide le coup de {Cible} autour de son axe avec sa lame.",
+                        "{Sujet} détourne progressivement la trajectoire de l'attaque avec son katana.",
+                        "{Sujet} utilise un mouvement circulaire pour dévier la frappe de {Cible}."
+                    ]
+                } // 1. Fermeture de 'circulaire'
+            } // 2. Fermeture de 'trajectoires'
+        } // 3. Fermeture de 'deviation_arme'
+    } // 4. Fermeture de la catégorie globale (ex: 'defense' ou l'objet parent dans NEO_ACTION_MODELS)
+}; // 5. Fermeture de la constante NEO_ACTION_MODELS avec le ';'
+
+
 /* ============================================================================
  * 9. EXPORT
  * ========================================================================== */
@@ -6013,3 +6012,6 @@ module.exports = {
     NEO_RELATIONS,
     NEO_ACTION_MODELS
 };
+ 
+
+        
