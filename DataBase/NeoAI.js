@@ -642,8 +642,10 @@ const NEO_PARAMETRES = {
 // peuvent lui être rattachés. Sert de guide au moteur de parsing, PAS de
 // logique d'extraction.
 const NEO_RELATIONS = {
-    // règle absolue : SUJET = celui qui réalise l'action ; CIBLE = celui/ce
-    // qui reçoit/subit l'action. Ces deux rôles sont toujours indépendants.
+
+    // règle absolue : SUJET = celui qui réalise l'action ;
+    // CIBLE = celui/ce qui reçoit/subit l'action.
+    // Ces deux rôles sont toujours indépendants.
     reglesRoles: {
         sujet: 'entite_qui_realise_action',
         cible: 'entite_qui_subit_action',
@@ -665,23 +667,41 @@ const NEO_RELATIONS = {
         'INTENSITE'
     ],
 
-    // Relations fines par type de champ (utile pour valider une extraction)
+    // Relations fines par type de champ
     sujet_action: ['sujet', 'action'],
     action_cible: ['action', 'cible'],
     action_partie_corps: ['action', 'partie_corps', 'cote_corps'],
     action_direction: ['action', 'direction'],
     action_trajectoire: ['action', 'trajectoire'],
-    action_parametres: ['action', 'distance', 'hauteur', 'vitesse', 'intensite', 'intention'],
+    action_parametres: [
+        'action',
+        'distance',
+        'hauteur',
+        'vitesse',
+        'intensite',
+        'intention'
+    ],
 
     // Contraintes explicites d'indépendance entre champs proches
     contraintes: [
-        { champ_a: 'direction', champ_b: 'trajectoire', regle: 'toujours_distincts' },
-        { champ_a: 'cote_corps', champ_b: 'direction', regle: 'toujours_distincts' },
-        { champ_a: 'partie_corps', champ_b: 'direction', regle: 'jamais_deduire_direction_depuis_partie_corps' }
- }
+        {
+            champ_a: 'direction',
+            champ_b: 'trajectoire',
+            regle: 'toujours_distincts'
+        },
+        {
+            champ_a: 'cote_corps',
+            champ_b: 'direction',
+            regle: 'toujours_distincts'
+        },
+        {
+            champ_a: 'partie_corps',
+            champ_b: 'direction',
+            regle: 'jamais_deduire_direction_depuis_partie_corps'
+        }
     ]
-};   
-        
+};
+
 
                                                                        
 //==============================================================
