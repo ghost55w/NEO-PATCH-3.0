@@ -678,10 +678,12 @@ const NEO_RELATIONS = {
         { champ_a: 'direction', champ_b: 'trajectoire', regle: 'toujours_distincts' },
         { champ_a: 'cote_corps', champ_b: 'direction', regle: 'toujours_distincts' },
         { champ_a: 'partie_corps', champ_b: 'direction', regle: 'jamais_deduire_direction_depuis_partie_corps' }
+ }
     ]
-};
+};   
+        
 
-                                                                       ],
+                                                                       
 //==============================================================
 // 🎮 NEO ACTION MODELS
 //==============================================================
