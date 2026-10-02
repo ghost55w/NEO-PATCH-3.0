@@ -5972,11 +5972,12 @@ parade_arme: {
                         "{Sujet} détourne progressivement la trajectoire de l'attaque avec son katana.",
                         "{Sujet} utilise un mouvement circulaire pour dévier la frappe de {Cible}."
                     ]
-                } // 1. Fermeture de 'circulaire'
-            } // 2. Fermeture de 'trajectoires'
-        } // 3. Fermeture de 'deviation_arme'
-    } // 4. Fermeture de la catégorie globale (ex: 'defense' ou l'objet parent dans NEO_ACTION_MODELS)
-}; // 5. Fermeture de la constante NEO_ACTION_MODELS avec le ';'
+                 } // fermeture de 'circulaire'
+            } // fermeture de 'trajectoires'
+        } // fermeture de 'deviation_arme'
+    } // fermeture de NEO_ACTION_MODELS
+
+};
 
 
 /* ============================================================================
