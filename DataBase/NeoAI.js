@@ -4069,121 +4069,669 @@ arme: {
         }
     },                                                                      
                                         
-    
-// ==========================================================
+    // ==========================================================
 // 🛡️ DEFENSE
 // ==========================================================
 
 defense: {
 
-    
-// ESQUIVE
+    // ======================================================
+    // ESQUIVE
+    // ======================================================
+
+    esquive: {
+
+        categorie: "defense",
+        id: "ESQUIVE",
+
+        concept:
+            "Action défensive consistant à éviter une attaque en déplaçant son corps hors de sa trajectoire.",
+
+        trajectoires: {
+
+            // ==================================================
+            // BAS
+            // ==================================================
+
+            bas: {
+
+                concept:
+                    "Abaissement rapide du corps pour laisser une attaque passer au-dessus.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} se baisse rapidement pour éviter le coup de {Cible}.",
+                    "{Sujet} s'abaisse vite pour laisser passer le poing de {Cible}.",
+                    "{Sujet} fléchit rapidement les genoux pour esquiver.",
+                    "{Sujet} descend à vmax sous le coup de {Cible}.",
+                    "{Sujet} se baisse à vitesse maximale pour éviter l'attaque.",
+                    "{Sujet} abaisse rapidement son buste pour laisser passer la frappe.",
+                    "{Sujet} descend vite sous la trajectoire du poing.",
+                    "{Sujet} se baisse à pleine vitesse pour esquiver le coup de {Cible}.",
+                    "{Sujet} fléchit rapidement les jambes pour passer sous l'attaque.",
+                    "{Sujet} s'abaisse à vitesse max pour éviter la frappe.",
+                    "{Sujet} descend à vmax pour laisser passer le coup de {Cible}.",
+                    "{Sujet} se baisse rapidement juste avant l'impact.",
+                    "{Sujet} abaisse son corps à sa vitesse maximale pour esquiver.",
+                    "{Sujet} descend vite sous la trajectoire de l'attaque.",
+                    "{Sujet} fléchit rapidement les genoux afin d'éviter le poing.",
+                    "{Sujet} s'abaisse à pleine vitesse sous le coup de {Cible}.",
+                    "{Sujet} descend à vitesse maximale pour sortir de la trajectoire.",
+                    "{Sujet} se baisse rapidement pour laisser passer l'attaque.",
+                    "{Sujet} s'abaisse vite afin d'éviter la frappe de {Cible}.",
+                    "{Sujet} descend à vmax sous la trajectoire du coup."
+                ]
+            },
+
+            // ==================================================
+            // ACCROUPI
+            // ==================================================
+
+            accroupi: {
+
+                concept:
+                    "Abaissement important du centre de gravité en position accroupie afin d'éviter une attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} s'accroupit rapidement pour éviter le crochet de {Cible}.",
+                    "{Sujet} descend vite en position accroupie pour esquiver le coup.",
+                    "{Sujet} se baisse rapidement en position accroupie pour laisser passer l'attaque.",
+                    "{Sujet} s'accroupit à vmax sous le poing de {Cible}.",
+                    "{Sujet} descend à vitesse maximale pour passer sous la frappe.",
+                    "{Sujet} fléchit rapidement les jambes et s'accroupit pour esquiver.",
+                    "{Sujet} s'accroupit à pleine vitesse pour éviter l'attaque de {Cible}.",
+                    "{Sujet} descend vite son centre de gravité pour laisser passer le coup.",
+                    "{Sujet} se place rapidement en position accroupie afin d'éviter la frappe.",
+                    "{Sujet} s'accroupit à vitesse max sous la trajectoire du poing.",
+                    "{Sujet} descend à vmax pour esquiver le coup de {Cible}.",
+                    "{Sujet} fléchit rapidement les genoux jusqu'à la position accroupie.",
+                    "{Sujet} s'abaisse à vitesse maximale pour sortir de la trajectoire.",
+                    "{Sujet} s'accroupit vite sous l'attaque de {Cible}.",
+                    "{Sujet} descend rapidement en position basse pour éviter la frappe.",
+                    "{Sujet} s'accroupit à pleine vitesse juste avant l'impact.",
+                    "{Sujet} abaisse rapidement son corps en position accroupie pour esquiver.",
+                    "{Sujet} descend à vitesse maximale sous le coup de {Cible}.",
+                    "{Sujet} s'accroupit vite afin de laisser passer l'attaque.",
+                    "{Sujet} descend à vmax en position accroupie pour éviter le coup."
+                ]
+            },
+
+            // ==================================================
+            // LATÉRALE
+            // ==================================================
+
+            laterale: {
+
+                concept:
+                    "Déplacement latéral rapide du corps afin de sortir de la trajectoire d'une attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} se décale rapidement vers la gauche pour éviter le poing de {Cible}.",
+                    "{Sujet} esquive vite vers la droite le coup de {Cible}.",
+                    "{Sujet} se déplace rapidement sur le côté gauche pour sortir de la trajectoire.",
+                    "{Sujet} se décale à vmax vers la droite pour éviter l'attaque.",
+                    "{Sujet} glisse à vitesse maximale vers la gauche pour esquiver le coup.",
+                    "{Sujet} fait rapidement un pas vers la droite pour laisser passer la frappe.",
+                    "{Sujet} se déporte à pleine vitesse vers la gauche afin d'éviter le poing.",
+                    "{Sujet} esquive vite sur le côté droit pour sortir de la trajectoire.",
+                    "{Sujet} se déplace rapidement vers la gauche pour éviter l'attaque de {Cible}.",
+                    "{Sujet} se décale à vitesse max vers la droite sous le coup.",
+                    "{Sujet} glisse à vmax vers la gauche pour laisser passer le poing.",
+                    "{Sujet} effectue rapidement un déplacement latéral vers la droite.",
+                    "{Sujet} sort à vitesse maximale vers la gauche de la trajectoire du coup.",
+                    "{Sujet} se déporte vite vers la droite pour esquiver.",
+                    "{Sujet} esquive à pleine vitesse vers la gauche l'attaque de {Cible}.",
+                    "{Sujet} se décale rapidement sur le côté droit pour éviter la frappe.",
+                    "{Sujet} glisse à vitesse maximale vers la droite pour sortir de la ligne d'attaque.",
+                    "{Sujet} se déplace à vmax vers la gauche pour esquiver le coup.",
+                    "{Sujet} se décale vite vers la droite afin de laisser passer l'attaque.",
+                    "{Sujet} se déporte rapidement vers la gauche pour éviter le poing de {Cible}."
+                ]
+            },
+
+            // ==================================================
+            // RECUL
+            // ==================================================
+
+            recul: {
+
+                concept:
+                    "Déplacement rapide vers l'arrière afin d'augmenter la distance et sortir de la portée de l'attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "DISTANCE",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} recule rapidement pour éviter le direct de {Cible}.",
+                    "{Sujet} recule vite pour laisser passer le coup.",
+                    "{Sujet} se retire rapidement vers l'arrière pour esquiver.",
+                    "{Sujet} recule à vmax pour sortir de la portée de {Cible}.",
+                    "{Sujet} recule à vitesse maximale pour éviter la frappe.",
+                    "{Sujet} fait rapidement deux pas en arrière pour esquiver.",
+                    "{Sujet} se retire à pleine vitesse afin d'éviter le poing.",
+                    "{Sujet} recule vite hors de portée de {Cible}.",
+                    "{Sujet} se déplace rapidement vers l'arrière pour laisser passer l'attaque.",
+                    "{Sujet} recule à vitesse max pour éviter le coup.",
+                    "{Sujet} se retire à vmax vers l'arrière afin d'esquiver.",
+                    "{Sujet} recule rapidement de 2 mètres pour éviter la frappe.",
+                    "{Sujet} prend rapidement de la distance avec {Cible}.",
+                    "{Sujet} recule à vitesse maximale de 1 mètre pour sortir de la trajectoire.",
+                    "{Sujet} fait rapidement plusieurs pas en arrière pour esquiver.",
+                    "{Sujet} se retire à pleine vitesse hors de portée de l'attaque.",
+                    "{Sujet} recule vite de 2 mètres pour laisser passer le coup de {Cible}.",
+                    "{Sujet} s'éloigne à vmax pour éviter la frappe.",
+                    "{Sujet} recule rapidement afin d'augmenter la distance avec {Cible}.",
+                    "{Sujet} se retire à vitesse maximale pour sortir de la portée du coup."
+                ]
+            },
+
+            // ==================================================
+            // AVANCE
+            // ==================================================
+
+            avance: {
+
+                concept:
+                    "Déplacement rapide vers l'avant permettant de sortir de la trajectoire d'une attaque ou de passer à l'intérieur de celle-ci.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} avance rapidement vers {Cible} pour passer sous son crochet.",
+                    "{Sujet} entre vite vers l'avant pour éviter le poing de {Cible}.",
+                    "{Sujet} avance rapidement à l'intérieur de la trajectoire du coup.",
+                    "{Sujet} se projette à vmax vers {Cible} pour esquiver l'attaque.",
+                    "{Sujet} avance à vitesse maximale pour passer sous la frappe.",
+                    "{Sujet} entre rapidement dans la garde de {Cible} afin d'éviter son coup.",
+                    "{Sujet} avance à pleine vitesse vers {Cible} pour sortir de la trajectoire.",
+                    "{Sujet} se rapproche vite de {Cible} pour passer sous son attaque.",
+                    "{Sujet} avance rapidement vers l'avant afin d'éviter le poing.",
+                    "{Sujet} entre à vitesse max sous le crochet de {Cible}.",
+                    "{Sujet} avance à vmax pour passer à l'intérieur de la trajectoire.",
+                    "{Sujet} fait rapidement un pas vers l'avant pour esquiver.",
+                    "{Sujet} se projette à vitesse maximale sous le coup de {Cible}.",
+                    "{Sujet} avance vite vers {Cible} pour laisser passer la frappe au-dessus.",
+                    "{Sujet} entre rapidement dans la distance de {Cible} pour éviter son attaque.",
+                    "{Sujet} avance à pleine vitesse sous le bras de {Cible}.",
+                    "{Sujet} se rapproche à vmax afin de sortir de la ligne d'attaque.",
+                    "{Sujet} avance rapidement à l'intérieur de la portée de {Cible}.",
+                    "{Sujet} entre vite vers l'avant pour esquiver le coup.",
+                    "{Sujet} se projette rapidement vers {Cible} pour passer sous l'attaque."
+                ]
+            },
+
+            // ==================================================
+            // PIVOT
+            // ==================================================
+
+            pivot: {
+
+                concept:
+                    "Rotation rapide du corps autour d'un appui afin de sortir de la trajectoire d'une attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} pivote rapidement vers la gauche pour laisser passer le poing de {Cible}.",
+                    "{Sujet} pivote vite vers la droite pour éviter le coup.",
+                    "{Sujet} tourne rapidement sur son appui pour sortir de la trajectoire.",
+                    "{Sujet} pivote à vmax vers la gauche pour esquiver l'attaque.",
+                    "{Sujet} tourne à vitesse maximale vers la droite pour éviter la frappe.",
+                    "{Sujet} effectue rapidement un pivot vers la gauche.",
+                    "{Sujet} pivote à pleine vitesse autour de son appui pour esquiver.",
+                    "{Sujet} tourne vite vers la droite pour laisser passer le poing.",
+                    "{Sujet} pivote rapidement sur la gauche afin d'éviter l'attaque de {Cible}.",
+                    "{Sujet} tourne à vitesse max vers la droite pour sortir de la trajectoire.",
+                    "{Sujet} pivote à vmax autour de son appui pour esquiver.",
+                    "{Sujet} effectue rapidement une rotation vers la gauche.",
+                    "{Sujet} pivote à vitesse maximale vers la droite pour éviter le coup.",
+                    "{Sujet} tourne vite sur son appui afin de laisser passer la frappe.",
+                    "{Sujet} pivote rapidement vers la gauche sous l'attaque de {Cible}.",
+                    "{Sujet} tourne à pleine vitesse vers la droite pour sortir de la ligne d'attaque.",
+                    "{Sujet} pivote à vmax afin d'éviter le poing de {Cible}.",
+                    "{Sujet} effectue rapidement un pivot vers la droite pour esquiver.",
+                    "{Sujet} tourne à vitesse maximale autour de son appui pour éviter la frappe.",
+                    "{Sujet} pivote vite vers la gauche pour laisser passer l'attaque."
+                ]
+            },
+
+            // ==================================================
+            // PENCHÉE
+            // ==================================================
+
+            penche: {
+
+                concept:
+                    "Inclinaison rapide du buste ou de la tête afin d'éviter une attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} penche rapidement la tête vers la gauche pour éviter le poing de {Cible}.",
+                    "{Sujet} incline vite son buste vers l'arrière pour esquiver.",
+                    "{Sujet} penche rapidement son corps sur le côté pour éviter l'attaque.",
+                    "{Sujet} incline à vmax sa tête vers la droite pour laisser passer le poing.",
+                    "{Sujet} penche à vitesse maximale son buste vers la gauche pour esquiver.",
+                    "{Sujet} bascule rapidement son corps vers l'arrière afin d'éviter la frappe.",
+                    "{Sujet} s'incline à pleine vitesse vers la droite pour sortir de la trajectoire.",
+                    "{Sujet} penche vite la tête vers la gauche pour éviter le coup.",
+                    "{Sujet} incline rapidement son buste vers la droite sous l'attaque de {Cible}.",
+                    "{Sujet} se penche à vitesse max vers l'arrière pour esquiver.",
+                    "{Sujet} incline à vmax le haut de son corps pour laisser passer la frappe.",
+                    "{Sujet} penche rapidement sa tête vers la droite afin d'éviter le poing.",
+                    "{Sujet} bascule à vitesse maximale vers la gauche pour sortir de la ligne d'attaque.",
+                    "{Sujet} se penche vite vers l'arrière pour éviter le coup.",
+                    "{Sujet} incline rapidement son corps sur la droite pour esquiver.",
+                    "{Sujet} penche à pleine vitesse son buste vers la gauche.",
+                    "{Sujet} se penche à vmax pour laisser passer l'attaque de {Cible}.",
+                    "{Sujet} incline rapidement sa tête vers l'arrière afin d'éviter la frappe.",
+                    "{Sujet} penche à vitesse maximale son corps sur le côté pour esquiver.",
+                    "{Sujet} se penche vite vers la droite pour sortir de la trajectoire."
+                ]
+            },
+
+            // ==================================================
+            // SAUT
+            // ==================================================
+
+            saut: {
+
+                concept:
+                    "Élévation rapide du corps permettant d'éviter une attaque passant au niveau du sol ou des jambes.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "HAUTEUR",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} saute rapidement pour éviter le balayage de {Cible}.",
+                    "{Sujet} bondit vite vers le haut pour éviter le coup de pied.",
+                    "{Sujet} saute rapidement de 1 mètre pour laisser passer l'attaque.",
+                    "{Sujet} bondit à vmax pour éviter le balayage de {Cible}.",
+                    "{Sujet} saute à vitesse maximale pour passer au-dessus de la frappe.",
+                    "{Sujet} s'élève rapidement dans les airs pour esquiver.",
+                    "{Sujet} bondit à pleine vitesse vers le haut pour éviter l'attaque.",
+                    "{Sujet} saute vite pour laisser passer le coup de pied de {Cible}.",
+                    "{Sujet} effectue rapidement un saut vertical afin d'éviter la frappe.",
+                    "{Sujet} bondit à vitesse max pour sortir de la trajectoire.",
+                    "{Sujet} saute à vmax au-dessus du balayage de {Cible}.",
+                    "{Sujet} se propulse rapidement vers le haut pour esquiver.",
+                    "{Sujet} s'élève à vitesse maximale pour éviter le coup.",
+                    "{Sujet} bondit vite vers le haut afin de laisser passer l'attaque.",
+                    "{Sujet} saute rapidement à 80 centimètres de hauteur pour esquiver.",
+                    "{Sujet} bondit à pleine vitesse pour éviter la frappe de {Cible}.",
+                    "{Sujet} saute à vmax afin de passer au-dessus du coup.",
+                    "{Sujet} s'élève rapidement pour sortir de la trajectoire de l'attaque.",
+                    "{Sujet} bondit à vitesse maximale vers le haut pour éviter le balayage.",
+                    "{Sujet} saute vite au-dessus de l'attaque de {Cible}."
+                ]
+            },
+
+            // ==================================================
+            // ROULADE
+            // ==================================================
+
+            roulade: {
+
+                concept:
+                    "Rotation rapide du corps au sol permettant de sortir de la trajectoire d'une attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} fait rapidement une roulade vers la gauche pour éviter l'attaque.",
+                    "{Sujet} roule vite vers l'avant sous le coup de {Cible}.",
+                    "{Sujet} effectue rapidement une roulade vers l'arrière pour esquiver.",
+                    "{Sujet} plonge à vmax au sol pour éviter la frappe.",
+                    "{Sujet} roule à vitesse maximale vers la gauche pour sortir de la trajectoire.",
+                    "{Sujet} effectue une roulade à pleine vitesse vers la droite pour esquiver.",
+                    "{Sujet} roule rapidement sous le poing de {Cible}.",
+                    "{Sujet} plonge vite au sol et roule vers l'avant.",
+                    "{Sujet} fait rapidement une roulade vers la droite pour éviter le coup.",
+                    "{Sujet} roule à vitesse max vers l'arrière pour esquiver.",
+                    "{Sujet} effectue une roulade à vmax sous l'attaque de {Cible}.",
+                    "{Sujet} plonge rapidement au sol pour laisser passer la frappe.",
+                    "{Sujet} roule à vitesse maximale vers la gauche afin d'éviter le poing.",
+                    "{Sujet} effectue rapidement une roulade vers l'avant pour sortir de la trajectoire.",
+                    "{Sujet} roule à pleine vitesse vers la droite pour esquiver.",
+                    "{Sujet} plonge à vmax puis roule sous le coup de {Cible}.",
+                    "{Sujet} fait vite une roulade vers l'arrière afin d'éviter l'attaque.",
+                    "{Sujet} roule rapidement sur le côté pour laisser passer la frappe.",
+                    "{Sujet} effectue une roulade à vitesse maximale pour sortir de la trajectoire.",
+                    "{Sujet} roule à vmax vers l'avant pour éviter l'attaque de {Cible}."
+                ]
+            },
+
+            // ==================================================
+            // PASSAGE
+            // ==================================================
+
+            passage: {
+
+                concept:
+                    "Déplacement rapide permettant de passer autour ou à proximité de l'adversaire en sortant de la trajectoire de son attaque.",
+
+                structure: [
+                    "SUJET",
+                    "ACTION",
+                    "VITESSE",
+                    "DIRECTION",
+                    "MANIERE",
+                    "ZONE",
+                    "CIBLE",
+                    "INTENTION"
+                ],
+
+                exemples: [
+                    "{Sujet} passe rapidement sur le côté de {Cible} pour éviter son attaque.",
+                    "{Sujet} se glisse vite derrière {Cible} pour sortir de la trajectoire.",
+                    "{Sujet} passe rapidement sur la droite de {Cible} pour esquiver.",
+                    "{Sujet} contourne à vmax {Cible} par la gauche pour éviter sa frappe.",
+                    "{Sujet} se faufile à vitesse maximale sur le côté de {Cible}.",
+                    "{Sujet} passe à pleine vitesse derrière {Cible} pour laisser passer l'attaque.",
+                    "{Sujet} se déplace rapidement autour de {Cible} pour esquiver.",
+                    "{Sujet} passe vite à côté de {Cible} pour sortir de la ligne d'attaque.",
+                    "{Sujet} contourne rapidement {Cible} par la droite afin d'éviter le coup.",
+                    "{Sujet} se glisse à vitesse max vers la gauche de {Cible}.",
+                    "{Sujet} passe à vmax derrière {Cible} pour esquiver son attaque.",
+                    "{Sujet} contourne rapidement l'adversaire pour laisser passer la frappe.",
+                    "{Sujet} se déplace à vitesse maximale sur le côté de {Cible}.",
+                    "{Sujet} passe vite derrière {Cible} pour sortir de la trajectoire.",
+                    "{Sujet} se faufile à pleine vitesse autour de {Cible} pour éviter son coup.",
+                    "{Sujet} contourne rapidement {Cible} vers la gauche afin d'esquiver.",
+                    "{Sujet} passe à vmax sur la droite de {Cible} pour éviter la frappe.",
+                    "{Sujet} se glisse rapidement derrière {Cible} pour laisser passer l'attaque.",
+                    "{Sujet} contourne à vitesse maximale {Cible} pour sortir de la ligne d'attaque.",
+                    "{Sujet} passe vite sur le côté de {Cible} afin d'éviter son attaque."
+                ]
+            }
+        }
+    }
+},    
+                
 // ======================================================
-
-esquive: {
-
+    // GARDE
+// ======================================================
+garde: {
     categorie: "defense",
-    id: "ESQUIVE",
+    id: "GARDE",
 
     concept:
-        "Action défensive consistant à éviter une attaque en déplaçant son corps hors de sa trajectoire.",
+        "Posture défensive destinée à protéger une ou plusieurs zones du corps.",
 
     trajectoires: {
 
-        // ==================================================
-        // BAS
-        // ==================================================
+        // ==========================================================
+        // GARDE HAUTE
+        // ==========================================================
 
-        bas: {
-
+        haute: {
             concept:
-                "Abaissement rapide du corps pour laisser une attaque passer au-dessus.",
+                "Garde protégeant principalement la tête et le haut du corps.",
 
             structure: [
                 "SUJET",
                 "ACTION",
-                "VITESSE",
                 "MANIERE",
                 "ZONE",
-                "CIBLE",
                 "INTENTION"
             ],
 
             exemples: [
-                "{Sujet} se baisse rapidement pour éviter le coup de {Cible}.",
-                "{Sujet} abaisse rapidement son buste pour laisser passer le poing de {Cible}.",
-                "{Sujet} fléchit rapidement les genoux pour passer sous le coup de {Cible}."
+                "{Sujet} lève sa garde pour protéger son visage.",
+                "{Sujet} place ses bras en garde haute pour protéger sa tête.",
+                "{Sujet} relève rapidement ses bras devant son visage.",
+                "{Sujet} monte sa garde afin de protéger sa tête.",
+                "{Sujet} place ses avant-bras devant son visage pour se protéger.",
+                "{Sujet} adopte une garde haute pour couvrir son visage.",
+                "{Sujet} garde ses bras levés devant sa tête.",
+                "{Sujet} remonte ses poings pour protéger son visage.",
+                "{Sujet} lève rapidement les bras pour couvrir sa tête.",
+                "{Sujet} positionne ses avant-bras en hauteur afin de protéger son visage.",
+                "{Sujet} maintient une garde haute pour protéger sa tête.",
+                "{Sujet} place ses mains devant son visage pour se protéger.",
+                "{Sujet} relève ses bras afin de couvrir le haut de son corps.",
+                "{Sujet} adopte une posture haute pour protéger sa tête et son visage.",
+                "{Sujet} garde ses poings près de son visage pour se protéger.",
+                "{Sujet} monte rapidement ses bras en garde haute.",
+                "{Sujet} croise ses avant-bras devant son visage pour bloquer les frappes.",
+                "{Sujet} positionne ses bras en hauteur pour protéger sa tête.",
+                "{Sujet} place ses deux mains en X devant son visage pour bloquer.",
+                "{Sujet} croise ses deux mains en X devant son visage pour bloquer l'attaque."
             ]
         },
 
-        // ==================================================
-        // ACCROUPI
-        // ==================================================
+        // ==========================================================
+        // GARDE BASSE
+        // ==========================================================
 
-        accroupi: {
-
+        basse: {
             concept:
-                "Abaissement important du centre de gravité en position accroupie afin d'éviter une attaque.",
+                "Garde protégeant principalement le bas du corps.",
 
             structure: [
                 "SUJET",
                 "ACTION",
-                "VITESSE",
                 "MANIERE",
                 "ZONE",
-                "CIBLE",
                 "INTENTION"
             ],
 
             exemples: [
-                "{Sujet} s'accroupit rapidement pour éviter le crochet de {Cible}.",
-                "{Sujet} descend rapidement en position accroupie pour esquiver le coup de {Cible}.",
-                "{Sujet} se baisse rapidement en position accroupie pour laisser passer l'attaque."
+                "{Sujet} adopte une garde basse pour protéger ses jambes.",
+                "{Sujet} descend sa garde pour protéger son abdomen.",
+                "{Sujet} place ses bras plus bas pour protéger son ventre.",
+                "{Sujet} abaisse sa garde afin de protéger ses jambes.",
+                "{Sujet} positionne ses bras devant son abdomen pour se protéger.",
+                "{Sujet} adopte une posture basse pour couvrir le bas de son corps.",
+                "{Sujet} descend ses mains pour protéger son ventre.",
+                "{Sujet} garde ses bras bas afin de protéger ses jambes.",
+                "{Sujet} place ses avant-bras devant son abdomen pour se protéger.",
+                "{Sujet} baisse rapidement sa garde pour couvrir son bas du corps.",
+                "{Sujet} maintient une garde basse pour protéger son ventre.",
+                "{Sujet} positionne ses mains devant son abdomen afin de se protéger.",
+                "{Sujet} abaisse ses bras pour couvrir ses jambes.",
+                "{Sujet} garde ses poings bas pour protéger son corps.",
+                "{Sujet} adopte une garde basse afin de protéger son abdomen.",
+                "{Sujet} descend ses bras devant son ventre pour bloquer les frappes.",
+                "{Sujet} place sa garde devant ses jambes pour les protéger.",
+                "{Sujet} abaisse rapidement ses avant-bras pour couvrir son abdomen.",
+                "{Sujet} maintient ses bras bas afin de protéger la partie inférieure de son corps.",
+                "{Sujet} baisse sa garde pour protéger ses jambes et son abdomen."
             ]
         },
 
-        // ==================================================
-        // LATÉRALE
-        // ==================================================
+        // ==========================================================
+        // GARDE CENTRALE
+        // ==========================================================
 
-        laterale: {
-
+        centrale: {
             concept:
-                "Déplacement latéral rapide du corps afin de sortir de la trajectoire d'une attaque.",
+                "Garde centrée devant le corps pour protéger les zones vitales.",
 
             structure: [
                 "SUJET",
                 "ACTION",
-                "VITESSE",
-                "DIRECTION",
                 "MANIERE",
                 "ZONE",
-                "CIBLE",
                 "INTENTION"
             ],
 
             exemples: [
-                "{Sujet} se décale rapidement vers la gauche pour éviter le poing de {Cible}.",
-                "{Sujet} esquive rapidement vers la droite le coup de {Cible}.",
-                "{Sujet} se déplace rapidement sur le côté gauche pour sortir de la trajectoire du coup."
+                "{Sujet} place ses bras devant son corps.",
+                "{Sujet} adopte une garde centrale pour protéger son torse.",
+                "{Sujet} positionne ses avant-bras devant sa poitrine pour se protéger.",
+                "{Sujet} place ses poings devant son corps afin de protéger son centre.",
+                "{Sujet} maintient ses bras devant son torse.",
+                "{Sujet} adopte une garde centrale pour couvrir ses zones vitales.",
+                "{Sujet} garde ses mains devant sa poitrine pour se protéger.",
+                "{Sujet} positionne ses bras au centre de son corps.",
+                "{Sujet} place rapidement ses avant-bras devant son torse.",
+                "{Sujet} maintient une garde centrée pour protéger son abdomen.",
+                "{Sujet} rapproche ses bras devant son corps afin de couvrir son centre.",
+                "{Sujet} adopte une posture centrale pour protéger sa poitrine.",
+                "{Sujet} garde ses poings devant son torse pour se défendre.",
+                "{Sujet} place ses bras devant son abdomen pour protéger sa zone centrale.",
+                "{Sujet} positionne ses mains au centre afin de couvrir ses zones vitales.",
+                "{Sujet} resserre sa garde devant son corps pour se protéger.",
+                "{Sujet} maintient ses avant-bras devant son torse afin de bloquer les frappes.",
+                "{Sujet} adopte rapidement une garde centrale pour protéger son centre.",
+                "{Sujet} place ses bras devant lui pour couvrir son torse et son abdomen.",
+                "{Sujet} garde une posture centrale afin de protéger les zones vitales."
             ]
         },
 
-        // ==================================================
-        // RECUL
-        // ==================================================
+        // ==========================================================
+        // GARDE COMPLÈTE
+        // ==========================================================
 
-        recul: {
-
+        complete: {
             concept:
-                "Déplacement rapide vers l'arrière afin d'augmenter la distance et sortir de la portée de l'attaque.",
+                "Posture défensive couvrant plusieurs zones simultanément.",
 
             structure: [
                 "SUJET",
                 "ACTION",
-                "VITESSE",
-                "DIRECTION",
-                "DISTANCE",
+                "MANIERE",
+                "ZONE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} se recroqueville pour protéger tout son corps.",
+                "{Sujet} adopte une garde complète pour encaisser l'attaque.",
+                "{Sujet} couvre son corps avec ses bras pour se protéger.",
+                "{Sujet} se replie afin de protéger plusieurs zones simultanément.",
+                "{Sujet} place ses bras autour de son corps pour se protéger.",
+                "{Sujet} adopte une posture fermée pour protéger l'ensemble de son corps.",
+                "{Sujet} resserre sa garde afin de couvrir son corps.",
+                "{Sujet} protège sa tête, son torse et son abdomen avec une garde complète.",
+                "{Sujet} se recroqueville rapidement pour couvrir ses zones vulnérables.",
+                "{Sujet} ferme sa garde autour de son corps pour se protéger.",
+                "{Sujet} positionne ses bras afin de protéger plusieurs parties de son corps.",
+                "{Sujet} adopte une garde complète pour couvrir ses zones vitales.",
+                "{Sujet} replie rapidement ses bras autour de son corps pour encaisser la frappe.",
+                "{Sujet} se protège entièrement en resserrant sa garde.",
+                "{Sujet} couvre simultanément sa tête et son torse avec ses bras.",
+                "{Sujet} adopte une posture défensive fermée pour protéger tout son corps.",
+                "{Sujet} resserre rapidement sa garde pour couvrir ses zones vulnérables.",
+                "{Sujet} se recroqueville afin de réduire les zones exposées.",
+                "{Sujet} place ses bras devant plusieurs zones de son corps pour se protéger.",
+                "{Sujet} maintient une garde complète afin de protéger l'ensemble de son corps."
+               ]
+            }
+        }
+    }
+},     
+
+// ======================================================
+// BLOCAGE
+// ======================================================
+
+blocage: {
+    categorie: "defense",
+    id: "BLOCAGE",
+
+    concept:
+        "Action défensive consistant à utiliser une partie du corps pour arrêter ou absorber directement une attaque.",
+
+    trajectoires: {
+
+        // ======================================================
+        // BLOCAGE AVEC LES BRAS
+        // ======================================================
+
+        bras: {
+            concept:
+                "Blocage effectué avec un membre supérieur.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
                 "MANIERE",
                 "ZONE",
                 "CIBLE",
@@ -4191,26 +4739,47 @@ esquive: {
             ],
 
             exemples: [
-                "{Sujet} recule rapidement de 2 mètres pour éviter le direct de {Cible}.",
-                "{Sujet} fait rapidement deux pas en arrière pour laisser passer le coup de {Cible}.",
-                "{Sujet} recule rapidement hors de portée de {Cible}."
+                "{Sujet} bloque le poing de {Cible} avec son avant-bras droit.",
+                "{Sujet} interpose sa paume gauche devant le coup de {Cible}.",
+                "{Sujet} bloque le direct de {Cible} avec son coude gauche.",
+                "{Sujet} place son avant-bras gauche devant son visage pour bloquer.",
+                "{Sujet} utilise son avant-bras droit pour arrêter la frappe de {Cible}.",
+                "{Sujet} lève son bras gauche afin de bloquer le coup.",
+                "{Sujet} positionne sa paume droite devant la frappe de {Cible}.",
+                "{Sujet} encaisse le coup de poing avec son avant-bras gauche.",
+                "{Sujet} interpose rapidement son bras droit entre lui et {Cible}.",
+                "{Sujet} bloque l'attaque avec son coude droit.",
+                "{Sujet} place ses deux avant-bras devant son visage pour bloquer.",
+                "{Sujet} croise ses avant-bras devant lui afin d'arrêter la frappe.",
+                "{Sujet} utilise sa paume gauche pour stopper le coup de {Cible}.",
+                "{Sujet} relève son avant-bras droit pour absorber l'impact.",
+                "{Sujet} protège son visage en bloquant avec son avant-bras gauche.",
+                "{Sujet} arrête le poing de {Cible} avec sa paume droite.",
+                "{Sujet} place son coude gauche sur la trajectoire de l'attaque.",
+                "{Sujet} bloque rapidement la frappe avec son bras droit.",
+                "{Sujet} interpose son avant-bras gauche pour encaisser l'impact.",
+                "{Sujet} utilise ses bras pour arrêter directement l'attaque de {Cible}.",
+
+                // Protection de la tempe avec le bras en L
+                "{Sujet} place son bras en L pour protéger sa tempe.",
+                "{Sujet} forme un L avec son bras pour protéger sa tempe.",
+                "{Sujet} positionne son bras en L devant sa tempe pour bloquer.",
+                "{Sujet} lève son bras en L afin de protéger sa tempe."
             ]
         },
 
-        // ==================================================
-        // AVANCE
-        // ==================================================
+        // ======================================================
+        // BLOCAGE AVEC LES JAMBES
+        // ======================================================
 
-        avance: {
-
+        jambes: {
             concept:
-                "Déplacement rapide vers l'avant permettant de sortir de la trajectoire d'une attaque ou de passer à l'intérieur de celle-ci.",
+                "Blocage effectué avec un membre inférieur.",
 
             structure: [
                 "SUJET",
                 "ACTION",
-                "VITESSE",
-                "DIRECTION",
+                "MEMBRE",
                 "MANIERE",
                 "ZONE",
                 "CIBLE",
@@ -4218,26 +4787,41 @@ esquive: {
             ],
 
             exemples: [
-                "{Sujet} avance rapidement vers {Cible} pour passer sous son crochet.",
-                "{Sujet} entre rapidement vers l'avant pour éviter le poing de {Cible}.",
-                "{Sujet} avance rapidement à l'intérieur de la trajectoire du coup."
+                "{Sujet} bloque le coup de pied de {Cible} avec son tibia droit.",
+                "{Sujet} lève sa jambe gauche pour bloquer l'attaque.",
+                "{Sujet} arrête le coup avec la plante de son pied droit.",
+                "{Sujet} interpose son tibia gauche devant la jambe de {Cible}.",
+                "{Sujet} bloque la frappe avec son genou droit.",
+                "{Sujet} utilise son tibia droit pour absorber l'impact.",
+                "{Sujet} relève rapidement sa jambe gauche pour bloquer le coup.",
+                "{Sujet} place son genou gauche sur la trajectoire de l'attaque.",
+                "{Sujet} arrête le coup de {Cible} avec son pied droit.",
+                "{Sujet} bloque la jambe de {Cible} avec son tibia gauche.",
+                "{Sujet} utilise la plante de son pied gauche pour stopper la frappe.",
+                "{Sujet} lève son genou droit afin de bloquer l'attaque.",
+                "{Sujet} interpose sa jambe droite entre lui et le coup de {Cible}.",
+                "{Sujet} absorbe l'impact avec son tibia gauche.",
+                "{Sujet} bloque rapidement le coup avec sa jambe droite.",
+                "{Sujet} place son pied gauche devant l'attaque pour l'arrêter.",
+                "{Sujet} utilise son genou droit pour bloquer la frappe de {Cible}.",
+                "{Sujet} relève son tibia gauche afin d'encaisser le coup.",
+                "{Sujet} bloque l'attaque avec la semelle de son pied droit.",
+                "{Sujet} interpose sa jambe gauche pour arrêter directement le coup de {Cible}."
             ]
         },
 
-        // ==================================================
-        // PIVOT
-        // ==================================================
+        // ======================================================
+        // BLOCAGE AVEC LE CORPS
+        // ======================================================
 
-        pivot: {
-
+        corps: {
             concept:
-                "Rotation rapide du corps autour d'un appui afin de sortir de la trajectoire d'une attaque.",
+                "Blocage effectué directement avec une partie du corps.",
 
             structure: [
                 "SUJET",
                 "ACTION",
-                "VITESSE",
-                "DIRECTION",
+                "MEMBRE",
                 "MANIERE",
                 "ZONE",
                 "CIBLE",
@@ -4245,408 +4829,261 @@ esquive: {
             ],
 
             exemples: [
-                "{Sujet} pivote rapidement vers la gauche pour laisser passer le poing de {Cible}.",
-                "{Sujet} pivote rapidement vers la droite pour éviter le coup de {Cible}.",
-                "{Sujet} tourne rapidement sur son appui pour sortir de la trajectoire de l'attaque."
-            ]
-        },
-
-        // ==================================================
-        // PENCHÉE
-        // ==================================================
-
-        penche: {
-
-            concept:
-                "Inclinaison rapide du buste ou de la tête afin d'éviter une attaque.",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "VITESSE",
-                "DIRECTION",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} penche rapidement la tête vers la gauche pour éviter le poing de {Cible}.",
-                "{Sujet} incline rapidement son buste vers l'arrière pour esquiver le coup.",
-                "{Sujet} penche rapidement son corps sur le côté pour éviter l'attaque."
-            ]
-        },
-
-        // ==================================================
-        // SAUT
-        // ==================================================
-
-        saut: {
-
-            concept:
-                "Élévation rapide du corps permettant d'éviter une attaque passant au niveau du sol ou des jambes.",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "VITESSE",
-                "DIRECTION",
-                "HAUTEUR",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} saute rapidement pour éviter le balayage de {Cible}.",
-                "{Sujet} bondit rapidement vers le haut pour éviter le coup de pied.",
-                "{Sujet} saute rapidement de 1 mètre pour laisser passer l'attaque."
-            ]
-        },
-
-        // ==================================================
-        // ROULADE
-        // ==================================================
-
-        roulade: {
-
-            concept:
-                "Rotation rapide du corps au sol permettant de sortir de la trajectoire d'une attaque.",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "VITESSE",
-                "DIRECTION",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} fait rapidement une roulade vers la gauche pour éviter l'attaque.",
-                "{Sujet} roule rapidement vers l'avant sous le coup de {Cible}.",
-                "{Sujet} effectue rapidement une roulade vers l'arrière pour esquiver."
-            ]
-        },
-
-        // ==================================================
-        // PASSAGE
-        // ==================================================
-
-        passage: {
-
-            concept:
-                "Déplacement rapide permettant de passer autour ou à proximité de l'adversaire en sortant de la trajectoire de son attaque.",
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "VITESSE",
-                "DIRECTION",
-                "MANIERE",
-                "ZONE",
-                "CIBLE",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} passe rapidement sur le côté de {Cible} pour éviter son attaque.",
-                "{Sujet} se glisse rapidement derrière {Cible} en sortant de la trajectoire du coup.",
-                "{Sujet} passe rapidement sur la droite de {Cible} pour esquiver son attaque."
+                "{Sujet} bloque le coup avec son épaule.",
+                "{Sujet} absorbe l'impact avec son torse.",
+                "{Sujet} encaisse le coup avec son flanc.",
+                "{Sujet} utilise son épaule droite pour bloquer la frappe de {Cible}.",
+                "{Sujet} encaisse l'attaque avec son épaule gauche.",
+                "{Sujet} laisse le coup frapper son torse pour absorber l'impact.",
+                "{Sujet} bloque la frappe avec son flanc droit.",
+                "{Sujet} utilise son abdomen pour absorber le coup.",
+                "{Sujet} interpose son épaule entre lui et l'attaque de {Cible}.",
+                "{Sujet} encaisse directement le coup avec son torse.",
+                "{Sujet} bloque l'attaque avec son flanc gauche.",
+                "{Sujet} utilise son abdomen pour arrêter la frappe.",
+                "{Sujet} reçoit le coup sur son épaule droite afin de le bloquer.",
+                "{Sujet} absorbe l'impact avec la partie supérieure de son corps.",
+                "{Sujet} place son épaule gauche sur la trajectoire de l'attaque.",
+                "{Sujet} bloque le coup de {Cible} avec son torse.",
+                "{Sujet} encaisse la frappe sur son flanc droit.",
+                "{Sujet} utilise son épaule pour arrêter directement l'attaque.",
+                "{Sujet} absorbe rapidement le choc avec son abdomen.",
+                "{Sujet} bloque l'attaque en utilisant directement son corps."
             ]
         }
     }
-}, 
-                
-
+},
+        
     // ======================================================
-    // GARDE
-    // ======================================================
+// PARADE
+// ======================================================
 
-    garde: {
-        categorie: "defense",
-        id: "GARDE",
+parade: {
+    categorie: "defense",
+    id: "PARADE",
 
-        concept:
-            "Posture défensive destinée à protéger une ou plusieurs zones du corps.",
+    concept:
+        "Action défensive consistant à intercepter activement une attaque avec une partie du corps.",
 
-        trajectoires: {
+    trajectoires: {
 
-            haute: {
-                concept: "Garde protégeant principalement la tête et le haut du corps.",
+        // ======================================================
+        // INTERCEPTER
+        // ======================================================
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "ZONE",
-                    "INTENTION"
-                ],
+        intercepter: {
+            concept:
+                "Interception directe de l'attaque avant qu'elle atteigne sa cible.",
 
-                exemples: [
-                    "{Sujet} lève sa garde pour protéger son visage.",
-                    "{Sujet} place ses bras en garde haute."
-                ]
-            },
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
 
-            basse: {
-                concept: "Garde protégeant principalement le bas du corps.",
+            exemples: [
+                "{Sujet} intercepte le poing de {Cible} avec sa paume droite.",
+                "{Sujet} arrête le coup avec son avant-bras gauche.",
+                "{Sujet} intercepte la frappe de {Cible} avec sa paume gauche.",
+                "{Sujet} place son avant-bras droit sur la trajectoire du poing.",
+                "{Sujet} intercepte rapidement le bras de {Cible} avec sa main droite.",
+                "{Sujet} stoppe la frappe de {Cible} avec son avant-bras gauche.",
+                "{Sujet} utilise sa paume droite pour intercepter le coup.",
+                "{Sujet} coupe la trajectoire du poing avec son avant-bras droit.",
+                "{Sujet} arrête directement l'attaque avec sa main gauche.",
+                "{Sujet} interpose sa paume gauche devant le poing de {Cible}.",
+                "{Sujet} intercepte le bras de {Cible} avec son avant-bras droit.",
+                "{Sujet} stoppe le coup avant qu'il ne l'atteigne avec sa paume.",
+                "{Sujet} utilise son bras gauche pour intercepter la frappe.",
+                "{Sujet} place rapidement sa main droite devant l'attaque.",
+                "{Sujet} intercepte le coup de {Cible} avec son coude gauche.",
+                "{Sujet} arrête la frappe avec sa paume droite avant l'impact.",
+                "{Sujet} interpose son avant-bras gauche entre lui et {Cible}.",
+                "{Sujet} intercepte rapidement le poing adverse avec sa main droite.",
+                "{Sujet} stoppe l'attaque avec son avant-bras droit.",
+                "{Sujet} utilise sa main gauche pour intercepter directement la frappe de {Cible}."
+            ]
+        },
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "ZONE",
-                    "INTENTION"
-                ],
+        // ======================================================
+        // EXTÉRIEUR
+        // ======================================================
 
-                exemples: [
-                    "{Sujet} adopte une garde basse pour protéger ses jambes.",
-                    "{Sujet} descend sa garde pour protéger son abdomen."
-                ]
-            },
+        exterieur: {
+            concept:
+                "Parade dirigeant l'attaque vers l'extérieur du corps.",
 
-            centrale: {
-                concept: "Garde centrée devant le corps pour protéger les zones vitales.",
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "DIRECTION",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "ZONE",
-                    "INTENTION"
-                ],
+            exemples: [
+                "{Sujet} repousse le poing de {Cible} vers l'extérieur avec sa paume droite.",
+                "{Sujet} détourne le bras de {Cible} vers la droite avec son avant-bras gauche.",
+                "{Sujet} dévie la frappe vers l'extérieur avec sa paume gauche.",
+                "{Sujet} pousse le poing de {Cible} sur le côté avec son avant-bras droit.",
+                "{Sujet} écarte le bras de {Cible} vers la droite avec sa main gauche.",
+                "{Sujet} détourne rapidement le coup vers l'extérieur avec sa paume droite.",
+                "{Sujet} repousse la frappe vers la gauche avec son avant-bras gauche.",
+                "{Sujet} dévie le poing de {Cible} vers l'extérieur avec sa main droite.",
+                "{Sujet} écarte l'attaque de son axe avec sa paume gauche.",
+                "{Sujet} pousse le bras de {Cible} vers l'extérieur avec son avant-bras droit.",
+                "{Sujet} dévie la frappe vers la droite afin de l'écarter de son corps.",
+                "{Sujet} repousse le poing vers l'extérieur avec sa paume gauche.",
+                "{Sujet} détourne le bras adverse vers la gauche avec son avant-bras droit.",
+                "{Sujet} utilise sa main droite pour écarter la frappe vers l'extérieur.",
+                "{Sujet} pousse rapidement le bras de {Cible} vers le côté avec sa paume gauche.",
+                "{Sujet} dévie le coup vers l'extérieur avec son avant-bras gauche.",
+                "{Sujet} écarte le poing de {Cible} vers la droite avec sa paume droite.",
+                "{Sujet} détourne l'attaque vers la gauche avec son avant-bras droit.",
+                "{Sujet} repousse le bras de {Cible} hors de son axe avec sa main gauche.",
+                "{Sujet} dévie rapidement la frappe vers l'extérieur pour éviter l'impact."
+            ]
+        },
 
-                exemples: [
-                    "{Sujet} place ses bras devant son corps.",
-                    "{Sujet} adopte une garde centrale pour protéger son torse."
-                ]
-            },
+        // ======================================================
+        // INTÉRIEUR
+        // ======================================================
 
-            complete: {
-                concept: "Posture défensive couvrant plusieurs zones simultanément.",
+        interieur: {
+            concept:
+                "Parade dirigeant l'attaque vers l'intérieur du corps ou vers l'axe central.",
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MANIERE",
-                    "ZONE",
-                    "INTENTION"
-                ],
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "DIRECTION",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
 
-                exemples: [
-                    "{Sujet} se recroqueville pour protéger tout son corps.",
-                    "{Sujet} adopte une garde complète pour encaisser l'attaque."
-                ]
-            }
+            exemples: [
+                "{Sujet} ramène le poing de {Cible} vers l'intérieur avec sa paume gauche.",
+                "{Sujet} dévie le bras de {Cible} vers son axe avec son avant-bras droit.",
+                "{Sujet} pousse la frappe vers l'intérieur avec sa paume droite.",
+                "{Sujet} ramène le bras de {Cible} vers son centre avec son avant-bras gauche.",
+                "{Sujet} détourne le poing vers l'intérieur avec sa main droite.",
+                "{Sujet} rapproche la frappe de son axe avec sa paume gauche.",
+                "{Sujet} dévie rapidement le bras de {Cible} vers l'intérieur.",
+                "{Sujet} guide le poing de {Cible} vers son centre avec son avant-bras droit.",
+                "{Sujet} ramène l'attaque vers l'axe central avec sa main gauche.",
+                "{Sujet} pousse le bras adverse vers l'intérieur avec sa paume droite.",
+                "{Sujet} attire le poing de {Cible} vers son axe avec son avant-bras gauche.",
+                "{Sujet} dévie la frappe vers le centre avec sa paume droite.",
+                "{Sujet} ramène rapidement le bras de {Cible} vers l'intérieur.",
+                "{Sujet} utilise son avant-bras droit pour guider le coup vers son axe.",
+                "{Sujet} pousse la frappe vers l'intérieur avec sa main gauche.",
+                "{Sujet} déplace le poing de {Cible} vers son centre avec sa paume droite.",
+                "{Sujet} détourne le bras adverse vers l'intérieur avec son avant-bras gauche.",
+                "{Sujet} ramène le coup vers son axe central avec sa main droite.",
+                "{Sujet} guide rapidement la frappe vers l'intérieur avec sa paume gauche.",
+                "{Sujet} dévie le poing de {Cible} vers son centre afin d'éviter l'impact."
+            ]
+        },
+
+        // ======================================================
+        // BAS
+        // ======================================================
+
+        bas: {
+            concept:
+                "Parade dirigeant l'attaque vers le bas.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "DIRECTION",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} rabat le poing de {Cible} vers le bas avec sa paume droite.",
+                "{Sujet} pousse le bras de {Cible} vers le bas avec son avant-bras gauche.",
+                "{Sujet} dévie la frappe vers le bas avec sa paume gauche.",
+                "{Sujet} abaisse le bras de {Cible} avec son avant-bras droit.",
+                "{Sujet} guide le poing vers le bas avec sa main droite.",
+                "{Sujet} détourne la frappe vers le sol avec sa paume gauche.",
+                "{Sujet} rabat rapidement le bras de {Cible} vers le bas.",
+                "{Sujet} pousse le coup vers le bas avec son avant-bras droit.",
+                "{Sujet} utilise sa paume droite pour abaisser la frappe.",
+                "{Sujet} dévie le poing de {Cible} vers le bas avec son avant-bras gauche.",
+                "{Sujet} ramène le bras adverse vers le bas avec sa main droite.",
+                "{Sujet} rabat l'attaque vers le bas avec sa paume gauche.",
+                "{Sujet} pousse rapidement le bras de {Cible} vers le bas.",
+                "{Sujet} utilise son avant-bras droit pour guider la frappe vers le bas.",
+                "{Sujet} abaisse le poing de {Cible} avec sa paume droite.",
+                "{Sujet} dévie le coup vers le sol avec son avant-bras gauche.",
+                "{Sujet} rabat le bras adverse vers le bas avec sa main gauche.",
+                "{Sujet} pousse la frappe vers le bas afin de l'écarter de son corps.",
+                "{Sujet} détourne rapidement le poing vers le bas avec sa paume droite.",
+                "{Sujet} guide le bras de {Cible} vers le bas avec son avant-bras gauche."
+            ]
+        },
+
+        // ======================================================
+        // HAUT
+        // ======================================================
+
+        haut: {
+            concept:
+                "Parade dirigeant l'attaque vers le haut.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "DIRECTION",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie le bras de {Cible} vers le haut avec sa paume droite.",
+                "{Sujet} relève le poing de {Cible} avec son avant-bras gauche.",
+                "{Sujet} pousse la frappe vers le haut avec sa paume gauche.",
+                "{Sujet} soulève le bras de {Cible} avec son avant-bras droit.",
+                "{Sujet} détourne le coup vers le haut avec sa main droite.",
+                "{Sujet} guide la frappe vers le haut avec sa paume gauche.",
+                "{Sujet} relève rapidement le bras de {Cible} avec son avant-bras droit.",
+                "{Sujet} dévie le poing vers le haut avec sa main gauche.",
+                "{Sujet} pousse l'attaque vers le haut avec sa paume droite.",
+                "{Sujet} soulève le bras de {Cible} avec son avant-bras gauche.",
+                "{Sujet} utilise sa main droite pour relever la frappe.",
+                "{Sujet} détourne le poing adverse vers le haut avec sa paume gauche.",
+                "{Sujet} guide rapidement le bras de {Cible} vers le haut.",
+                "{Sujet} relève le coup avec son avant-bras droit.",
+                "{Sujet} pousse le bras adverse vers le haut avec sa main gauche.",
+                "{Sujet} dévie la frappe vers le haut afin de l'écarter de son axe.",
+                "{Sujet} utilise son avant-bras gauche pour soulever le poing de {Cible}.",
+                "{Sujet} relève rapidement le bras de {Cible} avec sa paume droite.",
+                "{Sujet} détourne l'attaque vers le haut avec son avant-bras droit.",
+                "{Sujet} guide le poing de {Cible} vers le haut avec sa main gauche."
+            ]
         }
-    },
+    }
+},
 
-
-    // ======================================================
-    // BLOCAGE
-    // ======================================================
-
-    blocage: {
-        categorie: "defense",
-        id: "BLOCAGE",
-
-        concept:
-            "Action défensive consistant à utiliser une partie du corps pour arrêter ou absorber directement une attaque.",
-
-        trajectoires: {
-
-            bras: {
-                concept:
-                    "Blocage effectué avec un membre supérieur.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} bloque le poing de {Cible} avec son avant-bras droit.",
-                    "{Sujet} interpose sa paume gauche devant le coup de {Cible}.",
-                    "{Sujet} bloque le direct avec son coude gauche."
-                ]
-            },
-
-            jambes: {
-                concept:
-                    "Blocage effectué avec un membre inférieur.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} bloque le coup de pied de {Cible} avec son tibia droit.",
-                    "{Sujet} lève sa jambe gauche pour bloquer l'attaque.",
-                    "{Sujet} arrête le coup avec la plante de son pied droit."
-                ]
-            },
-
-            corps: {
-                concept:
-                    "Blocage effectué directement avec une partie du corps.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} bloque le coup avec son épaule.",
-                    "{Sujet} absorbe l'impact avec son torse.",
-                    "{Sujet} encaisse le coup avec son flanc."
-                ]
-            }
-        }
-    },
-
-
-    // ======================================================
-    // PARADE
-    // ======================================================
-
-    parade: {
-        categorie: "defense",
-        id: "PARADE",
-
-        concept:
-            "Action défensive consistant à intercepter activement une attaque avec une partie du corps.",
-
-        trajectoires: {
-
-            intercepter: {
-                concept:
-                    "Interception directe de l'attaque avant qu'elle atteigne sa cible.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} intercepte le poing de {Cible} avec sa paume droite.",
-                    "{Sujet} arrête le coup avec son avant-bras gauche."
-                ]
-            },
-
-            exterieur: {
-                concept:
-                    "Parade dirigeant l'attaque vers l'extérieur du corps.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} repousse le poing de {Cible} vers l'extérieur avec sa paume droite.",
-                    "{Sujet} détourne le bras de {Cible} vers la droite avec son avant-bras gauche."
-                ]
-            },
-
-            interieur: {
-                concept:
-                    "Parade dirigeant l'attaque vers l'intérieur du corps ou vers l'axe central.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} ramène le poing de {Cible} vers l'intérieur avec sa paume gauche.",
-                    "{Sujet} dévie le bras de {Cible} vers son axe avec son avant-bras droit."
-                ]
-            },
-
-            bas: {
-                concept:
-                    "Parade dirigeant l'attaque vers le bas.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} rabat le poing de {Cible} vers le bas avec sa paume droite.",
-                    "{Sujet} pousse le bras de {Cible} vers le bas avec son avant-bras gauche."
-                ]
-            },
-
-            haut: {
-                concept:
-                    "Parade dirigeant l'attaque vers le haut.",
-
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "DIRECTION",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
-
-                exemples: [
-                    "{Sujet} dévie le bras de {Cible} vers le haut avec sa paume droite.",
-                    "{Sujet} relève le poing de {Cible} avec son avant-bras gauche."
-                ]
-            }
-        }
-    },
-
-
-    // ======================================================
+// ======================================================
 // DÉVIATION
 // ======================================================
 
@@ -4714,7 +5151,21 @@ deviation: {
                 "{Sujet} dévie le coup de pied de {Cible} vers la gauche avec son tibia droit.",
                 "{Sujet} dévie la jambe de {Cible} vers la droite avec la semelle de son pied gauche.",
                 "{Sujet} dévie le genou de {Cible} vers la gauche avec son genou droit.",
-                "{Sujet} dévie le bras de {Cible} vers l'extérieur avec son coude gauche."
+                "{Sujet} dévie le bras de {Cible} vers l'extérieur avec son coude gauche.",
+                "{Sujet} pousse le poignet de {Cible} vers la droite avec sa paume gauche.",
+                "{Sujet} écarte le poing de {Cible} vers la gauche avec son avant-bras droit.",
+                "{Sujet} dévie la main de {Cible} vers la droite avec ses doigts gauches.",
+                "{Sujet} détourne l'avant-bras de {Cible} vers la gauche avec sa paume droite.",
+                "{Sujet} dévie la jambe de {Cible} vers l'extérieur avec son tibia gauche.",
+                "{Sujet} pousse le pied de {Cible} vers la droite avec la semelle de son pied gauche.",
+                "{Sujet} détourne le genou de {Cible} vers la droite avec son genou gauche.",
+                "{Sujet} dévie le coude de {Cible} vers l'extérieur avec son avant-bras droit.",
+                "{Sujet} écarte le bras de {Cible} vers la gauche avec sa paume gauche.",
+                "{Sujet} dévie rapidement le poing de {Cible} vers la droite avec son poignet droit.",
+                "{Sujet} repousse la jambe de {Cible} vers la gauche avec son tibia droit.",
+                "{Sujet} détourne la cheville de {Cible} vers la droite avec son pied gauche.",
+                "{Sujet} dévie le coup vers la gauche avec la semelle de son pied droit.",
+                "{Sujet} modifie la trajectoire du bras de {Cible} vers la droite avec sa paume gauche."
             ]
         },
 
@@ -4742,7 +5193,23 @@ deviation: {
                 "{Sujet} dévie le poignet de {Cible} dans un mouvement circulaire avec sa paume droite.",
                 "{Sujet} accompagne le bras de {Cible} dans un mouvement circulaire avec son avant-bras gauche.",
                 "{Sujet} dévie la jambe de {Cible} dans un mouvement circulaire avec son tibia droit.",
-                "{Sujet} guide le pied de {Cible} dans une trajectoire circulaire avec la semelle de son pied gauche."
+                "{Sujet} guide le pied de {Cible} dans une trajectoire circulaire avec la semelle de son pied gauche.",
+                "{Sujet} fait tourner le poing de {Cible} vers l'extérieur avec sa paume droite.",
+                "{Sujet} accompagne le poignet de {Cible} dans une rotation avec sa main gauche.",
+                "{Sujet} dévie le bras de {Cible} en cercle avec son avant-bras droit.",
+                "{Sujet} guide la frappe de {Cible} dans une trajectoire circulaire avec sa paume gauche.",
+                "{Sujet} détourne le coude de {Cible} dans un mouvement circulaire avec son poignet droit.",
+                "{Sujet} accompagne la jambe de {Cible} en cercle avec son tibia gauche.",
+                "{Sujet} fait suivre une trajectoire circulaire au pied de {Cible} avec son pied droit.",
+                "{Sujet} dévie progressivement le poing de {Cible} en cercle avec sa paume gauche.",
+                "{Sujet} entraîne le bras de {Cible} dans une rotation avec son avant-bras droit.",
+                "{Sujet} guide le genou de {Cible} dans un mouvement circulaire avec son genou gauche.",
+                "{Sujet} dévie la jambe de {Cible} en arc de cercle avec son tibia droit.",
+                "{Sujet} accompagne rapidement le bras de {Cible} dans une trajectoire circulaire.",
+                "{Sujet} détourne le poignet de {Cible} en cercle avec sa paume droite.",
+                "{Sujet} fait pivoter la trajectoire du poing de {Cible} avec son avant-bras gauche.",
+                "{Sujet} guide le coup de pied de {Cible} dans un mouvement circulaire avec sa semelle droite.",
+                "{Sujet} modifie progressivement la trajectoire du bras de {Cible} avec un mouvement circulaire de sa paume."
             ]
         },
 
@@ -4771,7 +5238,22 @@ deviation: {
                 "{Sujet} rabat le bras de {Cible} vers le bas avec son avant-bras gauche.",
                 "{Sujet} dévie le coup de pied de {Cible} vers le bas avec la semelle de son pied droit.",
                 "{Sujet} repousse la jambe de {Cible} vers le bas avec son tibia gauche.",
-                "{Sujet} pousse le genou de {Cible} vers le bas avec son genou droit."
+                "{Sujet} pousse le genou de {Cible} vers le bas avec son genou droit.",
+                "{Sujet} abaisse le poignet de {Cible} avec sa paume gauche.",
+                "{Sujet} dévie le bras de {Cible} vers le sol avec son avant-bras droit.",
+                "{Sujet} rabat le coude de {Cible} vers le bas avec sa main gauche.",
+                "{Sujet} guide le poing de {Cible} vers le bas avec sa paume droite.",
+                "{Sujet} pousse la jambe de {Cible} vers le bas avec son tibia droit.",
+                "{Sujet} dévie le pied de {Cible} vers le bas avec la semelle de son pied gauche.",
+                "{Sujet} abaisse le genou de {Cible} avec son genou gauche.",
+                "{Sujet} rabat rapidement le bras de {Cible} vers le bas avec son avant-bras droit.",
+                "{Sujet} détourne le poignet de {Cible} vers le bas avec sa paume gauche.",
+                "{Sujet} repousse le coup de pied vers le bas avec son tibia droit.",
+                "{Sujet} guide la jambe de {Cible} vers le bas avec son pied gauche.",
+                "{Sujet} dévie le coude de {Cible} vers le bas avec son avant-bras gauche.",
+                "{Sujet} pousse le poing de {Cible} vers le bas avec sa main droite.",
+                "{Sujet} rabat la frappe de {Cible} vers le sol avec sa paume gauche.",
+                "{Sujet} modifie la trajectoire du bras de {Cible} vers le bas avec son avant-bras droit."
             ]
         },
 
@@ -4800,107 +5282,701 @@ deviation: {
                 "{Sujet} relève le bras de {Cible} avec son avant-bras gauche.",
                 "{Sujet} dévie le coup de pied de {Cible} vers le haut avec la semelle de son pied droit.",
                 "{Sujet} soulève la jambe de {Cible} avec son tibia gauche.",
-                "{Sujet} repousse le genou de {Cible} vers le haut avec son genou droit."
+                "{Sujet} repousse le genou de {Cible} vers le haut avec son genou droit.",
+                "{Sujet} relève le poignet de {Cible} avec sa paume gauche.",
+                "{Sujet} dévie le poing de {Cible} vers le haut avec son avant-bras droit.",
+                "{Sujet} soulève le bras de {Cible} avec sa main gauche.",
+                "{Sujet} guide le coude de {Cible} vers le haut avec sa paume droite.",
+                "{Sujet} relève la jambe de {Cible} avec son tibia droit.",
+                "{Sujet} pousse le pied de {Cible} vers le haut avec la semelle de son pied gauche.",
+                "{Sujet} dévie le genou de {Cible} vers le haut avec son genou gauche.",
+                "{Sujet} soulève rapidement le bras de {Cible} avec son avant-bras droit.",
+                "{Sujet} guide le poignet de {Cible} vers le haut avec sa paume gauche.",
+                "{Sujet} relève le coup de pied de {Cible} avec son tibia droit.",
+                "{Sujet} pousse la jambe de {Cible} vers le haut avec son pied gauche.",
+                "{Sujet} dévie le coude de {Cible} vers le haut avec son avant-bras gauche.",
+                "{Sujet} soulève le poing de {Cible} avec sa main droite.",
+                "{Sujet} détourne la frappe vers le haut avec sa paume gauche.",
+                "{Sujet} modifie la trajectoire du bras de {Cible} vers le haut avec son avant-bras droit."
             ]
         }
     }
-}, 
-            
-    // ======================================================
-    // SAISIE
-    // ======================================================
+},
 
-    saisie: {
-        categorie: "defense",
-        id: "SAISIE",
+// ======================================================
+// SAISIE
+// ======================================================
 
-        concept:
-            "Action défensive consistant à saisir une partie du corps ou une arme adverse afin d'en contrôler le mouvement.",
+saisie: {
+    categorie: "defense",
+    id: "SAISIE",
 
-        trajectoires: {
+    concept:
+        "Action défensive consistant à saisir une partie du corps ou une arme adverse afin d'en contrôler le mouvement.",
 
-            bras: {
-                concept:
-                    "Capture et contrôle du bras adverse.",
+    trajectoires: {
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
+        // ==================================================
+        // SAISIE DU BRAS
+        // ==================================================
 
-                exemples: [
-                    "{Sujet} saisit le poignet de {Cible} avec sa main droite.",
-                    "{Sujet} attrape l'avant-bras de {Cible} avec ses deux mains."
-                ]
-            },
+        bras: {
+            concept:
+                "Capture et contrôle du bras adverse.",
 
-            poignet: {
-                concept:
-                    "Capture directe du poignet adverse.",
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
+            exemples: [
+                "{Sujet} saisit le poignet de {Cible} avec sa main droite.",
+                "{Sujet} attrape l'avant-bras de {Cible} avec ses deux mains.",
+                "{Sujet} saisit le bras de {Cible} avec sa main gauche.",
+                "{Sujet} capture l'avant-bras de {Cible} avec sa main droite.",
+                "{Sujet} agrippe le bras de {Cible} avec ses deux mains.",
+                "{Sujet} saisit rapidement le poignet de {Cible}.",
+                "{Sujet} attrape le bras de {Cible} avant qu'il ne se retire.",
+                "{Sujet} verrouille l'avant-bras de {Cible} avec ses deux mains.",
+                "{Sujet} saisit le bras droit de {Cible} avec sa main gauche.",
+                "{Sujet} capture le bras gauche de {Cible} avec sa main droite.",
+                "{Sujet} agrippe le poignet de {Cible} avec ses deux mains.",
+                "{Sujet} bloque le bras de {Cible} en le saisissant avec sa main droite.",
+                "{Sujet} attrape l'avant-bras de {Cible} avec sa paume gauche.",
+                "{Sujet} saisit fermement le bras de {Cible}.",
+                "{Sujet} capture rapidement le poignet de {Cible} avec sa main droite.",
+                "{Sujet} prend le bras de {Cible} avec ses deux mains pour le contrôler.",
+                "{Sujet} agrippe l'avant-bras de {Cible} avec sa main gauche.",
+                "{Sujet} saisit le bras de {Cible} afin d'en limiter le mouvement.",
+                "{Sujet} capture le poignet de {Cible} avant de le contrôler.",
+                "{Sujet} saisit fermement le bras de {Cible} pour empêcher son mouvement."
+            ]
+        },
 
-                exemples: [
-                    "{Sujet} capture le poignet de {Cible} avec sa main gauche.",
-                    "{Sujet} verrouille le poignet de {Cible} avec ses deux mains."
-                ]
-            },
+        // ==================================================
+        // SAISIE DU POIGNET
+        // ==================================================
 
-            jambe: {
-                concept:
-                    "Capture d'une jambe adverse afin d'en limiter le mouvement.",
+        poignet: {
+            concept:
+                "Capture directe du poignet adverse.",
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
 
-                exemples: [
-                    "{Sujet} saisit la cheville de {Cible} avec ses deux mains.",
-                    "{Sujet} attrape la jambe de {Cible} sous le genou."
-                ]
-            },
+            exemples: [
+                "{Sujet} capture le poignet de {Cible} avec sa main gauche.",
+                "{Sujet} verrouille le poignet de {Cible} avec ses deux mains.",
+                "{Sujet} saisit le poignet de {Cible} avec sa main droite.",
+                "{Sujet} attrape rapidement le poignet de {Cible}.",
+                "{Sujet} agrippe le poignet de {Cible} avec sa main gauche.",
+                "{Sujet} capture le poignet droit de {Cible} avec sa main gauche.",
+                "{Sujet} saisit le poignet gauche de {Cible} avec sa main droite.",
+                "{Sujet} prend fermement le poignet de {Cible}.",
+                "{Sujet} bloque le poignet de {Cible} en le saisissant avec sa main droite.",
+                "{Sujet} attrape le poignet de {Cible} avec ses deux mains.",
+                "{Sujet} saisit rapidement la main de {Cible} par le poignet.",
+                "{Sujet} verrouille le poignet de {Cible} avec sa main gauche.",
+                "{Sujet} capture le poignet adverse avant de contrôler son bras.",
+                "{Sujet} agrippe fermement le poignet de {Cible}.",
+                "{Sujet} saisit le poignet de {Cible} afin de limiter son mouvement.",
+                "{Sujet} attrape le poignet de {Cible} au passage.",
+                "{Sujet} capture la main de {Cible} en contrôlant son poignet.",
+                "{Sujet} saisit le poignet de {Cible} avec sa paume droite.",
+                "{Sujet} verrouille rapidement le poignet de {Cible} avec ses deux mains.",
+                "{Sujet} maintient le poignet de {Cible} pour contrôler son bras."
+            ]
+        },
 
-            arme: {
-                concept:
-                    "Capture ou contrôle d'une arme adverse.",
+        // ==================================================
+        // SAISIE DE LA JAMBE
+        // ==================================================
 
-                structure: [
-                    "SUJET",
-                    "ACTION",
-                    "MEMBRE",
-                    "MANIERE",
-                    "ZONE",
-                    "CIBLE",
-                    "INTENTION"
-                ],
+        jambe: {
+            concept:
+                "Capture d'une jambe adverse afin d'en limiter le mouvement.",
 
-                exemples: [
-                    "{Sujet} saisit le poignet armé de {Cible}.",
-                    "{Sujet} attrape le manche de l'arme de {Cible} avec sa main droite."
-                ]
-            }
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} saisit la cheville de {Cible} avec ses deux mains.",
+                "{Sujet} attrape la jambe de {Cible} sous le genou.",
+                "{Sujet} capture la cheville de {Cible} avec sa main droite.",
+                "{Sujet} saisit le mollet de {Cible} avec ses deux mains.",
+                "{Sujet} agrippe la jambe de {Cible} avec ses bras.",
+                "{Sujet} attrape rapidement la cheville de {Cible}.",
+                "{Sujet} saisit la jambe de {Cible} avant qu'elle ne se retire.",
+                "{Sujet} capture le tibia de {Cible} avec ses deux mains.",
+                "{Sujet} verrouille la jambe de {Cible} sous son bras.",
+                "{Sujet} saisit le pied de {Cible} avec sa main gauche.",
+                "{Sujet} attrape la cheville droite de {Cible} avec ses deux mains.",
+                "{Sujet} capture la jambe gauche de {Cible} avec son bras droit.",
+                "{Sujet} agrippe le tibia de {Cible} afin de limiter son mouvement.",
+                "{Sujet} saisit fermement la cheville de {Cible}.",
+                "{Sujet} bloque la jambe de {Cible} en la saisissant sous le genou.",
+                "{Sujet} capture rapidement le pied de {Cible} avec ses deux mains.",
+                "{Sujet} attrape le mollet de {Cible} pour contrôler sa jambe.",
+                "{Sujet} saisit la jambe de {Cible} afin d'empêcher son déplacement.",
+                "{Sujet} verrouille la cheville de {Cible} avec ses deux mains.",
+                "{Sujet} maintient la jambe de {Cible} après l'avoir saisie."
+            ]
+        },
+
+        // ==================================================
+        // SAISIE D'UNE ARME
+        // ==================================================
+
+        arme: {
+            concept:
+                "Capture ou contrôle d'une arme adverse.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MEMBRE",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} saisit le poignet armé de {Cible}.",
+                "{Sujet} attrape le manche de l'arme de {Cible} avec sa main droite.",
+                "{Sujet} saisit l'arme de {Cible} avec sa main gauche.",
+                "{Sujet} agrippe le poignet de {Cible} pour contrôler son arme.",
+                "{Sujet} capture le bras armé de {Cible} avec ses deux mains.",
+                "{Sujet} attrape rapidement le manche de l'arme adverse.",
+                "{Sujet} saisit la poignée de l'arme de {Cible} avec sa paume droite.",
+                "{Sujet} bloque le bras armé de {Cible} en le saisissant.",
+                "{Sujet} agrippe fermement le manche de l'arme de {Cible}.",
+                "{Sujet} capture le poignet armé de {Cible} avec sa main gauche.",
+                "{Sujet} saisit la lame de {Cible} par le poignet qui la tient.",
+                "{Sujet} attrape le bras de {Cible} afin de contrôler son arme.",
+                "{Sujet} saisit rapidement la poignée de l'arme adverse.",
+                "{Sujet} verrouille le poignet de {Cible} pour empêcher son arme de bouger.",
+                "{Sujet} capture le bras tenant l'arme de {Cible} avec ses deux mains.",
+                "{Sujet} agrippe le manche de l'arme de {Cible} avec sa main gauche.",
+                "{Sujet} saisit le poignet de {Cible} afin de neutraliser le mouvement de son arme.",
+                "{Sujet} attrape l'arme de {Cible} pour en contrôler la direction.",
+                "{Sujet} verrouille le bras armé de {Cible} avec sa main droite.",
+                "{Sujet} saisit fermement le poignet de {Cible} pour contrôler son arme."
+            ]
         }
     }
-}
+},
+
+    // ==========================================================
+// BLOCAGE AVEC ARME
+// ==========================================================
+
+blocage_arme: {
+
+    categorie: "defense",
+
+    id: "BLOCAGE_ARME",
+
+    concept:
+        "Action défensive consistant à utiliser une arme pour arrêter ou absorber directement une attaque adverse.",
+
+    trajectoires: {
+
+        horizontale: {
+
+            concept:
+                "Blocage effectué avec une arme placée horizontalement sur la trajectoire de l'attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} place son katana horizontalement devant lui pour bloquer le coup de {Cible}.",
+                "{Sujet} place son katana horizontalement devant son torse pour arrêter la frappe.",
+                "{Sujet} tient son katana horizontalement à deux mains pour bloquer l'attaque.",
+                "{Sujet} maintient son katana horizontalement avec une seule main pour bloquer le coup.",
+                "{Sujet} interpose horizontalement son katana entre lui et {Cible}.",
+                "{Sujet} place rapidement son katana horizontalement sur la trajectoire de l'attaque.",
+                "{Sujet} positionne sa lame horizontalement devant son corps pour bloquer.",
+                "{Sujet} place son katana horizontalement devant son visage pour arrêter la frappe.",
+                "{Sujet} utilise son katana horizontalement afin d'absorber l'impact du coup.",
+                "{Sujet} bloque la frappe de {Cible} avec son katana tenu horizontalement.",
+                "{Sujet} croise horizontalement son katana avec la trajectoire du coup.",
+                "{Sujet} tient son katana à deux mains horizontalement pour protéger son torse.",
+                "{Sujet} place une main à chaque extrémité de son katana pour bloquer horizontalement.",
+                "{Sujet} positionne la lame horizontalement devant lui afin d'arrêter l'attaque.",
+                "{Sujet} relève son katana horizontalement pour intercepter le coup.",
+                "{Sujet} place son katana horizontalement face à {Cible} pour bloquer.",
+                "{Sujet} utilise la lame de son katana comme barrière horizontale contre la frappe.",
+                "{Sujet} bloque directement le coup descendant avec son katana placé horizontalement.",
+                "{Sujet} place son katana horizontalement devant son corps pour protéger sa zone centrale.",
+                "{Sujet} interpose sa lame horizontalement afin de stopper le coup de {Cible}."
+            ]
+        },
+
+        verticale: {
+
+            concept:
+                "Blocage effectué avec une arme placée verticalement sur la trajectoire de l'attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} place son katana verticalement devant lui pour bloquer le coup de {Cible}.",
+                "{Sujet} positionne son katana verticalement devant son corps pour arrêter la frappe.",
+                "{Sujet} tient son katana verticalement à deux mains pour bloquer.",
+                "{Sujet} place sa lame verticalement entre lui et {Cible}.",
+                "{Sujet} utilise son katana verticalement pour intercepter l'attaque.",
+                "{Sujet} maintient son katana vertical devant son torse pour bloquer.",
+                "{Sujet} positionne rapidement sa lame verticalement sur la trajectoire du coup.",
+                "{Sujet} bloque la frappe de {Cible} avec son katana placé verticalement.",
+                "{Sujet} place son katana droit devant lui pour arrêter l'attaque.",
+                "{Sujet} tient son katana verticalement avec une main pour bloquer.",
+                "{Sujet} tient son katana verticalement avec ses deux mains pour renforcer le blocage.",
+                "{Sujet} interpose sa lame verticale entre son corps et le coup.",
+                "{Sujet} place verticalement son katana devant son visage pour se protéger.",
+                "{Sujet} utilise la lame verticale de son katana pour absorber l'impact.",
+                "{Sujet} bloque directement la frappe avec son katana maintenu verticalement.",
+                "{Sujet} relève son katana en position verticale pour arrêter le coup.",
+                "{Sujet} place sa lame verticalement face à {Cible} afin de bloquer son attaque.",
+                "{Sujet} croise la trajectoire de la frappe avec son katana vertical.",
+                "{Sujet} maintient son katana droit devant lui pour stopper le coup.",
+                "{Sujet} interpose rapidement son katana verticalement pour bloquer l'attaque."
+            ]
+        },
+
+        oblique: {
+
+            concept:
+                "Blocage effectué avec une arme placée obliquement afin de stopper ou absorber une attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} place son katana obliquement devant lui pour bloquer le coup de {Cible}.",
+                "{Sujet} positionne son katana en oblique pour arrêter la frappe.",
+                "{Sujet} tient son katana obliquement à deux mains pour bloquer.",
+                "{Sujet} place sa lame en oblique entre lui et {Cible}.",
+                "{Sujet} utilise son katana obliquement pour intercepter l'attaque.",
+                "{Sujet} positionne rapidement sa lame en oblique sur la trajectoire du coup.",
+                "{Sujet} bloque la frappe de {Cible} avec son katana placé obliquement.",
+                "{Sujet} place son katana en diagonale devant son corps pour bloquer.",
+                "{Sujet} maintient sa lame obliquement devant son torse pour arrêter l'attaque.",
+                "{Sujet} tient son katana en oblique avec une seule main pour bloquer.",
+                "{Sujet} tient son katana en oblique avec ses deux mains pour renforcer le blocage.",
+                "{Sujet} interpose sa lame obliquement entre lui et le coup adverse.",
+                "{Sujet} place son katana oblique devant son visage pour protéger sa tête.",
+                "{Sujet} utilise sa lame en oblique pour absorber directement l'impact.",
+                "{Sujet} bloque le coup descendant de {Cible} avec son katana placé obliquement.",
+                "{Sujet} croise obliquement son katana avec la trajectoire de l'attaque.",
+                "{Sujet} positionne sa lame en oblique afin de stopper la frappe.",
+                "{Sujet} place rapidement son katana obliquement devant lui pour bloquer.",
+                "{Sujet} utilise son katana en position oblique pour protéger son corps.",
+                "{Sujet} interpose obliquement sa lame afin de stopper le coup de {Cible}."
+            ]
+        },
+
+        dessus: {
+
+            concept:
+                "Blocage effectué en plaçant l'arme au-dessus du corps afin de protéger principalement la partie supérieure.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} place son katana au-dessus de sa tête pour bloquer le coup de {Cible}.",
+                "{Sujet} lève son katana au-dessus de sa tête pour arrêter la frappe.",
+                "{Sujet} tient son katana horizontalement au-dessus de sa tête pour bloquer.",
+                "{Sujet} place son katana au-dessus de son crâne avec une seule main pour se protéger.",
+                "{Sujet} tient son katana au-dessus de sa tête avec ses deux mains pour bloquer.",
+                "{Sujet} place ses deux mains sur son katana pour bloquer le coup descendant.",
+                "{Sujet} maintient son katana au-dessus de sa tête afin d'arrêter l'attaque.",
+                "{Sujet} lève rapidement sa lame au-dessus de lui pour bloquer.",
+                "{Sujet} utilise son katana au-dessus de sa tête comme protection contre la frappe.",
+                "{Sujet} place la lame au-dessus de son visage pour bloquer le coup.",
+                "{Sujet} bloque la frappe descendante de {Cible} avec son katana au-dessus de sa tête.",
+                "{Sujet} positionne son katana au-dessus de lui pour protéger son corps.",
+                "{Sujet} tient son katana à deux mains au-dessus de sa tête pour absorber l'impact.",
+                "{Sujet} place son katana horizontalement au-dessus de sa tête pour stopper le coup.",
+                "{Sujet} lève sa lame au-dessus de son crâne afin de bloquer l'attaque.",
+                "{Sujet} interpose son katana au-dessus de sa tête entre lui et {Cible}.",
+                "{Sujet} maintient sa lame au-dessus de son visage pour arrêter la frappe.",
+                "{Sujet} relève son katana au-dessus de lui pour bloquer le coup descendant.",
+                "{Sujet} protège sa tête en plaçant son katana au-dessus de celle-ci.",
+                "{Sujet} bloque directement l'attaque descendante avec son katana placé au-dessus de sa tête."
+            ]
+        }
+    }
+},
+
+
+// ==========================================================
+// PARADE AVEC ARME
+// ==========================================================
+
+parade_arme: {
+
+    categorie: "defense",
+
+    id: "PARADE_ARME",
+
+    concept:
+        "Action défensive consistant à intercepter activement une attaque adverse avec une arme afin d'en arrêter ou contrôler la trajectoire.",
+
+    trajectoires: {
+
+        horizontale: {
+
+            concept:
+                "Parade réalisée avec une arme tenue horizontalement pour intercepter l'attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} pare le coup de {Cible} avec son katana tenu horizontalement.",
+                "{Sujet} intercepte horizontalement la frappe avec son katana.",
+                "{Sujet} place son katana horizontalement pour parer l'attaque.",
+                "{Sujet} pare la frappe de {Cible} avec sa lame maintenue horizontalement.",
+                "{Sujet} utilise son katana horizontalement pour intercepter le coup.",
+                "{Sujet} place sa lame horizontalement sur la trajectoire de l'attaque.",
+                "{Sujet} pare rapidement le coup avec son katana horizontal.",
+                "{Sujet} tient son katana horizontalement à deux mains pour parer.",
+                "{Sujet} intercepte la frappe avec son katana placé devant son torse.",
+                "{Sujet} pare le coup avec une seule main en maintenant son katana horizontal.",
+                "{Sujet} bloque la trajectoire de la lame de {Cible} avec son katana horizontal.",
+                "{Sujet} place son katana horizontalement entre lui et {Cible}.",
+                "{Sujet} pare la frappe descendante avec son katana tenu horizontalement.",
+                "{Sujet} utilise sa lame horizontalement pour intercepter l'attaque.",
+                "{Sujet} maintient son katana horizontalement afin de parer le coup.",
+                "{Sujet} croise horizontalement sa lame avec l'attaque adverse.",
+                "{Sujet} pare directement la frappe de {Cible} avec son katana.",
+                "{Sujet} place son katana horizontalement devant lui pour intercepter le coup.",
+                "{Sujet} relève sa lame horizontalement afin de parer l'attaque.",
+                "{Sujet} intercepte le coup de {Cible} avec son katana tenu horizontalement."
+            ]
+        },
+
+        oblique: {
+
+            concept:
+                "Parade réalisée avec une arme placée obliquement afin d'intercepter activement l'attaque.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} pare le coup de {Cible} avec son katana placé obliquement.",
+                "{Sujet} place son katana en oblique pour parer la frappe.",
+                "{Sujet} intercepte l'attaque avec sa lame tenue obliquement.",
+                "{Sujet} pare la frappe descendante avec son katana en oblique.",
+                "{Sujet} positionne son katana obliquement devant lui pour intercepter le coup.",
+                "{Sujet} utilise son katana en oblique pour parer l'attaque.",
+                "{Sujet} pare rapidement la frappe avec sa lame oblique.",
+                "{Sujet} tient son katana obliquement à deux mains pour intercepter le coup.",
+                "{Sujet} place sa lame obliquement entre lui et {Cible}.",
+                "{Sujet} pare le coup de {Cible} avec son katana maintenu en diagonale.",
+                "{Sujet} croise obliquement sa lame avec la trajectoire de l'attaque.",
+                "{Sujet} intercepte la frappe avec son katana placé en diagonale.",
+                "{Sujet} relève son katana en oblique pour parer le coup descendant.",
+                "{Sujet} utilise la lame oblique de son katana pour intercepter la frappe.",
+                "{Sujet} pare l'attaque avec son katana tenu obliquement devant son torse.",
+                "{Sujet} positionne rapidement sa lame en oblique pour parer.",
+                "{Sujet} place son katana obliquement devant son visage pour intercepter le coup.",
+                "{Sujet} pare directement la frappe de {Cible} avec sa lame oblique.",
+                "{Sujet} maintient son katana en oblique afin d'intercepter l'attaque.",
+                "{Sujet} intercepte le coup de {Cible} avec son katana placé obliquement."
+            ]
+        },
+
+        dessus: {
+
+            concept:
+                "Parade réalisée en levant l'arme au-dessus de la tête afin d'intercepter principalement les frappes descendantes.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} pare le coup descendant de {Cible} avec son katana placé au-dessus de sa tête.",
+                "{Sujet} lève son katana au-dessus de sa tête pour parer la frappe.",
+                "{Sujet} intercepte le coup avec son katana placé au-dessus de lui.",
+                "{Sujet} pare la frappe descendante avec son katana tenu à deux mains.",
+                "{Sujet} place son katana horizontalement au-dessus de sa tête pour parer.",
+                "{Sujet} tient son katana au-dessus de sa tête avec une seule main pour intercepter.",
+                "{Sujet} utilise son katana au-dessus de sa tête pour parer l'attaque.",
+                "{Sujet} relève rapidement sa lame pour intercepter le coup descendant.",
+                "{Sujet} place son katana au-dessus de son visage afin de parer.",
+                "{Sujet} pare la frappe de {Cible} avec sa lame levée au-dessus de sa tête.",
+                "{Sujet} tient son katana à deux mains au-dessus de sa tête pour intercepter le coup.",
+                "{Sujet} lève son katana afin de croiser la trajectoire de la frappe descendante.",
+                "{Sujet} pare directement le coup descendant avec sa lame au-dessus de lui.",
+                "{Sujet} positionne son katana au-dessus de sa tête pour intercepter l'attaque.",
+                "{Sujet} utilise sa lame levée pour parer la frappe de {Cible}.",
+                "{Sujet} place son katana au-dessus de son crâne pour arrêter le coup.",
+                "{Sujet} relève son katana rapidement pour parer l'attaque descendante.",
+                "{Sujet} interpose sa lame au-dessus de sa tête entre lui et {Cible}.",
+                "{Sujet} maintient son katana au-dessus de lui afin de parer la frappe.",
+                "{Sujet} bloque la trajectoire du coup descendant avec son katana levé au-dessus de sa tête."
+            ]
+        }
+    }
+},
+
+
+// ==========================================================
+// DÉVIATION AVEC ARME
+// ==========================================================
+
+deviation_arme: {
+
+    categorie: "defense",
+
+    id: "DEVIATION_ARME",
+
+    concept:
+        "Action défensive consistant à utiliser une arme pour modifier volontairement la trajectoire d'une attaque adverse.",
+
+    trajectoires: {
+
+        laterale: {
+
+            concept:
+                "Déviation d'une attaque vers un côté à l'aide d'une arme.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie la lame de {Cible} vers la droite avec son katana.",
+                "{Sujet} dévie le coup de {Cible} vers la gauche avec son katana.",
+                "{Sujet} détourne la frappe vers l'extérieur avec son katana.",
+                "{Sujet} guide la lame de {Cible} vers la droite avec son katana.",
+                "{Sujet} accompagne le coup de {Cible} vers la gauche avec sa lame.",
+                "{Sujet} repousse la lame adverse sur le côté avec son katana.",
+                "{Sujet} dévie horizontalement la frappe vers l'extérieur avec son katana.",
+                "{Sujet} fait glisser son katana contre la lame adverse pour la dévier.",
+                "{Sujet} détourne rapidement l'attaque de {Cible} vers la droite.",
+                "{Sujet} guide la frappe adverse vers la gauche avec son katana.",
+                "{Sujet} écarte la lame de {Cible} de son axe avec son katana.",
+                "{Sujet} dévie le coup vers l'extérieur en faisant glisser sa lame.",
+                "{Sujet} repousse la trajectoire de l'attaque vers la droite avec son katana.",
+                "{Sujet} accompagne la lame adverse vers la gauche avec son katana.",
+                "{Sujet} détourne le coup de {Cible} sur le côté avec sa lame.",
+                "{Sujet} modifie la trajectoire de la frappe vers l'extérieur avec son katana.",
+                "{Sujet} dévie la lame adverse latéralement avec son katana.",
+                "{Sujet} guide le coup de {Cible} hors de son axe avec sa lame.",
+                "{Sujet} écarte rapidement la frappe adverse vers la droite.",
+                "{Sujet} détourne la trajectoire du coup de {Cible} vers la gauche avec son katana."
+            ]
+        },
+
+        haut: {
+
+            concept:
+                "Déviation d'une attaque vers le haut à l'aide d'une arme.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie la lame de {Cible} vers le haut avec son katana.",
+                "{Sujet} relève la frappe de {Cible} avec son katana.",
+                "{Sujet} guide le coup adverse vers le haut avec sa lame.",
+                "{Sujet} détourne la frappe vers le haut avec son katana.",
+                "{Sujet} soulève la trajectoire de la lame de {Cible} avec son katana.",
+                "{Sujet} dévie le coup montant avec sa lame vers le haut.",
+                "{Sujet} utilise son katana pour relever la trajectoire de l'attaque.",
+                "{Sujet} accompagne la lame adverse vers le haut avec son katana.",
+                "{Sujet} repousse la frappe de {Cible} vers le haut avec sa lame.",
+                "{Sujet} fait glisser son katana contre la lame adverse pour la relever.",
+                "{Sujet} dévie rapidement le coup vers le haut avec son katana.",
+                "{Sujet} détourne la trajectoire de la frappe vers le haut.",
+                "{Sujet} guide la lame de {Cible} vers le haut avec son katana.",
+                "{Sujet} écarte la frappe de son axe en la dirigeant vers le haut.",
+                "{Sujet} relève le coup descendant de {Cible} avec son katana.",
+                "{Sujet} modifie la trajectoire de l'attaque en la dirigeant vers le haut.",
+                "{Sujet} dévie la lame adverse vers le haut avec un mouvement de son katana.",
+                "{Sujet} accompagne le coup de {Cible} vers le haut avec sa lame.",
+                "{Sujet} détourne rapidement la frappe vers le haut avec son katana.",
+                "{Sujet} guide l'attaque adverse vers le haut afin de modifier sa trajectoire."
+            ]
+        },
+
+        bas: {
+
+            concept:
+                "Déviation d'une attaque vers le bas à l'aide d'une arme.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} dévie la lame de {Cible} vers le bas avec son katana.",
+                "{Sujet} guide la frappe de {Cible} vers le bas avec sa lame.",
+                "{Sujet} détourne le coup adverse vers le bas avec son katana.",
+                "{Sujet} abaisse la trajectoire de la lame de {Cible} avec son katana.",
+                "{Sujet} dévie la frappe vers le bas avec sa lame.",
+                "{Sujet} accompagne le coup de {Cible} vers le bas avec son katana.",
+                "{Sujet} repousse la lame adverse vers le bas avec son katana.",
+                "{Sujet} fait glisser son katana contre la lame pour la diriger vers le bas.",
+                "{Sujet} détourne rapidement l'attaque vers le bas avec son katana.",
+                "{Sujet} guide la trajectoire du coup vers le bas avec sa lame.",
+                "{Sujet} dévie la frappe descendante vers le bas avec son katana.",
+                "{Sujet} utilise sa lame pour abaisser la trajectoire de l'attaque.",
+                "{Sujet} modifie la trajectoire du coup de {Cible} en la dirigeant vers le bas.",
+                "{Sujet} écarte la lame adverse vers le bas avec son katana.",
+                "{Sujet} accompagne la frappe de {Cible} vers le bas avec sa lame.",
+                "{Sujet} détourne le coup de son axe en le dirigeant vers le bas.",
+                "{Sujet} dévie rapidement la lame adverse vers le bas.",
+                "{Sujet} guide la frappe vers le sol avec son katana.",
+                "{Sujet} repousse la trajectoire de l'attaque vers le bas avec sa lame.",
+                "{Sujet} modifie la direction du coup de {Cible} vers le bas avec son katana."
+            ]
+        },
+
+        circulaire: {
+
+            concept:
+                "Déviation suivant un mouvement circulaire afin de modifier progressivement la trajectoire de l'attaque adverse.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "ARME",
+                "MANIERE",
+                "ZONE",
+                "CIBLE",
+                "DIRECTION",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} accompagne la lame de {Cible} dans un mouvement circulaire avec son katana.",
+                "{Sujet} dévie la frappe en faisant tourner sa lame autour de l'attaque.",
+                "{Sujet} détourne le coup de {Cible} avec un mouvement circulaire de son katana.",
+                "{Sujet} guide la lame adverse dans une trajectoire circulaire avec son katana.",
+                "{Sujet} fait glisser son katana autour de la lame de {Cible} pour dévier le coup.",
+                "{Sujet} accompagne progressivement la frappe vers l'extérieur avec un mouvement circulaire.",
+                "{Sujet} détourne la lame de {Cible} en effectuant un mouvement circulaire avec son katana.",
+                "{Sujet} utilise un mouvement circulaire de sa lame pour modifier la trajectoire du coup.",
+                "{Sujet} fait pivoter son katana autour de la lame adverse pour la dévier.",
+                "{Sujet} guide la frappe de {Cible} dans une trajectoire circulaire avec son katana.",
+                "{Sujet} dévie progressivement l'attaque en faisant glisser sa lame autour du coup.",
+                "{Sujet} accompagne le mouvement de la lame adverse avec une rotation circulaire de son katana.",
+                "{Sujet} détourne la frappe de {Cible} en décrivant un arc avec son katana.",
+                "{Sujet} modifie la trajectoire du coup avec un mouvement circulaire de sa lame.",
+                "{Sujet} fait glisser son katana autour de l'attaque pour la détourner.",
+                "{Sujet} dévie la lame adverse avec une rotation circulaire de son katana.",
+                "{Sujet} accompagne la frappe dans un mouvement circulaire vers l'extérieur.",
+                "{Sujet} guide le coup de {Cible} autour de son axe avec sa lame.",
+                "{Sujet} détourne progressivement la trajectoire de l'attaque avec son katana.",
+                "{Sujet} utilise un mouvement circulaire pour dévier la frappe de {Cible}."
+            ]
+        }
+    }
+},    
+            
                                                                                                 
                     
                                 
