@@ -5972,11 +5972,12 @@ deviation_arme: {
                 "{Sujet} guide le coup de {Cible} autour de son axe avec sa lame.",
                 "{Sujet} détourne progressivement la trajectoire de l'attaque avec son katana.",
                 "{Sujet} utilise un mouvement circulaire pour dévier la frappe de {Cible}."
-            ]
-        }
-    }
-},    
-            
+                  ]
+               } 
+            } 
+         }  
+      } 
+    };
                                                                                                 
                     
                                 
