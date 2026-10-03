@@ -572,7 +572,7 @@ ovlcmd({
 /* ================= +PAVEMODO (PAVÉ VIDE ATTENDU) ================= */
 
 ovlcmd({
-    nom_cmd: "pavemodo🌀",
+    nom_cmd: "pavemodo",
     classe: "Duel",
     react: "📄",
     desc: "Envoie le pavé RazorX™ vide."
