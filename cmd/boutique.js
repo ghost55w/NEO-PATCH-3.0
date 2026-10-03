@@ -261,15 +261,20 @@ if (
 
                 await ovl.sendMessage(ms_org, {
                     image: { url: card.image },
-                    caption: `◥◣ 🎴 Carte: ${card.name}
-🔅 Grade: ${card.grade}
-🔅 Univers: ${card.univers}
-🔅 Catégorie: ${card.category}
-🔅 Placement: ${card.placement}
-🛍️ Prix: ${formatNumber(confirmPrice)} ${cardIcon}
+                    caption:`. ◥◣              🌀JUMP™🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+*◥◣ 🎴 Carte:* ${card.name}
+🔅*Grade:* ${card.grade}
+🔅*Univers:* ${card.univers}
+🔅 *Catégorie:* ${card.category}
+🔅 *Placement:* ${card.placement}
+🛍️ *Prix:* ${formatNumber(confirmPrice)} ${cardIcon}
 
 ✔️ Confirmer ${mode} ? (${confirmOptions})
-╰───────────────────`
+  
+╰───────────────────
+                            🌀🔆`
                 }, { quoted: ms });
 
                 const conf = await waitForConfirm();
@@ -365,7 +370,7 @@ if (alreadyOwnsCard) {
 💳 Paiement: 1 NP + ${formatNumber(finalPrice)} ${cardIcon}
 ${couponUsed ? "✅ Coupon utilisé (100🎟️)" : ""}
 
-Merci pour ton achat !
+🎊 *Merci pour ton achat!* 🎉 
 ╰───────────────────`
                     });          
                 }
