@@ -5188,1309 +5188,1151 @@ function neoCalculerSimilariteModele(
 //==============================================================
 // 📚 RECONNAISSANCE DU MODÈLE STRUCTUREL
 //==============================================================
-function neoReconnaitreModele(
-    texte,
-    analyse = {}
-) {
+                                                
+  function neoReconnaitreModele(texte, analyse = {}) {
 
-    //============================================================
-    // 🧰 OUTILS
-    //============================================================
-
-    const normaliser =
-        valeur =>
-            neoNormaliserMotLocal(
-                String(
-                    valeur ?? ""
-                )
-            )
+    const normaliser = valeur => {
+        return String(valeur ?? "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
+            .replace(/[_-]+/g, " ")
+            .replace(/\s+/g, " ")
             .trim();
+    };
 
-    const valeurPresente =
-        valeur => {
+    const texteNorm = normaliser(texte);
 
-            if (
-                valeur === null ||
-                valeur === undefined
-            ) {
-                return false;
-            }
-
-            if (
-                typeof valeur === "string"
-            ) {
-                return valeur.trim().length > 0;
-            }
-
-            if (
-                Array.isArray(valeur)
-            ) {
-                return valeur.length > 0;
-            }
-
-            return true;
-        };
-
-    //============================================================
-    // 🧠 SYNONYMES
-    //============================================================
-
-    const synonymes =
-        NeoAI?.NEO_SYNONYMES ||
-        {};
-
-    const trouverCanoniqueSynonyme =
-        mot => {
-
-            const motNorm =
-                normaliser(mot);
-
-            if (!motNorm) {
-                return null;
-            }
-
-            for (
-                const [
-                    categorie,
-                    groupe
-                ]
-                of Object.entries(synonymes)
-            ) {
-
-                if (
-                    !groupe ||
-                    typeof groupe !== "object" ||
-                    Array.isArray(groupe)
-                ) {
-                    continue;
-                }
-
-                for (
-                    const [
-                        canonique,
-                        aliases
-                    ]
-                    of Object.entries(groupe)
-                ) {
-
-                    const canoniqueNorm =
-                        normaliser(
-                            canonique
-                        );
-
-                    if (
-                        motNorm ===
-                        canoniqueNorm
-                    ) {
-
-                        return {
-                            canonique,
-                            categorie
-                        };
-                    }
-
-                    if (
-                        Array.isArray(aliases) &&
-                        aliases.some(
-                            alias =>
-                                normaliser(alias) ===
-                                motNorm
-                        )
-                    ) {
-
-                        return {
-                            canonique,
-                            categorie
-                        };
-                    }
-                }
-            }
-
-            return null;
-        };
-
-    //============================================================
-    // 🎯 INFORMATIONS DÉTECTÉES
-    //============================================================
-
-    const actionDetectee =
-        analyse?.action ||
-        neoDetecterAction(texte);
-
-    const actionBrute =
-        typeof actionDetectee === "string"
-            ? actionDetectee
-            : (
-                actionDetectee?.action ||
-                actionDetectee?.verbe ||
-                ""
-            );
-
-    const actionBruteNorm =
-        normaliser(
-            actionBrute
-        );
-
-    const maniereNorm =
-        normaliser(
-            analyse?.maniere
-        );
-
-    const trajectoireNorm =
-        normaliser(
-            analyse?.trajectoire
-        );
-
-    const directionNorm =
-        normaliser(
-            analyse?.direction
-        );
-
-    const familleNorm =
-        normaliser(
-            analyse?.famille
-        );
-
-    const categorieNorm =
-        normaliser(
-            analyse?.categorie
-        );
-
-    const synonymeAction =
-        trouverCanoniqueSynonyme(
-            actionBrute
-        );
-
-    let categorieCanonique =
-        analyse?.categorie ||
-        synonymeAction?.categorie ||
-        null;
-
-    //============================================================
-    // 🏗️ EXTRACTION DU NOUVEAU NEO_ACTION_MODELS
-    //============================================================
-    //
-    // Structure attendue :
-    //
-    // NEO_ACTION_MODELS = {
-    //
-    //     deplacement: {
-    //
-    //         marche: {
-    //             categorie: "deplacement",
-    //             id: "MARCHE",
-    //             trajectoires: {
-    //                 normale: {...}
-    //             }
-    //         },
-    //
-    //         course: {
-    //             categorie: "deplacement",
-    //             id: "COURSE",
-    //             trajectoires: {
-    //                 frontale: {...},
-    //                 diagonale: {...}
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    //============================================================
-
-    const candidatsBruts = [];
-
-    const parcourir =
-        (
-            objet,
-            categorieParent = null,
-            familleParent = null
-        ) => {
-
-            if (
-                !objet ||
-                typeof objet !== "object" ||
-                Array.isArray(objet)
-            ) {
-                return;
-            }
-
-            for (
-                const [
-                    cle,
-                    valeur
-                ]
-                of Object.entries(objet)
-            ) {
-
-                if (
-                    !valeur ||
-                    typeof valeur !== "object" ||
-                    Array.isArray(valeur)
-                ) {
-                    continue;
-                }
-
-                const categorie =
-                    valeur?.categorie ||
-                    categorieParent ||
-                    null;
-
-                const famille =
-                    valeur?.famille ||
-                    familleParent ||
-                    null;
-
-                //================================================
-                // 🎯 ACTION
-                //================================================
-                //
-                // Un objet qui possède id + concept + structure
-                // ou trajectoires est considéré comme une action.
-                //
-                //================================================
-
-                const estAction =
-                    Boolean(
-                        valeur?.id ||
-                        valeur?.action
-                    ) &&
-                    (
-                        Boolean(
-                            valeur?.trajectoires
-                        ) ||
-                        Array.isArray(
-                            valeur?.structure
-                        ) ||
-                        Array.isArray(
-                            valeur?.exemples
-                        ) ||
-                        Boolean(
-                            valeur?.concept
-                        )
-                    );
-
-                if (
-                    estAction
-                ) {
-
-                    const actionId =
-                        String(
-                            valeur?.id ||
-                            valeur?.action ||
-                            cle
-                        ).trim();
-
-                    const actionIdNorm =
-                        normaliser(
-                            actionId
-                        );
-
-                    const trajectoires =
-                        valeur?.trajectoires &&
-                        typeof valeur.trajectoires === "object"
-                            ? valeur.trajectoires
-                            : {};
-
-                    //============================================
-                    // 🚶 ACTION SANS TRAJECTOIRE
-                    //============================================
-
-                    if (
-                        !Object.keys(
-                            trajectoires
-                        ).length
-                    ) {
-
-                        candidatsBruts.push({
-
-                            action: valeur,
-
-                            actionId,
-
-                            actionIdNorm,
-
-                            maniere:
-                                cle,
-
-                            maniereNorm:
-                                normaliser(cle),
-
-                            trajectoire:
-                                null,
-
-                            trajectoireNorm:
-                                "",
-
-                            definitionTrajectoire:
-                                null,
-
-                            categorie,
-
-                            famille
-
-                        });
-
-                    }
-
-                    //============================================
-                    // 🧭 ACTION + TRAJECTOIRES
-                    //============================================
-
-                    else {
-
-                        for (
-                            const [
-                                cleTrajectoire,
-                                definitionTrajectoire
-                            ]
-                            of Object.entries(
-                                trajectoires
-                            )
-                        ) {
-
-                            if (
-                                !definitionTrajectoire ||
-                                typeof definitionTrajectoire !== "object"
-                            ) {
-                                continue;
-                            }
-
-                            candidatsBruts.push({
-
-                                action: valeur,
-
-                                actionId,
-
-                                actionIdNorm,
-
-                                maniere:
-                                    cle,
-
-                                maniereNorm:
-                                    normaliser(cle),
-
-                                trajectoire:
-                                    cleTrajectoire,
-
-                                trajectoireNorm:
-                                    normaliser(
-                                        cleTrajectoire
-                                    ),
-
-                                definitionTrajectoire,
-
-                                categorie,
-
-                                famille
-
-                            });
-                        }
-                    }
-
-                    //============================================
-                    // IMPORTANT
-                    //============================================
-                    //
-                    // On ne descend pas dans l'action comme si
-                    // ses champs étaient d'autres actions.
-                    //
-                    continue;
-                }
-
-                //================================================
-                // 📂 NIVEAU CATÉGORIE / FAMILLE
-                //================================================
-
-                parcourir(
-                    valeur,
-                    categorie,
-                    famille
-                );
-            }
-        };
-
-    parcourir(
-        NEO_ACTION_MODELS
-    );
-
-    //============================================================
-    // ❌ AUCUN MODÈLE
-    //============================================================
-
-    if (
-        !candidatsBruts.length
-    ) {
-
-        console.log(
-            "⚠️ [NeoAI MODEL] Aucun modèle disponible."
-        );
-
+    if (!texteNorm) {
         return {
-
             modele: null,
-
             score: 0,
-
             scoreExemple: 0,
-
+            meilleurExemple: null,
             scoreStructure: 0,
-
             structureComplete: false,
-
             slotsTrouves: [],
-
             slotsManquants: [],
-
             requisManquants: [],
-
-            actionCanonique:
-                analyse?.maniere ||
-                actionBrute ||
-                null,
-
-            categorie:
-                categorieCanonique,
-
-            structure: []
+            actionCanonique: null,
+            categorie: null,
+            structure: [],
+            correspondanceForte: false
         };
     }
 
-    //============================================================
-    // 🎯 ÉVALUATION DES CANDIDATS
-    //============================================================
+    // ==============================================================
+    // 1. RÉCUPÉRATION DES MODÈLES
+    //
+    // neoGetModeles() est maintenant LA source unique.
+    // ==============================================================
+
+    const modeles = neoGetModeles();
+
+    if (!Array.isArray(modeles) || !modeles.length) {
+
+        console.log(
+            "⚠️ [NeoAI RECONNAISSANCE] Aucun modèle disponible."
+        );
+
+        return {
+            modele: null,
+            score: 0,
+            scoreExemple: 0,
+            meilleurExemple: null,
+            scoreStructure: 0,
+            structureComplete: false,
+            slotsTrouves: [],
+            slotsManquants: [],
+            requisManquants: [],
+            actionCanonique: null,
+            categorie: null,
+            structure: [],
+            correspondanceForte: false
+        };
+    }
+
+    // ==============================================================
+    // 2. SYNONYMES
+    // ==============================================================
+
+    const synonymes =
+        NeoAI?.NEO_SYNONYMES || {};
+
+    const indexSynonymes = new Map();
+
+    const ajouterSynonyme = (
+        terme,
+        canonique,
+        categorie = null
+    ) => {
+
+        const termeNorm = normaliser(terme);
+        const canoniqueNorm = normaliser(canonique);
+
+        if (!termeNorm || !canoniqueNorm) return;
+
+        indexSynonymes.set(
+            termeNorm,
+            {
+                canonique: canoniqueNorm,
+                canoniqueBrut: canonique,
+                categorie
+            }
+        );
+    };
+
+    const parcourirSynonymes = (
+        objet,
+        categorie = null,
+        canoniqueParent = null
+    ) => {
+
+        if (!objet || typeof objet !== "object") {
+            return;
+        }
+
+        if (Array.isArray(objet)) {
+
+            for (const element of objet) {
+
+                if (
+                    typeof element === "string" &&
+                    canoniqueParent
+                ) {
+
+                    ajouterSynonyme(
+                        element,
+                        canoniqueParent,
+                        categorie
+                    );
+                }
+            }
+
+            return;
+        }
+
+        for (const [cle, valeur] of Object.entries(objet)) {
+
+            if (typeof valeur === "string") {
+
+                ajouterSynonyme(
+                    valeur,
+                    cle,
+                    categorie
+                );
+
+                ajouterSynonyme(
+                    cle,
+                    cle,
+                    categorie
+                );
+
+                continue;
+            }
+
+            if (Array.isArray(valeur)) {
+
+                // La clé représente généralement
+                // l'action canonique.
+                for (const element of valeur) {
+
+                    if (typeof element === "string") {
+
+                        ajouterSynonyme(
+                            element,
+                            cle,
+                            categorie
+                        );
+                    }
+                }
+
+                ajouterSynonyme(
+                    cle,
+                    cle,
+                    categorie
+                );
+
+                continue;
+            }
+
+            if (
+                valeur &&
+                typeof valeur === "object"
+            ) {
+
+                // Cas :
+                // {
+                //    deplacement: {
+                //       COURSE: [...]
+                //    }
+                // }
+
+                parcourirSynonymes(
+                    valeur,
+                    categorie || cle,
+                    cle
+                );
+            }
+        }
+    };
+
+    parcourirSynonymes(synonymes);
+
+    // ==============================================================
+    // 3. TROUVER LE CANONIQUE D'UN TERME
+    // ==============================================================
+
+    const trouverCanonique = terme => {
+
+        const termeNorm = normaliser(terme);
+
+        if (!termeNorm) {
+            return null;
+        }
+
+        const direct =
+            indexSynonymes.get(termeNorm);
+
+        if (direct) {
+            return direct;
+        }
+
+        return {
+            canonique: termeNorm,
+            canoniqueBrut: terme,
+            categorie: null
+        };
+    };
+
+    // ==============================================================
+    // 4. EXTRAIRE LES TERMES D'UNE PHRASE
+    //
+    // On cherche aussi les expressions de plusieurs mots.
+    // Exemple :
+    // "vitesse maximale"
+    // "course frontale"
+    // "coup de poing"
+    // ==============================================================
+
+    const extraireTermes = texteSource => {
+
+        const mots =
+            normaliser(texteSource)
+                .split(/\s+/)
+                .filter(Boolean);
+
+        const termes = new Set();
+
+        for (const mot of mots) {
+            termes.add(mot);
+        }
+
+        // Expressions 2 / 3 / 4 mots
+        for (let taille = 2; taille <= 4; taille++) {
+
+            for (
+                let i = 0;
+                i <= mots.length - taille;
+                i++
+            ) {
+
+                const expression =
+                    mots
+                        .slice(i, i + taille)
+                        .join(" ");
+
+                termes.add(expression);
+            }
+        }
+
+        return [...termes];
+    };
+
+    const termesTexte =
+        extraireTermes(texteNorm);
+
+    // ==============================================================
+    // 5. NORMALISATION DE L'ACTION DÉTECTÉE
+    // ==============================================================
+
+    const actionAnalyse =
+        analyse?.action ||
+        analyse?.verbe ||
+        analyse?.mouvement ||
+        analyse?.maniere ||
+        null;
+
+    const actionCanoniqueAnalyse =
+        actionAnalyse
+            ? trouverCanonique(actionAnalyse)
+            : null;
+
+    const actionAnalyseNorm =
+        actionCanoniqueAnalyse?.canonique ||
+        normaliser(actionAnalyse);
+
+    // ==============================================================
+    // 6. SYNONYMES TROUVÉS DANS LE TEXTE
+    // ==============================================================
+
+    const actionsTexte = [];
+
+    for (const terme of termesTexte) {
+
+        const info =
+            indexSynonymes.get(terme);
+
+        if (!info) continue;
+
+        actionsTexte.push({
+            terme,
+            canonique: info.canonique,
+            canoniqueBrut: info.canoniqueBrut,
+            categorie: info.categorie
+        });
+    }
+
+    // ==============================================================
+    // 7. VOCABULAIRE D'UN MODÈLE
+    //
+    // IMPORTANT :
+    // On ne prend PAS les noms propres de la phrase.
+    // Seuls les termes présents dans le modèle ou
+    // NEO_SYNONYMES peuvent influencer la reconnaissance.
+    // ==============================================================
+
+    const obtenirTermesModele = modele => {
+
+        const termes = new Set();
+
+        const ajouter = valeur => {
+
+            if (!valeur) return;
+
+            const valeurNorm =
+                normaliser(valeur);
+
+            if (valeurNorm) {
+                termes.add(valeurNorm);
+            }
+        };
+
+        ajouter(modele.id);
+        ajouter(modele.action);
+        ajouter(modele.actionNom);
+        ajouter(modele.maniere);
+        ajouter(modele.trajectoire);
+
+        // Canonique + synonymes associés
+        for (const [alias, info] of indexSynonymes.entries()) {
+
+            const canonique =
+                normaliser(info?.canonique);
+
+            if (!canonique) continue;
+
+            if (
+                canonique === normaliser(modele.id) ||
+                canonique === normaliser(modele.action) ||
+                canonique === normaliser(modele.maniere) ||
+                canonique === normaliser(modele.actionNom)
+            ) {
+                termes.add(alias);
+            }
+        }
+
+        return [...termes];
+    };
+
+    // ==============================================================
+    // 8. TEST DE PRÉSENCE D'UN TERME
+    // ==============================================================
+
+    const termePresent = (
+        terme,
+        texte = texteNorm
+    ) => {
+
+        const t = normaliser(terme);
+
+        if (!t) return false;
+
+        if (t.includes(" ")) {
+            return texte.includes(t);
+        }
+
+        const regex =
+            new RegExp(
+                `(^|\\s|[^a-z0-9])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=\\s|[^a-z0-9]|$)`,
+                "i"
+            );
+
+        return regex.test(texte);
+    };
+
+    // ==============================================================
+    // 9. CALCUL DE SIMILARITÉ AVEC LES EXEMPLES
+    // ==============================================================
+
+    const calculerScoreExemple = modele => {
+
+        if (!Array.isArray(modele.exemples)) {
+            return {
+                score: 0,
+                meilleur: null
+            };
+        }
+
+        let meilleurScore = 0;
+        let meilleur = null;
+
+        for (const exemple of modele.exemples) {
+
+            if (!exemple) continue;
+
+            const exempleNorm =
+                normaliser(exemple);
+
+            if (!exempleNorm) continue;
+
+            const mots =
+                [...new Set(
+                    exempleNorm.split(/\s+/)
+                )];
+
+            if (!mots.length) continue;
+
+            let presents = 0;
+
+            for (const mot of mots) {
+
+                if (
+                    mot.length >= 3 &&
+                    termePresent(mot)
+                ) {
+                    presents++;
+                }
+            }
+
+            const score =
+                Math.round(
+                    (presents / mots.length) * 100
+                );
+
+            if (score > meilleurScore) {
+
+                meilleurScore = score;
+                meilleur = exemple;
+            }
+        }
+
+        return {
+            score: meilleurScore,
+            meilleur
+        };
+    };
+
+    // ==============================================================
+    // 10. STRUCTURE
+    // ==============================================================
+
+    const slotsAnalyse = analyse?.slots || {};
+
+    const valeurPresente = valeur => {
+
+        if (valeur === null || valeur === undefined) {
+            return false;
+        }
+
+        if (Array.isArray(valeur)) {
+            return valeur.length > 0;
+        }
+
+        return String(valeur).trim().length > 0;
+    };
+
+    const resoudreSlot = slot => {
+
+        const s =
+            normaliser(slot);
+
+        const correspondances = {
+
+            sujet: [
+                "sujet",
+                "acteur",
+                "agent"
+            ],
+
+            acteur: [
+                "acteur",
+                "sujet",
+                "agent"
+            ],
+
+            action: [
+                "action",
+                "verbe",
+                "mouvement"
+            ],
+
+            verbe: [
+                "verbe",
+                "action",
+                "mouvement"
+            ],
+
+            cible: [
+                "cible",
+                "objet",
+                "adversaire"
+            ],
+
+            membre: [
+                "membre"
+            ],
+
+            partiecorps: [
+                "partie corps",
+                "partiecorps",
+                "corps"
+            ],
+
+            maniere: [
+                "maniere",
+                "manière",
+                "style"
+            ],
+
+            vitesse: [
+                "vitesse"
+            ],
+
+            distance: [
+                "distance",
+                "portee",
+                "portée"
+            ],
+
+            hauteur: [
+                "hauteur"
+            ],
+
+            direction: [
+                "direction"
+            ],
+
+            trajectoire: [
+                "trajectoire"
+            ],
+
+            intention: [
+                "intention",
+                "but"
+            ],
+
+            intensite: [
+                "intensite",
+                "intensité",
+                "puissance"
+            ],
+
+            cote: [
+                "cote",
+                "côté",
+                "cote corps",
+                "côté corps"
+            ],
+
+            courbe: [
+                "courbe"
+            ]
+        };
+
+        const cles =
+            correspondances[s] || [s];
+
+        for (const cle of cles) {
+
+            if (valeurPresente(analyse?.[cle])) {
+                return analyse[cle];
+            }
+
+            if (valeurPresente(slotsAnalyse?.[cle])) {
+                return slotsAnalyse[cle];
+            }
+        }
+
+        return null;
+    };
+
+    const analyserStructure = modele => {
+
+        const structure =
+            Array.isArray(modele.structure)
+                ? modele.structure
+                : [];
+
+        if (!structure.length) {
+
+            return {
+                score: 100,
+                complete: true,
+                trouves: [],
+                manquants: [],
+                requisManquants: []
+            };
+        }
+
+        const trouves = [];
+        const manquants = [];
+
+        for (const slot of structure) {
+
+            const valeur =
+                resoudreSlot(slot);
+
+            if (valeurPresente(valeur)) {
+                trouves.push(slot);
+            } else {
+                manquants.push(slot);
+            }
+        }
+
+        const score =
+            Math.round(
+                (trouves.length / structure.length) * 100
+            );
+
+        return {
+
+            score,
+
+            complete:
+                manquants.length === 0,
+
+            trouves,
+
+            manquants,
+
+            requisManquants:
+                [...manquants]
+        };
+    };
+
+    // ==============================================================
+    // 11. ÉVALUATION DES MODÈLES
+    // ==============================================================
 
     const candidats = [];
 
-    for (
-        const candidat
-        of candidatsBruts
-    ) {
+    for (const modele of modeles) {
 
-        let selectionScore = 0;
+        const idNorm =
+            normaliser(modele.id);
 
-        const actionIdNorm =
-            candidat.actionIdNorm;
+        const actionNorm =
+            normaliser(modele.action);
 
-        const maniereCandidatNorm =
-            candidat.maniereNorm;
+        const actionNomNorm =
+            normaliser(modele.actionNom);
 
-        const trajectoireCandidatNorm =
-            candidat.trajectoireNorm;
+        const maniereNorm =
+            normaliser(modele.maniere);
 
-        const categorieCandidatNorm =
-            normaliser(
-                candidat.categorie
-            );
+        const trajectoireNorm =
+            normaliser(modele.trajectoire);
 
-        const familleCandidatNorm =
-            normaliser(
-                candidat.famille
-            );
+        let score = 0;
 
-        //========================================================
-        // 🥇 MANIÈRE = ACTION
-        //========================================================
+        let correspondanceAction = false;
+        let correspondanceSynonyme = false;
+        let correspondanceTrajectoire = false;
+        let correspondanceManiere = false;
+
+        // ==========================================================
+        // A. ACTION PRÉSENTE DIRECTEMENT DANS LE TEXTE
+        // ==========================================================
+
+        const termesModele =
+            obtenirTermesModele(modele);
+
+        for (const termeModele of termesModele) {
+
+            if (!termePresent(termeModele)) {
+                continue;
+            }
+
+            const info =
+                indexSynonymes.get(
+                    normaliser(termeModele)
+                );
+
+            if (info) {
+
+                const canonique =
+                    normaliser(info.canonique);
+
+                if (
+                    canonique === idNorm ||
+                    canonique === actionNorm ||
+                    canonique === actionNomNorm ||
+                    canonique === maniereNorm
+                ) {
+
+                    correspondanceSynonyme = true;
+                    correspondanceAction = true;
+
+                    // Une action explicitement reconnue
+                    // dans le texte est très forte.
+                    score += 10000;
+                }
+            }
+
+            // Correspondance directe
+            if (
+                termeModele === idNorm ||
+                termeModele === actionNorm ||
+                termeModele === actionNomNorm ||
+                termeModele === maniereNorm
+            ) {
+
+                correspondanceAction = true;
+
+                score += 8000;
+            }
+
+            // Trajectoire
+            if (
+                trajectoireNorm &&
+                termeModele === trajectoireNorm
+            ) {
+
+                correspondanceTrajectoire = true;
+                score += 1800;
+            }
+        }
+
+        // ==========================================================
+        // B. SYNONYMES D'ACTION TROUVÉS DANS LE TEXTE
+        // ==========================================================
+
+        for (const actionTexte of actionsTexte) {
+
+            const canonique =
+                normaliser(
+                    actionTexte.canonique
+                );
+
+            if (
+                canonique === idNorm ||
+                canonique === actionNorm ||
+                canonique === actionNomNorm ||
+                canonique === maniereNorm
+            ) {
+
+                correspondanceAction = true;
+                correspondanceSynonyme = true;
+
+                score += 12000;
+
+                if (
+                    actionTexte.categorie &&
+                    normaliser(actionTexte.categorie) ===
+                        normaliser(modele.categorie)
+                ) {
+                    score += 500;
+                }
+            }
+        }
+
+        // ==========================================================
+        // C. ACTION FOURNIE PAR L'ANALYSE
         //
-        // course → COURSE
-        //
-        //========================================================
+        // Elle est secondaire :
+        // le texte réel reste prioritaire.
+        // ==========================================================
 
         if (
-            maniereNorm &&
+            actionAnalyseNorm &&
             (
-                maniereNorm ===
-                actionIdNorm ||
-
-                maniereNorm ===
-                maniereCandidatNorm
+                actionAnalyseNorm === idNorm ||
+                actionAnalyseNorm === actionNorm ||
+                actionAnalyseNorm === actionNomNorm ||
+                actionAnalyseNorm === maniereNorm
             )
         ) {
 
-            selectionScore += 5000;
+            score += 3000;
+            correspondanceAction = true;
         }
 
-        //========================================================
-        // 🥈 SYNONYME DE LA MANIÈRE
-        //========================================================
+        // ==========================================================
+        // D. MANIÈRE
+        // ==========================================================
 
-        const synonymeManiere =
-            trouverCanoniqueSynonyme(
-                analyse?.maniere
+        const maniereAnalyse =
+            normaliser(
+                analyse?.maniere ||
+                analyse?.style ||
+                ""
             );
 
         if (
-            synonymeManiere &&
-            normaliser(
-                synonymeManiere.canonique
-            ) ===
-            actionIdNorm
-        ) {
-
-            selectionScore += 4500;
-        }
-
-        //========================================================
-        // 🥉 ACTION DÉTECTÉE = ID
-        //========================================================
-        //
-        // Cela permet également à un détecteur qui retourne
-        // directement COURSE / DASH / VOL de sélectionner
-        // correctement le modèle.
-        //
-        //========================================================
-
-        if (
-            actionBruteNorm &&
-            actionBruteNorm ===
-            actionIdNorm
-        ) {
-
-            selectionScore += 4000;
-        }
-
-        //========================================================
-        // 🧭 TRAJECTOIRE
-        //========================================================
-
-        if (
-            trajectoireNorm &&
-            trajectoireCandidatNorm &&
-            trajectoireNorm ===
-            trajectoireCandidatNorm
-        ) {
-
-            selectionScore += 1800;
-        }
-
-        //========================================================
-        // 🧭 DIRECTION
-        //========================================================
-
-        if (
-            directionNorm &&
-            trajectoireCandidatNorm &&
-            directionNorm ===
-            trajectoireCandidatNorm
-        ) {
-
-            selectionScore += 700;
-        }
-
-        //========================================================
-        // 🏷️ CATÉGORIE
-        //========================================================
-
-        if (
-            categorieNorm &&
-            categorieCandidatNorm &&
-            categorieNorm ===
-            categorieCandidatNorm
-        ) {
-
-            selectionScore += 500;
-        }
-
-        //========================================================
-        // 🧩 FAMILLE
-        //========================================================
-
-        if (
-            familleNorm &&
-            familleCandidatNorm &&
-            familleNorm ===
-            familleCandidatNorm
-        ) {
-
-            selectionScore += 250;
-        }
-
-        //========================================================
-        // 🧠 CONCEPT + EXEMPLES
-        //========================================================
-
-        const texteModele = [
-
-            candidat.action?.id,
-
-            candidat.action?.concept,
-
-            candidat.maniere,
-
-            candidat.trajectoire,
-
-            candidat.definitionTrajectoire?.concept,
-
-            ...(Array.isArray(
-                candidat.definitionTrajectoire?.exemples
+            maniereAnalyse &&
+            (
+                maniereAnalyse === maniereNorm ||
+                maniereAnalyse === idNorm ||
+                maniereAnalyse === actionNorm
             )
-                ? candidat.definitionTrajectoire.exemples
-                : []),
+        ) {
 
-            ...(Array.isArray(
-                candidat.action?.exemples
-            )
-                ? candidat.action.exemples
-                : [])
+            correspondanceManiere = true;
+            score += 2500;
+        }
 
-        ]
-        .filter(
-            valeur =>
-                valeurPresente(
-                    valeur
-                )
-        )
-        .join(" ");
+        // ==========================================================
+        // E. TRAJECTOIRE
+        // ==========================================================
 
-        const texteModeleNorm =
+        const trajectoireAnalyse =
             normaliser(
-                texteModele
+                analyse?.trajectoire ||
+                ""
             );
 
         if (
-            maniereNorm &&
-            texteModeleNorm.includes(
-                maniereNorm
-            )
+            trajectoireAnalyse &&
+            trajectoireNorm &&
+            trajectoireAnalyse === trajectoireNorm
         ) {
 
-            selectionScore += 300;
+            correspondanceTrajectoire = true;
+            score += 2000;
         }
 
+        // ==========================================================
+        // F. DIRECTION
+        // ==========================================================
+
+        const directionAnalyse =
+            normaliser(
+                analyse?.direction ||
+                ""
+            );
+
         if (
-            trajectoireNorm &&
-            texteModeleNorm.includes(
-                trajectoireNorm
-            )
+            directionAnalyse &&
+            Array.isArray(modele.structure)
         ) {
 
-            selectionScore += 200;
+            const directionRequise =
+                modele.structure.some(
+                    s =>
+                        normaliser(s) ===
+                        "direction"
+                );
+
+            if (directionRequise) {
+                score += 300;
+            }
+        }
+
+        // ==========================================================
+        // G. CATÉGORIE
+        // ==========================================================
+
+        const categorieAnalyse =
+            normaliser(
+                analyse?.categorie ||
+                analyse?.category ||
+                ""
+            );
+
+        if (
+            categorieAnalyse &&
+            categorieAnalyse ===
+                normaliser(modele.categorie)
+        ) {
+
+            score += 600;
+        }
+
+        // ==========================================================
+        // H. FAMILLE
+        // ==========================================================
+
+        const familleAnalyse =
+            normaliser(
+                analyse?.famille ||
+                ""
+            );
+
+        if (
+            familleAnalyse &&
+            familleAnalyse ===
+                normaliser(modele.famille)
+        ) {
+
+            score += 400;
+        }
+
+        // ==========================================================
+        // I. EXEMPLES
+        // ==========================================================
+
+        const exempleResultat =
+            calculerScoreExemple(modele);
+
+        score +=
+            Math.round(
+                exempleResultat.score * 5
+            );
+
+        // ==========================================================
+        // J. STRUCTURE
+        // ==========================================================
+
+        const structureResultat =
+            analyserStructure(modele);
+
+        // La structure sert à départager les modèles,
+        // mais ne doit PAS remplacer la reconnaissance
+        // de l'action.
+        score +=
+            Math.round(
+                structureResultat.score * 2
+            );
+
+        // ==========================================================
+        // K. REJET DES MODÈLES SANS ACTION RECONNUE
+        //
+        // Si le texte contient clairement "court",
+        // un modèle SAUT ne doit pas gagner uniquement
+        // parce que l'analyse upstream dit SAUT.
+        // ==========================================================
+
+        const texteContientUneAction =
+            actionsTexte.length > 0;
+
+        if (
+            texteContientUneAction &&
+            !correspondanceAction
+        ) {
+
+            score -= 15000;
         }
 
         candidats.push({
 
-            ...candidat,
+            modele,
 
-            selectionScore,
+            score,
 
-            scoreExemple: 0,
+            scoreExemple:
+                exempleResultat.score,
 
-            meilleurExemple: null
+            meilleurExemple:
+                exempleResultat.meilleur,
+
+            scoreStructure:
+                structureResultat.score,
+
+            structureComplete:
+                structureResultat.complete,
+
+            slotsTrouves:
+                structureResultat.trouves,
+
+            slotsManquants:
+                structureResultat.manquants,
+
+            requisManquants:
+                structureResultat.requisManquants,
+
+            correspondanceAction,
+            correspondanceSynonyme,
+            correspondanceTrajectoire,
+            correspondanceManiere
         });
     }
 
-    //============================================================
-    // ❌ AUCUNE COMPATIBILITÉ
-    //============================================================
-
-    const candidatsCompatibles =
-        candidats.filter(
-            candidat =>
-                candidat.selectionScore > 0
-        );
-
-    if (
-        !candidatsCompatibles.length
-    ) {
-
-        console.log(
-            "⚠️ [NeoAI MODEL] Aucun modèle compatible.",
-            "| action:",
-            actionBrute,
-            "| manière:",
-            analyse?.maniere,
-            "| trajectoire:",
-            analyse?.trajectoire
-        );
-
-        return {
-
-            modele: null,
-
-            score: 0,
-
-            scoreExemple: 0,
-
-            scoreStructure: 0,
-
-            structureComplete: false,
-
-            slotsTrouves: [],
-
-            slotsManquants: [],
-
-            requisManquants: [],
-
-            actionCanonique:
-                analyse?.maniere ||
-                actionBrute ||
-                null,
-
-            categorie:
-                categorieCanonique,
-
-            structure: []
-        };
-    }
-
-    //============================================================
-    // 🧠 SIMILARITÉ DES EXEMPLES
-    //============================================================
-
-    for (
-        const candidat
-        of candidatsCompatibles
-    ) {
-
-        let scoreExemple = 0;
-
-        let meilleurExemple = null;
-
-        try {
-
-            const analyseModele = {
-
-                ...analyse,
-
-                action:
-                    candidat.actionId,
-
-                categorie:
-                    candidat.categorie,
-
-                maniere:
-                    candidat.maniere,
-
-                trajectoire:
-                    candidat.trajectoire
-
-            };
-
-            const modelePourSimilarite = {
-
-                ...candidat.action,
-
-                ...candidat.definitionTrajectoire,
-
-                id:
-                    candidat.actionId,
-
-                action:
-                    candidat.actionId,
-
-                categorie:
-                    candidat.categorie,
-
-                famille:
-                    candidat.famille,
-
-                maniere:
-                    candidat.maniere,
-
-                trajectoire:
-                    candidat.trajectoire
-
-            };
-
-            scoreExemple =
-                Number(
-                    neoCalculerSimilariteModele(
-                        texte,
-                        modelePourSimilarite,
-                        analyseModele
-                    )
-                ) || 0;
-
-            meilleurExemple =
-                analyseModele?.meilleurExemple ||
-                null;
-
-        } catch (
-            error
-        ) {
-
-            console.log(
-                "⚠️ [NeoAI SCORE] Erreur similarité :",
-                error?.message
-            );
-        }
-
-        candidat.scoreExemple =
-            scoreExemple;
-
-        candidat.meilleurExemple =
-            meilleurExemple;
-
-        // La similarité reste secondaire.
-
-        candidat.selectionScore +=
-            scoreExemple / 1000;
-    }
-
-    //============================================================
-    // 🏆 TRI
-    //============================================================
-
-    candidatsCompatibles.sort(
-        (
-            a,
-            b
-        ) => {
-
-            if (
-                b.selectionScore !==
-                a.selectionScore
-            ) {
-
-                return (
-                    b.selectionScore -
-                    a.selectionScore
-                );
-            }
-
-            if (
-                b.scoreExemple !==
-                a.scoreExemple
-            ) {
-
-                return (
-                    b.scoreExemple -
-                    a.scoreExemple
-                );
-            }
-
-            return 0;
-        }
-    );
-
-    const meilleurCandidat =
-        candidatsCompatibles[0];
-
-    if (
-        !meilleurCandidat
-    ) {
-
-        return {
-
-            modele: null,
-
-            score: 0,
-
-            scoreExemple: 0,
-
-            scoreStructure: 0,
-
-            structureComplete: false,
-
-            slotsTrouves: [],
-
-            slotsManquants: [],
-
-            requisManquants: [],
-
-            actionCanonique:
-                analyse?.maniere ||
-                actionBrute ||
-                null,
-
-            categorie:
-                categorieCanonique,
-
-            structure: []
-        };
-    }
-
-    //============================================================
-    // ⚔️ ACTION CANONIQUE
-    //============================================================
+    // ==============================================================
+    // 12. TRI
     //
-    // L'action canonique vient TOUJOURS du modèle.
-    //
-    // foncer + course → COURSE
-    // foncer + dash   → DASH
-    // foncer + vol    → VOL
-    //
-    //============================================================
+    // Priorité absolue :
+    // 1. action réelle dans le texte
+    // 2. synonymes
+    // 3. trajectoire/manière
+    // 4. analyse upstream
+    // 5. structure
+    // ==============================================================
 
-    const actionCanonique =
-        String(
-            meilleurCandidat.action?.id ||
-            meilleurCandidat.action?.action ||
-            meilleurCandidat.actionId ||
-            analyse?.maniere ||
-            actionBrute ||
-            ""
-        )
-        .trim();
-
-    categorieCanonique =
-        meilleurCandidat.action?.categorie ||
-        meilleurCandidat.categorie ||
-        categorieCanonique ||
-        null;
-
-    //============================================================
-    // 📐 STRUCTURE
-    //============================================================
-
-    let structure =
-        Array.isArray(
-            meilleurCandidat.definitionTrajectoire?.structure
-        )
-            ? [
-                ...meilleurCandidat.definitionTrajectoire.structure
-            ]
-            : (
-                Array.isArray(
-                    meilleurCandidat.action?.structure
-                )
-                    ? [
-                        ...meilleurCandidat.action.structure
-                    ]
-                    : []
-            );
-
-    //============================================================
-    // 🧭 TRAJECTOIRE CANONIQUE
-    //============================================================
-
-    const trajectoireCanonique =
-        meilleurCandidat.trajectoire ||
-        analyse?.trajectoire ||
-        null;
-
-    //============================================================
-    // 📌 VALEUR DES SLOTS
-    //============================================================
-
-    const valeurSlot =
-        slot => {
-
-            const slotNormalise =
-                String(
-                    slot || ""
-                )
-                .toUpperCase()
-                .replace(
-                    /\s+/g,
-                    "_"
-                );
-
-            switch (
-                slotNormalise
-            ) {
-
-                case "SUJET":
-                case "ACTEUR":
-
-                    return (
-                        analyse?.acteur ??
-                        analyse?.sujet ??
-                        null
-                    );
-
-                case "ACTION":
-                case "VERBE":
-
-                    return actionCanonique;
-
-                case "CIBLE":
-                case "OBJET":
-
-                    return (
-                        analyse?.cible ??
-                        null
-                    );
-
-                case "MEMBRE":
-
-                    return (
-                        analyse?.membre ??
-                        null
-                    );
-
-                case "PARTIE_CORPS":
-                case "PARTIECORPS":
-
-                    return (
-                        analyse?.partieCorps ??
-                        null
-                    );
-
-                case "MANIERE":
-
-                    return (
-                        analyse?.maniere ||
-                        meilleurCandidat.maniere ||
-                        null
-                    );
-
-                case "VITESSE":
-
-                    return (
-                        analyse?.vitesse ??
-                        null
-                    );
-
-                case "DISTANCE":
-
-                    return (
-                        analyse?.distance ??
-                        null
-                    );
-
-                case "HAUTEUR":
-
-                    return (
-                        analyse?.hauteur ??
-                        null
-                    );
-
-                case "DIRECTION":
-
-                    return (
-                        analyse?.direction ??
-                        null
-                    );
-
-                case "TRAJECTOIRE":
-
-                    return (
-                        trajectoireCanonique
-                    );
-
-                case "INTENTION":
-
-                    return (
-                        analyse?.intention ??
-                        null
-                    );
-
-                case "INTENSITE":
-
-                    return (
-                        analyse?.intensite ??
-                        null
-                    );
-
-                case "COTE":
-                case "COTE_CORPS":
-
-                    return (
-                        analyse?.cote ??
-                        analyse?.coteCorps ??
-                        null
-                    );
-
-                case "COURBE":
-
-                    return (
-                        analyse?.courbe ??
-                        null
-                    );
-
-                default:
-
-                    return null;
-            }
-        };
-
-    //============================================================
-    // 📊 VALIDATION STRUCTURELLE
-    //============================================================
-
-    const slotsTrouves = [];
-
-    const slotsManquants = [];
-
-    for (
-        const slot
-        of structure
-    ) {
+    candidats.sort((a, b) => {
 
         if (
-            valeurPresente(
-                valeurSlot(
-                    slot
-                )
-            )
+            a.correspondanceSynonyme !==
+            b.correspondanceSynonyme
         ) {
-
-            slotsTrouves.push(
-                slot
-            );
-
+            return a.correspondanceSynonyme ? -1 : 1;
         }
-        else {
 
-            slotsManquants.push(
-                slot
-            );
+        if (
+            a.correspondanceAction !==
+            b.correspondanceAction
+        ) {
+            return a.correspondanceAction ? -1 : 1;
         }
+
+        if (
+            a.correspondanceTrajectoire !==
+            b.correspondanceTrajectoire
+        ) {
+            return a.correspondanceTrajectoire ? -1 : 1;
+        }
+
+        if (
+            a.correspondanceManiere !==
+            b.correspondanceManiere
+        ) {
+            return a.correspondanceManiere ? -1 : 1;
+        }
+
+        return b.score - a.score;
+    });
+
+    const meilleur =
+        candidats[0];
+
+    if (
+        !meilleur ||
+        !meilleur.modele
+    ) {
+
+        return {
+            modele: null,
+            score: 0,
+            scoreExemple: 0,
+            meilleurExemple: null,
+            scoreStructure: 0,
+            structureComplete: false,
+            slotsTrouves: [],
+            slotsManquants: [],
+            requisManquants: [],
+            actionCanonique: null,
+            categorie: null,
+            structure: [],
+            correspondanceForte: false
+        };
     }
 
-    const totalSlots =
-        structure.length;
+    const modele =
+        meilleur.modele;
 
-    const totalTrouves =
-        slotsTrouves.length;
+    // ==============================================================
+    // 13. ACTION CANONIQUE
+    // ==============================================================
 
-    const scoreStructure =
-        totalSlots > 0
-            ? Math.round(
-                (
-                    totalTrouves /
-                    totalSlots
-                ) * 100
-            )
-            : 0;
+    const actionCanonique =
+        modele.id ||
+        modele.action ||
+        modele.actionNom ||
+        null;
 
-    const structureComplete =
-        totalSlots > 0 &&
-        slotsManquants.length === 0;
+    // ==============================================================
+    // 14. STRUCTURE FINALE
+    // ==============================================================
 
-    //============================================================
-    // 🧠 MODÈLE FINAL
-    //============================================================
+    const structure =
+        Array.isArray(modele.structure)
+            ? [...modele.structure]
+            : [];
 
-    const modeleFinal = {
+    // ==============================================================
+    // 15. CORRESPONDANCE FORTE
+    // ==============================================================
 
-        // Action canonique
+    const correspondanceForte =
+        Boolean(
+            meilleur.correspondanceSynonyme ||
+            meilleur.correspondanceAction
+        );
 
-        id:
-            actionCanonique,
-
-        action:
-            actionCanonique,
-
-        categorie:
-            categorieCanonique,
-
-        famille:
-            meilleurCandidat.action?.famille ||
-            meilleurCandidat.famille ||
-            null,
-
-        // Manière = action du modèle
-
-        maniere:
-            meilleurCandidat.maniere ||
-            analyse?.maniere ||
-            null,
-
-        // Trajectoire = sous-clé de trajectoires
-
-        trajectoire:
-            trajectoireCanonique,
-
-        concept:
-            meilleurCandidat.definitionTrajectoire?.concept ||
-            meilleurCandidat.action?.concept ||
-            null,
-
-        structure,
-
-        exemples:
-            Array.isArray(
-                meilleurCandidat.definitionTrajectoire?.exemples
-            )
-                ? [
-                    ...meilleurCandidat.definitionTrajectoire.exemples
-                ]
-                : (
-                    Array.isArray(
-                        meilleurCandidat.action?.exemples
-                    )
-                        ? [
-                            ...meilleurCandidat.action.exemples
-                        ]
-                        : []
-                ),
-
-        contraintes:
-            meilleurCandidat.definitionTrajectoire?.contraintes ||
-            meilleurCandidat.action?.contraintes ||
-            null
-    };
-
-    //============================================================
-    // 🏆 LOG
-    //============================================================
+    // ==============================================================
+    // 16. LOG
+    // ==============================================================
 
     console.log(
-        "🏆 [NeoAI MODEL]",
-
-        modeleFinal.id ||
-        "—",
-
-        "| manière:",
-        modeleFinal.maniere ||
-        "—",
-
-        "| trajectoire:",
-        modeleFinal.trajectoire ||
-        "—",
-
-        "| discrimination:",
-        meilleurCandidat.selectionScore,
-
-        "| similarité:",
-        `${meilleurCandidat.scoreExemple || 0}%`,
-
-        "| structure:",
-        `${totalTrouves}/${totalSlots}`,
-
-        structureComplete
-            ? "✅"
-            : "❌"
+        `🧠 [NeoAI MODELE] ` +
+        `${modele.id}` +
+        `${modele.trajectoire ? ` → ${modele.trajectoire}` : ""}` +
+        ` | score=${meilleur.score}` +
+        ` | exemple=${meilleur.scoreExemple}%` +
+        ` | structure=${meilleur.scoreStructure}%`
     );
 
-    //============================================================
-    // 📤 RETOUR
-    //============================================================
+    console.log(
+        `🎯 [NeoAI ACTION] ` +
+        `analyse="${actionAnalyse || "—"}"` +
+        ` | canonique="${actionCanonique || "—"}"` +
+        ` | texte=${meilleur.correspondanceAction ? "OUI" : "NON"}` +
+        ` | synonyme=${meilleur.correspondanceSynonyme ? "OUI" : "NON"}`
+    );
 
     return {
 
-        modele:
-            modeleFinal,
+        modele,
 
         score:
-            meilleurCandidat.scoreExemple ||
-            0,
+            meilleur.score,
 
         scoreExemple:
-            meilleurCandidat.scoreExemple ||
-            0,
+            meilleur.scoreExemple,
 
         meilleurExemple:
-            meilleurCandidat.meilleurExemple ||
-            null,
+            meilleur.meilleurExemple,
 
-        scoreStructure,
+        scoreStructure:
+            meilleur.scoreStructure,
 
-        structureComplete,
+        structureComplete:
+            meilleur.structureComplete,
 
-        slotsTrouves,
+        slotsTrouves:
+            meilleur.slotsTrouves,
 
-        slotsManquants,
+        slotsManquants:
+            meilleur.slotsManquants,
 
         requisManquants:
-            slotsManquants,
+            meilleur.requisManquants,
 
         actionCanonique,
 
         categorie:
-            categorieCanonique,
+            modele.categorie || null,
 
         structure,
 
-        correspondanceForte:
-            meilleurCandidat.selectionScore >=
-            4000
-    };
-}
-                                                                           
+        correspondanceForte,
 
+        // Informations supplémentaires utiles au debug
+        correspondanceAction:
+            meilleur.correspondanceAction,
+
+        correspondanceSynonyme:
+            meilleur.correspondanceSynonyme,
+
+        correspondanceTrajectoire:
+            meilleur.correspondanceTrajectoire,
+
+        correspondanceManiere:
+            meilleur.correspondanceManiere
+    };
+}      
+            
+                                               
 //==============================================================
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
 //==============================================================
