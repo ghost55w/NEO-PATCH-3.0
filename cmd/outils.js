@@ -3743,7 +3743,8 @@ function neoGetModeles() {
 
         if (
             !source ||
-            typeof source !== "object"
+            typeof source !== "object" ||
+            Array.isArray(source)
         ) {
             continue;
         }
@@ -3791,16 +3792,7 @@ function neoGetModeles() {
                 }
 
                 //================================================
-                // 🆕 NOUVEAU FORMAT
-                //
-                // course: {
-                //     id: "COURSE",
-                //     concept: "...",
-                //     manieres: {
-                //         frontale: {...},
-                //         diagonale: {...}
-                //     }
-                // }
+                // 🆔 IDENTITÉ ACTION
                 //================================================
 
                 const id =
@@ -3812,8 +3804,255 @@ function neoGetModeles() {
                     actionData?.categorie ||
                     categorieNom;
 
+                const familleFinale =
+                    actionData?.famille ||
+                    null;
+
                 //================================================
-                // 🧩 MODÈLE AVEC MANIÈRES
+                // 🆕 NOUVEAU FORMAT
+                //
+                // course: {
+                //     categorie: "deplacement",
+                //     id: "COURSE",
+                //     concept: "...",
+                //     trajectoires: {
+                //         frontale: {...},
+                //         diagonale: {...}
+                //     }
+                // }
+                //================================================
+
+                if (
+                    actionData?.trajectoires &&
+                    typeof actionData.trajectoires === "object" &&
+                    !Array.isArray(actionData.trajectoires)
+                ) {
+
+                    for (
+                        const [
+                            trajectoireNom,
+                            trajectoireData
+                        ]
+                        of Object.entries(
+                            actionData.trajectoires
+                        )
+                    ) {
+
+                        if (
+                            !trajectoireData ||
+                            typeof trajectoireData !== "object" ||
+                            Array.isArray(trajectoireData)
+                        ) {
+                            continue;
+                        }
+
+                        modeles.push({
+
+                            // ------------------------------------
+                            // 🆔 IDENTITÉ
+                            // ------------------------------------
+
+                            id,
+
+                            action:
+                                id,
+
+                            actionNom,
+
+                            categorie:
+                                categorieFinale,
+
+                            famille:
+                                familleFinale,
+
+                            // ------------------------------------
+                            // 🧠 CONCEPT ACTION
+                            // ------------------------------------
+
+                            concept:
+                                actionData?.concept ||
+                                null,
+
+                            // ------------------------------------
+                            // 💨 MANIÈRE
+                            //
+                            // La manière correspond à l'action.
+                            // Exemple :
+                            // COURSE
+                            // DASH
+                            // MARCHE
+                            // ------------------------------------
+
+                            maniere:
+                                actionData?.nom ||
+                                id,
+
+                            // ------------------------------------
+                            // 📐 TRAJECTOIRE
+                            // ------------------------------------
+
+                            trajectoire:
+                                trajectoireNom,
+
+                            trajectoireNom,
+
+                            conceptTrajectoire:
+                                trajectoireData?.concept ||
+                                null,
+
+                            // ------------------------------------
+                            // 📐 STRUCTURE
+                            // ------------------------------------
+
+                            structure:
+                                Array.isArray(
+                                    trajectoireData?.structure
+                                )
+                                    ? [
+                                        ...trajectoireData.structure
+                                    ]
+                                    : Array.isArray(
+                                        actionData?.structure
+                                    )
+                                        ? [
+                                            ...actionData.structure
+                                        ]
+                                        : [],
+
+                            // ------------------------------------
+                            // 📝 EXEMPLES
+                            // ------------------------------------
+
+                            exemples:
+                                Array.isArray(
+                                    trajectoireData?.exemples
+                                )
+                                    ? [
+                                        ...trajectoireData.exemples
+                                    ]
+                                    : Array.isArray(
+                                        actionData?.exemples
+                                    )
+                                        ? [
+                                            ...actionData.exemples
+                                        ]
+                                        : [],
+
+                            // ------------------------------------
+                            // 📦 PARAMÈTRES
+                            // ------------------------------------
+
+                            params:
+                                trajectoireData?.params ||
+                                actionData?.params ||
+                                {},
+
+                            // ------------------------------------
+                            // 🔗 CONTRAINTES
+                            // ------------------------------------
+
+                            contraintes:
+                                [
+                                    ...(Array.isArray(
+                                        actionData?.contraintes
+                                    )
+                                        ? actionData.contraintes
+                                        : []),
+
+                                    ...(Array.isArray(
+                                        trajectoireData?.contraintes
+                                    )
+                                        ? trajectoireData.contraintes
+                                        : [])
+                                ],
+
+                            // ------------------------------------
+                            // 🔗 RÉFÉRENCES
+                            // ------------------------------------
+
+                            actionData,
+
+                            trajectoireData
+
+                        });
+
+                    }
+
+                    // Cette action est déjà traitée.
+                    continue;
+                }
+
+                //================================================
+                // 🆕 MODÈLE UNIQUE SANS TRAJECTOIRE
+                //================================================
+
+                if (
+                    Array.isArray(
+                        actionData?.structure
+                    ) ||
+                    Array.isArray(
+                        actionData?.exemples
+                    )
+                ) {
+
+                    modeles.push({
+
+                        ...actionData,
+
+                        id,
+
+                        action:
+                            id,
+
+                        actionNom,
+
+                        categorie:
+                            categorieFinale,
+
+                        famille:
+                            familleFinale,
+
+                        maniere:
+                            actionData?.nom ||
+                            id,
+
+                        trajectoire:
+                            null,
+
+                        structure:
+                            Array.isArray(
+                                actionData?.structure
+                            )
+                                ? [
+                                    ...actionData.structure
+                                ]
+                                : [],
+
+                        exemples:
+                            Array.isArray(
+                                actionData?.exemples
+                            )
+                                ? [
+                                    ...actionData.exemples
+                                ]
+                                : [],
+
+                        contraintes:
+                            Array.isArray(
+                                actionData?.contraintes
+                            )
+                                ? [
+                                    ...actionData.contraintes
+                                ]
+                                : []
+
+                    });
+
+                    continue;
+                }
+
+                //================================================
+                // 🔙 ANCIEN FORMAT AVEC MANIÈRES
                 //================================================
 
                 if (
@@ -3842,29 +4081,22 @@ function neoGetModeles() {
 
                         modeles.push({
 
-                            // ------------------------------------
-                            // 🆔 IDENTITÉ DU MODÈLE
-                            // ------------------------------------
-
                             id,
 
                             action:
                                 id,
 
+                            actionNom,
+
                             categorie:
                                 categorieFinale,
 
                             famille:
-                                actionData?.famille ||
-                                null,
+                                familleFinale,
 
                             concept:
                                 actionData?.concept ||
                                 null,
-
-                            // ------------------------------------
-                            // 💨 MANIÈRE
-                            // ------------------------------------
 
                             maniere:
                                 maniereNom,
@@ -3873,9 +4105,8 @@ function neoGetModeles() {
                                 maniereData?.concept ||
                                 null,
 
-                            // ------------------------------------
-                            // 📐 STRUCTURE
-                            // ------------------------------------
+                            trajectoire:
+                                null,
 
                             structure:
                                 Array.isArray(
@@ -3886,10 +4117,6 @@ function neoGetModeles() {
                                     ]
                                     : [],
 
-                            // ------------------------------------
-                            // 📝 EXEMPLES
-                            // ------------------------------------
-
                             exemples:
                                 Array.isArray(
                                     maniereData?.exemples
@@ -3899,19 +4126,18 @@ function neoGetModeles() {
                                     ]
                                     : [],
 
-                            // ------------------------------------
-                            // 📦 PARAMÈTRES
-                            // ------------------------------------
-
                             params:
                                 maniereData?.params ||
                                 {},
 
-                            // ------------------------------------
-                            // 🔗 RÉFÉRENCE
-                            // ------------------------------------
-
-                            actionNom,
+                            contraintes:
+                                Array.isArray(
+                                    maniereData?.contraintes
+                                )
+                                    ? [
+                                        ...maniereData.contraintes
+                                    ]
+                                    : [],
 
                             maniereData,
 
@@ -3920,59 +4146,6 @@ function neoGetModeles() {
                         });
 
                     }
-
-                    // On passe à l'action suivante.
-                    continue;
-                }
-
-                //================================================
-                // 🆕 MODÈLE UNIQUE SANS MANIÈRES
-                //================================================
-
-                if (
-                    Array.isArray(
-                        actionData?.structure
-                    ) ||
-                    Array.isArray(
-                        actionData?.exemples
-                    )
-                ) {
-
-                    modeles.push({
-
-                        ...actionData,
-
-                        id,
-
-                        action:
-                            id,
-
-                        categorie:
-                            categorieFinale,
-
-                        famille:
-                            actionData?.famille ||
-                            null,
-
-                        structure:
-                            Array.isArray(
-                                actionData?.structure
-                            )
-                                ? [
-                                    ...actionData.structure
-                                ]
-                                : [],
-
-                        exemples:
-                            Array.isArray(
-                                actionData?.exemples
-                            )
-                                ? [
-                                    ...actionData.exemples
-                                ]
-                                : []
-
-                    });
 
                     continue;
                 }
@@ -4014,13 +4187,24 @@ function neoGetModeles() {
                                 modele?.action ||
                                 id,
 
+                            actionNom,
+
                             categorie:
                                 modele?.categorie ||
                                 categorieFinale,
 
                             famille:
                                 modele?.famille ||
-                                actionData?.famille ||
+                                familleFinale,
+
+                            maniere:
+                                modele?.maniere ||
+                                modele?.nom ||
+                                modele?.id ||
+                                id,
+
+                            trajectoire:
+                                modele?.trajectoire ||
                                 null
 
                         });
@@ -4089,6 +4273,20 @@ function neoGetModeles() {
             );
 
             console.log(
+                "📐 [NeoAI TRAJECTOIRES] :",
+                [
+                    ...new Set(
+                        modeles
+                            .map(
+                                modele =>
+                                    modele?.trajectoire
+                            )
+                            .filter(Boolean)
+                    )
+                ]
+            );
+
+            console.log(
                 "🆔 [NeoAI MODÈLES] :",
                 modeles.map(
                     modele =>
@@ -4111,9 +4309,9 @@ function neoGetModeles() {
     );
 
     return [];
-
 }
-        
+                
+    
 
 //==============================================================
 // 🧩 COMPARAISON SÉMANTIQUE D'UN MODÈLE
