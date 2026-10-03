@@ -6,7 +6,11 @@ const fs = require('fs');
 const FormData = require('form-data');
 const { Bans } = require('../DataBase/ban');
 const { Sudo } = require('../DataBase/sudo');
-const NeoAI = require("../DataBase/NeoAI");
+const {
+    NEO_ACTION_MODELS,
+    ...NeoAI
+} = require("../DataBase/NeoAI");
+
 
 function stylize(text) {
     const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
