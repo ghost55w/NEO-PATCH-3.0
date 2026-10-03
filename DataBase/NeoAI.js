@@ -1836,11 +1836,14 @@ salto: {
                 "{Sujet} réalise un salto arrière jusqu'à {Hauteur} afin de {Intention}.",
                 "{Sujet} se propulse dans les airs, atteint {Hauteur} et effectue un salto arrière pour {Intention}."
             ]
-        }
-
-    }
+                }
 
     } // fermeture de trajectoires
+
+} // fermeture de salto
+
+} // fermeture de deplacement
+
 }; // fermeture de NEO_ACTION_MODELS
 
 
