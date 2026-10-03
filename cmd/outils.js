@@ -6433,425 +6433,212 @@ function neoAnalyserAction(
     // 💨 MANIÈRE
     //============================================================
     //
-    // MANIÈRE = type d'exécution
+    // La manière est maintenant découverte automatiquement
+    // depuis NEO_ACTION_MODELS.
     //
-    // foncer en course frontale
-    //
-    // ACTION      = foncer
-    // MANIÈRE     = course
-    // TRAJECTOIRE = frontale
+    // Aucune liste d'actions à maintenir ici.
     //
     //============================================================
 
-    let maniere = null;
-
-    const manieres = [
-
-        //========================================================
-        // 🏃 DÉPLACEMENTS
-        //========================================================
-
-        {
-            valeur: "marche",
-            variantes: [
-                "marche",
-                "à pied",
-                "au pas",
-                "en marchant",
-                "en marche"
-            ]
-        },
-
-        {
-            valeur: "course",
-            variantes: [
-                "course",
-                "en course",
-                "à la course",
-                "en courant"
-            ]
-        },
-
-        {
-            valeur: "dash",
-            variantes: [
-                "dash",
-                "en dash"
-            ]
-        },
-
-        {
-            valeur: "rush",
-            variantes: [
-                "rush",
-                "en rush"
-            ]
-        },
-
-        {
-            valeur: "saut",
-            variantes: [
-                "saut",
-                "en saut",
-                "bond",
-                "en bond"
-            ]
-        },
-
-        {
-            valeur: "roulade",
-            variantes: [
-                "roulade",
-                "en roulade"
-            ]
-        },
-
-        {
-            valeur: "vol",
-            variantes: [
-                "vol",
-                "en vol",
-                "en volant"
-            ]
-        },
-
-        {
-            valeur: "pirouette",
-            variantes: [
-                "pirouette",
-                "en pirouette"
-            ]
-        },
-
-        {
-            valeur: "pivot",
-            variantes: [
-                "pivot",
-                "en pivot"
-            ]
-        },
-
-        {
-            valeur: "vrille",
-            variantes: [
-                "vrille",
-                "en vrille"
-            ]
-        },
-
-        {
-            valeur: "salto",
-            variantes: [
-                "salto",
-                "en salto"
-            ]
-        },
-
-        {
-            valeur: "flip",
-            variantes: [
-                "flip",
-                "en flip"
-            ]
-        },
-
-        //========================================================
-        // 👊 FRAPPES
-        //========================================================
-
-        {
-            valeur: "jab",
-            variantes: [
-                "jab"
-            ]
-        },
-
-        {
-            valeur: "direct",
-            variantes: [
-                "direct",
-                "coup direct"
-            ]
-        },
-
-        {
-            valeur: "crochet",
-            variantes: [
-                "crochet"
-            ]
-        },
-
-        {
-            valeur: "uppercut",
-            variantes: [
-                "uppercut"
-            ]
-        },
-
-        {
-            valeur: "backfist",
-            variantes: [
-                "backfist",
-                "back fist"
-            ]
-        },
-
-        {
-            valeur: "overhand",
-            variantes: [
-                "overhand"
-            ]
-        },
-
-        {
-            valeur: "hammerfist",
-            variantes: [
-                "hammerfist",
-                "hammer fist"
-            ]
-        },
-
-        //========================================================
-        // 🦵 COUPS DE PIED
-        //========================================================
-
-        {
-            valeur: "coup_de_pied_frontal",
-            variantes: [
-                "coup de pied frontal",
-                "kick frontal"
-            ]
-        },
-
-        {
-            valeur: "coup_de_pied_lateral",
-            variantes: [
-                "coup de pied latéral",
-                "coup de pied lateral",
-                "kick latéral",
-                "kick lateral"
-            ]
-        },
-
-        {
-            valeur: "coup_de_pied_circulaire",
-            variantes: [
-                "coup de pied circulaire",
-                "kick circulaire"
-            ]
-        },
-
-        {
-            valeur: "coup_de_pied_retourne",
-            variantes: [
-                "coup de pied retourné",
-                "coup de pied retourne",
-                "kick retourné",
-                "kick retourne"
-            ]
-        },
-
-        //========================================================
-        // 🔄 ROTATIONS
-        //========================================================
-
-        {
-            valeur: "rotation",
-            variantes: [
-                "rotation",
-                "en rotation"
-            ]
-        },
-
-        //========================================================
-        // 🛡️ DÉFENSE
-        //========================================================
-
-        {
-            valeur: "se_baisser",
-            variantes: [
-                "se baisse",
-                "se baissant",
-                "se baisser",
-                "en se baissant",
-                "en baissant"
-            ]
-        },
-
-        {
-            valeur: "esquive",
-            variantes: [
-                "esquive",
-                "esquiver",
-                "en esquivant"
-            ]
-        }
-
-    ];
-
-    const normalManiere =
-        neoNormaliserTexteLocal(
-            texte
-        )
-        .toLowerCase();
-
-    for (
-        const definition of manieres
-    ) {
-
-        const variantes =
-            [...definition.variantes]
-            .sort(
-                (a, b) =>
-                    b.length - a.length
-            );
-
-        for (
-            const variante of variantes
-        ) {
-
-            const varianteNormalisee =
-                neoNormaliserTexteLocal(
-                    variante
+    const neoNormaliserValeur =
+        valeur =>
+            neoNormaliserMotLocal(
+                String(
+                    valeur ?? ""
                 )
-                .toLowerCase()
-                .trim();
+            )
+            .toLowerCase()
+            .trim();
 
-            if (!varianteNormalisee) {
-                continue;
-            }
-
-            const regex =
-                new RegExp(
-                    `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
-                        /[.*+?^${}()|[\]\\]/g,
-                        "\\$&"
-                    )}(?![A-Za-zÀ-ÿ0-9_-])`,
-                    "iu"
-                );
+    const neoTrouverModeleAction =
+        (
+            actionRecherchee,
+            categorieRecherchee,
+            familleRecherchee
+        ) => {
 
             if (
-                regex.test(
-                    normalManiere
-                )
+                typeof NEO_ACTION_MODELS !== "object" ||
+                !NEO_ACTION_MODELS
             ) {
-
-                maniere =
-                    definition.valeur;
-
-                break;
+                return null;
             }
 
-        }
+            const actionNormalisee =
+                neoNormaliserValeur(
+                    actionRecherchee
+                );
 
-        if (maniere) {
-            break;
-        }
+            const categorieNormalisee =
+                neoNormaliserValeur(
+                    categorieRecherchee
+                );
 
-    }
+            const familleNormalisee =
+                neoNormaliserValeur(
+                    familleRecherchee
+                );
+
+            const rechercher =
+                objet => {
+
+                    if (
+                        !objet ||
+                        typeof objet !== "object"
+                    ) {
+                        return null;
+                    }
+
+                    for (
+                        const [
+                            cle,
+                            valeur
+                        ]
+                        of Object.entries(objet)
+                    ) {
+
+                        if (
+                            !valeur ||
+                            typeof valeur !== "object"
+                        ) {
+                            continue;
+                        }
+
+                        const cleNormalisee =
+                            neoNormaliserValeur(
+                                cle
+                            );
+
+                        const idNormalise =
+                            neoNormaliserValeur(
+                                valeur.id
+                            );
+
+                        const categorieModele =
+                            neoNormaliserValeur(
+                                valeur.categorie
+                            );
+
+                        const familleModele =
+                            neoNormaliserValeur(
+                                valeur.famille
+                            );
+
+                        const estModeleAction =
+                            (
+                                valeur.categorie ||
+                                valeur.id ||
+                                valeur.concept
+                            ) &&
+                            (
+                                valeur.trajectoires ||
+                                valeur.structure ||
+                                valeur.exemples
+                            );
+
+                        if (
+                            estModeleAction
+                        ) {
+
+                            const actionMatch =
+                                actionNormalisee &&
+                                (
+                                    cleNormalisee ===
+                                        actionNormalisee ||
+
+                                    idNormalise ===
+                                        actionNormalisee
+                                );
+
+                            const categorieMatch =
+                                categorieNormalisee &&
+                                categorieModele ===
+                                    categorieNormalisee;
+
+                            const familleMatch =
+                                familleNormalisee &&
+                                familleModele ===
+                                    familleNormalisee;
+
+                            if (
+                                actionMatch ||
+                                (
+                                    categorieMatch &&
+                                    familleMatch
+                                )
+                            ) {
+
+                                return {
+                                    modele: valeur,
+                                    nom: cle
+                                };
+
+                            }
+
+                        }
+
+                        const resultat =
+                            rechercher(
+                                valeur
+                            );
+
+                        if (
+                            resultat
+                        ) {
+                            return resultat;
+                        }
+
+                    }
+
+                    return null;
+                };
+
+            return rechercher(
+                NEO_ACTION_MODELS
+            );
+        };
+
+
+    let modeleAction =
+        neoTrouverModeleAction(
+            actionNom,
+            categorie,
+            famille
+        );
+
+
+    let maniere =
+        modeleAction?.nom ||
+        null;
+
 
     //============================================================
     // 🧭 TRAJECTOIRE
     //============================================================
     //
-    // La trajectoire est indépendante de la manière.
+    // Les trajectoires sont découvertes automatiquement depuis
+    // la structure trajectoires du modèle d'action.
     //
-    // course + frontale
-    // course + circulaire
-    // course + diagonale
-    // course + zig_zag
+    // Exemple :
+    //
+    // course.trajectoires.frontale
+    // course.trajectoires.diagonale
+    // dash.trajectoires.frontale
+    //
+    // Toute nouvelle trajectoire ajoutée dans NeoAI.js est
+    // automatiquement disponible ici.
     //
     //============================================================
 
     let trajectoire =
-        trajectoireDetectee || null;
+        trajectoireDetectee ||
+        null;
 
-    // Détection générique de trajectoire
-    // uniquement si neoDetecterTrajectoire() n'a rien trouvé.
 
-    if (!trajectoire) {
-
-        const trajectoires = [
-
-            {
-                valeur: "frontale",
-                variantes: [
-                    "frontale",
-                    "frontal",
-                    "frontalement",
-                    "en trajectoire frontale",
-                    "de manière frontale",
-                    "de maniere frontale"
-                ]
-            },
-
-            {
-                valeur: "circulaire",
-                variantes: [
-                    "circulaire",
-                    "circulairement",
-                    "en trajectoire circulaire",
-                    "de manière circulaire",
-                    "de maniere circulaire"
-                ]
-            },
-
-            {
-                valeur: "diagonale",
-                variantes: [
-                    "diagonale",
-                    "diagonal",
-                    "diagonalement",
-                    "en diagonale",
-                    "en trajectoire diagonale",
-                    "de manière diagonale",
-                    "de maniere diagonale"
-                ]
-            },
-
-            {
-                valeur: "zig_zag",
-                variantes: [
-                    "zig zag",
-                    "zigzag",
-                    "zig-zag",
-                    "en zig zag",
-                    "en zigzag",
-                    "en zig-zag"
-                ]
-            },
-
-            {
-                valeur: "laterale",
-                variantes: [
-                    "latérale",
-                    "lateral",
-                    "latéralement",
-                    "lateralement",
-                    "en latéral",
-                    "en lateral"
-                ]
-            },
-
-            {
-                valeur: "vers_le_bas",
-                variantes: [
-                    "vers le bas",
-                    "vers le bas",
-                    "en baissant",
-                    "vers le bas"
-                ]
-            },
-
-            {
-                valeur: "vers_le_haut",
-                variantes: [
-                    "vers le haut",
-                    "en montant"
-                ]
-            }
-
-        ];
+    if (
+        !trajectoire &&
+        modeleAction?.modele?.trajectoires
+    ) {
 
         const normalTrajectoire =
             neoNormaliserTexteLocal(
@@ -6859,33 +6646,98 @@ function neoAnalyserAction(
             )
             .toLowerCase();
 
+        const trajectoiresDisponibles =
+            Object.entries(
+                modeleAction.modele.trajectoires
+            );
+
         for (
-            const definition of trajectoires
+            const [
+                nomTrajectoire,
+                definitionTrajectoire
+            ]
+            of trajectoiresDisponibles
         ) {
 
-            const variantes =
-                [...definition.variantes]
+            const variantes = [
+
+                nomTrajectoire,
+
+                nomTrajectoire
+                    .replace(
+                        /_/g,
+                        " "
+                    ),
+
+                definitionTrajectoire?.concept
+
+            ];
+
+            if (
+                Array.isArray(
+                    definitionTrajectoire?.exemples
+                )
+            ) {
+
+                variantes.push(
+                    ...definitionTrajectoire.exemples
+                );
+
+            }
+
+            const variantesUniques =
+                [
+                    ...new Set(
+                        variantes
+                            .filter(Boolean)
+                            .map(
+                                variante =>
+                                    String(variante)
+                            )
+                    )
+                ]
                 .sort(
                     (a, b) =>
                         b.length - a.length
                 );
 
             for (
-                const variante of variantes
+                const variante
+                of variantesUniques
             ) {
 
-                const varianteNormalisee =
+                let varianteNormalisee =
                     neoNormaliserTexteLocal(
                         variante
                     )
                     .toLowerCase()
                     .trim();
 
-                if (!varianteNormalisee) {
+                if (
+                    !varianteNormalisee
+                ) {
                     continue;
                 }
 
-                const regex =
+                varianteNormalisee =
+                    varianteNormalisee
+                        .replace(
+                            /\{[^}]+\}/gu,
+                            " "
+                        )
+                        .replace(
+                            /\s+/gu,
+                            " "
+                        )
+                        .trim();
+
+                if (
+                    !varianteNormalisee
+                ) {
+                    continue;
+                }
+
+                const regexDirecte =
                     new RegExp(
                         `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
                             /[.*+?^${}()|[\]\\]/g,
@@ -6895,26 +6747,30 @@ function neoAnalyserAction(
                     );
 
                 if (
-                    regex.test(
+                    regexDirecte.test(
                         normalTrajectoire
                     )
                 ) {
 
                     trajectoire =
-                        definition.valeur;
+                        nomTrajectoire;
 
                     break;
+
                 }
 
             }
 
-            if (trajectoire) {
+            if (
+                trajectoire
+            ) {
                 break;
             }
 
         }
 
     }
+
 
     //============================================================
     // 🦾 MEMBRE UTILISÉ
@@ -6981,6 +6837,12 @@ function neoAnalyserAction(
                 b.length - a.length
         );
 
+    const normalTexte =
+        neoNormaliserTexteLocal(
+            texte
+        )
+        .toLowerCase();
+
     for (
         const partie of membresTries
     ) {
@@ -7002,7 +6864,7 @@ function neoAnalyserAction(
 
         if (
             regex.test(
-                normalManiere
+                normalTexte
             )
         ) {
 
@@ -7014,6 +6876,7 @@ function neoAnalyserAction(
 
     }
 
+
     //============================================================
     // 🧠 INTERPRÉTATION DU CÔTÉ
     //============================================================
@@ -7021,14 +6884,14 @@ function neoAnalyserAction(
     if (!membre) {
 
         const droit =
-            /\bdu\s+droit\b/iu.test(normalManiere) ||
-            /\bde\s+la\s+droite\b/iu.test(normalManiere) ||
-            /\bà\s+droite\b/iu.test(normalManiere);
+            /\bdu\s+droit\b/iu.test(normalTexte) ||
+            /\bde\s+la\s+droite\b/iu.test(normalTexte) ||
+            /\bà\s+droite\b/iu.test(normalTexte);
 
         const gauche =
-            /\bdu\s+gauche\b/iu.test(normalManiere) ||
-            /\bde\s+la\s+gauche\b/iu.test(normalManiere) ||
-            /\bà\s+gauche\b/iu.test(normalManiere);
+            /\bdu\s+gauche\b/iu.test(normalTexte) ||
+            /\bde\s+la\s+gauche\b/iu.test(normalTexte) ||
+            /\bà\s+gauche\b/iu.test(normalTexte);
 
         if (
             droit ||
@@ -7042,7 +6905,7 @@ function neoAnalyserAction(
 
             if (
                 /\b(poing|uppercut|crochet|frappe|frapper|coup de poing)\b/iu.test(
-                    normalManiere
+                    normalTexte
                 )
             ) {
 
@@ -7053,7 +6916,7 @@ function neoAnalyserAction(
 
             else if (
                 /\b(genou|coup de genou)\b/iu.test(
-                    normalManiere
+                    normalTexte
                 )
             ) {
 
@@ -7064,7 +6927,7 @@ function neoAnalyserAction(
 
             else if (
                 /\b(pied|coup de pied|kick|semelle|plante du pied)\b/iu.test(
-                    normalManiere
+                    normalTexte
                 )
             ) {
 
@@ -7075,7 +6938,7 @@ function neoAnalyserAction(
 
             else if (
                 /\b(coude|coup de coude)\b/iu.test(
-                    normalManiere
+                    normalTexte
                 )
             ) {
 
@@ -7086,7 +6949,7 @@ function neoAnalyserAction(
 
             else if (
                 /\b(jambe|cuisse|tibia|mollet)\b/iu.test(
-                    normalManiere
+                    normalTexte
                 )
             ) {
 
@@ -7097,7 +6960,7 @@ function neoAnalyserAction(
 
             else if (
                 /\b(bras|avant-bras|poignet)\b/iu.test(
-                    normalManiere
+                    normalTexte
                 )
             ) {
 
@@ -7109,6 +6972,7 @@ function neoAnalyserAction(
         }
 
     }
+
 
     //============================================================
     // 🧱 STRUCTURE GRAMMATICALE
@@ -7145,6 +7009,7 @@ function neoAnalyserAction(
                 : null
 
     };
+
 
     //============================================================
     // 📦 ANALYSE UTILISÉE POUR LE MODÈLE
@@ -7203,6 +7068,7 @@ function neoAnalyserAction(
 
     };
 
+
     //============================================================
     // 📚 RECONNAISSANCE DU MODÈLE
     //============================================================
@@ -7217,6 +7083,29 @@ function neoAnalyserAction(
         modele?.actionCanonique ||
         actionNom;
 
+
+    //============================================================
+    // 🔄 SYNCHRONISATION DU MODÈLE CANONIQUE
+    //============================================================
+
+    modeleAction =
+        neoTrouverModeleAction(
+            actionFinale,
+            categorie,
+            famille
+        ) ||
+        modeleAction;
+
+    if (
+        modeleAction?.nom
+    ) {
+
+        maniere =
+            modeleAction.nom;
+
+    }
+
+
     //============================================================
     // 🧠 RELATIONS SÉMANTIQUES
     //============================================================
@@ -7227,6 +7116,7 @@ function neoAnalyserAction(
     let objectif = null;
     let consequence = null;
     let relation = null;
+
 
     //============================================================
     // ⚡ DÉCLENCHEUR
@@ -7300,6 +7190,7 @@ function neoAnalyserAction(
 
     }
 
+
     //============================================================
     // 🎯 FINALITÉ
     //============================================================
@@ -7334,6 +7225,7 @@ function neoAnalyserAction(
         };
 
     }
+
 
     //============================================================
     // ➡️ CONSÉQUENCE
@@ -7409,6 +7301,7 @@ function neoAnalyserAction(
 
     }
 
+
     //============================================================
     // 🔗 TYPE DE RELATION
     //============================================================
@@ -7466,6 +7359,7 @@ function neoAnalyserAction(
 
     }
 
+
     //============================================================
     // 🧩 VALIDATION STRUCTURELLE
     //============================================================
@@ -7489,6 +7383,7 @@ function neoAnalyserAction(
             ? modeleReconnu.structure
             : [];
 
+
     //============================================================
     // 🔎 TEST EXISTENCE SLOT
     //============================================================
@@ -7511,6 +7406,7 @@ function neoAnalyserAction(
             .trim() !== "";
 
         };
+
 
     //============================================================
     // 📦 VALEURS SÉMANTIQUES
@@ -7556,6 +7452,7 @@ function neoAnalyserAction(
 
     };
 
+
     //============================================================
     // 🧠 COMPARAISON STRUCTURELLE
     //============================================================
@@ -7571,13 +7468,17 @@ function neoAnalyserAction(
             .toUpperCase()
             .replace(/\s+/g, "_");
 
-        if (!slot) {
+        if (
+            !slot
+        ) {
             continue;
         }
 
         let valeur = null;
 
-        switch (slot) {
+        switch (
+            slot
+        ) {
 
             case "SUJET":
             case "ACTEUR":
@@ -7699,6 +7600,7 @@ function neoAnalyserAction(
 
     }
 
+
     //============================================================
     // 📊 SCORE STRUCTURE
     //============================================================
@@ -7722,6 +7624,7 @@ function neoAnalyserAction(
     structureComplete =
         totalSlots > 0 &&
         slotsManquants.length === 0;
+
 
     //============================================================
     // 🧠 STRUCTURE SÉMANTIQUE FINALE
@@ -7785,6 +7688,7 @@ function neoAnalyserAction(
 
     };
 
+
     //============================================================
     // 📦 INFORMATIONS MODÈLE
     //============================================================
@@ -7807,6 +7711,7 @@ function neoAnalyserAction(
     analyseModele.relation =
         relation;
 
+
     //============================================================
     // 📚 MODÈLE CANONIQUE
     //============================================================
@@ -7815,6 +7720,7 @@ function neoAnalyserAction(
         modele?.actionCanonique ||
         actionFinale ||
         null;
+
 
     //============================================================
     // ✅ FORMAT DE SORTIE
@@ -7922,7 +7828,7 @@ function neoAnalyserAction(
 
     };
 
-}
+}          
                   
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
