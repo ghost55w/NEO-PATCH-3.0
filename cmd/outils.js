@@ -3725,7 +3725,7 @@ function neoFusionnerSegments(
 //==============================================================
 // 📚 MODÈLES D'ACTIONS
 //==============================================================
-function neoGetModeles() {
+ function neoGetModeles() {
 
     const sources = [
 
@@ -3739,9 +3739,491 @@ function neoGetModeles() {
             : null
     ];
 
-    //============================================================
-    // 🔎 PARCOURIR LES SOURCES
-    //============================================================
+    const normaliserTexte = valeur => {
+        return String(valeur ?? "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[_-]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    };
+
+    const modeles = [];
+
+    const ajouterModele = ({
+        categorie,
+        famille = null,
+        actionNom,
+        actionData = null,
+        modeleData = null,
+        id,
+        action,
+        maniere = null,
+        trajectoire = null,
+        concept = null,
+        structure = [],
+        exemples = [],
+        params = {},
+        contraintes = []
+    }) => {
+
+        const modele = {
+
+            id: id || action || actionNom,
+
+            action: action || id || actionNom,
+
+            actionNom: actionNom || id || action,
+
+            categorie:
+                categorie ||
+                actionData?.categorie ||
+                modeleData?.categorie ||
+                null,
+
+            famille:
+                famille ||
+                actionData?.famille ||
+                modeleData?.famille ||
+                null,
+
+            concept:
+                concept ||
+                actionData?.concept ||
+                modeleData?.concept ||
+                null,
+
+            maniere:
+                maniere ||
+                modeleData?.maniere ||
+                modeleData?.nom ||
+                actionData?.nom ||
+                id ||
+                action ||
+                actionNom,
+
+            trajectoire:
+                trajectoire ||
+                modeleData?.trajectoire ||
+                null,
+
+            structure:
+                Array.isArray(structure)
+                    ? [...structure]
+                    : [],
+
+            exemples:
+                Array.isArray(exemples)
+                    ? [...exemples]
+                    : [],
+
+            params:
+                params && typeof params === "object"
+                    ? { ...params }
+                    : {},
+
+            contraintes:
+                Array.isArray(contraintes)
+                    ? [...contraintes]
+                    : [],
+
+            actionData,
+
+            modeleData
+        };
+
+        // Évite les doublons exacts
+        const existe = modeles.some(m =>
+            String(m.id).toUpperCase() === String(modele.id).toUpperCase() &&
+            String(m.trajectoire || "").toLowerCase() ===
+                String(modele.trajectoire || "").toLowerCase() &&
+            String(m.maniere || "").toLowerCase() ===
+                String(modele.maniere || "").toLowerCase()
+        );
+
+        if (!existe) {
+            modeles.push(modele);
+        }
+    };
+
+    const parcourirCategorie = (source, categorieNom = null) => {
+
+        if (
+            !source ||
+            typeof source !== "object" ||
+            Array.isArray(source)
+        ) {
+            return;
+        }
+
+        for (const [nom, data] of Object.entries(source)) {
+
+            if (!data || typeof data !== "object" || Array.isArray(data)) {
+                continue;
+            }
+
+            // ==========================================================
+            // CAS : catégorie
+            // ==========================================================
+
+            const categorie =
+                data?.categorie ||
+                categorieNom ||
+                nom;
+
+            // ==========================================================
+            // CAS : objet directement reconnu comme modèle
+            // ==========================================================
+
+            const estModeleDirect = Boolean(
+                data?.id ||
+                data?.action ||
+                Array.isArray(data?.structure) ||
+                Array.isArray(data?.exemples) ||
+                data?.trajectoires ||
+                data?.manieres ||
+                data?.modeles
+            );
+
+            if (!estModeleDirect) {
+
+                // Catégorie intermédiaire
+                parcourirCategorie(
+                    data,
+                    data?.categorie || nom
+                );
+
+                continue;
+            }
+
+            const id =
+                data?.id ||
+                data?.action ||
+                nom;
+
+            const actionNom = nom;
+
+            const famille =
+                data?.famille ||
+                null;
+
+            // ==========================================================
+            // FORMAT :
+            //
+            // actionData.trajectoires
+            // ==========================================================
+
+            if (
+                data?.trajectoires &&
+                typeof data.trajectoires === "object" &&
+                !Array.isArray(data.trajectoires)
+            ) {
+
+                for (
+                    const [trajectoireNom, trajectoireData]
+                    of Object.entries(data.trajectoires)
+                ) {
+
+                    if (
+                        !trajectoireData ||
+                        typeof trajectoireData !== "object" ||
+                        Array.isArray(trajectoireData)
+                    ) {
+                        continue;
+                    }
+
+                    ajouterModele({
+
+                        categorie:
+                            data?.categorie ||
+                            categorie,
+
+                        famille,
+
+                        actionNom,
+
+                        actionData: data,
+
+                        modeleData: trajectoireData,
+
+                        id,
+
+                        action: id,
+
+                        maniere:
+                            data?.nom ||
+                            data?.maniere ||
+                            id,
+
+                        trajectoire:
+                            trajectoireNom,
+
+                        concept:
+                            data?.concept ||
+                            null,
+
+                        structure:
+                            Array.isArray(trajectoireData?.structure)
+                                ? trajectoireData.structure
+                                : Array.isArray(data?.structure)
+                                    ? data.structure
+                                    : [],
+
+                        exemples:
+                            Array.isArray(trajectoireData?.exemples)
+                                ? trajectoireData.exemples
+                                : Array.isArray(data?.exemples)
+                                    ? data.exemples
+                                    : [],
+
+                        params:
+                            trajectoireData?.params ||
+                            data?.params ||
+                            {},
+
+                        contraintes: [
+
+                            ...(Array.isArray(data?.contraintes)
+                                ? data.contraintes
+                                : []),
+
+                            ...(Array.isArray(trajectoireData?.contraintes)
+                                ? trajectoireData.contraintes
+                                : [])
+                        ]
+                    });
+                }
+
+                continue;
+            }
+
+            // ==========================================================
+            // FORMAT :
+            //
+            // actionData.manieres
+            // ==========================================================
+
+            if (
+                data?.manieres &&
+                typeof data.manieres === "object" &&
+                !Array.isArray(data.manieres)
+            ) {
+
+                for (
+                    const [maniereNom, maniereData]
+                    of Object.entries(data.manieres)
+                ) {
+
+                    if (
+                        !maniereData ||
+                        typeof maniereData !== "object" ||
+                        Array.isArray(maniereData)
+                    ) {
+                        continue;
+                    }
+
+                    ajouterModele({
+
+                        categorie:
+                            data?.categorie ||
+                            categorie,
+
+                        famille,
+
+                        actionNom,
+
+                        actionData: data,
+
+                        modeleData: maniereData,
+
+                        id,
+
+                        action: id,
+
+                        maniere: maniereNom,
+
+                        trajectoire: null,
+
+                        concept:
+                            data?.concept ||
+                            null,
+
+                        structure:
+                            Array.isArray(maniereData?.structure)
+                                ? maniereData.structure
+                                : [],
+
+                        exemples:
+                            Array.isArray(maniereData?.exemples)
+                                ? maniereData.exemples
+                                : [],
+
+                        params:
+                            maniereData?.params ||
+                            {},
+
+                        contraintes:
+                            Array.isArray(maniereData?.contraintes)
+                                ? maniereData.contraintes
+                                : []
+                    });
+                }
+
+                continue;
+            }
+
+            // ==========================================================
+            // FORMAT :
+            //
+            // actionData.modeles[]
+            // ==========================================================
+
+            if (Array.isArray(data?.modeles)) {
+
+                for (const modele of data.modeles) {
+
+                    if (
+                        !modele ||
+                        typeof modele !== "object" ||
+                        Array.isArray(modele)
+                    ) {
+                        continue;
+                    }
+
+                    ajouterModele({
+
+                        categorie:
+                            modele?.categorie ||
+                            data?.categorie ||
+                            categorie,
+
+                        famille:
+                            modele?.famille ||
+                            famille,
+
+                        actionNom,
+
+                        actionData: data,
+
+                        modeleData: modele,
+
+                        id:
+                            modele?.id ||
+                            modele?.action ||
+                            id,
+
+                        action:
+                            modele?.action ||
+                            id,
+
+                        maniere:
+                            modele?.maniere ||
+                            modele?.nom ||
+                            modele?.id ||
+                            id,
+
+                        trajectoire:
+                            modele?.trajectoire ||
+                            null,
+
+                        concept:
+                            modele?.concept ||
+                            data?.concept ||
+                            null,
+
+                        structure:
+                            Array.isArray(modele?.structure)
+                                ? modele.structure
+                                : [],
+
+                        exemples:
+                            Array.isArray(modele?.exemples)
+                                ? modele.exemples
+                                : [],
+
+                        params:
+                            modele?.params ||
+                            {},
+
+                        contraintes:
+                            Array.isArray(modele?.contraintes)
+                                ? modele.contraintes
+                                : []
+                    });
+                }
+
+                continue;
+            }
+
+            // ==========================================================
+            // FORMAT :
+            //
+            // modèle simple
+            // ==========================================================
+
+            if (
+                Array.isArray(data?.structure) ||
+                Array.isArray(data?.exemples)
+            ) {
+
+                ajouterModele({
+
+                    categorie:
+                        data?.categorie ||
+                        categorie,
+
+                    famille,
+
+                    actionNom,
+
+                    actionData: data,
+
+                    modeleData: data,
+
+                    id,
+
+                    action: id,
+
+                    maniere:
+                        data?.nom ||
+                        data?.maniere ||
+                        id,
+
+                    trajectoire:
+                        data?.trajectoire ||
+                        null,
+
+                    concept:
+                        data?.concept ||
+                        null,
+
+                    structure:
+                        Array.isArray(data?.structure)
+                            ? data.structure
+                            : [],
+
+                    exemples:
+                        Array.isArray(data?.exemples)
+                            ? data.exemples
+                            : [],
+
+                    params:
+                        data?.params ||
+                        {},
+
+                    contraintes:
+                        Array.isArray(data?.contraintes)
+                            ? data.contraintes
+                            : []
+                });
+            }
+        }
+    };
+
+    // ==============================================================
+    // RECHERCHE DES MODÈLES
+    // ==============================================================
 
     for (const source of sources) {
 
@@ -3753,569 +4235,88 @@ function neoGetModeles() {
             continue;
         }
 
-        const modeles = [];
+        const avant = modeles.length;
 
-        //========================================================
-        // 📚 CATÉGORIES
-        //========================================================
+        parcourirCategorie(source);
 
-        for (
-            const [categorieNom, categorie]
-            of Object.entries(source)
-        ) {
+        const ajoutes = modeles.length - avant;
 
-            if (
-                !categorie ||
-                typeof categorie !== "object" ||
-                Array.isArray(categorie)
-            ) {
-                continue;
-            }
-
-            //====================================================
-            // 🎯 ACTIONS
-            //====================================================
-
-            for (
-                const [actionNom, actionData]
-                of Object.entries(categorie)
-            ) {
-
-                if (
-                    actionNom === "categorie"
-                ) {
-                    continue;
-                }
-
-                if (
-                    !actionData ||
-                    typeof actionData !== "object" ||
-                    Array.isArray(actionData)
-                ) {
-                    continue;
-                }
-
-                //================================================
-                // 🆔 IDENTITÉ ACTION
-                //================================================
-
-                const id =
-                    actionData?.id ||
-                    actionData?.action ||
-                    actionNom;
-
-                const categorieFinale =
-                    actionData?.categorie ||
-                    categorieNom;
-
-                const familleFinale =
-                    actionData?.famille ||
-                    null;
-
-                //================================================
-                // 🆕 NOUVEAU FORMAT
-                //
-                // course: {
-                //     categorie: "deplacement",
-                //     id: "COURSE",
-                //     concept: "...",
-                //     trajectoires: {
-                //         frontale: {...},
-                //         diagonale: {...}
-                //     }
-                // }
-                //================================================
-
-                if (
-                    actionData?.trajectoires &&
-                    typeof actionData.trajectoires === "object" &&
-                    !Array.isArray(actionData.trajectoires)
-                ) {
-
-                    for (
-                        const [
-                            trajectoireNom,
-                            trajectoireData
-                        ]
-                        of Object.entries(
-                            actionData.trajectoires
-                        )
-                    ) {
-
-                        if (
-                            !trajectoireData ||
-                            typeof trajectoireData !== "object" ||
-                            Array.isArray(trajectoireData)
-                        ) {
-                            continue;
-                        }
-
-                        modeles.push({
-
-                            // ------------------------------------
-                            // 🆔 IDENTITÉ
-                            // ------------------------------------
-
-                            id,
-
-                            action:
-                                id,
-
-                            actionNom,
-
-                            categorie:
-                                categorieFinale,
-
-                            famille:
-                                familleFinale,
-
-                            // ------------------------------------
-                            // 🧠 CONCEPT ACTION
-                            // ------------------------------------
-
-                            concept:
-                                actionData?.concept ||
-                                null,
-
-                            // ------------------------------------
-                            // 💨 MANIÈRE
-                            //
-                            // La manière correspond à l'action.
-                            // Exemple :
-                            // COURSE
-                            // DASH
-                            // MARCHE
-                            // ------------------------------------
-
-                            maniere:
-                                actionData?.nom ||
-                                id,
-
-                            // ------------------------------------
-                            // 📐 TRAJECTOIRE
-                            // ------------------------------------
-
-                            trajectoire:
-                                trajectoireNom,
-
-                            trajectoireNom,
-
-                            conceptTrajectoire:
-                                trajectoireData?.concept ||
-                                null,
-
-                            // ------------------------------------
-                            // 📐 STRUCTURE
-                            // ------------------------------------
-
-                            structure:
-                                Array.isArray(
-                                    trajectoireData?.structure
-                                )
-                                    ? [
-                                        ...trajectoireData.structure
-                                    ]
-                                    : Array.isArray(
-                                        actionData?.structure
-                                    )
-                                        ? [
-                                            ...actionData.structure
-                                        ]
-                                        : [],
-
-                            // ------------------------------------
-                            // 📝 EXEMPLES
-                            // ------------------------------------
-
-                            exemples:
-                                Array.isArray(
-                                    trajectoireData?.exemples
-                                )
-                                    ? [
-                                        ...trajectoireData.exemples
-                                    ]
-                                    : Array.isArray(
-                                        actionData?.exemples
-                                    )
-                                        ? [
-                                            ...actionData.exemples
-                                        ]
-                                        : [],
-
-                            // ------------------------------------
-                            // 📦 PARAMÈTRES
-                            // ------------------------------------
-
-                            params:
-                                trajectoireData?.params ||
-                                actionData?.params ||
-                                {},
-
-                            // ------------------------------------
-                            // 🔗 CONTRAINTES
-                            // ------------------------------------
-
-                            contraintes:
-                                [
-                                    ...(Array.isArray(
-                                        actionData?.contraintes
-                                    )
-                                        ? actionData.contraintes
-                                        : []),
-
-                                    ...(Array.isArray(
-                                        trajectoireData?.contraintes
-                                    )
-                                        ? trajectoireData.contraintes
-                                        : [])
-                                ],
-
-                            // ------------------------------------
-                            // 🔗 RÉFÉRENCES
-                            // ------------------------------------
-
-                            actionData,
-
-                            trajectoireData
-
-                        });
-
-                    }
-
-                    // Cette action est déjà traitée.
-                    continue;
-                }
-
-                //================================================
-                // 🆕 MODÈLE UNIQUE SANS TRAJECTOIRE
-                //================================================
-
-                if (
-                    Array.isArray(
-                        actionData?.structure
-                    ) ||
-                    Array.isArray(
-                        actionData?.exemples
-                    )
-                ) {
-
-                    modeles.push({
-
-                        ...actionData,
-
-                        id,
-
-                        action:
-                            id,
-
-                        actionNom,
-
-                        categorie:
-                            categorieFinale,
-
-                        famille:
-                            familleFinale,
-
-                        maniere:
-                            actionData?.nom ||
-                            id,
-
-                        trajectoire:
-                            null,
-
-                        structure:
-                            Array.isArray(
-                                actionData?.structure
-                            )
-                                ? [
-                                    ...actionData.structure
-                                ]
-                                : [],
-
-                        exemples:
-                            Array.isArray(
-                                actionData?.exemples
-                            )
-                                ? [
-                                    ...actionData.exemples
-                                ]
-                                : [],
-
-                        contraintes:
-                            Array.isArray(
-                                actionData?.contraintes
-                            )
-                                ? [
-                                    ...actionData.contraintes
-                                ]
-                                : []
-
-                    });
-
-                    continue;
-                }
-
-                //================================================
-                // 🔙 ANCIEN FORMAT AVEC MANIÈRES
-                //================================================
-
-                if (
-                    actionData?.manieres &&
-                    typeof actionData.manieres === "object" &&
-                    !Array.isArray(actionData.manieres)
-                ) {
-
-                    for (
-                        const [
-                            maniereNom,
-                            maniereData
-                        ]
-                        of Object.entries(
-                            actionData.manieres
-                        )
-                    ) {
-
-                        if (
-                            !maniereData ||
-                            typeof maniereData !== "object" ||
-                            Array.isArray(maniereData)
-                        ) {
-                            continue;
-                        }
-
-                        modeles.push({
-
-                            id,
-
-                            action:
-                                id,
-
-                            actionNom,
-
-                            categorie:
-                                categorieFinale,
-
-                            famille:
-                                familleFinale,
-
-                            concept:
-                                actionData?.concept ||
-                                null,
-
-                            maniere:
-                                maniereNom,
-
-                            conceptManiere:
-                                maniereData?.concept ||
-                                null,
-
-                            trajectoire:
-                                null,
-
-                            structure:
-                                Array.isArray(
-                                    maniereData?.structure
-                                )
-                                    ? [
-                                        ...maniereData.structure
-                                    ]
-                                    : [],
-
-                            exemples:
-                                Array.isArray(
-                                    maniereData?.exemples
-                                )
-                                    ? [
-                                        ...maniereData.exemples
-                                    ]
-                                    : [],
-
-                            params:
-                                maniereData?.params ||
-                                {},
-
-                            contraintes:
-                                Array.isArray(
-                                    maniereData?.contraintes
-                                )
-                                    ? [
-                                        ...maniereData.contraintes
-                                    ]
-                                    : [],
-
-                            maniereData,
-
-                            actionData
-
-                        });
-
-                    }
-
-                    continue;
-                }
-
-                //================================================
-                // 🔙 ANCIEN FORMAT
-                //
-                // actionData.modeles = [...]
-                //================================================
-
-                if (
-                    Array.isArray(
-                        actionData?.modeles
-                    )
-                ) {
-
-                    for (
-                        const modele
-                        of actionData.modeles
-                    ) {
-
-                        if (
-                            !modele ||
-                            typeof modele !== "object"
-                        ) {
-                            continue;
-                        }
-
-                        modeles.push({
-
-                            ...modele,
-
-                            id:
-                                modele?.id ||
-                                modele?.action ||
-                                id,
-
-                            action:
-                                modele?.action ||
-                                id,
-
-                            actionNom,
-
-                            categorie:
-                                modele?.categorie ||
-                                categorieFinale,
-
-                            famille:
-                                modele?.famille ||
-                                familleFinale,
-
-                            maniere:
-                                modele?.maniere ||
-                                modele?.nom ||
-                                modele?.id ||
-                                id,
-
-                            trajectoire:
-                                modele?.trajectoire ||
-                                null
-
-                        });
-
-                    }
-
-                }
-
-            }
-
+        if (ajoutes > 0) {
+            console.log(
+                `🧠 [NeoAI MODELES] ${ajoutes} modèle(s) chargé(s)`
+            );
         }
-
-        //========================================================
-        // ✅ SOURCE TROUVÉE
-        //========================================================
-
-        if (
-            modeles.length
-        ) {
-
-            console.log(
-                "📚 [NeoAI MODELES] Chargés :",
-                modeles.length
-            );
-
-            console.log(
-                "🎯 [NeoAI CATÉGORIES] :",
-                [
-                    ...new Set(
-                        modeles
-                            .map(
-                                modele =>
-                                    modele?.categorie
-                            )
-                            .filter(Boolean)
-                    )
-                ]
-            );
-
-            console.log(
-                "🎯 [NeoAI ACTIONS] :",
-                [
-                    ...new Set(
-                        modeles
-                            .map(
-                                modele =>
-                                    modele?.action
-                            )
-                            .filter(Boolean)
-                    )
-                ]
-            );
-
-            console.log(
-                "💨 [NeoAI MANIÈRES] :",
-                [
-                    ...new Set(
-                        modeles
-                            .map(
-                                modele =>
-                                    modele?.maniere
-                            )
-                            .filter(Boolean)
-                    )
-                ]
-            );
-
-            console.log(
-                "📐 [NeoAI TRAJECTOIRES] :",
-                [
-                    ...new Set(
-                        modeles
-                            .map(
-                                modele =>
-                                    modele?.trajectoire
-                            )
-                            .filter(Boolean)
-                    )
-                ]
-            );
-
-            console.log(
-                "🆔 [NeoAI MODÈLES] :",
-                modeles.map(
-                    modele =>
-                        modele?.id
-                )
-            );
-
-            return modeles;
-
-        }
-
     }
 
-    //============================================================
-    // ❌ AUCUN MODÈLE
-    //============================================================
+    // ==============================================================
+    // INDEX DE NORMALISATION
+    //
+    // Utile pour neoReconnaitreModele()
+    // ==============================================================
+
+    for (const modele of modeles) {
+
+        modele.idNorm = normaliserTexte(modele.id);
+        modele.actionNorm = normaliserTexte(modele.action);
+        modele.actionNomNorm = normaliserTexte(modele.actionNom);
+        modele.maniereNorm = normaliserTexte(modele.maniere);
+        modele.trajectoireNorm = normaliserTexte(modele.trajectoire);
+        modele.categorieNorm = normaliserTexte(modele.categorie);
+        modele.familleNorm = normaliserTexte(modele.famille);
+
+        modele.termesModele = [
+            modele.id,
+            modele.action,
+            modele.actionNom,
+            modele.maniere,
+            modele.trajectoire
+        ]
+            .filter(Boolean)
+            .map(normaliserTexte)
+            .filter(Boolean);
+    }
+
+    if (modeles.length) {
+
+        const categories = [
+            ...new Set(
+                modeles
+                    .map(m => m.categorie)
+                    .filter(Boolean)
+            )
+        ];
+
+        const actions = [
+            ...new Set(
+                modeles
+                    .map(m => m.action)
+                    .filter(Boolean)
+            )
+        ];
+
+        console.log(
+            `🧠 [NeoAI MODELES] Total: ${modeles.length}`
+        );
+
+        console.log(
+            `📂 Catégories: ${categories.join(", ")}`
+        );
+
+        console.log(
+            `⚔️ Actions: ${actions.join(", ")}`
+        );
+
+        return modeles;
+    }
 
     console.log(
         "⚠️ [NeoAI MODELES] Aucun modèle trouvé."
     );
 
     return [];
-}
-                
-    
+}                                                                               
+                                
+
 
 //==============================================================
 // 🧩 COMPARAISON SÉMANTIQUE D'UN MODÈLE
