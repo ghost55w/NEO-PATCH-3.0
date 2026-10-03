@@ -142,15 +142,17 @@ Prix : ${formatPrice(card)}
       await ovl.sendMessage(ms_org, {
         image: { url: chosenCard.image },
         caption:
-`🎴🌀 *Carte :* ${chosenCard.name}
+`. ◥◣              🌀JUMP™🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+*◥◣ 🎴 Carte:* ${chosenCard.name}
+🔅*Grade:* ${chosenCard.grade}${String(chosenCard.grade).toLowerCase() === "bronze" ? "🥉" : ""}
+🔅*Univers:* ${chosenCard.univers}
+🔅 *Catégorie:* ${chosenCard.category}
+🔅 *Placement:* ${chosenCard.placement}
+🛍️ *Prix:* ${formatPrice(chosenCard).replace(/([🧭🔷])$/, " $1")}
 
-Nom : ${chosenCard.name}
-Grade : ${chosenCard.grade}
-Catégorie : ${chosenCard.category}
-Placement : ${chosenCard.placement}
-Prix : ${formatPrice(chosenCard)}
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░
-                                 🔆🌀`
+╰───────────────────
+                            🌀🔆`
       }, { quoted: choiceReply });
 
     }
