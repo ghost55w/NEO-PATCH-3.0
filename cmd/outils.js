@@ -4984,8 +4984,8 @@ function neoCalculerSimilariteModele(
             
 //==============================================================
 // 📚 RECONNAISSANCE DU MODÈLE STRUCTUREL
-//==============================================================
-function neoReconnaitreModele(
+//==============================================================                
+  function neoReconnaitreModele(
     texte,
     analyse = {}
 ) {
@@ -5030,6 +5030,86 @@ function neoReconnaitreModele(
             }
 
             return true;
+
+        };
+
+    const texteNormalise =
+        normaliser(
+            texte
+        );
+
+    //============================================================
+    // 🔎 TESTER UN SYNONYME DANS LE TEXTE
+    //============================================================
+
+    const trouverSynonymesDansTexte =
+        synonymes => {
+
+            if (
+                !Array.isArray(
+                    synonymes
+                )
+            ) {
+                return [];
+            }
+
+            const resultats = [];
+
+            for (
+                const synonyme of synonymes
+            ) {
+
+                if (
+                    !valeurPresente(
+                        synonyme
+                    )
+                ) {
+                    continue;
+                }
+
+                const synonymeNormalise =
+                    normaliser(
+                        synonyme
+                    );
+
+                if (
+                    !synonymeNormalise
+                ) {
+                    continue;
+                }
+
+                const regex =
+                    new RegExp(
+                        `(?<![A-Za-zÀ-ÿ0-9_-])${synonymeNormalise.replace(
+                            /[.*+?^${}()|[\]\\]/g,
+                            "\\$&"
+                        )}(?![A-Za-zÀ-ÿ0-9_-])`,
+                        "iu"
+                    );
+
+                if (
+                    regex.test(
+                        texteNormalise
+                    )
+                ) {
+
+                    resultats.push({
+                        synonyme,
+                        normalise:
+                            synonymeNormalise,
+                        longueur:
+                            synonymeNormalise.length
+                    });
+
+                }
+
+            }
+
+            return resultats.sort(
+                (a, b) =>
+                    b.longueur -
+                    a.longueur
+            );
 
         };
 
@@ -5114,24 +5194,7 @@ function neoReconnaitreModele(
         );
 
     //============================================================
-    // 🧠 SYNONYMES
-    //============================================================
-    //
-    // IMPORTANT :
-    //
-    // Le verbe brut ne devient PAS automatiquement
-    // l'action canonique.
-    //
-    // Exemple :
-    //
-    // foncer → ne devient PAS FONCER
-    //
-    // On attend d'abord de trouver la manière :
-    //
-    // foncer + course → COURSE
-    // foncer + vol    → VOL
-    // foncer + dash   → DASH
-    //
+    // 🧠 SYNONYMES GLOBAUX
     //============================================================
 
     const synonymes =
@@ -5250,22 +5313,6 @@ function neoReconnaitreModele(
     //============================================================
     // 🔎 EXTRACTION DES SOUS-MODÈLES
     //============================================================
-    //
-    // Nouveau format :
-    //
-    // {
-    //     id: "COURSE",
-    //     categorie: "deplacement",
-    //     concept: "...",
-    //     manieres: {
-    //         frontale: {...},
-    //         diagonale: {...}
-    //     }
-    // }
-    //
-    // Chaque sous-modèle devient un candidat indépendant.
-    //
-    //============================================================
 
     const candidatsBruts = [];
 
@@ -5285,36 +5332,8 @@ function neoReconnaitreModele(
             continue;
         }
 
-        const idModele =
-            String(
-                modele?.id ||
-                modele?.action ||
-                modele?.nom ||
-                ""
-            );
-
-        const idNorm =
-            normaliser(
-                idModele
-            );
-
-        const categorieModele =
-            normaliser(
-                modele?.categorie
-            );
-
-        const familleModele =
-            normaliser(
-                modele?.famille
-            );
-
         //========================================================
-        // 🧠 ANCIEN FORMAT
-        //========================================================
-        //
-        // On garde une compatibilité minimale avec les anciens
-        // modèles plats.
-        //
+        // 🧠 ANCIEN FORMAT PLAT
         //========================================================
 
         if (
@@ -5325,6 +5344,7 @@ function neoReconnaitreModele(
             candidatsBruts.push({
 
                 modele,
+
                 baseModele:
                     modele,
 
@@ -5366,6 +5386,7 @@ function neoReconnaitreModele(
             candidatsBruts.push({
 
                 modele,
+
                 baseModele:
                     modele,
 
@@ -5383,18 +5404,6 @@ function neoReconnaitreModele(
 
     //============================================================
     // 🎯 COMPATIBILITÉ DU MODÈLE
-    //============================================================
-    //
-    // PRIORITÉ :
-    //
-    // 1. MANIÈRE détectée = ID du modèle
-    // 2. MANIÈRE détectée = clé d'un modèle
-    // 3. action canonique détectée = ID du modèle
-    // 4. catégorie / famille
-    //
-    // Le verbe "foncer" seul ne suffit donc PAS à choisir
-    // COURSE.
-    //
     //============================================================
 
     const candidats = [];
@@ -5432,20 +5441,95 @@ function neoReconnaitreModele(
                 modele?.famille
             );
 
+        //========================================================
+        // 🧠 INFORMATIONS DU SOUS-MODÈLE
+        //========================================================
+
+        const maniereModele =
+            normaliser(
+                sousModele?.maniere ||
+                candidat?.cleManiere
+            );
+
+        const trajectoireModele =
+            normaliser(
+                sousModele?.trajectoire
+            );
+
+        const synonymesModele =
+            Array.isArray(
+                sousModele?.synonymes
+            )
+                ? sousModele.synonymes
+                : [];
+
+        const synonymesTrouves =
+            trouverSynonymesDansTexte(
+                synonymesModele
+            );
+
         let selectionScore = 0;
 
         //========================================================
-        // 🥇 MANIÈRE → ACTION CANONIQUE
+        // 🥇 SYNONYMES DIRECTS DU SOUS-MODÈLE
         //========================================================
+        //
+        // C'EST LE CHANGEMENT PRINCIPAL.
+        //
+        // Le modèle lui-même définit maintenant ses mots.
         //
         // Exemple :
         //
-        // analyse.maniere = "course"
+        // synonymes: [
+        //     "course",
+        //     "courir",
+        //     "fonce",
+        //     "foncer"
+        // ]
         //
-        // modèle.id = "COURSE"
+        // => aucun ajout nécessaire dans neoAnalyserAction().
         //
-        // => correspondance forte.
-        //
+        //========================================================
+
+        if (
+            synonymesTrouves.length
+        ) {
+
+            const meilleurSynonyme =
+                synonymesTrouves[0];
+
+            // Le synonyme est un indice fort,
+            // mais PAS une canonisation absolue.
+            //
+            // Cela permet à "fonce" d'exister dans plusieurs
+            // modèles sans forcer automatiquement COURSE.
+
+            selectionScore +=
+                2500 +
+                (
+                    meilleurSynonyme.longueur *
+                    20
+                );
+
+            // Plusieurs synonymes concordants
+            // renforcent légèrement le candidat.
+
+            if (
+                synonymesTrouves.length > 1
+            ) {
+
+                selectionScore +=
+                    Math.min(
+                        synonymesTrouves.length * 150,
+                        600
+                    );
+
+            }
+
+        }
+
+        //========================================================
+        // 🥇 MANIÈRE DÉTECTÉE = ID DU MODÈLE
         //========================================================
 
         if (
@@ -5459,7 +5543,22 @@ function neoReconnaitreModele(
         }
 
         //========================================================
-        // 🥈 SYNONYME DE LA MANIÈRE
+        // 🥈 MANIÈRE = PROPRIÉTÉ DU SOUS-MODÈLE
+        //========================================================
+
+        if (
+            maniereNorm &&
+            maniereModele &&
+            maniereNorm ===
+            maniereModele
+        ) {
+
+            selectionScore += 4800;
+
+        }
+
+        //========================================================
+        // 🥉 SYNONYME GLOBAL DE LA MANIÈRE
         //========================================================
 
         const synonymeManiere =
@@ -5480,23 +5579,29 @@ function neoReconnaitreModele(
         }
 
         //========================================================
-        // 🥉 CLÉ DE MANIÈRE
+        // 🧭 TRAJECTOIRE DU SOUS-MODÈLE
         //========================================================
-        //
-        // Exemple :
-        //
-        // manieres: {
-        //     frontale: {...}
-        // }
-        //
-        // analyse.trajectoire = frontale
-        //
+
+        if (
+            trajectoireNorm &&
+            trajectoireModele &&
+            trajectoireNorm ===
+            trajectoireModele
+        ) {
+
+            selectionScore += 3000;
+
+        }
+
+        //========================================================
+        // 🧭 CLÉ DE MANIÈRE = TRAJECTOIRE
         //========================================================
 
         if (
             trajectoireNorm &&
             cleManiere &&
-            trajectoireNorm === cleManiere
+            trajectoireNorm ===
+            cleManiere
         ) {
 
             selectionScore += 1200;
@@ -5504,13 +5609,25 @@ function neoReconnaitreModele(
         }
 
         //========================================================
-        // 🔄 DIRECTION COMME INDICE DE SOUS-MODÈLE
+        // 🔄 DIRECTION = TRAJECTOIRE
         //========================================================
 
         if (
             directionNorm &&
+            trajectoireModele &&
+            directionNorm ===
+            trajectoireModele
+        ) {
+
+            selectionScore += 900;
+
+        }
+
+        if (
+            directionNorm &&
             cleManiere &&
-            directionNorm === cleManiere
+            directionNorm ===
+            cleManiere
         ) {
 
             selectionScore += 800;
@@ -5550,22 +5667,33 @@ function neoReconnaitreModele(
         //========================================================
         // 🧠 COMPATIBILITÉ CONCEPTUELLE
         //========================================================
-        //
-        // On utilise le concept et les exemples comme indices
-        // secondaires, jamais comme validation structurelle.
-        //
-        //========================================================
 
         const texteModele = [
+
             modele?.id,
+
             modele?.concept,
+
             candidat?.cleManiere,
+
+            sousModele?.maniere,
+
+            sousModele?.trajectoire,
+
             sousModele?.concept,
+
+            ...(Array.isArray(
+                sousModele?.synonymes
+            )
+                ? sousModele.synonymes
+                : []),
+
             ...(Array.isArray(
                 sousModele?.exemples
             )
                 ? sousModele.exemples
                 : [])
+
         ]
             .filter(
                 valeur =>
@@ -5592,28 +5720,25 @@ function neoReconnaitreModele(
         }
 
         //========================================================
-        // ❌ LE VERBE BRUT N'EST PAS L'ACTION
+        // ❌ LE VERBE BRUT N'EST TOUJOURS PAS L'ACTION
         //========================================================
         //
-        // Exemple :
+        // actionBrute = "fonce"
         //
-        // actionBrute = foncer
-        // modèle.id   = COURSE
+        // NE PAS FAIRE :
         //
-        // On ne donne AUCUN bonus à "foncer".
+        // fonce → FONCER
         //
-        // Le choix repose sur la manière.
+        // Le verbe brut n'obtient aucun bonus.
         //
-        //========================================================
-
-        //========================================================
-        // 📚 CANDIDAT
         //========================================================
 
         candidats.push({
 
             modele,
+
             sousModele,
+
             cleManiere:
                 candidat?.cleManiere ||
                 null,
@@ -5621,7 +5746,22 @@ function neoReconnaitreModele(
             index:
                 candidat.index,
 
-            selectionScore
+            selectionScore,
+
+            synonymesTrouves,
+
+            meilleurSynonyme:
+                synonymesTrouves[0] ||
+                null,
+
+            maniereModele:
+                sousModele?.maniere ||
+                candidat?.cleManiere ||
+                null,
+
+            trajectoireModele:
+                sousModele?.trajectoire ||
+                null
 
         });
 
@@ -5657,14 +5797,17 @@ function neoReconnaitreModele(
         return {
 
             modele: null,
+
             score: 0,
+
             scoreStructure: 0,
+
             structureComplete: false,
+
             slotsTrouves: [],
+
             slotsManquants: [],
 
-            // IMPORTANT :
-            // aucune fausse canonisation de "foncer".
             actionCanonique:
                 analyse?.maniere ||
                 actionBrute ||
@@ -5689,6 +5832,7 @@ function neoReconnaitreModele(
     ) {
 
         let scoreExemple = 0;
+
         let meilleurExemple = null;
 
         try {
@@ -5696,9 +5840,6 @@ function neoReconnaitreModele(
             const analyseModele = {
 
                 ...analyse,
-
-                // Ici l'action canonique est l'ID
-                // du modèle, PAS le verbe "foncer".
 
                 action:
                     candidat?.modele?.id ||
@@ -5708,26 +5849,33 @@ function neoReconnaitreModele(
 
                 categorie:
                     candidat?.modele?.categorie ||
-                    categorieCanonique
+                    categorieCanonique,
+
+                // IMPORTANT :
+                // on fournit directement les informations
+                // du sous-modèle au moteur de similarité.
+
+                maniere:
+                    candidat?.sousModele?.maniere ||
+                    candidat?.cleManiere ||
+                    analyse?.maniere ||
+                    null,
+
+                trajectoire:
+                    candidat?.sousModele?.trajectoire ||
+                    analyse?.trajectoire ||
+                    null
 
             };
 
             //====================================================
-            // 🧩 ADAPTATION POUR LE MOTEUR DE SIMILARITÉ
-            //====================================================
-            //
-            // On présente le sous-modèle comme un modèle plat
-            // temporaire.
-            //
-            // Cela permet de conserver
-            // neoCalculerSimilariteModele()
-            // sans réécrire cette fonction.
-            //
+            // 🧩 MODÈLE TEMPORAIRE POUR SIMILARITÉ
             //====================================================
 
             const modelePourSimilarite = {
 
                 ...candidat.modele,
+
                 ...candidat.sousModele,
 
                 id:
@@ -5747,12 +5895,15 @@ function neoReconnaitreModele(
                     famille,
 
                 maniere:
+                    candidat?.sousModele?.maniere ||
                     candidat?.cleManiere ||
-                    analyse?.maniere,
+                    analyse?.maniere ||
+                    null,
 
                 trajectoire:
-                    candidat?.cleManiere ||
-                    analyse?.trajectoire
+                    candidat?.sousModele?.trajectoire ||
+                    analyse?.trajectoire ||
+                    null
 
             };
 
@@ -5783,9 +5934,6 @@ function neoReconnaitreModele(
 
         candidat.meilleurExemple =
             meilleurExemple;
-
-        // La similarité ne doit jamais
-        // écraser la correspondance structurelle.
 
         candidat.selectionScore +=
             scoreExemple / 1000;
@@ -5826,6 +5974,29 @@ function neoReconnaitreModele(
 
             }
 
+            // Un synonyme plus long est généralement
+            // plus spécifique.
+
+            const longueurA =
+                a?.meilleurSynonyme?.longueur ||
+                0;
+
+            const longueurB =
+                b?.meilleurSynonyme?.longueur ||
+                0;
+
+            if (
+                longueurB !==
+                longueurA
+            ) {
+
+                return (
+                    longueurB -
+                    longueurA
+                );
+
+            }
+
             return (
                 a.index -
                 b.index
@@ -5852,10 +6023,15 @@ function neoReconnaitreModele(
         return {
 
             modele: null,
+
             score: 0,
+
             scoreStructure: 0,
+
             structureComplete: false,
+
             slotsTrouves: [],
+
             slotsManquants: [],
 
             actionCanonique:
@@ -5875,16 +6051,6 @@ function neoReconnaitreModele(
     //============================================================
     // ⚔️ ACTION CANONIQUE
     //============================================================
-    //
-    // C'est ICI que la règle importante est appliquée.
-    //
-    // fonce en course → COURSE
-    // fonce en vol    → VOL
-    // fonce en dash   → DASH
-    //
-    // L'action vient du modèle, jamais du verbe de formulation.
-    //
-    //============================================================
 
     const actionCanonique =
         String(
@@ -5900,14 +6066,43 @@ function neoReconnaitreModele(
         categorieCanonique ||
         null;
 
-    // On conserve les informations normalisées
-    // pour le reste du moteur.
+    //============================================================
+    // 🧠 INFORMATIONS CANONIQUES DU SOUS-MODÈLE
+    //============================================================
+    //
+    // IMPORTANT :
+    //
+    // On récupère maintenant ces valeurs depuis le modèle.
+    //
+    // Exemple :
+    //
+    // sousModele.maniere = "course"
+    // sousModele.trajectoire = "frontale"
+    //
+    //============================================================
+
+    const maniereCanonique =
+        meilleurSousModele?.maniere ||
+        meilleurCandidat?.cleManiere ||
+        analyse?.maniere ||
+        null;
+
+    const trajectoireCanonique =
+        meilleurSousModele?.trajectoire ||
+        analyse?.trajectoire ||
+        null;
 
     analyse.action =
         actionCanonique;
 
     analyse.categorie =
         categorieCanonique;
+
+    analyse.maniere =
+        maniereCanonique;
+
+    analyse.trajectoire =
+        trajectoireCanonique;
 
     //============================================================
     // 📐 STRUCTURE DU SOUS-MODÈLE
@@ -5934,33 +6129,15 @@ function neoReconnaitreModele(
     // 🧭 NORMALISATION DIRECTION / TRAJECTOIRE
     //============================================================
     //
-    // Si le sous-modèle sélectionné est clairement une
-    // trajectoire (frontale, diagonale, circulaire, etc.)
-    // et que l'ancien modèle utilise DIRECTION pour cette
-    // information, on expose TRAJECTOIRE au moteur.
+    // Plus besoin d'une liste codée en dur :
+    //
+    // si le sous-modèle possède lui-même une trajectoire,
+    // alors son champ TRAJECTOIRE est prioritaire.
     //
     //============================================================
 
-    const clesTrajectoireGeneriques = [
-        "frontale",
-        "circulaire",
-        "diagonale",
-        "zig_zag",
-        "laterale",
-        "verticale",
-        "vers_le_haut",
-        "vers_le_bas"
-    ];
-
-    const cleSelectionnee =
-        normaliser(
-            meilleurCandidat?.cleManiere
-        );
-
     if (
-        clesTrajectoireGeneriques.includes(
-            cleSelectionnee
-        ) &&
+        meilleurSousModele?.trajectoire &&
         structure.includes("DIRECTION") &&
         !structure.includes("TRAJECTOIRE")
     ) {
@@ -5990,60 +6167,75 @@ function neoReconnaitreModele(
             ) {
 
                 case "SUJET":
+
                     return (
                         analyse?.acteur ??
                         analyse?.sujet
                     );
 
                 case "ACTION":
+
                     return (
                         actionCanonique
                     );
 
                 case "CIBLE":
+
                     return analyse?.cible;
 
                 case "MEMBRE":
+
                     return analyse?.membre;
 
                 case "PARTIE_CORPS":
+
                     return analyse?.partieCorps;
 
                 case "MANIERE":
-                    return analyse?.maniere;
+
+                    return (
+                        maniereCanonique
+                    );
 
                 case "VITESSE":
+
                     return analyse?.vitesse;
 
                 case "DISTANCE":
+
                     return analyse?.distance;
 
                 case "HAUTEUR":
+
                     return analyse?.hauteur;
 
                 case "DIRECTION":
+
                     return analyse?.direction;
 
                 case "TRAJECTOIRE":
+
                     return (
-                        analyse?.trajectoire ||
-                        meilleurCandidat?.cleManiere ||
-                        null
+                        trajectoireCanonique
                     );
 
                 case "INTENTION":
+
                     return analyse?.intention;
 
                 case "COURBE":
+
                     return analyse?.courbe;
 
                 case "COTE":
+
                     return (
                         analyse?.cote ||
                         null
                     );
 
                 default:
+
                     return null;
 
             }
@@ -6055,6 +6247,7 @@ function neoReconnaitreModele(
     //============================================================
 
     const slotsTrouves = [];
+
     const slotsManquants = [];
 
     for (
@@ -6107,21 +6300,17 @@ function neoReconnaitreModele(
     //============================================================
     // 🧠 MODÈLE RETOURNÉ
     //============================================================
-    //
-    // On retourne un objet combinant :
-    //
-    // - modèle principal
-    // - manière sélectionnée
-    // - structure sélectionnée
-    //
-    // Cela permet à envoyerResultatNeoAI()
-    // d'utiliser directement modele.structure.
-    //
-    //============================================================
 
     const modeleFinal = {
 
         ...meilleurBase,
+
+        ...(
+            meilleurSousModele &&
+            typeof meilleurSousModele === "object"
+                ? meilleurSousModele
+                : {}
+        ),
 
         id:
             meilleurBase?.id ||
@@ -6135,14 +6324,10 @@ function neoReconnaitreModele(
             categorieCanonique,
 
         maniere:
-            meilleurCandidat?.cleManiere ||
-            analyse?.maniere ||
-            null,
+            maniereCanonique,
 
         trajectoire:
-            meilleurCandidat?.cleManiere ||
-            analyse?.trajectoire ||
-            null,
+            trajectoireCanonique,
 
         concept:
             meilleurSousModele?.concept ||
@@ -6183,6 +6368,10 @@ function neoReconnaitreModele(
         modeleFinal?.trajectoire ||
         "—",
 
+        "| synonyme:",
+        meilleurCandidat?.meilleurSynonyme?.synonyme ||
+        "—",
+
         "| discrimination:",
         meilleurCandidat.selectionScore,
 
@@ -6206,7 +6395,6 @@ function neoReconnaitreModele(
         modele:
             modeleFinal,
 
-        // Similarité = information / départage.
         score:
             meilleurCandidat.scoreExemple || 0,
 
@@ -6217,7 +6405,6 @@ function neoReconnaitreModele(
             meilleurCandidat.meilleurExemple ||
             null,
 
-        // Structure = validation.
         scoreStructure,
 
         structureComplete,
@@ -6229,9 +6416,6 @@ function neoReconnaitreModele(
         requisManquants:
             slotsManquants,
 
-        // IMPORTANT :
-        // l'action canonique est maintenant
-        // l'action du modèle.
         actionCanonique,
 
         categorie:
@@ -6240,18 +6424,19 @@ function neoReconnaitreModele(
         structure,
 
         correspondanceForte:
-            false
+            Boolean(
+                meilleurCandidat?.meilleurSynonyme
+            )
 
     };
 
-}  
+}                              
                                                                                   
 
 //==============================================================
 // 🧠 ANALYSE SÉMANTIQUE D'UNE ACTION
 //==============================================================
-     
-function neoAnalyserAction(
+  function neoAnalyserAction(
     texte,
     contexte = {}
 ) {
@@ -6433,488 +6618,37 @@ function neoAnalyserAction(
     // 💨 MANIÈRE
     //============================================================
     //
-    // MANIÈRE = type d'exécution
+    // IMPORTANT :
     //
-    // foncer en course frontale
+    // La manière n'est PLUS déterminée par une liste codée
+    // en dur ici.
     //
-    // ACTION      = foncer
-    // MANIÈRE     = course
-    // TRAJECTOIRE = frontale
+    // Elle sera déterminée par neoReconnaitreModele()
+    // à partir de :
+    //
+    // sousModele.maniere
+    // sousModele.synonymes
     //
     //============================================================
 
     let maniere = null;
 
-    const manieres = [
-
-        //========================================================
-        // 🏃 DÉPLACEMENTS
-        //========================================================
-
-        {
-            valeur: "marche",
-            variantes: [
-                "marche",
-                "à pied",
-                "au pas",
-                "en marchant",
-                "en marche"
-            ]
-        },
-
-        {
-            valeur: "course",
-            variantes: [
-                "course",
-                "en course",
-                "à la course",
-                "en courant"
-            ]
-        },
-
-        {
-            valeur: "dash",
-            variantes: [
-                "dash",
-                "en dash"
-            ]
-        },
-
-        {
-            valeur: "rush",
-            variantes: [
-                "rush",
-                "en rush"
-            ]
-        },
-
-        {
-            valeur: "saut",
-            variantes: [
-                "saut",
-                "en saut",
-                "bond",
-                "en bond"
-            ]
-        },
-
-        {
-            valeur: "roulade",
-            variantes: [
-                "roulade",
-                "en roulade"
-            ]
-        },
-
-        {
-            valeur: "vol",
-            variantes: [
-                "vol",
-                "en vol",
-                "en volant"
-            ]
-        },
-
-        {
-            valeur: "pirouette",
-            variantes: [
-                "pirouette",
-                "en pirouette"
-            ]
-        },
-
-        {
-            valeur: "pivot",
-            variantes: [
-                "pivot",
-                "en pivot"
-            ]
-        },
-
-        {
-            valeur: "vrille",
-            variantes: [
-                "vrille",
-                "en vrille"
-            ]
-        },
-
-        {
-            valeur: "salto",
-            variantes: [
-                "salto",
-                "en salto"
-            ]
-        },
-
-        {
-            valeur: "flip",
-            variantes: [
-                "flip",
-                "en flip"
-            ]
-        },
-
-        //========================================================
-        // 👊 FRAPPES
-        //========================================================
-
-        {
-            valeur: "jab",
-            variantes: [
-                "jab"
-            ]
-        },
-
-        {
-            valeur: "direct",
-            variantes: [
-                "direct",
-                "coup direct"
-            ]
-        },
-
-        {
-            valeur: "crochet",
-            variantes: [
-                "crochet"
-            ]
-        },
-
-        {
-            valeur: "uppercut",
-            variantes: [
-                "uppercut"
-            ]
-        },
-
-        {
-            valeur: "backfist",
-            variantes: [
-                "backfist",
-                "back fist"
-            ]
-        },
-
-        {
-            valeur: "overhand",
-            variantes: [
-                "overhand"
-            ]
-        },
-
-        {
-            valeur: "hammerfist",
-            variantes: [
-                "hammerfist",
-                "hammer fist"
-            ]
-        },
-
-        //========================================================
-        // 🦵 COUPS DE PIED
-        //========================================================
-
-        {
-            valeur: "coup_de_pied_frontal",
-            variantes: [
-                "coup de pied frontal",
-                "kick frontal"
-            ]
-        },
-
-        {
-            valeur: "coup_de_pied_lateral",
-            variantes: [
-                "coup de pied latéral",
-                "coup de pied lateral",
-                "kick latéral",
-                "kick lateral"
-            ]
-        },
-
-        {
-            valeur: "coup_de_pied_circulaire",
-            variantes: [
-                "coup de pied circulaire",
-                "kick circulaire"
-            ]
-        },
-
-        {
-            valeur: "coup_de_pied_retourne",
-            variantes: [
-                "coup de pied retourné",
-                "coup de pied retourne",
-                "kick retourné",
-                "kick retourne"
-            ]
-        },
-
-        //========================================================
-        // 🔄 ROTATIONS
-        //========================================================
-
-        {
-            valeur: "rotation",
-            variantes: [
-                "rotation",
-                "en rotation"
-            ]
-        },
-
-        //========================================================
-        // 🛡️ DÉFENSE
-        //========================================================
-
-        {
-            valeur: "se_baisser",
-            variantes: [
-                "se baisse",
-                "se baissant",
-                "se baisser",
-                "en se baissant",
-                "en baissant"
-            ]
-        },
-
-        {
-            valeur: "esquive",
-            variantes: [
-                "esquive",
-                "esquiver",
-                "en esquivant"
-            ]
-        }
-
-    ];
-
-    const normalManiere =
-        neoNormaliserTexteLocal(
-            texte
-        )
-        .toLowerCase();
-
-    for (
-        const definition of manieres
-    ) {
-
-        const variantes =
-            [...definition.variantes]
-            .sort(
-                (a, b) =>
-                    b.length - a.length
-            );
-
-        for (
-            const variante of variantes
-        ) {
-
-            const varianteNormalisee =
-                neoNormaliserTexteLocal(
-                    variante
-                )
-                .toLowerCase()
-                .trim();
-
-            if (!varianteNormalisee) {
-                continue;
-            }
-
-            const regex =
-                new RegExp(
-                    `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
-                        /[.*+?^${}()|[\]\\]/g,
-                        "\\$&"
-                    )}(?![A-Za-zÀ-ÿ0-9_-])`,
-                    "iu"
-                );
-
-            if (
-                regex.test(
-                    normalManiere
-                )
-            ) {
-
-                maniere =
-                    definition.valeur;
-
-                break;
-            }
-
-        }
-
-        if (maniere) {
-            break;
-        }
-
-    }
-
     //============================================================
     // 🧭 TRAJECTOIRE
     //============================================================
     //
-    // La trajectoire est indépendante de la manière.
+    // neoDetecterTrajectoire() reste disponible comme détecteur
+    // générique.
     //
-    // course + frontale
-    // course + circulaire
-    // course + diagonale
-    // course + zig_zag
+    // Si le modèle possède sa propre trajectoire,
+    // neoReconnaitreModele() la prendra ensuite comme source
+    // canonique.
     //
     //============================================================
 
     let trajectoire =
-        trajectoireDetectee || null;
-
-    // Détection générique de trajectoire
-    // uniquement si neoDetecterTrajectoire() n'a rien trouvé.
-
-    if (!trajectoire) {
-
-        const trajectoires = [
-
-            {
-                valeur: "frontale",
-                variantes: [
-                    "frontale",
-                    "frontal",
-                    "frontalement",
-                    "en trajectoire frontale",
-                    "de manière frontale",
-                    "de maniere frontale"
-                ]
-            },
-
-            {
-                valeur: "circulaire",
-                variantes: [
-                    "circulaire",
-                    "circulairement",
-                    "en trajectoire circulaire",
-                    "de manière circulaire",
-                    "de maniere circulaire"
-                ]
-            },
-
-            {
-                valeur: "diagonale",
-                variantes: [
-                    "diagonale",
-                    "diagonal",
-                    "diagonalement",
-                    "en diagonale",
-                    "en trajectoire diagonale",
-                    "de manière diagonale",
-                    "de maniere diagonale"
-                ]
-            },
-
-            {
-                valeur: "zig_zag",
-                variantes: [
-                    "zig zag",
-                    "zigzag",
-                    "zig-zag",
-                    "en zig zag",
-                    "en zigzag",
-                    "en zig-zag"
-                ]
-            },
-
-            {
-                valeur: "laterale",
-                variantes: [
-                    "latérale",
-                    "lateral",
-                    "latéralement",
-                    "lateralement",
-                    "en latéral",
-                    "en lateral"
-                ]
-            },
-
-            {
-                valeur: "vers_le_bas",
-                variantes: [
-                    "vers le bas",
-                    "vers le bas",
-                    "en baissant",
-                    "vers le bas"
-                ]
-            },
-
-            {
-                valeur: "vers_le_haut",
-                variantes: [
-                    "vers le haut",
-                    "en montant"
-                ]
-            }
-
-        ];
-
-        const normalTrajectoire =
-            neoNormaliserTexteLocal(
-                texte
-            )
-            .toLowerCase();
-
-        for (
-            const definition of trajectoires
-        ) {
-
-            const variantes =
-                [...definition.variantes]
-                .sort(
-                    (a, b) =>
-                        b.length - a.length
-                );
-
-            for (
-                const variante of variantes
-            ) {
-
-                const varianteNormalisee =
-                    neoNormaliserTexteLocal(
-                        variante
-                    )
-                    .toLowerCase()
-                    .trim();
-
-                if (!varianteNormalisee) {
-                    continue;
-                }
-
-                const regex =
-                    new RegExp(
-                        `(?<![A-Za-zÀ-ÿ0-9_-])${varianteNormalisee.replace(
-                            /[.*+?^${}()|[\]\\]/g,
-                            "\\$&"
-                        )}(?![A-Za-zÀ-ÿ0-9_-])`,
-                        "iu"
-                    );
-
-                if (
-                    regex.test(
-                        normalTrajectoire
-                    )
-                ) {
-
-                    trajectoire =
-                        definition.valeur;
-
-                    break;
-                }
-
-            }
-
-            if (trajectoire) {
-                break;
-            }
-
-        }
-
-    }
+        trajectoireDetectee ||
+        null;
 
     //============================================================
     // 🦾 MEMBRE UTILISÉ
@@ -6980,6 +6714,12 @@ function neoAnalyserAction(
             (a, b) =>
                 b.length - a.length
         );
+
+    const normalManiere =
+        neoNormaliserTexteLocal(
+            texte
+        )
+        .toLowerCase();
 
     for (
         const partie of membresTries
@@ -7212,6 +6952,45 @@ function neoAnalyserAction(
             texte,
             analyseModele
         );
+
+    //============================================================
+    // 🧠 RÉCUPÉRATION DES VALEURS CANONIQUES DU MODÈLE
+    //============================================================
+    //
+    // C'est ici que le modèle devient la source de vérité.
+    //
+    // Exemple :
+    //
+    // texte :
+    // Yamato fonce en course frontale vers Naruto
+    //
+    // résultat :
+    //
+    // action      = COURSE
+    // maniere     = course
+    // trajectoire = frontale
+    //
+    //============================================================
+
+    const modeleReconnuInitial =
+        modele?.modele ||
+        null;
+
+    if (
+        modeleReconnuInitial
+    ) {
+
+        maniere =
+            modeleReconnuInitial?.maniere ||
+            maniere ||
+            null;
+
+        trajectoire =
+            modeleReconnuInitial?.trajectoire ||
+            trajectoire ||
+            null;
+
+    }
 
     const actionFinale =
         modele?.actionCanonique ||
@@ -7922,7 +7701,9 @@ function neoAnalyserAction(
 
     };
 
-}
+}   
+                                                    
+                                                
                   
 //==============================================================
 // ⚖️ ARBITRAGE SÉMANTIQUE NEOAI
