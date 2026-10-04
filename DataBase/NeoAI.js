@@ -642,10 +642,8 @@ const NEO_PARAMETRES = {
 // peuvent lui être rattachés. Sert de guide au moteur de parsing, PAS de
 // logique d'extraction.
 const NEO_RELATIONS = {
-
-    // règle absolue : SUJET = celui qui réalise l'action ;
-    // CIBLE = celui/ce qui reçoit/subit l'action.
-    // Ces deux rôles sont toujours indépendants.
+    // règle absolue : SUJET = celui qui réalise l'action ; CIBLE = celui/ce
+    // qui reçoit/subit l'action. Ces deux rôles sont toujours indépendants.
     reglesRoles: {
         sujet: 'entite_qui_realise_action',
         cible: 'entite_qui_subit_action',
@@ -667,70 +665,34 @@ const NEO_RELATIONS = {
         'INTENSITE'
     ],
 
-    // Relations fines par type de champ
+    // Relations fines par type de champ (utile pour valider une extraction)
     sujet_action: ['sujet', 'action'],
     action_cible: ['action', 'cible'],
     action_partie_corps: ['action', 'partie_corps', 'cote_corps'],
     action_direction: ['action', 'direction'],
     action_trajectoire: ['action', 'trajectoire'],
-    action_parametres: [
-        'action',
-        'distance',
-        'hauteur',
-        'vitesse',
-        'intensite',
-        'intention'
-    ],
+    action_parametres: ['action', 'distance', 'hauteur', 'vitesse', 'intensite', 'intention'],
 
     // Contraintes explicites d'indépendance entre champs proches
     contraintes: [
-        {
-            champ_a: 'direction',
-            champ_b: 'trajectoire',
-            regle: 'toujours_distincts'
-        },
-        {
-            champ_a: 'cote_corps',
-            champ_b: 'direction',
-            regle: 'toujours_distincts'
-        },
-        {
-            champ_a: 'partie_corps',
-            champ_b: 'direction',
-            regle: 'jamais_deduire_direction_depuis_partie_corps'
-        }
+        { champ_a: 'direction', champ_b: 'trajectoire', regle: 'toujours_distincts' },
+        { champ_a: 'cote_corps', champ_b: 'direction', regle: 'toujours_distincts' },
+        { champ_a: 'partie_corps', champ_b: 'direction', regle: 'jamais_deduire_direction_depuis_partie_corps' }
     ]
 };
 
 
-                                                                       
 //==============================================================
 // 🎮 NEO ACTION MODELS
 //==============================================================
-// ACTION      = concept d'action canonique
-// TRAJECTOIRE = manière géométrique / orientation d'exécution
-// CONCEPT     = définition sémantique de l'action
+// Chaque action possède ses propres paramètres.
+// SUJET  = personnage qui exécute l'action
+// CIBLE  = personnage visé / concerné par l'action
 //
 // Les champs de "structure" sont OBLIGATOIRES.
-// Les champs non présents dans la structure sont facultatifs.
-//
-// IMPORTANT :
-// - MANIERE n'est plus utilisé.
-// - Le moteur doit déduire ACTION à partir du concept,
-//   des synonymes et des formulations.
-// - TRAJECTOIRE décrit comment l'action se déroule.
+// Les champs de "optionnels" sont facultatifs.
 //==============================================================
-
-// ================================================================
-// 🧠 NEO ACTION MODELS
-// Base sémantique des actions de NEO
-// ================================================================
-
 const NEO_ACTION_MODELS = {
-
-    // ============================================================
-    // 🏃 DÉPLACEMENTS
-    // ============================================================
 
     deplacement: {
 
@@ -739,116 +701,64 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         marche: {
-
-    categorie: "deplacement",
-    id: "MARCHE",
-
-    concept:
-        "Déplacement volontaire d'un sujet au sol à pied, généralement à vitesse normale ou modérée.",
-
-    trajectoires: {
-
-        normale: {
+            categorie: "deplacement",
+            id: "MARCHE",
 
             concept:
-                "Progression régulière au sol sans accélération explosive.",
+                "Déplacement volontaire d'un sujet à pied, généralement à vitesse normale ou modérée.",
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "DIRECTION",
-                "DISTANCE",
-                "INTENTION"
-            ],
+            manieres: {
 
-            exemples: [
+                normale: {
+                    concept:
+                        "Déplacement au sol effectué à pied avec une progression régulière.",
 
-                // 1. Sujet + verbe simple
-                "{Sujet} marche.",
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "DISTANCE",
+                        "INTENTION"
+                    ],
 
-                // 2. Synonyme du verbe
-                "{Sujet} avance à pied.",
+                    exemples: [
+                        "{Sujet} marche vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} avance à pied vers {Cible} sur {Distance} pour se rapprocher",
+                        "{Sujet} se déplace au pas vers {Cible} sur {Distance} pour arriver à proximité",
+                        "{Sujet} progresse tranquillement vers {Cible} sur {Distance} pour rejoindre sa position"
+                    ]
+                }
+            }
+        },
 
-                // 3. Formulation naturelle
-                "{Sujet} se dirige tranquillement vers {Cible}.",
-
-                // 4. Formulation technique
-                "{Sujet} progresse au sol à pied en direction de {Cible}.",
-
-                // 5. Action + intention
-                "{Sujet} marche vers {Cible} pour {Intention}.",
-
-                // 6. Intention + action
-                "Pour {Intention}, {Sujet} avance à pied vers {Cible}.",
-
-                // 7. Description du mouvement
-                "{Sujet} progresse pas à pas vers {Cible}.",
-
-                // 8. Description du résultat recherché
-                "{Sujet} se déplace à pied afin de se rapprocher de {Cible}.",
-
-                // 9. Ordre des mots différent
-                "Vers {Cible}, {Sujet} avance à pied.",
-
-                // 10. Formulation courte
-                "{Sujet} avance vers {Cible}.",
-
-                // 11. Formulation détaillée
-                "{Sujet} avance calmement à pied sur {Distance} en direction de {Cible}.",
-
-                // 12. Avec cible
-                "{Sujet} marche en direction de {Cible} sur {Distance}.",
-
-                // 13. Sans cible
-                "{Sujet} marche sur {Distance}.",
-
-                // 14. Présence de vitesse
-                "{Sujet} marche lentement vers {Cible}.",
-
-                // 15. Présence de direction
-                "{Sujet} marche vers la gauche sur {Distance}.",
-
-                // 16. Présence de distance
-                "{Sujet} avance à pied sur {Distance}.",
-
-                // 17. Présence de manière
-                "{Sujet} marche d'un pas régulier vers {Cible}.",
-
-                // Combinaisons supplémentaires
-                "{Sujet} se rapproche de {Cible} en marchant sur {Distance}.",
-
-                "{Sujet} parcourt {Distance} à pied vers {Cible} afin de {Intention}.",
-
-                "{Sujet} avance progressivement vers {Cible}, sans accélération, pour {Intention}."
-            ]
-        }
-    }
-},
 
         // ==========================================================
         // COURSE
         // ==========================================================
 
         course: {
-
             categorie: "deplacement",
             id: "COURSE",
 
             concept:
-                "Déplacement rapide au sol par course.",
+                "Déplacement volontaire rapide d'un sujet par la course afin de progresser vers une position, une cible ou un objectif.",
 
-            trajectoires: {
+            manieres: {
+
+                // --------------------------------------------------
+                // COURSE FRONTALE
+                // --------------------------------------------------
 
                 frontale: {
-
                     concept:
-                        "Course suivant une trajectoire directe vers l'avant.",
+                        "Course effectuée selon une progression directe et principalement linéaire vers l'avant ou vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
-                        "TRAJECTOIRE",
                         "INTENTION",
                         "CIBLE",
                         "DISTANCE",
@@ -856,126 +766,60 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                "{Sujet} court vers {Cible}.",
-                "{Sujet} court droit vers {Cible}.",
-                "{Sujet} fonce vers {Cible}.",
-                "{Sujet} avance en courant vers {Cible}.",
-                "{Sujet} se dirige rapidement vers {Cible}.",
-                "{Sujet} court en ligne droite vers {Cible}.",
-                "{Sujet} court directement en direction de {Cible}.",
-                "{Sujet} fonce droit devant lui vers {Cible}.",
-                "{Sujet} progresse rapidement vers {Cible} en courant.",
-                "{Sujet} accélère en courant vers {Cible}.",
-                "{Sujet} court à {Vitesse} vers {Cible}.",
-                "{Sujet} fonce à {Vitesse} en direction de {Cible}.",
-                "{Sujet} court en ligne droite sur {Distance} vers {Cible}.",
-                "{Sujet} parcourt {Distance} en courant vers {Cible}.",
-                "{Sujet} court droit sur {Distance} pour {Intention}.",
-                "{Sujet} fonce vers {Cible} sur {Distance} afin de {Intention}.",
-                "Pour {Intention}, {Sujet} court directement vers {Cible}.",
-                "Afin de {Intention}, {Sujet} accélère et court vers {Cible}.",
-                "{Sujet} se lance dans une course frontale vers {Cible} à {Vitesse}.",
-                "{Sujet} court à {Vitesse} en trajectoire frontale vers {Cible} sur {Distance} pour {Intention}."
-            ]
-        },
+                        "{Sujet} court en course frontale vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} fonce frontalement vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
+                        "{Sujet} se rue droit vers {Cible} sur {Distance} pour le rejoindre",
+                        "{Sujet} s'élance directement vers {Cible} à {Vitesse} pour atteindre sa position",
+                        "{Sujet} file droit vers {Cible} sur {Distance} pour arriver jusqu'à lui"
+                    ]
+                },
 
 
-                diagonale: {
-
-                    concept:
-                        "Course suivant une trajectoire diagonale.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "DIRECTION",
-                        "TRAJECTOIRE",
-                        "COTE",
-                        "INTENTION",
-                        "CIBLE",
-                        "DISTANCE",
-                        "VITESSE"
-                    ],
-
-                    exemples: [
-                "{Sujet} court en diagonale vers {Cible}.",
-                "{Sujet} fonce en diagonale vers {Cible}.",
-                "{Sujet} court en diagonale vers la {Cote}.",
-                "{Sujet} avance en courant en diagonale vers {Cible}.",
-                "{Sujet} se déplace rapidement en diagonale.",
-                "{Sujet} court en direction diagonale vers {Cible}.",
-                "{Sujet} coupe sa trajectoire en courant vers la {Cote}.",
-                "{Sujet} progresse en diagonale vers {Cible}.",
-                "{Sujet} fonce vers la {Cote} en diagonale.",
-                "{Sujet} court diagonalement vers {Cible}.",
-                "{Sujet} court à {Vitesse} en diagonale vers {Cible}.",
-                "{Sujet} fonce à {Vitesse} vers la {Cote}.",
-                "{Sujet} parcourt {Distance} en diagonale vers {Cible}.",
-                "{Sujet} court sur {Distance} en direction de la {Cote}.",
-                "{Sujet} court en diagonale vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} court en diagonale vers {Cible}.",
-                "{Sujet} se lance en diagonale vers {Cible} à {Vitesse}.",
-                "{Sujet} change légèrement d'axe et court en diagonale vers {Cible}.",
-                "{Sujet} fonce en diagonale sur {Distance} vers la {Cote} afin de {Intention}.",
-                "{Sujet} court à {Vitesse} en trajectoire diagonale vers {Cible} sur {Distance} pour {Intention}."
-            ]
-        },
-
-
-                laterale: {
-
-                    concept:
-                        "Course parallèle ou principalement orientée latéralement.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "DIRECTION",
-                        "TRAJECTOIRE",
-                        "COTE",
-                        "INTENTION",
-                        "CIBLE",
-                        "DISTANCE",
-                        "VITESSE"
-                    ],
-
-                    exemples: [
-                "{Sujet} court latéralement.",
-                "{Sujet} court vers la {Cote}.",
-                "{Sujet} se déplace rapidement sur le côté.",
-                "{Sujet} court sur le côté vers la {Cote}.",
-                "{Sujet} progresse latéralement.",
-                "{Sujet} se déplace en courant vers la {Cote}.",
-                "{Sujet} court parallèlement vers la {Cote}.",
-                "{Sujet} se décale en courant vers la {Cote}.",
-                "{Sujet} fonce latéralement vers la {Cote}.",
-                "{Sujet} court de côté en direction de {Cible}.",
-                "{Sujet} court latéralement à {Vitesse}.",
-                "{Sujet} fonce vers la {Cote} à {Vitesse}.",
-                "{Sujet} parcourt {Distance} latéralement vers la {Cote}.",
-                "{Sujet} court sur {Distance} vers la {Cote}.",
-                "{Sujet} court latéralement vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} se déplace rapidement vers la {Cote}.",
-                "{Sujet} court de côté vers {Cible} afin de {Intention}.",
-                "{Sujet} accélère latéralement en direction de {Cible}.",
-                "{Sujet} fonce sur {Distance} vers la {Cote} à {Vitesse}.",
-                "{Sujet} court à {Vitesse} latéralement sur {Distance} vers {Cible} pour {Intention}."
-            ]
-        },
-
+                // --------------------------------------------------
+                // COURSE CIRCULAIRE
+                // --------------------------------------------------
 
                 circulaire: {
-
                     concept:
-                        "Course suivant une trajectoire courbe autour d'un point ou d'une cible.",
+                        "Course effectuée autour d'une cible ou selon une trajectoire courbe. Le côté indique vers quel côté le sujet se déplace autour de la cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
-                        "TRAJECTOIRE",
                         "COTE",
-                        "COURBE",
+                        "INTENTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "VITESSE",
+                        "COURBE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} court autour de {Cible} par sa gauche avec une courbe de {Courbe} pour se placer derrière lui",
+                        "{Sujet} court autour de {Cible} par sa droite avec une courbe de {Courbe} pour le contourner",
+                        "{Sujet} contourne {Cible} en courant sur sa gauche pour atteindre sa position",
+                        "{Sujet} fonce autour de {Cible} par sa droite pour se positionner derrière lui",
+                        "{Sujet} effectue une course circulaire autour de {Cible} vers sa gauche pour changer de position"
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COURSE DIAGONALE
+                // --------------------------------------------------
+
+                diagonale: {
+                    concept:
+                        "Course effectuée selon une trajectoire oblique vers une cible ou une position. Le côté indique si le sujet se déplace en diagonale vers sa gauche ou vers sa droite.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
                         "INTENTION",
                         "CIBLE",
                         "DISTANCE",
@@ -983,40 +827,28 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                "{Sujet} court en cercle autour de {Cible}.",
-                "{Sujet} court autour de {Cible}.",
-                "{Sujet} contourne {Cible} en courant.",
-                "{Sujet} tourne autour de {Cible} en courant.",
-                "{Sujet} décrit un cercle autour de {Cible}.",
-                "{Sujet} progresse en arc de cercle autour de {Cible}.",
-                "{Sujet} suit une trajectoire courbe autour de {Cible}.",
-                "{Sujet} court en formant une courbe autour de {Cible}.",
-                "{Sujet} contourne {Cible} par la {Cote}.",
-                "{Sujet} tourne autour de {Cible} vers la {Cote}.",
-                "{Sujet} court autour de {Cible} à {Vitesse}.",
-                "{Sujet} contourne {Cible} rapidement en courant.",
-                "{Sujet} parcourt {Distance} autour de {Cible}.",
-                "{Sujet} court en arc de cercle sur {Distance}.",
-                "{Sujet} tourne autour de {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} contourne {Cible} en courant.",
-                "{Sujet} court autour de {Cible} en passant par la {Cote}.",
-                "{Sujet} décrit une trajectoire circulaire autour de {Cible}.",
-                "{Sujet} contourne {Cible} à {Vitesse} sur {Distance} afin de {Intention}.",
-                "{Sujet} court à {Vitesse} en trajectoire circulaire autour de {Cible} sur {Distance} pour {Intention}."
-            ]
-        },
+                        "{Sujet} court en diagonale sur sa gauche vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} court en diagonale sur sa droite vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} fonce diagonalement vers sa gauche en direction de {Cible} à {Vitesse}",
+                        "{Sujet} se rue en diagonale sur sa droite vers {Cible} pour le rejoindre",
+                        "{Sujet} s'élance en diagonale vers sa gauche à {Vitesse} pour atteindre {Cible}"
+                    ]
+                },
 
+
+                // --------------------------------------------------
+                // COURSE ZIGZAG
+                // --------------------------------------------------
 
                 zig_zag: {
-
                     concept:
-                        "Course composée de changements successifs de direction.",
+                        "Course durant laquelle le sujet alterne successivement ses déplacements vers la gauche et vers la droite tout en progressant vers son objectif.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
+                        "MANIERE",
                         "DIRECTION",
-                        "TRAJECTOIRE",
                         "INTENTION",
                         "CIBLE",
                         "DISTANCE",
@@ -1024,27 +856,42 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                "{Sujet} court en zigzag vers {Cible}.",
-                "{Sujet} fonce en zigzag vers {Cible}.",
-                "{Sujet} avance en changeant rapidement de direction.",
-                "{Sujet} court en alternant ses directions.",
-                "{Sujet} progresse en zigzag vers {Cible}.",
-                "{Sujet} change plusieurs fois de direction en courant.",
-                "{Sujet} court en effectuant des écarts successifs.",
-                "{Sujet} se déplace en zigzag pour atteindre {Cible}.",
-                "{Sujet} fonce en changeant continuellement de direction.",
-                "{Sujet} serpente en courant vers {Cible}.",
-                "{Sujet} court en zigzag à {Vitesse}.",
-                "{Sujet} fonce à {Vitesse} en zigzag vers {Cible}.",
-                "{Sujet} parcourt {Distance} en zigzag vers {Cible}.",
-                "{Sujet} court sur {Distance} en changeant de direction.",
-                "{Sujet} court en zigzag vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} avance en zigzag vers {Cible}.",
-                "{Sujet} alterne gauche et droite en courant vers {Cible}.",
-                "{Sujet} multiplie les changements de direction tout en courant.",
-                "{Sujet} fonce en zigzag sur {Distance} à {Vitesse} vers {Cible}.",
-                "{Sujet} court à {Vitesse} en trajectoire zigzag sur {Distance} vers {Cible} pour {Intention}."
-            ]
+                        "{Sujet} court en zigzag vers {Cible} sur {Distance} pour éviter ses attaques et l'atteindre",
+                        "{Sujet} fonce en zigzag vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
+                        "{Sujet} se rue vers {Cible} en zigzag sur {Distance} pour éviter ses attaques et le rejoindre",
+                        "{Sujet} serpente rapidement vers {Cible} à {Vitesse} pour parvenir jusqu'à lui",
+                        "{Sujet} avance en alternant ses déplacements de gauche à droite vers {Cible} pour l'atteindre"
+                    ]
+                },
+
+
+                // --------------------------------------------------
+                // COURSE LATERALE
+                // --------------------------------------------------
+
+                laterale: {
+                    concept:
+                        "Course effectuée principalement vers un côté par rapport à l'orientation actuelle du sujet. Le côté indique obligatoirement la direction latérale du déplacement.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "COTE",
+                        "INTENTION",
+                        "CIBLE",
+                        "DISTANCE",
+                        "VITESSE"
+                    ],
+
+                    exemples: [
+                        "{Sujet} court latéralement sur sa gauche sur {Distance}",
+                        "{Sujet} court latéralement sur sa droite sur {Distance}",
+                        "{Sujet} se déplace rapidement vers sa gauche pour atteindre {Cible}",
+                        "{Sujet} fonce sur le côté droit vers {Cible} à {Vitesse}",
+                        "{Sujet} se rue latéralement sur sa gauche pour esquiver {Cible}"
+                    ]
                 }
             }
         },
@@ -1055,27 +902,24 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         dash: {
-
             categorie: "deplacement",
             id: "DASH",
 
             concept:
-                "Accélération explosive et brève permettant de parcourir rapidement une courte distance.",
+                "Déplacement extrêmement rapide et bref permettant au sujet de parcourir instantanément ou presque une courte distance.",
 
-            trajectoires: {
+            manieres: {
 
-                frontale: {
-
+                rapide: {
                     concept:
-                        "Dash explosif en ligne directe.",
+                        "Accélération brutale produisant un déplacement très rapide sur une courte distance.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
+                        "MANIERE",
                         "DISTANCE",
-                        "VITESSE",
+                        "DIRECTION",
                         "INTENTION"
                     ],
 
@@ -1085,73 +929,12 @@ const NEO_ACTION_MODELS = {
                     },
 
                     exemples: [
-                "{Sujet} dash directement vers {Cible}.",
-                "{Sujet} dash droit vers {Cible}.",
-                "{Sujet} effectue un dash vers {Cible}.",
-                "{Sujet} part brusquement en direction de {Cible}.",
-                "{Sujet} accélère brutalement vers {Cible}.",
-                "{Sujet} jaillit vers {Cible} en ligne droite.",
-                "{Sujet} bondit en avant sur une courte distance.",
-                "{Sujet} propulse son corps vers {Cible}.",
-                "{Sujet} effectue une accélération explosive vers {Cible}.",
-                "{Sujet} démarre instantanément vers {Cible}.",
-                "{Sujet} dash à {Vitesse} vers {Cible}.",
-                "{Sujet} accélère à {Vitesse} en direction de {Cible}.",
-                "{Sujet} effectue un dash sur {Distance} vers {Cible}.",
-                "{Sujet} parcourt rapidement {Distance} en ligne droite.",
-                "{Sujet} dash sur {Distance} pour {Intention}.",
-                "Pour {Intention}, {Sujet} déclenche un dash vers {Cible}.",
-                "{Sujet} jaillit vers {Cible} à {Vitesse}.",
-                "{Sujet} accélère brutalement sur {Distance} en direction de {Cible}.",
-                "{Sujet} effectue un dash frontal à {Vitesse} vers {Cible}.",
-                "{Sujet} dash à pleine vitesse sur {Distance} vers {Cible} afin de {Intention}."
-            ]
-                },
-
-
-                diagonale: {
-
-                    concept:
-                        "Dash explosif suivant une trajectoire diagonale.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "TRAJECTOIRE",
-                        "DIRECTION",
-                        "COTE",
-                        "DISTANCE",
-                        "VITESSE",
-                        "INTENTION"
-                    ],
-
-                    contraintes: {
-                        distance_max: 5,
-                        unite: "m"
-                    },
-
-                    exemples: [
-                "{Sujet} dash en diagonale vers la {Cote}.",
-                "{Sujet} dash diagonal vers {Cible}.",
-                "{Sujet} effectue un dash en diagonale.",
-                "{Sujet} accélère brusquement en diagonale vers {Cible}.",
-                "{Sujet} jaillit en diagonale vers la {Cote}.",
-                "{Sujet} part en diagonale vers {Cible}.",
-                "{Sujet} se propulse en diagonale vers la {Cote}.",
-                "{Sujet} effectue une accélération diagonale vers {Cible}.",
-                "{Sujet} dash vers la {Cote} en direction de {Cible}.",
-                "{Sujet} bondit rapidement en diagonale vers {Cible}.",
-                "{Sujet} dash à {Vitesse} vers la {Cote}.",
-                "{Sujet} accélère à {Vitesse} en diagonale vers {Cible}.",
-                "{Sujet} effectue un dash sur {Distance} vers la {Cote}.",
-                "{Sujet} parcourt {Distance} en diagonale vers {Cible}.",
-                "{Sujet} dash en diagonale sur {Distance} pour {Intention}.",
-                "Pour {Intention}, {Sujet} déclenche un dash diagonal vers {Cible}.",
-                "{Sujet} jaillit à {Vitesse} en diagonale vers la {Cote}.",
-                "{Sujet} accélère brutalement sur {Distance} vers {Cible} en diagonale.",
-                "{Sujet} effectue un dash diagonal à {Vitesse} vers {Cible}.",
-                "{Sujet} dash à pleine vitesse sur {Distance} vers la {Cote} afin de {Intention}."
-            ]
+                        "{Sujet} effectue un dash de {Distance} vers {Cible} pour l'atteindre",
+                        "{Sujet} dash rapidement sur {Distance} vers {Cible} pour se rapprocher",
+                        "{Sujet} accélère brutalement sur {Distance} vers l'avant pour atteindre {Cible}",
+                        "{Sujet} réalise une accélération instantanée de {Distance} pour rejoindre {Cible}",
+                        "{Sujet} bondit rapidement sur {Distance} vers {Cible} pour arriver au contact"
+                    ]
                 }
             }
         },
@@ -1162,52 +945,34 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         rush: {
-
             categorie: "deplacement",
             id: "RUSH",
 
             concept:
-                "Charge offensive rapide et continue destinée à réduire rapidement la distance avec une cible.",
+                "Déplacement offensif ou agressif rapide vers une cible afin de réduire rapidement la distance qui les sépare.",
 
-            trajectoires: {
+            manieres: {
 
-                frontale: {
-
+                directe: {
                     concept:
-                        "Charge directe vers une cible.",
+                        "Progression rapide et agressive directement vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "CIBLE",
-                        "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} rush vers {Cible}.",
-                "{Sujet} fonce directement vers {Cible}.",
-                "{Sujet} charge vers {Cible}.",
-                "{Sujet} se précipite vers {Cible}.",
-                "{Sujet} se lance à l'assaut de {Cible}.",
-                "{Sujet} charge droit devant vers {Cible}.",
-                "{Sujet} fonce en ligne droite sur {Cible}.",
-                "{Sujet} se rue vers {Cible}.",
-                "{Sujet} réduit rapidement la distance avec {Cible}.",
-                "{Sujet} accélère droit vers {Cible} dans une charge continue.",
-                "{Sujet} rush à pleine vitesse vers {Cible}.",
-                "{Sujet} fonce à {Vitesse} vers {Cible}.",
-                "{Sujet} charge sur {Distance} vers {Cible}.",
-                "{Sujet} parcourt {Distance} en fonçant vers {Cible}.",
-                "{Sujet} rush vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} charge directement vers {Cible}.",
-                "{Sujet} se rue sur {Cible} afin de {Intention}.",
-                "{Sujet} accélère continuellement vers {Cible} pour {Intention}.",
-                "{Sujet} effectue une charge frontale sur {Distance} vers {Cible}.",
-                "{Sujet} fonce en charge directe sur {Distance} vers {Cible} afin de {Intention}."
-            ]
+                        "{Sujet} rush vers {Cible} sur {Distance} pour l'atteindre",
+                        "{Sujet} fonce rapidement sur {Cible} pour arriver au contact",
+                        "{Sujet} se rue brutalement vers {Cible} pour réduire la distance",
+                        "{Sujet} se précipite sur {Cible} à grande vitesse pour l'atteindre",
+                        "{Sujet} charge vers {Cible} pour parvenir immédiatement au contact"
+                    ]
                 }
             }
         },
@@ -1218,129 +983,88 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         saut: {
-
             categorie: "deplacement",
             id: "SAUT",
 
             concept:
-                "Action permettant au sujet de quitter momentanément le sol grâce à une impulsion.",
+                "Déplacement durant lequel le sujet quitte temporairement le sol grâce à une impulsion verticale ou orientée.",
 
-            trajectoires: {
+            manieres: {
 
                 avant: {
+                    concept:
+                        "Saut orienté vers l'avant permettant de progresser dans cette direction pendant la phase aérienne.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "HAUTEUR",
+                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} saute vers l'avant.",
-                "{Sujet} bondit vers l'avant.",
-                "{Sujet} effectue un saut en avant.",
-                "{Sujet} fait un bond vers l'avant.",
-                "{Sujet} se propulse vers l'avant en sautant.",
-                "{Sujet} quitte le sol et saute vers l'avant.",
-                "{Sujet} prend appui et bondit vers l'avant.",
-                "{Sujet} s'élance dans les airs vers l'avant.",
-                "{Sujet} effectue un bond en direction de {Cible}.",
-                "{Sujet} saute en direction de {Cible}.",
-                "{Sujet} saute à une hauteur de {Hauteur} vers l'avant.",
-                "{Sujet} bondit à {Hauteur} vers l'avant.",
-                "{Sujet} effectue un saut vers l'avant pour {Intention}.",
-                "Pour {Intention}, {Sujet} bondit vers l'avant.",
-                "{Sujet} se projette vers l'avant dans les airs afin de {Intention}.",
-                "{Sujet} prend son impulsion et saute vers {Cible}.",
-                "{Sujet} quitte le sol pour se projeter vers l'avant.",
-                "{Sujet} bondit vers {Cible} en prenant de la hauteur.",
-                "{Sujet} effectue un saut avant jusqu'à {Hauteur} afin de {Intention}.",
-                "{Sujet} se propulse vers {Cible} par un saut vers l'avant pour {Intention}."
-            ]
+                        "{Sujet} saute vers l'avant à {Hauteur} de hauteur pour atteindre {Cible}",
+                        "{Sujet} bondit vers {Cible} en trajectoire ascendante à {Hauteur} pour l'atteindre",
+                        "{Sujet} quitte le sol en sautant vers l'avant pour rejoindre {Cible}",
+                        "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}"
+                    ]
                 },
 
 
                 arriere: {
+                    concept:
+                        "Saut orienté vers l'arrière permettant au sujet de s'éloigner ou de se repositionner.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "HAUTEUR",
+                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} saute vers l'arrière.",
-                "{Sujet} bondit en arrière.",
-                "{Sujet} effectue un saut arrière.",
-                "{Sujet} fait un bond vers l'arrière.",
-                "{Sujet} se propulse vers l'arrière en sautant.",
-                "{Sujet} quitte le sol et saute en arrière.",
-                "{Sujet} prend appui et bondit vers l'arrière.",
-                "{Sujet} s'élance dans les airs vers l'arrière.",
-                "{Sujet} recule dans les airs en effectuant un saut.",
-                "{Sujet} saute en direction de l'arrière.",
-                "{Sujet} saute à une hauteur de {Hauteur} vers l'arrière.",
-                "{Sujet} bondit à {Hauteur} en arrière.",
-                "{Sujet} effectue un saut arrière pour {Intention}.",
-                "Pour {Intention}, {Sujet} bondit vers l'arrière.",
-                "{Sujet} se projette vers l'arrière afin de {Intention}.",
-                "{Sujet} prend son impulsion et saute en arrière.",
-                "{Sujet} quitte le sol pour se projeter vers l'arrière.",
-                "{Sujet} bondit en arrière tout en prenant de la hauteur.",
-                "{Sujet} effectue un saut arrière jusqu'à {Hauteur} afin de {Intention}.",
-                "{Sujet} se propulse vers l'arrière par un saut pour {Intention}."
-            ]
+                        "{Sujet} saute vers l'arrière à {Hauteur} pour s'éloigner de {Cible}",
+                        "{Sujet} bondit en arrière pour éviter {Cible} et se repositionner",
+                        "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}"
+                    ]
                 },
 
 
                 vertical: {
+                    concept:
+                        "Saut principalement orienté vers le haut avec une progression horizontale minimale.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "HAUTEUR",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} saute verticalement.",
-                "{Sujet} bondit vers le haut.",
-                "{Sujet} effectue un saut vertical.",
-                "{Sujet} fait un bond vers le haut.",
-                "{Sujet} se propulse directement vers le haut.",
-                "{Sujet} quitte le sol à la verticale.",
-                "{Sujet} prend appui et bondit vers le ciel.",
-                "{Sujet} s'élève dans les airs par un saut.",
-                "{Sujet} saute directement vers le haut.",
-                "{Sujet} effectue une impulsion verticale.",
-                "{Sujet} saute jusqu'à {Hauteur}.",
-                "{Sujet} bondit à une hauteur de {Hauteur}.",
-                "{Sujet} s'élève de {Hauteur} dans les airs.",
-                "{Sujet} effectue un saut vertical pour {Intention}.",
-                "Pour {Intention}, {Sujet} bondit verticalement.",
-                "{Sujet} se projette vers le haut afin de {Intention}.",
-                "{Sujet} prend une forte impulsion et s'élève verticalement.",
-                "{Sujet} quitte le sol pour atteindre {Hauteur}.",
-                "{Sujet} bondit jusqu'à {Hauteur} afin de {Intention}.",
-                "{Sujet} se propulse verticalement dans les airs pour {Intention}."
-            ]
+                        "{Sujet} saute verticalement à {Hauteur} pour éviter {Cible}",
+                        "{Sujet} bondit directement vers le haut pour prendre de la hauteur",
+                        "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner"
+                    ]
                 },
 
 
                 laterale: {
+                    concept:
+                        "Saut effectué vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "COTE",
                         "HAUTEUR",
@@ -1348,27 +1072,11 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                "{Sujet} saute vers la gauche.",
-                "{Sujet} bondit vers la droite.",
-                "{Sujet} effectue un saut latéral vers la {Cote}.",
-                "{Sujet} fait un bond sur le côté.",
-                "{Sujet} se propulse latéralement vers la {Cote}.",
-                "{Sujet} quitte le sol en sautant vers la {Cote}.",
-                "{Sujet} prend appui et bondit sur le côté.",
-                "{Sujet} s'élance dans les airs vers la {Cote}.",
-                "{Sujet} saute de côté en direction de {Cible}.",
-                "{Sujet} bondit latéralement vers {Cible}.",
-                "{Sujet} saute à {Hauteur} vers la {Cote}.",
-                "{Sujet} bondit à une hauteur de {Hauteur} sur le côté.",
-                "{Sujet} effectue un saut latéral pour {Intention}.",
-                "Pour {Intention}, {Sujet} bondit vers la {Cote}.",
-                "{Sujet} se projette latéralement afin de {Intention}.",
-                "{Sujet} prend son impulsion et saute vers la {Cote}.",
-                "{Sujet} quitte le sol pour se déplacer latéralement.",
-                "{Sujet} bondit vers {Cible} en prenant de la hauteur sur la {Cote}.",
-                "{Sujet} effectue un saut latéral jusqu'à {Hauteur} afin de {Intention}.",
-                "{Sujet} se propulse vers {Cible} par un saut latéral vers la {Cote} pour {Intention}."
-            ]
+                        "{Sujet} saute latéralement sur sa gauche pour éviter {Cible}",
+                        "{Sujet} bondit sur sa droite pour esquiver {Cible}",
+                        "{Sujet} saute vers son côté gauche pour se repositionner",
+                        "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position"
+                    ]
                 }
             }
         },
@@ -1379,75 +1087,64 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         roulade: {
-
             categorie: "deplacement",
             id: "ROULADE",
 
             concept:
-                "Déplacement au sol réalisé par rotation successive du corps.",
+                "Déplacement au sol réalisé par rotation du corps autour de lui-même.",
 
-            trajectoires: {
+            manieres: {
 
                 avant: {
+                    concept:
+                        "Roulade au sol orientée vers l'avant.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} fait une roulade vers l'avant.",
-                "{Sujet} roule vers l'avant.",
-                "{Sujet} effectue une roulade avant.",
-                "{Sujet} se roule vers l'avant.",
-                "{Sujet} plonge au sol et roule vers l'avant.",
-                "{Sujet} prend appui et effectue une roulade avant.",
-                "{Sujet} se projette au sol en roulant vers l'avant.",
-                "{Sujet} enchaîne une roulade vers l'avant.",
-                "{Sujet} roule au sol en direction de {Cible}.",
-                "{Sujet} effectue une roulade vers {Cible}.",
-                "{Sujet} roule sur {Distance} vers l'avant.",
-                "{Sujet} parcourt {Distance} en roulade vers {Cible}.",
-                "{Sujet} effectue une roulade avant sur {Distance}.",
-                "{Sujet} roule rapidement vers {Cible}.",
-                "{Sujet} fait une roulade vers l'avant pour {Intention}.",
-                "Pour {Intention}, {Sujet} roule vers l'avant.",
-                "{Sujet} se projette au sol en roulade afin de {Intention}.",
-                "{Sujet} roule vers {Cible} sur {Distance} pour {Intention}.",
-                "{Sujet} effectue une roulade avant en direction de {Cible}.",
-                "{Sujet} se lance au sol et parcourt {Distance} en roulade vers {Cible} afin de {Intention}."
-            ]
+                        "{Sujet} effectue une roulade vers l'avant sur {Distance} pour se rapprocher de {Cible}",
+                        "{Sujet} roule au sol vers l'avant sur {Distance} pour éviter {Cible}",
+                        "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}"
+                    ]
                 },
 
 
                 arriere: {
+                    concept:
+                        "Roulade au sol orientée vers l'arrière.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "DISTANCE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                        "{Sujet} fait une roulade arrière.",
-                        "{Sujet} roule vers l'arrière."
+                        "{Sujet} effectue une roulade arrière sur {Distance} pour s'éloigner de {Cible}",
+                        "{Sujet} roule vers l'arrière pour éviter l'attaque de {Cible}",
+                        "{Sujet} fait une roulade arrière pour se repositionner"
                     ]
                 },
 
 
                 laterale: {
+                    concept:
+                        "Roulade au sol effectuée latéralement. Le côté indique obligatoirement vers lequel le sujet roule.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "COTE",
                         "DISTANCE",
@@ -1455,27 +1152,11 @@ const NEO_ACTION_MODELS = {
                     ],
 
                     exemples: [
-                "{Sujet} fait une roulade arrière.",
-                "{Sujet} roule vers l'arrière.",
-                "{Sujet} effectue une roulade vers l'arrière.",
-                "{Sujet} se roule vers l'arrière.",
-                "{Sujet} plonge au sol et roule en arrière.",
-                "{Sujet} prend appui et effectue une roulade arrière.",
-                "{Sujet} se projette au sol en roulant vers l'arrière.",
-                "{Sujet} enchaîne une roulade vers l'arrière.",
-                "{Sujet} roule au sol en direction de l'arrière.",
-                "{Sujet} effectue une roulade arrière pour reculer.",
-                "{Sujet} roule sur {Distance} vers l'arrière.",
-                "{Sujet} parcourt {Distance} en roulade arrière.",
-                "{Sujet} effectue une roulade arrière sur {Distance}.",
-                "{Sujet} roule rapidement vers l'arrière.",
-                "{Sujet} fait une roulade arrière pour {Intention}.",
-                "Pour {Intention}, {Sujet} roule vers l'arrière.",
-                "{Sujet} se projette au sol en roulade afin de {Intention}.",
-                "{Sujet} roule vers l'arrière sur {Distance} pour {Intention}.",
-                "{Sujet} effectue une roulade arrière en s'éloignant de {Cible}.",
-                "{Sujet} se lance au sol et parcourt {Distance} en roulade arrière afin de {Intention}."
-            ]
+                        "{Sujet} effectue une roulade latérale sur sa gauche sur {Distance} pour esquiver {Cible}",
+                        "{Sujet} effectue une roulade latérale sur sa droite sur {Distance} pour esquiver {Cible}",
+                        "{Sujet} roule au sol vers sa gauche pour éviter l'attaque",
+                        "{Sujet} réalise une roulade sur son côté droit pour se repositionner"
+                    ]
                 }
             }
         },
@@ -1486,367 +1167,290 @@ const NEO_ACTION_MODELS = {
         // ==========================================================
 
         vol: {
-
             categorie: "deplacement",
             id: "VOL",
 
             concept:
-                "Déplacement aérien continu sans contact permanent avec le sol.",
+                "Déplacement aérien continu d'un sujet sans contact permanent avec le sol.",
 
-            trajectoires: {
+            manieres: {
 
                 frontale: {
+                    concept:
+                        "Déplacement aérien principalement direct vers l'avant ou vers une cible.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "HAUTEUR",
-                        "DISTANCE",
-                        "VITESSE",
+                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} vole vers {Cible}.",
-                "{Sujet} se déplace dans les airs vers {Cible}.",
-                "{Sujet} avance dans les airs en direction de {Cible}.",
-                "{Sujet} vole droit vers {Cible}.",
-                "{Sujet} se propulse dans les airs vers l'avant.",
-                "{Sujet} progresse dans les airs vers {Cible}.",
-                "{Sujet} traverse les airs en ligne droite.",
-                "{Sujet} avance en volant vers {Cible}.",
-                "{Sujet} se dirige dans les airs vers {Cible}.",
-                "{Sujet} fonce dans les airs vers {Cible}.",
-                "{Sujet} vole à {Vitesse} vers {Cible}.",
-                "{Sujet} se déplace dans les airs à {Vitesse}.",
-                "{Sujet} vole sur {Distance} vers {Cible}.",
-                "{Sujet} parcourt {Distance} dans les airs vers {Cible}.",
-                "{Sujet} vole à {Hauteur} vers {Cible}.",
-                "{Sujet} se maintient à {Hauteur} et avance vers {Cible}.",
-                "{Sujet} vole vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} se propulse dans les airs vers {Cible}.",
-                "{Sujet} vole à {Vitesse} sur {Distance} vers {Cible} afin de {Intention}.",
-                "{Sujet} se déplace à {Hauteur} et {Vitesse} en trajectoire frontale sur {Distance} vers {Cible} pour {Intention}."
-            ]
+                        "{Sujet} vole vers {Cible} à {Hauteur} de hauteur en trajectoire frontale pour l'atteindre",
+                        "{Sujet} s'envole vers {Cible} à {Hauteur} pour le rejoindre",
+                        "{Sujet} plane directement vers {Cible} pour arriver au contact"
+                    ]
                 },
 
 
                 diagonale: {
+                    concept:
+                        "Déplacement aérien oblique vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "COTE",
                         "HAUTEUR",
-                        "DISTANCE",
-                        "VITESSE",
+                        "TRAJECTOIRE",
                         "INTENTION"
                     ],
 
                     exemples: [
-                "{Sujet} vole en diagonale vers {Cible}.",
-                "{Sujet} traverse les airs en diagonale.",
-                "{Sujet} se déplace dans les airs en diagonale vers {Cible}.",
-                "{Sujet} vole en diagonale vers la {Cote}.",
-                "{Sujet} se propulse en diagonale vers {Cible}.",
-                "{Sujet} avance dans les airs en direction de la {Cote}.",
-                "{Sujet} monte en diagonale vers {Cible}.",
-                "{Sujet} descend en diagonale vers {Cible}.",
-                "{Sujet} traverse les airs en suivant une trajectoire diagonale.",
-                "{Sujet} se dirige en diagonale vers {Cible}.",
-                "{Sujet} vole à {Vitesse} en diagonale vers {Cible}.",
-                "{Sujet} se déplace à {Vitesse} vers la {Cote}.",
-                "{Sujet} vole sur {Distance} en diagonale vers {Cible}.",
-                "{Sujet} parcourt {Distance} dans les airs vers la {Cote}.",
-                "{Sujet} vole à {Hauteur} en diagonale vers {Cible}.",
-                "{Sujet} se déplace à {Hauteur} vers la {Cote}.",
-                "{Sujet} vole en diagonale vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} se propulse en diagonale vers {Cible}.",
-                "{Sujet} vole à {Vitesse} sur {Distance} vers la {Cote} afin de {Intention}.",
-                "{Sujet} se déplace à {Hauteur} et {Vitesse} en trajectoire diagonale sur {Distance} vers {Cible} pour {Intention}."
-            ]
+                        "{Sujet} vole en diagonale sur sa gauche vers {Cible} à {Hauteur}",
+                        "{Sujet} vole en diagonale sur sa droite vers {Cible} à {Hauteur}",
+                        "{Sujet} s'élève en diagonale vers sa gauche pour se positionner au-dessus de {Cible}",
+                        "{Sujet} plane obliquement vers sa droite à {Hauteur} pour rejoindre {Cible}"
+                    ]
                 },
 
 
                 laterale: {
+                    concept:
+                        "Déplacement aérien principalement latéral. Le côté indique obligatoirement vers lequel le sujet vole.",
 
                     structure: [
                         "SUJET",
                         "ACTION",
-                        "TRAJECTOIRE",
+                        "MANIERE",
                         "DIRECTION",
                         "COTE",
                         "HAUTEUR",
-                        "DISTANCE",
-                        "VITESSE",
                         "INTENTION"
                     ],
 
-                   exemples: [
-                "{Sujet} vole latéralement vers la droite.",
-                "{Sujet} vole vers la gauche.",
-                "{Sujet} se déplace dans les airs vers la {Cote}.",
-                "{Sujet} avance latéralement dans les airs.",
-                "{Sujet} se propulse sur le côté vers la {Cote}.",
-                "{Sujet} traverse les airs latéralement.",
-                "{Sujet} se déplace dans les airs en direction de la {Cote}.",
-                "{Sujet} vole de côté vers {Cible}.",
-                "{Sujet} progresse latéralement vers {Cible}.",
-                "{Sujet} se dirige dans les airs vers la {Cote}.",
-                "{Sujet} vole latéralement à {Vitesse}.",
-                "{Sujet} se déplace à {Vitesse} vers la {Cote}.",
-                "{Sujet} vole sur {Distance} vers la {Cote}.",
-                "{Sujet} parcourt {Distance} latéralement dans les airs.",
-                "{Sujet} vole à {Hauteur} vers la {Cote}.",
-                "{Sujet} maintient une hauteur de {Hauteur} en se déplaçant latéralement.",
-                "{Sujet} vole latéralement vers {Cible} pour {Intention}.",
-                "Pour {Intention}, {Sujet} se déplace dans les airs vers la {Cote}.",
-                "{Sujet} vole à {Vitesse} sur {Distance} vers {Cible} afin de {Intention}.",
-                "{Sujet} se déplace à {Hauteur} et {Vitesse} latéralement sur {Distance} vers la {Cote} pour {Intention}."
-            ] 
+                    exemples: [
+                        "{Sujet} vole latéralement sur sa gauche à {Hauteur}",
+                        "{Sujet} vole latéralement sur sa droite à {Hauteur}",
+                        "{Sujet} se déplace dans les airs vers sa gauche pour éviter {Cible}",
+                        "{Sujet} plane vers son côté droit pour se repositionner"
+                    ]
                 }
             }
         },
 
-// ==========================================================
-// PIVOT
-// ==========================================================
 
-pivot: {
+        // ==========================================================
+        // PIVOT
+        // ==========================================================
 
-    categorie: "deplacement",
-    id: "PIVOT",
+        pirouette_pivot: {
+            categorie: "deplacement",
+            id: "PIVOT",
 
-    concept:
-        "Rotation du corps au sol autour d'un appui afin de modifier son orientation selon un angle déterminé.",
+            concept:
+                "Rotation du corps autour d'un axe ou d'un point d'appui afin de changer son orientation ou sa position.",
 
-    trajectoires: {
+            manieres: {
 
-        droite: {
+                droite: {
+                    concept:
+                        "Rotation du corps vers le côté droit.",
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "COTE",
-                "TRAJECTOIRE",
-                "ANGLE",
-                "VITESSE",
-                "INTENTION"
-            ],
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "COTE",
+                        "INTENTION"
+                    ],
 
-            exemples: [
-                "{Sujet} pivote de {Angle}° vers la droite.",
-                "{Sujet} pivote rapidement de {Angle}° vers la droite.",
-                "{Sujet} pivote lentement de {Angle}° vers la droite.",
-                "{Sujet} effectue un pivot de {Angle}° à droite.",
-                "{Sujet} tourne de {Angle}° vers la droite à {Vitesse}.",
-                "{Sujet} pivote de 60° vers la droite à {Vitesse}.",
-                "{Sujet} pivote de 90° vers la droite à {Vitesse}.",
-                "{Sujet} effectue une rotation de 90° vers la droite.",
-                "{Sujet} tourne son corps de 60° vers la droite.",
-                "{Sujet} pivote à droite sur un angle de 90°.",
-                "{Sujet} effectue un pivot droit de 90° rapidement.",
-                "{Sujet} réalise une rotation de 180° vers la droite.",
-                "{Sujet} pivote brusquement de {Angle}° vers la droite.",
-                "{Sujet} tourne rapidement de {Angle}° à droite.",
-                "{Sujet} prend appui et pivote de {Angle}° vers la droite.",
-                "{Sujet} change son orientation de {Angle}° vers la droite à {Vitesse}.",
-                "{Sujet} pivote de {Angle}° à droite afin de faire face à {Cible}.",
-                "Pour {Intention}, {Sujet} pivote rapidement de {Angle}° vers la droite.",
-                "{Sujet} tourne de {Angle}° vers la droite à {Vitesse} pour {Intention}.",
-                "{Sujet} prend appui et effectue un pivot de {Angle}° vers la droite à {Vitesse} afin de {Intention}."
-            ]
-        },
+                    exemples: [
+                        "{Sujet} pivote vers sa droite pour faire face à {Cible}",
+                        "{Sujet} effectue un pivot sur sa droite pour changer d'orientation",
+                        "{Sujet} tourne son corps vers la droite pour se placer face à {Cible}"
+                    ]
+                },
 
 
-        gauche: {
+                gauche: {
+                    concept:
+                        "Rotation du corps vers le côté gauche.",
 
-            structure: [
-                "SUJET",
-                "ACTION",
-                "COTE",
-                "TRAJECTOIRE",
-                "ANGLE",
-                "VITESSE",
-                "INTENTION"
-            ],
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "COTE",
+                        "INTENTION"
+                    ],
 
-            exemples: [
-                "{Sujet} pivote de {Angle}° vers la gauche.",
-                "{Sujet} pivote rapidement de {Angle}° vers la gauche.",
-                "{Sujet} pivote lentement de {Angle}° vers la gauche.",
-                "{Sujet} effectue un pivot de {Angle}° à gauche.",
-                "{Sujet} tourne de {Angle}° vers la gauche à {Vitesse}.",
-                "{Sujet} pivote de 60° vers la gauche à {Vitesse}.",
-                "{Sujet} pivote de 90° vers la gauche à {Vitesse}.",
-                "{Sujet} effectue une rotation de 90° vers la gauche.",
-                "{Sujet} tourne son corps de 60° vers la gauche.",
-                "{Sujet} pivote à gauche sur un angle de 90°.",
-                "{Sujet} effectue un pivot gauche de 90° rapidement.",
-                "{Sujet} réalise une rotation de 180° vers la gauche.",
-                "{Sujet} pivote brusquement de {Angle}° vers la gauche.",
-                "{Sujet} tourne rapidement de {Angle}° à gauche.",
-                "{Sujet} prend appui et pivote de {Angle}° vers la gauche.",
-                "{Sujet} change son orientation de {Angle}° vers la gauche à {Vitesse}.",
-                "{Sujet} pivote de {Angle}° à gauche afin de faire face à {Cible}.",
-                "Pour {Intention}, {Sujet} pivote rapidement de {Angle}° vers la gauche.",
-                "{Sujet} tourne de {Angle}° vers la gauche à {Vitesse} pour {Intention}.",
-                "{Sujet} prend appui et effectue un pivot de {Angle}° vers la gauche à {Vitesse} afin de {Intention}."
-            ]
-        }
-    }
-},
-        
-// ==========================================================
-// VRILLE / PIROUETTE
-// ==========================================================
-
-vrille: {
-
-    categorie: "deplacement",
-    id: "VRILLE",
-
-    concept:
-        "Rotation du corps autour de son axe longitudinal, pouvant être réalisée au sol ou pendant un déplacement, avec un angle de rotation déterminé.",
-
-    trajectoires: {
-
-        rotation: {
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "ANGLE",
-                "VITESSE",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} effectue une vrille de {Angle}°.",
-                "{Sujet} effectue une pirouette de {Angle}°.",
-                "{Sujet} tourne sur lui-même de {Angle}°.",
-                "{Sujet} réalise une rotation de {Angle}° sur son axe.",
-                "{Sujet} pivote sur son axe de {Angle}°.",
-                "{Sujet} effectue une rotation à {Vitesse} de {Angle}°.",
-                "{Sujet} tourne rapidement de {Angle}° sur lui-même.",
-                "{Sujet} tourne lentement de {Angle}° sur son axe.",
-                "{Sujet} réalise une vrille de 180°.",
-                "{Sujet} réalise une vrille de 360°.",
-                "{Sujet} effectue une pirouette de 180°.",
-                "{Sujet} effectue une pirouette de 360°.",
-                "{Sujet} tourne de 90° sur son axe à {Vitesse}.",
-                "{Sujet} enchaîne une rotation de {Angle}° pendant son déplacement.",
-                "{Sujet} se met à tourner sur lui-même de {Angle}°.",
-                "{Sujet} effectue plusieurs rotations successives de {Angle}°.",
-                "Pour {Intention}, {Sujet} effectue une vrille de {Angle}°.",
-                "{Sujet} réalise une pirouette de {Angle}° afin de {Intention}.",
-                "{Sujet} tourne sur son axe de {Angle}° à {Vitesse} pour {Intention}.",
-                "{Sujet} se propulse tout en effectuant une rotation de {Angle}° à {Vitesse} afin de {Intention}."
-            ]
-        }
-    }
-},
-
-
-       // ==========================================================
-// SALTO
-// ==========================================================
-
-salto: {
-
-    categorie: "deplacement",
-    id: "SALTO",
-
-    concept:
-        "Rotation aérienne du corps autour d'un axe horizontal.",
-
-    trajectoires: {
-
-        avant: {
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "DIRECTION",
-                "HAUTEUR",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} effectue un salto avant.",
-                "{Sujet} réalise un salto vers l'avant.",
-                "{Sujet} fait une rotation aérienne vers l'avant.",
-                "{Sujet} tourne dans les airs vers l'avant.",
-                "{Sujet} effectue une rotation avant en plein vol.",
-                "{Sujet} se projette dans les airs et réalise un salto avant.",
-                "{Sujet} prend appui et effectue un salto vers l'avant.",
-                "{Sujet} bondit puis réalise une rotation aérienne vers l'avant.",
-                "{Sujet} effectue une rotation complète vers l'avant.",
-                "{Sujet} enchaîne un salto avant dans les airs.",
-                "{Sujet} effectue un salto avant jusqu'à {Hauteur}.",
-                "{Sujet} réalise une rotation aérienne à {Hauteur}.",
-                "{Sujet} bondit à {Hauteur} avant d'effectuer un salto.",
-                "{Sujet} effectue un salto vers l'avant pour {Intention}.",
-                "Pour {Intention}, {Sujet} réalise un salto avant.",
-                "{Sujet} se projette dans les airs afin d'effectuer un salto vers l'avant.",
-                "{Sujet} prend son impulsion puis tourne vers l'avant dans les airs.",
-                "{Sujet} effectue une rotation avant en prenant de la hauteur.",
-                "{Sujet} réalise un salto avant jusqu'à {Hauteur} afin de {Intention}.",
-                "{Sujet} se propulse dans les airs, atteint {Hauteur} et effectue un salto avant pour {Intention}."
-            ]
-        },
-
-
-        arriere: {
-
-            structure: [
-                "SUJET",
-                "ACTION",
-                "TRAJECTOIRE",
-                "DIRECTION",
-                "HAUTEUR",
-                "INTENTION"
-            ],
-
-            exemples: [
-                "{Sujet} effectue un salto arrière.",
-                "{Sujet} réalise un salto vers l'arrière.",
-                "{Sujet} fait une rotation aérienne vers l'arrière.",
-                "{Sujet} tourne dans les airs vers l'arrière.",
-                "{Sujet} effectue une rotation arrière en plein vol.",
-                "{Sujet} se projette dans les airs et réalise un salto arrière.",
-                "{Sujet} prend appui et effectue un salto vers l'arrière.",
-                "{Sujet} bondit puis réalise une rotation aérienne vers l'arrière.",
-                "{Sujet} effectue une rotation complète vers l'arrière.",
-                "{Sujet} enchaîne un salto arrière dans les airs.",
-                "{Sujet} effectue un salto arrière jusqu'à {Hauteur}.",
-                "{Sujet} réalise une rotation aérienne à {Hauteur}.",
-                "{Sujet} bondit à {Hauteur} avant d'effectuer un salto arrière.",
-                "{Sujet} effectue un salto vers l'arrière pour {Intention}.",
-                "Pour {Intention}, {Sujet} réalise un salto arrière.",
-                "{Sujet} se projette dans les airs afin d'effectuer un salto vers l'arrière.",
-                "{Sujet} prend son impulsion puis tourne vers l'arrière dans les airs.",
-                "{Sujet} effectue une rotation arrière en prenant de la hauteur.",
-                "{Sujet} réalise un salto arrière jusqu'à {Hauteur} afin de {Intention}.",
-                "{Sujet} se propulse dans les airs, atteint {Hauteur} et effectue un salto arrière pour {Intention}."
-            ]
+                    exemples: [
+                        "{Sujet} pivote vers sa gauche pour faire face à {Cible}",
+                        "{Sujet} effectue un pivot sur sa gauche pour changer d'orientation",
+                        "{Sujet} tourne son corps vers la gauche pour se placer face à {Cible}"
+                    ]
                 }
-
-    } // fermeture de trajectoires
-
-} // fermeture de salto
-
-} // fermeture de deplacement
-
-}; // fermeture de NEO_ACTION_MODELS
+            }
+        },
 
 
+        // ==========================================================
+        // VRILLE
+        // ==========================================================
+
+        vrille: {
+            categorie: "deplacement",
+            id: "VRILLE",
+
+            concept:
+                "Rotation répétée du corps autour de son propre axe pendant un déplacement ou une phase aérienne.",
+
+            manieres: {
+
+                rotation: {
+                    concept:
+                        "Rotation du corps autour de son axe avec une ou plusieurs rotations successives.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} effectue une vrille vers la droite dans les airs pour éviter {Cible}",
+                        "{Sujet} vrille sur lui-même en avançant pour esquiver l'attaque de {Cible}",
+                        "{Sujet} réalise une vrille aérienne vers la gauche pour changer de trajectoire",
+                        "{Sujet} tourne sur lui-même plusieurs fois pour éviter {Cible}"
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // SALTO
+        // ==========================================================
+
+        salto: {
+            categorie: "deplacement",
+            id: "SALTO",
+
+            concept:
+                "Rotation aérienne du corps autour d'un axe horizontal permettant d'effectuer une rotation complète pendant un saut.",
+
+            manieres: {
+
+                avant: {
+                    concept:
+                        "Rotation aérienne vers l'avant.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} fait un salto avant pour atterrir derrière {Cible}",
+                        "{Sujet} effectue un salto vers l'avant pour éviter {Cible}",
+                        "{Sujet} réalise un salto avant pour se repositionner",
+                        "{Sujet} effectue une rotation aérienne vers l'avant pour passer au-dessus de {Cible}"
+                    ]
+                },
+
+
+                arriere: {
+                    concept:
+                        "Rotation aérienne vers l'arrière.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} fait un salto arrière pour éviter {Cible}",
+                        "{Sujet} effectue un salto vers l'arrière pour se repositionner",
+                        "{Sujet} réalise une rotation aérienne arrière pour s'éloigner de {Cible}"
+                    ]
+                }
+            }
+        },
+
+
+        // ==========================================================
+        // FLIP
+        // ==========================================================
+
+        flip: {
+            categorie: "deplacement",
+            id: "FLIP",
+
+            concept:
+                "Mouvement acrobatique aérien impliquant une rotation du corps afin de changer de position ou de franchir un obstacle.",
+
+            manieres: {
+
+                avant: {
+                    concept:
+                        "Flip réalisé vers l'avant.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} fait un flip avant pour passer au-dessus de {Cible}",
+                        "{Sujet} effectue un flip vers l'avant pour esquiver {Cible}",
+                        "{Sujet} réalise un flip avant pour franchir l'obstacle",
+                        "{Sujet} effectue une rotation avant pour retomber derrière {Cible}"
+                    ]
+                },
+
+
+                arriere: {
+                    concept:
+                        "Flip réalisé vers l'arrière.",
+
+                    structure: [
+                        "SUJET",
+                        "ACTION",
+                        "MANIERE",
+                        "DIRECTION",
+                        "INTENTION"
+                    ],
+
+                    exemples: [
+                        "{Sujet} fait un flip arrière pour retomber derrière {Cible}",
+                        "{Sujet} effectue un flip vers l'arrière pour éviter {Cible}",
+                        "{Sujet} réalise un flip arrière pour se repositionner"
+                    ]
+                }
+            }
+        }
+    }
+};
+                                
+      
 /* ============================================================================
  * 9. EXPORT
  * ========================================================================== */
