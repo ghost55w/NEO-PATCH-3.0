@@ -5457,11 +5457,17 @@ function neoCalculerSimilariteModele(
             );
 
         const synonymesModele =
+    Array.isArray(
+        candidat?.maniereData?.synonymes
+    )
+        ? candidat.maniereData.synonymes
+        : (
             Array.isArray(
                 sousModele?.synonymes
             )
                 ? sousModele.synonymes
-                : [];
+                : []
+        );
 
         const synonymesTrouves =
             trouverSynonymesDansTexte(
@@ -5683,10 +5689,16 @@ function neoCalculerSimilariteModele(
             sousModele?.concept,
 
             ...(Array.isArray(
-                sousModele?.synonymes
-            )
-                ? sousModele.synonymes
-                : []),
+    candidat?.maniereData?.synonymes
+)
+    ? candidat.maniereData.synonymes
+    : (
+        Array.isArray(
+            sousModele?.synonymes
+        )
+            ? sousModele.synonymes
+            : []
+    )),
 
             ...(Array.isArray(
                 sousModele?.exemples
