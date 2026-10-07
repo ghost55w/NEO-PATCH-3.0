@@ -84,8 +84,6 @@ ovlcmd(
         "https://files.catbox.moe/yhczn8.jpg",
         "https://files.catbox.moe/v6wvtz.jpg",
         "https://files.catbox.moe/j5e4vk.jpg",
-        "https://files.catbox.moe/ag5xsx.jpg", 
-        "https://files.catbox.moe/nemlgy.jpg", 
       ];
 
       const msg = ""; // texte de légende optionnel
