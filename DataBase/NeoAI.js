@@ -692,7 +692,7 @@ const NEO_RELATIONS = {
 // Les champs de "structure" sont OBLIGATOIRES.
 // Les champs de "optionnels" sont facultatifs.
 //==============================================================
-const NEO_ACTION_MODELS = {
+ const NEO_ACTION_MODELS = {
 
     deplacement: {
 
@@ -726,7 +726,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} marche vers {Cible} sur {Distance} pour l'atteindre",
                         "{Sujet} avance à pied vers {Cible} sur {Distance} pour se rapprocher",
                         "{Sujet} se déplace au pas vers {Cible} sur {Distance} pour arriver à proximité",
-                        "{Sujet} progresse tranquillement vers {Cible} sur {Distance} pour rejoindre sa position"
+                        "{Sujet} progresse tranquillement vers {Cible} sur {Distance} pour rejoindre sa position",
+                        "{Sujet} avance lentement vers {Cible} sur {Distance} pour le rejoindre",
+                        "{Sujet} marche directement en direction de {Cible} sur {Distance}",
+                        "{Sujet} se dirige à pied vers {Cible} pour réduire la distance",
+                        "{Sujet} progresse à pied jusqu'à {Cible} sur {Distance}",
+                        "{Sujet} avance normalement vers {Cible} pour se rapprocher de lui",
+                        "{Sujet} marche calmement en direction de {Cible} sur {Distance}",
+                        "{Sujet} se rend à pied vers {Cible} pour atteindre sa position",
+                        "{Sujet} avance progressivement vers {Cible} sur {Distance}",
+                        "{Sujet} se rapproche de {Cible} en marchant sur {Distance}",
+                        "{Sujet} progresse au pas en direction de {Cible} pour le rejoindre",
+                        "{Sujet} marche droit vers {Cible} sur {Distance}",
+                        "{Sujet} avance tranquillement en direction de {Cible}",
+                        "{Sujet} se déplace à pied jusqu'à la position de {Cible}",
+                        "{Sujet} continue son avancée à pied vers {Cible} sur {Distance}",
+                        "{Sujet} parcourt {Distance} en marchant vers {Cible}",
+                        "{Sujet} avance au pas pour parvenir jusqu'à {Cible} sur {Distance}"
                     ]
                 }
             }
@@ -770,7 +786,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} fonce frontalement vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
                         "{Sujet} se rue droit vers {Cible} sur {Distance} pour le rejoindre",
                         "{Sujet} s'élance directement vers {Cible} à {Vitesse} pour atteindre sa position",
-                        "{Sujet} file droit vers {Cible} sur {Distance} pour arriver jusqu'à lui"
+                        "{Sujet} file droit vers {Cible} sur {Distance} pour arriver jusqu'à lui",
+                        "{Sujet} court droit devant lui en direction de {Cible} sur {Distance}",
+                        "{Sujet} fonce tout droit vers {Cible} à {Vitesse}",
+                        "{Sujet} sprinte directement vers {Cible} sur {Distance} pour le rejoindre",
+                        "{Sujet} se précipite en ligne droite vers {Cible} à {Vitesse}",
+                        "{Sujet} charge droit vers {Cible} sur {Distance} pour arriver au contact",
+                        "{Sujet} court directement en direction de {Cible} à {Vitesse}",
+                        "{Sujet} s'élance en ligne droite vers {Cible} sur {Distance}",
+                        "{Sujet} accélère en courant droit vers {Cible} pour atteindre sa position",
+                        "{Sujet} avance rapidement en ligne droite vers {Cible} sur {Distance}",
+                        "{Sujet} fonce droit devant vers {Cible} à {Vitesse} pour réduire la distance",
+                        "{Sujet} court sans dévier vers {Cible} sur {Distance}",
+                        "{Sujet} se rue en ligne droite sur {Cible} à {Vitesse}",
+                        "{Sujet} sprinte droit vers {Cible} pour parvenir jusqu'à lui",
+                        "{Sujet} part en course directe vers {Cible} sur {Distance}",
+                        "{Sujet} effectue une course en ligne droite vers {Cible} à {Vitesse} pour l'atteindre"
                     ]
                 },
 
@@ -801,7 +832,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} court autour de {Cible} par sa droite avec une courbe de {Courbe} pour le contourner",
                         "{Sujet} contourne {Cible} en courant sur sa gauche pour atteindre sa position",
                         "{Sujet} fonce autour de {Cible} par sa droite pour se positionner derrière lui",
-                        "{Sujet} effectue une course circulaire autour de {Cible} vers sa gauche pour changer de position"
+                        "{Sujet} effectue une course circulaire autour de {Cible} vers sa gauche pour changer de position",
+                        "{Sujet} court en cercle autour de {Cible} par la gauche sur {Distance}",
+                        "{Sujet} tourne autour de {Cible} en courant vers sa droite",
+                        "{Sujet} contourne {Cible} par la droite à {Vitesse} pour passer derrière lui",
+                        "{Sujet} contourne {Cible} par la gauche en courant sur {Distance}",
+                        "{Sujet} court autour de {Cible} dans un mouvement circulaire vers sa droite",
+                        "{Sujet} se déplace en cercle autour de {Cible} par sa gauche pour le contourner",
+                        "{Sujet} fonce en arc de cercle autour de {Cible} vers sa droite",
+                        "{Sujet} court en décrivant une courbe autour de {Cible} par la gauche",
+                        "{Sujet} effectue une course courbe autour de {Cible} vers sa droite",
+                        "{Sujet} tourne autour de {Cible} en courant par son côté gauche",
+                        "{Sujet} se rue autour de {Cible} par la droite pour atteindre son dos",
+                        "{Sujet} court en rotation autour de {Cible} vers sa gauche sur {Distance}",
+                        "{Sujet} effectue un déplacement circulaire en courant autour de {Cible}",
+                        "{Sujet} court autour de {Cible} en décrivant une trajectoire courbe vers la droite",
+                        "{Sujet} contourne rapidement {Cible} en courant par sa gauche pour changer de position"
                     ]
                 },
 
@@ -831,7 +877,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} court en diagonale sur sa droite vers {Cible} sur {Distance} pour l'atteindre",
                         "{Sujet} fonce diagonalement vers sa gauche en direction de {Cible} à {Vitesse}",
                         "{Sujet} se rue en diagonale sur sa droite vers {Cible} pour le rejoindre",
-                        "{Sujet} s'élance en diagonale vers sa gauche à {Vitesse} pour atteindre {Cible}"
+                        "{Sujet} s'élance en diagonale vers sa gauche à {Vitesse} pour atteindre {Cible}",
+                        "{Sujet} court obliquement vers la gauche en direction de {Cible}",
+                        "{Sujet} court obliquement vers la droite sur {Distance} pour rejoindre {Cible}",
+                        "{Sujet} fonce en diagonale à gauche vers {Cible} à {Vitesse}",
+                        "{Sujet} fonce en diagonale à droite vers {Cible} sur {Distance}",
+                        "{Sujet} avance en biais vers sa gauche pour atteindre {Cible}",
+                        "{Sujet} avance en biais vers sa droite à {Vitesse} vers {Cible}",
+                        "{Sujet} se déplace en diagonale gauche vers {Cible} sur {Distance}",
+                        "{Sujet} se déplace en diagonale droite vers {Cible} à {Vitesse}",
+                        "{Sujet} part en course oblique vers sa gauche pour rejoindre {Cible}",
+                        "{Sujet} part en course oblique vers sa droite pour atteindre {Cible}",
+                        "{Sujet} coupe en diagonale vers la gauche en direction de {Cible}",
+                        "{Sujet} coupe en diagonale vers la droite pour rejoindre {Cible}",
+                        "{Sujet} se rue en biais vers sa gauche à {Vitesse}",
+                        "{Sujet} se rue en biais vers sa droite sur {Distance}",
+                        "{Sujet} effectue une course diagonale vers sa gauche à {Vitesse} pour atteindre {Cible}"
                     ]
                 },
 
@@ -860,7 +921,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} fonce en zigzag vers {Cible} à {Vitesse} sur {Distance} pour arriver au contact",
                         "{Sujet} se rue vers {Cible} en zigzag sur {Distance} pour éviter ses attaques et le rejoindre",
                         "{Sujet} serpente rapidement vers {Cible} à {Vitesse} pour parvenir jusqu'à lui",
-                        "{Sujet} avance en alternant ses déplacements de gauche à droite vers {Cible} pour l'atteindre"
+                        "{Sujet} avance en alternant ses déplacements de gauche à droite vers {Cible} pour l'atteindre",
+                        "{Sujet} court en zigzag vers {Cible} pour réduire la distance",
+                        "{Sujet} fonce en alternant gauche et droite vers {Cible}",
+                        "{Sujet} se déplace en zigzag à {Vitesse} en direction de {Cible}",
+                        "{Sujet} court en changeant constamment de côté vers {Cible}",
+                        "{Sujet} serpente en courant vers {Cible} sur {Distance}",
+                        "{Sujet} avance en zigzag jusqu'à {Cible} à {Vitesse}",
+                        "{Sujet} se rue vers {Cible} en alternant ses déplacements latéraux",
+                        "{Sujet} court en faisant des écarts successifs vers {Cible}",
+                        "{Sujet} fonce vers {Cible} en alternant gauche et droite sur {Distance}",
+                        "{Sujet} progresse en zigzag à grande vitesse vers {Cible}",
+                        "{Sujet} court en serpentant de gauche à droite vers {Cible}",
+                        "{Sujet} effectue une course sinueuse vers {Cible} pour éviter ses attaques",
+                        "{Sujet} avance rapidement en zigzag sur {Distance} pour rejoindre {Cible}",
+                        "{Sujet} se précipite vers {Cible} en changeant alternativement de direction",
+                        "{Sujet} court vers {Cible} en effectuant des changements de direction successifs"
                     ]
                 },
 
@@ -890,7 +966,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} court latéralement sur sa droite sur {Distance}",
                         "{Sujet} se déplace rapidement vers sa gauche pour atteindre {Cible}",
                         "{Sujet} fonce sur le côté droit vers {Cible} à {Vitesse}",
-                        "{Sujet} se rue latéralement sur sa gauche pour esquiver {Cible}"
+                        "{Sujet} se rue latéralement sur sa gauche pour esquiver {Cible}",
+                        "{Sujet} court vers son côté gauche sur {Distance}",
+                        "{Sujet} court vers son côté droit sur {Distance}",
+                        "{Sujet} se déplace latéralement vers la gauche à {Vitesse}",
+                        "{Sujet} se déplace latéralement vers la droite à {Vitesse}",
+                        "{Sujet} fonce sur sa gauche pour changer de position",
+                        "{Sujet} fonce sur sa droite pour rejoindre {Cible}",
+                        "{Sujet} sprinte latéralement vers sa gauche sur {Distance}",
+                        "{Sujet} sprinte latéralement vers sa droite sur {Distance}",
+                        "{Sujet} part en course vers son côté gauche à {Vitesse}",
+                        "{Sujet} part en course vers son côté droit à {Vitesse}",
+                        "{Sujet} se rue sur le côté gauche pour éviter {Cible}",
+                        "{Sujet} se rue sur le côté droit pour atteindre {Cible}",
+                        "{Sujet} court parallèlement vers sa gauche en direction de {Cible}",
+                        "{Sujet} court parallèlement vers sa droite pour se repositionner",
+                        "{Sujet} effectue une course latérale vers sa gauche à {Vitesse} sur {Distance}"
                     ]
                 }
             }
@@ -933,7 +1024,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} dash rapidement sur {Distance} vers {Cible} pour se rapprocher",
                         "{Sujet} accélère brutalement sur {Distance} vers l'avant pour atteindre {Cible}",
                         "{Sujet} réalise une accélération instantanée de {Distance} pour rejoindre {Cible}",
-                        "{Sujet} bondit rapidement sur {Distance} vers {Cible} pour arriver au contact"
+                        "{Sujet} bondit rapidement sur {Distance} vers {Cible} pour arriver au contact",
+                        "{Sujet} effectue une accélération fulgurante vers {Cible} sur {Distance}",
+                        "{Sujet} jaillit brusquement vers {Cible} pour réduire la distance",
+                        "{Sujet} propulse son corps sur {Distance} en direction de {Cible}",
+                        "{Sujet} part en dash vers {Cible} à toute vitesse",
+                        "{Sujet} accélère soudainement vers {Cible} sur {Distance}",
+                        "{Sujet} fonce instantanément vers {Cible} sur une courte distance",
+                        "{Sujet} effectue une poussée rapide vers l'avant sur {Distance}",
+                        "{Sujet} se projette brutalement vers {Cible} pour arriver au contact",
+                        "{Sujet} traverse rapidement {Distance} en direction de {Cible}",
+                        "{Sujet} réalise une accélération explosive vers {Cible}",
+                        "{Sujet} démarre brusquement et parcourt {Distance} vers {Cible}",
+                        "{Sujet} jaillit en avant sur {Distance} pour atteindre {Cible}",
+                        "{Sujet} se propulse rapidement vers {Cible} sur {Distance}",
+                        "{Sujet} effectue une accélération soudaine pour rejoindre {Cible}",
+                        "{Sujet} bondit en avant sur {Distance} pour réduire l'écart avec {Cible}"
                     ]
                 }
             }
@@ -971,7 +1077,22 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} fonce rapidement sur {Cible} pour arriver au contact",
                         "{Sujet} se rue brutalement vers {Cible} pour réduire la distance",
                         "{Sujet} se précipite sur {Cible} à grande vitesse pour l'atteindre",
-                        "{Sujet} charge vers {Cible} pour parvenir immédiatement au contact"
+                        "{Sujet} charge vers {Cible} pour parvenir immédiatement au contact",
+                        "{Sujet} se jette rapidement vers {Cible} pour l'atteindre",
+                        "{Sujet} fonce agressivement sur {Cible} pour réduire l'écart",
+                        "{Sujet} se précipite droit sur {Cible} pour arriver jusqu'à lui",
+                        "{Sujet} charge directement {Cible} pour entrer au contact",
+                        "{Sujet} se rue à toute vitesse vers {Cible}",
+                        "{Sujet} attaque la distance en fonçant vers {Cible}",
+                        "{Sujet} part brutalement à l'assaut de {Cible}",
+                        "{Sujet} s'élance avec force vers {Cible} pour le rejoindre",
+                        "{Sujet} fonce sur {Cible} sans ralentir pour arriver au contact",
+                        "{Sujet} se précipite droit vers {Cible} pour réduire la distance",
+                        "{Sujet} charge rapidement en direction de {Cible}",
+                        "{Sujet} se rue directement sur {Cible} à grande vitesse",
+                        "{Sujet} accélère agressivement vers {Cible} pour parvenir au contact",
+                        "{Sujet} se lance à pleine vitesse vers {Cible} pour l'atteindre",
+                        "{Sujet} effectue une charge rapide vers {Cible} pour réduire l'écart"
                     ]
                 }
             }
@@ -1009,7 +1130,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} saute vers l'avant à {Hauteur} de hauteur pour atteindre {Cible}",
                         "{Sujet} bondit vers {Cible} en trajectoire ascendante à {Hauteur} pour l'atteindre",
                         "{Sujet} quitte le sol en sautant vers l'avant pour rejoindre {Cible}",
-                        "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}"
+                        "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}",
+                        "{Sujet} bondit en avant pour atteindre {Cible}",
+                        "{Sujet} saute directement vers {Cible} à {Hauteur}",
+                        "{Sujet} se projette dans les airs vers l'avant pour rejoindre {Cible}",
+                        "{Sujet} prend son impulsion et saute vers {Cible}",
+                        "{Sujet} effectue un bond vers l'avant à {Hauteur} pour atteindre {Cible}",
+                        "{Sujet} s'élance dans les airs en direction de {Cible}",
+                        "{Sujet} bondit vers l'avant pour se rapprocher de {Cible}",
+                        "{Sujet} saute en avant en direction de {Cible} à {Hauteur}",
+                        "{Sujet} quitte le sol et progresse vers {Cible} pendant son saut",
+                        "{Sujet} se propulse vers l'avant dans les airs pour atteindre {Cible}",
+                        "{Sujet} réalise un saut orienté vers {Cible}",
+                        "{Sujet} effectue un bond aérien vers l'avant pour rejoindre {Cible}",
+                        "{Sujet} saute en direction de {Cible} avec une trajectoire ascendante",
+                        "{Sujet} s'élève puis avance vers {Cible} à {Hauteur}",
+                        "{Sujet} bondit vers l'avant sur sa trajectoire pour atteindre {Cible}",
+                        "{Sujet} prend de l'élan et saute vers {Cible} pour le rejoindre"
                     ]
                 },
 
@@ -1031,7 +1168,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} saute vers l'arrière à {Hauteur} pour s'éloigner de {Cible}",
                         "{Sujet} bondit en arrière pour éviter {Cible} et se repositionner",
-                        "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}"
+                        "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}",
+                        "{Sujet} saute en arrière pour prendre de la distance avec {Cible}",
+                        "{Sujet} se projette dans les airs vers l'arrière pour s'éloigner",
+                        "{Sujet} bondit vers l'arrière à {Hauteur} pour éviter {Cible}",
+                        "{Sujet} recule en sautant pour sortir de portée de {Cible}",
+                        "{Sujet} effectue un saut arrière pour se repositionner",
+                        "{Sujet} saute directement en arrière pour éviter l'attaque de {Cible}",
+                        "{Sujet} se propulse vers l'arrière dans les airs",
+                        "{Sujet} bondit en arrière afin de créer de la distance",
+                        "{Sujet} prend appui et saute vers l'arrière pour s'éloigner de {Cible}",
+                        "{Sujet} quitte le sol en reculant vers l'arrière",
+                        "{Sujet} effectue un bond arrière pour éviter {Cible}",
+                        "{Sujet} saute en direction opposée à {Cible}",
+                        "{Sujet} s'élève puis recule dans les airs pour se repositionner",
+                        "{Sujet} bondit en arrière pour sortir de la portée de {Cible}",
+                        "{Sujet} réalise un saut arrière à {Hauteur} pour esquiver",
+                        "{Sujet} se déplace vers l'arrière par un saut pour prendre de la distance",
+                        "{Sujet} effectue un saut de recul pour s'éloigner de {Cible}"
                     ]
                 },
 
@@ -1052,7 +1206,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} saute verticalement à {Hauteur} pour éviter {Cible}",
                         "{Sujet} bondit directement vers le haut pour prendre de la hauteur",
-                        "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner"
+                        "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner",
+                        "{Sujet} saute droit vers le ciel à {Hauteur}",
+                        "{Sujet} bondit sur place pour prendre de la hauteur",
+                        "{Sujet} se propulse verticalement dans les airs",
+                        "{Sujet} quitte le sol en montant directement vers le haut",
+                        "{Sujet} effectue un saut vertical pour éviter {Cible}",
+                        "{Sujet} bondit directement vers le ciel pour s'élever",
+                        "{Sujet} saute à la verticale jusqu'à {Hauteur}",
+                        "{Sujet} prend de la hauteur avec un saut vertical",
+                        "{Sujet} s'élève brusquement dans une trajectoire verticale",
+                        "{Sujet} effectue un bond droit vers le haut",
+                        "{Sujet} saute verticalement pour se repositionner",
+                        "{Sujet} se projette directement vers le haut à {Hauteur}",
+                        "{Sujet} monte dans les airs par une impulsion verticale",
+                        "{Sujet} bondit sur place afin d'éviter {Cible}",
+                        "{Sujet} effectue une impulsion verticale pour gagner de la hauteur",
+                        "{Sujet} saute directement au-dessus de sa position actuelle",
+                        "{Sujet} s'élève à la verticale pour prendre de la hauteur"
                     ]
                 },
 
@@ -1075,7 +1246,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} saute latéralement sur sa gauche pour éviter {Cible}",
                         "{Sujet} bondit sur sa droite pour esquiver {Cible}",
                         "{Sujet} saute vers son côté gauche pour se repositionner",
-                        "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position"
+                        "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position",
+                        "{Sujet} bondit vers la gauche à {Hauteur} pour éviter {Cible}",
+                        "{Sujet} bondit vers la droite à {Hauteur} pour esquiver {Cible}",
+                        "{Sujet} se projette dans les airs vers sa gauche",
+                        "{Sujet} se projette latéralement vers sa droite",
+                        "{Sujet} saute sur le côté gauche pour éviter l'attaque",
+                        "{Sujet} saute sur le côté droit pour changer de position",
+                        "{Sujet} effectue un bond latéral vers sa gauche",
+                        "{Sujet} effectue un bond latéral vers sa droite",
+                        "{Sujet} quitte le sol en se déplaçant vers sa gauche",
+                        "{Sujet} quitte le sol en se déplaçant vers sa droite",
+                        "{Sujet} bondit de côté vers la gauche pour se repositionner",
+                        "{Sujet} bondit de côté vers la droite pour se repositionner",
+                        "{Sujet} saute vers sa gauche à {Hauteur} pour éviter {Cible}",
+                        "{Sujet} saute vers sa droite à {Hauteur} pour atteindre sa position",
+                        "{Sujet} réalise un saut latéral gauche pour esquiver",
+                        "{Sujet} réalise un saut latéral droit pour esquiver"
                     ]
                 }
             }
@@ -1111,7 +1298,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} effectue une roulade vers l'avant sur {Distance} pour se rapprocher de {Cible}",
                         "{Sujet} roule au sol vers l'avant sur {Distance} pour éviter {Cible}",
-                        "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}"
+                        "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}",
+                        "{Sujet} roule vers l'avant pour se rapprocher de {Cible}",
+                        "{Sujet} effectue une roulade frontale sur {Distance}",
+                        "{Sujet} se met à rouler vers l'avant pour éviter {Cible}",
+                        "{Sujet} plonge dans une roulade vers l'avant",
+                        "{Sujet} se propulse au sol en roulade avant vers {Cible}",
+                        "{Sujet} effectue un roulement vers l'avant pour avancer",
+                        "{Sujet} roule rapidement vers l'avant sur {Distance}",
+                        "{Sujet} réalise une roulade avant pour franchir la distance",
+                        "{Sujet} s'engage dans une roulade vers l'avant pour atteindre {Cible}",
+                        "{Sujet} avance au sol en effectuant une roulade avant",
+                        "{Sujet} roule en avant afin de se rapprocher de {Cible}",
+                        "{Sujet} effectue plusieurs rotations au sol vers l'avant",
+                        "{Sujet} fait une roulade frontale pour esquiver {Cible}",
+                        "{Sujet} se déplace au sol par une roulade vers l'avant",
+                        "{Sujet} roule droit vers l'avant sur {Distance}",
+                        "{Sujet} effectue une roulade avant pour changer de position",
+                        "{Sujet} utilise une roulade vers l'avant pour rejoindre {Cible}"
                     ]
                 },
 
@@ -1132,7 +1336,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} effectue une roulade arrière sur {Distance} pour s'éloigner de {Cible}",
                         "{Sujet} roule vers l'arrière pour éviter l'attaque de {Cible}",
-                        "{Sujet} fait une roulade arrière pour se repositionner"
+                        "{Sujet} fait une roulade arrière pour se repositionner",
+                        "{Sujet} roule au sol vers l'arrière sur {Distance}",
+                        "{Sujet} effectue un roulement arrière pour prendre de la distance",
+                        "{Sujet} se laisse rouler vers l'arrière pour éviter {Cible}",
+                        "{Sujet} part en roulade arrière pour s'éloigner",
+                        "{Sujet} réalise une roulade vers l'arrière afin de sortir de portée",
+                        "{Sujet} roule rapidement en arrière sur {Distance}",
+                        "{Sujet} effectue une roulade arrière pour esquiver",
+                        "{Sujet} se déplace au sol en roulant vers l'arrière",
+                        "{Sujet} recule en effectuant une roulade",
+                        "{Sujet} fait un roulement arrière pour se repositionner",
+                        "{Sujet} roule en arrière pour créer de la distance avec {Cible}",
+                        "{Sujet} effectue une roulade arrière afin d'éviter {Cible}",
+                        "{Sujet} plonge dans une roulade vers l'arrière",
+                        "{Sujet} se propulse au sol en arrière par une roulade",
+                        "{Sujet} roule droit vers l'arrière sur {Distance}",
+                        "{Sujet} utilise une roulade arrière pour s'éloigner de {Cible}",
+                        "{Sujet} effectue une rotation au sol vers l'arrière pour changer de position"
                     ]
                 },
 
@@ -1155,7 +1376,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} effectue une roulade latérale sur sa gauche sur {Distance} pour esquiver {Cible}",
                         "{Sujet} effectue une roulade latérale sur sa droite sur {Distance} pour esquiver {Cible}",
                         "{Sujet} roule au sol vers sa gauche pour éviter l'attaque",
-                        "{Sujet} réalise une roulade sur son côté droit pour se repositionner"
+                        "{Sujet} réalise une roulade sur son côté droit pour se repositionner",
+                        "{Sujet} roule latéralement vers sa gauche pour éviter {Cible}",
+                        "{Sujet} roule latéralement vers sa droite pour éviter {Cible}",
+                        "{Sujet} effectue une roulade sur sa gauche sur {Distance}",
+                        "{Sujet} effectue une roulade sur sa droite sur {Distance}",
+                        "{Sujet} se laisse rouler vers son côté gauche",
+                        "{Sujet} se laisse rouler vers son côté droit",
+                        "{Sujet} part en roulade latérale à gauche pour esquiver",
+                        "{Sujet} part en roulade latérale à droite pour esquiver",
+                        "{Sujet} se déplace au sol par une roulade vers sa gauche",
+                        "{Sujet} se déplace au sol par une roulade vers sa droite",
+                        "{Sujet} roule de côté vers la gauche pour se repositionner",
+                        "{Sujet} roule de côté vers la droite pour se repositionner",
+                        "{Sujet} effectue un roulement latéral gauche pour éviter {Cible}",
+                        "{Sujet} effectue un roulement latéral droit pour éviter {Cible}",
+                        "{Sujet} réalise une roulade vers son flanc gauche sur {Distance}",
+                        "{Sujet} réalise une roulade vers son flanc droit sur {Distance}"
                     ]
                 }
             }
@@ -1192,7 +1429,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} vole vers {Cible} à {Hauteur} de hauteur en trajectoire frontale pour l'atteindre",
                         "{Sujet} s'envole vers {Cible} à {Hauteur} pour le rejoindre",
-                        "{Sujet} plane directement vers {Cible} pour arriver au contact"
+                        "{Sujet} plane directement vers {Cible} pour arriver au contact",
+                        "{Sujet} vole droit vers {Cible} à {Hauteur}",
+                        "{Sujet} se déplace dans les airs vers {Cible}",
+                        "{Sujet} avance en volant vers {Cible} à {Hauteur}",
+                        "{Sujet} prend son envol en direction de {Cible}",
+                        "{Sujet} plane en ligne droite vers {Cible}",
+                        "{Sujet} vole frontalement vers {Cible} pour l'atteindre",
+                        "{Sujet} se propulse dans les airs vers {Cible}",
+                        "{Sujet} traverse les airs en direction de {Cible}",
+                        "{Sujet} vole directement jusqu'à {Cible} à {Hauteur}",
+                        "{Sujet} s'élance dans les airs vers {Cible}",
+                        "{Sujet} se dirige en volant vers {Cible}",
+                        "{Sujet} plane rapidement vers {Cible} pour arriver au contact",
+                        "{Sujet} avance dans les airs en trajectoire directe vers {Cible}",
+                        "{Sujet} vole en ligne droite vers {Cible} à {Hauteur}",
+                        "{Sujet} prend de la vitesse dans les airs en direction de {Cible}",
+                        "{Sujet} effectue un déplacement aérien direct vers {Cible}",
+                        "{Sujet} fonce dans les airs vers {Cible} pour le rejoindre"
                     ]
                 },
 
@@ -1216,7 +1470,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} vole en diagonale sur sa gauche vers {Cible} à {Hauteur}",
                         "{Sujet} vole en diagonale sur sa droite vers {Cible} à {Hauteur}",
                         "{Sujet} s'élève en diagonale vers sa gauche pour se positionner au-dessus de {Cible}",
-                        "{Sujet} plane obliquement vers sa droite à {Hauteur} pour rejoindre {Cible}"
+                        "{Sujet} plane obliquement vers sa droite à {Hauteur} pour rejoindre {Cible}",
+                        "{Sujet} vole obliquement vers sa gauche en direction de {Cible}",
+                        "{Sujet} vole obliquement vers sa droite pour atteindre {Cible}",
+                        "{Sujet} se déplace dans les airs en diagonale vers sa gauche",
+                        "{Sujet} se déplace dans les airs en diagonale vers sa droite",
+                        "{Sujet} fonce en diagonale dans les airs vers {Cible}",
+                        "{Sujet} plane en biais vers sa gauche à {Hauteur}",
+                        "{Sujet} plane en biais vers sa droite à {Hauteur}",
+                        "{Sujet} s'envole en diagonale vers sa gauche pour rejoindre {Cible}",
+                        "{Sujet} s'envole en diagonale vers sa droite pour rejoindre {Cible}",
+                        "{Sujet} traverse les airs en diagonale vers la gauche",
+                        "{Sujet} traverse les airs en diagonale vers la droite",
+                        "{Sujet} change de hauteur en volant vers sa gauche",
+                        "{Sujet} change de hauteur en volant vers sa droite",
+                        "{Sujet} effectue un déplacement aérien oblique vers sa gauche",
+                        "{Sujet} effectue un déplacement aérien oblique vers sa droite",
+                        "{Sujet} vole en biais vers {Cible} à {Hauteur} pour atteindre sa position"
                     ]
                 },
 
@@ -1239,7 +1509,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} vole latéralement sur sa gauche à {Hauteur}",
                         "{Sujet} vole latéralement sur sa droite à {Hauteur}",
                         "{Sujet} se déplace dans les airs vers sa gauche pour éviter {Cible}",
-                        "{Sujet} plane vers son côté droit pour se repositionner"
+                        "{Sujet} plane vers son côté droit pour se repositionner",
+                        "{Sujet} vole vers sa gauche à {Hauteur}",
+                        "{Sujet} vole vers sa droite à {Hauteur}",
+                        "{Sujet} se déplace aériennement sur sa gauche",
+                        "{Sujet} se déplace aériennement sur sa droite",
+                        "{Sujet} glisse dans les airs vers sa gauche",
+                        "{Sujet} glisse dans les airs vers sa droite",
+                        "{Sujet} plane latéralement vers sa gauche",
+                        "{Sujet} plane latéralement vers sa droite",
+                        "{Sujet} fonce dans les airs vers sa gauche pour éviter {Cible}",
+                        "{Sujet} fonce dans les airs vers sa droite pour éviter {Cible}",
+                        "{Sujet} se décale dans les airs vers sa gauche",
+                        "{Sujet} se décale dans les airs vers sa droite",
+                        "{Sujet} effectue un déplacement aérien latéral vers sa gauche",
+                        "{Sujet} effectue un déplacement aérien latéral vers sa droite",
+                        "{Sujet} vole parallèlement vers sa gauche pour changer de position",
+                        "{Sujet} vole parallèlement vers sa droite pour changer de position"
                     ]
                 }
             }
@@ -1274,7 +1560,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} pivote vers sa droite pour faire face à {Cible}",
                         "{Sujet} effectue un pivot sur sa droite pour changer d'orientation",
-                        "{Sujet} tourne son corps vers la droite pour se placer face à {Cible}"
+                        "{Sujet} tourne son corps vers la droite pour se placer face à {Cible}",
+                        "{Sujet} pivote à droite pour faire face à {Cible}",
+                        "{Sujet} tourne vers sa droite pour changer de position",
+                        "{Sujet} effectue une rotation vers la droite pour se repositionner",
+                        "{Sujet} tourne son corps sur la droite",
+                        "{Sujet} pivote du côté droit pour faire face à {Cible}",
+                        "{Sujet} réalise un pivot droit pour changer d'orientation",
+                        "{Sujet} fait pivoter son corps vers la droite",
+                        "{Sujet} tourne sur son appui vers la droite",
+                        "{Sujet} effectue une rotation corporelle vers sa droite",
+                        "{Sujet} pivote sur sa droite afin de se retrouver face à {Cible}",
+                        "{Sujet} tourne rapidement vers son côté droit",
+                        "{Sujet} change son orientation en pivotant vers la droite",
+                        "{Sujet} effectue un demi-tour par pivot vers la droite",
+                        "{Sujet} pivote vers la droite pour se repositionner",
+                        "{Sujet} tourne sur lui-même vers la droite",
+                        "{Sujet} réoriente son corps vers la droite par un pivot",
+                        "{Sujet} effectue un mouvement de pivot vers sa droite pour faire face à {Cible}"
                     ]
                 },
 
@@ -1294,7 +1597,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} pivote vers sa gauche pour faire face à {Cible}",
                         "{Sujet} effectue un pivot sur sa gauche pour changer d'orientation",
-                        "{Sujet} tourne son corps vers la gauche pour se placer face à {Cible}"
+                        "{Sujet} tourne son corps vers la gauche pour se placer face à {Cible}",
+                        "{Sujet} pivote à gauche pour faire face à {Cible}",
+                        "{Sujet} tourne vers sa gauche pour changer de position",
+                        "{Sujet} effectue une rotation vers la gauche pour se repositionner",
+                        "{Sujet} tourne son corps sur la gauche",
+                        "{Sujet} pivote du côté gauche pour faire face à {Cible}",
+                        "{Sujet} réalise un pivot gauche pour changer d'orientation",
+                        "{Sujet} fait pivoter son corps vers la gauche",
+                        "{Sujet} tourne sur son appui vers la gauche",
+                        "{Sujet} effectue une rotation corporelle vers sa gauche",
+                        "{Sujet} pivote sur sa gauche afin de se retrouver face à {Cible}",
+                        "{Sujet} tourne rapidement vers son côté gauche",
+                        "{Sujet} change son orientation en pivotant vers la gauche",
+                        "{Sujet} effectue un demi-tour par pivot vers la gauche",
+                        "{Sujet} pivote vers la gauche pour se repositionner",
+                        "{Sujet} tourne sur lui-même vers la gauche",
+                        "{Sujet} réoriente son corps vers la gauche par un pivot",
+                        "{Sujet} effectue un mouvement de pivot vers sa gauche pour faire face à {Cible}"
                     ]
                 }
             }
@@ -1330,7 +1650,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} effectue une vrille vers la droite dans les airs pour éviter {Cible}",
                         "{Sujet} vrille sur lui-même en avançant pour esquiver l'attaque de {Cible}",
                         "{Sujet} réalise une vrille aérienne vers la gauche pour changer de trajectoire",
-                        "{Sujet} tourne sur lui-même plusieurs fois pour éviter {Cible}"
+                        "{Sujet} tourne sur lui-même plusieurs fois pour éviter {Cible}",
+                        "{Sujet} effectue une rotation complète autour de son axe",
+                        "{Sujet} vrille dans les airs vers la droite",
+                        "{Sujet} vrille dans les airs vers la gauche",
+                        "{Sujet} tourne plusieurs fois sur lui-même pour se repositionner",
+                        "{Sujet} effectue plusieurs rotations successives dans les airs",
+                        "{Sujet} se met à tourner sur son axe pour éviter {Cible}",
+                        "{Sujet} réalise une vrille aérienne pour changer de direction",
+                        "{Sujet} effectue une rotation rapide de son corps dans les airs",
+                        "{Sujet} tourne continuellement autour de son propre axe",
+                        "{Sujet} vrille vers la droite pour esquiver {Cible}",
+                        "{Sujet} vrille vers la gauche pour éviter l'attaque",
+                        "{Sujet} enchaîne plusieurs rotations autour de lui-même",
+                        "{Sujet} effectue une vrille tout en avançant",
+                        "{Sujet} tourne sur lui-même pendant son déplacement",
+                        "{Sujet} réalise une rotation aérienne répétée pour se repositionner",
+                        "{Sujet} effectue plusieurs tours sur son axe pour changer de trajectoire"
                     ]
                 }
             }
@@ -1366,7 +1702,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} fait un salto avant pour atterrir derrière {Cible}",
                         "{Sujet} effectue un salto vers l'avant pour éviter {Cible}",
                         "{Sujet} réalise un salto avant pour se repositionner",
-                        "{Sujet} effectue une rotation aérienne vers l'avant pour passer au-dessus de {Cible}"
+                        "{Sujet} effectue une rotation aérienne vers l'avant pour passer au-dessus de {Cible}",
+                        "{Sujet} bondit dans les airs en réalisant un salto avant",
+                        "{Sujet} fait une rotation complète vers l'avant",
+                        "{Sujet} effectue un salto frontal pour dépasser {Cible}",
+                        "{Sujet} réalise une rotation avant dans les airs",
+                        "{Sujet} tourne vers l'avant pendant son saut",
+                        "{Sujet} effectue une rotation aérienne avant pour esquiver",
+                        "{Sujet} fait un salto avant afin de retomber derrière {Cible}",
+                        "{Sujet} se projette dans les airs puis effectue un salto vers l'avant",
+                        "{Sujet} réalise un salto en direction de l'avant pour changer de position",
+                        "{Sujet} effectue une rotation complète vers l'avant au-dessus de {Cible}",
+                        "{Sujet} bondit puis tourne vers l'avant dans les airs",
+                        "{Sujet} fait un salto avant pour franchir {Cible}",
+                        "{Sujet} effectue un mouvement de rotation aérienne vers l'avant",
+                        "{Sujet} réalise un salto frontal pour éviter l'attaque",
+                        "{Sujet} tourne complètement vers l'avant pendant son déplacement aérien",
+                        "{Sujet} effectue un salto avant pour se repositionner derrière {Cible}"
                     ]
                 },
 
@@ -1386,7 +1738,24 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} fait un salto arrière pour éviter {Cible}",
                         "{Sujet} effectue un salto vers l'arrière pour se repositionner",
-                        "{Sujet} réalise une rotation aérienne arrière pour s'éloigner de {Cible}"
+                        "{Sujet} réalise une rotation aérienne arrière pour s'éloigner de {Cible}",
+                        "{Sujet} bondit dans les airs en réalisant un salto arrière",
+                        "{Sujet} effectue une rotation complète vers l'arrière",
+                        "{Sujet} fait un salto arrière pour prendre de la distance",
+                        "{Sujet} réalise une rotation arrière dans les airs",
+                        "{Sujet} tourne vers l'arrière pendant son saut",
+                        "{Sujet} effectue un salto arrière pour esquiver {Cible}",
+                        "{Sujet} se projette dans les airs puis tourne vers l'arrière",
+                        "{Sujet} réalise un salto vers l'arrière pour changer de position",
+                        "{Sujet} bondit puis effectue une rotation arrière",
+                        "{Sujet} fait une rotation complète vers l'arrière dans les airs",
+                        "{Sujet} effectue un salto arrière pour retomber plus loin",
+                        "{Sujet} réalise un mouvement de rotation aérienne vers l'arrière",
+                        "{Sujet} tourne complètement vers l'arrière pendant son saut",
+                        "{Sujet} effectue un salto arrière afin de s'éloigner de {Cible}",
+                        "{Sujet} bondit en arrière et réalise une rotation aérienne",
+                        "{Sujet} fait un salto arrière pour éviter l'attaque de {Cible}",
+                        "{Sujet} réalise un salto arrière pour se repositionner hors de portée"
                     ]
                 }
             }
@@ -1422,7 +1791,23 @@ const NEO_ACTION_MODELS = {
                         "{Sujet} fait un flip avant pour passer au-dessus de {Cible}",
                         "{Sujet} effectue un flip vers l'avant pour esquiver {Cible}",
                         "{Sujet} réalise un flip avant pour franchir l'obstacle",
-                        "{Sujet} effectue une rotation avant pour retomber derrière {Cible}"
+                        "{Sujet} effectue une rotation avant pour retomber derrière {Cible}",
+                        "{Sujet} bondit dans les airs et réalise un flip avant",
+                        "{Sujet} effectue un retournement vers l'avant",
+                        "{Sujet} réalise une rotation acrobatique vers l'avant",
+                        "{Sujet} fait un flip frontal pour dépasser {Cible}",
+                        "{Sujet} tourne vers l'avant pendant son saut",
+                        "{Sujet} effectue un flip avant pour changer de position",
+                        "{Sujet} se projette dans les airs puis tourne vers l'avant",
+                        "{Sujet} réalise un mouvement acrobatique vers l'avant",
+                        "{Sujet} effectue une rotation complète vers l'avant dans les airs",
+                        "{Sujet} fait un flip vers l'avant pour éviter l'attaque",
+                        "{Sujet} bondit puis réalise une rotation avant",
+                        "{Sujet} effectue un retournement aérien vers l'avant",
+                        "{Sujet} réalise un flip avant pour retomber derrière {Cible}",
+                        "{Sujet} tourne complètement vers l'avant au cours de son saut",
+                        "{Sujet} effectue un flip frontal pour se repositionner",
+                        "{Sujet} réalise une rotation aérienne avant pour franchir {Cible}"
                     ]
                 },
 
@@ -1442,14 +1827,31 @@ const NEO_ACTION_MODELS = {
                     exemples: [
                         "{Sujet} fait un flip arrière pour retomber derrière {Cible}",
                         "{Sujet} effectue un flip vers l'arrière pour éviter {Cible}",
-                        "{Sujet} réalise un flip arrière pour se repositionner"
+                        "{Sujet} réalise un flip arrière pour se repositionner",
+                        "{Sujet} effectue une rotation arrière pour s'éloigner de {Cible}",
+                        "{Sujet} bondit dans les airs et réalise un flip arrière",
+                        "{Sujet} effectue un retournement vers l'arrière",
+                        "{Sujet} réalise une rotation acrobatique vers l'arrière",
+                        "{Sujet} fait un flip arrière pour prendre de la distance",
+                        "{Sujet} tourne vers l'arrière pendant son saut",
+                        "{Sujet} effectue un flip arrière pour changer de position",
+                        "{Sujet} se projette dans les airs puis tourne vers l'arrière",
+                        "{Sujet} réalise un mouvement acrobatique vers l'arrière",
+                        "{Sujet} effectue une rotation complète vers l'arrière dans les airs",
+                        "{Sujet} fait un flip vers l'arrière pour esquiver l'attaque",
+                        "{Sujet} bondit puis réalise une rotation arrière",
+                        "{Sujet} effectue un retournement aérien vers l'arrière",
+                        "{Sujet} réalise un flip arrière pour retomber plus loin",
+                        "{Sujet} tourne complètement vers l'arrière au cours de son saut",
+                        "{Sujet} effectue un flip arrière pour sortir de portée de {Cible}",
+                        "{Sujet} réalise une rotation aérienne arrière pour se repositionner"
                     ]
                 }
             }
         }
     }
-};
-                                
+};                   
+                                                                    
       
 /* ============================================================================
  * 9. EXPORT
