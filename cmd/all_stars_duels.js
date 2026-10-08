@@ -103,6 +103,57 @@ function generateFicheDuel(duel) {
 R A Z O R X™⚡`;
 }
 
+//================= +DUEL =================
+ovlcmd({
+    nom_cmd: "duel",
+    classe: "Duel",
+    react: "⚔️"
+}, async (ms_org, ovl, { arg, ms }) => {
+    if (!arg.length) return;
+
+    const input = arg.join(' '); // ne pas remplacer ou nettoyer
+    const [players, statsCustom] = input.split('/').map(v => v.trim());
+    const [p1, p2] = players.split('vs').map(v => v.trim());
+
+    if (!p1 || !p2) return;
+
+    const equipe1 = [{
+        nom: p1,
+        stats: {
+            sta: 100,
+            energie: 100,
+            pv: 100
+        }
+    }];
+
+    const equipe2 = [{
+        nom: p2,
+        stats: {
+            sta: 100,
+            energie: 100,
+            pv: 100
+        }
+    }];
+
+    const arene = tirerAr();
+
+    duelsEnCours[ms_org] = {
+        equipe1,
+        equipe2,
+        arene,
+        statsCustom: statsCustom || null
+    };
+
+    // 🌀 LANCEMENT DU CHARGEMENT
+    await chargerDuel(
+        ms_org,
+        ovl,
+        ms,
+        duelsEnCours[ms_org]
+    );
+});
+
+
 /* ==========================================================
    🌀 CHARGEMENT DU DUEL
    ========================================================== */
@@ -204,29 +255,6 @@ async function chargerDuel(ms_org, ovl, ms, duel) {
         caption: generateFicheDuel(duel)
     }, { quoted: ms });
 }
-
-/* ==========================================================
-   IMPORTANT :
-   Quand ton code crée réellement le duel, il doit faire :
-
-   const arene = tirerAr();
-
-   duelsEnCours[ms_org] = {
-       arene,
-       equipe1: [...],
-       equipe2: [...]
-   };
-
-   puis :
-
-   await chargerDuel(
-       ms_org,
-       ovl,
-       ms,
-       duelsEnCours[ms_org]
-   );
-
-   ========================================================== */
 
 
 /* ================= +STATS ================= */
