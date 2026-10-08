@@ -288,9 +288,16 @@ ovlcmd({
   react: "🪪",
   desc: "Afficher ou modifier les données NEO d'un joueur.",
 }, async (ms_org, ovl, cmd_options) => {
-  const { arg, auteur_Message, prenium_id, repondre } = cmd_options;
-  const userId = arg.length >= 1 && arg[0].includes("@") ? normalizeJid(arg[0]) : auteur_Message;
+const { arg, auteur_Message, prenium_id, repondre } = cmd_options;
 
+const isAll = arg.length >= 1 && /^@all$/i.test(arg[0]);
+
+const userId = isAll
+  ? null
+  : (arg.length >= 1 && arg[0].includes("@")
+      ? normalizeJid(arg[0])
+      : auteur_Message);
+  
   try {
     const data = await getNeo(userId);
     if (!data) return repondre("⚠️ Aucune donnée trouvée pour cet utilisateur.");
@@ -319,6 +326,77 @@ ovlcmd({
 
     // 2️⃣ Vérification prenium
     if (!prenium_id) return repondre("⚠️ Seuls les membres Premium peuvent actualiser un joueur.");
+    // ─── @ALL : MODIFICATION GLOBALE DES RESSOURCES ───
+if (isAll) {
+
+  const champ = arg[1]?.toLowerCase();
+  const operation = arg[2];
+  const valeur = parseInt(arg[3], 10);
+
+  // Champs autorisés pour @All
+  const champsAll = ["nc", "np", "ns", "coupons"];
+
+  if (!champsAll.includes(champ)) {
+    return repondre(
+      "⚠️ Avec @All, seuls ces champs sont autorisés : nc, np, ns, coupons."
+    );
+  }
+
+  if (!["=", "+", "-"].includes(operation) || isNaN(valeur)) {
+    return repondre(
+      "⚠️ Syntaxe : +myneo🔷 @All nc/np/ns/coupons =/+/- valeur"
+    );
+  }
+
+  try {
+
+    // Récupération de tous les joueurs MyNeo
+    const allPlayers = await MyNeoFunctions.getAllUsers();
+
+    if (!allPlayers || !allPlayers.length) {
+      return repondre("⚠️ Aucun joueur enregistré sur MyNeo.");
+    }
+
+    let count = 0;
+
+    for (const player of allPlayers) {
+
+      if (!player?.id) continue;
+
+      const ancien = Number(player[champ]) || 0;
+      let nouveau;
+
+      if (operation === "=") {
+        nouveau = valeur;
+      } else if (operation === "+") {
+        nouveau = ancien + valeur;
+      } else {
+        nouveau = ancien - valeur;
+      }
+
+      // Évite les valeurs négatives
+      nouveau = Math.max(0, nouveau);
+
+      await updateMyNeo(player.id, {
+        [champ]: nouveau
+      });
+
+      count++;
+    }
+
+    return repondre(
+      `✅ Modification globale effectuée.\n\n` +
+      `👥 Joueurs : ${count}\n` +
+      `🔷 ${champ.toUpperCase()} : ${operation} ${valeur}`
+    );
+
+  } catch (err) {
+    console.error("❌ Erreur myNeo @All:", err);
+    return repondre(
+      "❌ Une erreur est survenue lors de la modification globale."
+    );
+  }
+}
 
     const modifiables = ["users","tel","ns","nc","np","coupons","gift_box","all_stars","blue_lock","elysium"];
     let updates = {};
