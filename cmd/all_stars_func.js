@@ -166,10 +166,10 @@ let gifUrl = "";
 if (!mots[0]?.startsWith("@")) return;
 
 if (mots[1] === "go") {
-    countdownTime = 6 * 60;
+    countdownTime = 7 * 60;
     gifUrl = "https://files.catbox.moe/1td1ai.mp4";
 } else if (mots[1] === "next") {
-    countdownTime = 6 * 60;
+    countdownTime = 7 * 60;
     gifUrl = "https://files.catbox.moe/mdvntr.mp4";
 } else {
     return;
