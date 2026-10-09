@@ -696,6 +696,7 @@ const NEO_RELATIONS = {
 
     deplacement: {
 
+        
         // ==========================================================
         // MARCHE
         // ==========================================================
@@ -707,9 +708,38 @@ const NEO_RELATIONS = {
             concept:
                 "Déplacement volontaire d'un sujet à pied, généralement à vitesse normale ou modérée.",
 
+            synonymes: [
+                "marcher",
+                "marche",
+                "avancer à pied",
+                "se déplacer à pied",
+                "progresser à pied",
+                "aller à pied",
+                "se diriger à pied",
+                "se rendre à pied",
+                "se rapprocher en marchant",
+                "avancer au pas",
+                "progresser au pas"
+            ],
+
             manieres: {
 
                 normale: {
+                    synonymes: [
+                        "normalement",
+                        "à pied",
+                        "au pas",
+                        "en marchant",
+                        "d'un pas normal",
+                        "à allure normale",
+                        "tranquillement",
+                        "calmement",
+                        "progressivement",
+                        "lentement",
+                        "directement",
+                        "droit devant"
+                    ],
+
                     concept:
                         "Déplacement au sol effectué à pied avec une progression régulière.",
 
