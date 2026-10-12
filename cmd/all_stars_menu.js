@@ -1,5 +1,42 @@
 const { ovlcmd } = require("../lib/ovlcmd");
 
+// ==========================================================
+// 🖼️ IMAGES DES RUBRIQUES ALLSTARS
+// ==========================================================
+
+const imagesRubriquesAllstars = {
+    "1": [
+        "https://files.catbox.moe/uz7tyi.jpg",
+        "https://files.catbox.moe/yhczn8.jpg",
+        "https://files.catbox.moe/v6wvtz.jpg",
+        "https://files.catbox.moe/j5e4vk.jpg"      
+    ],
+
+    "2": [
+        "https://files.catbox.moe/ma5elg.jpg"
+    ],
+
+    "3": [
+        "https://exemple.com/evenements1.jpg",
+        "https://exemple.com/evenements2.jpg",
+        "https://exemple.com/evenements3.jpg"
+    ],
+
+    "4": [
+        "https://exemple.com/tournois.jpg"
+    ],
+
+    "5": [
+        "https://exemple.com/boutique1.jpg",
+        "https://exemple.com/boutique2.jpg"
+    ],
+
+    "6": [
+        "https://exemple.com/aventure.jpg"
+    ]
+};
+
+
 const gifIntro = 'https://files.catbox.moe/7033mc.mp4';
 
 ovlcmd(
