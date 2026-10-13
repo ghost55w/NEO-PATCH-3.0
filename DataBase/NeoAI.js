@@ -696,7 +696,7 @@ const NEO_RELATIONS = {
 
     deplacement: {
 
-        
+       
         // ==========================================================
         // MARCHE
         // ==========================================================
@@ -777,8 +777,8 @@ const NEO_RELATIONS = {
                 }
             }
         },
-
-
+ 
+              
         // ==========================================================
         // COURSE
         // ==========================================================
@@ -790,6 +790,24 @@ const NEO_RELATIONS = {
             concept:
                 "Déplacement volontaire rapide d'un sujet par la course afin de progresser vers une position, une cible ou un objectif.",
 
+            synonymes: [
+                "courir",
+                "foncer",
+                "se précipiter",
+                "charger",
+                "sprinter",
+                "accourir",
+                "se ruer",
+                "se jeter",
+                "filer",
+                "s'élancer",
+                "partir en courant",
+                "se lancer en course",
+                "courir rapidement",
+                "avancer en courant",
+                "se déplacer en courant"
+            ],
+
             manieres: {
 
                 // --------------------------------------------------
@@ -797,6 +815,19 @@ const NEO_RELATIONS = {
                 // --------------------------------------------------
 
                 frontale: {
+                    synonymes: [
+                        "frontalement",
+                        "en ligne droite",
+                        "droit devant",
+                        "tout droit",
+                        "directement vers l'avant",
+                        "en course directe",
+                        "sans dévier",
+                        "droit vers la cible",
+                        "en direction directe",
+                        "vers l'avant"
+                    ],
+
                     concept:
                         "Course effectuée selon une progression directe et principalement linéaire vers l'avant ou vers une cible.",
 
@@ -835,12 +866,23 @@ const NEO_RELATIONS = {
                     ]
                 },
 
-
                 // --------------------------------------------------
                 // COURSE CIRCULAIRE
                 // --------------------------------------------------
 
                 circulaire: {
+                    synonymes: [
+                        "en cercle",
+                        "en mouvement circulaire",
+                        "en arc de cercle",
+                        "en trajectoire courbe",
+                        "en tournant autour",
+                        "en contournant",
+                        "autour de la cible",
+                        "en course courbe",
+                        "en rotation autour de la cible"
+                    ],
+
                     concept:
                         "Course effectuée autour d'une cible ou selon une trajectoire courbe. Le côté indique vers quel côté le sujet se déplace autour de la cible.",
 
@@ -881,12 +923,24 @@ const NEO_RELATIONS = {
                     ]
                 },
 
-
                 // --------------------------------------------------
                 // COURSE DIAGONALE
                 // --------------------------------------------------
 
                 diagonale: {
+                    synonymes: [
+                        "en diagonale",
+                        "diagonalement",
+                        "obliquement",
+                        "en biais",
+                        "en course oblique",
+                        "en diagonale vers la gauche",
+                        "en diagonale vers la droite",
+                        "en biais vers la gauche",
+                        "en biais vers la droite",
+                        "en coupant en diagonale"
+                    ],
+
                     concept:
                         "Course effectuée selon une trajectoire oblique vers une cible ou une position. Le côté indique si le sujet se déplace en diagonale vers sa gauche ou vers sa droite.",
 
@@ -926,12 +980,25 @@ const NEO_RELATIONS = {
                     ]
                 },
 
-
                 // --------------------------------------------------
                 // COURSE ZIGZAG
                 // --------------------------------------------------
 
                 zig_zag: {
+                    synonymes: [
+                        "en zigzag",
+                        "en zig zag",
+                        "en serpentant",
+                        "en serpentant de gauche à droite",
+                        "en alternant gauche et droite",
+                        "en alternant les côtés",
+                        "en changeant constamment de direction",
+                        "en effectuant des écarts successifs",
+                        "en changeant alternativement de côté",
+                        "en course sinueuse",
+                        "en trajectoire sinueuse"
+                    ],
+
                     concept:
                         "Course durant laquelle le sujet alterne successivement ses déplacements vers la gauche et vers la droite tout en progressant vers son objectif.",
 
@@ -970,12 +1037,25 @@ const NEO_RELATIONS = {
                     ]
                 },
 
-
                 // --------------------------------------------------
                 // COURSE LATERALE
                 // --------------------------------------------------
 
                 laterale: {
+                    synonymes: [
+                        "latéralement",
+                        "sur le côté",
+                        "vers le côté gauche",
+                        "vers le côté droit",
+                        "vers sa gauche",
+                        "vers sa droite",
+                        "en course latérale",
+                        "en déplacement latéral",
+                        "parallèlement à la cible",
+                        "sur le flanc",
+                        "en longeant latéralement"
+                    ],
+
                     concept:
                         "Course effectuée principalement vers un côté par rapport à l'orientation actuelle du sujet. Le côté indique obligatoirement la direction latérale du déplacement.",
 
@@ -1016,8 +1096,9 @@ const NEO_RELATIONS = {
                 }
             }
         },
+                   
 
-
+        
         // ==========================================================
         // DASH
         // ==========================================================
@@ -1029,9 +1110,39 @@ const NEO_RELATIONS = {
             concept:
                 "Déplacement extrêmement rapide et bref permettant au sujet de parcourir instantanément ou presque une courte distance.",
 
+            synonymes: [
+                "dash",
+                "faire un dash",
+                "effectuer un dash",
+                "accélérer brutalement",
+                "accélérer soudainement",
+                "jaillir",
+                "se propulser",
+                "se projeter",
+                "bondir rapidement",
+                "démarrer brusquement",
+                "accélération explosive",
+                "accélération fulgurante",
+                "déplacement fulgurant",
+                "poussée rapide"
+            ],
+
             manieres: {
 
                 rapide: {
+                    synonymes: [
+                        "rapidement",
+                        "très rapidement",
+                        "brutalement",
+                        "soudainement",
+                        "instantanément",
+                        "explosivement",
+                        "à toute vitesse",
+                        "en accélération fulgurante",
+                        "en accélération explosive",
+                        "sur une courte distance"
+                    ],
+
                     concept:
                         "Accélération brutale produisant un déplacement très rapide sur une courte distance.",
 
@@ -1087,9 +1198,39 @@ const NEO_RELATIONS = {
             concept:
                 "Déplacement offensif ou agressif rapide vers une cible afin de réduire rapidement la distance qui les sépare.",
 
+            synonymes: [
+                "rush",
+                "faire un rush",
+                "effectuer un rush",
+                "charger",
+                "foncer agressivement",
+                "se ruer sur une cible",
+                "se lancer à l'assaut",
+                "partir à l'assaut",
+                "effectuer une charge",
+                "charge rapide",
+                "charge offensive",
+                "se jeter sur une cible",
+                "attaquer la distance",
+                "foncer sans ralentir"
+            ],
+
             manieres: {
 
                 directe: {
+                    synonymes: [
+                        "directement",
+                        "droit vers la cible",
+                        "droit sur la cible",
+                        "agressivement",
+                        "brutalement",
+                        "à grande vitesse",
+                        "à toute vitesse",
+                        "sans ralentir",
+                        "en charge directe",
+                        "en fonçant sur la cible"
+                    ],
+
                     concept:
                         "Progression rapide et agressive directement vers une cible.",
 
@@ -1128,305 +1269,474 @@ const NEO_RELATIONS = {
             }
         },
 
-
         // ==========================================================
-        // SAUT
-        // ==========================================================
+// SAUT
+// ==========================================================
 
-        saut: {
-            categorie: "deplacement",
-            id: "SAUT",
+saut: {
+    categorie: "deplacement",
+    id: "SAUT",
+
+    concept:
+        "Déplacement durant lequel le sujet quitte temporairement le sol grâce à une impulsion verticale ou orientée.",
+
+    synonymes: [
+        "sauter",
+        "faire un saut",
+        "effectuer un saut",
+        "bondir",
+        "faire un bond",
+        "effectuer un bond",
+        "s'élancer dans les airs",
+        "quitter le sol",
+        "se propulser dans les airs",
+        "s'élever dans les airs",
+        "prendre son impulsion",
+        "effectuer une impulsion",
+        "se projeter dans les airs",
+        "faire un saut aérien",
+        "bondir dans les airs"
+    ],
+
+    manieres: {
+
+        avant: {
+            synonymes: [
+                "vers l'avant",
+                "en avant",
+                "vers l'avant dans les airs",
+                "en sautant vers l'avant",
+                "en bondissant vers l'avant",
+                "saut avant",
+                "bond avant",
+                "sauter devant soi",
+                "bondir devant soi",
+                "vers l'avant en trajectoire ascendante",
+                "en direction de la cible",
+                "en avançant dans les airs",
+                "en saut frontal",
+                "sauter droit devant",
+                "bondir droit devant"
+            ],
 
             concept:
-                "Déplacement durant lequel le sujet quitte temporairement le sol grâce à une impulsion verticale ou orientée.",
+                "Saut orienté vers l'avant permettant de progresser dans cette direction pendant la phase aérienne.",
 
-            manieres: {
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "HAUTEUR",
+                "TRAJECTOIRE",
+                "INTENTION"
+            ],
 
-                avant: {
-                    concept:
-                        "Saut orienté vers l'avant permettant de progresser dans cette direction pendant la phase aérienne.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "HAUTEUR",
-                        "TRAJECTOIRE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} saute vers l'avant à {Hauteur} de hauteur pour atteindre {Cible}",
-                        "{Sujet} bondit vers {Cible} en trajectoire ascendante à {Hauteur} pour l'atteindre",
-                        "{Sujet} quitte le sol en sautant vers l'avant pour rejoindre {Cible}",
-                        "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}",
-                        "{Sujet} bondit en avant pour atteindre {Cible}",
-                        "{Sujet} saute directement vers {Cible} à {Hauteur}",
-                        "{Sujet} se projette dans les airs vers l'avant pour rejoindre {Cible}",
-                        "{Sujet} prend son impulsion et saute vers {Cible}",
-                        "{Sujet} effectue un bond vers l'avant à {Hauteur} pour atteindre {Cible}",
-                        "{Sujet} s'élance dans les airs en direction de {Cible}",
-                        "{Sujet} bondit vers l'avant pour se rapprocher de {Cible}",
-                        "{Sujet} saute en avant en direction de {Cible} à {Hauteur}",
-                        "{Sujet} quitte le sol et progresse vers {Cible} pendant son saut",
-                        "{Sujet} se propulse vers l'avant dans les airs pour atteindre {Cible}",
-                        "{Sujet} réalise un saut orienté vers {Cible}",
-                        "{Sujet} effectue un bond aérien vers l'avant pour rejoindre {Cible}",
-                        "{Sujet} saute en direction de {Cible} avec une trajectoire ascendante",
-                        "{Sujet} s'élève puis avance vers {Cible} à {Hauteur}",
-                        "{Sujet} bondit vers l'avant sur sa trajectoire pour atteindre {Cible}",
-                        "{Sujet} prend de l'élan et saute vers {Cible} pour le rejoindre"
-                    ]
-                },
-
-
-                arriere: {
-                    concept:
-                        "Saut orienté vers l'arrière permettant au sujet de s'éloigner ou de se repositionner.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "HAUTEUR",
-                        "TRAJECTOIRE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} saute vers l'arrière à {Hauteur} pour s'éloigner de {Cible}",
-                        "{Sujet} bondit en arrière pour éviter {Cible} et se repositionner",
-                        "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}",
-                        "{Sujet} saute en arrière pour prendre de la distance avec {Cible}",
-                        "{Sujet} se projette dans les airs vers l'arrière pour s'éloigner",
-                        "{Sujet} bondit vers l'arrière à {Hauteur} pour éviter {Cible}",
-                        "{Sujet} recule en sautant pour sortir de portée de {Cible}",
-                        "{Sujet} effectue un saut arrière pour se repositionner",
-                        "{Sujet} saute directement en arrière pour éviter l'attaque de {Cible}",
-                        "{Sujet} se propulse vers l'arrière dans les airs",
-                        "{Sujet} bondit en arrière afin de créer de la distance",
-                        "{Sujet} prend appui et saute vers l'arrière pour s'éloigner de {Cible}",
-                        "{Sujet} quitte le sol en reculant vers l'arrière",
-                        "{Sujet} effectue un bond arrière pour éviter {Cible}",
-                        "{Sujet} saute en direction opposée à {Cible}",
-                        "{Sujet} s'élève puis recule dans les airs pour se repositionner",
-                        "{Sujet} bondit en arrière pour sortir de la portée de {Cible}",
-                        "{Sujet} réalise un saut arrière à {Hauteur} pour esquiver",
-                        "{Sujet} se déplace vers l'arrière par un saut pour prendre de la distance",
-                        "{Sujet} effectue un saut de recul pour s'éloigner de {Cible}"
-                    ]
-                },
-
-
-                vertical: {
-                    concept:
-                        "Saut principalement orienté vers le haut avec une progression horizontale minimale.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "HAUTEUR",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} saute verticalement à {Hauteur} pour éviter {Cible}",
-                        "{Sujet} bondit directement vers le haut pour prendre de la hauteur",
-                        "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner",
-                        "{Sujet} saute droit vers le ciel à {Hauteur}",
-                        "{Sujet} bondit sur place pour prendre de la hauteur",
-                        "{Sujet} se propulse verticalement dans les airs",
-                        "{Sujet} quitte le sol en montant directement vers le haut",
-                        "{Sujet} effectue un saut vertical pour éviter {Cible}",
-                        "{Sujet} bondit directement vers le ciel pour s'élever",
-                        "{Sujet} saute à la verticale jusqu'à {Hauteur}",
-                        "{Sujet} prend de la hauteur avec un saut vertical",
-                        "{Sujet} s'élève brusquement dans une trajectoire verticale",
-                        "{Sujet} effectue un bond droit vers le haut",
-                        "{Sujet} saute verticalement pour se repositionner",
-                        "{Sujet} se projette directement vers le haut à {Hauteur}",
-                        "{Sujet} monte dans les airs par une impulsion verticale",
-                        "{Sujet} bondit sur place afin d'éviter {Cible}",
-                        "{Sujet} effectue une impulsion verticale pour gagner de la hauteur",
-                        "{Sujet} saute directement au-dessus de sa position actuelle",
-                        "{Sujet} s'élève à la verticale pour prendre de la hauteur"
-                    ]
-                },
-
-
-                laterale: {
-                    concept:
-                        "Saut effectué vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "COTE",
-                        "HAUTEUR",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} saute latéralement sur sa gauche pour éviter {Cible}",
-                        "{Sujet} bondit sur sa droite pour esquiver {Cible}",
-                        "{Sujet} saute vers son côté gauche pour se repositionner",
-                        "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position",
-                        "{Sujet} bondit vers la gauche à {Hauteur} pour éviter {Cible}",
-                        "{Sujet} bondit vers la droite à {Hauteur} pour esquiver {Cible}",
-                        "{Sujet} se projette dans les airs vers sa gauche",
-                        "{Sujet} se projette latéralement vers sa droite",
-                        "{Sujet} saute sur le côté gauche pour éviter l'attaque",
-                        "{Sujet} saute sur le côté droit pour changer de position",
-                        "{Sujet} effectue un bond latéral vers sa gauche",
-                        "{Sujet} effectue un bond latéral vers sa droite",
-                        "{Sujet} quitte le sol en se déplaçant vers sa gauche",
-                        "{Sujet} quitte le sol en se déplaçant vers sa droite",
-                        "{Sujet} bondit de côté vers la gauche pour se repositionner",
-                        "{Sujet} bondit de côté vers la droite pour se repositionner",
-                        "{Sujet} saute vers sa gauche à {Hauteur} pour éviter {Cible}",
-                        "{Sujet} saute vers sa droite à {Hauteur} pour atteindre sa position",
-                        "{Sujet} réalise un saut latéral gauche pour esquiver",
-                        "{Sujet} réalise un saut latéral droit pour esquiver"
-                    ]
-                }
-            }
+            exemples: [
+                "{Sujet} saute vers l'avant à {Hauteur} de hauteur pour atteindre {Cible}",
+                "{Sujet} bondit vers {Cible} en trajectoire ascendante à {Hauteur} pour l'atteindre",
+                "{Sujet} quitte le sol en sautant vers l'avant pour rejoindre {Cible}",
+                "{Sujet} s'élève dans les airs vers l'avant à {Hauteur} pour parvenir jusqu'à {Cible}",
+                "{Sujet} bondit en avant pour atteindre {Cible}",
+                "{Sujet} saute directement vers {Cible} à {Hauteur}",
+                "{Sujet} se projette dans les airs vers l'avant pour rejoindre {Cible}",
+                "{Sujet} prend son impulsion et saute vers {Cible}",
+                "{Sujet} effectue un bond vers l'avant à {Hauteur} pour atteindre {Cible}",
+                "{Sujet} s'élance dans les airs en direction de {Cible}",
+                "{Sujet} bondit vers l'avant pour se rapprocher de {Cible}",
+                "{Sujet} saute en avant en direction de {Cible} à {Hauteur}",
+                "{Sujet} quitte le sol et progresse vers {Cible} pendant son saut",
+                "{Sujet} se propulse vers l'avant dans les airs pour atteindre {Cible}",
+                "{Sujet} réalise un saut orienté vers {Cible}",
+                "{Sujet} effectue un bond aérien vers l'avant pour rejoindre {Cible}",
+                "{Sujet} saute en direction de {Cible} avec une trajectoire ascendante",
+                "{Sujet} s'élève puis avance vers {Cible} à {Hauteur}",
+                "{Sujet} bondit vers l'avant sur sa trajectoire pour atteindre {Cible}",
+                "{Sujet} prend de l'élan et saute vers {Cible} pour le rejoindre"
+            ]
         },
 
-
-        // ==========================================================
-        // ROULADE
-        // ==========================================================
-
-        roulade: {
-            categorie: "deplacement",
-            id: "ROULADE",
+        arriere: {
+            synonymes: [
+                "vers l'arrière",
+                "en arrière",
+                "vers l'arrière dans les airs",
+                "en sautant vers l'arrière",
+                "en bondissant vers l'arrière",
+                "saut arrière",
+                "bond arrière",
+                "sauter en arrière",
+                "bondir en arrière",
+                "saut de recul",
+                "bond de recul",
+                "reculer en sautant",
+                "sauter en reculant",
+                "s'éloigner par un saut",
+                "sauter dans la direction opposée",
+                "reculer dans les airs"
+            ],
 
             concept:
-                "Déplacement au sol réalisé par rotation du corps autour de lui-même.",
+                "Saut orienté vers l'arrière permettant au sujet de s'éloigner ou de se repositionner.",
 
-            manieres: {
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "HAUTEUR",
+                "TRAJECTOIRE",
+                "INTENTION"
+            ],
 
-                avant: {
-                    concept:
-                        "Roulade au sol orientée vers l'avant.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une roulade vers l'avant sur {Distance} pour se rapprocher de {Cible}",
-                        "{Sujet} roule au sol vers l'avant sur {Distance} pour éviter {Cible}",
-                        "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}",
-                        "{Sujet} roule vers l'avant pour se rapprocher de {Cible}",
-                        "{Sujet} effectue une roulade frontale sur {Distance}",
-                        "{Sujet} se met à rouler vers l'avant pour éviter {Cible}",
-                        "{Sujet} plonge dans une roulade vers l'avant",
-                        "{Sujet} se propulse au sol en roulade avant vers {Cible}",
-                        "{Sujet} effectue un roulement vers l'avant pour avancer",
-                        "{Sujet} roule rapidement vers l'avant sur {Distance}",
-                        "{Sujet} réalise une roulade avant pour franchir la distance",
-                        "{Sujet} s'engage dans une roulade vers l'avant pour atteindre {Cible}",
-                        "{Sujet} avance au sol en effectuant une roulade avant",
-                        "{Sujet} roule en avant afin de se rapprocher de {Cible}",
-                        "{Sujet} effectue plusieurs rotations au sol vers l'avant",
-                        "{Sujet} fait une roulade frontale pour esquiver {Cible}",
-                        "{Sujet} se déplace au sol par une roulade vers l'avant",
-                        "{Sujet} roule droit vers l'avant sur {Distance}",
-                        "{Sujet} effectue une roulade avant pour changer de position",
-                        "{Sujet} utilise une roulade vers l'avant pour rejoindre {Cible}"
-                    ]
-                },
-
-
-                arriere: {
-                    concept:
-                        "Roulade au sol orientée vers l'arrière.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une roulade arrière sur {Distance} pour s'éloigner de {Cible}",
-                        "{Sujet} roule vers l'arrière pour éviter l'attaque de {Cible}",
-                        "{Sujet} fait une roulade arrière pour se repositionner",
-                        "{Sujet} roule au sol vers l'arrière sur {Distance}",
-                        "{Sujet} effectue un roulement arrière pour prendre de la distance",
-                        "{Sujet} se laisse rouler vers l'arrière pour éviter {Cible}",
-                        "{Sujet} part en roulade arrière pour s'éloigner",
-                        "{Sujet} réalise une roulade vers l'arrière afin de sortir de portée",
-                        "{Sujet} roule rapidement en arrière sur {Distance}",
-                        "{Sujet} effectue une roulade arrière pour esquiver",
-                        "{Sujet} se déplace au sol en roulant vers l'arrière",
-                        "{Sujet} recule en effectuant une roulade",
-                        "{Sujet} fait un roulement arrière pour se repositionner",
-                        "{Sujet} roule en arrière pour créer de la distance avec {Cible}",
-                        "{Sujet} effectue une roulade arrière afin d'éviter {Cible}",
-                        "{Sujet} plonge dans une roulade vers l'arrière",
-                        "{Sujet} se propulse au sol en arrière par une roulade",
-                        "{Sujet} roule droit vers l'arrière sur {Distance}",
-                        "{Sujet} utilise une roulade arrière pour s'éloigner de {Cible}",
-                        "{Sujet} effectue une rotation au sol vers l'arrière pour changer de position"
-                    ]
-                },
-
-
-                laterale: {
-                    concept:
-                        "Roulade au sol effectuée latéralement. Le côté indique obligatoirement vers lequel le sujet roule.",
-
-                    structure: [
-                        "SUJET",
-                        "ACTION",
-                        "MANIERE",
-                        "DIRECTION",
-                        "COTE",
-                        "DISTANCE",
-                        "INTENTION"
-                    ],
-
-                    exemples: [
-                        "{Sujet} effectue une roulade latérale sur sa gauche sur {Distance} pour esquiver {Cible}",
-                        "{Sujet} effectue une roulade latérale sur sa droite sur {Distance} pour esquiver {Cible}",
-                        "{Sujet} roule au sol vers sa gauche pour éviter l'attaque",
-                        "{Sujet} réalise une roulade sur son côté droit pour se repositionner",
-                        "{Sujet} roule latéralement vers sa gauche pour éviter {Cible}",
-                        "{Sujet} roule latéralement vers sa droite pour éviter {Cible}",
-                        "{Sujet} effectue une roulade sur sa gauche sur {Distance}",
-                        "{Sujet} effectue une roulade sur sa droite sur {Distance}",
-                        "{Sujet} se laisse rouler vers son côté gauche",
-                        "{Sujet} se laisse rouler vers son côté droit",
-                        "{Sujet} part en roulade latérale à gauche pour esquiver",
-                        "{Sujet} part en roulade latérale à droite pour esquiver",
-                        "{Sujet} se déplace au sol par une roulade vers sa gauche",
-                        "{Sujet} se déplace au sol par une roulade vers sa droite",
-                        "{Sujet} roule de côté vers la gauche pour se repositionner",
-                        "{Sujet} roule de côté vers la droite pour se repositionner",
-                        "{Sujet} effectue un roulement latéral gauche pour éviter {Cible}",
-                        "{Sujet} effectue un roulement latéral droit pour éviter {Cible}",
-                        "{Sujet} réalise une roulade vers son flanc gauche sur {Distance}",
-                        "{Sujet} réalise une roulade vers son flanc droit sur {Distance}"
-                    ]
-                }
-            }
+            exemples: [
+                "{Sujet} saute vers l'arrière à {Hauteur} pour s'éloigner de {Cible}",
+                "{Sujet} bondit en arrière pour éviter {Cible} et se repositionner",
+                "{Sujet} quitte le sol en reculant dans les airs pour esquiver {Cible}",
+                "{Sujet} saute en arrière pour prendre de la distance avec {Cible}",
+                "{Sujet} se projette dans les airs vers l'arrière pour s'éloigner",
+                "{Sujet} bondit vers l'arrière à {Hauteur} pour éviter {Cible}",
+                "{Sujet} recule en sautant pour sortir de portée de {Cible}",
+                "{Sujet} effectue un saut arrière pour se repositionner",
+                "{Sujet} saute directement en arrière pour éviter l'attaque de {Cible}",
+                "{Sujet} se propulse vers l'arrière dans les airs",
+                "{Sujet} bondit en arrière afin de créer de la distance",
+                "{Sujet} prend appui et saute vers l'arrière pour s'éloigner de {Cible}",
+                "{Sujet} quitte le sol en reculant vers l'arrière",
+                "{Sujet} effectue un bond arrière pour éviter {Cible}",
+                "{Sujet} saute en direction opposée à {Cible}",
+                "{Sujet} s'élève puis recule dans les airs pour se repositionner",
+                "{Sujet} bondit en arrière pour sortir de la portée de {Cible}",
+                "{Sujet} réalise un saut arrière à {Hauteur} pour esquiver",
+                "{Sujet} se déplace vers l'arrière par un saut pour prendre de la distance",
+                "{Sujet} effectue un saut de recul pour s'éloigner de {Cible}"
+            ]
         },
+
+        vertical: {
+            synonymes: [
+                "verticalement",
+                "à la verticale",
+                "vers le haut",
+                "directement vers le haut",
+                "droit vers le ciel",
+                "saut vertical",
+                "bond vertical",
+                "sauter sur place",
+                "bondir sur place",
+                "s'élever verticalement",
+                "monter dans les airs",
+                "prendre de la hauteur",
+                "gagner de la hauteur",
+                "effectuer une impulsion verticale",
+                "sauter droit vers le ciel",
+                "se propulser verticalement",
+                "sauter au-dessus de sa position"
+            ],
+
+            concept:
+                "Saut principalement orienté vers le haut avec une progression horizontale minimale.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "HAUTEUR",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} saute verticalement à {Hauteur} pour éviter {Cible}",
+                "{Sujet} bondit directement vers le haut pour prendre de la hauteur",
+                "{Sujet} s'élève verticalement à {Hauteur} pour se repositionner",
+                "{Sujet} saute droit vers le ciel à {Hauteur}",
+                "{Sujet} bondit sur place pour prendre de la hauteur",
+                "{Sujet} se propulse verticalement dans les airs",
+                "{Sujet} quitte le sol en montant directement vers le haut",
+                "{Sujet} effectue un saut vertical pour éviter {Cible}",
+                "{Sujet} bondit directement vers le ciel pour s'élever",
+                "{Sujet} saute à la verticale jusqu'à {Hauteur}",
+                "{Sujet} prend de la hauteur avec un saut vertical",
+                "{Sujet} s'élève brusquement dans une trajectoire verticale",
+                "{Sujet} effectue un bond droit vers le haut",
+                "{Sujet} saute verticalement pour se repositionner",
+                "{Sujet} se projette directement vers le haut à {Hauteur}",
+                "{Sujet} monte dans les airs par une impulsion verticale",
+                "{Sujet} bondit sur place afin d'éviter {Cible}",
+                "{Sujet} effectue une impulsion verticale pour gagner de la hauteur",
+                "{Sujet} saute directement au-dessus de sa position actuelle",
+                "{Sujet} s'élève à la verticale pour prendre de la hauteur"
+            ]
+        },
+
+        laterale: {
+            synonymes: [
+                "latéralement",
+                "sur le côté",
+                "vers le côté",
+                "saut latéral",
+                "bond latéral",
+                "sauter sur le côté",
+                "bondir de côté",
+                "sauter vers la gauche",
+                "sauter vers la droite",
+                "bondir vers la gauche",
+                "bondir vers la droite",
+                "sauter sur sa gauche",
+                "sauter sur sa droite",
+                "bondir sur sa gauche",
+                "bondir sur sa droite",
+                "se projeter latéralement",
+                "se déplacer latéralement dans les airs",
+                "saut latéral gauche",
+                "saut latéral droit",
+                "bond latéral gauche",
+                "bond latéral droit"
+            ],
+
+            concept:
+                "Saut effectué vers un côté. Le côté indique obligatoirement la direction latérale du déplacement.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "COTE",
+                "HAUTEUR",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} saute latéralement sur sa gauche pour éviter {Cible}",
+                "{Sujet} bondit sur sa droite pour esquiver {Cible}",
+                "{Sujet} saute vers son côté gauche pour se repositionner",
+                "{Sujet} effectue un saut latéral vers sa droite pour atteindre sa position",
+                "{Sujet} bondit vers la gauche à {Hauteur} pour éviter {Cible}",
+                "{Sujet} bondit vers la droite à {Hauteur} pour esquiver {Cible}",
+                "{Sujet} se projette dans les airs vers sa gauche",
+                "{Sujet} se projette latéralement vers sa droite",
+                "{Sujet} saute sur le côté gauche pour éviter l'attaque",
+                "{Sujet} saute sur le côté droit pour changer de position",
+                "{Sujet} effectue un bond latéral vers sa gauche",
+                "{Sujet} effectue un bond latéral vers sa droite",
+                "{Sujet} quitte le sol en se déplaçant vers sa gauche",
+                "{Sujet} quitte le sol en se déplaçant vers sa droite",
+                "{Sujet} bondit de côté vers la gauche pour se repositionner",
+                "{Sujet} bondit de côté vers la droite pour se repositionner",
+                "{Sujet} saute vers sa gauche à {Hauteur} pour éviter {Cible}",
+                "{Sujet} saute vers sa droite à {Hauteur} pour atteindre sa position",
+                "{Sujet} réalise un saut latéral gauche pour esquiver",
+                "{Sujet} réalise un saut latéral droit pour esquiver"
+            ]
+        }
+    }
+},
+                             
+         // ==========================================================
+// ROULADE
+// ==========================================================
+
+roulade: {
+    categorie: "deplacement",
+    id: "ROULADE",
+
+    concept:
+        "Déplacement au sol réalisé par rotation du corps autour de lui-même.",
+
+    synonymes: [
+        "rouler",
+        "faire une roulade",
+        "effectuer une roulade",
+        "réaliser une roulade",
+        "faire un roulement",
+        "effectuer un roulement",
+        "rouler au sol",
+        "se déplacer en roulant",
+        "faire une rotation au sol",
+        "effectuer une rotation au sol",
+        "se laisser rouler",
+        "se propulser au sol en roulant",
+        "avancer en roulant",
+        "reculer en roulant"
+    ],
+
+    manieres: {
+
+        avant: {
+            synonymes: [
+                "vers l'avant",
+                "en avant",
+                "roulade avant",
+                "rouler vers l'avant",
+                "rouler en avant",
+                "roulement avant",
+                "rotation au sol vers l'avant",
+                "roulade frontale",
+                "rouler droit devant",
+                "se déplacer en roulant vers l'avant",
+                "avancer en roulade",
+                "se projeter au sol vers l'avant",
+                "effectuer un roulement vers l'avant",
+                "faire une roulade frontale"
+            ],
+
+            concept:
+                "Roulade au sol orientée vers l'avant.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} effectue une roulade vers l'avant sur {Distance} pour se rapprocher de {Cible}",
+                "{Sujet} roule au sol vers l'avant sur {Distance} pour éviter {Cible}",
+                "{Sujet} fait une roulade avant pour esquiver l'attaque de {Cible}",
+                "{Sujet} roule vers l'avant pour se rapprocher de {Cible}",
+                "{Sujet} effectue une roulade frontale sur {Distance}",
+                "{Sujet} se met à rouler vers l'avant pour éviter {Cible}",
+                "{Sujet} plonge dans une roulade vers l'avant",
+                "{Sujet} se propulse au sol en roulade avant vers {Cible}",
+                "{Sujet} effectue un roulement vers l'avant pour avancer",
+                "{Sujet} roule rapidement vers l'avant sur {Distance}",
+                "{Sujet} réalise une roulade avant pour franchir la distance",
+                "{Sujet} s'engage dans une roulade vers l'avant pour atteindre {Cible}",
+                "{Sujet} avance au sol en effectuant une roulade avant",
+                "{Sujet} roule en avant afin de se rapprocher de {Cible}",
+                "{Sujet} effectue plusieurs rotations au sol vers l'avant",
+                "{Sujet} fait une roulade frontale pour esquiver {Cible}",
+                "{Sujet} se déplace au sol par une roulade vers l'avant",
+                "{Sujet} roule droit vers l'avant sur {Distance}",
+                "{Sujet} effectue une roulade avant pour changer de position",
+                "{Sujet} utilise une roulade vers l'avant pour rejoindre {Cible}"
+            ]
+        },
+
+        arriere: {
+            synonymes: [
+                "vers l'arrière",
+                "en arrière",
+                "vers l'arrière au sol",
+                "roulade arrière",
+                "rouler vers l'arrière",
+                "rouler en arrière",
+                "roulement arrière",
+                "rotation au sol vers l'arrière",
+                "reculer en roulade",
+                "reculer en roulant",
+                "faire une roulade de recul",
+                "effectuer un roulement arrière",
+                "se déplacer en roulant vers l'arrière",
+                "se propulser au sol vers l'arrière",
+                "faire une roulade arrière",
+                "rouler en reculant"
+            ],
+
+            concept:
+                "Roulade au sol orientée vers l'arrière.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} effectue une roulade arrière sur {Distance} pour s'éloigner de {Cible}",
+                "{Sujet} roule vers l'arrière pour éviter l'attaque de {Cible}",
+                "{Sujet} fait une roulade arrière pour se repositionner",
+                "{Sujet} roule au sol vers l'arrière sur {Distance}",
+                "{Sujet} effectue un roulement arrière pour prendre de la distance",
+                "{Sujet} se laisse rouler vers l'arrière pour éviter {Cible}",
+                "{Sujet} part en roulade arrière pour s'éloigner",
+                "{Sujet} réalise une roulade vers l'arrière afin de sortir de portée",
+                "{Sujet} roule rapidement en arrière sur {Distance}",
+                "{Sujet} effectue une roulade arrière pour esquiver",
+                "{Sujet} se déplace au sol en roulant vers l'arrière",
+                "{Sujet} recule en effectuant une roulade",
+                "{Sujet} fait un roulement arrière pour se repositionner",
+                "{Sujet} roule en arrière pour créer de la distance avec {Cible}",
+                "{Sujet} effectue une roulade arrière afin d'éviter {Cible}",
+                "{Sujet} plonge dans une roulade vers l'arrière",
+                "{Sujet} se propulse au sol en arrière par une roulade",
+                "{Sujet} roule droit vers l'arrière sur {Distance}",
+                "{Sujet} utilise une roulade arrière pour s'éloigner de {Cible}",
+                "{Sujet} effectue une rotation au sol vers l'arrière pour changer de position"
+            ]
+        },
+
+        laterale: {
+            synonymes: [
+                "latéralement",
+                "sur le côté",
+                "vers le côté",
+                "roulade latérale",
+                "rouler sur le côté",
+                "rouler latéralement",
+                "roulement latéral",
+                "rotation latérale au sol",
+                "roulade de côté",
+                "rouler de côté",
+                "se laisser rouler sur le côté",
+                "rouler vers la gauche",
+                "rouler vers la droite",
+                "rouler sur sa gauche",
+                "rouler sur sa droite",
+                "roulade latérale gauche",
+                "roulade latérale droite",
+                "roulement latéral gauche",
+                "roulement latéral droit",
+                "se déplacer au sol latéralement"
+            ],
+
+            concept:
+                "Roulade au sol effectuée latéralement. Le côté indique obligatoirement vers lequel le sujet roule.",
+
+            structure: [
+                "SUJET",
+                "ACTION",
+                "MANIERE",
+                "DIRECTION",
+                "COTE",
+                "DISTANCE",
+                "INTENTION"
+            ],
+
+            exemples: [
+                "{Sujet} effectue une roulade latérale sur sa gauche sur {Distance} pour esquiver {Cible}",
+                "{Sujet} effectue une roulade latérale sur sa droite sur {Distance} pour esquiver {Cible}",
+                "{Sujet} roule au sol vers sa gauche pour éviter l'attaque",
+                "{Sujet} réalise une roulade sur son côté droit pour se repositionner",
+                "{Sujet} roule latéralement vers sa gauche pour éviter {Cible}",
+                "{Sujet} roule latéralement vers sa droite pour éviter {Cible}",
+                "{Sujet} effectue une roulade sur sa gauche sur {Distance}",
+                "{Sujet} effectue une roulade sur sa droite sur {Distance}",
+                "{Sujet} se laisse rouler vers son côté gauche",
+                "{Sujet} se laisse rouler vers son côté droit",
+                "{Sujet} part en roulade latérale à gauche pour esquiver",
+                "{Sujet} part en roulade latérale à droite pour esquiver",
+                "{Sujet} se déplace au sol par une roulade vers sa gauche",
+                "{Sujet} se déplace au sol par une roulade vers sa droite",
+                "{Sujet} roule de côté vers la gauche pour se repositionner",
+                "{Sujet} roule de côté vers la droite pour se repositionner",
+                "{Sujet} effectue un roulement latéral gauche pour éviter {Cible}",
+                "{Sujet} effectue un roulement latéral droit pour éviter {Cible}",
+                "{Sujet} réalise une roulade vers son flanc gauche sur {Distance}",
+                "{Sujet} réalise une roulade vers son flanc droit sur {Distance}"
+            ]
+        }
+    }
+}, 
+         
 
 
         // ==========================================================
