@@ -18,20 +18,17 @@ const imagesRubriquesAllstars = {
 
     "3": [
         "https://files.catbox.moe/tflyg4.jpg",
-        "https://files.catbox.moe/9yi31e.jpg",
+        "https://files.catbox.moe/9yi31e.jpg"
     ],
 
     "4": [
-        "https://exemple.com/tournois.jpg"
+        "https://files.catbox.moe/g88wqp.jpg", 
+        "https://files.catbox.moe/kgeovt.jpg"
+        
     ],
 
     "5": [
-        "https://exemple.com/boutique1.jpg",
-        "https://exemple.com/boutique2.jpg"
-    ],
-
-    "6": [
-        "https://exemple.com/aventure.jpg"
+        "https://files.catbox.moe/1uokf5.jpg"
     ]
 };
 
