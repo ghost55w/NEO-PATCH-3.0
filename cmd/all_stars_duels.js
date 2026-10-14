@@ -414,376 +414,372 @@ async function getFicheByPseudo(pseudo) {
 }
 
 
-/* ================= PARSER GLOBAL RAZORX ================= */
+/* ================= PARSER RESULTAT MATCH NSL ================= */
 
-function parseRazorX(text) {
+function parseResultatNSL(text) {
 
-    const result = {
-        actions: [],
-        results: []
+    if (!/R[ÉE]SULTAT\s+MATCH\s+NSL/i.test(text || "")) {
+        return null;
+    }
+
+    const resultat = {
+        match: "",
+        winner: null,
+        loser: null,
+        arbitre: "",
+        tours: null
     };
 
-    // ---------- MATCH LIVE ----------
+    const lignes = text
+        .split("\n")
+        .map(ligne => ligne.replace(/\*/g, "").trim())
+        .filter(Boolean);
 
-    const liveBloc = text.match(
-        /▶️`?Match Live`?\s*:\s*([\s\S]+?)(?:▔|🏆`?RESULTAT`?)/i
-    );
+    for (const ligne of lignes) {
 
-    if (liveBloc) {
+        const matchType = ligne.match(/Match\s*:\s*(.*)/i);
 
-        const lignes = liveBloc[1]
-            .split('\n')
-            .map(l => l.trim())
-            .filter(Boolean);
+        if (matchType) {
+            resultat.match = matchType[1].trim();
+            continue;
+        }
 
-        for (const ligne of lignes) {
+        const winner = ligne.match(/Winner\s*:\s*(.*)/i);
 
-            const cleanLine = ligne.replace(
-                /[\u2066-\u2069\u200e\u200f\u202a-\u202e]/g,
-                ''
-            );
+        if (winner) {
 
-            const idx = cleanLine.indexOf(':');
+            const valeur = winner[1].trim();
+            const symbole = valeur.match(/(✅|❌)\s*$/u);
 
-            if (idx === -1) continue;
+            resultat.winner = {
+                pseudo: valeur
+                    .replace(/\s*(✅|❌)\s*$/u, "")
+                    .trim(),
+                symbole: symbole ? symbole[1] : null
+            };
 
-            const p = cleanLine
-                .slice(0, idx)
-                .trim();
+            continue;
+        }
 
-            const s = cleanLine
-                .slice(idx + 1)
-                .trim();
+        const loser = ligne.match(/Loser\s*:\s*(.*)/i);
 
-            if (!p || !s) continue;
+        if (loser) {
 
-            const tag = normalizeTag(p);
+            resultat.loser = {
+                pseudo: loser[1]
+                    .replace(/\s*(✅|❌)\s*$/u, "")
+                    .trim()
+            };
 
-            const stats = s
-                .split('|')
-                .map(v => v.trim());
+            continue;
+        }
 
-            for (const st of stats) {
+        const arbitre = ligne.match(/Arbitre\s*:\s*(.*)/i);
 
-                const m = st.match(
-                    /(talent|strikes|attaques|pv|sta|energie)\s*:?\s*(\d+)/i
-                );
+        if (arbitre) {
+            resultat.arbitre = arbitre[1].trim();
+            continue;
+        }
 
-                if (!m) continue;
+        const toursMatch = ligne.match(/Tours\s*:\s*(\d+)/i);
 
-                result.actions.push({
-                    tag,
-                    stat: m[1].toLowerCase(),
-                    valeur: Number(m[2]),
-                    mode: "set"
-                });
-            }
+        if (toursMatch) {
+            resultat.tours = Number(toursMatch[1]);
         }
     }
 
-    // ---------- RESULTAT ----------
-
-    const resBloc = text.match(
-        /🏆`?RESULTAT`?\s*:\s*([\s\S]+)/i
-    );
-
-    if (resBloc) {
-
-        const lignes = resBloc[1]
-            .split('\n')
-            .map(l => l.trim())
-            .filter(Boolean);
-
-        for (const ligne of lignes) {
-
-            const m = ligne.match(
-                /(victoire|defaite|défaite)\s*:?\s*@?(.+?)(?:\s*(✅|❌))?$/i
-            );
-
-            if (!m) continue;
-
-            result.results.push({
-                type:
-                    m[1].toLowerCase() === "défaite"
-                        ? "defaite"
-                        : m[1].toLowerCase(),
-
-                tag: normalizeTag(m[2]),
-
-                symbol: m[3] || null
-            });
-        }
+    if (
+        !resultat.match ||
+        !resultat.winner?.pseudo ||
+        !resultat.loser?.pseudo ||
+        resultat.tours === null
+    ) {
+        return null;
     }
 
-    return result;
+    return resultat;
 }
 
 
-/* ================= RAZORX AUTO ================= */
+/* ================= RAZORX AUTO — RESULTAT NSL ================= */
 
 ovlcmd({
     nom: "razorx_auto",
     isfunc: true
 }, async (ms_org, ovl, { texte, ms }) => {
 
-    if (!texte?.includes("RAZORX")) return;
+    if (!texte || !/R[ÉE]SULTAT\s+MATCH\s+NSL/i.test(texte)) {
+        return;
+    }
 
     try {
 
-        const duel = duelsEnCours[ms_org];
+        const resultat = parseResultatNSL(texte);
 
-        // ======================================================
-        // VÉRIFICATION DU DUEL
-        // ======================================================
+        if (!resultat) {
+            console.log("⚠️ Pavé NSL incomplet ou invalide.");
+            return;
+        }
 
-        if (!duel) {
+        // ==============================================
+        // 🆚 TYPE DE MATCH
+        // ==============================================
+
+        const typeMatch = normalizeTag(resultat.match);
+
+        if (!["amical", "saison"].includes(typeMatch)) {
 
             console.log(
-                "⚠️ Aucun duel actif pour ce groupe."
+                `⚠️ Type de match non reconnu : ${resultat.match}`
             );
 
             return;
         }
 
-        const {
-            actions,
-            results
-        } = parseRazorX(texte);
+        // Vérifier que Winner et Loser sont différents
+        if (
+            normalizeTag(resultat.winner.pseudo) ===
+            normalizeTag(resultat.loser.pseudo)
+        ) {
+            console.log(
+                "❌ Winner et Loser ne peuvent pas être le même joueur."
+            );
+            return;
+        }
 
-        // ======================================================
-        // VÉRIFICATION DU RESULTAT
-        // ======================================================
+        // ==============================================
+        // 🎴 RECHERCHE DES FICHES ALL STARS
+        // ==============================================
 
-        if (!results.length) {
+        const ficheWinner = await getFicheByPseudo(
+            resultat.winner.pseudo
+        );
+
+        const ficheLoser = await getFicheByPseudo(
+            resultat.loser.pseudo
+        );
+
+        const ficheArbitre = resultat.arbitre
+            ? await getFicheByPseudo(resultat.arbitre)
+            : null;
+
+        if (!ficheWinner) {
 
             console.log(
-                "⚠️ Aucun résultat trouvé dans le pavé RazorX."
+                `❌ Fiche Winner introuvable : ${resultat.winner.pseudo}`
             );
 
             return;
         }
 
-        // ======================================================
-        // MATCH LIVE
-        // STRIKES + ATTAQUES
-        // ======================================================
+        if (!ficheLoser) {
 
-        for (const act of actions) {
+            console.log(
+                `❌ Fiche Loser introuvable : ${resultat.loser.pseudo}`
+            );
 
-            if (!["strikes", "attaques"].includes(act.stat)) {
-                continue;
-            }
+            return;
+        }
 
-            const fiche =
-                await getFicheByPseudo(act.tag);
+        // ==============================================
+        // 🥇 WINNER : +1 VICTOIRE
+        // ==============================================
 
-            if (!fiche) {
+        const victoires =
+            Number(ficheWinner.victoires) || 0;
 
-                console.log(
-                    `⚠️ Joueur introuvable pour ${act.tag}`
-                );
+        await setfiche(
+            "victoires",
+            victoires + 1,
+            ficheWinner.jid
+        );
 
-                continue;
-            }
+        // ==============================================
+        // 🎁 RÉCOMPENSE DU WINNER
+        // ==============================================
 
-            const ancien =
-                Number(fiche[act.stat]) || 0;
+        let recompenseWinner = false;
 
-            const nouveau =
-                ancien + Number(act.valeur);
+        if (resultat.winner.symbole === "✅") {
+
+            const exp =
+                Number(ficheWinner.exp) || 0;
+
+            const golds =
+                Number(ficheWinner.golds) || 0;
+
+            const talents =
+                Number(ficheWinner.talent) || 0;
 
             await setfiche(
-                act.stat,
-                nouveau,
-                fiche.jid
+                "golds",
+                golds + 10000,
+                ficheWinner.jid
             );
-
-            console.log(
-                `📊 ${fiche.pseudo} | ${act.stat} : ${ancien} → ${nouveau}`
-            );
-        }
-
-        // ======================================================
-        // RESULTATS
-        // ======================================================
-
-        for (const r of results) {
-
-            const fiche =
-                await getFicheByPseudo(r.tag);
-
-            if (!fiche) {
-
-                console.log(
-                    `⚠️ Joueur introuvable pour résultat : ${r.tag}`
-                );
-
-                continue;
-            }
-
-            let exp =
-                Number(fiche.exp) || 0;
-
-            let talent =
-                Number(fiche.talent) || 0;
-
-            let golds =
-                Number(fiche.golds) || 0;
-
-            let victoires =
-                Number(fiche.victoires) || 0;
-
-            let defaites =
-                Number(fiche.defaites) || 0;
-
-            // ==================================================
-            // VICTOIRE
-            // ==================================================
-
-            if (r.type === "victoire") {
-
-                victoires += 1;
-
-                if (r.symbol === "✅") {
-
-                    exp += 10;
-                    talent += 1;
-                    golds += 10000;
-
-                    console.log(
-                        `✅ Bonne performance : ${fiche.pseudo}`
-                    );
-
-                } else if (r.symbol === "❌") {
-
-                    exp = Math.max(
-                        0,
-                        exp - 10
-                    );
-
-                    talent = Math.max(
-                        0,
-                        talent - 1
-                    );
-
-                    console.log(
-                        `❌ Mauvaise performance : ${fiche.pseudo}`
-                    );
-                }
-            }
-
-            // ==================================================
-            // DEFAITE
-            // ==================================================
-
-            else if (r.type === "defaite") {
-
-                defaites += 1;
-
-                if (r.symbol === "✅") {
-
-                    exp += 10;
-                    talent += 1;
-                    golds += 10000;
-
-                    console.log(
-                        `✅ Bonne performance : ${fiche.pseudo}`
-                    );
-
-                } else if (r.symbol === "❌") {
-
-                    exp = Math.max(
-                        0,
-                        exp - 10
-                    );
-
-                    talent = Math.max(
-                        0,
-                        talent - 1
-                    );
-
-                    console.log(
-                        `❌ Mauvaise performance : ${fiche.pseudo}`
-                    );
-                }
-            }
-
-            // ==================================================
-            // SAUVEGARDE
-            // ==================================================
 
             await setfiche(
                 "exp",
-                exp,
-                fiche.jid
+                exp + 10,
+                ficheWinner.jid
             );
 
             await setfiche(
                 "talent",
-                talent,
-                fiche.jid
+                talents + 10,
+                ficheWinner.jid
             );
 
-            await setfiche(
-                "golds",
-                golds,
-                fiche.jid
-            );
-
-            await setfiche(
-                "victoires",
-                victoires,
-                fiche.jid
-            );
-
-            await setfiche(
-                "defaites",
-                defaites,
-                fiche.jid
-            );
+            recompenseWinner = true;
 
             console.log(
-                `🏆 ${fiche.pseudo} | ` +
-                `V:${victoires} D:${defaites} | ` +
-                `EXP:${exp} Talent:${talent} Golds:${golds}`
+                `🎁 ${ficheWinner.pseudo} : +10 000 Golds, +10 EXP, +10 talents, +1 victoire`
+            );
+
+        } else if (resultat.winner.symbole === "❌") {
+
+            console.log(
+                `🏆 ${ficheWinner.pseudo} : +1 victoire, aucune récompense`
+            );
+
+        } else {
+
+            console.log(
+                `⚠️ Emoji de performance absent : ${ficheWinner.pseudo}. Victoire enregistrée sans récompense.`
             );
         }
 
-        // ======================================================
-        // FIN DU DUEL
-        // ======================================================
+        // ==============================================
+        // 🥈 LOSER : +1 DÉFAITE
+        // ==============================================
 
-        delete duelsEnCours[ms_org];
+        const defaites =
+            Number(ficheLoser.defaites) || 0;
 
-        console.log(
-            `🏁 Duel terminé automatiquement dans ${ms_org}`
+        await setfiche(
+            "defaites",
+            defaites + 1,
+            ficheLoser.jid
         );
 
-        // ======================================================
-        // CONFIRMATION
-        // ======================================================
+        // ==============================================
+        // ⚠️ PÉNALITÉ SI MOINS DE 3 TOURS
+        // ==============================================
+
+        let penaliteLoser = false;
+
+        if (resultat.tours < 3) {
+
+            const exp = Math.max(
+                0,
+                (Number(ficheLoser.exp) || 0) - 10
+            );
+
+            const talents = Math.max(
+                0,
+                (Number(ficheLoser.talent) || 0) - 10
+            );
+
+            await setfiche(
+                "exp",
+                exp,
+                ficheLoser.jid
+            );
+
+            await setfiche(
+                "talent",
+                talents,
+                ficheLoser.jid
+            );
+
+            penaliteLoser = true;
+
+            console.log(
+                `⚠️ ${ficheLoser.pseudo} : +1 défaite, -10 EXP, -10 talents (${resultat.tours} tour(s))`
+            );
+
+        } else {
+
+            console.log(
+                `📉 ${ficheLoser.pseudo} : +1 défaite, aucune pénalité (${resultat.tours} tours)`
+            );
+        }
+
+        // ==============================================
+        // 👑 RÉCOMPENSE DE L'ARBITRE
+        // ==============================================
+
+        let recompenseArbitre = false;
+
+        if (ficheArbitre) {
+
+            const goldsArbitre =
+                Number(ficheArbitre.golds) || 0;
+
+            await setfiche(
+                "golds",
+                goldsArbitre + 15000,
+                ficheArbitre.jid
+            );
+
+            recompenseArbitre = true;
+
+            console.log(
+                `👑 ${ficheArbitre.pseudo} : +15 000 Golds pour l'arbitrage`
+            );
+
+        } else if (resultat.arbitre) {
+
+            console.log(
+                `⚠️ Aucune fiche All Stars trouvée pour l'arbitre : ${resultat.arbitre}`
+            );
+        }
+
+        // ==============================================
+        // ✅ CONFIRMATION
+        // ==============================================
 
         await ovl.sendMessage(
             ms_org,
             {
                 text:
-                    `🏁 *FIN DU MATCH* | *JUMP™🔅🌀*\n` +
-                    `▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n` +
-                    `✅ Résultats enregistrés.\n` +
-                    `📊 Statistiques mises à jour.\n` +
-                    `🏆 Victoire / défaite enregistrées.\n` +
-                    `🎴 Strikes / attaques enregistrés.\n` +
-                    `🎁 Performances récompensées.\n\n` +
+                    `🏆 *RÉSULTAT MATCH NSL ENREGISTRÉ*\n` +
+                    `▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n\n` +
+                    `🆚 Match : ${resultat.match}\n` +
+                    `🥇 Winner : ${ficheWinner.pseudo}\n` +
+                    `🏆 Victoires : +1\n` +
+                    (
+                        recompenseWinner
+                            ? `🎁 Récompenses Winner : +10 000 Golds, +10 EXP, +10 talents\n`
+                            : `🎁 Récompenses Winner : aucune\n`
+                    ) +
+                    `🥈 Loser : ${ficheLoser.pseudo}\n` +
+                    `📉 Défaites : +1\n` +
+                    (
+                        penaliteLoser
+                            ? `⚠️ Pénalité Loser : -10 EXP, -10 talents\n`
+                            : `✅ Aucune pénalité pour le Loser\n`
+                    ) +
+                    `👤 Arbitre : ${resultat.arbitre || "Non renseigné"}\n` +
+                    (
+                        recompenseArbitre
+                            ? `👑 Récompense Arbitre : +15 000 Golds\n`
+                            : `👑 Récompense Arbitre : aucune\n`
+                    ) +
+                    `🕒 Tours : ${resultat.tours}\n\n` +
                     `╰───────────────────\n` +
-                    `                                   *R A Z O R X™⚡*`
+                    `R A Z O R X™⚡`
             },
-            { quoted: ms }
+            ms ? { quoted: ms } : {}
+        );
+
+        console.log(
+            `🏁 Match NSL terminé : ${ficheWinner.pseudo} vs ${ficheLoser.pseudo}`
         );
 
     } catch (err) {
 
         console.error(
-            "❌ Erreur RAZORX AUTO :",
+            "❌ Erreur RAZORX AUTO NSL :",
             err
         );
     }
@@ -796,28 +792,22 @@ ovlcmd({
     nom_cmd: "pavemodo",
     classe: "Duel",
     react: "📄",
-    desc: "Envoie le pavé RazorX™ vide."
+    desc: "Envoie le pavé de résultat du match NSL."
 }, async (ms_org, ovl) => {
 
-    const pave = `. ◥◣              🌀JUMP™🔆
+    const pave = `.  *◥◣🏆RÉSULTAT MATCH NSL🏆*
 ▔▔▔▔▔▔▔▔▔▔▔◥◣▔▔▔▔▔▔▔
-
-▶️Match Live:
-🎮j1 : Strikes: 0 | attaques: 0
-🎮j2 : Strikes: 0 | attaques: 0
-
-▔▔▔▔▔▔▔▔▔▔▔▔░▔▔▔▔▔▔▔▔
-🏆RESULTAT:
-◥◣victoire :
-◥◣défaite :
-👤Arbitre:
-⏱️Durée:
+*🆚Match:*
+*👍🏼Winner:*
+*👎🏼Loser :*
+*👤Arbitre:*
+*🕒Tours:*
 
 ╰───────────────────
-R A Z O R X™⚡`;
+                          R A Z O R X™⚡`;
 
-    await ovl.sendMessage(
-        ms_org,
-        { text: pave }
-    );
+    await ovl.sendMessage(ms_org, {
+        text: pave
+    });
 });
+
