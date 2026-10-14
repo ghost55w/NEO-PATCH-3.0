@@ -1,5 +1,9 @@
 const { ovlcmd } = require("../lib/ovlcmd");
-const { getData, setfiche } = require("../DataBase/allstars_divs_fiches");
+const {
+    getData,
+    getAllFiches,
+    setfiche
+} = require("../DataBase/allstars_divs_fiches");
 
 //================= ARENES =================
 const arenes = [
@@ -59,6 +63,10 @@ function normalizeTag(tag) {
     return String(tag || '')
         .replace(/@/g, '')
         .replace(/[\u2066-\u2069\u200e\u200f\u202a-\u202e]/g, '')
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+        .replace(/\uFE0F/g, '')
         .trim()
         .toLowerCase();
 }
@@ -374,41 +382,30 @@ ovlcmd({
    ========================================================== */
 
 async function getFicheByPseudo(pseudo) {
-
     const cible = normalizeTag(pseudo);
 
     try {
+        const donnees = await getAllFiches();
+        if (!donnees) return null;
 
-        const fiches = await getData();
+        const fiches = Array.isArray(donnees)
+            ? donnees
+            : Object.values(donnees);
 
-        if (!fiches) return null;
-
-        const liste = Array.isArray(fiches)
-            ? fiches
-            : Object.values(fiches);
-
-        return liste.find(fiche => {
-
+        return fiches.find(fiche => {
             const valeurs = [
                 fiche.pseudo,
                 fiche.nom,
                 fiche.code_fiche
             ];
 
-            return valeurs.some(
-                valeur =>
-                    normalizeTag(valeur) === cible
+            return valeurs.some(valeur =>
+                normalizeTag(valeur) === cible
             );
-
         }) || null;
 
     } catch (err) {
-
-        console.error(
-            "❌ Erreur getFicheByPseudo :",
-            err
-        );
-
+        console.error("❌ Erreur recherche fiche All Stars :", err);
         return null;
     }
 }
