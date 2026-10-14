@@ -413,87 +413,81 @@ async function getFicheByPseudo(pseudo) {
 
 /* ================= PARSER RESULTAT MATCH NSL ================= */
 
-function parseResultatNSL(text) {
+function parseResultatNSL(texte) {
+    try {
+        const contenu = String(texte || "");
 
-    if (!/R[ÉE]SULTAT\s+MATCH\s+NSL/i.test(text || "")) {
+        if (!/R[ÉE]SULTAT\s+MATCH\s+NSL/i.test(contenu)) {
+            return null;
+        }
+
+        const lignes = contenu
+            .split(/\r?\n/)
+            .map(ligne => ligne.replace(/\*/g, "").trim())
+            .filter(Boolean);
+
+        const lire = (nom) => {
+            const ligne = lignes.find(l =>
+                new RegExp(`^.*${nom}\\s*:`, "i").test(l)
+            );
+
+            if (!ligne) return "";
+
+            return ligne
+                .replace(new RegExp(`^.*?${nom}\\s*:\\s*`, "i"), "")
+                .trim();
+        };
+
+        const match = lire("Match");
+        const winnerBrut = lire("Winner");
+        const loserBrut = lire("Loser");
+        const arbitre = lire("Arbitre");
+        const toursMatch = contenu.match(
+            /(?:🕒|🔟)?\s*\*?\s*Tours\s*\*?\s*:\s*(\d+)/i
+        );
+
+        const symboleWinnerMatch = winnerBrut.match(/[✅❌]\s*$/u);
+        const symboleWinner = symboleWinnerMatch
+            ? symboleWinnerMatch[0].trim()
+            : "";
+
+        const winner = winnerBrut
+            .replace(/[✅❌]\s*$/u, "")
+            .trim();
+
+        const loser = loserBrut
+            .replace(/[✅❌]\s*$/u, "")
+            .trim();
+
+        if (!match || !winner || !loser || !toursMatch) {
+            console.log("⚠️ Résultat NSL incomplet :", {
+                match,
+                winner,
+                loser,
+                arbitre,
+                tours: toursMatch?.[1]
+            });
+            return null;
+        }
+
+        if (!["amical", "saison"].includes(match.toLowerCase())) {
+            console.log("⚠️ Type de match non reconnu :", match);
+            return null;
+        }
+
+        return {
+            match,
+            winner,
+            symboleWinner,
+            loser,
+            arbitre,
+            tours: Number(toursMatch[1])
+        };
+
+    } catch (err) {
+        console.error("❌ Erreur parseResultatNSL :", err);
         return null;
     }
-
-    const resultat = {
-        match: "",
-        winner: null,
-        loser: null,
-        arbitre: "",
-        tours: null
-    };
-
-    const lignes = text
-        .split("\n")
-        .map(ligne => ligne.replace(/\*/g, "").trim())
-        .filter(Boolean);
-
-    for (const ligne of lignes) {
-
-        const matchType = ligne.match(/Match\s*:\s*(.*)/i);
-
-        if (matchType) {
-            resultat.match = matchType[1].trim();
-            continue;
-        }
-
-        const winner = ligne.match(/Winner\s*:\s*(.*)/i);
-
-        if (winner) {
-
-            const valeur = winner[1].trim();
-            const symbole = valeur.match(/(✅|❌)\s*$/u);
-
-            resultat.winner = {
-                pseudo: valeur
-                    .replace(/\s*(✅|❌)\s*$/u, "")
-                    .trim(),
-                symbole: symbole ? symbole[1] : null
-            };
-
-            continue;
-        }
-
-        const loser = ligne.match(/Loser\s*:\s*(.*)/i);
-
-        if (loser) {
-
-            resultat.loser = {
-                pseudo: loser[1]
-                    .replace(/\s*(✅|❌)\s*$/u, "")
-                    .trim()
-            };
-
-            continue;
-        }
-
-        const arbitre = ligne.match(/Arbitre\s*:\s*(.*)/i);
-
-        if (arbitre) {
-            resultat.arbitre = arbitre[1].trim();
-            continue;
-        }
-
-       const toursMatch = texte.match(/[🕒🔟]?\s*Tours\s*:\s*(\d+)/i); 
-        if (toursMatch) {
-            resultat.tours = Number(toursMatch[1]);
-        }
-    }
-
-    if (
-        !resultat.match ||
-        !resultat.winner?.pseudo ||
-        !resultat.loser?.pseudo ||
-        resultat.tours === null
-    ) {
-        return null;
-    }
-
-    return resultat;
 }
 
 
