@@ -478,8 +478,7 @@ function parseResultatNSL(text) {
             continue;
         }
 
-        const toursMatch = ligne.match(/Tours\s*:\s*(\d+)/i);
-
+       const toursMatch = texte.match(/[🕒🔟]?\s*Tours\s*:\s*(\d+)/i); 
         if (toursMatch) {
             resultat.tours = Number(toursMatch[1]);
         }
