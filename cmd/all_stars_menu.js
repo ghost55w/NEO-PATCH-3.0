@@ -124,8 +124,8 @@ ovlcmd({
         { quoted: ms }
     );
 
-    // Attendre 30 secondes
-    await new Promise(resolve => setTimeout(resolve, 30000));
+    // Attendre 20 secondes
+    await new Promise(resolve => setTimeout(resolve, 20000));
 
     // Étape 2 : menu prêt
     await ovl.sendMessage(ms_org, {
@@ -153,7 +153,7 @@ ovlcmd({
         ms_org,
         {
             image: {
-                url: "https://files.catbox.moe/uz7tyi.jpg"
+                url: "https://files.catbox.moe/0g8gpd.jpg"
             },
             caption
         },
