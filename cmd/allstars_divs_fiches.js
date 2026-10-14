@@ -176,19 +176,19 @@ async function verifierNiveauXP(jid, ovl, chat) {
     if (nouveauNiveau > ancienNiveau) {
 
       const texte =
-`🎉🎉🎉 ✨ *LEVEL UP* ✨ 🎉🎉🎉
+`.  *◥◣ 🎉🏆LEVEL UP XP🔰🎊*
+▔▔▔▔▔▔▔▔▔▔▔◥◣▔▔▔▔▔▔▔
 
-🏆 *FÉLICITATIONS !* 🏆
-👤 ${mention} vient d'atteindre le niveau supérieur !
-⚡ Continue comme ça vers le sommet ! 🏆🏆🏆
+*🏆FÉLICITATIONS CHAMPION !🏆*
+*👤Joueur:*  ${mention}
+*✨Niveau:*  ${ancienNiveau} ➜ 🌟 *${nouveauNiveau}*
+*🔰EXP:* ${exp}/1000 XP
 
-🎖️ *Niveau :*
-${ancienNiveau} ➜ 🌟 *${nouveauNiveau}*
+⚡ Tu viens de franchir un nouveau palier !
+🔥 Continue ta progression vers le sommet !
 
-⏫ *XP :*
-${exp}/1000 XP
-
-░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
+╰───────────────────
+                          R A Z O R X™⚡`;
 
       // Image de fiche disponible
       if (data.oc_url && data.oc_url !== "aucun") {
