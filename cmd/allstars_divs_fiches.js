@@ -81,15 +81,52 @@ async function telechargerImageFiche(url) {
 // ===============================================================
 
 function calculerNiveauXP(exp) {
-  exp = Number(exp) || 0;
+    exp = Math.max(0, Math.min(1000, Number(exp) || 0));
 
-  // 0-99 XP  = niveau 1
-  // 100-199  = niveau 2
-  // 200-299  = niveau 3
-  // etc.
-  return Math.floor(exp / 100) + 1;
+    return exp === 0
+        ? 1
+        : Math.ceil(exp / 100);
 }
 
+// ===============================================================
+// 📊 CALCUL AUTOMATIQUE DE LA NOTE /100
+// ===============================================================
+
+function calculerNote(talent, victoires, defaites) {
+    talent = Math.max(0, Math.min(1000, Number(talent) || 0));
+    victoires = Math.max(0, Number(victoires) || 0);
+    defaites = Math.max(0, Number(defaites) || 0);
+
+    // 50 points : talent
+    const scoreTalent = (talent / 1000) * 50;
+
+    // 40 points : ratio victoires/défaites,
+    // avec un ajustement selon le nombre de matchs joués
+    const matchs = victoires + defaites;
+    const ratioVictoires = matchs > 0
+        ? victoires / matchs
+        : 0;
+
+    const fiabilite = Math.min(matchs / 20, 1);
+    const scoreResultats =
+        ratioVictoires * fiabilite * 40;
+
+    // 10 points : volume de victoires
+    const scoreVictoires =
+        Math.min(victoires / 100, 1) * 10;
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Math.round(
+                scoreTalent +
+                scoreResultats +
+                scoreVictoires
+            )
+        )
+    );
+}
 
 // ===============================================================
 // 🔄 VÉRIFICATION AUTOMATIQUE DU NIVEAU
@@ -149,7 +186,7 @@ async function verifierNiveauXP(jid, ovl, chat) {
 ${ancienNiveau} ➜ 🌟 *${nouveauNiveau}*
 
 ⏫ *XP :*
-${exp}/3000 XP
+${exp}/1000 XP
 
 ░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
 
@@ -206,7 +243,7 @@ ${exp}/3000 XP
 ${ancienNiveau} ➜ *${nouveauNiveau}*
 
 ⏫ *XP :*
-${exp}/3000 XP
+${exp}/1000 XP
 
 ░▒░  *𝗡𝗘𝗢🔷 ESPORTS ARENA®🏆* ░▒░`;
 
@@ -308,13 +345,16 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 ◇ *Rank 🎖️*: ${data.rang || 'aucun'}
 ◇ *Classe🎖️*: ${data.classe || 'aucun'}
 
+*◥◣ STATS 📊*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds || 0} ©🧭
-◇ *Exp⏫*: ${data.exp || 0}/3000 XP
+◇ *Exp⏫*: ${data.exp || 0}/1000 XP 🔰
+◇ *Points de Talent🌟*: ${data.talent || 0}/1000 PU🌟
 ◇ *Archetype ⚖️*: ${data.archetype || 'aucun'}
+◇📈 Note: ${data.note || 0}/100
 
-░▒░░ PALMARÈS🏆
-▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
+*◥◣ PALMARÈS🏆*
+▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ✅ Victoires: ${data.victoires || 0} - ❌ Défaites: ${data.defaites || 0}
 *◇🏆Championnats MVP*: ${data.championnats || 0}
 *◇🏆NEO cup💫*: ${data.neo_cup || 0}
@@ -326,14 +366,7 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 *◇🗿Laureat🏆*: ${data.sigma || 0}
 *◇🎖️Neo Globes*: ${data.neo_globes || 0}
 
-░▒░▒░ STATS 📊
-▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
-📈 Note: ${data.note || 0}/100
-⌬ *Talent⭐:* ▱▱▱▱▬▬▬ ${data.talent || 0}
-⌬ *Strikes👊🏻:* ▱▱▱▱▬▬▬ ${data.strikes || 0}
-⌬ *Attaques🌀:* ▱▱▱▱▬▬▬ ${data.attaques || 0}
-
-░▒░▒░ CARDS 🎴: ${count}
+*◥◣ CARDS 🎴:* ${count}
 ▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 🎴 ${cardsFormatted}
 
