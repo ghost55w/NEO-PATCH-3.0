@@ -348,7 +348,7 @@ const cards = [
   Price: "800k",
   specs: {
     force: 2,
-    speed: 2,
+    speed: 1,
     attacks: 2
   },
   Moves: {
@@ -453,8 +453,8 @@ const cards = [
   Price: "100k",
   specs: {
     force: 1,
-    speed: 2,
-    attacks: 2
+    speed: 0,
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -495,7 +495,7 @@ const cards = [
   Price: "310nc",
   specs: {
     force: 4,
-    speed: 4,
+    speed: 1,
     attacks: 4
   },
   Moves: {
@@ -515,9 +515,9 @@ const cards = [
   card: "https://files.catbox.moe/gz77gh.jpg",
   Price: "300k",
   specs: {
-    force: 2,
-    speed: 2,
-    attacks: 2
+    force: 1,
+    speed: 0,
+    attacks: 3
   },
   Moves: {
     basic: [],
@@ -557,9 +557,9 @@ const cards = [
   card: "https://files.catbox.moe/yis1od.jpg",
   Price: "450k",
   specs: {
-    force: 2,
+    force: 3,
     speed: 2,
-    attacks: 2
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -579,7 +579,7 @@ const cards = [
   Price: "530nc",
   specs: {
     force: 6,
-    speed: 6,
+    speed: 5,
     attacks: 6
   },
   Moves: {
@@ -740,13 +740,13 @@ const cards = [
   name: "Boruto",
   grade: "Bronze",
   rarete: "Sparking SP",
-  category: "S",
+  category: "S-",
   univers: "Boruto",
   images: [],
   card: "https://files.catbox.moe/8qzmzr.jpg",
   Price: "300k",
   specs: {
-    force: 2,
+    force: 1,
     speed: 2,
     attacks: 2
   },
@@ -811,7 +811,7 @@ const cards = [
   specs: {
     force: 1,
     speed: 1,
-    attacks: 2
+    attacks: 1
   },
   Moves: {
     basic: [],
@@ -832,7 +832,7 @@ const cards = [
   specs: {
     force: 4,
     speed: 4,
-    attacks: 5
+    attacks: 4
   },
   Moves: {
     basic: [],
