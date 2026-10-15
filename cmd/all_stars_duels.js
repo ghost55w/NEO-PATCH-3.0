@@ -442,9 +442,9 @@ function parseResultatNSL(texte) {
         const winnerBrut = lire("Winner");
         const loserBrut = lire("Loser");
         const arbitre = lire("Arbitre");
-        const toursMatch = contenu.match(
-            /(?:🕒|🔟)?\s*\*?\s*Tours\s*\*?\s*:\s*(\d+)/i
-        );
+        const toursMatch = lignes
+    .map(ligne => ligne.match(/Tours\s*:\s*(\d+)/i))
+    .find(Boolean);
 
         const symboleWinnerMatch = winnerBrut.match(/[✅❌]\s*$/u);
         const symboleWinner = symboleWinnerMatch
