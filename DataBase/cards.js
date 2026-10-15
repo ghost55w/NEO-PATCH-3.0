@@ -137,8 +137,8 @@ const cards = [
   card: "https://files.catbox.moe/o8waf7.jpg",
   Price: "450K",
   specs: {
-        force: 3,
-        speed: 2,
+        force: 2,
+        speed: 1,
         attacks: 2
     },
     Moves: {
@@ -159,7 +159,7 @@ const cards = [
   Price: "",
   specs: {
         force: 4,
-        speed: 3,
+        speed: 1,
         attacks: 4
     },
     Moves: {
@@ -179,8 +179,8 @@ const cards = [
   card: "https://files.catbox.moe/u18ovi.jpg",
   Price: "1M",
   specs: {
-    force: 3,
-    speed: 3,
+    force: 2,
+    speed: 0,
     attacks: 3
   },
   Moves: {
@@ -201,7 +201,7 @@ const cards = [
   Price: "1M",
   specs: {
     force: 4,
-    speed: 3,
+    speed: 1,
     attacks: 3
   },
   Moves: {
@@ -222,7 +222,7 @@ const cards = [
   Price: "100nc",
   specs: {
     force: 4,
-    speed: 3,
+    speed: 1,
     attacks: 4
   },
   Moves: {
