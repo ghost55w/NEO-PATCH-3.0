@@ -21,30 +21,92 @@ const normalize = str =>
         .replace(/[^a-z0-9]/g, "");
 
 //-------- VERIFICATION NIVEAU POUR ACHAT
+//-------- VERIFICATION NIVEAU EXP POUR ACHAT
 const checkLevelRequirement = (playerLevel, cardCategory, cardGrade) => {
-    let levelRequired = 0;
+    const category = normalize(cardCategory);
+    const grade = normalize(cardGrade);
 
-    if (["or", "gold"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 10;
-        else if (cardGrade === "s") levelRequired = 5;
-    } else if (["argent", "silver"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 5;
-        else if (cardGrade === "s") levelRequired = 5;
-    } else if (["bronze"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 3;
-        else if (cardGrade === "s") levelRequired = 3;
-    } else if (["ss", "ss+", "ssp", "ss-", "ssm"].includes(cardGrade)) {
-        levelRequired = 15;
-    }
+    let minLevel = 0;
+    let maxLevel = 0;
 
-    if (playerLevel < levelRequired) {
+    // Tranches de niveaux classiques
+    if (category === "bronze") {
+        minLevel = 1;
+        maxLevel = 4;
+    } else if (["argent", "silver"].includes(category)) {
+        minLevel = 5;
+        maxLevel = 7;
+    } else if (["or", "gold"].includes(category)) {
+        minLevel = 8;
+        maxLevel = 10;
+    } else {
         return {
             ok: false,
             message:
-                `❌ Tu n'as pas le niveau requis pour posséder cette carte.\n` +
-                `Niveau requis: ${levelRequired} ▲, ton niveau: ${playerLevel} ▲  
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░  
-                              🌀🔆`
+`. ◥◣              🌀JUMP™ SHOP🛍️ 🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+❌ Catégorie de carte inconnue : ${cardCategory}
+
+╰───────────────────
+                            🌀🔆`
+        };
+    }
+
+    // Grades SS concernés
+    const isSS = ["ss-", "ss", "ss+"].includes(grade);
+
+    // Niveau spécial pour les cartes SS
+    if (isSS) {
+        const requiredLevel = {
+            bronze: 4,
+            argent: 7,
+            silver: 7,
+            or: 10,
+            gold: 10
+        }[category];
+
+        if (playerLevel < requiredLevel) {
+            return {
+                ok: false,
+                message:
+`. ◥◣              🌀JUMP™ SHOP🛍️ 🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+❌ *NIVEAU EXP INSUFFISANT*
+
+🎴 Catégorie : ${cardCategory}
+💎 Grade : ${cardGrade}
+🔰 Niveau requis : ${requiredLevel}
+🔰 Ton niveau actuel : ${playerLevel}
+
+⚠️ Cette carte SS exige un niveau EXP supérieur.
+
+╰───────────────────
+                            🌀🔆`
+            };
+        }
+    }
+
+    // Vérification des tranches de niveaux classiques
+    if (playerLevel < minLevel || playerLevel > maxLevel) {
+        return {
+            ok: false,
+            message:
+`. ◥◣              🌀JUMP™ SHOP🛍️ 🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+❌ *NIVEAU EXP INSUFFISANT*
+
+🎴 Catégorie : ${cardCategory}
+💎 Grade : ${cardGrade}
+🔰 Niveau autorisé : ${minLevel} à ${maxLevel}
+🔰 Ton niveau actuel : ${playerLevel}
+
+⚠️ Ton niveau ne correspond pas à cette carte.
+
+╰───────────────────
+                            🌀🔆`
         };
     }
 
