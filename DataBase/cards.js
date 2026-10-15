@@ -243,7 +243,7 @@ const cards = [
   Price: "200nc",
   specs: {
     force: 4,
-    speed: 4,
+    speed: 1,
     attacks: 4
   },
   Moves: {
@@ -264,7 +264,7 @@ const cards = [
   Price: "420nc",
   specs: {
     force: 4,
-    speed: 5,
+    speed: 1,
     attacks: 4
   },
   Moves: {
@@ -285,7 +285,7 @@ const cards = [
   Price: "190nc",
   specs: {
     force: 4,
-    speed: 4,
+    speed: 1,
     attacks: 4
   },
   Moves: {
@@ -306,7 +306,7 @@ const cards = [
   Price: "90nc",
   specs: {
     force: 4,
-    speed: 3,
+    speed: 1,
     attacks: 4
   },
   Moves: {
@@ -349,7 +349,7 @@ const cards = [
   specs: {
     force: 2,
     speed: 2,
-    attacks: 3
+    attacks: 2
   },
   Moves: {
     basic: [],
@@ -369,7 +369,7 @@ const cards = [
   Price: "1M",
   specs: {
     force: 2,
-    speed: 3,
+    speed: 1,
     attacks: 2
   },
   Moves: {
@@ -390,7 +390,7 @@ const cards = [
   Price: "300k",
   specs: {
     force: 2,
-    speed: 2,
+    speed: 0,
     attacks: 3
   },
   Moves: {
@@ -411,7 +411,7 @@ const cards = [
   Price: "450k",
   specs: {
     force: 3,
-    speed: 2,
+    speed: 0,
     attacks: 3
   },
   Moves: {
