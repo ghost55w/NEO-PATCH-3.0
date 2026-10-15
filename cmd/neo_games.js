@@ -333,10 +333,11 @@ ovlcmd({
       const autorises = [
         '120363049564083813@g.us',
         '120363307444088356@g.us',
-        '120363403433342575@g.us', 
+        '120363403433342575@g.us',
         '22651463203@s.whatsapp.net',
-        '22605463559@s.whatsapp.net', 
-        ];
+        '22605463559@s.whatsapp.net',
+      ];
+
       if (!autorises.includes(ms_org)) return;
 
       // IMAGE DE DÉBUT
@@ -348,21 +349,35 @@ ovlcmd({
       // -------------------------
       //   DEMANDE DE NIVEAU
       // -------------------------
-const demanderNiveau = async (tentative = 1) => {
-  if (tentative > 3) throw new Error("MaxAttempts");
-  try {
-    const rep = await ovl.recup_msg({ auteur: auteur_Message, ms_org, temps: 60000 });
-    const texte = rep.message?.extendedTextMessage?.text || rep.message?.conversation || "";
-    const r = texte.toLowerCase();
-    if (["legend", "legends"].includes(r)) return "legend";
-    if (r === "ultra") return "ultra";
-    if (r === "sparking") return "sparking";
-    await repondre("Choix invalide. Réponds par *legend*, *ultra* ou *sparking*.");
-    return await demanderNiveau(tentative + 1);
-  } catch (e) {
-    throw new Error("Timeout");
-  }
-};
+      const demanderNiveau = async (tentative = 1) => {
+        if (tentative > 3) throw new Error("MaxAttempts");
+
+        try {
+          const rep = await ovl.recup_msg({
+            auteur: auteur_Message,
+            ms_org,
+            temps: 60000
+          });
+
+          const texte =
+            rep.message?.extendedTextMessage?.text ||
+            rep.message?.conversation ||
+            "";
+
+          const r = texte.toLowerCase();
+
+          if (["legend", "legends"].includes(r)) return "legend";
+          if (r === "ultra") return "ultra";
+          if (r === "sparking") return "sparking";
+
+          await repondre("Choix invalide. Réponds par *legend*, *ultra* ou *sparking*.");
+          return await demanderNiveau(tentative + 1);
+
+        } catch (e) {
+          if (e.message === "MaxAttempts") throw e;
+          throw new Error("Timeout");
+        }
+      };
 
       const niveau = await demanderNiveau();
 
@@ -370,16 +385,31 @@ const demanderNiveau = async (tentative = 1) => {
       //  Récupération fiche MyNeo
       // -------------------------
       const ficheNeo = await MyNeoFunctions.getUserData(auteur_Message);
-      if (!ficheNeo) return repondre(`❌ Aucun joueur trouvé avec l'id : ${auteur_Message}`);
+
+      if (!ficheNeo) {
+        return repondre(`❌ Aucun joueur trouvé avec l'id : ${auteur_Message}`);
+      }
 
       // -------------------------
       //  DÉDUCTION DES NC
       // -------------------------
-      const prixNC = { sparking: 20, ultra: 40, legend: 60 }[niveau];
-      if ((ficheNeo.nc || 0) < prixNC) return repondre(`❌ Tu n’as pas assez de NC 🔷 (il te faut ${prixNC})`);
+      const prixNC = {
+        sparking: 20,
+        ultra: 40,
+        legend: 60
+      }[niveau];
 
-      await MyNeoFunctions.updateUser(auteur_Message, { nc: (ficheNeo.nc || 0) - prixNC });
-      await repondre(`🔷 *${prixNC} NC* retirés de ta fiche. Nouveau solde : *${(ficheNeo.nc || 0) - prixNC} NC*`);
+      if ((ficheNeo.nc || 0) < prixNC) {
+        return repondre(`❌ Tu n’as pas assez de NC 🔷 (il te faut ${prixNC})`);
+      }
+
+      await MyNeoFunctions.updateUser(auteur_Message, {
+        nc: (ficheNeo.nc || 0) - prixNC
+      });
+
+      await repondre(
+        `🔷 *${prixNC} NC* retirés de ta fiche. Nouveau solde : *${(ficheNeo.nc || 0) - prixNC} NC*`
+      );
 
       // -------------------------
       //   VIDÉO DE TIRAGE
@@ -389,28 +419,17 @@ const demanderNiveau = async (tentative = 1) => {
         ultra: 'https://files.catbox.moe/kodcj4.mp4',
         legend: 'https://files.catbox.moe/3x9cvk.mp4'
       };
-      await envoyerVideo(ms_org, ovl, videoLinks[niveau]);
 
-      const probasGrade = [
-        { value: "or", probability: 3 },
-        { value: "argent", probability: 25 },
-        { value: "bronze", probability: 70 }
-      ];
-      const probasCategorie = [
-        { value: "ss+", probability: 1 },
-        { value: "ss", probability: 2 },
-        { value: "ss-", probability: 5 },
-        { value: "s+", probability: 18 },
-        { value: "s", probability: 25 },
-        { value: "s-", probability: 40 }
-      ];
+      await envoyerVideo(ms_org, ovl, videoLinks[niveau]);
 
       // -------------------------
       //   Vérification All Stars
       // -------------------------
       const ficheAllStars = await getData({ jid: auteur_Message });
-      if (!ficheAllStars) 
+
+      if (!ficheAllStars) {
         return repondre("❌ Fiche All Stars introuvable pour ce joueur.");
+      }
 
       let allStarsArray = ficheAllStars.all_stars
         ? ficheAllStars.all_stars.split(". ")
@@ -421,13 +440,74 @@ const demanderNiveau = async (tentative = 1) => {
       }
 
       // -------------------------
+      //   NIVEAU EXP ET GRADES AUTORISÉS
+      // -------------------------
+      const playerLevel = parseInt(
+        ficheAllStars?.data?.niveau ??
+        ficheAllStars?.niveau ??
+        0,
+        10
+      );
+
+      let gradesAutorises = [];
+
+      if (playerLevel >= 1 && playerLevel <= 4) {
+        gradesAutorises = ["bronze"];
+      } else if (playerLevel >= 5 && playerLevel <= 7) {
+        gradesAutorises = ["argent"];
+      } else if (playerLevel >= 8 && playerLevel <= 10) {
+        gradesAutorises = ["or"];
+      }
+
+      const probasGrade = gradesAutorises.map(value => ({
+        value,
+        probability: 100
+      }));
+
+      // -------------------------
+      //   CATÉGORIES AUTORISÉES SELON LE GRADE
+      // -------------------------
+      const toutesLesCategories = [
+        { value: "ss+", probability: 1 },
+        { value: "ss", probability: 2 },
+        { value: "ss-", probability: 5 },
+        { value: "s+", probability: 18 },
+        { value: "s", probability: 25 },
+        { value: "s-", probability: 40 }
+      ];
+
+      const seuilSS = {
+        bronze: 4,
+        argent: 7,
+        or: 10
+      };
+
+      const probasCategorie = toutesLesCategories.filter(categorie => {
+        const estGradeSS = ["ss+", "ss", "ss-"].includes(categorie.value);
+
+        if (!estGradeSS) return true;
+
+        return gradesAutorises.some(
+          grade => playerLevel >= seuilSS[grade]
+        );
+      });
+
+      // -------------------------
       //   Tirage de 2 cartes max
       // -------------------------
       const tirees = [];
       const maxCardsToAdd = Math.min(2, 10 - allStarsArray.length);
 
       for (let i = 0; i < maxCardsToAdd; i++) {
-        await envoyerCarte(ms_org, ovl, ms, niveau, probasGrade, probasCategorie, tirees);
+        await envoyerCarte(
+          ms_org,
+          ovl,
+          ms,
+          niveau,
+          probasGrade,
+          probasCategorie,
+          tirees
+        );
       }
 
       // -------------------------
@@ -435,39 +515,48 @@ const demanderNiveau = async (tentative = 1) => {
       // -------------------------
       await addNSWithPaliers(auteur_Message, ovl, ms_org, 5);
 
- // -------------------------
-//   AJOUT DES CARTES DANS ALL STARS
-// -------------------------
+      // -------------------------
+      //   AJOUT DES CARTES DANS ALL STARS
+      // -------------------------
+      const ficheAllStars2 = await getData({ jid: auteur_Message });
 
-// Récupération de la fiche All Stars correctement
-const ficheAllStars2 = await getData({ jid: auteur_Message });
+      let allStarsCardsArray = [];
 
-let allStarsCardsArray = [];
+      if (ficheAllStars2 && typeof ficheAllStars2.cards === "string") {
+        allStarsCardsArray = ficheAllStars2.cards.length > 0
+          ? ficheAllStars2.cards.split(" • ")
+          : [];
+      }
 
-if (ficheAllStars2 && typeof ficheAllStars2.cards === "string") {
-    allStarsCardsArray = ficheAllStars2.cards.length > 0
-        ? ficheAllStars2.cards.split(" • ")
-        : [];
-}
+      // Ajouter les nouvelles cartes
+      for (let card of tirees) {
+        if (allStarsCardsArray.length < 10) {
+          allStarsCardsArray.push(card + "🎰");
+        }
+      }
 
-// Ajouter les nouvelles cartes
-for (let card of tirees) {
-    if (allStarsCardsArray.length < 10) {
-        allStarsCardsArray.push(card + "🎰");
-    }
-}
+      // Sauvegarde propre
+      await setfiche(
+        "cards",
+        allStarsCardsArray.join(" • "),
+        auteur_Message
+      );
 
-// Sauvegarde propre
-await setfiche("cards", allStarsCardsArray.join(" • "), auteur_Message);
+      await repondre(
+        `🎉 Cartes ajoutées à ta fiche All Stars : ${tirees
+          .map(c => c + "🎰")
+          .join(", ")}`
+      );
 
-await repondre(
-  `🎉 Cartes ajoutées à ta fiche All Stars : ${tirees
-    .map(c => c + "🎰")
-    .join(", ")}`
-);
     } catch (e) {
-      if (e.message === "Timeout") return repondre("*⏱️ Temps écoulé sans réponse.*");
-      if (e.message === "MaxAttempts") return repondre("*❌ Trop de tentatives échouées.*");
+      if (e.message === "Timeout") {
+        return repondre("*⏱️ Temps écoulé sans réponse.*");
+      }
+
+      if (e.message === "MaxAttempts") {
+        return repondre("*❌ Trop de tentatives échouées.*");
+      }
+
       repondre("Erreur lors du tirage : " + e.message);
       console.error(e);
     }
@@ -475,3 +564,4 @@ await repondre(
 
   await tirageHandler();
 }); 
+      
