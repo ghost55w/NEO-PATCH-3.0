@@ -9,9 +9,9 @@ const cards = [
   card: "https://files.catbox.moe/7c3pgw.jpg",
   Price: "800K",
   specs: {
-        force: 3,
-        speed: 3,
-        attacks: 3
+        force: 2,
+        speed: 1,
+        attacks: 2
     },
     Moves: {
         basic: [],
@@ -31,8 +31,8 @@ const cards = [
   Price: "600K",
   specs: {
         force: 2,
-        speed: 3,
-        attacks: 3
+        speed: 1,
+        attacks: 2
     },
     Moves: {
         basic: [],
@@ -52,7 +52,7 @@ const cards = [
   Price: "400K",
   specs: {
         force: 1,
-        speed: 2,
+        speed: 0,
         attacks: 2
     },
     Moves: {
@@ -73,7 +73,7 @@ const cards = [
   Price: "1M",
   specs: {
         force: 3,
-        speed: 4,
+        speed: 1,
         attacks: 3
     },
     Moves: {
@@ -95,7 +95,7 @@ const cards = [
   Price: "1M",
   specs: {
         force: 3,
-        speed: 4,
+        speed: 1,
         attacks: 4
     },
     Moves: {
@@ -1201,7 +1201,7 @@ const cards = [
 {
   name: "Dabi",
   grade: "Bronze",
-  rarete: "",
+  rarete: "Ultra UL",
   category: "S+",
   univers: "My Hero Academia",
   images: [],
@@ -1222,8 +1222,8 @@ const cards = [
 {
   name: "Dabura",
   grade: "Argent",
-  rarete: "",
-  category: "SS+",
+  rarete: "Sparking SP",
+  category: "SS+ Extreme",
   univers: "Dragon Ball",
   images: [],
   card: "https://files.catbox.moe/edan2e.jpg",
@@ -1243,7 +1243,7 @@ const cards = [
 {
   name: "Daemon",
   grade: "Or",
-  rarete: "",
+  rarete: "Legends LE",
   category: "S",
   univers: "Boruto",
   images: [],
