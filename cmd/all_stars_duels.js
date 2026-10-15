@@ -392,23 +392,34 @@ async function getFicheByPseudo(pseudo) {
             ? donnees
             : Object.values(donnees);
 
-        return fiches.find(fiche => {
-            const valeurs = [
-                fiche.pseudo,
-                fiche.nom,
-                fiche.code_fiche
-            ];
+        for (const fiche of fiches) {
+            if (!fiche) continue;
 
-            return valeurs.some(valeur =>
-                normalizeTag(valeur) === cible
-            );
-        }) || null;
+            // Le pseudo officiel se trouve dans data.pseudo
+            const data = fiche.data || fiche;
+
+            if (normalizeTag(data.pseudo) === cible) {
+                return {
+                    ...fiche,
+                    ...data,
+                    pseudo: data.pseudo,
+                    jid: fiche.jid || data.jid
+                };
+            }
+        }
+
+        return null;
 
     } catch (err) {
-        console.error("❌ Erreur recherche fiche All Stars :", err);
+        console.error(
+            "❌ Erreur recherche fiche All Stars :",
+            err
+        );
         return null;
     }
 }
+
+
 
 
 /* ================= PARSER RESULTAT MATCH NSL ================= */
