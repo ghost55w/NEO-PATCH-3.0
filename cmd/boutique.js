@@ -371,12 +371,17 @@ if (alreadyOwnsCard) {
     userInput = await waitFor();
     continue;
 }
-                    const levelCheck = checkLevelRequirement(playerLevel, card.category, card.grade.toLowerCase());
-                    if (!levelCheck.ok) {
-                        await repondre(levelCheck.message);
-                        userInput = await waitFor();
-                        continue;
-                    }
+   const levelCheck = checkLevelRequirement(
+    playerLevel,
+    card.category,
+    card.grade
+);
+
+if (!levelCheck.ok) {
+    await repondre(levelCheck.message);
+    userInput = await waitFor();
+    continue;
+}
 
                     let finalPrice = confirmPrice;
                     let couponUsed = false;
