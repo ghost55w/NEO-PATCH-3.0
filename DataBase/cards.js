@@ -21,33 +21,30 @@ const cards = [
     Moves: "🥉BASIC: 🌀PREMIÈRE FORME ENTAILLE D’EAU: l’eau recouvre le katana de Tanjiro puis il effectue une unique frappe horizontale dirigée vers sa cible afin de la décapiter, avec une portée de 2 m. 🌀DEUXIÈME FORME ROUE À EAU: l’eau recouvre le katana de Tanjiro puis il saute à 1 m de hauteur en effectuant un salto avant et libère une unique entaille verticale dans un mouvement circulaire, avec une portée de 2 m. 🌀QUATRIÈME FORME MARÉE FRAPPANTE: l’eau recouvre le katana de Tanjiro puis il effectue une multitude d’entailles obliques de manière fluide afin de libérer plusieurs entailles consécutives, avec une portée de 2 m. 🌀HUITIÈME FORME BASSIN DE CASCADE: l’eau recouvre le katana de Tanjiro puis il effectue une coupe verticale descendante vers sa cible, créant une petite cascade d’eau de 3 m de diamètre qui descend dans la même direction que le mouvement de sa frappe, avec une portée de 2 m. 🥈SPECIAL: 🌀TROISIÈME FORME DANSE FLUIDE: l’eau recouvre le katana de Tanjiro puis il balance et plie sa lame dans un mouvement sinueux avec son corps tout en se déplaçant en zigzags fluides semblables à un serpent afin de couper tout ce qui se trouve sur son passage, avec une portée de 2 m. 🌀SIXIÈME FORME TOURBILLON: l’eau recouvre le katana de Tanjiro puis il fait tourner son corps en utilisant sa lame pour effectuer un mouvement tourbillonnant féroce qui génère un tourbillon d’air capable de déchiqueter tout ce qui est pris dans son courant, avec une portée de 2 m, son effet et son efficacité étant améliorés sous l’eau. 🌀SEPTIÈME FORME POUSSÉE D’ONDULATION DE CHUTE: l’eau recouvre le katana de Tanjiro puis il effectue une poussée précise, rapide et exacte avec son épée, créant des ondulations capables de bloquer les attaques projectiles ainsi que les attaques fonçant directement sur lui, avec une portée de 2 m. 🌀NEUVIÈME FORME ÉCOULEMENT D’EAU ÉCLABOUSSANT, TURBULENT: l’eau recouvre le katana de Tanjiro puis de l’eau se manifeste sous ses pieds au contact du sol, lui permettant de modifier son jeu de jambes afin de minimiser son temps d’atterrissage et la surface nécessaire lors de celui-ci, ce qui lui permet de se déplacer librement et de combattre efficacement dans des endroits sans assise solide, avec une portée de 2 m. 🥇ULTIME: 🌀DIXIÈME FORME DRAGON DU CHANGEMENT: l’eau recouvre le katana de Tanjiro puis il fonce vers son adversaire en effectuant un mouvement de découpe vers le bas, manifestant un dragon d’eau de 3 m de diamètre qui fonce directement vers l’adversaire, avec une portée de 2 m.",
     infos: [
       "Arme: Possède un katana noir de 1m",
-      "Possède un odorat très développé qui lui permet de détecter les mouvements et les faiblesses de ses adversaires.",
-      "Peut utiliser la Danse du Dieu du Feu (Hinokami Kagura) pour effectuer des attaques puissantes.",
-      "Peut développer la marque des pourfendeurs au cours de son évolution."
+      "boost: Concentration intégrale, l'utilisateur prends une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de +1 pendant 3 tours". 
     ]
   },
 
   {
     name: "Giyu",
     grade: "Bronze",
-    rarete: "Sparking",
-    category: "S+",
+    rarete: "Ultra",
+    category: "S",
     univers: "Demon Slayer",
     images: [],
-    card: "",
+    card: "https://files.catbox.moe/93xx42.jpg",
     Price: "200k",
     specs: {
-      force: 2,
+      force: 1,
       speed: 1,
-      attacks: 2
+      attacks: 1
     },
     Moves: "",
     infos: [
-      "Possède un katana Nichirin et maîtrise la Respiration de l'Eau.",
-      "Utilise des mouvements fluides et précis pour enchaîner ses attaques et défendre efficacement.",
-      "A développé la onzième forme de la Respiration de l'Eau, appelée Accalmie, qui neutralise les attaques dans sa zone.",
-      "Possède un sang-froid remarquable qui lui permet d'analyser les situations dangereuses."
-    ]
+      "Arme: Possède un katana de 1m.",
+      "boost: Concentration intégrale, l'utilisateur prends une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de +1 pendant 3 tours",
+      "boost: Marque des pourfendeurs, une fois activée pour 20% d'énergie une marque apparaît sur le front de l'utilisateur ce qui a pour effet de booster le niveau de giyu à S+ et sa force de +1". 
+    ] 
   },
 
   {
