@@ -59,15 +59,12 @@ const cards = [
     specs: {
       force: 2,
       speed: 1,
-      attacks: 0
+      attacks: 1
     },
-    Moves: "",
+    Moves: "🥉BASIC : Demon body Renforcement, un tatouage de ronce rampe sur le corps de Nezuko puis elle durcis rapidement ce qui augmente sa résistance faisant que les adversaires equal et moins fort ne lui cause aucun dégâts au corps à corps et pour les adversaires plus forts jusqu'à force 3 max c'est pareil.  Mais pour les adversaires plus forts de 4 à plus c'est moitié de dégâts encaissés pendant 3 tours. 🥈SPECIAL: CRAMOISES FLAMES ROSE, Seulement en forme démon, Nezuko tends sa main vers l'adversaire en dégageant une grande quantité de flammes  sombres puis elle relâche une vague de flammes rose de 2m diamètre sur la cible causant de grave brûlures. ",
     infos: [
-      "Possède une force physique démoniaque et peut combattre sans arme conventionnelle.",
-      "Utilise un art démoniaque du sang capable d'enflammer le sang démoniaque et les démons touchés.",
-      "Possède une régénération accélérée qui lui permet de récupérer de blessures importantes.",
-      "Peut modifier sa taille pour se dissimuler ou adapter son corps au combat.",
-      "Développe une résistance à la lumière du soleil au cours de son évolution."
+      "Régénération immediate des membres coupés et des blessures, sauf la tête.",
+      "EVEIL:Elle peut s'éveiller en forme de demon complète avec une corne qui se mets à pousser sur sa tête tout en dégageant une grande quantité d'énergie rose sombre puis elle passe en démon voyant son niveau de combat passé à S et sa force à 3. ". 
     ]
   },
 
