@@ -54,8 +54,8 @@ const cards = [
     category: "S",
     univers: "Demon Slayer",
     images: [],
-    card: "",
-    Price: "120k",
+    card: "https://files.catbox.moe/udtxhv.jpg",
+    Price: "100k",
     specs: {
       force: 2,
       speed: 1,
