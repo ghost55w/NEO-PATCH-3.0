@@ -208,3 +208,267 @@ const cards = [
   }
 
 ];
+
+// ---------------- Fonctions utilitaires ----------------
+function generateSpecs(grade, rarete) {
+    return `Specs pour ${grade} - ${rarete || "standard"}`;
+}
+
+function generateMoves(name) {
+    return `Moves de ${name}`;
+}
+
+function generateInfos(name) {
+    return [`Infos de ${name}`];
+}
+
+
+// ---------------- Détermination du prix ----------------
+function determinePrice(pricePart) {
+    if (pricePart === undefined || pricePart === null || pricePart === "") {
+        return { price: 0, unit: "golds" };
+    }
+
+    const text = String(pricePart).toLowerCase().trim();
+
+    // Cas NC (ex: "420nc")
+    if (text.endsWith("nc")) {
+        const value = parseInt(text.replace(/[^\d]/g, ""), 10);
+
+        return {
+            price: Number.isNaN(value) ? 0 : value,
+            unit: "nc"
+        };
+    }
+
+    // Cas GOLDS (ex: "500k", "2m", "100")
+    let total = 0;
+    const priceRegex = /(\d+(?:[.,]\d+)?)([km]?)/g;
+    let match;
+
+    while ((match = priceRegex.exec(text)) !== null) {
+        const value = parseFloat(match[1].replace(",", "."));
+        const unit = match[2];
+
+        if (unit === "k") {
+            total += value * 1000;
+        } else if (unit === "m") {
+            total += value * 1000000;
+        } else {
+            total += value;
+        }
+    }
+
+    return {
+        price: total,
+        unit: "golds"
+    };
+}
+
+
+// ---------------- Formatage pour affichage boutique ----------------
+function formatPrice(priceObj) {
+    if (!priceObj) return "0";
+
+    if (priceObj.unit === "nc") {
+        return `${priceObj.price} 🔷`;
+    }
+
+    return priceObj.price.toLocaleString("fr-FR");
+}
+
+
+// ---------------- Catégories par ordre de puissance ----------------
+const CATEGORIES_PUISSANCE = [
+    // S-
+    "S-",
+    "S- super",
+    "S- ultra",
+    "S- mega",
+    "S- extreme",
+    "S- ultimate",
+
+    // S
+    "S",
+    "S super",
+    "S ultra",
+    "S mega",
+    "S extreme",
+    "S ultimate",
+
+    // S+
+    "S+",
+    "S+ super",
+    "S+ ultra",
+    "S+ mega",
+    "S+ extreme",
+    "S+ ultimate",
+
+    // SS-
+    "SS-",
+    "SS- super",
+    "SS- ultra",
+    "SS- mega",
+    "SS- extreme",
+    "SS- ultimate",
+
+    // SS
+    "SS",
+    "SS super",
+    "SS ultra",
+    "SS mega",
+    "SS extreme",
+    "SS ultimate",
+
+    // SS+
+    "SS+",
+    "SS+ super",
+    "SS+ ultra",
+    "SS+ mega",
+    "SS+ extreme",
+    "SS+ ultimate"
+];
+
+
+// ---------------- Détermination de la catégorie ----------------
+function determineCategory(categoryPart) {
+    if (!categoryPart) return "inconnu";
+
+    const text = String(categoryPart)
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+
+    return CATEGORIES_PUISSANCE.find(
+        category => category.toLowerCase() === text
+    ) || "inconnu";
+}
+
+
+// ---------------- Classement numérique de puissance ----------------
+function getCategoryRank(categoryPart) {
+    const category = determineCategory(categoryPart);
+
+    if (category === "inconnu") return -1;
+
+    return CATEGORIES_PUISSANCE.indexOf(category);
+}
+
+
+// ---------------- Détermination de la rareté ----------------
+function determineRarete(cardObj) {
+    const rarete = cardObj?.rarete;
+
+    if (!rarete) return "standard";
+
+    const text = String(rarete).trim().toLowerCase();
+
+    if (text === "sp" || text === "sparking") {
+        return "Sparking";
+    }
+
+    if (text === "ul" || text === "ultra") {
+        return "Ultra";
+    }
+
+    if (text === "le" || text === "legends") {
+        return "Legends";
+    }
+
+    return String(rarete).trim();
+}
+
+
+// ---------------- Création d'une carte ----------------
+function createCard(cardObj) {
+    const rawPrice =
+        cardObj.Price ??
+        cardObj.price ??
+        cardObj.PRICE;
+
+    const priceData = determinePrice(rawPrice);
+    const rarete = determineRarete(cardObj);
+
+    const infos = Array.isArray(cardObj.infos)
+        ? cardObj.infos
+        : Array.isArray(cardObj.Patterns)
+            ? cardObj.Patterns
+            : Array.isArray(cardObj.patterns)
+                ? cardObj.patterns
+                : [];
+
+    return {
+        name: cardObj.name || "Inconnu",
+
+        grade: cardObj.grade || "Standard",
+
+        rarete: rarete,
+
+        univers: cardObj.univers || "",
+
+        category: determineCategory(cardObj.category),
+
+        categoryRank: getCategoryRank(cardObj.category),
+
+        price: priceData.price,
+
+        unit: priceData.unit,
+
+        image: cardObj.card || "",
+
+        images: Array.isArray(cardObj.images)
+            ? cardObj.images
+            : [],
+
+        specs: cardObj.specs || generateSpecs(
+            cardObj.grade,
+            rarete
+        ),
+
+        Moves:
+            cardObj.Moves ??
+            cardObj.moves ??
+            generateMoves(cardObj.name),
+
+        infos: infos,
+
+        // Compatibilité avec les anciens appels utilisant Patterns
+        Patterns: infos
+    };
+}
+
+
+// ---------------- Grouper les cartes par rareté ----------------
+function groupCardsByRarete(cardsArray) {
+    const groupedCards = {};
+
+    for (const card of cardsArray) {
+        const rarete = card.rarete || "standard";
+
+        if (!groupedCards[rarete]) {
+            groupedCards[rarete] = [];
+        }
+
+        groupedCards[rarete].push(card);
+    }
+
+    return groupedCards;
+}
+
+
+// ---------------- Génération finale ----------------
+const allCards = cards.map(card => createCard(card));
+
+const cardData = groupCardsByRarete(allCards);
+
+
+// ---------------- Exportation ----------------
+module.exports = {
+    cards: cardData,
+    CATEGORIES_PUISSANCE,
+    determineCategory,
+    getCategoryRank,
+    determinePrice,
+    formatPrice,
+    createCard
+};
