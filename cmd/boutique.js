@@ -143,15 +143,16 @@ ovlcmd({
         //-------- TEXTE D'ACCUEIL 
         await ovl.sendMessage(ms_org, {
             image: { url: 'https://files.catbox.moe/i87tdr.png' },
-            caption: `╭────〔 *🛍️BOUTIQUE🛒* 〕  
-
-😃Bienvenue dans la boutique NEO🛍️Store🛒, pour faire un achat il vous suffit de taper comme ceci :
-🛍️achat: sasuke(Hebi) / 🛍️vente: sasuke(Hebi)
-
-Après cela attendez la validation de votre achat ou de votre vente.
-#Happy202️⃣6️⃣🎊🎄
+            caption: `. ◥◣       🌀JUMP™ SHOP🛍️ 🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+😃Bienvenue dans la boutique, vous pouvez acheter où vendre vos cards comme ceci :
+*🛍️Achat: sasuke(Hebi)* 
+*🛍️Vente: sasuke(Hebi)*
+▪️Après cela attendez la validation de votre achat ou de votre vente.
+*#Happy202️⃣6️⃣🎊🎄*.
+ 
 ╰───────────────────
-                    *🔷NEO🛍️STORE*`
+                            🌀🔆`
         }, { quoted: ms });
 
         const waitFor = async (timeout = 120000) => {
@@ -253,12 +254,16 @@ if (
 
     await ovl.sendMessage(ms_org, {
         text:
-            `❌ Cette carte a déjà atteint sa limite de possession.\n\n` +
-            `🎴 Carte : *${card.name}*\n` +
-            `👥 Possesseurs : ${taggedOwners}\n` +
-            `🔒 Limite maximale : *2 utilisateurs*\n\n` +
-            `Cette carte n'est plus disponible à l'achat.`,
-        mentions: owners.slice(0, 2)
+    `. ◥◣              🌀JUMP™ SHOP🛍️ 🔆\n` +
+    `▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔\n\n` +
+    `❌ *ACHAT REFUSÉ*\n\n` +
+    `🎴 Carte : *${card.name}*\n` +
+    `👥 Possesseurs : ${taggedOwners}\n` +
+    `🔒 Limite maximale : *2 utilisateurs*\n\n` +
+    `Cette carte n'est plus disponible à l'achat.\n\n` +
+    `╰───────────────────\n` +
+    `                            🌀🔆`,
+mentions: owners.slice(0, 2)
     }, { quoted: ms });
 
     userInput = await waitFor();
@@ -274,10 +279,10 @@ if (
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 
 *◥◣ 🎴 Carte:* ${card.name}
-🔅*Grade:* ${card.grade}
-🔅*Univers:* ${card.univers}
+🔅 *Grade:* ${card.grade}
+🔅 *Univers:* ${card.univers}
 🔅 *Catégorie:* ${card.category}
-🔅 *Placement:* ${card.placement}
+🔅 *Rareté:* ${card.rarete}
 🛍️ *Prix:* ${formatNumber(confirmPrice)} ${cardIcon}
 
 ✔️ Confirmer ${mode} ? (${confirmOptions})
