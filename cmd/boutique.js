@@ -411,8 +411,8 @@ ${couponUsed ? "✅ Coupon utilisé (100🎟️)" : ""}
                     await setfiche("cards", cardsList.join("\n"), auteur_Message);
 
                     let finalSalePrice = isCasinoSale
-                        ? Math.floor(basePrix * 0.15)
-                        : Math.floor(basePrix / 2);
+    ? Math.floor(basePrix * 0.15)
+    : Math.floor(basePrix * 0.20);
 
                     if (cardCurrency === "golds")
                         await setfiche("golds", golds + finalSalePrice, auteur_Message);
