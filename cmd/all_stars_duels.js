@@ -539,26 +539,26 @@ ovlcmd({
 
         // Vérifier que Winner et Loser sont différents
         if (
-            normalizeTag(resultat.winner.pseudo) ===
-            normalizeTag(resultat.loser.pseudo)
-        ) {
-            console.log(
-                "❌ Winner et Loser ne peuvent pas être le même joueur."
-            );
-            return;
-        }
+    normalizeTag(resultat.winner) ===
+    normalizeTag(resultat.loser)
+) {
+    console.log(
+        "❌ Winner et Loser ne peuvent pas être le même joueur."
+    );
+    return;
+}
 
         // ==============================================
         // 🎴 RECHERCHE DES FICHES ALL STARS
         // ==============================================
 
         const ficheWinner = await getFicheByPseudo(
-            resultat.winner.pseudo
-        );
+    resultat.winner
+);
 
-        const ficheLoser = await getFicheByPseudo(
-            resultat.loser.pseudo
-        );
+const ficheLoser = await getFicheByPseudo(
+    resultat.loser
+);
 
         const ficheArbitre = resultat.arbitre
             ? await getFicheByPseudo(resultat.arbitre)
@@ -601,7 +601,7 @@ ovlcmd({
 
         let recompenseWinner = false;
 
-        if (resultat.winner.symbole === "✅") {
+        if (resultat.symboleWinner === "✅") {
 
             const exp =
                 Number(ficheWinner.exp) || 0;
@@ -636,7 +636,7 @@ ovlcmd({
                 `🎁 ${ficheWinner.pseudo} : +10 000 Golds, +10 EXP, +10 talents, +1 victoire`
             );
 
-        } else if (resultat.winner.symbole === "❌") {
+        } else if (resultat.symboleWinner === "❌") {
 
             console.log(
                 `🏆 ${ficheWinner.pseudo} : +1 victoire, aucune récompense`
