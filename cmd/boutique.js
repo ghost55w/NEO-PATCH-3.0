@@ -327,7 +327,11 @@ if (alreadyOwnsCard) {
     userInput = await waitFor();
     continue;
 }
-                    const levelCheck = checkLevelRequirement(playerLevel, card.category, card.grade.toLowerCase());
+                    const levelCheck = checkLevelRequirement(
+    playerLevel,
+    card.grade,
+    card.category
+);
                     if (!levelCheck.ok) {
                         await repondre(levelCheck.message);
                         userInput = await waitFor();
