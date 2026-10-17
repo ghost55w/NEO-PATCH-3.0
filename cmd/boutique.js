@@ -41,10 +41,19 @@ const checkLevelRequirement = (playerLevel, cardCategory, cardGrade) => {
         return {
             ok: false,
             message:
-                `❌ Tu n'as pas le niveau requis pour posséder cette carte.\n` +
-                `Niveau requis: ${levelRequired} ▲, ton niveau: ${playerLevel} ▲  
-▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░  
-                              🌀🔆`
+                `◥◣              🌀JUMP™ SHOP🛍️ 🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+❌ ACHAT REFUSÉ
+
+🎴 Cette carte nécessite un niveau supérieur.
+🔒 Niveau requis : 8-10 ▲
+👤 Ton niveau : 6 ▲
+
+📌 Continue à progresser pour débloquer cette carte !
+
+╰───────────────────
+🌀🔆`
         };
     }
 
