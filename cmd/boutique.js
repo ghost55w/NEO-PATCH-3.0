@@ -142,7 +142,7 @@ ovlcmd({
 
         //-------- TEXTE D'ACCUEIL 
         await ovl.sendMessage(ms_org, {
-            image: { url: 'https://files.catbox.moe/i87tdr.png' },
+            image: { url: 'https://files.catbox.moe/1uokf5.jpg' },
             caption: `. ◥◣       🌀JUMP™ SHOP🛍️ 🔆
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 😃Bienvenue dans la boutique, vous pouvez acheter où vendre vos cards comme ceci :
