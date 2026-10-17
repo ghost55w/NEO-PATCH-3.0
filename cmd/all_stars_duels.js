@@ -416,6 +416,48 @@ async function getFicheByPseudo(pseudo) {
 } 
 
 
+async function getJoueurParPseudo(pseudo) {
+    const normaliser = texte => String(texte || "")
+        .replace(/@/g, "")
+        .replace(/[\u2066-\u2069\u200e\u200f\u202a-\u202e]/g, "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+        .replace(/\uFE0F/g, "")
+        .trim()
+        .toLowerCase();
+
+    const cible = normaliser(pseudo);
+    const fiches = await getAllFiches();
+
+    const correspondances = fiches.filter(fiche => {
+        const data = typeof fiche.get === "function"
+            ? fiche.get({ plain: true })
+            : fiche.dataValues || fiche;
+
+        return normaliser(data.pseudo) === cible;
+    });
+
+    if (correspondances.length !== 1) {
+        console.log(
+            correspondances.length === 0
+                ? `❌ Joueur introuvable : ${pseudo}`
+                : `❌ Plusieurs fiches pour le pseudo : ${pseudo}`
+        );
+        return null;
+    }
+
+    const fiche = correspondances[0];
+    const data = typeof fiche.get === "function"
+        ? fiche.get({ plain: true })
+        : fiche.dataValues || fiche;
+
+    // On récupère les données actuelles comme dans l'ancien code.
+    return await getData({ jid: data.jid });
+}
+
+
+
 /* ================= PARSER RESULTAT MATCH NSL ================= */
 
 function parseResultatNSL(texte) {
@@ -546,169 +588,62 @@ ovlcmd({
         // 🎴 RECHERCHE DES FICHES ALL STARS
         // ==============================================
 
-        const ficheWinner = await getFicheByPseudo(
-    resultat.winner
-);
+        
+const ficheWinner = await getJoueurParPseudo(resultat.winner);
+const ficheLoser = await getJoueurParPseudo(resultat.loser);
 
-const ficheLoser = await getFicheByPseudo(
-    resultat.loser
-);
+if (!ficheWinner || !ficheLoser) {
+    console.log("❌ Récompenses NSL annulées : fiche manquante.");
+    return;
+}
 
-        const ficheArbitre = resultat.arbitre
-            ? await getFicheByPseudo(resultat.arbitre)
-            : null;
+// ---------- WINNER ----------
+let goldsWinner = Number(ficheWinner.golds) || 0;
+let expWinner = Number(ficheWinner.exp) || 0;
+let talentWinner = Number(ficheWinner.talent) || 0;
+let victoiresWinner = Number(ficheWinner.victoires) || 0;
 
-        if (!ficheWinner) {
+victoiresWinner += 1;
 
-            console.log(
-                `❌ Fiche Winner introuvable : ${resultat.winner}`
-            );
+if (resultat.symboleWinner === "✅") {
+    goldsWinner += 10000;
+    expWinner += 10;
+    talentWinner += 10;
+}
 
-            return;
-        }
+await setfiche("golds", goldsWinner, ficheWinner.jid);
+await setfiche("exp", expWinner, ficheWinner.jid);
+await setfiche("talent", talentWinner, ficheWinner.jid);
+await setfiche("victoires", victoiresWinner, ficheWinner.jid);
 
-        if (!ficheLoser) {
+// ---------- LOSER ----------
+let defaitesLoser = Number(ficheLoser.defaites) || 0;
+let expLoser = Number(ficheLoser.exp) || 0;
+let talentLoser = Number(ficheLoser.talent) || 0;
 
-            console.log(
-                `❌ Fiche Loser introuvable : ${resultat.loser}` 
-            );
+defaitesLoser += 1;
 
-            return;
-        }
+if (resultat.tours < 3) {
+    expLoser = Math.max(0, expLoser - 10);
+    talentLoser = Math.max(0, talentLoser - 10);
+}
 
-        // ==============================================
-        // 🥇 WINNER : +1 VICTOIRE
-        // ==============================================
+await setfiche("defaites", defaitesLoser, ficheLoser.jid);
+await setfiche("exp", expLoser, ficheLoser.jid);
+await setfiche("talent", talentLoser, ficheLoser.jid);
 
-        const victoires =
-            Number(ficheWinner.victoires) || 0;
 
-        await setfiche(
-            "victoires",
-            victoires + 1,
-            ficheWinner.jid
-        );
+// ---------- ARBITRE ----------
+let recompenseArbitre = false;
 
-        // ==============================================
-        // 🎁 RÉCOMPENSE DU WINNER
-        // ==============================================
+if (resultat.arbitre) {
+    const ficheArbitre = await getJoueurParPseudo(resultat.arbitre);
 
-        let recompenseWinner = false;
+    if (ficheArbitre) {
+        const dataArbitre = await getData({ jid: ficheArbitre.jid });
 
-        if (resultat.symboleWinner === "✅") {
-
-            const exp =
-                Number(ficheWinner.exp) || 0;
-
-            const golds =
-                Number(ficheWinner.golds) || 0;
-
-            const talents =
-                Number(ficheWinner.talent) || 0;
-
-            await setfiche(
-                "golds",
-                golds + 10000,
-                ficheWinner.jid
-            );
-
-            await setfiche(
-                "exp",
-                exp + 10,
-                ficheWinner.jid
-            );
-
-            await setfiche(
-                "talent",
-                talents + 10,
-                ficheWinner.jid
-            );
-
-            recompenseWinner = true;
-
-            console.log(
-                `🎁 ${ficheWinner.pseudo} : +10 000 Golds, +10 EXP, +10 talents, +1 victoire`
-            );
-
-        } else if (resultat.symboleWinner === "❌") {
-
-            console.log(
-                `🏆 ${ficheWinner.pseudo} : +1 victoire, aucune récompense`
-            );
-
-        } else {
-
-            console.log(
-                `⚠️ Emoji de performance absent : ${ficheWinner.pseudo}. Victoire enregistrée sans récompense.`
-            );
-        }
-
-        // ==============================================
-        // 🥈 LOSER : +1 DÉFAITE
-        // ==============================================
-
-        const defaites =
-            Number(ficheLoser.defaites) || 0;
-
-        await setfiche(
-            "defaites",
-            defaites + 1,
-            ficheLoser.jid
-        );
-
-        // ==============================================
-        // ⚠️ PÉNALITÉ SI MOINS DE 3 TOURS
-        // ==============================================
-
-        let penaliteLoser = false;
-
-        if (resultat.tours < 3) {
-
-            const exp = Math.max(
-                0,
-                (Number(ficheLoser.exp) || 0) - 10
-            );
-
-            const talents = Math.max(
-                0,
-                (Number(ficheLoser.talent) || 0) - 10
-            );
-
-            await setfiche(
-                "exp",
-                exp,
-                ficheLoser.jid
-            );
-
-            await setfiche(
-                "talent",
-                talents,
-                ficheLoser.jid
-            );
-
-            penaliteLoser = true;
-
-            console.log(
-                `⚠️ ${ficheLoser.pseudo} : +1 défaite, -10 EXP, -10 talents (${resultat.tours} tour(s))`
-            );
-
-        } else {
-
-            console.log(
-                `📉 ${ficheLoser.pseudo} : +1 défaite, aucune pénalité (${resultat.tours} tours)`
-            );
-        }
-
-        // ==============================================
-        // 👑 RÉCOMPENSE DE L'ARBITRE
-        // ==============================================
-
-        let recompenseArbitre = false;
-
-        if (ficheArbitre) {
-
-            const goldsArbitre =
-                Number(ficheArbitre.golds) || 0;
+        if (dataArbitre) {
+            const goldsArbitre = Number(dataArbitre.golds) || 0;
 
             await setfiche(
                 "golds",
@@ -717,18 +652,10 @@ const ficheLoser = await getFicheByPseudo(
             );
 
             recompenseArbitre = true;
-
-            console.log(
-                `👑 ${ficheArbitre.pseudo} : +15 000 Golds pour l'arbitrage`
-            );
-
-        } else if (resultat.arbitre) {
-
-            console.log(
-                `⚠️ Aucune fiche All Stars trouvée pour l'arbitre : ${resultat.arbitre}`
-            );
         }
-
+    }
+} 
+        
         // ==============================================
         // ✅ CONFIRMATION
         // ==============================================
