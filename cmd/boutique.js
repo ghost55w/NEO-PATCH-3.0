@@ -21,39 +21,43 @@ const normalize = str =>
         .replace(/[^a-z0-9]/g, "");
 
 //-------- VERIFICATION NIVEAU POUR ACHAT
-const checkLevelRequirement = (playerLevel, cardCategory, cardGrade) => {
-    let levelRequired = 0;
+const checkLevelRequirement = (playerLevel, cardGrade, cardCategory) => {
+    const grade = normalize(cardGrade);
+    const category = normalize(cardCategory);
 
-    if (["or", "gold"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 10;
-        else if (cardGrade === "s") levelRequired = 5;
-    } else if (["argent", "silver"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 5;
-        else if (cardGrade === "s") levelRequired = 5;
-    } else if (["bronze"].includes(cardCategory)) {
-        if (["s+", "sp", "sm"].includes(cardGrade)) levelRequired = 3;
-        else if (cardGrade === "s") levelRequired = 3;
-    } else if (["ss", "ss+", "ssp", "ss-", "ssm"].includes(cardGrade)) {
-        levelRequired = 15;
+    let minLevel = 0;
+    let maxLevel = 0;
+
+    if (grade === "bronze") {
+        minLevel = 1;
+        maxLevel = 4;
+    } else if (["argent", "silver"].includes(grade)) {
+        minLevel = 5;
+        maxLevel = 7;
+    } else if (["or", "gold"].includes(grade)) {
+        minLevel = 8;
+        maxLevel = 10;
+    } else {
+        return {
+            ok: false,
+            message: `❌ Grade inconnu : ${cardGrade}`
+        };
     }
 
-    if (playerLevel < levelRequired) {
+    // Les catégories SS ne contournent pas la limite de niveau du grade.
+    if (playerLevel < minLevel || playerLevel > maxLevel) {
         return {
             ok: false,
             message:
-                `◥◣              🌀JUMP™ SHOP🛍️ 🔆
-▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
-
-❌ ACHAT REFUSÉ
-
-🎴 Cette carte nécessite un niveau supérieur.
-🔒 Niveau requis : 8-10 ▲
-👤 Ton niveau : 6 ▲
-
-📌 Continue à progresser pour débloquer cette carte !
-
-╰───────────────────
-🌀🔆`
+                `◥◣              🌀JUMP™ SHOP🛍️ 🔆\n` +
+                `▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔\n\n` +
+                `❌ *ACHAT REFUSÉ*\n\n` +
+                `🎴 Cette carte nécessite un niveau supérieur.\n` +
+                `🔒 Niveau requis : ${minLevel}-${maxLevel} ▲\n` +
+                `👤 Ton niveau : ${playerLevel} ▲\n\n` +
+                `📌 Continue à progresser pour débloquer cette carte !\n\n` +
+                `╰───────────────────\n` +
+                `🌀🔆`
         };
     }
 
