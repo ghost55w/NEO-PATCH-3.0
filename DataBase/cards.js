@@ -9081,26 +9081,70 @@ function formatPrice(priceObj) {
   return priceObj.price.toLocaleString(); // ex: 500000 -> "500,000"
 }
 
+// ---------------- Catégories par ordre de puissance ----------------
+const CATEGORIES_PUISSANCE = [
+    // S-
+    "S-",
+    "S- super",
+    "S- ultra",
+    "S- mega",
+    "S- extreme",
+    "S- ultimate",
+
+    // S
+    "S",
+    "S super",
+    "S ultra",
+    "S mega",
+    "S extreme",
+    "S ultimate",
+
+    // S+
+    "S+",
+    "S+ super",
+    "S+ ultra",
+    "S+ mega",
+    "S+ extreme",
+    "S+ ultimate",
+
+    // SS-
+    "SS-",
+    "SS- super",
+    "SS- ultra",
+    "SS- mega",
+    "SS- extreme",
+    "SS- ultimate",
+
+    // SS
+    "SS",
+    "SS super",
+    "SS ultra",
+    "SS mega",
+    "SS extreme",
+    "SS ultimate",
+
+    // SS+
+    "SS+",
+    "SS+ super",
+    "SS+ ultra",
+    "SS+ mega",
+    "SS+ extreme",
+    "SS+ ultimate"
+];
+
+
 // ---------------- Détermination de la catégorie ----------------
 function determineCategory(categoryPart) {
-  if (!categoryPart) return 'inconnu';
+    if (!categoryPart) return "inconnu";
 
-  const text = categoryPart.toLowerCase();
+    const text = String(categoryPart)
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
 
-  // 🔍 On extrait juste le code (sm, sp, ss...)
-  const match = text.match(/ssm|ssp|ss|sm|sp|s/);
-
-  if (!match) return 'inconnu';
-
-  switch (match[0]) {
-    case 'sm': return 'S-';
-    case 'sp': return 'S+';
-    case 's': return 'S';
-    case 'ssm': return 'SS-';
-    case 'ssp': return 'SS+';
-    case 'ss': return 'SS';
-    default: return 'inconnu';
-  }
+    return CATEGORIES_PUISSANCE.find(
+        category => category.toLowerCase() === text
+    ) || "inconnu";
 }
 
 // ---------------- Création d'une carte ----------------
@@ -9108,11 +9152,13 @@ function createCard(cardObj) {
   const rawPrice = cardObj.price || cardObj.Price || cardObj.PRICE;
   const priceData = determinePrice(rawPrice);
 
-  const placement = cardObj.placement || determinePlacement(cardObj.category);
+  const placement = cardObj.placement || determinePlacement(cardObj.rarete);
 
   return {
     name: cardObj.name || 'Inconnu',
     grade: cardObj.grade || 'Standard',
+    univers: cardObj.univers || 'Inconnu',
+    rarete: cardObj.rarete || 'Standard',
     placement: placement,
     category: determineCategory(cardObj.category),
 
@@ -9135,13 +9181,13 @@ function determinePlacement(category) {
   const text = category.toLowerCase();
 
   // SP → Sparking
-  if (text.includes('sp')) return 'Sparking';
+  if (text.includes('SP')) return 'Sparking';
 
   // UL → Ultra
-  if (text.includes('ul')) return 'Ultra';
+  if (text.includes('UL')) return 'Ultra';
 
   // LE → Legends
-  if (text.includes('le')) return 'Legends';
+  if (text.includes('LE')) return 'Legends';
 
   // Si aucun match
   return 'standard';
@@ -9162,7 +9208,9 @@ function groupCardsByPlacement(cardsArray) {
       unit: card.unit,
       specs: card.specs,
       Moves: card.Moves,
-      Patterns: card.Patterns
+      Patterns: card.Patterns, 
+      univers: card.univers,
+rarete: card.rarete
     });
   }
   return groupedCards;
