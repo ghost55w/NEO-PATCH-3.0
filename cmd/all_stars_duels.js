@@ -387,73 +387,85 @@ async function getFicheByPseudo(pseudo) {
 
     try {
         const donnees = await getAllFiches();
-
         if (!donnees) return null;
 
         const fiches = Array.isArray(donnees)
             ? donnees
             : Object.values(donnees);
 
-        const correspondances = fiches.filter(fiche => {
-            if (!fiche) return false;
+        const extraireData = (fiche) => {
+            if (!fiche) return null;
 
-            const data = typeof fiche.get === "function"
+            return typeof fiche.get === "function"
                 ? fiche.get({ plain: true })
                 : (fiche.dataValues || fiche.data || fiche);
+        };
 
-            return normalizeTag(data.pseudo) === cible;
-        });
+        const fichesValides = fiches
+            .map(extraireData)
+            .filter(fiche =>
+                fiche &&
+                fiche.jid &&
+                typeof fiche.jid === "string" &&
+                fiche.jid.trim() !== "" &&
+                fiche.jid.trim().toLowerCase() !== "aucun"
+            );
 
-        if (correspondances.length === 0) {
-            console.log(`❌ Fiche introuvable : ${pseudo}`);
+        // 1. Priorité au pseudo exact, emojis compris
+        const correspondanceExacte = fichesValides.filter(
+            fiche =>
+                String(fiche.pseudo || "").trim().toLowerCase() ===
+                String(pseudo || "").trim().toLowerCase()
+        );
+
+        if (correspondanceExacte.length === 1) {
+            return { ...correspondanceExacte[0] };
+        }
+
+        if (correspondanceExacte.length > 1) {
+            console.error(
+                `❌ Plusieurs fiches exactes pour : ${pseudo}`,
+                correspondanceExacte.map(f => ({
+                    id: f.id,
+                    pseudo: f.pseudo,
+                    jid: f.jid
+                }))
+            );
             return null;
+        }
+
+        // 2. Sinon, recherche normalisée parmi les fiches valides
+        const correspondances = fichesValides.filter(
+            fiche => normalizeTag(fiche.pseudo) === cible
+        );
+
+        if (correspondances.length === 1) {
+            return { ...correspondances[0] };
         }
 
         if (correspondances.length > 1) {
             console.error(
-                `❌ Plusieurs fiches portent le pseudo : ${pseudo}`,
-                correspondances.map(fiche => {
-                    const data = typeof fiche.get === "function"
-                        ? fiche.get({ plain: true })
-                        : (fiche.dataValues || fiche.data || fiche);
-
-                    return {
-                        id: data.id,
-                        pseudo: data.pseudo,
-                        jid: data.jid
-                    };
-                })
-            );
-
-            return null;
-        }
-
-        const fiche = correspondances[0];
-
-        const data = typeof fiche.get === "function"
-            ? fiche.get({ plain: true })
-            : (fiche.dataValues || fiche.data || fiche);
-
-        if (!data.jid || data.jid === "aucun") {
-            console.error(
-                `❌ JID absent pour la fiche : ${data.pseudo}`
+                `❌ Plusieurs fiches correspondent à : ${pseudo}`,
+                correspondances.map(f => ({
+                    id: f.id,
+                    pseudo: f.pseudo,
+                    jid: f.jid
+                }))
             );
             return null;
         }
 
-        return { ...data };
+        console.log(`❌ Fiche introuvable : ${pseudo}`);
+        return null;
 
     } catch (err) {
         console.error(
             "❌ Erreur recherche fiche All Stars :",
             err
         );
-
         return null;
     }
 }
-
-
 
 /* ================= PARSER RESULTAT MATCH NSL ================= */
 
