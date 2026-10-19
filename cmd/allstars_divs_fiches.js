@@ -770,14 +770,13 @@ async function initFichesAuto() {
     for (const player of all) {
 
       console.log(
-        "Chargement :",
-        player.code_fiche,
-        "| division :",
-        player.division,
-        "| jid :",
-        player.jid
-      );
-
+    "📋 FICHE CHARGÉE",
+    "| id :", player.id,
+    "| pseudo :", player.pseudo,
+    "| code :", player.code_fiche,
+    "| jid :", player.jid
+);
+      
       // IMPORTANT :
       // oc_url n'est plus obligatoire.
       // Une fiche peut fonctionner sans image.
