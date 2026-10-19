@@ -697,11 +697,13 @@ const ficheLoser = await getFicheByPseudo(
                 ficheWinner.jid
             );
 
-            await setfiche(
-                "exp",
-                exp + 10,
-                ficheWinner.jid
-            );
+            const recompenseEXP = resultat.match === "Tournois🏆" ? 20 : 10;
+
+await setfiche(
+    "exp",
+    (Number(ficheWinner.exp) || 0) + recompenseEXP,
+    ficheWinner.jid
+);
 
             await setfiche(
                 "talent",
@@ -740,49 +742,40 @@ const ficheLoser = await getFicheByPseudo(
             defaites + 1,
             ficheLoser.jid
         );
+        
+ // ==============================================
+// ⚠️ PÉNALITÉ DU LOSER
+// ==============================================
 
-        // ==============================================
-        // ⚠️ PÉNALITÉ SI MOINS DE 3 TOURS
-        // ==============================================
+let penaliteLoser = false;
 
-        let penaliteLoser = false;
+if (resultat.symboleLoser === "❌" || resultat.tours < 3) {
 
-        if (resultat.tours < 3) {
+    const exp = Math.max(
+        0,
+        (Number(ficheLoser.exp) || 0) - 10
+    );
 
-            const exp = Math.max(
-                0,
-                (Number(ficheLoser.exp) || 0) - 10
-            );
+    const talents = Math.max(
+        0,
+        (Number(ficheLoser.talent) || 0) - 10
+    );
 
-            const talents = Math.max(
-                0,
-                (Number(ficheLoser.talent) || 0) - 10
-            );
+    await setfiche("exp", exp, ficheLoser.jid);
+    await setfiche("talent", talents, ficheLoser.jid);
 
-            await setfiche(
-                "exp",
-                exp,
-                ficheLoser.jid
-            );
+    penaliteLoser = true;
 
-            await setfiche(
-                "talent",
-                talents,
-                ficheLoser.jid
-            );
+    console.log(
+        `⚠️ ${ficheLoser.pseudo} : +1 défaite, -10 EXP, -10 talents`
+    );
 
-            penaliteLoser = true;
+} else {
 
-            console.log(
-                `⚠️ ${ficheLoser.pseudo} : +1 défaite, -10 EXP, -10 talents (${resultat.tours} tour(s))`
-            );
-
-        } else {
-
-            console.log(
-                `📉 ${ficheLoser.pseudo} : +1 défaite, aucune pénalité (${resultat.tours} tours)`
-            );
-        }
+    console.log(
+        `📉 ${ficheLoser.pseudo} : +1 défaite, aucune pénalité`
+    );
+}
 
         // ==============================================
         // 👑 RÉCOMPENSE DE L'ARBITRE
