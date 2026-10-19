@@ -377,6 +377,7 @@ ovlcmd({
 });
 
 
+
 /* ==========================================================
    🔎 RECHERCHE FICHE PAR PSEUDO
    ========================================================== */
@@ -386,39 +387,71 @@ async function getFicheByPseudo(pseudo) {
 
     try {
         const donnees = await getAllFiches();
+
         if (!donnees) return null;
 
         const fiches = Array.isArray(donnees)
             ? donnees
             : Object.values(donnees);
 
-        for (const fiche of fiches) {
-            if (!fiche) continue;
+        const correspondances = fiches.filter(fiche => {
+            if (!fiche) return false;
 
-            // Le pseudo officiel se trouve dans data.pseudo
-            const data = fiche.data || fiche;
+            const data = typeof fiche.get === "function"
+                ? fiche.get({ plain: true })
+                : (fiche.dataValues || fiche.data || fiche);
 
-            if (normalizeTag(data.pseudo) === cible) {
-                return {
-                    ...fiche,
-                    ...data,
-                    pseudo: data.pseudo,
-                    jid: fiche.jid || data.jid
-                };
-            }
+            return normalizeTag(data.pseudo) === cible;
+        });
+
+        if (correspondances.length === 0) {
+            console.log(`❌ Fiche introuvable : ${pseudo}`);
+            return null;
         }
 
-        return null;
+        if (correspondances.length > 1) {
+            console.error(
+                `❌ Plusieurs fiches portent le pseudo : ${pseudo}`,
+                correspondances.map(fiche => {
+                    const data = typeof fiche.get === "function"
+                        ? fiche.get({ plain: true })
+                        : (fiche.dataValues || fiche.data || fiche);
+
+                    return {
+                        id: data.id,
+                        pseudo: data.pseudo,
+                        jid: data.jid
+                    };
+                })
+            );
+
+            return null;
+        }
+
+        const fiche = correspondances[0];
+
+        const data = typeof fiche.get === "function"
+            ? fiche.get({ plain: true })
+            : (fiche.dataValues || fiche.data || fiche);
+
+        if (!data.jid || data.jid === "aucun") {
+            console.error(
+                `❌ JID absent pour la fiche : ${data.pseudo}`
+            );
+            return null;
+        }
+
+        return { ...data };
 
     } catch (err) {
         console.error(
             "❌ Erreur recherche fiche All Stars :",
             err
         );
+
         return null;
     }
 }
-
 
 
 
@@ -564,10 +597,44 @@ const ficheLoser = await getFicheByPseudo(
             ? await getFicheByPseudo(resultat.arbitre)
             : null;
 
+        console.log("🔎 VÉRIFICATION DES FICHES NSL", {
+    winner: ficheWinner
+        ? {
+            id: ficheWinner.id,
+            pseudo: ficheWinner.pseudo,
+            jid: ficheWinner.jid,
+            victoires: ficheWinner.victoires,
+            golds: ficheWinner.golds,
+            exp: ficheWinner.exp,
+            talent: ficheWinner.talent
+        }
+        : null,
+
+    loser: ficheLoser
+        ? {
+            id: ficheLoser.id,
+            pseudo: ficheLoser.pseudo,
+            jid: ficheLoser.jid,
+            defaites: ficheLoser.defaites,
+            exp: ficheLoser.exp,
+            talent: ficheLoser.talent
+        }
+        : null,
+
+    arbitre: ficheArbitre
+        ? {
+            id: ficheArbitre.id,
+            pseudo: ficheArbitre.pseudo,
+            jid: ficheArbitre.jid,
+            golds: ficheArbitre.golds
+        }
+        : null
+});
+
         if (!ficheWinner) {
 
             console.log(
-                `❌ Fiche Winner introuvable : ${resultat.winner.pseudo}`
+                `❌ Fiche Winner introuvable : ${resultat.winner}`
             );
 
             return;
@@ -576,7 +643,7 @@ const ficheLoser = await getFicheByPseudo(
         if (!ficheLoser) {
 
             console.log(
-                `❌ Fiche Loser introuvable : ${resultat.loser.pseudo}`
+                `❌ Fiche Loser introuvable : ${resultat.loser}`
             );
 
             return;
