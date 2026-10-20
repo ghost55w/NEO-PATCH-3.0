@@ -46,6 +46,27 @@ async function findTeamJidByUsers(name) {
     return team ? team.id : null;
 }
 
+// --- RECHERCHE MYNEO PAR PSEUDO ---
+async function findMyNeoByPseudo(pseudo) {
+  if (!pseudo) return null;
+
+  const normalize = str => String(str || "")
+    .normalize("NFKC")
+    .replace(/[\u200B-\u206F]/g, "")
+    .replace(/[\p{Emoji}]/gu, "")
+    .replace(/[^\p{L}\p{N}]/gu, "")
+    .toLowerCase();
+
+  const target = normalize(pseudo);
+  const allUsers = await MyNeoFunctions.getAllUsers();
+
+  if (!allUsers || !allUsers.length) return null;
+
+  return allUsers.find(user =>
+    normalize(user.users) === target
+  ) || null;
+}
+
 
 // --- RECHERCHE JOUEUR DB AVEC OVR ---
 function findPlayerInDB(inputName) {
@@ -282,28 +303,79 @@ ovlcmd({
 
 
 // --- Commande myneo🔷 ---
+
 ovlcmd({
   nom_cmd: "myneo🔷",
   classe: "Other",
   react: "🪪",
   desc: "Afficher ou modifier les données NEO d'un joueur.",
 }, async (ms_org, ovl, cmd_options) => {
-const { arg, auteur_Message, prenium_id, repondre } = cmd_options;
+  const { arg, auteur_Message, prenium_id, repondre } = cmd_options;
 
-const isAll = arg.length >= 1 && /^@all$/i.test(arg[0]);
+  const isAll = arg.length >= 1 && /^@all$/i.test(arg[0]);
 
-const userId = isAll
-  ? null
-  : (arg.length >= 1 && arg[0].includes("@")
-      ? normalizeJid(arg[0])
-      : auteur_Message);
-  
+  let userId = auteur_Message;
+  let argsJoueur = arg;
+
   try {
-    const data = await getNeo(userId);
-    if (!data) return repondre("⚠️ Aucune donnée trouvée pour cet utilisateur.");
+    // ─── IDENTIFICATION DU JOUEUR ───
+    if (isAll) {
+      userId = null;
+      argsJoueur = arg;
+    } else if (arg.length > 0) {
+      // Les champs modifiables servent à détecter la fin du pseudo.
+      const champsConnus = [
+        "users", "tel", "ns", "nc", "np", "coupons",
+        "gift_box", "all_stars", "blue_lock", "elysium"
+      ];
 
-    // 1️⃣ Affichage compte
-    if (arg.length <= 1) {
+      let indexChamp = -1;
+
+      for (let i = 1; i < arg.length; i++) {
+        if (
+          champsConnus.includes(arg[i]?.toLowerCase()) &&
+          ["=", "+", "-"].includes(arg[i + 1])
+        ) {
+          indexChamp = i;
+          break;
+        }
+      }
+
+      const pseudoParts = indexChamp === -1
+        ? arg
+        : arg.slice(0, indexChamp);
+
+      const pseudo = pseudoParts.join(" ").trim();
+
+      // Compatibilité avec les anciennes mentions WhatsApp.
+      if (pseudo.includes("@")) {
+        userId = normalizeJid(pseudo);
+        argsJoueur = indexChamp === -1
+          ? []
+          : arg.slice(indexChamp);
+      } else {
+        const joueur = await findMyNeoByPseudo(pseudo);
+
+        if (!joueur) {
+          return repondre("⚠️ Joueur introuvable dans MyNeo.");
+        }
+
+        userId = joueur.id;
+        argsJoueur = indexChamp === -1
+          ? []
+          : arg.slice(indexChamp);
+      }
+    }
+
+    // ─── RÉCUPÉRATION DU COMPTE ───
+    const data = isAll ? null : await getNeo(userId);
+
+    if (!isAll && !data) {
+      return repondre("⚠️ Aucune donnée trouvée pour cet utilisateur.");
+    }
+
+    // ─── AFFICHAGE DU COMPTE ───
+    if (!isAll && argsJoueur.length === 0) {
       const myn = `╭───〔 *🪀 COMPTE NEO 🔷* 〕
 👤User: ${data.users}
 📳Téléphone: ${data.tel}
@@ -312,152 +384,200 @@ const userId = isAll
 🔶NEOpoints: ${data.np}🔶
 🎫Coupons: ${data.coupons}🎫
 ▔▔▔▔▔▔▔▔▔░░ INFOS
-   
+
 🎮MY GAMES🪀
 🌀All Stars: ${data.all_stars}
 ⚽Blue Lock: ${data.blue_lock}
 💠Élysium: ${data.elysium}
-╰───────────────────     
+╰───────────────────
         *🔷Powered by NEOVERSE™*`;
 
-      await ovl.sendMessage(ms_org,{video:{url:"https://files.catbox.moe/yimc4o.mp4"},gifPlayback:true},{quoted:cmd_options.ms});
-      return await ovl.sendMessage(ms_org,{image:{url:"https://files.catbox.moe/nyy6fb.jpg"},caption:myn},{quoted:cmd_options.ms});
+      await ovl.sendMessage(
+        ms_org,
+        {
+          video: { url: "https://files.catbox.moe/yimc4o.mp4" },
+          gifPlayback: true
+        },
+        { quoted: cmd_options.ms }
+      );
+
+      return await ovl.sendMessage(
+        ms_org,
+        {
+          image: { url: "https://files.catbox.moe/nyy6fb.jpg" },
+          caption: myn
+        },
+        { quoted: cmd_options.ms }
+      );
     }
 
-    // 2️⃣ Vérification prenium
-    if (!prenium_id) return repondre("⚠️ Seuls les membres Premium peuvent actualiser un joueur.");
-    // ─── @ALL : MODIFICATION GLOBALE DES RESSOURCES ───
-if (isAll) {
-
-  const champ = arg[1]?.toLowerCase();
-  const operation = arg[2];
-  const valeur = parseInt(arg[3], 10);
-
-  // Champs autorisés pour @All
-  const champsAll = ["nc", "np", "ns", "coupons"];
-
-  if (!champsAll.includes(champ)) {
-    return repondre(
-      "⚠️ Avec @All, seuls ces champs sont autorisés : nc, np, ns, coupons."
-    );
-  }
-
-  if (!["=", "+", "-"].includes(operation) || isNaN(valeur)) {
-    return repondre(
-      "⚠️ Syntaxe : +myneo🔷 @All nc/np/ns/coupons =/+/- valeur"
-    );
-  }
-
-  try {
-
-    // Récupération de tous les joueurs MyNeo
-    const allPlayers = await MyNeoFunctions.getAllUsers();
-
-    if (!allPlayers || !allPlayers.length) {
-      return repondre("⚠️ Aucun joueur enregistré sur MyNeo.");
+    // ─── VÉRIFICATION PREMIUM ───
+    if (!prenium_id) {
+      return repondre(
+        "⚠️ Seuls les membres Premium peuvent actualiser un joueur."
+      );
     }
 
-    let count = 0;
+    // ─── @ALL : MODIFICATION GLOBALE ───
+    if (isAll) {
+      const champ = argsJoueur[1]?.toLowerCase();
+      const operation = argsJoueur[2];
+      const valeur = parseInt(argsJoueur[3], 10);
 
-    for (const player of allPlayers) {
+      const champsAll = ["nc", "np", "ns", "coupons"];
 
-      if (!player?.id) continue;
-
-      const ancien = Number(player[champ]) || 0;
-      let nouveau;
-
-      if (operation === "=") {
-        nouveau = valeur;
-      } else if (operation === "+") {
-        nouveau = ancien + valeur;
-      } else {
-        nouveau = ancien - valeur;
+      if (!champsAll.includes(champ)) {
+        return repondre(
+          "⚠️ Avec @All, seuls ces champs sont autorisés : nc, np, ns, coupons."
+        );
       }
 
-      // Évite les valeurs négatives
-      nouveau = Math.max(0, nouveau);
+      if (!["=", "+", "-"].includes(operation) || isNaN(valeur)) {
+        return repondre(
+          "⚠️ Syntaxe : +myneo🔷 @All nc/np/ns/coupons =/+/- valeur"
+        );
+      }
 
-      await updateMyNeo(player.id, {
-        [champ]: nouveau
-      });
+      const allPlayers = await MyNeoFunctions.getAllUsers();
 
-      count++;
+      if (!allPlayers || !allPlayers.length) {
+        return repondre("⚠️ Aucun joueur enregistré sur MyNeo.");
+      }
+
+      let count = 0;
+
+      for (const player of allPlayers) {
+        if (!player?.id) continue;
+
+        const ancien = Number(player[champ]) || 0;
+        let nouveau;
+
+        if (operation === "=") nouveau = valeur;
+        else if (operation === "+") nouveau = ancien + valeur;
+        else nouveau = ancien - valeur;
+
+        nouveau = Math.max(0, nouveau);
+
+        if (champ === "ns") {
+          const delta = nouveau - ancien;
+          if (delta !== 0) {
+            await giveNS(player.id, delta, ovl, ms_org);
+          }
+        } else {
+          await updateMyNeo(player.id, {
+            [champ]: nouveau
+          });
+        }
+
+        count++;
+      }
+
+      return repondre(
+        `✅ Modification globale effectuée.\n\n` +
+        `👥 Joueurs : ${count}\n` +
+        `🔷 ${champ.toUpperCase()} : ${operation} ${valeur}`
+      );
     }
 
-    return repondre(
-      `✅ Modification globale effectuée.\n\n` +
-      `👥 Joueurs : ${count}\n` +
-      `🔷 ${champ.toUpperCase()} : ${operation} ${valeur}`
-    );
+    // ─── MODIFICATION DES CHAMPS ───
+    const modifiables = [
+      "users", "tel", "ns", "nc", "np", "coupons",
+      "gift_box", "all_stars", "blue_lock", "elysium"
+    ];
 
-  } catch (err) {
-    console.error("❌ Erreur myNeo @All:", err);
-    return repondre(
-      "❌ Une erreur est survenue lors de la modification globale."
-    );
-  }
-}
-
-    const modifiables = ["users","tel","ns","nc","np","coupons","gift_box","all_stars","blue_lock","elysium"];
-    let updates = {};
+    const updates = {};
     let nsDelta = 0;
 
-    // 3️⃣ Lecture des arguments
-    for (let i = 1; i < arg.length;) {
-      const field = arg[i]?.toLowerCase();
-      const op = arg[i + 1];
-      if (!modifiables.includes(field) || !["=", "+", "-"].includes(op)) { i++; continue; }
+    for (let i = 0; i < argsJoueur.length;) {
+      const field = argsJoueur[i]?.toLowerCase();
+      const op = argsJoueur[i + 1];
 
-      const isNumeric = ["ns","nc","np","coupons","gift_box"].includes(field);
+      if (
+        !modifiables.includes(field) ||
+        !["=", "+", "-"].includes(op)
+      ) {
+        i++;
+        continue;
+      }
+
+      const isNumeric = [
+        "ns", "nc", "np", "coupons", "gift_box"
+      ].includes(field);
+
       let value;
 
       if (op === "=" && !isNumeric) {
-        let valParts=[], j=i+2;
-        while(j<arg.length && !modifiables.includes(arg[j]?.toLowerCase())) valParts.push(arg[j++]);
-        value = valParts.join(" "); i=j;
+        const valParts = [];
+        let j = i + 2;
+
+        while (
+          j < argsJoueur.length &&
+          !(
+            modifiables.includes(argsJoueur[j]?.toLowerCase()) &&
+            ["=", "+", "-"].includes(argsJoueur[j + 1])
+          )
+        ) {
+          valParts.push(argsJoueur[j++]);
+        }
+
+        value = valParts.join(" ");
+        i = j;
       } else {
-        value = arg[i+2]; i+=3;
+        value = argsJoueur[i + 2];
+        i += 3;
       }
 
-      if (value !== undefined) {
-        if (isNumeric) {
-          const val = parseInt(value);
-          if (!isNaN(val)) {
-            if (field==="ns") {
-              if(op==="=") nsDelta = val-(data.ns||0);
-              else if(op==="+") nsDelta = val;
-              else if(op==="-") nsDelta = -val;
-            } else {
-              if(op==="=") updates[field]=val;
-              else if(op==="+") updates[field]=(data[field]||0)+val;
-              else if(op==="-") updates[field]=(data[field]||0)-val;
-            }
-          }
-        } else if(op==="=") updates[field]=value;
+      if (value === undefined) continue;
+
+      if (isNumeric) {
+        const val = parseInt(value, 10);
+        if (isNaN(val)) continue;
+
+        if (field === "ns") {
+          if (op === "=") nsDelta = val - (Number(data.ns) || 0);
+          else if (op === "+") nsDelta += val;
+          else nsDelta -= val;
+        } else {
+          const ancien = Number(updates[field] ?? data[field]) || 0;
+
+          if (op === "=") updates[field] = Math.max(0, val);
+          else if (op === "+") updates[field] = Math.max(0, ancien + val);
+          else updates[field] = Math.max(0, ancien - val);
+        }
+      } else if (op === "=") {
+        updates[field] = value;
       }
     }
 
-    if('np' in updates) updates.np = Math.min(updates.np, 10);
+    if ("np" in updates) {
+      updates.np = Math.min(updates.np, 10);
+    }
 
-    if(Object.keys(updates).length===0 && nsDelta===0)
-      return repondre("⚠️ Aucun champ mis à jour. Exemple : +myNeo @user nc + 200 ou ns + 1");
+    if (Object.keys(updates).length === 0 && nsDelta === 0) {
+      return repondre(
+        "⚠️ Aucun champ mis à jour. Exemple : +myNeo NEO PATCH 2.5👑 nc + 200 ou ns + 1"
+      );
+    }
 
-    // 4️⃣ NS via giveNS
-    if(nsDelta!==0) await giveNS(userId, nsDelta, ovl, ms_org);
+    // ─── NS ET RÉCOMPENSES ───
+    if (nsDelta !== 0) {
+      await giveNS(userId, nsDelta, ovl, ms_org);
+    }
 
-    // 5️⃣ Mise à jour autres champs
-    if(Object.keys(updates).length>0){
+    // ─── AUTRES CHAMPS ───
+    if (Object.keys(updates).length > 0) {
       const msg = await updateMyNeo(userId, updates);
       return repondre(msg || "✅ Joueur mis à jour avec succès !");
-    } else {
-      return repondre("✅ Joueur mis à jour avec succès !");
     }
 
-  } catch(err) {
+    return repondre("✅ Joueur mis à jour avec succès !");
+
+  } catch (err) {
     console.error("❌ Erreur myNeo:", err);
     return repondre("❌ Une erreur est survenue.");
   }
 });
+
 
 // --- Fonction centralisée pour ajouter des NS (automatique et safe) ---
 async function giveNS(userId, amount, ovl, ms_org) {
