@@ -1,17 +1,17 @@
 const axios = require("axios");
 
 //==============================================================================
-// ALL STARS — ARBITRE (fichier unique)
+// ALL STARS — ARBITRE (fichier unique) · règles officielles du 6e anniversaire
 //------------------------------------------------------------------------------
 // Organisation (même découpage que le modèle, rassemblé dans ce fichier) :
 //   🔁 IA          relais d'IA : Gemini → Mistral → SambaNova → OpenRouter     (ai_manager)
 //   🧾 PARSEUR     prompt d'extraction, normalisation, validation de schéma     (prompts/pave)
 //   🧰 LOCAL       repli sans IA par mots-clés (réutilise ACTIONS_MAP)          (heuristique)
-//   ⚖️ REGLES      discipline du pavé + file des attaques en attente            (moteur : cycle d'un pavé)
-//   🛡️ DEFENSES    réactions permises / coûts selon l'écart de Combat Speed     (esquive)
-//   ⚙️ MOTEUR      résolution chiffrée (dégâts, Stamina, Force, posture)        (moteur : résolution)
-//   🎙️ NARRATEUR   récit déterministe du verdict                                (narrateur)
-//   🧩 PIPELINE    analyse complète d'un pavé, au format attendu par l'affichage
+//   ⚖️ REGLES      vérification stricte (aucune tolérance) + file d'attaques    (moteur : cycle d'un pavé)
+//   🛡️ DEFENSES    réactions permises / coûts selon Combat Speed et vitesses    (esquive)
+//   ⚙️ MOTEUR      résolution chiffrée (dégâts, Stamina, Force, états)          (moteur : résolution)
+//   🎙️ NARRATEUR   récit déterministe + gabarit du message de verdict           (narrateur)
+//   🧩 PIPELINE    analyse d'un pavé, gestion des tours (1 tour = 2 pavés), fin de match
 //   puis : analysePaveAvecGemini / envoyerResultatPaveGemini, tracker, match, commandes.
 //==============================================================================
 const { ovlcmd } = require("../lib/ovlcmd");
@@ -325,192 +325,230 @@ const IA = (() => {
 //================================================
 // 🧾 PARSEUR DE PAVÉ — prompt d'extraction, normalisation, validation de schéma (équivalent de prompts/pave.js)
 //================================================
+// L'IA n'ARBITRE PAS, elle EXTRAIT : elle ne juge ni la validité ni le résultat et ne complète JAMAIS un détail absent
+// (côté, trajectoire, distance, intention…) : elle met null. Les manques sont sanctionnés par le code (REGLES) → même verdict
+// quelle que soit l'IA du relais.
+// Vocabulaire = affiche « ACTIONS COMMANDES » (déplacements, attaques, défenses).
 const PARSEUR = (() => {
     'use strict';
-    /**
-     * parseur_pave.js — Parseur de pavé ALL STARS (prompt + normalisation + validation de schéma).
-     *
-     * PRINCIPE (repris de l'autre bot) : l'IA n'ARBITRE PAS, elle EXTRAIT. Elle ne juge ni la validité, ni le résultat,
-     * et ne complète JAMAIS un détail absent (côté, sens, distance…) : elle met null. Les manques sont sanctionnés
-     * par le code (regles_pave.js) → même verdict quelle que soit l'IA du relais.
-     *
-     * Utilisation avec le relais :
-     *   const r = await relay.demander({ tache:'parse_pave', messages:[{role:'user', content: construirePrompt(ctx)}],
-     *                                    json:true, temperature:0, maxTokens:2500, cle: match.id, valider });
-     *   const parse = normaliser(r.data);
-     */
 
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* Utilitaires                                                                                                    */
-    /* ------------------------------------------------------------------------------------------------------------- */
+    /* --------------------------------------------------------------------------------------------------------- */
+    /* Utilitaires                                                                                                */
+    /* --------------------------------------------------------------------------------------------------------- */
     const norm = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     /** Chaîne normalisée, ou null pour les « valeurs vides » que les IA écrivent (null, none, n/a…). */
-    const txt = (v) => { const s = norm(v); return (s === '' || /^(null|none|n\/a|aucun|aucune|non precise|inconnu)$/.test(s)) ? null : s; };
+    const txt = (v) => { const s = norm(v); return (s === '' || /^(null|none|n\/a|aucun|aucune|non precise|inconnu|undefined)$/.test(s)) ? null : s; };
+    /** Texte tel qu'écrit (casse conservée), ou null. */
+    const brut = (v) => { if (v == null) return null; const s = String(v).replace(/\s+/g, ' ').trim(); return txt(s) ? s : null; };
     const bool = (v) => v === true || /^(true|oui|yes|vrai|1)$/.test(norm(v));
     const nombre = (v) => {
-      if (typeof v === 'number' && Number.isFinite(v)) return v;
-      const m = /(-?\d+(?:[.,]\d+)?)/.exec(String(v == null ? '' : v));
-      return m ? Number(m[1].replace(',', '.')) : null;
+        if (typeof v === 'number' && Number.isFinite(v)) return v;
+        const m = /(-?\d+(?:[.,]\d+)?)/.exec(String(v == null ? '' : v));
+        return m ? Number(m[1].replace(',', '.')) : null;
     };
-    const parmi = (v, liste) => { const s = txt(v); return s && liste.includes(s) ? s : null; };
+    const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : null);
 
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* Énumérations & alias (variantes que les IA écrivent volontiers)                                                */
-    /* ------------------------------------------------------------------------------------------------------------- */
-    const TYPES = ['deplacement', 'attaque', 'defense', 'competence', 'autre'];
-    const MEMBRES_LATERAUX = ['poing', 'pied', 'coude', 'genou', 'main', 'bras', 'jambe'];
-    const MODES_DEFENSE = ['esquive', 'blocage', 'deviation', 'saisie', 'contre', 'coupe', 'changement_trajectoire'];
-    const TRAJECTOIRES = ['rectiligne', 'arc', 'zigzag', 'contournement', 'saut'];
-    const SENS_DEPL = ['gauche', 'droite', 'avant', 'arriere', 'haut', 'bas'];
-    const SENS_FRAPPE = ['horizontale', 'ascendante', 'descendante', 'oblique', 'frontale', 'circulaire'];
+    /* --------------------------------------------------------------------------------------------------------- */
+    /* Référentiel officiel (affiche « Actions commandes »)                                                       */
+    /* --------------------------------------------------------------------------------------------------------- */
+    const DEPLACEMENTS = ['marche', 'course', 'dash', 'saut', 'roulade', 'vol', 'pivot', 'decalage', 'salto', 'vrille', 'flip'];
+    const AERIENS = ['vol', 'saut', 'salto', 'vrille', 'flip'];                       // hauteur obligatoire
+    const TRAJ_DEPL = ['frontale', 'circulaire', 'diagonale', 'zigzag', 'laterale', 'montante', 'descendante'];
+    /** Frappes : membre utilisé + trajectoires possibles ([] = aucune à préciser, 1 = implicite, ≥2 = à préciser par le joueur). */
+    const FRAPPES = {
+        coup_direct: { membre: 'main', traj: ['frontale'] }, crochet: { membre: 'main', traj: ['laterale', 'oblique'] },
+        uppercut: { membre: 'main', traj: ['ascendante'] }, overhand: { membre: 'main', traj: ['descendante'] },
+        reverse: { membre: 'main', traj: ['arriere'] }, hammer: { membre: 'main', traj: ['descendante', 'oblique'] },
+        coup_de_tete: { membre: 'tete', traj: [] }, coup_de_coude: { membre: 'coude', traj: [] },
+        front_kick: { membre: 'pied', traj: ['frontale'] }, side_kick: { membre: 'pied', traj: ['laterale'] },
+        axe_kick: { membre: 'pied', traj: ['descendante'] }, roundhouse_kick: { membre: 'pied', traj: ['circulaire', 'laterale', 'oblique'] },
+        back_kick: { membre: 'pied', traj: ['arriere'] }, upward_kick: { membre: 'pied', traj: ['ascendante'] },
+        low_kick: { membre: 'pied', traj: ['directe', 'oblique'] }, reverse_kick: { membre: 'pied', traj: ['inversee', 'laterale', 'oblique'] },
+        spinning_back_kick: { membre: 'pied', traj: ['circulaire', 'laterale', 'oblique'] }, coup_de_genou: { membre: 'genou', traj: [] },
+    };
+    const TRAJ_ARME = ['directe', 'pique', 'horizontale', 'ascendante', 'descendante', 'oblique', 'revers'];
+    const DEFENSES_TYPES = ['garde', 'blocage', 'saisie', 'deviation', 'parade', 'esquive'];
+    const MEMBRES_LATERAUX = ['main', 'pied', 'genou', 'coude', 'bras', 'jambe'];
+    const PRONOMS = /^(je|j'|moi|il|elle|lui|on|nous|tu)$/;
 
-    const ALIAS_TYPE = [[/depl|mouvement|move|course|run/, 'deplacement'], [/attaq|attack|frapp|strike|offens/, 'attaque'],
-      [/defen|reaction|guard|parade/, 'defense'], [/compet|technique|sort|skill|spell|energ/, 'competence']];
-    const type = (v) => { const s = norm(v); for (const [re, t] of ALIAS_TYPE) if (re.test(s)) return t; return 'autre'; };
+    /* --------------------------------------------------------------------------------------------------------- */
+    /* Alias (variantes d'écriture des IA et synonymes autorisés par les règles)                                   */
+    /* --------------------------------------------------------------------------------------------------------- */
+    const type = (v) => { const s = norm(v);
+        if (/depl|mouvement|move|course|run/.test(s)) return 'deplacement'; if (/attaq|attack|frapp|strike|offens/.test(s)) return 'attaque';
+        if (/defen|reaction|guard|parade/.test(s)) return 'defense'; if (/compet|technique|sort|skill|spell|energ/.test(s)) return 'competence'; return 'autre'; };
 
-    /** « poing_droit », « main droite », « katana » → { membre:'poing', cote:'droite' } (la base et le côté sont séparés). */
+    const genreDepl = (v) => { const s = txt(v); if (!s) return null; if (DEPLACEMENTS.includes(s)) return s;
+        const t = [[/marche|march|walk|pas\b/, 'marche'], [/cour|sprint|run|fonc|file/, 'course'], [/dash|elan|ruee/, 'dash'], [/saut|bond|jump|hop/, 'saut'], [/roul/, 'roulade'],
+            [/\bvol|voler|flotte|plane|fly|envol/, 'vol'], [/pivot|tourn/, 'pivot'], [/decal|esquive lateral|pas de cote/, 'decalage'], [/salto/, 'salto'], [/vrille|spin|tonneau/, 'vrille'], [/flip|backflip|culbute/, 'flip']];
+        for (const [re, g] of t) if (re.test(s)) return g; return null; };
+    const trajDepl = (v) => { const s = txt(v); if (!s) return null; if (TRAJ_DEPL.includes(s)) return s;
+        if (/zig/.test(s)) return 'zigzag'; if (/circul|arc|arqu|courb|demi|cercle|rotati|spiral/.test(s)) return 'circulaire'; if (/diagonal|oblique/.test(s)) return 'diagonale';
+        if (/later|cote|de cote/.test(s)) return 'laterale'; if (/mont|ascend|vers le haut/.test(s)) return 'montante'; if (/descend|plong|vers le bas/.test(s)) return 'descendante';
+        if (/front|droit|ligne|rectil|avant|vers lui|direct/.test(s)) return 'frontale'; return null; };
+    const sens = (v) => { const s = txt(v); if (!s) return null; if (/gauche|left/.test(s)) return 'gauche'; if (/droit|right/.test(s)) return 'droite';
+        if (/arriere|recul|back/.test(s)) return 'arriere'; if (/avant|devant|front/.test(s)) return 'avant'; if (/haut|monte|up/.test(s)) return 'haut'; if (/bas|descend|down/.test(s)) return 'bas'; return null; };
+    const vitesse = (v) => { const s = txt(v); if (!s) return null; if (/vmax|vitesse max|pleine vitesse|a fond|maximale|\bmax\b/.test(s)) return 'vmax'; if (/lent|reduit/.test(s)) return 'lente'; return nombre(s); };
+
+    /** Ordre important : les pieds avant les mains (« reverse kick » ≠ « reverse »). */
+    const genreFrappe = (v) => { const s = txt(v); if (!s) return null; const k = s.replace(/[\s-]+/g, '_'); if (FRAPPES[k] || k === 'arme') return k;
+        const t = [[/spinning|retourne|tournant/, 'spinning_back_kick'], [/reverse.?kick|kick.?inverse|coup de pied.*invers/, 'reverse_kick'], [/roundhouse|coup de pied circulaire/, 'roundhouse_kick'],
+            [/side.?kick|coup de pied lateral/, 'side_kick'], [/axe.?kick|coup de pied descend/, 'axe_kick'], [/back.?kick|coup de pied arriere/, 'back_kick'], [/upward|coup de pied ascend/, 'upward_kick'],
+            [/low.?kick|coup de pied bas/, 'low_kick'], [/front.?kick|coup de pied/, 'front_kick'], [/genou|knee/, 'coup_de_genou'], [/coude|elbow/, 'coup_de_coude'], [/tete|headbutt|boule/, 'coup_de_tete'],
+            [/uppercut/, 'uppercut'], [/overhand/, 'overhand'], [/hammer|marteau/, 'hammer'], [/crochet|hook/, 'crochet'], [/\breverse\b|poing invers/, 'reverse'],
+            [/direct|jab|coup de poing|frontal/, 'coup_direct'], [/taill|tranch|decoup|slash|estoc|poignard|plant|transperc|lame|katana|epee|sabre|dague|arme/, 'arme']];
+        for (const [re, g] of t) if (re.test(s)) return g; return null; };
+    const trajCoup = (v, genre) => { const s = txt(v); const arme = genre === 'arme';
+        if (s) { if (arme) { if (TRAJ_ARME.includes(s)) return s; if (/pique|estoc|plant|transperc/.test(s)) return 'pique'; if (/horizon|lateral/.test(s)) return 'horizontale'; if (/ascend|remont/.test(s)) return 'ascendante';
+            if (/descend/.test(s)) return 'descendante'; if (/obliq|diagonal/.test(s)) return 'oblique'; if (/revers|inver/.test(s)) return 'revers'; if (/direct|front/.test(s)) return 'directe'; return null; }
+            const l = ['frontale', 'laterale', 'oblique', 'ascendante', 'descendante', 'arriere', 'circulaire', 'directe', 'inversee']; if (l.includes(s)) return s;
+            if (/front|droit/.test(s)) return 'frontale'; if (/later|horizon/.test(s)) return 'laterale'; if (/obliq|diagonal/.test(s)) return 'oblique'; if (/ascend|montant|remont/.test(s)) return 'ascendante';
+            if (/descend/.test(s)) return 'descendante'; if (/arriere|back/.test(s)) return 'arriere'; if (/circul|rotat/.test(s)) return 'circulaire'; if (/direct/.test(s)) return 'directe'; if (/invers/.test(s)) return 'inversee'; return null; }
+        const def = FRAPPES[genre]; return def && def.traj.length === 1 ? def.traj[0] : null; };       // une seule trajectoire possible = implicite
+
     const BASES = [[/deux mains|two hands|both hands|2 mains/, 'deux_mains'], [/\btete\b|\bfront\b|crane|head|coup de boule/, 'tete'],
-      [/epee|lame|katana|dague|couteau|hache|sabre|arme|weapon|baton|rapiere/, 'arme'], [/poing|fist|crochet|uppercut|\bjab\b|\bdirect\b/, 'poing'],
-      [/pied|jambe|kick|semelle|talon|botte|\bjambe/, 'pied'], [/genou|knee/, 'genou'], [/coude|elbow/, 'coude'],
-      [/\bmain\b|paume|hand/, 'main'], [/\bbras\b|\barm\b/, 'bras'], [/corps|body|epaule|buste|torse/, 'corps']];
+        [/epee|lame|katana|dague|couteau|hache|sabre|arme|weapon|baton|rapiere/, 'arme'], [/poing|fist|\bmain\b|paume|hand|crochet|uppercut|\bjab\b|\bdirect\b/, 'main'],
+        [/pied|jambe|kick|semelle|talon|botte/, 'pied'], [/genou|knee/, 'genou'], [/coude|elbow/, 'coude'], [/\bbras\b|\barm\b/, 'bras'], [/corps|body|epaule|buste|torse/, 'corps']];
     const cote = (s) => (/\b(gauche|left)\b/.test(s) ? 'gauche' : /\b(droit|droite|right)\b/.test(s) ? 'droite' : null);
     function membreEtCote(membre, coteBrut) {
-      const s = (txt(membre) || '').replace(/_/g, ' ');
-      let base = null; for (const [re, b] of BASES) if (re.test(s)) { base = b; break; }
-      const c = cote(txt(coteBrut) || '') || cote(s);
-      return { membre: base, cote: base && !['deux_mains', 'tete', 'corps'].includes(base) ? c : null };
+        const s = (txt(membre) || '').replace(/_/g, ' ');
+        let base = null; for (const [re, b] of BASES) if (re.test(s)) { base = b; break; }
+        const c = cote(txt(coteBrut) || '') || cote(s);
+        return { membre: base, cote: base && MEMBRES_LATERAUX.includes(base) ? c : (base === 'arme' ? c : null) };
     }
 
-    const ALIAS_GENRE = [[/direct|jab/, 'direct'], [/crochet|hook/, 'crochet'], [/uppercut/, 'uppercut'], [/balay|fauch|sweep/, 'balayage'],
-      [/pied|kick|low/, 'coup_de_pied'], [/estoc|poignard|plant|transperc|empal|pique|stab/, 'estoc'], [/taill|tranch|\bcoupe\b|decoup|slash|lame/, 'taille'],
-      [/projectile|lanc|jet|shuriken|kunai/, 'projectile'], [/energ|souffle|boule|rayon|blast/, 'energie']];
-    const genre = (v) => { const s = txt(v); if (!s) return null; for (const [re, g] of ALIAS_GENRE) if (re.test(s)) return g; return 'autre'; };
-    const sensFrappe = (v) => { const s = txt(v); if (!s) return null; if (SENS_FRAPPE.includes(s)) return s;
-      if (/horizon|lateral/.test(s)) return 'horizontale'; if (/ascend|monta|vers le haut/.test(s)) return 'ascendante'; if (/descend|vers le bas|plongeante/.test(s)) return 'descendante';
-      if (/obliq|diagonal/.test(s)) return 'oblique'; if (/front|direct|droit devant/.test(s)) return 'frontale'; if (/circul|rotati|360/.test(s)) return 'circulaire'; return null; };
-    const lateral = (v) => { const s = txt(v); if (!s) return null; if (/gauche|left/.test(s)) return 'gauche'; if (/droit|right/.test(s)) return 'droite'; if (/haut|up/.test(s)) return 'haut'; if (/bas|down/.test(s)) return 'bas'; return null; };
-    const sensDepl = (v) => { const s = txt(v); if (!s) return null; if (SENS_DEPL.includes(s)) return s;
-      if (/gauche|left/.test(s)) return 'gauche'; if (/droite|right/.test(s)) return 'droite'; if (/arriere|recul|back/.test(s)) return 'arriere';
-      if (/avant|devant|front|vers lui|vers l.adversaire/.test(s)) return 'avant'; if (/haut|monte|up/.test(s)) return 'haut'; if (/bas|descend|down/.test(s)) return 'bas'; return null; };
-    const trajectoire = (v) => { const s = txt(v); if (!s) return null; if (TRAJECTOIRES.includes(s)) return s;
-      if (/zig/.test(s)) return 'zigzag'; if (/arc|arqu|courb|circul|demi|cercle/.test(s)) return 'arc'; if (/contourn|autour|tour de/.test(s)) return 'contournement';
-      if (/saut|bond/.test(s)) return 'saut'; if (/rectil|droit|ligne/.test(s)) return 'rectiligne'; return null; };
-    const vitesse = (v) => { const s = txt(v); if (!s) return null; if (/vmax|vitesse max|pleine vitesse|a fond|maximale|\bmax\b/.test(s)) return 'vmax'; if (/reduit|lent/.test(s)) return 'reduite'; return nombre(s); };
-    const niveau = (v) => { const s = txt(v); if (!s) return null; if (/basic|basique|bronze|🥉/.test(s)) return 'basic'; if (/advanced|avance|argent|silver|🥈/.test(s)) return 'advanced'; if (/ultim|gold|\bor\b|🥇/.test(s)) return 'ultime'; return null; };
-    const modeDef = (v) => { const s = txt(v); if (!s) return null; if (MODES_DEFENSE.includes(s)) return s;
-      if (/esquiv|evit|dodge/.test(s)) return 'esquive'; if (/bloc|block|encaiss/.test(s)) return 'blocage'; if (/devi|detourn|repouss|parade|parry/.test(s)) return 'deviation';
-      if (/saisi|attrap|grab/.test(s)) return 'saisie'; if (/contre|riposte|counter/.test(s)) return 'contre'; if (/coup|interromp|stopp/.test(s)) return 'coupe'; if (/trajectoire/.test(s)) return 'changement_trajectoire'; return null; };
-    const zone = (v) => { const s = txt(v); if (!s) return null; const l = ['tete', 'gorge', 'coeur', 'thorax', 'abdomen', 'dos', 'jambes', 'bras'];
-      if (l.includes(s)) return s; if (/\bcou\b|gorge/.test(s)) return 'gorge'; if (/visage|tempe|menton|machoire|nez|\bfront\b|crane|oeil/.test(s)) return 'tete';
-      if (/torse|poitrine|thorax/.test(s)) return 'thorax'; if (/ventre|cotes|abdomen|plexus/.test(s)) return 'abdomen'; if (/\bdos\b|nuque|omoplate/.test(s)) return 'dos';
-      if (/jambe|cuisse|mollet|cheville/.test(s)) return 'jambes'; if (/bras|epaule|poignet/.test(s)) return 'bras'; if (/coeur/.test(s)) return 'coeur'; return null; };
+    const ZONES = [[/tempe/, 'tempe'], [/machoire|menton/, 'machoire'], [/visage|\bnez\b|oeil|yeux|joue/, 'visage'], [/\btete\b|crane|\bfront\b/, 'tete'], [/gorge/, 'gorge'], [/\bcou\b|nuque/, 'cou'], [/coeur/, 'coeur'],
+        [/torse|thorax|poitrine|sternum/, 'torse'], [/\bcotes?\b|flanc/, 'cotes'], [/abdomen|ventre|estomac|plexus/, 'abdomen'], [/\bdos\b|omoplate|colonne/, 'dos'], [/hanche|bassin/, 'hanche'],
+        [/cuisse/, 'cuisse'], [/genou/, 'genou'], [/tibia|mollet|cheville/, 'tibia'], [/talon/, 'talon'], [/jambe/, 'jambes'], [/epaule|bras|poignet|coude/, 'bras']];
+    const FAMILLE_ZONE = { tempe: 'tete', machoire: 'tete', visage: 'tete', tete: 'tete', gorge: 'gorge', cou: 'gorge', coeur: 'coeur' };
+    const zoneFamille = (z) => FAMILLE_ZONE[z] || z || null;
+    const zone = (v) => { const s = txt(v); if (!s) return null; for (const [re, z] of ZONES) if (re.test(s)) return z; return null; };
+
+    const niveau = (v) => { const s = txt(v); if (!s) return null; if (/basic|basique|bronze|🥉/.test(s)) return 'basic'; if (/special|speciale|advanced|avance|argent|silver|🥈/.test(s)) return 'special'; if (/ultim|gold|\bor\b|🥇/.test(s)) return 'ultime'; return null; };
+    const modeDef = (v) => { const s = txt(v); if (!s) return null; if (DEFENSES_TYPES.includes(s)) return s;
+        if (/esquiv|evit|dodge|decal/.test(s)) return 'esquive'; if (/garde|guard/.test(s)) return 'garde'; if (/parade|parry|pare\b/.test(s)) return 'parade'; if (/bloc|block|encaiss/.test(s)) return 'blocage';
+        if (/devi|detourn|repouss/.test(s)) return 'deviation'; if (/saisi|attrap|grab/.test(s)) return 'saisie'; return null; };
     /** « [#2] », « #2 », « 2 », « attaque 2 » → 2 ; sinon null. */
     const vise = (v) => { if (v == null) return null; const m = /(\d+)/.exec(String(v)); return m ? Number(m[1]) : null; };
 
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* Normalisation (sortie d'IA → structure stable, indépendante du modèle)                                         */
-    /* ------------------------------------------------------------------------------------------------------------- */
+    /* --------------------------------------------------------------------------------------------------------- */
+    /* Normalisation (sortie d'IA → structure stable, indépendante du modèle)                                      */
+    /* --------------------------------------------------------------------------------------------------------- */
     function normaliserAction(a, i) {
-      const t = type(a.type);
-      const { membre, cote: c } = membreEtCote(a.membre, a.cote);
-      const dep = a.deplacement && typeof a.deplacement === 'object' ? a.deplacement : null;
-      const fr = a.frappe && typeof a.frappe === 'object' ? a.frappe : null;
-      const df = a.defense && typeof a.defense === 'object' ? a.defense : null;
-      const en = a.energie && typeof a.energie === 'object' ? a.energie : null;
-      const arc = dep && dep.arc && typeof dep.arc === 'object' ? { rayonM: nombre(dep.arc.rayonM), angleDeg: nombre(dep.arc.angleDeg) } : null;
-      const nn = nombre(a.n), sq = nombre(a.sequence);
-      return {
-        n: nn != null && nn >= 1 ? Math.round(nn) : i + 1,
-        sequence: sq != null && sq >= 1 ? Math.round(sq) : i + 1,                       // sans info : une séquence par action (pas de combo présumé)
-        texte: String(a.texte || a.description || '').replace(/\s+/g, ' ').trim().slice(0, 160),
-        type: t,
-        cible: txt(a.cible) ? String(a.cible).trim() : null,
-        membre, cote: c,
-        membreComplet: !!membre && (!MEMBRES_LATERAUX.includes(membre) || !!c),         // recalculé par le code : on ne croit pas les drapeaux de l'IA
-        frappe: fr ? { genre: genre(fr.genre), sens: sensFrappe(fr.sens), depart: lateral(fr.depart), arrivee: lateral(fr.arrivee) } : null,
-        zone: zone(a.zone),
-        tranchant: bool(a.tranchant) || (!!a.frappe && /taill|estoc|tranch/.test(norm(a.frappe.genre))),   // lame/katana/griffe : sert à la règle « tranchant en zone critique = mort »
-        energie: en ? { niveau: niveau(en.niveau), projectile: bool(en.projectile) } : null,
-        competence: txt(a.competence) ? String(a.competence).trim() : null,
-        deplacement: dep ? {
-          vitesse: vitesse(dep.vitesse), trajectoire: trajectoire(dep.trajectoire), sens: sensDepl(dep.sens),
-          distanceM: (() => { const d = nombre(dep.distanceM); return d != null && d >= 0 ? d : null; })(),
-          vers: /cible|adversaire|lui/.test(txt(dep.vers) || '') ? 'cible' : null,
-          arriveeCote: (() => { const s = txt(dep.arrivee_cote || dep.arriveeCote); return s && /gauche|droite|dos|face/.test(s) ? (s.match(/gauche|droite|dos|face/) || [])[0] : null; })(),
-          arc: arc && (arc.rayonM != null || arc.angleDeg != null) ? arc : null,
-        } : null,
-        defense: df ? { mode: modeDef(df.mode), vise: vise(df.vise), corps: df.corps == null ? null : bool(df.corps) } : null,
-        riposte: bool(a.riposte),
-      };
+        const t = type(a.type);
+        const fr = obj(a.frappe), dep = obj(a.deplacement), df = obj(a.defense), en = obj(a.energie);
+        let genreF = fr ? genreFrappe(fr.genre) : null;
+        let { membre, cote: c } = membreEtCote(a.membre, a.cote);
+        if (!membre && genreF && FRAPPES[genreF]) membre = FRAPPES[genreF].membre;
+        if (membre === 'arme' && !genreF) genreF = 'arme';
+        if (genreF === 'arme') membre = 'arme';
+        const nn = nombre(a.n);
+        const acteurBrut = brut(a.acteur);
+        const frappe = (t === 'attaque' || genreF) ? { genre: genreF, trajectoire: trajCoup(fr && fr.trajectoire, genreF) } : null;
+        const arc = dep && dep.arc && typeof dep.arc === 'object' ? { rayonM: nombre(dep.arc.rayonM), angleDeg: nombre(dep.arc.angleDeg) } : null;
+        return {
+            n: nn != null && nn >= 1 ? Math.round(nn) : i + 1,
+            combo: bool(a.combo),                                                              // « (combo) » écrit après CETTE action (= 2e action du combo)
+            sequence: null,                                                                    // calculée dans normaliser()
+            texte: String(a.texte || a.description || '').replace(/\s+/g, ' ').trim().slice(0, 160),
+            type: t,
+            acteur: acteurBrut && !PRONOMS.test(norm(acteurBrut)) ? acteurBrut : null,        // « je » ne désigne pas un perso
+            cible: brut(a.cible),
+            intention: brut(a.intention),
+            perception: bool(a.perception),
+            membre, cote: c,
+            membreComplet: !!membre && (!MEMBRES_LATERAUX.includes(membre) || !!c),            // recalculé par le code : on ne croit pas les drapeaux de l'IA
+            frappe,
+            zone: zone(a.zone),
+            tranchant: bool(a.tranchant) || genreF === 'arme' && /taill|estoc|tranch|lame|katana|epee|sabre|dague/.test(norm(a.texte || '')),
+            energie: en ? { niveau: niveau(en.niveau), projectile: bool(en.projectile) } : null,
+            competence: brut(a.competence),
+            deplacement: dep ? {
+                genre: genreDepl(dep.genre), trajectoire: trajDepl(dep.trajectoire), vitesse: vitesse(dep.vitesse), sens: sens(dep.sens),
+                distanceM: (() => { const d = nombre(dep.distanceM); return d != null && d >= 0 ? d : null; })(),
+                hauteurM: (() => { const d = nombre(dep.hauteurM); return d != null && d >= 0 ? d : null; })(),
+                courbeM: (() => { const d = nombre(dep.courbeM); return d != null && d >= 0 ? d : null; })(),
+                vers: /cible|adversaire|lui/.test(txt(dep.vers) || '') ? 'cible' : null,
+                arriveeCote: (() => { const s = txt(dep.arrivee_cote || dep.arriveeCote); return s && /gauche|droite|dos|face/.test(s) ? (s.match(/gauche|droite|dos|face/) || [])[0] : null; })(),
+                arc: arc && (arc.rayonM != null || arc.angleDeg != null) ? arc : null,
+            } : null,
+            defense: df ? { mode: modeDef(df.mode), cote: sens(df.cote), vise: vise(df.vise), corps: df.corps == null ? null : bool(df.corps) } : null,
+            riposte: bool(a.riposte),
+        };
     }
-    /** Sortie brute d'IA → { actions[], nombreActions, contradictions[], implicites[], resume }. */
+    /** Sortie brute d'IA → { actions[], nombreActions, contradictions[], implicites[], resume }. Les séquences viennent des marqueurs « (combo) ». */
     function normaliser(raw) {
-      const brut = raw && typeof raw === 'object' ? raw : {};
-      const actions = (Array.isArray(brut.actions) ? brut.actions : []).filter((a) => a && typeof a === 'object').map(normaliserAction);
-      const liste = (x) => (Array.isArray(x) ? x : []).map((s) => String(s).trim()).filter(Boolean);
-      return { actions, nombreActions: actions.length, contradictions: liste(brut.contradictions), implicites: liste(brut.actionsImplicites || brut.implicites), resume: String(brut.resume || '').trim() };
+        const b = raw && typeof raw === 'object' ? raw : {};
+        const actions = (Array.isArray(b.actions) ? b.actions : []).filter((a) => a && typeof a === 'object').map(normaliserAction);
+        let seq = 0;
+        actions.forEach((a, k) => { if (!(a.combo && k > 0)) seq += 1; a.sequence = seq; });
+        const liste = (x) => (Array.isArray(x) ? x : []).map((s) => String(s).trim()).filter(Boolean);
+        return { actions, nombreActions: actions.length, contradictions: liste(b.contradictions), implicites: liste(b.actionsImplicites || b.implicites), resume: String(b.resume || '').trim() };
     }
     /** Validation de SCHÉMA pour le relais (`valider`) : une sortie malformée = échec du modèle, pas faute du joueur. */
     function valider(raw) {
-      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return 'objet JSON attendu';
-      if (!Array.isArray(raw.actions)) return 'champ "actions" absent';
-      if (raw.actions.length > 12) return 'plus de 12 actions : réponse suspecte';
-      for (const a of raw.actions) if (!a || typeof a !== 'object' || !('type' in a)) return 'action sans "type"';
-      return true;
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return 'objet JSON attendu';
+        if (!Array.isArray(raw.actions)) return 'champ "actions" absent';
+        if (raw.actions.length > 12) return 'plus de 12 actions : réponse suspecte';
+        for (const a of raw.actions) if (!a || typeof a !== 'object' || !('type' in a)) return 'action sans "type"';
+        return true;
     }
 
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* Prompt                                                                                                         */
-    /* ------------------------------------------------------------------------------------------------------------- */
+    /* --------------------------------------------------------------------------------------------------------- */
+    /* Prompt                                                                                                     */
+    /* --------------------------------------------------------------------------------------------------------- */
     /**
      * @param {{joueur:{nom,grade?,vmax?}, adversaire:{nom}, distance?:number|string, tour?:number,
      *          attaquesEnAttente?:{n:number, auteur:string, texte:string}[], actionsTexte:string}} c
      */
     function construirePrompt(c) {
-      const j = c.joueur || {};
-      const att = (c.attaquesEnAttente || []).length
-        ? `Attaques adverses EN ATTENTE contre ${j.nom || 'le joueur'} (le pavé peut y répondre) :\n${c.attaquesEnAttente.map((x) => `  [#${x.n}] ${x.auteur} : ${x.texte}`).join('\n')}`
-        : 'Aucune attaque adverse en attente (rien à défendre).';
-      return `Tu es le "Message Parser" de l'arbitre du jeu ALL STARS (combat textuel 1v1). Tu ne juges RIEN et tu ne narres RIEN : tu transformes le texte d'un joueur ("pavé") en JSON strict. Le code du bot applique les règles.
+        const j = c.joueur || {};
+        const att = (c.attaquesEnAttente || []).length
+            ? `Attaques adverses EN ATTENTE contre ${j.nom || 'le joueur'} (le pavé peut y répondre) :\n${c.attaquesEnAttente.map((x) => `  [#${x.n}] ${x.auteur} : ${x.texte}`).join('\n')}`
+            : 'Aucune attaque adverse en attente (rien à défendre).';
+        return `Tu es le "Message Parser" de l'arbitre du jeu ALL STARS (combat textuel 1v1). Tu ne juges RIEN et tu ne narres RIEN : tu transformes le texte d'un joueur ("pavé") en JSON strict. Le code du bot applique les règles.
 
-    CONTEXTE
-    - Joueur : ${j.nom || '?'}${j.grade ? ` (grade ${j.grade}${j.vmax ? `, vmax ${j.vmax} m/s` : ''})` : ''} — Adversaire : ${(c.adversaire && c.adversaire.nom) || '?'} — Distance actuelle : ${c.distance != null ? c.distance : '?'} m — Tour ${c.tour || 1}
-    ${att}
+CONTEXTE
+- Joueur : ${j.nom || '?'}${j.grade ? ` (grade ${j.grade}${j.vmax ? `, vmax ${j.vmax} m/s` : ''})` : ''} — Adversaire : ${(c.adversaire && c.adversaire.nom) || '?'} — Distance actuelle : ${c.distance != null ? c.distance : '?'} m — Tour ${c.tour || 1}
+${att}
 
-    PAVÉ À ANALYSER
-    """
-    ${c.actionsTexte}
-    """
+PAVÉ À ANALYSER
+"""
+${c.actionsTexte}
+"""
 
-    RÈGLES D'EXTRACTION
-    0. Lis le SENS (jargon et synonymes acceptés). N'INVENTE ET NE DEVINE JAMAIS une précision absente : si le texte ne donne pas le côté, le sens, la distance en mètres ou la vitesse, mets null. Ce n'est pas à toi de sanctionner les manques.
-    1. Une action = un verbe décrivant un acte distinct ("pour"/"afin de" séparent deux actions). Le dialogue n'est pas une action. "n" part de 1. "sequence" = numéro de séquence : "/", "|", " - " entre deux blocs ou "puis" ouvrent une nouvelle séquence ; "(combo)" ou "enchaîne" rattache l'action à la séquence précédente.
-    2. DÉPLACEMENT (type "deplacement") : vitesse = "vmax" (vmax, vitesse maximale, à fond…) ou nombre en m/s ou null ; trajectoire = rectiligne | arc | zigzag | contournement | saut | null ; sens = gauche | droite | avant | arriere | haut | bas | null (côté par lequel il passe/part) ; distanceM = nombre de MÈTRES explicitement écrit, jamais calculé (un arc donné par rayon + angle va dans "arc", pas dans distanceM) ; vers = "cible" si le déplacement s'arrête sur/vers l'adversaire ; arrivee_cote = côté de l'adversaire où il arrive (gauche | droite | dos | face | null).
-    3. ATTAQUE (type "attaque" pour un geste physique, "competence" pour une technique/énergie) : membre = poing | pied | coude | genou | main | bras | jambe | deux_mains | tete | arme | corps | null et cote = droite | gauche | null (le côté seulement s'il est écrit) ; frappe.genre = direct | crochet | uppercut | coup_de_pied | balayage | taille | estoc | projectile | energie | autre | null ; frappe.sens = horizontale | ascendante | descendante | oblique | frontale | circulaire | null (seulement s'il est écrit ou évident par le mot) ; frappe.depart / frappe.arrivee = côté où le geste commence / finit (gauche | droite | haut | bas | null) ; zone = tete | gorge | coeur | thorax | abdomen | dos | jambes | bras | null ; energie.niveau = basic | advanced | ultime | null (🥉 = basic, 🥈 = advanced, 🥇 = ultime) ; energie.projectile = true si projectile ; competence = nom de la technique si cité ; tranchant = true si l'attaque coupe ou transperce (lame, katana, griffe, estoc), false sinon.
-    4. DÉFENSE (type "defense") : defense.mode = esquive | blocage | deviation | saisie | contre | coupe | changement_trajectoire ; defense.vise = numéro [#n] de l'attaque adverse visée si le texte permet de l'identifier, sinon null ; defense.corps = true si tout le corps se déplace, false s'il reste sur place (si corps = true, remplis aussi "deplacement"). Une riposte qui SUIT une défense est une "attaque" avec riposte = true.
-    5. contradictions : incohérences internes ÉVIDENTES entre les actions (ex. côté de l'arme ou de la main incompatible avec le côté d'approche et le sens du geste ; membre brisé réutilisé ; action physiquement impossible). Liste vide si tout est cohérent.
-    6. actionsImplicites : actions indispensables mais non écrites (ex. se lever), seulement si réellement nécessaires.
+RÈGLES D'EXTRACTION
+0. Principe du jeu : ACTION + MANIÈRE + INTENTION. Lis le SENS (synonymes, conjugaisons et formulations différentes acceptés). N'INVENTE ET NE DEVINE JAMAIS une précision absente : si le texte ne donne pas le côté, la trajectoire, la distance, la hauteur, la zone, l'intention, mets null. Ce n'est pas à toi de sanctionner les manques.
+1. Une action = un verbe décrivant un acte distinct. Le dialogue n'est pas une action. "n" part de 1. Les actions durent 1 s ; deux actions en combo durent 0,5 s chacune. "combo" = true UNIQUEMENT pour l'action qui est suivie du marqueur écrit « (combo) » (c'est la 2e action du combo, rattachée à la précédente) ; sinon false.
+2. "acteur" = le nom du perso qui réalise l'action, tel qu'écrit par le joueur (ex. « Naruto »). Un sujet nommé en début de phrase vaut pour toutes les actions de cette phrase. null si le joueur écrit « je / j' » ou si aucun perso n'est nommé.
+3. "intention" = le but annoncé par le joueur (« pour … », « afin de … », « dans le but de … », « visant à … »), recopié en peu de mots ; null s'il n'y en a pas.
+4. DÉPLACEMENT (type "deplacement") — deplacement.genre : marche | course | dash | saut | roulade | vol | pivot | decalage | salto | vrille | flip ; trajectoire : frontale | circulaire | diagonale | zigzag | laterale | montante | descendante ; vitesse : "vmax" (vmax, vitesse maximale, à fond…) UNIQUEMENT s'il est écrit juste après l'action de déplacement, sinon null (ou un nombre en m/s) ; sens : gauche | droite | avant | arriere | haut | bas (côté par lequel il passe ou part) ; distanceM : nombre de mètres explicitement écrit ; hauteurM : hauteur en mètres si écrite (déplacements aériens) ; courbeM : la courbe en mètres si écrite (déplacements circulaires) ; vers = "cible" si le déplacement s'arrête sur/vers l'adversaire ; arrivee_cote : gauche | droite | dos | face | null.
+5. ATTAQUE physique (type "attaque") — frappe.genre : coup_direct | crochet | uppercut | overhand | reverse | hammer | coup_de_tete | coup_de_coude | front_kick | side_kick | axe_kick | roundhouse_kick | back_kick | upward_kick | low_kick | reverse_kick | spinning_back_kick | coup_de_genou | arme (katana, épée, lame…) ; membre : main | pied | genou | coude | tete | arme et cote : droite | gauche | null (le côté UNIQUEMENT s'il est écrit : « du droit », « du gauche », « de la main droite »…) ; frappe.trajectoire : celle écrite par le joueur (frontale, laterale, oblique, ascendante, descendante, arriere, circulaire, directe, inversee) ; pour une arme : directe | pique | horizontale | ascendante | descendante | oblique | revers ; zone : tete | tempe | visage | machoire | cou | gorge | coeur | torse | cotes | abdomen | dos | hanche | cuisse | genou | tibia | talon | jambes | bras | null ; tranchant = true si l'attaque coupe ou transperce (lame, katana, griffe, estoc).
+6. TECHNIQUE / ÉNERGIE (type "competence") — competence = nom de la technique tel qu'écrit ; energie.niveau : basic | special | ultime | null (🥉 = basic, 🥈 = special, 🥇 = ultime) ; energie.projectile = true si lancée en projectile.
+7. DÉFENSE (type "defense") — defense.mode : garde | blocage | saisie | deviation | parade | esquive ; defense.cote = côté de la déviation (gauche | droite) pour une déviation ; defense.vise = numéro [#n] de l'attaque adverse visée si le texte permet de l'identifier, sinon null ; defense.corps = true si tout le corps se déplace, false s'il reste sur place (si true, remplis aussi "deplacement") ; membre/cote = membre qui bloque ou dévie (deux_mains, main, bras…). "perception" = true si le joueur écrit que son perso VOIT, SENT ou RESSENT l'action avant d'y réagir (voit, voyant, en voyant, sent, sentant, ressent, perçoit…) ; sinon false. Une riposte qui SUIT une défense est une "attaque" avec riposte = true.
+8. contradictions : incohérences internes ÉVIDENTES entre les actions (côté de l'arme ou de la main incompatible avec la position et le sens du geste ; membre brisé réutilisé ; action physiquement impossible). Liste vide si tout est cohérent.
 
-    FORMAT — réponds UNIQUEMENT avec ce JSON (pas de Markdown, aucun texte autour ; mets null/false/[] quand l'information est absente) :
-    {"actions":[{"n":1,"sequence":1,"texte":"extrait court","type":"deplacement|attaque|defense|competence|autre","cible":null,"membre":null,"cote":null,"frappe":{"genre":null,"sens":null,"depart":null,"arrivee":null},"zone":null,"tranchant":false,"energie":{"niveau":null,"projectile":false},"competence":null,"deplacement":{"vitesse":null,"trajectoire":null,"sens":null,"distanceM":null,"vers":null,"arrivee_cote":null,"arc":{"rayonM":null,"angleDeg":null}},"defense":{"mode":null,"vise":null,"corps":null},"riposte":false}],"contradictions":[],"actionsImplicites":[],"resume":"une phrase"}`;
+FORMAT — réponds UNIQUEMENT avec ce JSON (pas de Markdown, aucun texte autour ; mets null/false/[] quand l'information est absente) :
+{"actions":[{"n":1,"combo":false,"texte":"extrait court","type":"deplacement|attaque|defense|competence|autre","acteur":null,"cible":null,"intention":null,"perception":false,"membre":null,"cote":null,"frappe":{"genre":null,"trajectoire":null},"zone":null,"tranchant":false,"energie":{"niveau":null,"projectile":false},"competence":null,"deplacement":{"genre":null,"trajectoire":null,"vitesse":null,"sens":null,"distanceM":null,"hauteurM":null,"courbeM":null,"vers":null,"arrivee_cote":null},"defense":{"mode":null,"cote":null,"vise":null,"corps":null},"riposte":false}],"contradictions":[],"actionsImplicites":[],"resume":"une phrase"}`;
     }
 
-    return { construirePrompt, normaliser, normaliserAction, valider, TYPES, MODES_DEFENSE, MEMBRES_LATERAUX };
+    return { construirePrompt, normaliser, normaliserAction, valider, zoneFamille, DEPLACEMENTS, AERIENS, TRAJ_DEPL, FRAPPES, TRAJ_ARME, DEFENSES_TYPES, MEMBRES_LATERAUX };
 })();
 
 //================================================
 // 🧰 REPLI LOCAL SANS IA — analyse par mots-clés (équivalent de heuristique.js)
 //================================================
 // Utilisé UNIQUEMENT si toutes les IA du relais échouent : le jeu continue au lieu de se bloquer.
-// Volontairement prudent : en cas de doute une action est « autre ». Réutilise le vocabulaire de ACTIONS_MAP (frappes mains/pieds).
-// Sortie = même structure brute que l'extraction de l'IA (PARSEUR.normaliser la normalise ensuite).
+// Volontairement approximatif : le pipeline n'annule jamais un pavé sur la seule foi de cette analyse.
+// Réutilise le vocabulaire de ACTIONS_MAP (frappes mains/pieds). Sortie = même structure brute que l'extraction de l'IA.
 const LOCAL = (() => {
     'use strict';
 
     const norm = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     const nb = (s) => Number(String(s).replace(',', '.'));
+    const premier = (v) => (Array.isArray(v) ? v[0] : v);
 
-    // --- Vocabulaire de ACTIONS_MAP (aplati une seule fois) ------------------------------------------------------
+    // --- Vocabulaire de ACTIONS_MAP (aplati une seule fois) ----------------------------------------------------------
     let INDEX = null;
     function indexActions() {
         if (INDEX) return INDEX;
@@ -524,21 +562,20 @@ const LOCAL = (() => {
         INDEX.sort((a, b) => b.alias.length - a.alias.length);          // alias les plus longs d'abord
         return INDEX;
     }
-    const TRAJ = { directe: 'frontale', circulaire: 'circulaire', montante: 'ascendante', descendante: 'descendante', laterale: 'horizontale', horizontale: 'horizontale', diagonale: 'oblique', crochet: 'circulaire' };
-    const premier = (v) => (Array.isArray(v) ? v[0] : v);
 
     // --- Verbes ------------------------------------------------------------------------------------------------------
     const RE = {
-        defense: /\b(esquiv\w*|evit\w*|bloqu\w*|parer?|pare\b|devi\w*|saisi\w*|attrap\w*|contr(?:e|er)\b|ripost\w*|me decal\w*|m'ecart\w*|me derob\w*|encaiss\w*)/,
+        defense: /\b(esquiv\w*|evit\w*|bloqu\w*|garde|parade|parer|pare|devi\w*|saisi\w*|attrap\w*|me decal\w*|m'ecart\w*|me derob\w*|encaiss\w*)/,
         competence: /\*[^*]{2,40}\*|\b(souffle|jutsu|technique|nuage de poison|boule d'energie|kamehameha|invoque|deploie|canalise)\b|🥉|🥈|🥇/,
-        attaque: /\b(frapp\w*|coup\w*|crochet|uppercut|direct|jab|trancher?|tranche|decoup\w*|degain\w*|plant\w*|poignard\w*|transperc\w*|assen\w*|envoi\w*|donne\w*|estoc\w*|balay\w*|fauch\w*|lance\w*)/,
-        deplacement: /\b(fonc\w*|cour\w*|cours\w*|course|avanc\w*|recul\w*|saut\w*|bondi\w*|me deplac\w*|m'approch\w*|approch\w*|contourn\w*|zigzag\w*|sprint\w*|vol\w*|fil\w*|se place\w*|me place\w*|rejoin\w*)/,
+        attaque: /\b(frapp\w*|coup\w*|crochet|uppercut|direct|jab|overhand|hammer|kick|trancher?|tranche|decoup\w*|degain\w*|plant\w*|poignard\w*|transperc\w*|assen\w*|envoi\w*|donne\w*|estoc\w*|balay\w*|fauch\w*|lance\w*)/,
+        deplacement: /\b(fonc\w*|cour\w*|course|march\w*|dash\w*|avanc\w*|recul\w*|saut\w*|bondi\w*|roul\w*|pivot\w*|salto|vrille|flip|me deplac\w*|m'approch\w*|approch\w*|contourn\w*|zigzag\w*|sprint\w*|vol\w*|se place\w*|me place\w*|rejoin\w*)/,
     };
+    const GENRES_DEPL = [[/\b(march\w*)\b/, 'marche'], [/\bdash\w*\b/, 'dash'], [/\b(saut\w*|bondi\w*)\b/, 'saut'], [/\broul\w*\b/, 'roulade'], [/\b(vole\w*|vol)\b/, 'vol'], [/\bpivot\w*\b/, 'pivot'],
+        [/\bdecal\w*\b/, 'decalage'], [/\bsalto\b/, 'salto'], [/\bvrille\b/, 'vrille'], [/\bflip\b/, 'flip'], [/\b(cour\w*|course|fonc\w*|sprint\w*|file|avanc\w*|m'approch\w*|approch\w*|contourn\w*|rejoin\w*)\b/, 'course']];
     const ZONES = [[/\b(gorge|cou)\b/, 'gorge'], [/\bcoeur\b/, 'coeur'], [/\b(tete|visage|menton|tempe|machoire|nez|front|crane)\b/, 'tete'],
-        [/\b(torse|thorax|poitrine)\b/, 'thorax'], [/\b(ventre|abdomen|plexus|cotes|flanc)\b/, 'abdomen'], [/\b(dos|nuque|omoplate)\b/, 'dos'],
+        [/\b(torse|thorax|poitrine)\b/, 'torse'], [/\b(ventre|abdomen|plexus|cotes|flanc)\b/, 'abdomen'], [/\b(dos|nuque|omoplate)\b/, 'dos'],
         [/\b(jambe|cuisse|mollet|cheville)\b/, 'jambes'], [/\b(bras|epaule|poignet)\b/, 'bras']];
-    const MEMBRES = [[/\bdeux mains\b/, 'deux_mains'], [/\b(epee|lame|katana|dague|couteau|hache|sabre|arme)\b/, 'arme'], [/\b(poing|crochet|uppercut|jab|direct)\b/, 'poing'],
-        [/\b(pied|semelle|talon|botte)\b/, 'pied'], [/\bgenou\b/, 'genou'], [/\bcoude\b/, 'coude'], [/\bmain\b/, 'main'], [/\bbras\b/, 'bras'], [/\bjambe\b/, 'jambe']];
+    const ARMES = /\b(epee|lame|katana|dague|couteau|hache|sabre|arme)\b/;
 
     function premiereZone(s) {
         const apres = /(?:dans|sur|sous|au niveau de|vers|a la|au)\s+(?:le |la |les |l'|sa |son |ses |mon |ma )?(.*)$/.exec(s);
@@ -551,19 +588,28 @@ const LOCAL = (() => {
     }
 
     // --- Segmentation ----------------------------------------------------------------------------------------------
-    /** Découpe en actions ; "sequence" change à « / », « | », « ; », « . », « puis », « ensuite ». */
+    /**
+     * Découpe en actions. « (combo) » écrit après une action la marque comme 2e action d'un combo.
+     * Après « pour / afin de / visant », un morceau sans verbe d'action est l'INTENTION de l'action précédente.
+     */
     function segmenter(texte) {
-        const brut = String(texte).replace(/\(\s*\/\s*\)/g, ' ').replace(/\s+/g, ' ');
-        const blocs = brut.split(/\s*(?:\/|\||;|\.(?=\s|$)|\bpuis\b|\bensuite\b)\s*/i).map((s) => s.trim()).filter((s) => s.length > 2);
-        const out = []; let seq = 0;
+        const brut = String(texte).replace(/\(\s*\/\s*\)/g, ' ').replace(/\s+/g, ' ').replace(/\(\s*combo\s*\)/gi, ' §C ');
+        const blocs = brut.split(/\s*(?:\/|\||;|\.(?=\s|$)|\bpuis\b|\bensuite\b)\s*/i);
+        const out = [];
         for (const bloc of blocs) {
-            seq += 1;
-            const morceaux = bloc.split(/\s*\(\s*combo\s*\)\s*|\s+pour\s+|\s+visant\s+|\s+avec\s+(?=une?\s)|,\s*(?=je\s|j')|\s+et\s+(?=je\s|j')/i).map((s) => s.trim()).filter((s) => s.length > 2);
-            for (const m of morceaux) {
-                const n = norm(m);
-                const aVerbe = Object.values(RE).some((re) => re.test(n));
-                if (!aVerbe && out.length && out[out.length - 1].sequence === seq) out[out.length - 1].texte += ' ' + m;   // clause sans verbe : rattachée à la précédente
-                else out.push({ texte: m, sequence: seq });
+            const parts = bloc.split(/(\s+pour\s+|\s+afin de\s+|\s+visant\s+(?:a\s+)?|\s+avec\s+(?=une?\s)|,\s*(?=je\s|j')|\s+et\s+(?=je\s|j'))/i);
+            let delim = '';
+            for (let i = 0; i < parts.length; i++) {
+                if (i % 2 === 1) { delim = parts[i]; continue; }
+                let m = parts[i];
+                const combo = /§C/.test(m); m = m.replace(/§C/g, '').trim();
+                if (!m || m.length <= 2) { if (combo && out.length) out[out.length - 1].combo = true; continue; }
+                const n = norm(m); const aVerbe = Object.values(RE).some((re) => re.test(n));
+                const but = /pour|afin de|visant/i.test(delim);
+                if (!aVerbe && out.length) {
+                    if (but) out[out.length - 1].intention = m.replace(/^à\s+/i, ''); else out[out.length - 1].texte += ' ' + m;
+                    if (combo) out[out.length - 1].combo = true;
+                } else out.push({ texte: m, combo, intention: null });
             }
         }
         return out;
@@ -578,73 +624,84 @@ const LOCAL = (() => {
         return 'autre';
     }
     function extraireDeplacement(n) {
-        const vitesse = /\b(vmax|vitesse max\w*|pleine vitesse|a fond)\b/.test(n) ? 'vmax' : ((/(\d+(?:[.,]\d+)?)\s*m\s*\/\s*s/.exec(n) || [])[1] ? nb(/(\d+(?:[.,]\d+)?)\s*m\s*\/\s*s/.exec(n)[1]) : null);
-        const trajectoire = /zig\s*-?\s*zag/.test(n) ? 'zigzag' : /\b(arc|arcque\w*|arque\w*|courb\w*|circulaire|demi-?cercle)\b/.test(n) ? 'arc' : /contourn/.test(n) ? 'contournement' : /\b(saut\w*|bond\w*)\b/.test(n) ? 'saut' : /ligne droite|rectiligne/.test(n) ? 'rectiligne' : null;
+        const vm = /(\d+(?:[.,]\d+)?)\s*m\s*\/\s*s/.exec(n);
+        const vitesse = /\b(vmax|vitesse max\w*|pleine vitesse|a fond)\b/.test(n) ? 'vmax' : (vm ? nb(vm[1]) : null);
+        const genre = (GENRES_DEPL.find(([re]) => re.test(n)) || [])[1] || null;
+        const trajectoire = /zig\s*-?\s*zag/.test(n) ? 'zigzag' : /\b(arc|arcque\w*|arque\w*|courb\w*|circulaire|demi-?cercle)\b/.test(n) ? 'circulaire' : /diagonal/.test(n) ? 'diagonale' : /\blater\w*/.test(n) ? 'laterale'
+            : /\b(montant\w*|ascend\w*)\b/.test(n) ? 'montante' : /\b(descend\w*|plong\w*)\b/.test(n) ? 'descendante' : /ligne droite|frontal|droit devant|vers lui|vers l'adversaire|sur (?:mon )?adversaire|sur lui/.test(n) ? 'frontale' : null;
         let sensV = null;
         if (/\b(par la gauche|sur ma gauche|vers la gauche|a gauche|de ma gauche)\b/.test(n) && !/partant de ma gauche/.test(n)) sensV = 'gauche';
         else if (/\b(par la droite|sur ma droite|vers la droite|a droite)\b/.test(n)) sensV = 'droite';
         else if (/\b(recul\w*|vers l'arriere|m'eloign\w*)\b/.test(n)) sensV = 'arriere';
-        else if (/\b(vers lui|vers l'adversaire|sur (?:mon )?adversaire|sur lui|vers (?:le|la) \w+)\b/.test(n)) sensV = 'avant';
+        else if (/\b(vers lui|vers l'adversaire|sur (?:mon )?adversaire|sur lui)\b/.test(n)) sensV = 'avant';
         else if (/partant de ma droite/.test(n)) sensV = 'droite';
         else if (/partant de ma gauche/.test(n)) sensV = 'gauche';
         const rayon = /rayon\s+(?:de\s+)?(\d+(?:[.,]\d+)?)\s*m/.exec(n);
+        const courbe = /courbe\s+(?:de\s+)?(\d+(?:[.,]\d+)?)\s*m/.exec(n);
+        const haut = /(\d+(?:[.,]\d+)?)\s*m(?:etres?)?\s+de\s+haut|hauteur\s+(?:de\s+)?(\d+(?:[.,]\d+)?)\s*m/.exec(n);
         const angle = /(\d+)\s*(?:°|\^|degres?)/.exec(n);
-        const sansRayon = n.replace(/rayon\s+(?:de\s+)?\d+(?:[.,]\d+)?\s*m/g, ' ').replace(/\(\s*\d+(?:[.,]\d+)?\s*m\s+entre[^)]*\)/g, ' ');
-        const dist = /(\d+(?:[.,]\d+)?)\s*(?:m|metres?)\b(?!\s*\/)/.exec(sansRayon);
+        const sansBruit = n.replace(/rayon\s+(?:de\s+)?\d+(?:[.,]\d+)?\s*m/g, ' ').replace(/courbe\s+(?:de\s+)?\d+(?:[.,]\d+)?\s*m/g, ' ').replace(/\(\s*\d+(?:[.,]\d+)?\s*m\s+entre[^)]*\)/g, ' ')
+            .replace(/(\d+(?:[.,]\d+)?)\s*m(?:etres?)?\s+de\s+haut/g, ' ');
+        const dist = /(\d+(?:[.,]\d+)?)\s*(?:m|metres?)\b(?!\s*\/)/.exec(sansBruit);
         const cote = /profil gauche|cote gauche/.test(n) ? 'gauche' : /profil droit|cote droit/.test(n) ? 'droite' : /derriere (?:lui|elle)|dans le dos|\bderriere\b/.test(n) ? 'dos' : /\bface\b|devant lui/.test(n) ? 'face' : null;
         return {
-            vitesse, trajectoire, sens: sensV, distanceM: dist ? nb(dist[1]) : null,
+            genre, trajectoire, vitesse, sens: sensV, distanceM: dist ? nb(dist[1]) : null, hauteurM: haut ? nb(haut[1] || haut[2]) : null,
+            courbeM: courbe ? nb(courbe[1]) : (rayon ? nb(rayon[1]) : null),
             vers: /\b(vers|sur) (?:lui|elle|(?:mon |son )?adversaire)\b|\bderriere lui\b|profil (?:gauche|droit)/.test(n) ? 'cible' : null,
-            arrivee_cote: cote, arc: rayon || angle ? { rayonM: rayon ? nb(rayon[1]) : null, angleDeg: angle ? Number(angle[1]) : null } : { rayonM: null, angleDeg: null },
+            arrivee_cote: cote, arc: rayon || angle ? { rayonM: rayon ? nb(rayon[1]) : null, angleDeg: angle ? Number(angle[1]) : null } : null,
         };
     }
     function extraireFrappe(n) {
-        let genre = null, sens = null, membre = null, cote = null;
+        let genre = null, traj = null, membre = null, cote = null;
         const al = indexActions().find((x) => n.includes(x.alias));
-        if (al) {
-            const t = al.def.type;                                                   // poing | pied | genou
-            membre = t === 'pied' ? 'pied' : t; cote = al.def.main || al.def.pied || null;
-            sens = TRAJ[norm(premier(al.def.trajectoire) || '')] || null;
-            genre = /crochet/.test(al.alias) ? 'crochet' : /uppercut/.test(al.alias) ? 'uppercut' : t === 'poing' ? 'direct' : t === 'pied' ? 'coup_de_pied' : null;
+        if (al) { genre = al.alias; membre = al.def.type; cote = al.def.main || al.def.pied || null; traj = premier(al.def.trajectoire) || null; }
+        if (!genre) {
+            const g = /\b(uppercut|overhand|hammer|crochet|jab|direct)\b/.exec(n) || /\b(coup de pied[a-z ]{0,12}|\w+ kick)\b/.exec(n) || /\bcoup de (genou|coude|tete)\b/.exec(n);
+            genre = g ? g[0] : (ARMES.test(n) ? 'arme' : null);
         }
-        if (!genre) genre = /crochet/.test(n) ? 'crochet' : /uppercut/.test(n) ? 'uppercut' : /\b(plant\w*|poignard\w*|transperc\w*|estoc\w*)\b/.test(n) ? 'estoc' : /\b(tranch\w*|decoup\w*|coupe\w*|degain\w*|lame|katana|epee)\b/.test(n) ? 'taille' : /coup de pied|\bkick\b/.test(n) ? 'coup_de_pied' : /\b(direct|jab)\b/.test(n) ? 'direct' : null;
-        if (/horizontal/.test(n)) sens = 'horizontale'; else if (/ascendant|remontant/.test(n)) sens = 'ascendante'; else if (/descendant/.test(n)) sens = 'descendante'; else if (/oblique|diagonal/.test(n)) sens = 'oblique';
-        if (!membre) for (const [re, m] of MEMBRES) if (re.test(n)) { membre = m; break; }
-        if (membre && !['arme', 'deux_mains', 'tete', 'corps'].includes(membre)) cote = cote || coteApres(n, membre);
-        else if (membre === 'arme') cote = (/\b(main|bras)\s+droit/.test(n) || /de la main droite/.test(n)) ? 'droite' : (/\b(main|bras)\s+gauche/.test(n) ? 'gauche' : null);
-        const dg = /de (?:la )?gauche (?:vers|a) (?:la )?droite/.test(n), gd = /de (?:la )?droite (?:vers|a) (?:la )?gauche/.test(n);
-        return { membre, cote, frappe: { genre, sens, depart: dg ? 'gauche' : gd ? 'droite' : null, arrivee: dg ? 'droite' : gd ? 'gauche' : null } };
+        if (!membre) membre = ARMES.test(n) ? 'arme' : /pied|kick/.test(n) ? 'pied' : /genou/.test(n) ? 'genou' : /coude/.test(n) ? 'coude' : /\btete\b/.test(n) && /coup de tete/.test(n) ? 'tete' : /poing|main|crochet|uppercut|jab|direct|overhand|hammer/.test(n) ? 'main' : null;
+        if (membre && !['arme', 'tete'].includes(membre)) cote = cote || coteApres(n, membre === 'main' ? 'main|poing' : membre);
+        else if (membre === 'arme') cote = /\b(main|bras)\s+droit/.test(n) ? 'droite' : /\b(main|bras)\s+gauche/.test(n) ? 'gauche' : null;
+        const t = /horizontal/.test(n) ? 'horizontale' : /ascendant|remontant/.test(n) ? 'ascendante' : /descendant/.test(n) ? 'descendante' : /oblique|diagonal/.test(n) ? 'oblique' : /\bpique\b|estoc|plant\w*|poignard\w*|transperc\w*/.test(n) ? 'pique' : /revers/.test(n) ? 'revers' : null;
+        return { membre, cote, frappe: { genre, trajectoire: t || traj } };
     }
     function extraireDefense(n) {
-        const mode = /\b(saisi\w*|attrap\w*)\b/.test(n) ? 'saisie' : /\b(devi\w*|detourn\w*|repouss\w*)\b/.test(n) ? 'deviation' : /\b(contre|contrer|ripost\w*)\b/.test(n) ? 'contre' : /\b(bloqu\w*|pare|parer|encaiss\w*)\b/.test(n) ? 'blocage' : 'esquive';
+        const mode = /\b(saisi\w*|attrap\w*)\b/.test(n) ? 'saisie' : /\b(devi\w*|detourn\w*|repouss\w*)\b/.test(n) ? 'deviation' : /\bparade\b|\bparer?\b/.test(n) ? 'parade' : /\b(bloqu\w*|encaiss\w*)\b/.test(n) ? 'blocage' : /\bgarde\b/.test(n) ? 'garde' : 'esquive';
         const corps = /\b(recul\w*|saut\w*|bondi\w*|roul\w*|plong\w*|m'ecart\w*|me deplac\w*|pas (?:en arriere|lateral))\b/.test(n);
         const v = /#\s*(\d+)|attaque\s*(?:n°?\s*)?(\d+)/.exec(n);
-        return { mode, vise: v ? Number(v[1] || v[2]) : null, corps };
+        const c = /(?:par la|vers la|a)\s+(gauche|droite)/.exec(n);
+        return { mode, vise: v ? Number(v[1] || v[2]) : null, corps, cote: c ? c[1] : null };
     }
 
-    /** @param {string} texte pavé brut   @param {{cibleNoms?:string[]}} ctx   @returns {object} extraction brute (schéma de l'IA) */
+    /** @param {string} texte pavé brut   @param {{cibleNoms?:string[], acteurNoms?:string[]}} ctx   @returns {object} extraction brute (schéma de l'IA) */
     function analyser(texte, ctx = {}) {
-        const actions = []; let n = 0;
+        const actions = []; let n = 0, acteurPrec = null, textePrec = '';
         const cibles = (ctx.cibleNoms || []).map((c) => [norm(c), c]);
+        const acteurs = (ctx.acteurNoms || []).map((c) => [norm(c), c]);
         for (const seg of segmenter(texte)) {
             const s = norm(seg.texte);
             const type = typeDe(s);
-            if (type === 'autre' && /^(je vois|je le vois|je remarque|je constate|je sens)\b/.test(s)) continue;     // observation, pas une action
-            const a = { n: ++n, sequence: seg.sequence, texte: seg.texte.slice(0, 160), type, cible: (cibles.find(([k]) => k && s.includes(k)) || [])[1] || null };
+            if (type === 'autre' && /^(je vois|je le vois|je remarque|je constate|je sens)\b/.test(s)) { textePrec = s; continue; }       // observation, pas une action
+            const trouve = (acteurs.find(([k]) => k && s.includes(k)) || [])[1] || null;
+            if (trouve) acteurPrec = trouve;
+            const intentionTxt = seg.intention || ((/\b(?:dans le but de|histoire de)\s+([^,;.]{3,60})/.exec(seg.texte) || [])[1] || null);
+            const a = { n: ++n, combo: !!seg.combo, texte: seg.texte.slice(0, 160), type, acteur: acteurPrec, intention: intentionTxt,
+                cible: (cibles.find(([k]) => k && s.includes(k)) || [])[1] || null,
+                perception: /\b(voit|vois|voir|voyant|sent|sens|sentant|ressent\w*|percoit|percevant|apercoit|remarque|entend\w*)\b/.test(s + ' ' + textePrec) };
             if (type === 'deplacement') a.deplacement = extraireDeplacement(s);
             else if (type === 'attaque') {
                 Object.assign(a, extraireFrappe(s)); a.zone = premiereZone(s);
                 a.tranchant = /\b(lame|katana|epee|dague|couteau|hache|sabre|tranch\w*|decoup\w*|poignard\w*|transperc\w*|griffe)\b/.test(s);
-                if (/\b(basic|basique|advanced|ultime)\b|🥉|🥈|🥇/.test(seg.texte.toLowerCase())) a.energie = { niveau: /🥇|ultime/.test(seg.texte.toLowerCase()) ? 'ultime' : /🥈|advanced/.test(seg.texte.toLowerCase()) ? 'advanced' : 'basic', projectile: false };
             } else if (type === 'competence') {
                 const nom = /\*([^*]{2,40})\*/.exec(seg.texte);
                 a.competence = nom ? nom[1].trim() : null;
                 const t = seg.texte;
-                a.energie = { niveau: /🥇|ultime/i.test(t) ? 'ultime' : /🥈|advanced/i.test(t) ? 'advanced' : /🥉|basic|basique/i.test(t) ? 'basic' : null, projectile: /projectile/.test(s) };
+                a.energie = { niveau: /🥇|ultime/i.test(t) ? 'ultime' : /🥈|special/i.test(t) ? 'special' : /🥉|basic|basique/i.test(t) ? 'basic' : null, projectile: /projectile/.test(s) };
             } else if (type === 'defense') {
                 a.defense = extraireDefense(s);
                 if (a.defense.corps) a.deplacement = extraireDeplacement(s);
             }
+            textePrec = s;
             actions.push(a);
         }
         return { actions, contradictions: [], actionsImplicites: [], resume: '' };
@@ -654,163 +711,147 @@ const LOCAL = (() => {
 })();
 
 //================================================
-// ⚖️ RÈGLES DU PAVÉ — discipline (tolérance / pénalité / annulation) + file des attaques en attente
+// ⚖️ RÈGLES DU PAVÉ — vérification stricte + file des attaques en attente (équivalent de moteur.js : cycle d'un pavé)
 //================================================
+// Règle officielle : « si une seule action est mal réalisée dans le pavé, tout le reste est raté, donc tout le pavé est ❌ ».
+// Aucune tolérance, aucune correction : la moindre erreur refuse le pavé en entier.
+// Toutes les interprétations sont des drapeaux nommés dans REGLES.CFG.
 const REGLES = (() => {
     'use strict';
-    /**
-     * regles_pave.js — Discipline du pavé + file des attaques en attente (ALL STARS).
-     *
-     * Entrée : la sortie NORMALISÉE du parseur (parseur_pave.normaliser). Sortie : une DÉCISION déterministe,
-     * identique quelle que soit l'IA qui a extrait le pavé. Aucun appel IA ici.
-     *
-     * Trois classes d'écarts (déduites de ton match de référence) :
-     *   remarque    : détail déductible mais non nommé (ex. « frappe » non nommée)  → le pavé passe, simple rappel
-     *   omission    : donnée requise absente (côté, sens, distance, membre…)        → toléré UNE fois (tour 1) avec pénalité,
-     *                                                                                  ensuite le pavé est ANNULÉ
-     *   incoherence : contradiction interne / limites de pavé dépassées              → pavé ANNULÉ ; au tour 1 la 1re erreur
-     *                                                                                  s'accompagne en plus de la pénalité
-     * Pas de correction : seul le premier message de pavé compte (à gérer côté bot : ignorer les messages suivants du tour).
-     *
-     * Toutes les hypothèses interprétatives sont des drapeaux nommés dans CFG (même esprit que config/regles.js).
-     */
+
     const CFG = {
-      MAX_ACTIONS: 4,                       // images : 4 actions max par pavé
-      MAX_PAR_SEQUENCE: 2,                  // images : 2 en combo max par séquence
-      TOLERANCE_TOUR_MAX: 1,                // la tolérance de début de combat ne vaut qu'au tour 1 (1 usage par joueur)
-      PENALITE: { stat: 'combatSpeed', de: 'S', vers: 'S-', libelle: 'Baisse de Réactivité S vers S-' },
-      VITESSE_ABSENTE: 'reduite',           // 'reduite' (règle de l'image 1 : 1 m/s) | 'erreur'
-      VITESSE_REDUITE_MS: 1,
-      ARC_COMPTE_COMME_DISTANCE: false,     // match de référence : « rayon 1,01 m, 180° » n'a PAS suffi comme distance
-      DISTANCE_ESQUIVE_CORPS_EXIGEE: true,  // une esquive qui déplace tout le corps doit donner sens + distance (sortie de zone)
-      IMPLICITES_CLASSE: 'remarque',        // 'remarque' | 'omission' : action implicite manquante signalée par l'IA
+        MAX_ACTIONS: 4,                                   // affiche « Nouvelle expérience dynamique » : 4 actions maximum par pavé
+        MAX_COMBO: 2,                                     // … avec un combo de 2 actions maximum
+        ACTEUR_OBLIGATOIRE: true,                         // « vous devez toujours préciser le perso qui réalise l'action » (pas de « je »)
+        INTENTION_OBLIGATOIRE: { deplacement: true, defense: true, attaque: false },   // HYPOTHÈSE : l'affiche ne dit « optionnelle » que pour les attaques
+        PERCEPTION_OBLIGATOIRE: true,                     // réagir sans « voit / sent / ressent » = divination → pavé ❌
+        SPECIALES_INTERDITES_EN_COMBO: ['special', 'ultime'],   // « vous ne pouvez pas lancer une attaque spéciale en combo »
+        DISTANCE_CIBLE_SUFFIT: true,                      // HYPOTHÈSE : « vers l'adversaire » donne la distance et la trajectoire frontale
+        COURBE_MAX_M: 3,                                  // courbe d'un déplacement circulaire : 3 m max pour garder la vitesse max
+        VITESSE_LENTE_MS: 1,                              // vitesse « considérée lente » si vmax n'est pas écrit juste après le déplacement (valeur de l'ancienne affiche)
     };
-    const RANG = { remarque: 1, omission: 2, incoherence: 3 };
 
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* 1. Vérification stricte (pure)                                                                                 */
-    /* ------------------------------------------------------------------------------------------------------------- */
-    const COURBES = ['arc', 'zigzag', 'contournement'];
+    const MSG = {
+        TROP_ACTIONS: () => `Plus de ${CFG.MAX_ACTIONS} actions dans le pavé (${CFG.MAX_ACTIONS} maximum).`,
+        TROP_COMBO: () => `Plus de ${CFG.MAX_COMBO} actions en combo (${CFG.MAX_COMBO} maximum).`,
+        SPECIALE_EN_COMBO: (n) => `Action ${n} : une attaque spéciale ne peut pas être lancée en combo.`,
+        ACTEUR_ABSENT: (n) => `Action ${n} : précise le perso qui réalise l'action (ex. « Naruto frappe… »), sans dire « je ».`,
+        TYPE_DEPLACEMENT_ABSENT: (n) => `Action ${n} : type de déplacement non précisé (marche, course, dash, saut, roulade, vol, pivot, décalage, salto, vrille, flip).`,
+        TRAJECTOIRE_ABSENTE: (n) => `Action ${n} : trajectoire du déplacement non précisée (frontale, circulaire, diagonale, zig zag, latérale, montante, descendante).`,
+        DISTANCE_ABSENTE: (n) => `Action ${n} : distance du déplacement non précisée (combien de mètres ?).`,
+        HAUTEUR_ABSENTE: (n) => `Action ${n} : la hauteur est obligatoire pour un déplacement aérien.`,
+        COURBE_ABSENTE: (n) => `Action ${n} : la courbe est obligatoire pour un déplacement circulaire (${CFG.COURBE_MAX_M} m max pour garder la vitesse max).`,
+        SENS_ABSENT: (n) => `Action ${n} : le sens est obligatoire pour un déplacement circulaire (par la gauche ou par la droite).`,
+        INTENTION_ABSENTE: (n) => `Action ${n} : intention non précisée (dans quel but ?).`,
+        FRAPPE_ABSENTE: (n) => `Action ${n} : type de frappe non précisé (direct, crochet, uppercut, kick…).`,
+        COTE_ABSENT: (n) => `Action ${n} : la main ou le pied utilisé n'est pas précisé (droit ou gauche).`,
+        TRAJECTOIRE_COUP_ABSENTE: (n, opts) => `Action ${n} : trajectoire du coup non précisée (${opts}).`,
+        ZONE_ABSENTE: (n) => `Action ${n} : zone visée non précisée (tête, abdomen, torse, côtes, cou…).`,
+        TYPE_DEFENSE_ABSENT: (n) => `Action ${n} : type de défense non précisé (garde, blocage, saisie, déviation, parade, esquive).`,
+        DIVINATION: (n) => `Action ${n} : tu dois mentionner que ton perso voit, sent ou ressent l'action avant d'y réagir, sinon c'est de la divination.`,
+        COTE_DEVIATION: (n) => `Action ${n} : précise le côté de la déviation (gauche ou droite).`,
+        AUCUNE_ACTION: () => 'Aucune action détectée dans le pavé.',
+    };
 
-    function verifierDeplacement(a, d, add, { strictDistance = false } = {}) {
-      const courbe = COURBES.includes(d.trajectoire);
-      const arcCalculable = CFG.ARC_COMPTE_COMME_DISTANCE && d.arc && d.arc.rayonM != null && d.arc.angleDeg != null;
-      if (d.vitesse == null && a.type === 'deplacement') {
-        if (CFG.VITESSE_ABSENTE === 'erreur') add('VITESSE_ABSENTE', 'omission', a.n, `Action ${a.n} : vitesse de déplacement non précisée (vmax ?).`);
-      }
-      if (courbe) {
-        if (!d.sens) add('SENS_ABSENT', 'omission', a.n, `Action ${a.n} : le sens de la course n'est pas précisé (par la gauche ou par la droite).`);
-        if (d.distanceM == null && !arcCalculable) add('DISTANCE_ABSENTE', 'omission', a.n, `Action ${a.n} : distance parcourue non précisée (combien de mètres ?).`);
-      } else {
-        if (!d.sens && d.vers !== 'cible') add('DIRECTION_ABSENTE', 'omission', a.n, `Action ${a.n} : direction du déplacement non précisée.`);
-        if (d.distanceM == null && (strictDistance || d.vers !== 'cible')) add('DISTANCE_ABSENTE', 'omission', a.n, `Action ${a.n} : distance parcourue non précisée (combien de mètres ?).`);
-      }
-    }
-
+    /* ------------------------------------------------------------------------------------------------------- */
+    /* 1. Vérification stricte (pure)                                                                           */
+    /* ------------------------------------------------------------------------------------------------------- */
     /**
-     * @param {object} p sortie de parseur_pave.normaliser
-     * @returns {{issues:{code,classe,n,message}[], notes:{code,n,valeur?}[], pire:number}}
+     * @param {object} p sortie de PARSEUR.normaliser
+     * @returns {{issues:{code,n,message}[], notes:{code,n,valeur?}[]}}
      */
     function verifierPave(p) {
-      const issues = [], notes = [];
-      const add = (code, classe, n, message) => issues.push({ code, classe, n: n == null ? null : n, message });
-      const acts = (p && p.actions) || [];
+        const issues = [], notes = [];
+        const add = (code, n, ...args) => issues.push({ code, n: n == null ? null : n, message: MSG[code](n, ...args) });
+        const acts = (p && p.actions) || [];
 
-      if (acts.length > CFG.MAX_ACTIONS) add('TROP_ACTIONS', 'incoherence', null, `${acts.length} actions : ${CFG.MAX_ACTIONS} maximum par pavé.`);
-      const parSeq = {};
-      for (const a of acts) parSeq[a.sequence] = (parSeq[a.sequence] || 0) + 1;
-      for (const [s, k] of Object.entries(parSeq)) if (k > CFG.MAX_PAR_SEQUENCE) add('TROP_PAR_SEQUENCE', 'incoherence', null, `Séquence ${s} : ${k} actions, ${CFG.MAX_PAR_SEQUENCE} maximum en combo.`);
+        if (!acts.length) add('AUCUNE_ACTION', null);
+        if (acts.length > CFG.MAX_ACTIONS) add('TROP_ACTIONS', null);
+        const parSeq = {};
+        for (const a of acts) parSeq[a.sequence] = (parSeq[a.sequence] || 0) + 1;
+        if (Object.values(parSeq).some((k) => k > CFG.MAX_COMBO)) add('TROP_COMBO', null);
 
-      for (const a of acts) {
-        if (a.type === 'deplacement') {
-          const d = a.deplacement || {};
-          verifierDeplacement(a, d, add);
-          if (d.vitesse == null && CFG.VITESSE_ABSENTE === 'reduite') notes.push({ code: 'VITESSE_REDUITE', n: a.n, valeur: CFG.VITESSE_REDUITE_MS });
+        for (const a of acts) {
+            const dansCombo = (parSeq[a.sequence] || 0) > 1;
+            if (CFG.ACTEUR_OBLIGATOIRE && a.type !== 'autre' && !a.acteur) add('ACTEUR_ABSENT', a.n);
+            if (a.type === 'deplacement') verifierDeplacement(a, add, notes);
+            else if (a.type === 'attaque') verifierAttaque(a, add);
+            else if (a.type === 'defense') verifierDefense(a, add, notes);
+            if (a.type === 'competence' && dansCombo && a.energie && CFG.SPECIALES_INTERDITES_EN_COMBO.includes(a.energie.niveau)) add('SPECIALE_EN_COMBO', a.n);
+            if (a.type !== 'defense' && a.type !== 'deplacement' && a.type !== 'attaque' && a.type !== 'competence') continue;
+            if (CFG.INTENTION_OBLIGATOIRE[a.type] && !a.intention) add('INTENTION_ABSENTE', a.n);
         }
-        if (a.type === 'defense' && a.defense && a.defense.corps === true && a.defense.mode === 'esquive' && CFG.DISTANCE_ESQUIVE_CORPS_EXIGEE) {
-          verifierDeplacement(a, a.deplacement || {}, add, { strictDistance: true });   // l'IA a oublié le bloc "deplacement" = rien n'est précisé
+        for (const c of (p && p.contradictions) || []) issues.push({ code: 'CONTRADICTION', n: null, message: c });
+        return { issues, notes };
+    }
+
+    function verifierDeplacement(a, add, notes) {
+        const d = a.deplacement || {};
+        const versCible = CFG.DISTANCE_CIBLE_SUFFIT && d.vers === 'cible';
+        if (!d.genre) add('TYPE_DEPLACEMENT_ABSENT', a.n);
+        if (!d.trajectoire && !versCible) add('TRAJECTOIRE_ABSENTE', a.n);
+        if (d.distanceM == null && !versCible) add('DISTANCE_ABSENTE', a.n);
+        if (d.trajectoire === 'circulaire') {
+            if (d.courbeM == null) add('COURBE_ABSENTE', a.n);
+            if (!d.sens) add('SENS_ABSENT', a.n);
+            else if (d.courbeM != null && d.courbeM > CFG.COURBE_MAX_M) notes.push({ code: 'COURBE_TROP_LARGE', n: a.n, valeur: d.courbeM });
         }
-        if (a.type === 'attaque') {
-          if (!a.membre) add('MEMBRE_ABSENT', 'omission', a.n, `Action ${a.n} : le membre utilisé n'est pas précisé.`);
-          else if (!a.membreComplet) add('COTE_ABSENT', 'omission', a.n, `Action ${a.n} : le côté du membre (${a.membre}) n'est pas précisé (droit ou gauche).`);
-          else {
-            const f = a.frappe || {};
-            const sansTrajet = !f.genre && !f.sens && !f.depart && !f.arrivee;
-            if (sansTrajet) add('FRAPPE_ABSENTE', 'omission', a.n, `Action ${a.n} : la frappe n'est pas décrite (type et sens du geste).`);
-            else if (!f.genre && !f.sens) add('FRAPPE_NON_NOMMEE', 'remarque', a.n, `Action ${a.n} : il faut toujours nommer la frappe (ex. « frappe horizontale du droit, de la gauche vers la droite »).`);
-          }
+        if ((PARSEUR.AERIENS.includes(d.genre) || d.trajectoire === 'montante' || d.trajectoire === 'descendante') && d.hauteurM == null) add('HAUTEUR_ABSENTE', a.n);
+        if (d.vitesse == null || d.vitesse === 'lente') notes.push({ code: 'VITESSE_LENTE', n: a.n, valeur: CFG.VITESSE_LENTE_MS });
+    }
+
+    function verifierAttaque(a, add) {
+        const f = a.frappe || {};
+        if (!f.genre) { add('FRAPPE_ABSENTE', a.n); return; }
+        if (f.genre !== 'arme' && !a.membreComplet) add('COTE_ABSENT', a.n);
+        if (f.genre === 'arme') { if (!f.trajectoire) add('TRAJECTOIRE_COUP_ABSENTE', a.n, 'directe/pique, horizontale, ascendante, descendante, oblique, revers'); }
+        else {
+            const def = PARSEUR.FRAPPES[f.genre];
+            if (def && def.traj.length > 1 && !f.trajectoire) add('TRAJECTOIRE_COUP_ABSENTE', a.n, def.traj.join(', '));
         }
-      }
-      for (const c of (p && p.contradictions) || []) add('CONTRADICTION', 'incoherence', null, c);
-      for (const i of (p && p.implicites) || []) add('ACTION_IMPLICITE', CFG.IMPLICITES_CLASSE, null, `Action implicite manquante : ${i}`);
-
-      return { issues, notes, pire: issues.reduce((m, i) => Math.max(m, RANG[i.classe]), 0) };
+        if (!a.zone) add('ZONE_ABSENTE', a.n);
     }
 
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* 2. Politique : tolérance de début de combat, pénalité, annulation                                              */
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /**
-     * LECTURE SEULE (aperçu, relances sans effet de bord). La tolérance n'est consommée que par `appliquerDecision`.
-     * @param {object} parse  sortie normalisée du parseur
-     * @param {{tour?:number, joueur?:string, discipline?:object}} ctx  discipline = match.discipline
-     * @returns decision { etat:'valide'|'attention'|'mc', annule, penalite, toleranceConsommee, issues, notes, messages[] }
-     */
-    function evaluerPave(parse, ctx = {}) {
-      const v = verifierPave(parse);
-      const tour = ctx.tour || 1;
-      const d = (ctx.discipline && ctx.discipline[ctx.joueur]) || {};
-      const toleranceDispo = tour <= CFG.TOLERANCE_TOUR_MAX && !d.toleranceUtilisee;
-      let etat = 'valide', annule = false, penalite = null, consommee = false;
-      if (v.pire === RANG.remarque) etat = 'attention';
-      else if (v.pire === RANG.omission) {
-        if (toleranceDispo) { etat = 'attention'; penalite = CFG.PENALITE; consommee = true; }
-        else { etat = 'mc'; annule = true; }
-      } else if (v.pire === RANG.incoherence) {
-        etat = 'mc'; annule = true;
-        if (toleranceDispo) { penalite = CFG.PENALITE; consommee = true; }
-      }
-      return { etat, annule, penalite, toleranceConsommee: consommee, issues: v.issues, notes: v.notes, messages: composerMessages({ etat, annule, penalite, issues: v.issues }) };
+    function verifierDefense(a, add, notes) {
+        const df = a.defense || {};
+        if (!df.mode) add('TYPE_DEFENSE_ABSENT', a.n);
+        if (CFG.PERCEPTION_OBLIGATOIRE && !a.perception) add('DIVINATION', a.n);
+        if (df.mode === 'deviation' && !df.cote) add('COTE_DEVIATION', a.n);
+        if (df.mode === 'esquive') {                      // « les déplacements rapides et esquives : préciser (vmax) juste après l'action »
+            const v = a.deplacement && a.deplacement.vitesse;
+            if (v == null || v === 'lente') notes.push({ code: 'VITESSE_LENTE', n: a.n, valeur: CFG.VITESSE_LENTE_MS });
+        }
     }
 
-    /** Messages au format de l'arbitre humain (❌ERREUR / ⚠️ / pénalité). */
-    function composerMessages({ etat, annule, penalite, issues }) {
-      const m = [];
-      if (!issues.length) return m;
-      const txtIssues = issues.map((i) => i.message).join(' ');
-      if (etat === 'mc') m.push(`❌ERREUR : ${txtIssues}${annule ? ' Aucune action ne passe.' : ''}`);
-      else m.push(`⚠️Attention : ${txtIssues}`);
-      if (penalite) m.push(`⚠️Pénalité (erreur tolérée en début de combat) : ${penalite.libelle}.`);
-      return m;
+    /* ------------------------------------------------------------------------------------------------------- */
+    /* 2. Décision (lecture seule)                                                                              */
+    /* ------------------------------------------------------------------------------------------------------- */
+    /** @returns {{etat:'valide'|'mc', annule:boolean, issues, notes, messages:string[]}} */
+    function evaluerPave(parse) {
+        const v = verifierPave(parse);
+        const annule = v.issues.length > 0;
+        return { etat: annule ? 'mc' : 'valide', annule, issues: v.issues, notes: v.notes, messages: v.issues.map((i) => i.message) };
     }
 
-    /** Commit : consomme la tolérance et enregistre la pénalité. À appeler UNE fois, à la résolution réelle du pavé. */
-    function appliquerDecision(match, joueur, decision, tour) {
-      match.discipline = match.discipline || {};
-      const d = match.discipline[joueur] = match.discipline[joueur] || { toleranceUtilisee: false, penalites: [] };
-      if (decision.toleranceConsommee) { d.toleranceUtilisee = true; d.penalites.push({ ...decision.penalite, tour: tour || 1 }); }
-      return d;
-    }
-
-    /* ------------------------------------------------------------------------------------------------------------- */
-    /* 3. File des attaques en attente                                                                                */
-    /* ------------------------------------------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------------------------------------------- */
+    /* 3. File des attaques en attente                                                                          */
+    /* ------------------------------------------------------------------------------------------------------- */
     /** Une action est « offensive » (à mettre en attente) : attaque physique ou technique (hors défense / déplacement). */
     const estOffensive = (a) => a.type === 'attaque' || a.type === 'competence';
 
     /** Empile les attaques d'un pavé validé contre `cibleId`. Numérotation [#n] propre au défenseur (1, 2, 3…). */
     function empiler(match, { auteurId, auteurNom, cibleId, paveId, tour, actions }) {
-      match.fileAttaques = match.fileAttaques || [];
-      const out = [];
-      for (const a of actions.filter(estOffensive)) {
-        const n = match.fileAttaques.filter((x) => x.cibleId === cibleId && x.statut === 'en_attente').length + 1;
-        const att = { id: `A${(match.compteurAttaques = (match.compteurAttaques || 0) + 1)}`, n, auteurId, auteurNom: auteurNom || String(auteurId), cibleId, paveId, tour, action: a, statut: 'en_attente' };
-        match.fileAttaques.push(att); out.push(att);
-      }
-      return out;
+        match.fileAttaques = match.fileAttaques || [];
+        const out = [];
+        for (const a of actions.filter(estOffensive)) {
+            const n = match.fileAttaques.filter((x) => x.cibleId === cibleId && x.statut === 'en_attente').length + 1;
+            const att = { id: `A${(match.compteurAttaques = (match.compteurAttaques || 0) + 1)}`, n, auteurId, auteurNom: auteurNom || String(auteurId), cibleId, paveId, tour, action: a, statut: 'en_attente' };
+            match.fileAttaques.push(att); out.push(att);
+        }
+        return out;
     }
     const attaquesEnAttente = (match, defenseurId) => (match.fileAttaques || []).filter((x) => x.cibleId === defenseurId && x.statut === 'en_attente');
-    /** Format attendu par parseur_pave.construirePrompt({ attaquesEnAttente }). */
+    /** Format attendu par PARSEUR.construirePrompt({ attaquesEnAttente }). */
     const pourPrompt = (match, defenseurId) => attaquesEnAttente(match, defenseurId).map((x) => ({ n: x.n, auteur: x.auteurNom, texte: x.action.texte || x.action.competence || x.action.type }));
 
     /**
@@ -819,104 +860,113 @@ const REGLES = (() => {
      * @returns {{liens:{attaque, defenses:object[]}[], orphelines:object[]}}
      */
     function lierDefenses(attaques, defenses) {
-      const liens = attaques.map((attaque) => ({ attaque, defenses: [] }));
-      const restantes = [];
-      for (const d of defenses) {
-        const cible = d.defense && d.defense.vise != null ? liens.find((l) => l.attaque.n === d.defense.vise) : null;
-        if (cible) cible.defenses.push(d); else restantes.push(d);
-      }
-      const libres = liens.filter((l) => !l.defenses.length);
-      const orphelines = [];
-      restantes.forEach((d, i) => { if (libres[i]) libres[i].defenses.push(d); else orphelines.push(d); });
-      return { liens, orphelines };
+        const liens = attaques.map((attaque) => ({ attaque, defenses: [] }));
+        const restantes = [];
+        for (const d of defenses) {
+            const cible = d.defense && d.defense.vise != null ? liens.find((l) => l.attaque.n === d.defense.vise) : null;
+            if (cible) cible.defenses.push(d); else restantes.push(d);
+        }
+        const libres = liens.filter((l) => !l.defenses.length);
+        const orphelines = [];
+        restantes.forEach((d, i) => { if (libres[i]) libres[i].defenses.push(d); else orphelines.push(d); });
+        return { liens, orphelines };
     }
 
     /**
-     * Point d'entrée : intègre un pavé (déjà évalué) dans l'état du match.
-     *  • consomme la tolérance (commit) ;
+     * Intègre un pavé (déjà évalué) dans l'état du match :
      *  • pavé annulé → toutes les attaques en attente contre ce joueur touchent de plein fouet (aucune défense retenue) ;
      *  • sinon → défenses liées aux attaques ; ses propres attaques sont mises en attente contre l'adversaire.
-     * La résolution chiffrée (dégâts, coûts, écarts de S…) viendra du moteur de règles à partir de `liens`.
      */
     function integrerPave(match, { joueurId, joueurNom, adversaireId, tour, paveId, parse, decision }) {
-      appliquerDecision(match, joueurId, decision, tour);
-      const enAttente = attaquesEnAttente(match, joueurId);
-      const defenses = decision.annule ? [] : parse.actions.filter((a) => a.type === 'defense');
-      const { liens, orphelines } = lierDefenses(enAttente, defenses);
-      for (const att of enAttente) att.statut = 'resolue';
-      const empilees = decision.annule ? [] : empiler(match, { auteurId: joueurId, auteurNom: joueurNom, cibleId: adversaireId, paveId, tour, actions: parse.actions });
-      return { liens, orphelines, empilees, pleinFouet: liens.filter((l) => !l.defenses.length).map((l) => l.attaque) };
+        const enAttente = attaquesEnAttente(match, joueurId);
+        const defenses = decision.annule ? [] : parse.actions.filter((a) => a.type === 'defense');
+        const { liens, orphelines } = lierDefenses(enAttente, defenses);
+        for (const att of enAttente) att.statut = 'resolue';
+        const empilees = decision.annule ? [] : empiler(match, { auteurId: joueurId, auteurNom: joueurNom, cibleId: adversaireId, paveId, tour, actions: parse.actions });
+        return { liens, orphelines, empilees, pleinFouet: liens.filter((l) => !l.defenses.length).map((l) => l.attaque) };
     }
 
-    return { CFG, verifierPave, evaluerPave, appliquerDecision, composerMessages, empiler, attaquesEnAttente, pourPrompt, lierDefenses, integrerPave };
+    return { CFG, MSG, verifierPave, evaluerPave, empiler, attaquesEnAttente, pourPrompt, lierDefenses, integrerPave };
 })();
 
 //================================================
-// 🛡️ DÉFENSES — options de réaction et coûts (équivalent de esquive.js)
+// 🛡️ DÉFENSES — réactions permises et coûts (équivalent de esquive.js)
 //================================================
-// Source : image « Close Combat » (Combat Speed S), image « Close Combat Dynamique » (coûts de Stamina),
-// image « Attaque à pleine puissance » (zone de vitesse de 5 m).
+// Source : affiches « Close Combat Technique » (Combat Speed S), « Close Combat Hyper Technique » (coûts, speedblitz),
+// « Attaque à pleine puissance » (coût d'esquive selon la vitesse de l'attaque, projectiles).
 // Toutes les interprétations sont des drapeaux nommés dans DEFENSES.CFG.
 const DEFENSES = (() => {
     'use strict';
 
     const CFG = {
-        // Réactions permises selon l'écart de Combat Speed (défenseur − attaquant)
-        MODES: {
-            inferieur: ['esquive', 'blocage'],                                          // retard 1 s : bloquer et esquiver seulement
-            egal: ['esquive', 'blocage', 'deviation', 'saisie'],                        // retard 0,5 s : dévier et saisir
-            sup1: ['esquive', 'blocage', 'deviation', 'saisie', 'contre'],              // aucun retard : réagit au même moment
-            sup2: ['esquive', 'blocage', 'deviation', 'saisie', 'contre'],
-        },
-        // Coûts de Stamina (en %)
-        COUT: { esquive: 10, esquiveZone: 20, esquiveSup2: 5, saisie: 5, saisieSup2: 0, changement_trajectoire: 5, blocage: 0, deviation: 0, contre: 0 },
-        ZONE_VITESSE_M: 5,                       // attaque frontale lancée à ≤ 5 m : esquive à 20 % si on n'est pas plus rapide qu'elle
-        // HYPOTHÈSE : les images ne disent pas laquelle l'emporte quand S+2 (5 %) et zone de 5 m (20 %) s'appliquent ensemble.
-        PRIORITE_COUT_ESQUIVE: 'ecart',          // 'ecart' : S+2 l'emporte (5 %)  |  'zone' : la zone de 5 m l'emporte (20 %)
-        // Vitesse des attaques d'énergie (m/s)
-        VITESSE_ATTAQUE: { basic: 6, advanced: 8, ultime: 10, projectile_energie: 6, projectile_physique: 5 },
-        // HYPOTHÈSE : l'interruption (« coupe ») n'existe pas dans les règles de ce jeu → traitée comme un contre.
-        COUPE_COMME: 'contre',
+        GRADE_RANG: { bronze: 0, silver: 1, argent: 1, gold: 2, or: 2 },       // Bronze < Silver < Gold
+        VITESSE_GRADE_MS: [10, 15, 20],                                        // Travel Speed : Bronze 10 m/s, Silver 15, Gold 20
+        VITESSE_ATTAQUE_MS: { basic: 10, special: 15, ultime: 20, projectile: 10 },
+        EQUIVALENT: { garde: 'blocage', parade: 'blocage' },                   // HYPOTHÈSE : garde et parade se traitent comme un blocage
+        MODES_INFERIEUR: ['esquive', 'blocage'],                               // S inférieur : retard de 1 s, bloquer ou esquiver seulement
+        MODES_ETAT_NORMAL: ['esquive', 'blocage', 'deviation', 'saisie'],      // S égal ou supérieur : dévier et saisir permis
+        COUT: { esquive: 10, esquiveEgale: 20, esquiveBoost: 30, esquiveSup2: 5, esquiveProjectile: 5, saisie: 5, saisieSup2: 0, changement_trajectoire: 5, esquiveSonne: 30 },
+        // HYPOTHÈSE : l'affiche dit « S+2 : esquive à 5 % au lieu de 10 % » ; on applique 5 % même si la vitesse de l'attaque donnerait 20 ou 30 %.
+        S_PLUS2_ECRASE_COUT_VITESSE: true,
     };
 
-    const modeEffectif = (m) => (m === 'coupe' ? CFG.COUPE_COMME : m);
+    const rangGrade = (g) => { const k = String(g || '').toLowerCase().trim(); return CFG.GRADE_RANG[k] != null ? CFG.GRADE_RANG[k] : 0; };
+    const modeCanon = (m) => CFG.EQUIVALENT[m] || m;
+    const tierVitesse = (ms) => { const i = CFG.VITESSE_GRADE_MS.indexOf(ms); if (i >= 0) return i; return CFG.VITESSE_GRADE_MS.reduce((best, v, k) => (Math.abs(v - ms) < Math.abs(CFG.VITESSE_GRADE_MS[best] - ms) ? k : best), 0); };
 
-    /** Écart de Combat Speed (défenseur − attaquant). Un perso « Ss » est toujours +2 face à un non-Ss (image Close Combat). */
+    /**
+     * Écart de Combat Speed (défenseur − attaquant).
+     * Le GRADE l'emporte : « même si le Bronze est S+ et l'Argent S-, le Silver aura l'avantage +1 ».
+     * À grade égal : écart de rang S. Un perso SS « n'est jamais inférieur » à un S ; si le S est supérieur ils sont égaux.
+     */
     function ecart(def, att) {
-        if (def.ss && !att.ss) return 2;
-        if (att.ss && !def.ss) return -2;
-        return (def.rang || 0) - (att.rang || 0);
+        const gd = (def.gradeRang || 0) - (att.gradeRang || 0);
+        if (gd !== 0) return gd;
+        const brut = (def.rang || 0) - (att.rang || 0);
+        if (def.ss && !att.ss) return Math.max(0, brut);
+        if (att.ss && !def.ss) return Math.min(0, brut);
+        return brut;
     }
-    const classe = (g) => (g < 0 ? 'inferieur' : g === 0 ? 'egal' : g === 1 ? 'sup1' : 'sup2');
-    const modesPermis = (g) => CFG.MODES[classe(g)];
 
-    /** Vitesse de l'attaque (m/s) si elle a une zone de vitesse (énergie / projectile), sinon null (coup au corps à corps). */
+    const estProjectile = (a) => !!a && ((a.energie && a.energie.projectile) || (a.frappe && a.frappe.genre === 'projectile'));
+    /** Vitesse (m/s) d'une attaque d'énergie / projectile ; null pour un coup au corps à corps. */
     function vitesseAttaque(a) {
-        const e = (a && a.energie) || {};
-        if (e.projectile) return CFG.VITESSE_ATTAQUE.projectile_energie;
-        if (e.niveau) return CFG.VITESSE_ATTAQUE[e.niveau];
-        if (a && a.frappe && a.frappe.genre === 'projectile') return CFG.VITESSE_ATTAQUE.projectile_physique;
+        if (!a) return null;
+        const e = a.energie || {};
+        if (estProjectile(a)) return CFG.VITESSE_ATTAQUE_MS.projectile;
+        if (e.niveau) return CFG.VITESSE_ATTAQUE_MS[e.niveau];
         return null;
     }
 
-    /** Coût de Stamina (en %) d'une réaction. */
-    function coutStamina({ mode, gap, distance, action, vitesseDefenseur, instantane }) {
-        const m = modeEffectif(mode);
+    /** Réactions permises (noms canoniques). `speedblitz` : retard de 1 s même à S égal → seulement esquiver ou bloquer. */
+    function modesPermis(gap, action, sonne) {
+        if (sonne) return ['esquive'];                                          // sonné : seule une esquive boostée est possible
+        if (gap < 0 || (action && action.speedblitz)) return CFG.MODES_INFERIEUR;
+        const modes = CFG.MODES_ETAT_NORMAL.slice();
+        if (estProjectile(action) && gap < 1) return modes.filter((m) => m !== 'saisie');   // saisir un projectile : seulement plus fort que le lanceur en S
+        return modes;
+    }
+
+    /** Coût de Stamina (en %) d'une réaction, ou null si elle est impossible (attaque trop rapide). */
+    function coutStamina({ mode, gap, action, def, sonne }) {
+        const m = modeCanon(mode);
         if (m === 'esquive') {
+            if (sonne) return CFG.COUT.esquiveSonne;
+            if (estProjectile(action)) return gap >= 1 ? 0 : CFG.COUT.esquiveProjectile;      // plus fort que le lanceur : gratuit
+            let cout = CFG.COUT.esquive;
             const va = vitesseAttaque(action);
-            const zone = distance != null && distance <= CFG.ZONE_VITESSE_M && va != null && !instantane && !(vitesseDefenseur > va);
-            if (CFG.PRIORITE_COUT_ESQUIVE === 'ecart') {
-                if (gap >= 2) return CFG.COUT.esquiveSup2;
-                return zone ? CFG.COUT.esquiveZone : CFG.COUT.esquive;
+            if (va != null) {
+                const diff = tierVitesse(va) - tierVitesse(def.vitesseMax != null ? def.vitesseMax : CFG.VITESSE_GRADE_MS[0]);
+                if (diff >= 2) return null;                                                     // +2 : esquive impossible (speedblitz)
+                cout = diff <= -1 ? CFG.COUT.esquive : diff === 0 ? CFG.COUT.esquiveEgale : CFG.COUT.esquiveBoost;
             }
-            if (zone) return CFG.COUT.esquiveZone;
-            return gap >= 2 ? CFG.COUT.esquiveSup2 : CFG.COUT.esquive;
+            return gap >= 2 && CFG.S_PLUS2_ECRASE_COUT_VITESSE ? CFG.COUT.esquiveSup2 : cout;
         }
         if (m === 'saisie') return gap >= 2 ? CFG.COUT.saisieSup2 : CFG.COUT.saisie;
         return CFG.COUT[m] || 0;
     }
 
-    return { CFG, ecart, classe, modesPermis, vitesseAttaque, coutStamina, modeEffectif };
+    return { CFG, rangGrade, modeCanon, tierVitesse, ecart, estProjectile, vitesseAttaque, modesPermis, coutStamina };
 })();
 
 //================================================
@@ -924,108 +974,131 @@ const DEFENSES = (() => {
 //================================================
 // Déterministe : l'IA ne fait que COMPRENDRE le pavé ; les pourcentages, coûts et issues sont calculés ici.
 // Entrée : les « liens » attaque ↔ défenses (REGLES.integrerPave). Sortie : l'état du défenseur après le pavé + le détail par attaque.
-// Source des valeurs : les 4 images de règles. Tout ce qui est interprété est un drapeau nommé dans MOTEUR.CFG.
 const MOTEUR = (() => {
     'use strict';
 
     const CFG = {
-        DEGATS_COUP_PCT: 10,                                    // image 1 : un coup = 10 % PV
-        DEGATS_NIVEAU_PCT: { basic: 50, advanced: 70, ultime: 100 },   // image 2
-        DEGATS_PROJECTILE_PCT: 20,                              // image 2 : projectile physique = 20 % PV
-        DEGATS_PROJECTION_PCT: 10,                              // image 3 : envoyé valser contre le décor = 10 % PV
-        ZONES_CRITIQUES: ['tete', 'gorge', 'coeur'],            // HYPOTHÈSE : « tranchant en endroit critique = mort » (image 2)
-        FORCE_DEMI_DEGATS: 2,                                   // image 3 : Force +2 → dégâts de coups et projections divisés par 2
+        DEGATS_COUP_PCT: 10,                                    // un coup encaissé = 10 % PV
+        DEGATS_MEMBRE_BRISE_PCT: 15,                            // membre brisé (ou coupé) = 15 % PV
+        DEGATS_NIVEAU_PCT: { basic: 30, special: 60, ultime: 100 },   // attaques d'énergie : 30 / 60 / 100 % PV
+        DEGATS_PROJECTILE_PCT: 20,                              // ancienne affiche, non remplacée : projectile = 20 % PV
+        FORCE_DEMI_DEGATS: 2,                                   // écart de Force +2 en faveur du défenseur : dégâts des coups divisés par 2
+        // HYPOTHÈSE : règle de l'ancienne affiche, non remplacée par les nouvelles → « tranchant en zone critique = mort ».
+        TRANCHANT_CRITIQUE_MORTEL: true,
+        ZONES_CRITIQUES: ['tete', 'gorge', 'coeur'],            // familles de zones (tempe/visage/mâchoire → tête ; cou → gorge)
         REACTION_IMPOSSIBLE: 'ratee',                           // HYPOTHÈSE : réaction interdite par l'écart de S → l'attaque touche
         STAMINA_INSUFFISANTE: 'ratee',                          // HYPOTHÈSE : pas assez de Stamina → la défense échoue sans rien coûter
-        CONTRE_ENCAISSE: true,                                  // HYPOTHÈSE : un « contre à travers » encaisse quand même le coup
-        REEVALUER_APRES_PARTIELLE: true,                        // consigne arbitre : une défense partielle change l'état pour la suivante
-        TECHNIQUE_DEGATS_PAR_NIVEAU: false,                     // les techniques nommées dépendent de la carte → non chiffrées par défaut
+        // Affiche « Nouvelle expérience dynamique » : mauvaise réaction sur la première action → le reste des actions adverses passe automatiquement.
+        PREMIERE_DEFENSE_RATEE_ENTRAINE_LE_RESTE: true,
+        SONNE_FORCE_MIN: true,                                  // « seul un adversaire supérieur en force ou égal peut sonner »
+        BRISE_GARDE_TOURS: 2,                                   // écart de Force +3 : blocage impossible pendant 2 tours
+        REPOUSSE_M: 10,
     };
 
+    const zoneCritique = (z) => CFG.ZONES_CRITIQUES.includes(PARSEUR.zoneFamille(z));
+
     /** Nature d'une attaque : dégâts (en % PV), mort immédiate, ou technique non chiffrée. */
-    function nature(a) {
+    function nature(a, ctx) {
         const nom = a.competence || a.texte || a.type;
         const e = a.energie || {};
         if (a.type === 'competence') {
-            return { nom, technique: true, pct: CFG.TECHNIQUE_DEGATS_PAR_NIVEAU && e.niveau ? CFG.DEGATS_NIVEAU_PCT[e.niveau] : null };
+            let niv = e.niveau;
+            const info = ctx && ctx.infosTechnique ? ctx.infosTechnique(a) : null;           // la carte du perso peut fournir le niveau
+            if (info && info.niveau) niv = info.niveau;
+            return { nom, technique: true, niveau: niv, pct: niv ? CFG.DEGATS_NIVEAU_PCT[niv] : null, physique: false };
         }
-        if (a.tranchant && CFG.ZONES_CRITIQUES.includes(a.zone)) return { nom, mort: true, zone: a.zone };
-        if (e.niveau) return { nom, pct: CFG.DEGATS_NIVEAU_PCT[e.niveau] };
-        if (a.frappe && a.frappe.genre === 'projectile') return { nom, pct: CFG.DEGATS_PROJECTILE_PCT };
-        return { nom, pct: CFG.DEGATS_COUP_PCT };
+        if (a.tranchant && CFG.TRANCHANT_CRITIQUE_MORTEL && zoneCritique(a.zone)) return { nom, mort: true, zone: a.zone };
+        if (a.frappe && a.frappe.genre === 'projectile') return { nom, pct: CFG.DEGATS_PROJECTILE_PCT, physique: false };
+        return { nom, pct: CFG.DEGATS_COUP_PCT, physique: true };
     }
 
+    const arrondi = (x) => Math.round(x * 10) / 10;
+
     function resoudreLien(lien, ctx) {
-        const { def, att, etat, distance, effetsCarte } = ctx;
+        const { def, att, etat, effetsCarte } = ctx;
         const a = lien.attaque.action;
-        let nat = nature(a);
+        let nat = nature(a, ctx);
         const carte = effetsCarte ? effetsCarte(a, { def, att, etat }) : null;
-        if (carte) nat = { ...nat, ...carte };                    // la carte peut fournir pct / mort / lignes
-        const res = { n: lien.attaque.n, nom: nat.nom, statut: null, cout: 0, degats: 0, mort: false, raison: '', effets: [] };
+        if (carte) nat = { ...nat, ...carte };                       // la carte peut fournir pct / mort / lignes
+        const res = { n: lien.attaque.n, nom: nat.nom, statut: null, mode: null, cout: 0, degats: 0, mort: false, raison: '', effets: [], touche: false, auto: false };
         const gap = DEFENSES.ecart(def, att);
         const d = lien.defenses[0] || null;
         let touche = false;
 
         if (!d) { res.statut = 'plein_fouet'; touche = true; }
         else {
-            const mode = DEFENSES.modeEffectif((d.defense && d.defense.mode) || 'esquive');
-            if (!DEFENSES.modesPermis(gap).includes(mode)) {
-                res.statut = 'ratee'; res.raison = 'réaction impossible avec cet écart de Combat Speed'; touche = CFG.REACTION_IMPOSSIBLE === 'ratee';
-            } else if (CFG.REEVALUER_APRES_PARTIELLE && etat.equilibre === 'perdu' && (mode === 'esquive' || mode === 'blocage')) {
-                res.statut = 'ratee'; res.raison = 'déséquilibré par la défense précédente'; touche = true;
-            } else if (CFG.REEVALUER_APRES_PARTIELLE && etat.posture === 'cassee' && mode === 'blocage') {
-                res.statut = 'ratee'; res.raison = 'posture cassée par la défense précédente'; touche = true;
+            const modeAff = (d.defense && d.defense.mode) || 'esquive';
+            const mode = DEFENSES.modeCanon(modeAff);
+            res.mode = modeAff;
+            const permis = DEFENSES.modesPermis(gap, a, etat.sonne);
+            if (!permis.includes(mode)) {
+                res.statut = 'ratee'; touche = CFG.REACTION_IMPOSSIBLE === 'ratee';
+                res.raison = etat.sonne ? 'sonné : seule une esquive boostée est possible' : a.speedblitz ? 'speedblitz : retard de réaction, seulement esquiver ou bloquer' : 'réaction impossible avec cet écart de Combat Speed';
+            } else if (mode === 'blocage' && etat.blocageInterdit > 0) {
+                res.statut = 'ratee'; touche = true; res.raison = 'garde brisée : blocage impossible pour le moment';
+            } else if (mode !== 'saisie' && etat.equilibre === 'perdu' && (mode === 'esquive' || mode === 'blocage')) {
+                res.statut = 'ratee'; touche = true; res.raison = 'déséquilibré par la défense précédente';
+            } else if (mode === 'blocage' && etat.posture === 'cassee') {
+                res.statut = 'ratee'; touche = true; res.raison = 'posture cassée par la défense précédente';
             } else {
-                const cout = DEFENSES.coutStamina({ mode, gap, distance, action: a, vitesseDefenseur: def.vitesseMax, instantane: false });
-                if (etat.stamina < cout && CFG.STAMINA_INSUFFISANTE === 'ratee') {
-                    res.statut = 'ratee'; res.raison = 'Stamina insuffisante'; touche = true;
-                } else {
+                const cout = DEFENSES.coutStamina({ mode, gap, action: a, def, sonne: etat.sonne });
+                if (cout == null) { res.statut = 'ratee'; touche = true; res.raison = 'esquive impossible : attaque trop rapide (speedblitz)'; }
+                else if (etat.stamina < cout && CFG.STAMINA_INSUFFISANTE === 'ratee') { res.statut = 'ratee'; touche = true; res.raison = 'Stamina insuffisante'; }
+                else {
                     etat.stamina = Math.max(0, etat.stamina - cout); res.cout = cout;
-                    if (mode === 'contre') { res.statut = 'echange'; touche = CFG.CONTRE_ENCAISSE; }
-                    else if (mode === 'blocage') {
-                        const fg = (def.force || 0) - (att.force || 0);                  // écart de Force (image 3)
+                    if (mode === 'blocage') {
+                        const fg = (att.force || 0) - (def.force || 0);                  // supériorité de Force de l'attaquant
                         const deuxMains = d.membre === 'deux_mains';
-                        if (fg >= 0 || (fg === -1 && deuxMains)) res.statut = 'reussie';
-                        else if (fg >= -2) {
-                            res.statut = 'partielle'; etat.posture = 'cassee';
-                            if (fg === -2 && !deuxMains) etat.equilibre = 'perdu';
-                            res.raison = fg === -1 ? 'blocage à une main : posture cassée' : (deuxMains ? 'posture cassée' : 'équilibre perdu');
-                        } else {
-                            res.statut = 'ratee'; res.raison = 'envoyé valser'; touche = true;
-                            nat = { nom: nat.nom, pct: CFG.DEGATS_PROJECTION_PCT, projection: true };
-                        }
-                    } else res.statut = 'reussie';                                         // esquive, déviation, saisie, changement de trajectoire
+                        if (fg <= 0 || (fg === 1 && deuxMains) || (fg === 2 && deuxMains)) res.statut = 'reussie';
+                        else if (fg === 1) { res.statut = 'partielle'; etat.equilibre = 'perdu'; res.raison = 'blocage à une main : déséquilibre, repoussé'; }
+                        else if (!deuxMains) { res.statut = 'partielle'; touche = true; nat = { nom: nat.nom, pct: CFG.DEGATS_MEMBRE_BRISE_PCT, physique: false }; res.raison = 'main brisée'; }
+                        else if (fg === 3) { res.statut = 'partielle'; etat.posture = 'cassee'; etat.brisegarde = true; res.raison = `garde brisée : blocage impossible ${CFG.BRISE_GARDE_TOURS} tours`; }
+                        else { res.statut = 'partielle'; etat.posture = 'cassee'; res.raison = `repoussé de ${CFG.REPOUSSE_M} m malgré les deux mains`; }
+                    } else res.statut = 'reussie';                                         // esquive, déviation, saisie
                 }
             }
-            if (lien.defenses.length > 1) res.effets.push(`${lien.defenses.length - 1} défense(s) supplémentaire(s) ignorée(s) pour cette attaque`);
+            if (lien.defenses.length > 1) res.effets.push(`ℹ️ ${lien.defenses.length - 1} défense(s) supplémentaire(s) ignorée(s) pour cette attaque`);
         }
 
         if (touche) {
-            if (nat.mort) { res.degats = etat.pv; etat.pv = 0; res.mort = true; if (nat.zone) res.raison = res.raison || `coup tranchant en zone critique (${nat.zone})`; }
+            res.touche = true;
+            if (nat.mort) { res.degats = etat.pv; etat.pv = 0; res.mort = true; res.raison = res.raison || `coup tranchant en zone critique (${nat.zone})`; }
             else if (nat.pct != null) {
-                const mult = ((def.force || 0) - (att.force || 0)) >= CFG.FORCE_DEMI_DEGATS ? 0.5 : 1;
-                const avant = etat.pv; etat.pv = Math.max(0, etat.pv - nat.pct * mult); res.degats = avant - etat.pv;
-            } else res.effets.push(`Technique non chiffrée : ${nat.nom} (effet de carte à appliquer)`);
+                const mult = nat.physique && ((def.force || 0) - (att.force || 0)) >= CFG.FORCE_DEMI_DEGATS ? 0.5 : 1;
+                const avant = etat.pv; etat.pv = Math.max(0, etat.pv - nat.pct * mult); res.degats = arrondi(avant - etat.pv);
+            } else res.effets.push(`ℹ️ ${nat.nom} : niveau ou effet de carte à appliquer par l'arbitre`);
             if (nat.lignes) res.effets.push(...nat.lignes);
         }
-        res.touche = touche;
         return res;
     }
 
     /**
-     * @param {{liens:{attaque,defenses}[], defenseur:object, attaquant:object, distance?:number, effetsCarte?:Function}} p
-     * defenseur / attaquant : { pv, stamina, energie, rang, ss, force, vitesseMax, … } (voir PIPELINE.statsDe)
-     * @returns {{etat:{pv,stamina,energie,posture,equilibre}, details:object[], ko:boolean}}
+     * @param {{liens:{attaque,defenses}[], defenseur:object, attaquant:object, effetsCarte?:Function, infosTechnique?:Function}} p
+     * defenseur / attaquant : { pv, stamina, energie, rang, gradeRang, ss, force, vitesseMax, sonne?, blocageTours? } (voir PIPELINE.statsDe)
+     * @returns {{etat, details:object[], ko:boolean}}
      */
-    function resoudrePave({ liens, defenseur, attaquant, distance, effetsCarte }) {
+    function resoudrePave({ liens, defenseur, attaquant, effetsCarte, infosTechnique }) {
         const etat = {
             pv: defenseur.pv != null ? defenseur.pv : 100, stamina: defenseur.stamina != null ? defenseur.stamina : 100,
             energie: defenseur.energie != null ? defenseur.energie : 100, posture: 'neutre', equilibre: 'stable',
+            sonne: !!defenseur.sonne, blocageInterdit: defenseur.blocageTours || 0, brisegarde: false, nouveauSonne: false,
         };
-        const details = [];
+        const details = []; let passeAuto = false, premier = true, prec = null;
         for (const lien of liens) {
             if (etat.pv <= 0) break;
-            details.push(resoudreLien(lien, { def: defenseur, att: attaquant, etat, distance, effetsCarte }));
+            const auto = passeAuto && CFG.PREMIERE_DEFENSE_RATEE_ENTRAINE_LE_RESTE && lien.defenses.length > 0;
+            const r = resoudreLien(auto ? { attaque: lien.attaque, defenses: [] } : lien, { def: defenseur, att: attaquant, etat, effetsCarte, infosTechnique });
+            if (auto) { r.auto = true; r.raison = 'la première réaction a échoué : la suite passe automatiquement'; }
+            if (premier) { premier = false; if (r.statut === 'ratee' || r.statut === 'plein_fouet') passeAuto = true; }
+            // Combo de 2 coups au visage → sonné 1 tour (seul un adversaire de Force supérieure ou égale peut sonner)
+            const a = lien.attaque.action;
+            const visage = PARSEUR.zoneFamille(a.zone) === 'tete';
+            if (prec && prec.visage && prec.touche && visage && r.touche && prec.paveId === lien.attaque.paveId && prec.sequence === a.sequence
+                && (!CFG.SONNE_FORCE_MIN || (attaquant.force || 0) >= (defenseur.force || 0)) && !etat.nouveauSonne) {
+                etat.nouveauSonne = true; r.effets.push('😵 combo de deux coups au visage : sonné pour 1 tour');
+            }
+            prec = { visage, touche: r.touche, paveId: lien.attaque.paveId, sequence: a.sequence };
+            details.push(r);
         }
         return { etat, details, ko: etat.pv <= 0 };
     }
@@ -1034,121 +1107,237 @@ const MOTEUR = (() => {
 })();
 
 //================================================
-// 🎙️ NARRATEUR — texte du verdict, déterministe (équivalent de narrateur.js, sans appel IA)
+// 🎙️ NARRATEUR — récit du verdict et gabarit du message, déterministes (équivalent de narrateur.js, sans appel IA)
 //================================================
-// Même formulation quelle que soit l'IA du relais : le récit est construit à partir de l'extraction et du moteur.
+// Même formulation quelle que soit l'IA du relais. Ressources : ❤️ PV · 🫀 Stamina · 🌀 Énergie.
 const NARRATEUR = (() => {
     'use strict';
 
-    const VERBES_DEF = { esquive: 'esquive', blocage: 'bloque', deviation: 'dévie', saisie: 'saisit', contre: 'contre', coupe: 'interrompt', changement_trajectoire: 'change la trajectoire' };
-    const GENRES = { direct: 'un direct', crochet: 'un crochet', uppercut: 'un uppercut', coup_de_pied: 'un coup de pied', balayage: 'un balayage', taille: 'une taille', estoc: 'un estoc', projectile: 'un projectile', energie: "une attaque d'énergie", autre: 'une frappe' };
-    const ZONES = { tete: 'la tête', gorge: 'la gorge', coeur: 'le cœur', thorax: 'le thorax', abdomen: "l'abdomen", dos: 'le dos', jambes: 'les jambes', bras: 'les bras' };
-    const sens = (s) => (s === 'gauche' || s === 'droite' ? `par la ${s}` : s === 'avant' ? "vers l'avant" : s === 'arriere' ? "vers l'arrière" : s ? `vers le ${s}` : '');
+    const EM = { pv: '❤️', sta: '🫀', en: '🌀' };
+    const arrondi = (x) => Math.round(x * 10) / 10;
+    /** « -10%🫀 » */
+    const pct = (x, em, signe = '-') => `${signe}${arrondi(x)}%${em}`;
+
+    const VERBES_DEPL = { marche: 'marche', course: 'court', dash: 'fait un dash', saut: 'saute', roulade: 'fait une roulade', vol: 'vole', pivot: 'pivote', decalage: 'se décale', salto: 'fait un salto', vrille: 'fait une vrille', flip: 'fait un flip' };
+    const TRAJ_TXT = { frontale: 'en frontale', circulaire: 'en circulaire', diagonale: 'en diagonale', zigzag: 'en zig zag', laterale: 'en latérale', montante: 'en montante', descendante: 'en descendante' };
+    const FRAPPES_TXT = { coup_direct: 'un direct', crochet: 'un crochet', uppercut: 'un uppercut', overhand: 'un overhand', reverse: 'un reverse', hammer: 'un hammer', coup_de_tete: 'un coup de tête',
+        coup_de_coude: 'un coup de coude', front_kick: 'un front kick', side_kick: 'un side kick', axe_kick: 'un axe kick', roundhouse_kick: 'un roundhouse kick', back_kick: 'un back kick',
+        upward_kick: 'un upward kick', low_kick: 'un low kick', reverse_kick: 'un reverse kick', spinning_back_kick: 'un spinning back kick', coup_de_genou: 'un coup de genou', arme: "un coup d'arme" };
+    const ZONES_TXT = { tete: 'la tête', tempe: 'la tempe', machoire: 'la mâchoire', visage: 'le visage', gorge: 'la gorge', cou: 'le cou', coeur: 'le cœur', torse: 'le torse', cotes: 'les côtes',
+        abdomen: "l'abdomen", dos: 'le dos', hanche: 'la hanche', cuisse: 'la cuisse', genou: 'le genou', tibia: 'le tibia', talon: 'le talon', jambes: 'les jambes', bras: 'les bras' };
+    const DEF_TXT = { esquive: 'esquive', garde: 'se met en garde', blocage: 'bloque', saisie: 'saisit', deviation: 'dévie', parade: 'pare' };
+    const sansPour = (s) => String(s || '').replace(/^\s*(pour|afin de|dans le but de|histoire de|visant à)\s+/i, '').trim();
 
     function decrireAction(a) {
         const d = a.deplacement || {}, f = a.frappe || {};
+        let phrase;
         switch (a.type) {
             case 'deplacement': {
-                const bits = [d.trajectoire ? `en ${d.trajectoire}` : '', sens(d.sens), d.distanceM != null ? `sur ${d.distanceM} m` : '',
-                    d.vitesse === 'vmax' ? 'à vmax' : typeof d.vitesse === 'number' ? `à ${d.vitesse} m/s` : ''].filter(Boolean);
-                return `se déplace${bits.length ? ' ' + bits.join(' ') : ''}`;
+                const bits = [VERBES_DEPL[d.genre] || 'se déplace', TRAJ_TXT[d.trajectoire] || '', d.sens === 'gauche' || d.sens === 'droite' ? `par la ${d.sens}` : '',
+                    d.courbeM != null ? `courbe de ${d.courbeM} m` : '', d.distanceM != null ? `sur ${d.distanceM} m` : '', d.hauteurM != null ? `à ${d.hauteurM} m de haut` : '',
+                    d.vitesse === 'vmax' ? 'à vmax' : typeof d.vitesse === 'number' ? `à ${d.vitesse} m/s` : '', d.vers === 'cible' ? "vers l'adversaire" : ''].filter(Boolean);
+                phrase = bits.join(' '); break;
             }
             case 'attaque': {
-                const mem = a.membre ? ` du ${a.membre.replace('_', ' ')}${a.cote ? ' ' + a.cote : ''}`.replace(/ du (tete|corps)/, ' de la $1') : '';
-                const arme = a.tranchant ? ' tranchante' : '';
-                return `porte ${GENRES[f.genre] || 'une frappe'}${arme}${mem}${a.zone ? ' vers ' + ZONES[a.zone] : ''}`;
+                const def = PARSEUR.FRAPPES[f.genre];
+                const cote = a.cote === 'droite' ? 'droit' : a.cote === 'gauche' ? 'gauche' : '';
+                const mem = !def ? '' : def.membre === 'main' ? (cote ? ` du ${cote}` : '') : def.membre === 'pied' ? (a.cote ? ` du pied ${a.cote}` : '') : (def.membre === 'genou' || def.membre === 'coude') && a.cote ? ` (${a.cote})` : '';
+                phrase = `porte ${FRAPPES_TXT[f.genre] || 'une frappe'}${a.tranchant ? ' tranchante' : ''}${mem}${f.trajectoire && (f.genre === 'arme' || (def && def.traj.length > 1)) ? ` ${f.trajectoire}` : ''}${a.zone ? ` vers ${ZONES_TXT[a.zone] || a.zone}` : ''}`;
+                break;
             }
-            case 'competence': return `utilise ${a.competence || 'une technique'}${a.energie && a.energie.niveau ? ` (${a.energie.niveau})` : ''}`;
+            case 'competence': phrase = `utilise ${a.competence || 'une technique'}${a.energie && a.energie.niveau ? ` (${a.energie.niveau})` : ''}`; break;
             case 'defense': {
                 const df = a.defense || {};
-                return `${VERBES_DEF[df.mode] || 'réagit'}${df.vise ? ` l'attaque [#${df.vise}]` : ''}`;
+                phrase = `${DEF_TXT[df.mode] || 'réagit'}${df.mode === 'deviation' && df.cote ? ` par la ${df.cote}` : ''}${df.vise ? ` l'attaque [#${df.vise}]` : ''}`;
+                break;
             }
-            default: return a.texte || 'agit';
+            default: phrase = a.texte || 'agit';
         }
+        return a.intention ? `${phrase} pour ${sansPour(a.intention)}` : phrase;
     }
 
-    const ICONES = { reussie: '🛡️', partielle: '⚠️', ratee: '❌', echange: '⚔️', plein_fouet: '💥' };
-    const LIBELLES = { reussie: 'défense réussie', partielle: 'défense partielle', ratee: 'défense ratée', echange: 'échange de coups', plein_fouet: 'non défendu' };
+    const ICONES = { reussie: '🛡️', partielle: '⚠️', ratee: '❌', plein_fouet: '💥' };
+    const LIBELLES = { reussie: 'défense réussie', partielle: 'défense partielle', ratee: 'défense ratée', plein_fouet: 'non défendu' };
 
+    /** « 🛡️ [#1] Nuage : défense réussie (-10%🫀) » */
     function decrireResultat(r) {
         const bits = [];
         if (r.raison) bits.push(r.raison);
-        if (r.cout) bits.push(`-${r.cout}% Stamina`);
+        if (r.cout) bits.push(pct(r.cout, EM.sta));
         if (r.mort) bits.push('coup mortel');
-        else if (r.degats) bits.push(`-${Math.round(r.degats * 10) / 10}% PV`);
-        return `${ICONES[r.statut] || '•'} [#${r.n}] ${r.nom} : ${LIBELLES[r.statut] || r.statut}${bits.length ? ' (' + bits.join(', ') + ')' : ''}.`;
+        else if (r.degats) bits.push(pct(r.degats, EM.pv));
+        const lib = r.auto && r.statut === 'plein_fouet' ? 'passe automatiquement' : (LIBELLES[r.statut] || r.statut);
+        return `${r.auto ? '💥' : ICONES[r.statut] || '•'} [#${r.n}] ${r.nom} : ${lib}${bits.length ? ' (' + bits.join(', ') + ')' : ''}`;
     }
 
-    /** @returns {{resume:string, lignes:string[]}} resume = une ligne d'actions ; lignes = résultats par attaque reçue */
-    function composer({ nom, parse, details }) {
-        const actions = parse.actions.map(decrireAction);
-        const resume = actions.length ? `${nom} ${actions.join(', puis ')}.` : `${nom} ne fait aucune action.`;
-        return { resume, lignes: (details || []).map(decrireResultat) };
+    /** @returns {{resume:string, lignes:string[]}} resume = ce que le pavé fait ; lignes = résultat de chaque attaque reçue */
+    function composer({ nomDefaut, parse, details }) {
+        const groupes = [];
+        for (const a of parse.actions) {
+            const nom = a.acteur || nomDefaut;
+            const g = groupes[groupes.length - 1], phrase = decrireAction(a);
+            if (g && g.nom === nom) g.phrases.push(phrase); else groupes.push({ nom, phrases: [phrase] });
+        }
+        const resume = groupes.length ? `${groupes.map((g) => `${g.nom} ${g.phrases.join(', puis ')}`).join(' ; ')}.` : `${nomDefaut} ne fait aucune action.`;
+        return { resume, lignes: (details || []).flatMap((r) => [decrireResultat(r), ...(r.effets || []).map((e) => `   ${e}`)]) };
     }
 
-    return { decrireAction, decrireResultat, composer };
+    /* --------------------------------------------------------------------------------------------------------- */
+    /* Gabarits de message                                                                                        */
+    /* --------------------------------------------------------------------------------------------------------- */
+    const SEP1 = '▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔', SEP2 = '▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔';
+    const PIED = ['╰───────────────────', '               *JUMP™️ ARENA🌀🔆*'];
+    const bloc = (t) => { const s = Array.isArray(t) ? t.filter(Boolean).join('\n') : String(t || '').trim(); return s ? `- ${s.replace(/\n+/g, '\n  ')}` : null; };
+
+    /** Verdict d'un pavé (valide ou refusé). section1 = résumé + verdict ; section2 = dégâts, coûts, pénalités et autres. */
+    function gabaritVerdict({ valide, section1, section2, note, tour, maxTours, prochainPseudo }) {
+        const l = ['◥◣   *🎮COMBAT ♨️🌀* ░▒░', SEP1, `⚔️ *TOUR :* ${tour}/${maxTours}`, valide ? '✅ *ACTIONS VALIDÉES*' : '❌ *PAVÉ REFUSÉ*', ''];
+        const b1 = bloc(section1), b2 = bloc(section2);
+        if (b1) l.push(b1, '');
+        if (b2) l.push(b2, '');
+        l.push('📊 *Note du pavé :*', `${note}/10 ⭐`, '', SEP2, '🔆 *JOUEUR SUIVANT :*', '', `➡️ @${prochainPseudo} *GO!!* 🔥`, '', ...PIED);
+        return l.join('\n');
+    }
+    /** Fin de match (KO, décision ou égalité) : même cadre, sans « joueur suivant ». */
+    function gabaritFin({ valide, section1, section2, tour, maxTours, messageFin }) {
+        const l = ['◥◣   *🎮COMBAT ♨️🌀* ░▒░', SEP1, `⚔️ *TOUR :* ${tour}/${maxTours}`, valide ? '✅ *ACTIONS VALIDÉES*' : '❌ *PAVÉ REFUSÉ*', ''];
+        const b1 = bloc(section1), b2 = bloc(section2);
+        if (b1) l.push(b1, '');
+        if (b2) l.push(b2, '');
+        l.push(SEP2, messageFin, '', ...PIED);
+        return l.join('\n');
+    }
+
+    return { EM, pct, decrireAction, decrireResultat, composer, gabaritVerdict, gabaritFin };
 })();
 
 //================================================
 // 🧩 PIPELINE — analyse complète d'un pavé (cœur de l'arbitre)
 //================================================
-// relais d'IA (IA) → extraction (PARSEUR) → discipline + file d'attaques (REGLES) → résolution (MOTEUR) → récit (NARRATEUR)
-// Le retour garde exactement les champs lus par envoyerResultatPaveGemini : ok, paveDetecte, paveValide, verdict, erreurs[],
-// resume, note, joueurSuivant{nom,jid}, plus nombreActions / actions / consequences.
-// Champs AJOUTÉS : majTracker[], fin, penalite, modele, source, etat, horsTour, enAttente.
-// Modifie `match` : discipline, fileAttaques, compteurPaves, pavesTraites (données simples, pas de timers).
+// relais d'IA (IA) → extraction (PARSEUR) → règles strictes + file d'attaques (REGLES) → résolution (MOTEUR) → récit (NARRATEUR)
+// Le retour garde les champs lus par l'affichage : ok, paveDetecte, paveValide, verdict, erreurs[], resume, note, joueurSuivant{nom,jid}…
+// Champs AJOUTÉS : section1, section2 (corps du verdict), tour, maxTours, majTracker[], fin, modele, source, etat, horsTour, enAttente.
+// Modifie `match` : fileAttaques, paveDuTour, tourArbitre, etats, bilan, pavesTraites (données simples, pas de timers).
 const PIPELINE = (() => {
     'use strict';
 
     const CFG = {
         VERIFIER_TOUR: true,                                   // ignore un pavé hors tour (= « pas de correction »)
-        REPLI_LOCAL: true,                                     // si toutes les IA échouent : LOCAL.analyser (vérification stricte adoucie)
-        COUT_ENERGIE_PCT: { basic: 20, advanced: 30, ultime: 50, projectile: 5 },   // image 2 : coût en énergie des attaques d'énergie
-        NOTE: { max: 10, parRemarque: 1, tolerance: 4 },       // PLACEHOLDER : sens exact de « note /10 » à confirmer
+        REPLI_LOCAL: true,                                     // si toutes les IA échouent : LOCAL.analyser (jamais d'annulation sur cette seule analyse)
+        SOURCE_TOUR: 'arbitre',                                // 'arbitre' : compteur géré ici (1 tour = 2 pavés) | 'match' : lit match.tour (géré ailleurs)
+        MAX_TOURS: 10,
+        COUT_ENERGIE_PCT: { basic: 20, special: 30, ultime: 50, projectile: 5, projectileExcedentaire: 10 },   // affiche « Attaque à pleine puissance »
+        NOTE: { max: 10, parDefenseRatee: 3, parDefensePartielle: 1 },   // PLACEHOLDER : sens exact de « note /10 » à confirmer ; un pavé refusé = 0
         PAVES_EN_MEMOIRE: 30,
         TACHE: 'parse_pave', MAX_TOKENS: 2500,
     };
 
     const num = (j) => String(j || '').split('@')[0].split(':')[0];
     const memeJid = (a, b) => !!a && !!b && num(a) === num(b);
-    const nomPerso = (j) => j.personnage || j.pseudo || String(j.jid);
 
-    /** Stats de combat d'un joueur. Rang de Combat Speed = rang de la catégorie (échelle S-, S, S+, … existante) − pénalités. */
+    /** Nom lisible : texte, ou objet carte { nom | name | titre … }. Évite le « [object Object] ». */
+    function nomDe(x, profondeur = 0) {
+        if (x == null || profondeur > 3) return null;
+        if (typeof x === 'string') return x.trim() || null;
+        if (typeof x === 'object') { for (const k of ['nom', 'name', 'titre', 'title', 'personnage', 'character', 'pseudo']) { const v = nomDe(x[k], profondeur + 1); if (v) return v; } }
+        return null;
+    }
+    const nomCarte = (j) => nomDe(j.personnage) || nomDe(j.pseudo) || String(j.jid);
+
+    /** Stats de combat. Rang de Combat Speed = rang de la catégorie (S-, S, S+ … échelle existante) ; le grade (Bronze < Silver < Gold) l'emporte. */
     function statsDe(j, match) {
         const niv = j.category ? getNiveauCategorie(j.category) : -1;
-        const pen = ((match.discipline && match.discipline[j.jid] && match.discipline[j.jid].penalites) || []).filter((p) => p.stat === 'combatSpeed').length;
-        const rang = (j.combatSpeed != null ? Number(j.combatSpeed) : (niv >= 0 ? niv : 0)) - pen;
+        const rang = j.combatSpeed != null ? Number(j.combatSpeed) : (niv >= 0 ? niv : 0);
         const ss = j.ss != null ? !!j.ss : /^ss/.test(normalizeCategorie(j.category || ''));
-        return { ...j, rang, ss, force: Number(j.force) || 0, puissance: Number(j.puissance) || 0 };
+        const etats = (match.etats && match.etats[j.jid]) || {};
+        return { ...j, rang, gradeRang: DEFENSES.rangGrade(j.grade), ss, force: Number(j.force) || 0, puissance: Number(j.puissance) || 0, sonne: !!etats.sonne, blocageTours: etats.blocageTours || 0 };
     }
 
-    /** Note /10 : 0 si annulé ; −1 par remarque ; −4 si la tolérance de début de combat a été utilisée. */
-    function calculerNote(decision) {
-        if (decision.annule) return 0;
-        const remarques = decision.issues.filter((i) => i.classe === 'remarque').length;
-        return Math.max(0, CFG.NOTE.max - remarques * CFG.NOTE.parRemarque - (decision.toleranceConsommee ? CFG.NOTE.tolerance : 0));
+    /* --- Tours : 1 tour = 2 pavés (un par joueur) ; le compteur ne bouge JAMAIS après un seul pavé -------------------- */
+    const maxToursDe = (match) => Number(match.trackerCombatGemini && match.trackerCombatGemini.combat && match.trackerCombatGemini.combat.maxTours) || CFG.MAX_TOURS;
+    function tourCourant(match, opt) { return opt.SOURCE_TOUR === 'match' && Number(match.tour) >= 1 ? Number(match.tour) : (match.tourArbitre || 1); }
+    function synchroniserTour(match, tour, opt) {
+        match.tourArbitre = tour;
+        if (opt.SOURCE_TOUR !== 'match') { match.tour = tour; const c = match.trackerCombatGemini && match.trackerCombatGemini.combat; if (c) c.tour = tour; }
     }
-    function coutEnergie(actions) {
-        let c = 0;
+    /** Enregistre le pavé dans le tour ; renvoie { tourTermine, matchTermine }. */
+    function avancerTour(match, jid, tour, max, opt) {
+        match.paveDuTour = match.paveDuTour || [];
+        if (!match.paveDuTour.some((j) => memeJid(j, jid))) match.paveDuTour.push(jid);
+        if (match.paveDuTour.length < 2) return { tourTermine: false, matchTermine: false };
+        match.paveDuTour = [];
+        if (tour >= max) return { tourTermine: true, matchTermine: true };
+        synchroniserTour(match, tour + 1, opt);
+        return { tourTermine: true, matchTermine: false };
+    }
+
+    /** « Un perso plus rapide qui se déplace à vmax puis frappe en combo » : retard de réaction de 1 s pour le défenseur (speedblitz). */
+    function marquerSpeedblitz(parse, statsMoi, statsAdv) {
+        const acts = parse.actions;
+        for (let i = 1; i < acts.length; i++) {
+            const a = acts[i], p = acts[i - 1];
+            if ((a.type === 'attaque' || a.type === 'competence') && a.combo && p.type === 'deplacement' && p.deplacement && p.deplacement.vitesse === 'vmax' && statsMoi.gradeRang > statsAdv.gradeRang) a.speedblitz = true;
+        }
+    }
+
+    function coutEnergie(actions, infosTechnique) {
+        let c = 0, proj = 0;
         for (const a of actions) {
-            if ((a.type !== 'competence' && a.type !== 'attaque') || !a.energie) continue;
-            if (a.energie.projectile) c += CFG.COUT_ENERGIE_PCT.projectile; else if (a.energie.niveau) c += CFG.COUT_ENERGIE_PCT[a.energie.niveau];
+            if (a.type !== 'competence' && a.type !== 'attaque') continue;
+            const e = a.energie || {}; let niv = e.niveau;
+            if (a.type === 'competence' && infosTechnique) { const i = infosTechnique(a); if (i && i.niveau) niv = i.niveau; }
+            if (e.projectile) { proj += 1; c += proj > 3 ? CFG.COUT_ENERGIE_PCT.projectileExcedentaire : CFG.COUT_ENERGIE_PCT.projectile; }
+            else if (niv && CFG.COUT_ENERGIE_PCT[niv]) c += CFG.COUT_ENERGIE_PCT[niv];
         }
         return c;
     }
-    /** Repli local : on n'annule ni ne pénalise sur la seule foi d'une analyse par mots-clés. */
+    function calculerNote(decision, details) {
+        if (decision.annule) return 0;
+        let n = CFG.NOTE.max;
+        for (const d of details) { if (d.statut === 'ratee' || d.statut === 'plein_fouet') n -= CFG.NOTE.parDefenseRatee; else if (d.statut === 'partielle') n -= CFG.NOTE.parDefensePartielle; }
+        return Math.max(1, n);
+    }
+    /** Repli local : on n'annule jamais un pavé sur la seule foi d'une analyse par mots-clés. */
     function adoucirRepli(decision) {
-        const issues = decision.issues.filter((i) => i.classe === 'remarque');
-        return { ...decision, issues, etat: 'attention', annule: false, penalite: null, toleranceConsommee: false,
-            messages: ['⚠️ Analyse locale (IA indisponible) : vérification stricte du pavé différée.'] };
+        return { ...decision, issues: [], etat: 'valide', annule: false, messages: [] };
+    }
+    function majBilan(match, moi, adv, details, parse, annule) {
+        const b = (match.bilan = match.bilan || {});
+        const zero = () => ({ infliges: 0, recus: 0, attaques: 0, touches: 0, defReussies: 0, defPartielles: 0, defRatees: 0 });
+        const bm = (b[moi.jid] = b[moi.jid] || zero()), ba = (b[adv.jid] = b[adv.jid] || zero());
+        for (const d of details) {
+            bm.recus += d.degats || 0; ba.infliges += d.degats || 0; if (d.touche) ba.touches += 1;
+            if (d.statut === 'reussie') bm.defReussies += 1; else if (d.statut === 'partielle') bm.defPartielles += 1; else bm.defRatees += 1;
+        }
+        if (!annule) bm.attaques += parse.actions.filter((a) => a.type === 'attaque' || a.type === 'competence').length;
+    }
+
+    /** Fin par décision après le dernier tour (sans KO) : jugée par l'IA sur le bilan ; ÉGALITÉ si impossible de départager ou IA indisponible. */
+    async function decider({ match, moi, adv, pvMoi }) {
+        const bilan = match.bilan || {};
+        const donnees = { toursJoues: maxToursDe(match), joueurs: [
+            { jid: moi.jid, nom: nomCarte(moi), pvRestants: pvMoi, bilan: bilan[moi.jid] || {} },
+            { jid: adv.jid, nom: nomCarte(adv), pvRestants: adv.pv, bilan: bilan[adv.jid] || {} }] };
+        const prompt = `Tu es l'arbitre officiel d'ALL STARS. Le match 1v1 est terminé après le dernier tour, sans KO. Désigne le vainqueur PAR DÉCISION selon : les dégâts infligés et reçus, les attaques réussies, les défenses, esquives et contres réussis, la domination des échanges, la qualité et l'efficacité des actions, la régularité sur l'ensemble du combat, les désavantages réellement imposés à l'adversaire. Le joueur qui a le plus de PV restants ne gagne PAS automatiquement. Si aucun joueur ne peut être objectivement départagé, réponds "egalite". N'invente aucune donnée.\n\nBILAN :\n${JSON.stringify(donnees)}\n\nRéponds UNIQUEMENT avec ce JSON : {"gagnant":"<jid du vainqueur>" ou "egalite","raison":"une phrase"}`;
+        const r = await IA.demander({ tache: 'decision_match', messages: [{ role: 'user', content: prompt }], json: true, temperature: 0, maxTokens: 600,
+            cle: match.id || match.matchId || 'match', valider: (d) => (d && (d.gagnant === 'egalite' || d.gagnant === moi.jid || d.gagnant === adv.jid)) || 'gagnant invalide' });
+        if (!r.ok || r.data.gagnant === 'egalite') return { egalite: true, raison: 'ÉGALITÉ', detail: r.ok ? String(r.data.raison || '') : 'Décision impossible (IA indisponible) : égalité par défaut.' };
+        const gagnant = r.data.gagnant === moi.jid ? moi : adv, perdant = gagnant === moi ? adv : moi;
+        return { gagnantJid: gagnant.jid, gagnantPseudo: gagnant.pseudo || nomCarte(gagnant), perdantJid: perdant.jid, raison: 'DÉCISION', detail: String(r.data.raison || '') };
+    }
+
+    function composerMessageFin(resultat) {
+        const f = resultat && resultat.fin; if (!f) return null;
+        if (f.egalite) return `🤝 *ÉGALITÉ* ${f.detail ? '— ' + f.detail : ''}`.trim();
+        return `🏆 *VICTOIRE* de @${f.gagnantPseudo} par ${f.raison} !${f.raison === 'DÉCISION' && f.detail ? `\n${f.detail}` : ''}`;
     }
 
     /**
      * @param {object} p
-     *   user          JID de l'auteur            actionsTexte  texte après « 🌀🎮: »
-     *   contexteMatch { match }                  joueursGemini joueurs du tracker (jid, pseudo, personnage, grade, category, vitesseMax, pv, stamina, energie, …)
-     *   paveId        id du message (évite un double traitement)
-     *   options       { resoudre?, effetsCarte?, verifierTour? } surcharge de CFG
+     *   user  JID de l'auteur        actionsTexte  texte après « 🌀🎮: »
+     *   contexteMatch { match }       joueursGemini joueurs du tracker (jid, pseudo, personnage, grade, category, vitesseMax, pv, stamina, energie, force…)
+     *   paveId  id du message (évite un double traitement)
+     *   options { resoudre?, effetsCarte?, infosTechnique?, verifierTour?, SOURCE_TOUR? } surcharge de CFG
      */
     async function analyser({ user, actionsTexte, contexteMatch = {}, joueursGemini = [], paveId = null, options = {} }) {
         const opt = { ...CFG, ...options };
@@ -1159,7 +1348,6 @@ const PIPELINE = (() => {
         const adv = moi && joueursGemini.find((j) => j !== moi);
         if (!moi || !adv) return { ok: false, ...base, erreur: 'Joueur ou adversaire introuvable dans le match' };
         if (moi.ko || adv.ko) return { ok: false, ...base, erreur: 'Le match est terminé' };
-
         if (paveId && match.pavesTraites && match.pavesTraites[paveId]) return match.pavesTraites[paveId];
 
         const attendu = match.joueurTour || match.joueurActifJid || null;
@@ -1170,15 +1358,18 @@ const PIPELINE = (() => {
         match.paveEnCours = moi.jid;                                 // vérifier + poser AVANT tout await (JS mono-thread = atomique)
 
         try {
-            const tour = ((match.compteurPaves && match.compteurPaves[moi.jid]) || 0) + 1;   // « tour » du joueur (match.tour n'est jamais incrémenté)
+            const maxTours = maxToursDe(match);
+            const tour = tourCourant(match, opt);
+            if (opt.SOURCE_TOUR !== 'match' && !match.tourArbitre) synchroniserTour(match, 1, opt);
+            const nomMoi = nomCarte(moi), nomAdv = nomCarte(adv);
 
             //------------------------------------------------
             // 1. Extraction (IA, sinon repli local)
             //------------------------------------------------
             let parse, source = 'ia', modele = null;
             const prompt = PARSEUR.construirePrompt({
-                joueur: { nom: `${nomPerso(moi)} (joueur ${moi.pseudo || moi.jid})`, grade: moi.grade, vmax: moi.vitesseMax },
-                adversaire: { nom: `${nomPerso(adv)} (joueur ${adv.pseudo || adv.jid})` },
+                joueur: { nom: `${nomMoi} (joueur ${moi.pseudo || moi.jid})`, grade: moi.grade, vmax: moi.vitesseMax },
+                adversaire: { nom: `${nomAdv} (joueur ${adv.pseudo || adv.jid})` },
                 distance: moi.distanceAdversaire, tour, attaquesEnAttente: REGLES.pourPrompt(match, moi.jid), actionsTexte,
             });
             const r = await IA.demander({
@@ -1187,75 +1378,94 @@ const PIPELINE = (() => {
             });
             if (r.ok) { parse = PARSEUR.normaliser(r.data); modele = r.modele; }
             else if (opt.REPLI_LOCAL) {
-                parse = PARSEUR.normaliser(LOCAL.analyser(actionsTexte, { cibleNoms: [nomPerso(adv), adv.pseudo].filter(Boolean) }));
+                parse = PARSEUR.normaliser(LOCAL.analyser(actionsTexte, { cibleNoms: [nomAdv, adv.pseudo].filter(Boolean), acteurNoms: [nomMoi, moi.pseudo].filter(Boolean) }));
                 source = 'local'; modele = 'local';
             } else return { ok: false, ...base, enAttente: true, erreur: `Aucune IA disponible : ${r.erreurs.join(' | ')}` };
 
             //------------------------------------------------
-            // 2. Discipline + file d'attaques
+            // 2. Règles strictes + file d'attaques
             //------------------------------------------------
-            let decision = REGLES.evaluerPave(parse, { tour, joueur: moi.jid, discipline: match.discipline });
+            let decision = REGLES.evaluerPave(parse);
             if (source === 'local') decision = adoucirRepli(decision);
-            const integ = REGLES.integrerPave(match, { joueurId: moi.jid, joueurNom: nomPerso(moi), adversaireId: adv.jid, tour, paveId: paveId || `p${Date.now()}`, parse, decision });
-            match.compteurPaves = match.compteurPaves || {};
-            match.compteurPaves[moi.jid] = tour;
+            const statsMoi = statsDe(moi, match), statsAdv = statsDe(adv, match);
+            if (!decision.annule) marquerSpeedblitz(parse, statsMoi, statsAdv);
+            const integ = REGLES.integrerPave(match, { joueurId: moi.jid, joueurNom: nomMoi, adversaireId: adv.jid, tour, paveId: paveId || `p${Date.now()}`, parse, decision });
 
             //------------------------------------------------
             // 3. Résolution chiffrée des attaques reçues + coût en énergie
             //------------------------------------------------
-            const statsMoi = statsDe(moi, match), statsAdv = statsDe(adv, match);
             const resolveur = typeof opt.resoudre === 'function' ? opt.resoudre : MOTEUR.resoudrePave;
-            const reso = (await resolveur({ liens: integ.liens, defenseur: statsMoi, attaquant: statsAdv, distance: moi.distanceAdversaire, effetsCarte: opt.effetsCarte, parse, decision, match })) || {};
+            const reso = (await resolveur({ liens: integ.liens, defenseur: statsMoi, attaquant: statsAdv, effetsCarte: opt.effetsCarte, infosTechnique: opt.infosTechnique, parse, decision, match })) || {};
             const etat = reso.etat || { pv: moi.pv, stamina: moi.stamina, energie: moi.energie, posture: 'neutre', equilibre: 'stable' };
             const details = reso.details || [];
-            const energieAvant = moi.energie != null ? moi.energie : 100;
-            const energieApres = Math.max(0, energieAvant - (decision.annule ? 0 : coutEnergie(parse.actions)));
-            const staminaAvant = moi.stamina != null ? moi.stamina : 100;
+            const cout = decision.annule ? 0 : coutEnergie(parse.actions, opt.infosTechnique);
+            const energieAvant = moi.energie != null ? moi.energie : 100, staminaAvant = moi.stamina != null ? moi.stamina : 100;
+            const energieApres = Math.max(0, energieAvant - cout);
+            majBilan(match, moi, adv, details, parse, decision.annule);
+
+            // états qui durent d'un pavé à l'autre : sonné (1 tour), garde brisée (2 tours)
+            match.etats = match.etats || {};
+            const prec = match.etats[moi.jid] || {};
+            match.etats[moi.jid] = { sonne: !!etat.nouveauSonne, blocageTours: etat.brisegarde ? MOTEUR.CFG.BRISE_GARDE_TOURS : Math.max(0, (prec.blocageTours || 0) - 1) };
+
+            const posture = etat.nouveauSonne ? 'sonné' : etat.posture;
             const majTracker = [];
-            if (etat.pv !== moi.pv || etat.stamina !== staminaAvant || energieApres !== energieAvant || etat.posture !== 'neutre' || etat.equilibre !== 'stable') {
-                majTracker.push({ jid: moi.jid, pv: etat.pv, stamina: etat.stamina, energie: energieApres, posture: etat.posture, equilibre: etat.equilibre });
+            if (etat.pv !== moi.pv || etat.stamina !== staminaAvant || energieApres !== energieAvant || posture !== 'neutre' || etat.equilibre !== 'stable') {
+                majTracker.push({ jid: moi.jid, pv: etat.pv, stamina: etat.stamina, energie: energieApres, posture, equilibre: etat.equilibre });
             }
+            let fin = null;
             const ko = etat.pv <= 0;
-            const fin = ko ? { gagnantJid: adv.jid, gagnantPseudo: adv.pseudo || adv.jid, perdantJid: moi.jid, raison: 'KO' } : null;
+            if (ko) fin = { gagnantJid: adv.jid, gagnantPseudo: adv.pseudo || adv.jid, perdantJid: moi.jid, raison: 'KO' };
 
             //------------------------------------------------
-            // 4. Récit + verdict au format actuel
+            // 4. Tour suivant / fin de match
             //------------------------------------------------
-            const recit = NARRATEUR.composer({ nom: nomPerso(moi), parse, details });
-            const lignePenalite = decision.penalite ? `⚠️ Pénalité (erreur tolérée en début de combat) : ${decision.penalite.libelle}.` : null;
-            const ligneKO = ko ? `☠️ ${nomPerso(moi)} est KO.` : null;
+            if (!ko) {
+                const t = avancerTour(match, moi.jid, tour, maxTours, opt);
+                if (t.matchTermine) fin = await decider({ match, moi, adv, pvMoi: etat.pv });
+            }
+
+            //------------------------------------------------
+            // 5. Récit + verdict au format du jeu
+            //------------------------------------------------
+            const recit = NARRATEUR.composer({ nomDefaut: nomMoi, parse, details });
+            const lignesNotes = decision.notes.map((n) => (n.code === 'VITESSE_LENTE' ? `🐢 Action ${n.n} : vmax non précisé juste après l'action → vitesse considérée lente` : n.code === 'COURBE_TROP_LARGE' ? `🐢 Action ${n.n} : courbe de ${n.valeur} m (3 m max pour garder la vitesse max)` : null)).filter(Boolean);
+            const lignesCout = cout > 0 ? [`🌀 Coût du pavé : ${NARRATEUR.pct(cout, NARRATEUR.EM.en)}`] : [];
+            const ligneKO = ko ? `☠️ ${nomMoi} est KO.` : null;
             const actions = parse.actions.map((a) => {
                 const lie = integ.liens.find((l) => l.defenses.includes(a));
                 const res = lie && details.find((d) => d.n === lie.attaque.n);
                 const mes = decision.issues.filter((i) => i.n === a.n).map((i) => i.message);
                 return {
-                    ordre: a.n, acteur: nomPerso(moi), cible: a.cible || nomPerso(adv), type: a.type, description: a.texte,
-                    valide: !decision.annule, raison: decision.annule ? (mes.join(' ') || 'Pavé annulé') : mes.join(' '),
+                    ordre: a.n, acteur: a.acteur || nomMoi, cible: a.cible || nomAdv, type: a.type, description: a.texte,
+                    valide: !decision.annule, raison: decision.annule ? (mes.join(' ') || 'Pavé annulé') : '',
                     resultatDefense: a.type === 'defense' ? (lie ? `liée à [#${lie.attaque.n}]${res ? ' : ' + res.statut : ''}` : 'aucune attaque visée') : '',
                     consequence: a.type === 'attaque' || a.type === 'competence' ? (decision.annule ? 'annulée' : "mise en attente (l'adversaire peut y répondre)") : '',
                 };
             });
-
-            let verdict = '', resume = '', erreurs = [];
+            let section1, section2;
             if (decision.annule) {
-                verdict = ['Aucune action ne passe.', ...recit.lignes, ligneKO].filter(Boolean).join('\n');
-                erreurs = [...decision.issues.map((i) => i.message), ...(lignePenalite ? [lignePenalite] : [])];
+                section1 = [recit.resume, ...decision.issues.map((i) => `❌ ${i.message}`), 'Aucune action ne passe.'].join('\n');
+                section2 = [...recit.lignes, ligneKO].filter(Boolean).join('\n');
             } else {
-                resume = [recit.resume, ...decision.messages, ...recit.lignes, ligneKO].filter(Boolean).join('\n');
+                section1 = recit.resume;
+                section2 = [...recit.lignes, ...lignesCout, ...lignesNotes, ligneKO].filter(Boolean).join('\n');
             }
 
             const resultat = {
                 ok: true, ...base,
                 paveValide: !decision.annule, nombreActions: parse.nombreActions, actions,
-                note: calculerNote(decision), verdict, resume,
+                note: calculerNote(decision, details), tour, maxTours,
+                section1, section2,
+                verdict: decision.annule ? section1 : '', resume: decision.annule ? '' : [section1, section2].filter(Boolean).join('\n'),
+                erreurs: decision.annule ? decision.issues.map((i) => i.message) : [],
                 joueurSuivant: { nom: adv.pseudo || adv.jid, jid: adv.jid },
                 consequences: {
-                    touche: details.some((d) => d.touche), contre: details.some((d) => d.statut === 'echange'), mauvaisContre: decision.annule && integ.liens.length > 0,
+                    touche: details.some((d) => d.touche), contre: false, mauvaisContre: decision.annule && integ.liens.length > 0,
                     degats: details.reduce((s, d) => s + (d.degats || 0), 0), effets: details.flatMap((d) => d.effets || []),
-                    position: '', posture: etat.posture, equilibre: etat.equilibre, garde: '',
+                    position: '', posture, equilibre: etat.equilibre, garde: '',
                 },
-                erreurs,
-                majTracker, fin, penalite: decision.penalite || null, modele, source, etat: decision.etat,
+                majTracker, fin, modele, source, etat: decision.etat,
             };
             match.pavesTraites = match.pavesTraites || {};
             match.pavesTraites[paveId || `p${Date.now()}`] = resultat;
@@ -1267,11 +1477,7 @@ const PIPELINE = (() => {
         }
     }
 
-    function composerMessageFin(resultat) {
-        return resultat && resultat.fin ? `🏆 *VICTOIRE* de @${resultat.fin.gagnantPseudo} par ${resultat.fin.raison} !` : null;
-    }
-
-    return { CFG, analyser, composerMessageFin, statsDe, calculerNote };
+    return { CFG, analyser, composerMessageFin, statsDe, nomDe, nomCarte, calculerNote, coutEnergie };
 })();
 
 //================================================
@@ -1507,7 +1713,11 @@ const joueursGemini =
 
             pseudo,
 
-            personnage,
+            personnage:
+                PIPELINE.nomDe(personnage) ||
+                PIPELINE.nomDe(j?.carte) ||
+                PIPELINE.nomDe(j?.card) ||
+                null,
 
             grade,
 
@@ -1656,21 +1866,33 @@ async function envoyerResultatPaveGemini(
         }
 
         //================================================
-        // 🏁 FIN DE MATCH (KO)
+        // 📝 CORPS DU VERDICT (résumé + verdict)
+        //================================================
+        const section1Verdict =
+            resultat.section1 ??
+            (resultat.paveValide
+                ? (resultat.resume || "Actions validées.")
+                : [resultat.verdict || "Le pavé est invalide.",
+                   ...(Array.isArray(resultat.erreurs) ? resultat.erreurs.map(e => `❌ ${e}`) : [])].join("\n"));
+
+        //================================================
+        // 🏁 FIN DE MATCH (KO, DÉCISION OU ÉGALITÉ)
         //================================================
         if (resultat.fin) {
             clearTimeout(match?.timerTour);
             clearTimeout(match?.timerWarning);
-            const corps = resultat.paveValide
-                ? `✅ *ACTIONS VALIDÉES :*\n- ${resultat.resume || ""}`
-                : `❌ *PAVÉ REFUSÉ*\n${resultat.verdict || ""}\n` +
-                  (Array.isArray(resultat.erreurs) ? resultat.erreurs.map(e => `- ${e}`).join("\n") : "");
             await ovl.sendMessage(
                 chat,
                 {
-                    text:
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░\n▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n${corps}\n▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n${PIPELINE.composerMessageFin(resultat)}\n╰───────────────────\n               *JUMP BATTLE ARENA 🌀🔆*`,
-                    mentions: [resultat.fin.gagnantJid]
+                    text: NARRATEUR.gabaritFin({
+                        valide: !!resultat.paveValide,
+                        section1: section1Verdict,
+                        section2: resultat.section2 || "",
+                        tour: resultat.tour ?? match?.tour ?? 1,
+                        maxTours: resultat.maxTours ?? 10,
+                        messageFin: PIPELINE.composerMessageFin(resultat)
+                    }),
+                    mentions: resultat.fin.gagnantJid ? [resultat.fin.gagnantJid] : []
                 }
             );
             // nettoyage du match (même logique que stopmatch🌀)
@@ -1854,136 +2076,28 @@ async function envoyerResultatPaveGemini(
 
 
         //================================================
-        // ❌ PAVÉ INVALIDE
+        // 📤 MESSAGE DU VERDICT (gabarit unique : validé ou refusé)
         //================================================
-
-        if (!resultat.paveValide) {
-
-            const erreurs =
-                Array.isArray(resultat.erreurs)
-                    ? resultat.erreurs
-                        .map(
-                            e => `- ${e}`
-                        )
-                        .join("\n")
-                    : "Pavé invalide";
-
-
-            const texte =
-
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-❌ *PAVÉ REFUSÉ*
-
-${resultat.verdict ||
-    "Le pavé est invalide."}
-
-${erreurs}
-
-📊 *Note du pavé :*
-${resultat.note ?? 0}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *JOUEUR SUIVANT :*
-
-➡️ @${prochainPseudo} *GO!!* 🔥
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
-
-            await ovl.sendMessage(
-                chat,
-                {
-                    text: texte,
-
-                    mentions:
-                        prochainJid
-                            ? [prochainJid]
-                            : []
-                }
-            );
-
-
-            console.log(
-                "🎮 PAVÉ REFUSÉ"
-            );
-
-            console.log(
-                "➡️ PROCHAIN GO :",
-                prochainPseudo,
-                "|",
-                prochainJid
-            );
-
-
-            return;
-        }
-
-
-        //================================================
-        // ✅ ACTIONS VALIDÉES
-        //================================================
-
-        const resume =
-            resultat.resume ||
-            "Actions validées.";
-
-
-        const note =
-            Number(resultat.note) || 0;
-
-
-        //================================================
-        // 📤 MESSAGE VISUEL
-        //================================================
-
-        const texte =
-
-`░▒░   *🎮COMBAT ♨️🌀* ░▒░
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-
-✅ *ACTIONS VALIDÉES :*
-
-- ${resume}
-
-📊 *Note du pavé :*
-${note}/10 ⭐
-
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-🔆 *JOUEUR SUIVANT :*
-
-➡️ @${prochainPseudo} *GO!!* 🔥
-
-╰───────────────────
-               *JUMP BATTLE ARENA 🌀🔆*`;
-
+        const texte = NARRATEUR.gabaritVerdict({
+            valide: !!resultat.paveValide,
+            section1: section1Verdict,
+            section2: resultat.section2 || "",
+            note: Number(resultat.note) || 0,
+            tour: resultat.tour ?? match?.tour ?? 1,
+            maxTours: resultat.maxTours ?? 10,
+            prochainPseudo
+        });
 
         await ovl.sendMessage(
             chat,
             {
                 text: texte,
-
-                mentions:
-                    prochainJid
-                        ? [prochainJid]
-                        : []
+                mentions: prochainJid ? [prochainJid] : []
             }
         );
 
-
-        console.log(
-            "🎮 RENDU PAVÉ ENVOYÉ"
-        );
-
-        console.log(
-            "➡️ PROCHAIN GO :",
-            prochainPseudo,
-            "|",
-            prochainJid
-        );
-
+        console.log(resultat.paveValide ? "🎮 RENDU PAVÉ ENVOYÉ" : "🎮 PAVÉ REFUSÉ");
+        console.log("➡️ PROCHAIN GO :", prochainPseudo, "|", prochainJid);
 
     } catch (error) {
 
@@ -2732,13 +2846,15 @@ function obtenirVitesseMaxParGrade(grade) {
     switch (g) {
 
         case "bronze":
-            return 6;
+            return 10;
 
         case "argent":
-            return 8;
+        case "silver":
+            return 15;
 
         case "or":
-            return 10;
+        case "gold":
+            return 20;
 
         default:
             return null;
@@ -3760,8 +3876,8 @@ const HIERARCHIE_CATEGORIES = [
     "S+",
     "S+ super",
     "S+ ultra",
-    "S+ extreme",
     "S+ mega",
+    "S+ extreme",
     "S+ ultimate",
 
     "SS-",
@@ -3769,8 +3885,8 @@ const HIERARCHIE_CATEGORIES = [
     "SS+",
     "SS+ super",
     "SS+ ultra",
-    "SS+ extreme",
     "SS+ mega",
+    "SS+ extreme",
     "SS+ ultimate"
 ];
 
