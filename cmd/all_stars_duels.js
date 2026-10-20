@@ -526,19 +526,22 @@ function parseResultatNSL(texte) {
             return null;
         }
 
-        if (!["amical", "saison"].includes(match.toLowerCase())) {
-            console.log("⚠️ Type de match non reconnu :", match);
-            return null;
-        }
+        const matchNormalise = normalizeTag(match);
+
+if (!["amical", "saison", "tournois"].includes(matchNormalise)) {
+    console.log("⚠️ Type de match non reconnu :", match);
+    return null;
+}
 
         return {
-            match,
-            winner,
-            symboleWinner,
-            loser,
-            arbitre,
-            tours: Number(toursMatch[1])
-        };
+    match,
+    matchNormalise,
+    winner,
+    symboleWinner,
+    loser,
+    arbitre,
+    tours: Number(toursMatch[1])
+};
 
     } catch (err) {
         console.error("❌ Erreur parseResultatNSL :", err);
@@ -571,10 +574,9 @@ ovlcmd({
         // 🆚 TYPE DE MATCH
         // ==============================================
 
-        const typeMatch = normalizeTag(resultat.match);
+        const typeMatch = resultat.matchNormalise || normalizeTag(resultat.match);
 
-        if (!["amical", "saison"].includes(typeMatch)) {
-
+if (!["amical", "saison", "tournois"].includes(typeMatch)) {
             console.log(
                 `⚠️ Type de match non reconnu : ${resultat.match}`
             );
@@ -697,7 +699,10 @@ const ficheLoser = await getFicheByPseudo(
                 ficheWinner.jid
             );
 
-            const recompenseEXP = resultat.match === "Tournois🏆" ? 20 : 10;
+            const recompenseEXP =
+    typeMatch === "tournois" ? 20 :
+    typeMatch === "saison" ? 15 :
+    10;
 
 await setfiche(
     "exp",
@@ -821,9 +826,7 @@ if (resultat.symboleLoser === "❌" || resultat.tours < 3) {
                     `🥇 Winner : ${ficheWinner.pseudo}\n` +
                     `🏆 Victoires : +1\n` +
                     (
-                        recompenseWinner
-                            ? `🎁 Récompenses Winner : +10 000 Golds, +10 EXP, +10 talents\n`
-                            : `🎁 Récompenses Winner : aucune\n`
+                        ? `🎁 Récompenses Winner : +10 000 Golds, +${typeMatch === "tournois" ? 20 : typeMatch === "saison" ? 15 : 10} EXP, +10 talents\n`
                     ) +
                     `🥈 Loser : ${ficheLoser.pseudo}\n` +
                     `📉 Défaites : +1\n` +
