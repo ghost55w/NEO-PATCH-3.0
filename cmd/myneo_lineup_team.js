@@ -456,7 +456,16 @@ ovlcmd({
         else if (operation === "+") nouveau = ancien + valeur;
         else nouveau = ancien - valeur;
 
-        nouveau = Math.max(0, nouveau);
+        // Limites des ressources
+nouveau = Math.max(0, nouveau);
+
+if (champ === "nc") {
+  nouveau = Math.min(nouveau, 1000);
+}
+
+if (champ === "np") {
+  nouveau = Math.min(nouveau, 10);
+}
 
         if (champ === "ns") {
           const delta = nouveau - ancien;
@@ -549,9 +558,13 @@ ovlcmd({
       }
     }
 
-    if ("np" in updates) {
-      updates.np = Math.min(updates.np, 10);
-    }
+  if ('nc' in updates) {
+  updates.nc = Math.max(0, Math.min(updates.nc, 1000));
+}
+
+if ('np' in updates) {
+  updates.np = Math.max(0, Math.min(updates.np, 10));
+}  
 
     if (Object.keys(updates).length === 0 && nsDelta === 0) {
       return repondre(
@@ -610,10 +623,10 @@ async function giveNS(userId, amount, ovl, ms_org) {
 
       // Mise à jour des champs NC et coupons + dernier palier
       await updateMyNeo(userId, {
-        nc: (data.nc || 0) + recompenses.nc,
-        coupons: (data.coupons || 0) + recompenses.coupons,
-        lastRewardNS: palierActuel * 100
-      });
+  nc: Math.min(1000, Math.max(0, Number(data.nc) || 0) + recompenses.nc),
+  coupons: (data.coupons || 0) + recompenses.coupons,
+  lastRewardNS: palierActuel * 100
+});
 
       // ⚡ Mise à jour golds dans AllStars
       const allStarsFiche = await getData({ jid: userId });
