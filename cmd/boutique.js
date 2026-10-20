@@ -104,9 +104,10 @@ const autoRewardNS = async (jid, ovl, ms_org, nsGained = 0) => {
             const totalReward = tiersGained * rewardPerTier;
 
             await MyNeoFunctions.updateUser(jid, {
-                ns: currentNS + totalReward,
-                lastRewardNS: currentNS
-            });
+    ns: currentNS + totalReward,
+    lastRewardNS: currentNS,
+    nc: Math.min(1000, Math.max(0, Number(userData.nc) || 0) + 50 * tiersGained)
+});
 
             await ovl.sendMessage(ms_org, {
                 text: `🎉👑 LEVEL UP ROYALITY XP
@@ -421,8 +422,9 @@ ${couponUsed ? "✅ Coupon utilisé (100🎟️)" : ""}
                     if (cardCurrency === "golds")
                         await setfiche("golds", golds + finalSalePrice, auteur_Message);
                     else
-                        await MyNeoFunctions.updateUser(auteur_Message, { nc: nc + finalSalePrice });
-
+    await MyNeoFunctions.updateUser(auteur_Message, {
+        nc: Math.min(1000, nc + finalSalePrice)
+    });
                     await ovl.sendMessage(ms_org, {
                         image: { url: card.image },
                         caption: `╭───〔 🛍️ REÇU DE VENTE 〕───────  
