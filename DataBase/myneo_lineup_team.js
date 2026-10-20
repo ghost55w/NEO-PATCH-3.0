@@ -141,11 +141,36 @@ const MyNeoFunctions = {
     }
   },
 
+  
   async updateUser(id, updates) {
     try {
-      const [updated] = await MyNeo.update(updates, { where: { id } });
-      return updated ? "✅ Données mises à jour." : "⚠️ Aucun champ mis à jour.";
-    } catch {
+      const safeUpdates = { ...updates };
+
+      // Limite globale des NC🔷 : entre 0 et 1000
+      if (Object.prototype.hasOwnProperty.call(safeUpdates, "nc")) {
+        safeUpdates.nc = Math.max(
+          0,
+          Math.min(1000, Number(safeUpdates.nc) || 0)
+        );
+      }
+
+      // Limite globale des NP🔶 : entre 0 et 10
+      if (Object.prototype.hasOwnProperty.call(safeUpdates, "np")) {
+        safeUpdates.np = Math.max(
+          0,
+          Math.min(10, Number(safeUpdates.np) || 0)
+        );
+      }
+
+      const [updated] = await MyNeo.update(safeUpdates, {
+        where: { id }
+      });
+
+      return updated
+        ? "✅ Données mises à jour."
+        : "⚠️ Aucun champ mis à jour.";
+    } catch (err) {
+      console.error("❌ Erreur MyNeoFunctions.updateUser:", err);
       return "❌ Erreur lors de la mise à jour.";
     }
   },
