@@ -468,7 +468,6 @@ async function getFicheByPseudo(pseudo) {
 }
 
 /* ================= PARSER RESULTAT MATCH NSL ================= */
-
 function parseResultatNSL(texte) {
     try {
         const contenu = String(texte || "");
@@ -498,13 +497,19 @@ function parseResultatNSL(texte) {
         const winnerBrut = lire("Winner");
         const loserBrut = lire("Loser");
         const arbitre = lire("Arbitre");
+
         const toursMatch = lignes
-    .map(ligne => ligne.match(/Tours\s*:\s*(\d+)/i))
-    .find(Boolean);
+            .map(ligne => ligne.match(/Tours\s*:\s*(\d+)/i))
+            .find(Boolean);
 
         const symboleWinnerMatch = winnerBrut.match(/[✅❌]\s*$/u);
         const symboleWinner = symboleWinnerMatch
             ? symboleWinnerMatch[0].trim()
+            : "";
+
+        const symboleLoserMatch = loserBrut.match(/[✅❌]\s*$/u);
+        const symboleLoser = symboleLoserMatch
+            ? symboleLoserMatch[0].trim()
             : "";
 
         const winner = winnerBrut
@@ -528,28 +533,27 @@ function parseResultatNSL(texte) {
 
         const matchNormalise = normalizeTag(match);
 
-if (!["amical", "saison", "tournois"].includes(matchNormalise)) {
-    console.log("⚠️ Type de match non reconnu :", match);
-    return null;
-}
+        if (!["amical", "saison", "tournois"].includes(matchNormalise)) {
+            console.log("⚠️ Type de match non reconnu :", match);
+            return null;
+        }
 
         return {
-    match,
-    matchNormalise,
-    winner,
-    symboleWinner,
-    loser,
-    arbitre,
-    tours: Number(toursMatch[1])
-};
+            match,
+            matchNormalise,
+            winner,
+            symboleWinner,
+            loser,
+            symboleLoser,
+            arbitre,
+            tours: Number(toursMatch[1])
+        };
 
     } catch (err) {
         console.error("❌ Erreur parseResultatNSL :", err);
         return null;
     }
 }
-
-
 /* ================= RAZORX AUTO — RESULTAT NSL ================= */
 
 ovlcmd({
@@ -754,8 +758,7 @@ await setfiche(
 
 let penaliteLoser = false;
 
-if (resultat.symboleLoser === "❌" || resultat.tours < 3) {
-
+if (resultat.tours < 3 || resultat.symboleLoser === "❌") {
     const exp = Math.max(
         0,
         (Number(ficheLoser.exp) || 0) - 10
@@ -812,45 +815,47 @@ if (resultat.symboleLoser === "❌" || resultat.tours < 3) {
             );
         }
 
-        // ==============================================
-        // ✅ CONFIRMATION
-        // ==============================================
+       // ==============================================
+// ✅ CONFIRMATION
+// ==============================================
 
-        await ovl.sendMessage(
-            ms_org,
-            {
-                text:
-                    `🏆 *RÉSULTAT MATCH NSL ENREGISTRÉ*\n` +
-                    `▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n\n` +
-                    `🆚 Match : ${resultat.match}\n` +
-                    `🥇 Winner : ${ficheWinner.pseudo}\n` +
-                    `🏆 Victoires : +1\n` +
-                    (
-                        ? `🎁 Récompenses Winner : +10 000 Golds, +${typeMatch === "tournois" ? 20 : typeMatch === "saison" ? 15 : 10} EXP, +10 talents\n`
-                    ) +
-                    `🥈 Loser : ${ficheLoser.pseudo}\n` +
-                    `📉 Défaites : +1\n` +
-                    (
-                        penaliteLoser
-                            ? `⚠️ Pénalité Loser : -10 EXP, -10 talents\n`
-                            : `✅ Aucune pénalité pour le Loser\n`
-                    ) +
-                    `👤 Arbitre : ${resultat.arbitre || "Non renseigné"}\n` +
-                    (
-                        recompenseArbitre
-                            ? `👑 Récompense Arbitre : +15 000 Golds\n`
-                            : `👑 Récompense Arbitre : aucune\n`
-                    ) +
-                    `🕒 Tours : ${resultat.tours}\n\n` +
-                    `╰───────────────────\n` +
-                    `R A Z O R X™⚡`
-            },
-            ms ? { quoted: ms } : {}
-        );
+await ovl.sendMessage(
+    ms_org,
+    {
+        text:
+            `🏆 *RÉSULTAT MATCH NSL ENREGISTRÉ*\n` +
+            `▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔\n\n` +
+            `🆚 Match : ${resultat.match}\n` +
+            `🥇 Winner : ${ficheWinner.pseudo}\n` +
+            `🏆 Victoires : +1\n` +
+            (
+                recompenseWinner
+                    ? `🎁 Récompenses Winner : +10 000 Golds, +${typeMatch === "tournois" ? 20 : typeMatch === "saison" ? 15 : 10} EXP, +10 talents\n`
+                    : `🎁 Récompenses Winner : aucune\n`
+            ) +
+            `🥈 Loser : ${ficheLoser.pseudo}\n` +
+            `📉 Défaites : +1\n` +
+            (
+                penaliteLoser
+                    ? `⚠️ Pénalité Loser : -10 EXP, -10 talents\n`
+                    : `✅ Aucune pénalité pour le Loser\n`
+            ) +
+            `👤 Arbitre : ${resultat.arbitre || "Non renseigné"}\n` +
+            (
+                recompenseArbitre
+                    ? `👑 Récompense Arbitre : +15 000 Golds\n`
+                    : `👑 Récompense Arbitre : aucune\n`
+            ) +
+            `🕒 Tours : ${resultat.tours}\n\n` +
+            `╰───────────────────\n` +
+            `R A Z O R X™⚡`
+    },
+    ms ? { quoted: ms } : {}
+);
 
-        console.log(
-            `🏁 Match NSL terminé : ${ficheWinner.pseudo} vs ${ficheLoser.pseudo}`
-        );
+console.log(
+    `🏁 Match NSL terminé : ${ficheWinner.pseudo} vs ${ficheLoser.pseudo}`
+); 
 
     } catch (err) {
 
