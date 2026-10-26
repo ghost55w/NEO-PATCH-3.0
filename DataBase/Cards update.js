@@ -50,7 +50,7 @@ const cards = [
     name: "Nezuko",
     grade: "Bronze",
     rarete: "Sparking",
-    category: "S",
+    category: "S-",
     univers: "Demon Slayer",
     images: ["https://files.catbox.moe/qymj91.jpg"],
     card: "https://files.catbox.moe/pme5v3.jpg",
@@ -71,20 +71,20 @@ const cards = [
     name: "Zenitsu",
     grade: "Bronze",
     rarete: "Sparking",
-    category: "S",
+    category: "S-",
     univers: "Demon Slayer",
     images: [],
     card: "",
-    Price: "130k",
+    Price: "100k",
     specs: {
       force: 1,
       speed: 2,
       attacks: 1
     },
-    Moves: "",
+    Moves: "[SPECIAL🥈] : *FRAPPE FOUDROYANTE: Zénitsu en position accroupie tenant son katana des deux mains dégage des étincelles de foudre puis il fonce sur son adversaire à une vitesse éclaire couvrant 50cm de diamètre pour venir décapiter la cible d'un seul coup. *SEXTUPLE: Une variante de la frappe foudroyante mais cette fois ci au lieu de foncer droit sur l'adversaire il fonce en zig zag où en ricochet si c'est un espace fermé pour venir décapiter la cible rendant sa trajectoire imprévisible de couvrant 3m de diamètre mais cela coupe . *[ULTIME🥇 ] : SEPTIÈME FORME DIEU DU FEU CÉLESTE: Zénitsu concentre une énorme quantité de foudre autour de lui puis il fonce à une vitesse phénoménale sur la cible sous la forme d'un dragon foudroyant de 3m de diamètre afin de le trancher d'un seul coup. ",
     infos: [
-      "Possède un katana Nichirin et maîtrise la Respiration de la Foudre.",
-      "Se spécialise dans la première forme de la Respiration de la Foudre, qui lui permet de foncer sur son adversaire à très grande vitesse.",
+      "Arme: Possède un katana de 1m.",
+      "boost: Concentration intégrale, l'utilisateur prends une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de +1 pendant 3 tours",
       "Possède une ouïe extrêmement développée qui lui permet de percevoir les sons et les émotions.",
       "Peut exploiter ses capacités de combat même lorsqu'il est inconscient."
     ]
