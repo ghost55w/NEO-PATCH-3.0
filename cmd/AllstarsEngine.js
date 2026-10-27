@@ -941,7 +941,7 @@ const DEFENSES = (() => {
     /** Réactions permises (noms canoniques). `speedblitz` : retard de 1 s même à S égal → seulement esquiver ou bloquer. */
     function modesPermis(gap, action, sonne) {
         if (sonne) return ['esquive'];                                          // sonné : seule une esquive boostée est possible
-        if (gap < 0 || (action && action.speedblitz)) return CFG.MODES_INFERIEUR;
+        if (gap < 0 || (action && (action.speedblitz || action.instantanee))) return CFG.MODES_INFERIEUR;
         const modes = CFG.MODES_ETAT_NORMAL.slice();
         if (estProjectile(action) && gap < 1) return modes.filter((m) => m !== 'saisie');   // saisir un projectile : seulement plus fort que le lanceur en S
         return modes;
@@ -1021,6 +1021,7 @@ const MOTEUR = (() => {
         const carte = effetsCarte ? effetsCarte(a, { def, att, etat }) : null;
         if (carte) nat = { ...nat, ...carte };                       // la carte peut fournir pct / mort / lignes
         const res = { n: lien.attaque.n, nom: nat.nom, statut: null, mode: null, cout: 0, degats: 0, mort: false, raison: '', effets: [], touche: false, auto: false };
+        if (a.instantanee) res.effets.push("⚡ attaque lancée instantanément (pénalité de l'adversaire)");
         const gap = DEFENSES.ecart(def, att);
         const d = lien.defenses[0] || null;
         let touche = false;
@@ -1033,7 +1034,7 @@ const MOTEUR = (() => {
             const permis = DEFENSES.modesPermis(gap, a, etat.sonne);
             if (!permis.includes(mode)) {
                 res.statut = 'ratee'; touche = CFG.REACTION_IMPOSSIBLE === 'ratee';
-                res.raison = etat.sonne ? 'sonné : seule une esquive boostée est possible' : a.speedblitz ? 'speedblitz : retard de réaction, seulement esquiver ou bloquer' : 'réaction impossible avec cet écart de Combat Speed';
+                res.raison = etat.sonne ? 'sonné : seule une esquive boostée est possible' : a.speedblitz ? 'speedblitz : retard de réaction, seulement esquiver ou bloquer' : a.instantanee ? 'attaque lancée instantanément : seulement esquiver ou bloquer' : 'réaction impossible avec cet écart de Combat Speed';
             } else if (mode === 'blocage' && etat.blocageInterdit > 0) {
                 res.statut = 'ratee'; touche = true; res.raison = 'garde brisée : blocage impossible pour le moment';
             } else if (mode !== 'saisie' && etat.equilibre === 'perdu' && (mode === 'esquive' || mode === 'blocage')) {
@@ -1230,6 +1231,10 @@ const PIPELINE = (() => {
         NOTE: { max: 10, parDefenseRatee: 3, parDefensePartielle: 1 },   // PLACEHOLDER : sens exact de « note /10 » à confirmer ; un pavé refusé = 0
         PAVES_EN_MEMOIRE: 30,
         TACHE: 'parse_pave', MAX_TOKENS: 2500,
+        // 5️⃣ PÉNALITÉS : un pavé refusé applique UNE des deux pénalités, tirée au hasard.
+        PENALITES: ['attaque_instantanee', 'baisse_cs'],
+        PENALITE_CS_TOURS: 3,                                  // « pendant 3 tours »
+        aleatoire: null,                                       // fonction () → [0,1[ ; null = Math.random (injectable pour les tests)
     };
 
     const num = (j) => String(j || '').split('@')[0].split(':')[0];
@@ -1297,6 +1302,51 @@ const PIPELINE = (() => {
         for (const d of details) { if (d.statut === 'ratee' || d.statut === 'plein_fouet') n -= CFG.NOTE.parDefenseRatee; else if (d.statut === 'partielle') n -= CFG.NOTE.parDefensePartielle; }
         return Math.max(1, n);
     }
+    /* --- Pénalités (pavé refusé) ---------------------------------------------------------------------------------- */
+    const TXT_PENALITE = {
+        attaque_instantanee: () => "La prochaine attaque🥉🥈 de l'adversaire est lancée instantanément🌀.",
+        baisse_cs: (tours) => `Baisse du niveau de combat S : inférieur à l'adversaire de -1 pendant ${tours} tours.`,
+    };
+    function tirerPenalite(opt) {
+        const l = opt.PENALITES, r = typeof opt.aleatoire === 'function' ? opt.aleatoire() : Math.random();
+        return l[Math.min(l.length - 1, Math.max(0, Math.floor(r * l.length)))];
+    }
+    function etatsDe(match, jid) { match.etats = match.etats || {}; match.etats[jid] = match.etats[jid] || {}; return match.etats[jid]; }
+    function ajouterPenalite(match, jid, type, tour, opt) {
+        const e = etatsDe(match, jid); e.penalites = e.penalites || [];
+        const p = type === 'baisse_cs' ? { type, finTour: tour + opt.PENALITE_CS_TOURS } : { type };      // active du tour suivant au tour tour+3
+        e.penalites.push(p);
+        return { type, texte: TXT_PENALITE[type](opt.PENALITE_CS_TOURS) };
+    }
+    function penalitesActives(match, jid, tour) {
+        const e = match.etats && match.etats[jid]; if (!e || !e.penalites) return [];
+        e.penalites = e.penalites.filter((p) => p.type !== 'baisse_cs' || tour <= p.finTour);               // purge des pénalités expirées
+        return e.penalites;
+    }
+    /**
+     * Baisse du niveau de combat S : le puni passe à -1 sous l'adversaire (égal si l'adversaire est déjà S- Bronze, le plus bas),
+     * sans jamais le RELEVER s'il était déjà plus bas. Modifie les copies de stats passées en argument.
+     */
+    function appliquerPenalitesCS(a, b, match, tour) {
+        const oa = { ...a }, ob = { ...b };
+        const baisser = (cible, autre) => {
+            if (!penalitesActives(match, cible.jid, tour).some((p) => p.type === 'baisse_cs')) return;
+            const plancher = autre.gradeRang === 0 && autre.rang <= 0;                                       // S- Bronze : on ne peut pas descendre en dessous
+            if (DEFENSES.ecart(cible, autre) <= (plancher ? 0 : -1)) return;
+            cible.gradeRang = autre.gradeRang; cible.ss = false; cible.rang = plancher ? autre.rang : autre.rang - 1; cible.penaliseCS = true;
+        };
+        baisser(a, ob); baisser(b, oa);
+    }
+    /** « La prochaine attaque🥉🥈 de l'adversaire est lancée instantanément » : consommée par la 1re technique non ultime du pavé. */
+    function consommerInstantanee(match, penaliseJid, parse, infosTechnique) {
+        const e = match.etats && match.etats[penaliseJid]; if (!e || !e.penalites) return null;
+        const i = e.penalites.findIndex((p) => p.type === 'attaque_instantanee'); if (i < 0) return null;
+        const a = parse.actions.find((x) => { if (x.type !== 'competence') return false; const info = infosTechnique ? infosTechnique(x) : null; const niv = (info && info.niveau) || (x.energie && x.energie.niveau); return niv !== 'ultime'; });
+        if (!a) return null;
+        a.instantanee = true; e.penalites.splice(i, 1);
+        return a;
+    }
+
     /** Repli local : on n'annule jamais un pavé sur la seule foi d'une analyse par mots-clés. */
     function adoucirRepli(decision) {
         return { ...decision, issues: [], etat: 'valide', annule: false, messages: [] };
@@ -1388,7 +1438,15 @@ const PIPELINE = (() => {
             let decision = REGLES.evaluerPave(parse);
             if (source === 'local') decision = adoucirRepli(decision);
             const statsMoi = statsDe(moi, match), statsAdv = statsDe(adv, match);
-            if (!decision.annule) marquerSpeedblitz(parse, statsMoi, statsAdv);
+            appliquerPenalitesCS(statsMoi, statsAdv, match, tour);
+            let penalite = null, lignePenaliteAdverse = null;
+            if (decision.annule) {
+                if (source === 'ia') penalite = ajouterPenalite(match, moi.jid, tirerPenalite(opt), tour, opt);   // pavé refusé = pénalité au hasard
+            } else {
+                marquerSpeedblitz(parse, statsMoi, statsAdv);
+                const a = consommerInstantanee(match, adv.jid, parse, opt.infosTechnique);
+                if (a) lignePenaliteAdverse = `⚡ Pénalité de ${nomAdv} : ${a.competence || 'ton attaque'} est lancée instantanément🌀.`;
+            }
             const integ = REGLES.integrerPave(match, { joueurId: moi.jid, joueurNom: nomMoi, adversaireId: adv.jid, tour, paveId: paveId || `p${Date.now()}`, parse, decision });
 
             //------------------------------------------------
@@ -1406,7 +1464,7 @@ const PIPELINE = (() => {
             // états qui durent d'un pavé à l'autre : sonné (1 tour), garde brisée (2 tours)
             match.etats = match.etats || {};
             const prec = match.etats[moi.jid] || {};
-            match.etats[moi.jid] = { sonne: !!etat.nouveauSonne, blocageTours: etat.brisegarde ? MOTEUR.CFG.BRISE_GARDE_TOURS : Math.max(0, (prec.blocageTours || 0) - 1) };
+            match.etats[moi.jid] = { ...prec, sonne: !!etat.nouveauSonne, blocageTours: etat.brisegarde ? MOTEUR.CFG.BRISE_GARDE_TOURS : Math.max(0, (prec.blocageTours || 0) - 1) };
 
             const posture = etat.nouveauSonne ? 'sonné' : etat.posture;
             const majTracker = [];
@@ -1446,10 +1504,10 @@ const PIPELINE = (() => {
             let section1, section2;
             if (decision.annule) {
                 section1 = [recit.resume, ...decision.issues.map((i) => `❌ ${i.message}`), 'Aucune action ne passe.'].join('\n');
-                section2 = [...recit.lignes, ligneKO].filter(Boolean).join('\n');
+                section2 = [...recit.lignes, penalite ? `❌ *Pénalité* — ${penalite.texte}` : null, ligneKO].filter(Boolean).join('\n');
             } else {
                 section1 = recit.resume;
-                section2 = [...recit.lignes, ...lignesCout, ...lignesNotes, ligneKO].filter(Boolean).join('\n');
+                section2 = [...recit.lignes, ...lignesCout, ...lignesNotes, lignePenaliteAdverse, ligneKO].filter(Boolean).join('\n');
             }
 
             const resultat = {
@@ -1465,7 +1523,7 @@ const PIPELINE = (() => {
                     degats: details.reduce((s, d) => s + (d.degats || 0), 0), effets: details.flatMap((d) => d.effets || []),
                     position: '', posture, equilibre: etat.equilibre, garde: '',
                 },
-                majTracker, fin, modele, source, etat: decision.etat,
+                majTracker, fin, modele, source, etat: decision.etat, penalite,
             };
             match.pavesTraites = match.pavesTraites || {};
             match.pavesTraites[paveId || `p${Date.now()}`] = resultat;
@@ -1477,7 +1535,7 @@ const PIPELINE = (() => {
         }
     }
 
-    return { CFG, analyser, composerMessageFin, statsDe, nomDe, nomCarte, calculerNote, coutEnergie };
+    return { CFG, analyser, composerMessageFin, statsDe, nomDe, nomCarte, calculerNote, coutEnergie, appliquerPenalitesCS, ajouterPenalite, penalitesActives, consommerInstantanee, tirerPenalite };
 })();
 
 //================================================
