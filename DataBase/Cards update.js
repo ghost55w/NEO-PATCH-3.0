@@ -102,7 +102,7 @@ const cards = [
       speed: 1,
       attacks: 1
     },
-    Moves: "",
+    Moves: "*[BASIC🥉] : Inosuke frappe le sol avec sa Jambe tenant ses deux lames croisées en X puis il relâche ses bras envoyant deux découpes tranchantes vers la cible couvrant 3m de diamètre causant de grosses déchirures où même deviant les projectiles. *[SPECIAL🥈]: Souffle bestiale 5e forme: Inosuke expire des narines de son masque se mettant en position accroupie les lames croisées en X puis il fonce vers la cible à grande vitesse en Pirouette les bras tendus formant une tornade de lames de 3m de diamètre tranchants tout ce qui se trouve sur son passage, il peut foncer jusqu'à 10m max où même sauter dans les airs à 5m max puis redescendre en tourbillon de la sorte. Mais cette attaque est inefficace contre des attaques d'énergie. ",
     infos: [
       "Possède deux katanas Nichirin dentelés qu'il utilise pour découper ses adversaires.",
       "Maîtrise la Respiration de la Bête, un style de combat sauvage et imprévisible.",
