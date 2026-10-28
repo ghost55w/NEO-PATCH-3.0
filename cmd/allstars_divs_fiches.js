@@ -343,7 +343,6 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 ◇ *Niveau🎖️*: ${data.niveau || 1} ▲
 ◇ *Division🛡️*: ${data.division || 'aucun'}
 ◇ *Rank 🎖️*: ${data.rang || 'aucun'}
-◇ *Saisons📅*: ${data.saisons || 1}
 
 *◥◣ STATS 📊*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
