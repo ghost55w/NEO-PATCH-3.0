@@ -343,13 +343,14 @@ function add_fiche(nom_joueur, playerJid, image_oc, joueur_div) {
 ◇ *Niveau🎖️*: ${data.niveau || 1} ▲
 ◇ *Division🛡️*: ${data.division || 'aucun'}
 ◇ *Rank 🎖️*: ${data.rang || 'aucun'}
-◇ *Classe🎖️*: ${data.classe || 'aucun'}
+◇ *Saisons📅*: ${data.saisons || 1}
 
 *◥◣ STATS 📊*
 ▔▔▔▔▔▔▔▔▔▔▔▔░▒▒▒▒░░▒░
 ◇ *Golds🧭*: ${data.golds || 0} ©🧭
 ◇ *Exp⏫*: ${data.exp || 0}/1000 XP 🔰
-◇ *Points de Talent🌟*: ${data.talent || 0}/1000 PU🌟
+◇ *Points de Talent🌟*: ${data.talent || 0}/1000 🌟
+◇ *Points de classement🎖️*: ${data.points || 0} pts🏆 
 ◇ *Archetype ⚖️*: ${data.archetype || 'aucun'}
 ◇📈 Note: ${data.note || 0}/100
 
