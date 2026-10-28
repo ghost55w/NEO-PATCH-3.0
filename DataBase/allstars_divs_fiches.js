@@ -36,7 +36,7 @@ const AllStarsDivsFiche = sequelize.define('AllStarsDivsFiche', {
   division: { type: DataTypes.STRING, defaultValue: 'aucun' },
   rang: { type: DataTypes.STRING, defaultValue: 'aucun' },
   classe: { type: DataTypes.STRING, defaultValue: 'aucun' },
-  saison_pro: { type: DataTypes.INTEGER, defaultValue: 0 },
+  saisons: { type: DataTypes.INTEGER, defaultValue: 0 },
   golds: { type: DataTypes.INTEGER, defaultValue: 0 },
   worlds: { type: DataTypes.INTEGER, defaultValue: 0 },
   archetype: { type: DataTypes.STRING, defaultValue: 'aucun' },
