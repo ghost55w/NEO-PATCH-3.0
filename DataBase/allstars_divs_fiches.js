@@ -184,17 +184,29 @@ async function synchroniserClassementAllStars() {
       joueurs.map(fiche => fiche.id)
     );
 
-    // Enregistrer les positions des joueurs classés.
+    
+    // Enregistrer les positions avec suffixes et médailles.
     for (let i = 0; i < joueurs.length; i++) {
       const fiche = joueurs[i];
-      const position = String(i + 1);
+      const position = i + 1;
 
-      if (String(fiche.classement) !== position) {
-        await fiche.update({
-          classement: position
-        });
+      let classement;
+
+      if (position === 1) {
+        classement = "1er🥇";
+      } else if (position === 2) {
+        classement = "2e🥈";
+      } else if (position === 3) {
+        classement = "3e🥉";
+      } else {
+        classement = `${position}e`;
+      }
+
+      if (String(fiche.classement) !== classement) {
+        await fiche.update({ classement });
       }
     }
+
 
     // Retirer du classement les joueurs ayant 0 point ou moins.
     for (const fiche of fiches) {
