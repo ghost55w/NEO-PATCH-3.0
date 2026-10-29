@@ -507,11 +507,12 @@ attente.date = Date.now();
 if (texte === "6") {
 
     const imagesClassement = [
-        "https://files.catbox.moe/0g8gpd.jpg",
-        "https://files.catbox.moe/uz7tyi.jpg",
-        "https://files.catbox.moe/yhczn8.jpg",
-        "https://files.catbox.moe/v6wvtz.jpg",
-        "https://files.catbox.moe/j5e4vk.jpg"
+        "https://files.catbox.moe/uemk6t.jpg",
+        "https://files.catbox.moe/pe4p3q.jpg",
+        "https://files.catbox.moe/bh146y.jpg",
+        "https://files.catbox.moe/zyunx7.jpg",
+        "https://files.catbox.moe/twr38p.jpg", 
+        "https://files.catbox.moe/fpyi1p.jpg"
     ];
 
     // Choisir une image aléatoire.
@@ -543,11 +544,7 @@ if (texte === "6") {
 if (texte === "7") {
 
     const imagesPantheons = [
-        "https://files.catbox.moe/0g8gpd.jpg",
-        "https://files.catbox.moe/uz7tyi.jpg",
-        "https://files.catbox.moe/yhczn8.jpg",
-        "https://files.catbox.moe/v6wvtz.jpg",
-        "https://files.catbox.moe/j5e4vk.jpg"
+        "https://files.catbox.moe/xvsy2r.jpg"
     ];
 
     const imageAleatoire =
