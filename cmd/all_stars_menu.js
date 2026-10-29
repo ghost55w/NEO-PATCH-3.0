@@ -1,4 +1,6 @@
 const { ovlcmd } = require("../lib/ovlcmd");
+const { getAllFiches } = require("../DataBase/allstars_divs_fiches");
+
 
 // ==========================================================
 // 🖼️ IMAGES DES RUBRIQUES ALLSTARS
@@ -97,6 +99,141 @@ ovlcmd(
 // ==========================================================
 
 const allStarsMenuAttente = new Map();
+// ==========================================================
+// 🏆 MÉMOIRE DU CLASSEMENT ALLSTARS
+// ==========================================================
+
+// Conserve les positions précédentes pendant l'exécution du bot.
+const allStarsPositionsPrecedentes = new Map();
+
+// ==========================================================
+// 🏆 CLASSEMENT DYNAMIQUE ALLSTARS
+// ==========================================================
+
+async function genererClassementAllStars() {
+    try {
+        const fiches = await getAllFiches();
+
+        if (!fiches || fiches.length === 0) {
+            return `. ◥◣              🌀JUMP™RANKINGS🏆🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+⚠️ Aucun joueur trouvé dans la base de données.
+
+╰───────────────────
+                                   *R A Z O R X™⚡*`;
+        }
+
+        // Récupérer les données des fiches Sequelize.
+        const joueurs = fiches
+            .map((fiche) => {
+                const data = typeof fiche?.get === "function"
+                    ? fiche.get({ plain: true })
+                    : fiche?.dataValues || fiche?.data || fiche;
+
+                if (!data) return null;
+
+                const points = Number(data.points);
+
+                // Ignorer les fiches sans pseudo ou avec des points invalides.
+                if (
+                    !data.pseudo ||
+                    !String(data.pseudo).trim() ||
+                    !Number.isFinite(points)
+                ) {
+                    return null;
+                }
+
+                return {
+                    pseudo: String(data.pseudo).trim(),
+                    points,
+                    jid: data.jid || data.code_fiche || data.pseudo
+                };
+            })
+            .filter(Boolean);
+
+        // Trier du plus grand nombre de points au plus petit.
+        joueurs.sort((a, b) => b.points - a.points);
+
+        // Préparer les nouvelles positions.
+        const nouvellesPositions = new Map();
+
+        joueurs.forEach((joueur, index) => {
+            nouvellesPositions.set(
+                String(joueur.jid),
+                index + 1
+            );
+        });
+
+        // Construire le classement des 10 premiers.
+        const lignes = [];
+
+        for (let i = 0; i < 10; i++) {
+            const joueur = joueurs[i];
+
+            if (!joueur) {
+                lignes.push(`${i + 1}-`);
+                continue;
+            }
+
+            const position = i + 1;
+            const identifiant = String(joueur.jid);
+
+            const anciennePosition =
+                allStarsPositionsPrecedentes.get(identifiant);
+
+            let mouvement = "";
+
+            if (anciennePosition !== undefined) {
+                if (position < anciennePosition) {
+                    mouvement = " ▲";
+                } else if (position > anciennePosition) {
+                    mouvement = " ▼";
+                }
+            }
+
+            const medailles = {
+                1: "🥇",
+                2: "🥈",
+                3: "🥉"
+            };
+
+            const prefixe = medailles[position] || `${position}-`;
+
+            lignes.push(
+                `${prefixe} ${position <= 3 ? "- " : ""}*${joueur.pseudo}:* ${joueur.points} pts🏆${mouvement}`
+            );
+        }
+
+        // Mettre à jour les positions après avoir calculé les mouvements.
+        allStarsPositionsPrecedentes.clear();
+
+        for (const [identifiant, position] of nouvellesPositions) {
+            allStarsPositionsPrecedentes.set(identifiant, position);
+        }
+
+        return `. ◥◣              🌀JUMP™RANKINGS🏆🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+🎙️Classement des meilleurs joueurs ALL TIMES🌟🏆
+#Alltimesrankings:
+
+${lignes.join("\n")}
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+╰───────────────────
+                                   *R A Z O R X™⚡*`;
+
+    } catch (error) {
+        console.error(
+            "❌ Erreur classement AllStars :",
+            error
+        );
+
+        return `⚠️ Impossible de charger le classement ALL STARS pour le moment.`;
+    }
+}
+
 
 // ================= COMMANDE +ALLSTARS🌀 =================
 
@@ -143,6 +280,8 @@ ovlcmd({
 🔆3️⃣ *Événements📅*
 🔆4️⃣ *Tournois / Saison🏆*
 🔆5️⃣ *Boutique🛍️*
+🔆6️⃣ *Classements / Rankings🎖️*
+🔆7️⃣ *Records⚜️*
 
 🀄Veuillez taper un numéro pour afficher le menu | JUMP🍃 
 
@@ -198,17 +337,19 @@ ovlcmd({
     ).trim();
 
     // Accepte uniquement un chiffre de 1 à 6
-    if (!/^[1-5]$/.test(texte)) return;
+    if (!/^[1-7]$/.test(texte)) return;
 
     const images = imagesRubriquesAllstars[texte] || [];
 
     const noms = {
-        "1": "Règles de combat🎮",
-        "2": "Commandes/Actions♨️",
-        "3": "Événements📅",
-        "4": "Tournois / Saison🏆",
-        "5": "Boutique🛍️"
-    };
+    "1": "Règles de combat🎮",
+    "2": "Commandes/Actions♨️",
+    "3": "Événements📅",
+    "4": "Tournois / Saison🏆",
+    "5": "Boutique🛍️",
+    "6": "Classements / Rankings🎖️",
+    "7": "Records⚜️"
+};
 
     if (images.length === 0) {
         await ovl.sendMessage(
@@ -222,10 +363,84 @@ ovlcmd({
     }
 
     // Prolonge l'attente après une sélection valide
-    attente.date = Date.now();
+attente.date = Date.now();
 
-    // Envoie toutes les images de la rubrique sélectionnée
-    for (const lien of images) {
+// ==========================================================
+// 🏆 RUBRIQUE 6 : CLASSEMENTS / RANKINGS
+// ==========================================================
+
+if (texte === "6") {
+
+    const imagesClassement = [
+        "https://files.catbox.moe/0g8gpd.jpg",
+        "https://files.catbox.moe/uz7tyi.jpg",
+        "https://files.catbox.moe/yhczn8.jpg",
+        "https://files.catbox.moe/v6wvtz.jpg",
+        "https://files.catbox.moe/j5e4vk.jpg"
+    ];
+
+    // Choisir une image aléatoire.
+    const imageAleatoire =
+        imagesClassement[
+            Math.floor(Math.random() * imagesClassement.length)
+        ];
+
+    // Générer le classement dynamique.
+    const classement = await genererClassementAllStars();
+
+    // Envoyer l'image avec le classement en légende.
+    await ovl.sendMessage(
+        ms_org,
+        {
+            image: { url: imageAleatoire },
+            caption: classement
+        },
+        { quoted: ms }
+    );
+
+    return;
+}
+
+// ==========================================================
+// ⚜️ RUBRIQUE 7 : RECORDS
+// ==========================================================
+
+// Le contenu des records pourra être ajouté ultérieurement.
+if (texte === "7") {
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text: `. ◥◣              🌀JUMP™RECORDS⚜️🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+⚜️ Bienvenue dans les RECORDS ALL STARS !
+
+🏆 Cette rubrique sera consacrée aux records des joueurs du JUMP.
+
+╰───────────────────
+                                   *R A Z O R X™⚡*`
+        },
+        { quoted: ms }
+    );
+
+    return;
+}
+
+// ==========================================================
+// 🖼️ RUBRIQUES 1 À 5 : ENVOI DES IMAGES
+// ==========================================================
+
+for (const lien of images) {
+    await ovl.sendMessage(
+        ms_org,
+        {
+            image: { url: lien },
+            caption: ""
+        },
+        { quoted: ms }
+    );
+}
+    
         await ovl.sendMessage(
             ms_org,
             {
