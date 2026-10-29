@@ -161,13 +161,74 @@ async function getData(where = {}) {
   return fiche;
 }
 
-async function setfiche(colonne, valeur, jid) {
 
+/* ==========================================================
+   🔄 SYNCHRONISATION AUTOMATIQUE DU CLASSEMENT ALL STARS
+========================================================== */
+
+async function synchroniserClassementAllStars() {
+  try {
+    const fiches = await AllStarsDivsFiche.findAll();
+
+    // Seuls les joueurs ayant plus de 0 point sont classés.
+    const joueurs = fiches
+      .filter(fiche => Number(fiche.points) > 0)
+      .sort((a, b) => {
+        const difference = Number(b.points) - Number(a.points);
+
+        // En cas d'égalité, conserver un ordre stable.
+        return difference || Number(a.id) - Number(b.id);
+      });
+
+    const joueursClasses = new Set(
+      joueurs.map(fiche => fiche.id)
+    );
+
+    // Enregistrer les positions des joueurs classés.
+    for (let i = 0; i < joueurs.length; i++) {
+      const fiche = joueurs[i];
+      const position = String(i + 1);
+
+      if (String(fiche.classement) !== position) {
+        await fiche.update({
+          classement: position
+        });
+      }
+    }
+
+    // Retirer du classement les joueurs ayant 0 point ou moins.
+    for (const fiche of fiches) {
+      if (
+        !joueursClasses.has(fiche.id) &&
+        fiche.classement !== "aucun"
+      ) {
+        await fiche.update({
+          classement: "aucun"
+        });
+      }
+    }
+
+    console.log(
+      `🏆 Classement All Stars synchronisé : ${joueurs.length} joueur(s).`
+    );
+
+  } catch (error) {
+    console.error(
+      "❌ Erreur de synchronisation du classement All Stars :",
+      error
+    );
+
+    throw error;
+  }
+}
+
+async function setfiche(colonne, valeur, jid) {
   if (!jid) {
     throw new Error("JID requis");
   }
 
-  let normalizedJid = String(jid).trim()
+  let normalizedJid = String(jid)
+    .trim()
     .replace("@whatsapp.net", "@s.whatsapp.net")
     .replace("@c.us", "@s.whatsapp.net");
 
@@ -188,9 +249,7 @@ async function setfiche(colonne, valeur, jid) {
   // ==========================================================
 
   if (!updated) {
-
     const numero = normalizedJid.split("@")[0];
-
     const fiches = await AllStarsDivsFiche.findAll();
 
     const fiche = fiches.find(f => {
@@ -200,9 +259,7 @@ async function setfiche(colonne, valeur, jid) {
     });
 
     if (fiche) {
-
       fiche[colonne] = valeur;
-
       await fiche.save();
 
       updated = 1;
@@ -220,8 +277,18 @@ async function setfiche(colonne, valeur, jid) {
   }
 
   console.log(`✔ ${colonne} mis à jour → ${valeur}`);
+
+  // ==========================================================
+  // 🏆 MISE À JOUR AUTOMATIQUE DES POSITIONS
+  // ==========================================================
+
+  if (colonne === "points") {
+    await synchroniserClassementAllStars();
+  }
 }
 
+
+    
 async function add_id(jid, data = {}) {
   if (!jid) throw new Error("JID requis");
 
