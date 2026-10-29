@@ -474,9 +474,10 @@ ${lignes.join("\n")}
     // Accepte uniquement un chiffre de 1 à 6
     if (!/^[1-7]$/.test(texte)) return;
 
-    const images = imagesRubriquesAllstars[texte] || [];
+    
+const images = imagesRubriquesAllstars[texte] || [];
 
-    const noms = {
+const noms = {
     "1": "Règles de combat🎮",
     "2": "Commandes/Actions♨️",
     "3": "Événements📅",
@@ -486,16 +487,37 @@ ${lignes.join("\n")}
     "7": "Records⚜️"
 };
 
-    if (images.length === 0) {
-        await ovl.sendMessage(
-            ms_org,
-            {
-                text: `♨️ La rubrique *${noms[texte]}* ne contient aucune image configurée.`
-            },
-            { quoted: ms }
-        );
-        return;
-    }
+// Prolonge l'attente après une sélection valide
+attente.date = Date.now();
+
+// Les choix 6 et 7 sont traités séparément.
+// Ils ne doivent pas passer par la vérification des images.
+if (texte === "6") {
+    const classement = await genererClassementAllStars();
+
+    // Garde ici ton bloc d'envoi actuel du classement.
+    // Ne mets pas de nouvelle URL d'image inventée.
+
+    return;
+}
+
+if (texte === "7") {
+    // Garde ici ton bloc actuel de gestion des Records.
+    return;
+}
+
+// Vérification réservée aux rubriques 1 à 5
+if (images.length === 0) {
+    await ovl.sendMessage(
+        ms_org,
+        {
+            text: `♨️ La rubrique *${noms[texte]}* ne contient aucune image configurée.`
+        },
+        { quoted: ms }
+    );
+    return;
+}
+
 
     // Prolonge l'attente après une sélection valide
 attente.date = Date.now();
