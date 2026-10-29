@@ -65,6 +65,67 @@ ovlcmd(
   }
 );
 
+
+ovlcmd(
+    {
+        nom_cmd: "syncclassement",
+        classe: "AllStars🌀",
+        react: "🏆",
+        desc: "Synchronise les rangs All Stars"
+    },
+    async (ms_org, ovl, { ms }) => {
+        try {
+            const fiches = await getAllFiches();
+
+            const joueurs = fiches
+                .filter(f => Number(f.points) > 0)
+                .sort((a, b) =>
+                    Number(b.points) - Number(a.points) ||
+                    Number(a.id) - Number(b.id)
+                );
+
+            for (let i = 0; i < joueurs.length; i++) {
+                const f = joueurs[i];
+                const position = i + 1;
+
+                let classement;
+
+                if (position === 1) classement = "1er🥇";
+                else if (position === 2) classement = "2e🥈";
+                else if (position === 3) classement = "3e🥉";
+                else classement = `${position}e`;
+
+                if (String(f.classement) !== classement) {
+                    await f.update({ classement });
+                }
+            }
+
+            for (const f of fiches) {
+                if (Number(f.points) <= 0 && f.classement !== "aucun") {
+                    await f.update({ classement: "aucun" });
+                }
+            }
+
+            await ovl.sendMessage(
+                ms_org,
+                {
+                    text: `✅ Classement synchronisé pour ${joueurs.length} joueurs.`
+                },
+                { quoted: ms }
+            );
+
+        } catch (error) {
+            console.error("Erreur synchronisation classement :", error);
+
+            await ovl.sendMessage(
+                ms_org,
+                { text: "❌ Échec de la synchronisation du classement." },
+                { quoted: ms }
+            );
+        }
+    }
+);
+
 ovlcmd(
   {
     nom_cmd: "gamepass🎮",
