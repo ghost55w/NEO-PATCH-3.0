@@ -490,24 +490,8 @@ const noms = {
 // Prolonge l'attente après une sélection valide
 attente.date = Date.now();
 
-// Les choix 6 et 7 sont traités séparément.
-// Ils ne doivent pas passer par la vérification des images.
-if (texte === "6") {
-    const classement = await genererClassementAllStars();
-
-    // Garde ici ton bloc d'envoi actuel du classement.
-    // Ne mets pas de nouvelle URL d'image inventée.
-
-    return;
-}
-
-if (texte === "7") {
-    // Garde ici ton bloc actuel de gestion des Records.
-    return;
-}
-
 // Vérification réservée aux rubriques 1 à 5
-if (images.length === 0) {
+if (["1", "2", "3", "4", "5"].includes(texte) && images.length === 0) {
     await ovl.sendMessage(
         ms_org,
         {
@@ -517,8 +501,6 @@ if (images.length === 0) {
     );
     return;
 }
-
-
     // Prolonge l'attente après une sélection valide
 attente.date = Date.now();
 
