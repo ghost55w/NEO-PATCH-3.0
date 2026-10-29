@@ -164,17 +164,19 @@ async function genererClassementAllStars() {
             );
         });
 
-        // Construire le classement des 10 premiers.
+        
+        // Construire le classement de tous les joueurs ayant plus de 0 point.
+        const joueursClassement = joueurs.filter(
+            joueur => joueur.points > 0
+        );
+
         const lignes = [];
 
-        for (let i = 0; i < 10; i++) {
-            const joueur = joueurs[i];
+        const barre =
+            "▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔";
 
-            if (!joueur) {
-                lignes.push(`${i + 1}-`);
-                continue;
-            }
-
+        for (let i = 0; i < joueursClassement.length; i++) {
+            const joueur = joueursClassement[i];
             const position = i + 1;
             const identifiant = String(joueur.jid);
 
@@ -197,10 +199,15 @@ async function genererClassementAllStars() {
                 3: "🥉"
             };
 
+            if (position === 4 || position === 11) {
+                lignes.push(barre);
+            }
+
             const prefixe = medailles[position] || `${position}-`;
+            const separation = position <= 3 ? "- " : "";
 
             lignes.push(
-                `${prefixe} ${position <= 3 ? "- " : ""}*${joueur.pseudo}:* ${joueur.points} pts🏆${mouvement}`
+                `${prefixe} ${separation}*${joueur.pseudo}:* ${joueur.points} pts🏆${mouvement}`
             );
         }
 
