@@ -1,7 +1,6 @@
 const { ovlcmd } = require("../lib/ovlcmd");
 const { getAllFiches } = require("../DataBase/allstars_divs_fiches");
 
-
 // ==========================================================
 // 🖼️ IMAGES DES RUBRIQUES ALLSTARS
 // ==========================================================
@@ -336,6 +335,142 @@ ovlcmd({
         ""
     ).trim();
 
+// ==========================================================
+// 🏆 SOUS-MENU PANTHEONS : CLASSEMENTS DES TITRES
+// ==========================================================
+
+if (attente.etape === "pantheons") {
+
+    // Accepte 1 à 5, avec ou sans tiret.
+    const choixPantheon = texte.match(/^([1-5])-?$/);
+
+    if (!choixPantheon) return;
+
+    const numero = choixPantheon[1];
+
+    const competitions = {
+        "1": {
+            nom: "CHAMPIONNATS MNVP🌟",
+            champ: "championnats",
+            emoji: "🌟"
+        },
+        "2": {
+            nom: "NEO CUP🏆",
+            champ: "neo_cup",
+            emoji: "🏆"
+        },
+        "3": {
+            nom: "EVO CUP💠",
+            champ: "evo",
+            emoji: "💠"
+        },
+        "4": {
+            nom: "GRAND SLAM🏆",
+            champ: "grandslam",
+            emoji: "🏆"
+        },
+        "5": {
+            nom: "WORLDS🌟🏆",
+            champ: "worlds",
+            emoji: "🌟"
+        }
+    };
+
+    const competition = competitions[numero];
+
+    // Images aléatoires pour les listes de palmarès.
+    const imagesPalmares = [
+        "https://files.catbox.moe/0g8gpd.jpg",
+        "https://files.catbox.moe/uz7tyi.jpg",
+        "https://files.catbox.moe/yhczn8.jpg",
+        "https://files.catbox.moe/v6wvtz.jpg",
+        "https://files.catbox.moe/j5e4vk.jpg"
+    ];
+
+    try {
+        const fiches = await getAllFiches();
+
+        const possesseurs = fiches
+            .map((fiche) => {
+                const data = typeof fiche?.get === "function"
+                    ? fiche.get({ plain: true })
+                    : fiche?.dataValues || fiche?.data || fiche;
+
+                if (!data || !data.pseudo) return null;
+
+                const titres = Number(data[competition.champ]) || 0;
+
+                // Seuls les joueurs possédant au moins un titre apparaissent.
+                if (titres <= 0) return null;
+
+                return {
+                    pseudo: String(data.pseudo).trim(),
+                    titres
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => b.titres - a.titres);
+
+        const lignes = possesseurs.length
+            ? possesseurs.map((joueur, index) => {
+                const position = index + 1;
+
+                const medailles = {
+                    1: "🥇",
+                    2: "🥈",
+                    3: "🥉"
+                };
+
+                const rang = medailles[position] || `${position}-`;
+
+                return `${rang} *${joueur.pseudo}:* ${joueur.titres} titre(s) ${competition.emoji}`;
+            })
+            : ["⚠️ Aucun possesseur enregistré pour cette compétition."];
+
+        const caption = `. ◥◣              🌀JUMP™${competition.nom}🔆
+▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+🏆 *PALMARÈS DES JOUEURS ALL STARS*
+🎙️ Classement par nombre de titres remportés
+
+${lignes.join("\n")}
+
+╰───────────────────
+                                   *R A Z O R X™⚡*`;
+
+        const imageAleatoire =
+            imagesPalmares[
+                Math.floor(Math.random() * imagesPalmares.length)
+            ];
+
+        // Retour au menu principal après sélection.
+        attente.etape = "menu";
+        attente.date = Date.now();
+
+        await ovl.sendMessage(
+            ms_org,
+            {
+                image: { url: imageAleatoire },
+                caption
+            },
+            { quoted: ms }
+        );
+
+    } catch (error) {
+        console.error("❌ Erreur palmarès Pantheons :", error);
+
+        await ovl.sendMessage(
+            ms_org,
+            {
+                text: "❌ Impossible de récupérer le palmarès de cette compétition."
+            },
+            { quoted: ms }
+        );
+    }
+
+    return;
+}
+    
     // Accepte uniquement un chiffre de 1 à 6
     if (!/^[1-7]$/.test(texte)) return;
 
@@ -402,23 +537,45 @@ if (texte === "6") {
 }
 
 // ==========================================================
-// ⚜️ RUBRIQUE 7 : RECORDS
+// ⚜️ RUBRIQUE 7 : MENU PANTHEONS
 // ==========================================================
 
-// Le contenu des records pourra être ajouté ultérieurement.
 if (texte === "7") {
+
+    const imagesPantheons = [
+        "https://files.catbox.moe/0g8gpd.jpg",
+        "https://files.catbox.moe/uz7tyi.jpg",
+        "https://files.catbox.moe/yhczn8.jpg",
+        "https://files.catbox.moe/v6wvtz.jpg",
+        "https://files.catbox.moe/j5e4vk.jpg"
+    ];
+
+    const imageAleatoire =
+        imagesPantheons[
+            Math.floor(Math.random() * imagesPantheons.length)
+        ];
+
+    const menuPantheons = `. ◥◣                       🌀JUMP™PANTHEONS🔆🍃
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
+
+▪️1- *◥◣Championnats MNVP🌟*
+▪️2- *◥◣NEO Cup🏆*
+▪️3- *◥◣EVO Cup💠*
+▪️4- *◥◣Grand Slam🏆*
+▪️5- *◥◣WORLDS🌟🏆*
+
+╰───────────────────
+                                   *R A Z O R X™⚡*`;
+
+    // Active le sous-menu pour le prochain message du joueur.
+    attente.etape = "pantheons";
+    attente.date = Date.now();
+
     await ovl.sendMessage(
         ms_org,
         {
-            text: `. ◥◣              🌀JUMP™RECORDS⚜️🔆
-▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
-
-⚜️ Bienvenue dans les RECORDS ALL STARS !
-
-🏆 Cette rubrique sera consacrée aux records des joueurs du JUMP.
-
-╰───────────────────
-                                   *R A Z O R X™⚡*`
+            image: { url: imageAleatoire },
+            caption: menuPantheons
         },
         { quoted: ms }
     );
