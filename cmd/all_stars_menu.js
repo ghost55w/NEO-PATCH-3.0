@@ -226,7 +226,6 @@ async function genererClassementAllStars() {
 
 ${lignes.join("\n")}
 
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 ╰───────────────────
                                    *R A Z O R X™⚡*`;
 
