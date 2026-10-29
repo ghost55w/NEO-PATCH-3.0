@@ -580,21 +580,12 @@ if (texte === "7") {
     return;
 }
 
-// ==========================================================
-// 🖼️ RUBRIQUES 1 À 5 : ENVOI DES IMAGES
-// ==========================================================
 
-for (const lien of images) {
-    await ovl.sendMessage(
-        ms_org,
-        {
-            image: { url: lien },
-            caption: ""
-        },
-        { quoted: ms }
-    );
-}
-    
+    // ==========================================================
+    // 🖼️ RUBRIQUES 1 À 5 : ENVOI DES IMAGES
+    // ==========================================================
+
+    for (const lien of images) {
         await ovl.sendMessage(
             ms_org,
             {
@@ -605,7 +596,7 @@ for (const lien of images) {
         );
     }
 });
-
+        
 
 // commande pour envoyer le pave
 ovlcmd(
