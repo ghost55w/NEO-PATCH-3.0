@@ -279,7 +279,7 @@ async function genererClassementAllStars() {
             allStarsPositionsPrecedentes.set(identifiant, position);
         }
 
-        return `. ◥◣              🌀JUMP™RANKINGS🏆🔆
+        return `. ◥◣         🌀JUMP™RANKINGS🏆🔆
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 
 🎙️Classement des meilleurs joueurs ALL TIMES🌟🏆
@@ -288,7 +288,7 @@ async function genererClassementAllStars() {
 ${lignes.join("\n")}
 
 ╰───────────────────
-                                   *R A Z O R X™⚡*`;
+                         *R A Z O R X™⚡*`;
 
     } catch (error) {
         console.error(
@@ -447,11 +447,7 @@ if (attente.etape === "pantheons") {
 
     // Images aléatoires pour les listes de palmarès.
     const imagesPalmares = [
-        "https://files.catbox.moe/0g8gpd.jpg",
-        "https://files.catbox.moe/uz7tyi.jpg",
-        "https://files.catbox.moe/yhczn8.jpg",
-        "https://files.catbox.moe/v6wvtz.jpg",
-        "https://files.catbox.moe/j5e4vk.jpg"
+        "https://files.catbox.moe/t26b9p.jpg"
     ];
 
     try {
@@ -494,7 +490,7 @@ if (attente.etape === "pantheons") {
             })
             : ["⚠️ Aucun possesseur enregistré pour cette compétition."];
 
-        const caption = `. ◥◣              🌀JUMP™${competition.nom}🔆
+        const caption = `. ◥◣         🌀JUMP™${competition.nom}🔆
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 
 🏆 *PALMARÈS DES JOUEURS ALL STARS*
@@ -503,7 +499,7 @@ if (attente.etape === "pantheons") {
 ${lignes.join("\n")}
 
 ╰───────────────────
-                                   *R A Z O R X™⚡*`;
+                          *R A Z O R X™⚡*`;
 
         const imageAleatoire =
             imagesPalmares[
@@ -623,7 +619,7 @@ if (texte === "7") {
             Math.floor(Math.random() * imagesPantheons.length)
         ];
 
-    const menuPantheons = `. ◥◣                       🌀JUMP™PANTHEONS🔆🍃
+    const menuPantheons = `. ◥◣        🌀JUMP™PANTHEONS🔆🍃
 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 
 ▪️1- *◥◣Championnats MNVP🌟*
@@ -633,7 +629,7 @@ if (texte === "7") {
 ▪️5- *◥◣WORLDS🌟🏆*
 
 ╰───────────────────
-                                   *R A Z O R X™⚡*`;
+                         *R A Z O R X™⚡*`;
 
     // Active le sous-menu pour le prochain message du joueur.
     attente.etape = "pantheons";
@@ -692,7 +688,7 @@ ovlcmd(
     );
     */
 
-    const texte = `. ◥◣              🌀JUMP™🔆
+    const texte = `. ◥◣          🌀JUMP™🔆
 ▔▔▔▔▔▔▔▔▔▔▔◥▔▔▔▔▔▔▔
 💬: 
 
