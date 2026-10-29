@@ -450,9 +450,9 @@ ${lignes.join("\n")}
                 Math.floor(Math.random() * imagesPalmares.length)
             ];
 
-        // Retour au menu principal après sélection.
-        attente.etape = "menu";
-        attente.date = Date.now();
+        // Rester dans le sous-menu Panthéons après chaque sélection.
+attente.etape = "pantheons";
+attente.date = Date.now();
 
         await ovl.sendMessage(
             ms_org,
