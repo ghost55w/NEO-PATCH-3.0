@@ -9,7 +9,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: ["https://files.catbox.moe/2xgluf.jpg"],
+    images: ["https://files.catbox.moe/n8hk5b.jpg"],
     card: "https://files.catbox.moe/0pwalw.jpg",
     Price: "100k",
     specs: {
@@ -30,7 +30,7 @@ const cards = [
     rarete: "Ultra",
     category: "S",
     univers: "Demon Slayer",
-    images: [ "https://files.catbox.moe/db8fmt.jpg"],
+    images: [ "https://files.catbox.moe/b0vvny.jpg"],
     card: "https://files.catbox.moe/bnes93.jpg",
     Price: "200k",
     specs: {
@@ -52,7 +52,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: ["https://files.catbox.moe/qymj91.jpg"],
+    images: ["https://files.catbox.moe/5akcie.jpg"],
     card: "https://files.catbox.moe/pme5v3.jpg",
     Price: "100k",
     specs: {
@@ -73,7 +73,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: ["https://files.catbox.moe/yekg8i.jpg"],
+    images: ["https://files.catbox.moe/v30v59.jpg"],
     card: "https://files.catbox.moe/lozfvk.jpg",
     Price: "100k",
     specs: {
@@ -94,7 +94,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: ["https://files.catbox.moe/7u3mib.jpg"],
+    images: ["https://files.catbox.moe/o3cpx2.jpg"],
     card: "https://files.catbox.moe/8ed4d4.jpg",
     Price: "100k",
     specs: {
@@ -140,7 +140,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: ["https://files.catbox.moe/romg66.jpg"],
+    images: ["https://files.catbox.moe/m3lwih.jpg"],
     card: "https://files.catbox.moe/c1qumb.jpg",
     Price: "100k",
     specs: {
