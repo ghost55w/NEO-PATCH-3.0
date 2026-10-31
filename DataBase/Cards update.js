@@ -130,7 +130,7 @@ const cards = [
       "Lance des temaris comme projectiles pour frapper ses adversaires avec une grande puissance.",
       "Peut contrôler plusieurs temaris et modifier leurs trajectoires pendant le combat.",
       "Ses projectiles peuvent rebondir et changer de direction pour rendre leur esquive difficile.",
-      "Possède une force démoniaque qui renforce la puissance de ses lancers."
+      "Régénération immediate des membres coupés et des blessures, sauf la tête."
     ]
   },
 
@@ -138,22 +138,23 @@ const cards = [
     name: "Yahaba",
     grade: "Bronze",
     rarete: "Sparking",
-    category: "A+",
+    category: "S-",
     univers: "Demon Slayer",
     images: [],
     card: "",
-    Price: "150k",
+    Price: "100k",
     specs: {
-      force: 1,
-      speed: 2,
-      attacks: 2
+      force: 2,
+      speed: 1,
+      attacks: 1
     },
-    Moves: "",
+    Moves: " [🥉BASIC]: FLÈCHE ROUGE : yahaba tends sa main vers la cible alors que l'œil sur sa paume brille puis il envoit une flèche rouge de 1m de diamètre sur la cible. La flèche peut faire chuter la cible violemment au sol de dos où de face, s'enrouler autour de l'adversaire pour l'immobiliser pendant 2 tours max où la déséquilibrée selon la direction et peut aussi donc dévier les attaques du même niveau de puissance vers la gauche, la droite, le haut où le bas. Pour une flèche c'est 10% d'énergie et la flèche disparaît après avoir parcourue la distance.  [SPECIAL🥈]: TORRENTIAL ARROWS: Yahaba tends ses deux mains vers la cible alors que les deux yeux sur ses paumes brillent puis il relâche 6 flèches rouges rapides vers la cible couvrant 3m de diamètre efficace pour devier les trajectoires des attaques de même puissance où inférieure et ses flèches là peuvent être complètement contrôlées par l'utilisateur pendant 2 tours dans sa portée de 10m. *LES FLÈCHES ROUGES PEUVENT ÊTRE DÉTRUITES PAR UNE ATTAQUE ÉNERGÉTIQUE, DES DÉCOUPES OÙ UN COUP DE LAME. ",
     infos: [
       "Possède des yeux dans les paumes de ses mains qui lui permettent de percevoir et de diriger ses attaques.",
       "Utilise un art démoniaque créant des flèches directionnelles capables de modifier la trajectoire des objets.",
       "Peut manipuler les déplacements de ses adversaires en les poussant ou en les attirant selon la direction de ses flèches.",
-      "Peut combiner ses flèches avec les temaris de Susamaru pour rendre les attaques plus difficiles à esquiver."
+      "Pour une flèche les dégâts de la projection au sol sont de 10% PV. Et si la flèche s'enroule autour il faut une force au moins de 2 à plus pour s'en libérer, la flèche restera enroulée et immobilisera cible pendant 2 tours avant de disparaître.",
+      "Régénération immediate des membres coupés et des blessures, sauf la tête."
     ]
   },
 
@@ -176,7 +177,7 @@ const cards = [
       "Utilise des fils démoniaques extrêmement tranchants capables de découper ses adversaires.",
       "Peut tendre ses fils dans une zone pour créer des pièges et contrôler les mouvements adverses.",
       "Peut renforcer ses fils pour augmenter leur résistance et leur pouvoir de découpe.",
-      "Possède une régénération démoniaque et peut manipuler ses fils avec une grande précision."
+      "Régénération immediate des membres coupés et des blessures, sauf la tête."
     ]
   },
 
@@ -200,7 +201,7 @@ const cards = [
       "Peut manipuler les rêves de ses adversaires pour les distraire et les empêcher de réagir correctement.",
       "Exploite le sommeil de ses victimes pour les attaquer pendant qu'elles sont vulnérables.",
       "Peut fusionner avec un train et étendre son influence à travers sa structure.",
-      "Possède une régénération démoniaque qui lui permet de récupérer de blessures importantes."
+      "Régénération immediate des membres coupés et des blessures, sauf la tête."
     ]
   }
 
