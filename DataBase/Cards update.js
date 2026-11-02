@@ -115,21 +115,22 @@ const cards = [
     name: "Susamaru",
     grade: "Bronze",
     rarete: "Sparking",
-    category: "A+",
+    category: "S-",
     univers: "Demon Slayer",
     images: [],
     card: "",
-    Price: "150k",
+    Price: "100k",
     specs: {
       force: 2,
       speed: 1,
-      attacks: 2
+      attacks: 1
     },
-    Moves: "",
+    Moves: "*[BASIC🥉] TEMARI SPINNING THROWN: Susamaru dégage une énergie sombre tendant sa main puis elle fait apparaître une boule temari sur sa paume avant de lancer sur la cible a bout portant, la balle est assez puissante pour causer de gros dégâts, meme a travers des murs, une balle pour 10% d'énergie. *[SPECIAL🥈] TEMARI SEXTUPLE: après être passée en mode transformée précédent, susamaru fait apparaître 6 temaris sur chaque bras donc 6 balles, qu'elle lance sur la cible comme des Rafalles avec une grande puissance pouvant complement exploser le corps des adversaires moins résistants inférieurs au Niveau. 
+",
     infos: [
-      "Lance des temaris comme projectiles pour frapper ses adversaires avec une grande puissance.",
-      "Peut contrôler plusieurs temaris et modifier leurs trajectoires pendant le combat.",
-      "Ses projectiles peuvent rebondir et changer de direction pour rendre leur esquive difficile.",
+      "Projectile: Elle peut faire apparaître un temari sur sa main et lancer comme projectile. Les projectiles peuvent ricocher sur une surface puis revenir vers la cible",
+      "ÉVEIL: Susamaru dégage une grande quantité d'énergie sombre puis après cela des bras sortent de ses côtes ce qui lui confère 6 bras, elle peut utiliser 3 bras max pour une seule action.",
+      "Peut contrôler plusieurs temaris et modifier leurs trajectoires pendant le combat."
       "Régénération immediate des membres coupés et des blessures, sauf la tête."
     ]
   },
