@@ -198,11 +198,7 @@ const cards = [
     },
     Moves: "[ BASIC ] : YEUX DU SOMMEIL FORCÉ : Une aura bleue recouvre la main de Enmu puis il pose sa main au sol générant une montagne de chair de 2m de hauteur et 3m de diamètre derrière lui avec des yeux fermés de partout qui s'ouvrent avec des pupilles bleues éclatantes marquées par le Kanji rêves. Si l'adversaire se trouve dans un rayon de 5m du mur de chair II est affecté par le sommeil, si aussi il ne ferme pas les yeux dans ce rayon il se retrouve forcer à dormir pendant 1 tour maximum. Un tour de sommeil où l'adversaire est carrément à la merci de enmu, un adversaire peut se ressaisir par la force de sa volonté en dégageant de l'énergie en release perdant 40% de Stamina si il est plus fort que Enmu alors le release coûtera 20% de stamina.*[2]MANIPULATION DE LA CHAIR : Enmu touche le sol qui commence à se déformer puis il génère des tentacules de chair couvrant 5m de rayon longs jusqu'à 10m max fonçant sur la cible pour s'enrouler autour et l'emprisonner et absorber la cible pour tuer.[SPECIAL] HYPNOSE DU SOMMEIL FORCÉ : Enmu tends l'arrière de sa paume de main vers la cible puis une bouche se manifeste et dit Va dormir créant une explosion d'une poussière bleue sur 2m en face max, si l'adversaire est là il est forcé dans un sommeil pendant 2 tours.",
     infos: [
-      "Utilise un art démoniaque qui lui permet d'endormir ses victimes et de les plonger dans des rêves.",
-      "Peut manipuler les rêves de ses adversaires pour les distraire et les empêcher de réagir correctement.",
-      "Exploite le sommeil de ses victimes pour les attaquer pendant qu'elles sont vulnérables.",
-      "Peut fusionner avec un train et étendre son influence à travers sa structure.",
-      "Régénération immediate des membres coupés et des blessures, sauf la tête."
+      "REGENERATION: Régénération immediate des membres coupés et des blessures, sauf la tête. Enmu peut étendre une zone de sa portée 10m max en posant sa paume de main au sol avec une aura bleue puis la surface sera recouverte de chair pour 20% d'énergie et là il peut désormais sortir une tentacule de chair de 5m de long max et 1m de diamètre pour 5% d'énergie. La tentacule pourra alors venir s'enrouler autour de la cible."
     ]
   }
 
