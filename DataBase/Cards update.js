@@ -161,24 +161,21 @@ const cards = [
 
   {
     name: "Rui",
-    grade: "Silver",
+    grade: "Bronze",
     rarete: "Sparking",
-    category: "S+",
+    category: "S-",
     univers: "Demon Slayer",
     images: [],
     card: "",
-    Price: "300k",
+    Price: "100k",
     specs: {
       force: 2,
-      speed: 2,
-      attacks: 3
+      speed: 1,
+      attacks: 1
     },
-    Moves: "",
+    Moves: "[BASIC] THREAD WEB : Rui tends sa main vers l'adversaire générant des boules de sang sur ses 5 doigts puis tir des fils de sang fins sur l'adversaire couvrant 2m de diamètre causant de grosses coupures sur la cible selon l'endroit visé.  [2]ROUE DE FIL : Rui joint ses deux mains commençant à condenser du sang comme une roue de sang grandissante puis relâche sur l'adversaire une roue fine verticale où qui fonce sur l'adversaire frontalement de 1m de long le coupant en deux. *[SPECIAL] : MURDEROUS EYE BASKET : Rui tends ses deux mains vers la cible générant du sang sur ses 10 doigts puis il tir des fils de sang en arc autour et au dessus de l'adversaire couvrant 3m de rayon pour venir se refermer derrière l'adversaire l'emprisonnant dans une cage de fils de sang sans issue avant de faire un mouvement des mains croisées pour rétrécir la cage jusqu'à déchiqueter l'adversaire d'un seul coups en morceaux.",
     infos: [
-      "Utilise des fils démoniaques extrêmement tranchants capables de découper ses adversaires.",
-      "Peut tendre ses fils dans une zone pour créer des pièges et contrôler les mouvements adverses.",
-      "Peut renforcer ses fils pour augmenter leur résistance et leur pouvoir de découpe.",
-      "Régénération immediate des membres coupés et des blessures, sauf la tête."
+      "🌀 Regeneration immediate des membres coupés sauf la tête. Les fils de sang de rui sont assez tranchants pour déchirer la peau. Il peut tendre sa main vers la cible pour façonner une roue de sang de 50cm de diamètre à travers ses doigts qu'il envoie sur l'adversaire comme projectile coupant, qui tranchera la partie coupée. "
     ]
   },
 
