@@ -197,7 +197,26 @@ const cards = [
     infos: [
       "REGENERATION: Régénération immediate des membres coupés et des blessures, sauf la tête. Enmu peut étendre une zone de sa portée 10m max en posant sa paume de main au sol avec une aura bleue puis la surface sera recouverte de chair pour 20% d'énergie et là il peut désormais sortir une tentacule de chair de 5m de long max et 1m de diamètre pour 5% d'énergie. La tentacule pourra alors venir s'enrouler autour de la cible."
     ]
-  }
+  }, 
+{
+    name: "Tanjiro(Éveil)",
+    grade: "Bronze",
+    rarete: "Sparking",
+    category: "S",
+    univers: "Demon Slayer",
+    images: ["https://files.catbox.moe/n8hk5b.jpg"],
+    card: "https://files.catbox.moe/0pwalw.jpg",
+    Price: "200k",
+    specs: {
+      force: 1,
+      speed: 1,
+      attacks: 2
+    },
+    Moves: "[BASIC]: *VALSE : Tanjiro recouvre son katana de flammes puis donne une frappe ascendante des deux mains visant le centre de l'adversaire pour le trancher verticalement avec une lame de flammes, sur 2m de portée et 1m de diamètre. *CRÉPUSCULE : Tanjiro recouvre son katana de flammes en étant dans les airs puis donne une frappe descendante des deux mains sur l'adversaire pour le couper avec une lame de flammes de 2m de portée et 1m de diamètre. *FLEUR SOLAIRE : Tanjiro recouvre son katana de flammes puis frappe un coups devant lui en pique causant de grosses brûlures sur la cible. *[SPECIAL]: HALO DRAGON SOLAIRE : Tanjiro expire des flammes de sa bouche tout en recouvrant son katana de flammes puis frappe plusieurs mouvements circulaires formant un dragon de feu qui se déplace de manière circulaire sur 5m de rayon.*MIROIR SOLEIL BRÛLANT : Tanjiro expire des flammes recouvrant son katana de flammes puis exécute une frappe en 360° des deux mains lame tendue pour créer un cercle de flammes repoussant les attaques entrantes de niveau 2 max tout en tranchant ce qui se trouve dans le rayon de 2m. *VALSE FOUDROYANTE : tanjiro expire des flammes de sa bouche se mettant en position accroupie mains sur son katana qui se recouvre de flammes puis fonce à une vitesse hallucinante droit sur l'adversaire comme un laser de flammes de 1m de diamètre pour le décapiter d'un coups.*TREIZIÈME FORME : Tanjiro se mets en position d'attaque les yeux fermés dégageant des flammes autour de son corps puis fonce sur l'adversaire avec une découpe simple oblique sur son torse à la vitesse argent et si la découpe passe tanjiro enchaîne avec tous les mouvements du souffle du soleil ce qui ne laisse rien de l'adversaire.",
+    infos: [
+      "🌀 MONDE TRANSPARENT: Tanjiro se concentre en fixant intensément sa cible puis il active le monde transparent pour 3 tours le rendant capable de prédire les actions des adversaires equal et supérieurs à lui de +1, donc réagir dès le début d'une action sans avoir de retard.🌀 IRIDESCENCE PARHÉLIQUE : Tanjiro se déplace rapidement en laissant une image remanente de lui même dans son ancienne position pour 10% de stamina, efficace pour faire diversion et surprendre l'adversaire avec un coup par surprise le forçant à réagir avec un retard de 1s sur le prochain coup en combo l'effet dure une sequence. 🌀 Il possède un katana de 1m de long et de résistance 1. ". 
+    ]
+  },
 
 ];
 
