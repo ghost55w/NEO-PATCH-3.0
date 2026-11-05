@@ -217,7 +217,32 @@ const cards = [
       "🌀 MONDE TRANSPARENT: Tanjiro se concentre en fixant intensément sa cible puis il active le monde transparent pour 3 tours le rendant capable de prédire les actions des adversaires equal et supérieurs à lui de +1, donc réagir dès le début d'une action sans avoir de retard.🌀 IRIDESCENCE PARHÉLIQUE : Tanjiro se déplace rapidement en laissant une image remanente de lui même dans son ancienne position pour 10% de stamina, efficace pour faire diversion et surprendre l'adversaire avec un coup par surprise le forçant à réagir avec un retard de 1s sur le prochain coup en combo l'effet dure une sequence. 🌀 Il possède un katana de 1m de long et de résistance 1. ". 
     ]
   },
+{
+  name: "Rengoku",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S",
+  univers: "Demon Slayer",
+  images: [],
+  card: "",
+  Price: "200k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
 
+  Moves: "🥉[BASIC]: PREMIÈRE FORME SHIRANUI: Rengoku adopte une position basse en tenant fermement son katana puis fonce à une vitesse explosive sur son adversaire en libérant une puissante entaille horizontale destinée à le décapiter, avec une portée de 2 m. DEUXIÈME FORME SOLEIL ARDENT ASCENDANT: Rengoku tient son katana à deux mains puis effectue une frappe ascendante pour trancher son adversaire de bas en haut, avec une portée de 2 m. TROISIÈME FORME UNIVERS FLAMBOYANT: Rengoku tient son katana des deux mains au-dessus de sa tête puis effectue une frappe descendante pour trancher son adversaire, avec une portée de 2 m. 🥈[SPECIAL]: QUATRIÈME FORME ONDULATION: Rengoku tient son katana tendu puis effectue une rotation circulaire avec sa lame afin de repousser les attaques entrantes de puissance 2 maximum tout en tranchant les adversaires dans un rayon de 2 m. CINQUIÈME FORME TIGRE: Rengoku lève son katana au-dessus de sa tête puis frappe violemment de manière descendante vers sa cible en enchaînant un puissant mouvement de découpe destiné à lacérer son adversaire, avec une portée de 3 m. 🥇[ULTIME]: NEUVIÈME FORME RENGOKU: Rengoku adopte une posture d'attaque en tenant fermement son katana à deux mains puis se propulse à une vitesse fulgurante vers son adversaire avant de libérer une frappe dévastatrice à courte distance capable de trancher tout ce qui se trouve sur son passage.",
+
+  infos: [
+    "CONCENTRATION INTÉGRALE: Rengoku se tient immobile et inspire profondément pendant 1 séquence en concentrant sa respiration dans ses muscles, puis active la concentration intégrale à la séquence suivante, ce qui augmente sa vitesse de +1 pendant 3 tours.",
+    "ESPRIT INDÉFECTIBLE: Rengoku concentre sa volonté en ignorant temporairement la douleur et la fatigue, lui permettant de continuer à combattre malgré les blessures et de maintenir ses actions offensives sans être déstabilisé pendant 2 tours.",
+    "GARDE: Rengoku place son katana devant son corps en adoptant une posture défensive, puis effectue des mouvements circulaires pour dévier les attaques physiques entrantes de niveau 2 maximum.",
+    "Il possède un katana Nichirin à lame rouge orangé d'environ 1 m de long et de résistance 1."
+  ]
+},
+
+  
 ];
 
 // ---------------- Fonctions utilitaires ----------------
