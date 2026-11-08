@@ -31,11 +31,11 @@ const cards = [
     category: "S",
     univers: "Demon Slayer",
     images: [ "https://files.catbox.moe/b0vvny.jpg"],
-    card: "https://files.catbox.moe/bnes93.jpg",
+    card: "https://files.catbox.moe/9pgcm6.jpg",
     Price: "200k",
     specs: {
       force: 1,
-      speed: 2,
+      speed: 1,
       attacks: 1
     },
     Moves: "*BASIC🥉: PREMIÈRE FORME TRANQUILLITÉ: de l’eau recouvre le katana de Giyu puis il effectue une unique entaille horizontale extrêmement rapide vers sa cible afin de la décapiter, avec une portée de 2 m. CINQUIÈME FORME PLUIE BIENFAISANTE APRÈS LA SÉCHERESSE: de l’eau recouvre le katana de Giyu puis il effectue une décapitation extrêmement rapide et douce d'une cible qui ne souhaite plus combattre, avec une portée de 2 m. SEPTIÈME FORME POUSSÉE D’ONDULATION DE CHUTE: de l’eau recouvre le katana de Giyu puis il effectue une estoc extrêmement précise accompagnée d’un mouvement d’eau permettant de dévier ou de neutraliser une attaque venant directement vers lui, avec une portée de 2 m. 🌀NEUVIÈME FORME ÉCLABOUSSURE D’EAU TURBULENTE: de l’eau recouvre le katana de Giyu puis il modifie rapidement son jeu de jambes afin de se déplacer sur des surfaces instables tout en maintenant son équilibre et sa capacité à combattre, avec une portée de 2 m. *SPECIAL🥈: DEUXIÈME FORME ROUE À EAU: de l’eau recouvre le katana de Giyu puis il saute dans les airs en effectuant une rotation avant de libérer une puissante entaille circulaire descendante vers sa cible, avec une portée de 2 m. TROISIÈME FORME DANSE DES COURANTS RAPIDES: de l’eau recouvre le katana de Giyu puis il se déplace rapidement en effectuant plusieurs mouvements fluides et continus tout en enchaînant plusieurs entailles successives vers sa cible, avec une portée de 2 m. 🌀QUATRIÈME FORME MARÉE FRAPPANTE: de l’eau recouvre le katana de Giyu puis il effectue une succession d’entailles fluides et précises dans plusieurs directions afin de frapper sa cible à plusieurs reprises, avec une portée de 2 m. 🌀SIXIÈME FORME TOURBILLON: de l’eau recouvre le katana de Giyu puis il fait tourner son corps avec son katana afin de générer un puissant tourbillon capable de repousser et de trancher ce qui se trouve autour de lui, avec une portée de 2 m. 🌀HUITIÈME FORME BASSIN DE CASCADE: de l’eau recouvre le katana de Giyu puis il effectue une puissante coupe verticale descendante vers sa cible en utilisant tout son poids dans le mouvement, avec une portée de 2 m. *ULTIME🥇: DIXIÈME FORME DRAGON DU CHANGEMENT: de l’eau recouvre le katana de Giyu puis il fonce vers sa cible en effectuant plusieurs mouvements de découpe successifs qui s’enchaînent comme un dragon d’eau, chaque mouvement augmentant progressivement la puissance de l’attaque, avec une portée de 2 m. 🌀ONZIÈME FORME ACCALMIE: Giyu adopte une posture immobile et extrêmement calme puis il neutralise instantanément les attaques qui pénètrent dans sa zone de défense en effectuant des mouvements minimaux et extrêmement rapides avec son katana, avec une portée de 2 m.". 
@@ -78,7 +78,7 @@ const cards = [
     Price: "100k",
     specs: {
       force: 1,
-      speed: 2,
+      speed: 1,
       attacks: 1
     },
     Moves: "*SPECIAL🥈 : *FRAPPE FOUDROYANTE: Zénitsu en position accroupie tenant son katana des deux mains dégage des étincelles de foudre puis il fonce sur son adversaire à une vitesse éclaire couvrant 50cm de diamètre pour venir décapiter la cible d'un seul coup. *SEXTUPLE: Une variante de la frappe foudroyante mais cette fois ci au lieu de foncer droit sur l'adversaire il fonce en zig zag où en ricochet si c'est un espace fermé pour venir décapiter la cible rendant sa trajectoire imprévisible de couvrant 3m de diamètre mais cela coupe . *ULTIME🥇 : SEPTIÈME FORME DIEU DU FEU CÉLESTE: Zénitsu concentre une énorme quantité de foudre autour de lui puis il fonce à une vitesse phénoménale sur la cible sous la forme d'un dragon foudroyant de 3m de diamètre afin de le trancher d'un seul coup. ",
@@ -186,7 +186,7 @@ const cards = [
     category: "S-",
     univers: "Demon Slayer",
     images: [],
-    card: "",
+    card: "https://files.catbox.moe/8qcd1z.jpg",
     Price: "100k",
     specs: {
       force: 2,
@@ -205,7 +205,7 @@ const cards = [
     category: "S",
     univers: "Demon Slayer",
     images: ["https://files.catbox.moe/tpr98a.jpg"],
-    card: "https://files.catbox.moe/0pwalw.jpg",
+    card: "https://files.catbox.moe/tpr98a.jpg",
     Price: "200k",
     specs: {
       force: 1,
@@ -224,7 +224,7 @@ const cards = [
   category: "S",
   univers: "Demon Slayer",
   images: [],
-  card: "",
+  card: "https://files.catbox.moe/uis902.jpg",
   Price: "200k",
   specs: {
     force: 2,
