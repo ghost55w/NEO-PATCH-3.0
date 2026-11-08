@@ -237,6 +237,26 @@ const cards = [
     "CONCENTRATION INTÉGRALE: Rengoku se tient immobile et inspire profondément pendant 1 séquence en concentrant sa respiration dans ses muscles, puis active la concentration intégrale à la séquence suivante, ce qui augmente sa vitesse de +1 pendant 3 tours. *ESPRIT INDÉFECTIBLE: Rengoku se tient debout prenant une grande inspiration puis boost sa volonté en ignorant temporairement la douleur et la fatigue, lui permettant de continuer à combattre malgré les blessures et de maintenir ses actions offensives sans être déstabilisé pendant 3 tours.Il possède un katana long de 1m et de résistance 1."
   ]
 },
+{
+  name: "Akaza",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S+",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/bunvbg.jpg"],
+  card: "https://files.catbox.moe/w9u8rr.jpg",
+  Price: "350k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: "[BASIC]: DESTRUCTIVE DEATH: AIR TYPE: Akaza concentre son énergie dans ses deux poings puis frappe dans le vide en rafales consécutives vers la cible envoyant des ondes de chocs couvrant de 2m de diamètre. *LEG TYPE: EXPLOSIVE FLURRY: Akaza lève sa jambe droite recouverte d'énergie puis il frappe plusieurs coups de pied explosifs à grande vitesse vers son adversaire sur une portée de 5m couvrant 2m de diamètre. *[SPECIAL]: DESTRUCTIVE DEATH: DISORDER: Akaza se met en position offensive en manifestant son aura de combat puis enchaîne une multitude de coups de poings dans toutes les directions pour frapper son adversaire sur un rayon de 5m, il peut aussi utiliser cette attaque défensivement. *DESTRUCTIVE DEATH: EIGHT-LAYERED DEMON CORE: Akaza se met en position de combat en concentrant son énergie dans ses deux poings puis libère huit frappes successives extrêmement rapides accompagnées d'ondes de choc de 3 m de diamètre sur une portée de 10m. *DESTRUCTIVE DEATH: ANNIHILATION TYPE: Akaza adopte une position offensive en concentrant une immense quantité d'énergie dans ses deux mains puis ramène les deux mains jointes devant lui à close distance visant l'adversaire libérant au contact une gigantesque onde de choc de 10 m de diamètre qui ravage tout sur son passage sur une portée de 10m. *[ULTIME]: DESTRUCTIVE DEATH: BLUE SILVER CHAOTIC AFTERGLOW: Akaza se mets en position de combat en concentrant une immense quantité d'énergie puis déploie son Compas avec des clones de lui rouge avant de libérer une succession dévastatrice d'ondes de choc multidirectionnelles. Ses attaques se propagent simultanément dans toutes les directions, créant un barrage de frappes extrêmement rapides qui submerge et ravage tout autour de lui sur 15m.",
+  infos: [
+    "Régénération immédiate des membres coupés et même après une décapitation il peut continuer le combat. 🌀 Akaza peut recouvrir son poing ou son pied d'énergie bleue puis frapper dans le vide envoyant une onde en projectile de 1m de diamètre. COMPASS NEEDLE: Akaza se met en posture de combat dégageant une aura bleue autour de lui puis un flocon de neige géant apparaît sous ses pieds comme activation de la capacité, cela fait que Akaza peut détecter l'esprit combatif de ses adversaires donc les détecter automatiquement dans sa portée de 10m, il peut aussi s'adapter à la vitesse de combat au corps à corps de l'adversaire pendant 3 tours en prédisant les coups, donc à ria plus d'effets de retard dans la réactivité même face à des adversaires plus rapides que lui de +2."
+  ]
+},
+  
 
   
 ];
