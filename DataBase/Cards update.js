@@ -204,7 +204,7 @@ const cards = [
     rarete: "Sparking",
     category: "S",
     univers: "Demon Slayer",
-    images: ["https://files.catbox.moe/n8hk5b.jpg"],
+    images: ["https://files.catbox.moe/tpr98a.jpg"],
     card: "https://files.catbox.moe/0pwalw.jpg",
     Price: "200k",
     specs: {
