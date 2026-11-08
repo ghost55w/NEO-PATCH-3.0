@@ -117,7 +117,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: [],
+    images: ["https://files.catbox.moe/0o5i3g.jpg"],
     card: "https://files.catbox.moe/0qe65b.jpg",
     Price: "100k",
     specs: {
@@ -165,7 +165,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: [],
+    images: ["https://files.catbox.moe/b8eywi.jpg"],
     card: "https://files.catbox.moe/5ayl2b.jpg",
     Price: "100k",
     specs: {
@@ -185,7 +185,7 @@ const cards = [
     rarete: "Sparking",
     category: "S-",
     univers: "Demon Slayer",
-    images: [],
+    images: ["https://files.catbox.moe/f4n1m0.jpg"],
     card: "https://files.catbox.moe/8qcd1z.jpg",
     Price: "100k",
     specs: {
