@@ -268,14 +268,15 @@ const cards = [
   Price: "200.000",
   specs: {
     force: 2,
-    speed: 2,
+    speed: 1,
     attacks: 1
   }, 
   Moves: "[BASIC]: SOUND BREATHING: FIRST FORM: ROAR : Tengen lève ses doubles katanas reliés par une chaîne puis frappe violemment le sol, provoquant une explosion sonore de grande envergure équivalente à la détonation de bombes,sur un rayon de 5m. Cela à pour effet de rendre la cible sonnée pendant 2 tours si elle reste dans le rayon à cause du bruit assourdissant, dans cet état la cible ne peut que esquiver les coups, plus moyen de parer, dévier, où bloquer.*FOURTH FORM: CONSTANT RESONATING SLASHES : Tengen fait tournoyer rapidement ses doubles katanas reliés puis crée un bouclier tourbillonnant de lames et de chaînes qui repousse et détruit les projectiles ou attaques frontales de niveau 1 max sur un rayon de 2m, il peut aussi l'utiliser offensivement en fonçant sur l'adversaire à grande vitesse pour venir le trancher avec les deux lames en hélices. *[SPECIAL]: SOUND BREATHING: FIFTH FORM: STRING PERFORMANCE : Tengen se mets en position de course tenant ses deux  katanas puis fonce sur l'adversaire à grande vitesse pour lui porter un violent coup de pied au torse, si le coup passe alors il effectue un enchaînement ultra-rapide de frappes et de taillades tout en lançant simultanément des bombes spéciales à haut pouvoir destructeur, submergeant l'adversaire dans une zone de 10m de rayon.".
-  infos: [
-    "Résistance physique exceptionnelle et immunité partielle aux poisons mortels grâce à son entraînement de shinobi. 🌀 SCORE MUSICAL (PARTITION MUSICALE): Capacité ultime de lecture du combat où Tengen analyse les attaques adverses pour anticiper et contrer chaque mouvement avec une efficacité totale, neutralisant les effets de retard et augmentant sa réactivité de +2."
+  infos: 
+    "🌀 RESISTANCE ET IMMUNITÉ AUX POISONS: Il ne ressens pas les effets d'affaiblissements liés aux poisons. 🌀 Il possède deux gros katanas de 1m de  reliés par une chaîne de 1m de long, donc en lâchant il peut avoir une portée de 3m. Il peut sortir puis lancer une petite bombe noire explosive en projectile sur un rayon de 5m mais il doit éviter d'être dans ce rayon lui aussi où alors il possède aussi des Kunais dans son arsenal. 🌀Volonté inébranlable, peut continuer à combattre normalement malgré les blessures. 🌀SCORE: tengen se concentre en observant la cible pehdant 1s puis la capacité est en attente, il doit bloquer 3 coups consécutifs en close combat puis la capacité s'active pendant 3 tours Il peut désormais prédire les coups de l'adversaire donc les esquives lui coûtent 5% de stamina et il peut réagir aux frappes sans retard donc même face à un S+.".
   ]
 }, 
+
   
 ];
 
