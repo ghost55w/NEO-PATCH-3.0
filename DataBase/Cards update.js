@@ -276,6 +276,25 @@ const cards = [
     "🌀 RESISTANCE ET IMMUNITÉ AUX POISONS: Il ne ressens pas les effets d'affaiblissements liés aux poisons. 🌀 Il possède deux gros katanas de 1m de  reliés par une chaîne de 1m de long, donc en lâchant il peut avoir une portée de 3m. Il peut sortir puis lancer une petite bombe noire explosive en projectile sur un rayon de 5m mais il doit éviter d'être dans ce rayon lui aussi où alors il possède aussi des Kunais dans son arsenal. 🌀Volonté inébranlable, peut continuer à combattre normalement malgré les blessures. 🌀SCORE: tengen se concentre en observant la cible pehdant 1s puis la capacité est en attente, il doit bloquer 3 coups consécutifs en close combat puis la capacité s'active pendant 3 tours Il peut désormais prédire les coups de l'adversaire donc les esquives lui coûtent 5% de stamina et il peut réagir aux frappes sans retard donc même face à un S+.".
   ]
 }, 
+{
+  name: "Shinobu",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S- super",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "100k",
+  specs: {
+    force: 0,
+    speed: 1,
+    attacks: 0
+  },
+  Moves: "[BASIC]: VAGUE DE PAPILLONS: Shinobu se tient debout levant sa tenue puis plusieurs papillons sortent fonçant sur l'adversaire comme une vague couvrant toute sa portée et un diamètre de 5m pour permettre à Shinobu de se déplacer sans que l'adversaire la suive et distraire l'adversaire qui ne pourra que réagir au dernier moment grâce à la zone de sensorialité avec un retard de 0.5s donc ne peut que bloquer où esquiver son prochain coup. *DANSE DES PAPILLONS PREMIÈRE DANSE: Shinobu saute dans les airs à 5m max en pirouette avant vers l'adversaire pour venir sur lui avec plusieurs coupures à l'atterrissage qui vont lui causer des blessures et injecter le poison avec un diamètre de 1m. *[SPECIAL]: DANSE DES PAPILLONS TROISIÈME DANSE: Shinobu en face de son adversaire des papillons recouvrent sa lame puis elle frappe 6 découpes consécutives sur l'adversaire visant le torse et le cou pour injecter le poison au contact sur une portée de 2m max. *DANSE DES PAPILLONS DEUXIÈME DANSE: Shinobu se mets en position accroupie puis fonce sur l'adversaire à grande vitesse avec sa main tenant sa lame tendue vers l'avant visant la gorge, le torse ou ect une partie du corps... Afin de lui injecter du poison et causer 30% de dégâts sur une portée de 10m et un diamètre de 5m. *[ULTIME]: DANSE DES PAPILLONS QUATRIÈME DANSE: Shinobu se mets en position de course avec sa lame qui se recouvre de papillons puis fonce sur l'adversaire en zig zag laissant des afterimages d'elle sur les côtés ce qui lui permets de créer une ouverture sur l'adversaire venant lui donner un coups de lame et lui injecter le poison, l'adversaire ne se rendra compte qu'au dernier moment à 0.5s de retard sur une portée de 10m et couvrant un diamètre de 2m.",
+  infos: [
+    "Shinobu peut flotter dans les airs grâce à sa tenue, et est une combattante très rapide et souple[span_0](start_span)[span_0](end_span), seulement son manque de force physique fait que ses coups de poings infligeront seulement 5% de dégâts et ses découpes 10%, mais attention car si elle réussi à vous blesser avec sa lame le poison vous causera des dégâts de 30% PV crachant du sang et vous paralysant pendant 1 tour. Elle possède un katana de 1m."
+  ]
+}, 
 
   
 ];
