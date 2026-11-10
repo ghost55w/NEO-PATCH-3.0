@@ -295,6 +295,25 @@ const cards = [
     "Shinobu peut flotter dans les airs grâce à sa tenue, et est une combattante très rapide et souple[span_0](start_span)[span_0](end_span), seulement son manque de force physique fait que ses coups de poings infligeront seulement 5% de dégâts et ses découpes 10%, mais attention car si elle réussi à vous blesser avec sa lame le poison vous causera des dégâts de 30% PV crachant du sang et vous paralysant pendant 1 tour. Elle possède un katana de 1m."
   ]
 }, 
+{
+  name: "Daki",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S- super",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "150k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: OBI DE LA SÉDUCTION : Daki pose ses mains sur ses hanches en souriant avec arrogance puis déploie ses ceintures obi à partir de son corps pour fouetter et lacérer l'adversaire de toutes parts dans un tourbillon tranchant sur une portée de 10m et un diamètre de 3m. *OBI TRANCHANT - LAMES DE SANG : Daki croise les bras en concentrant son sang démoniaque puis projette ses obi à haute vitesse en ligne droite pour pourfendre et traverser l'adversaire telles des lames acérées sur une portée de 10m et un diamètre de 3m. *[SPECIAL]: TOURBILLON DE L'OBI CREL : Daki pivote sèchement sur elle-même en tendant les bras vers l'extérieur puis fait tournoyer ses ceintures obi autour d'elle pour créer une zone de protection et découper tout ce qui s'approche dans un rayon de 5m. *POUPÉES DE L'OBI : Daki pose ses mains au sol en laissant ses rubans s'enfoncer dans le décor puis extériorise des fragments de ses obi pour attaquer l'adversaire par surprise en surgissant du sol sur un rayon de 10m et une hauteur de 5m. *[ULTIME]: CARAPACE DE L'OBI - CARNAGE MORTEL : Daki libère une aura démoniaque écrasante en joignant ses mains puis ses ceintures obi foncent à toute vitesse sur l'adversaire sur une portée de 10m et un diamètre de 3m pour venir s'enrouler autour de lui et l'enfermer dans un cocon géant, avant de libérer une multitude de taillades ultra-rapides et dévastatrices.",
+  infos: [
+    "Daki est une Lune Supérieure capable de manipuler ses ceintures obi vivantes et tranchantes comme des lames de rasoir. 🌀 RÉGÉNÉRATION DÉMONIAQUE : Régénération immédiate des membres coupés et des blessures à l'exception de la tête. Elle peut utiliser un des obi de son dos d'une longueur de 5m et de diamètre 1m comme un membre de plus au combat pour attaquer ou s'enrouler autour de son adversaire une fois après 2 tours, ses obi sont très résistants et aiguisés comme des lames tranchantes de résistance 2 face aux lames, épées et autres armes."
+  ]
+}, 
 
   
 ];
