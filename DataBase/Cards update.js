@@ -314,6 +314,25 @@ const cards = [
     "Daki est une Lune Supérieure capable de manipuler ses ceintures obi vivantes et tranchantes comme des lames de rasoir. 🌀 RÉGÉNÉRATION DÉMONIAQUE : Régénération immédiate des membres coupés et des blessures à l'exception de la tête. Elle peut utiliser un des obi de son dos d'une longueur de 5m et de diamètre 1m comme un membre de plus au combat pour attaquer ou s'enrouler autour de son adversaire une fois après 2 tours, ses obi sont très résistants et aiguisés comme des lames tranchantes de résistance 2 face aux lames, épées et autres armes."
   ]
 }, 
+{
+  name: "Gyutaro",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "200k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: FLYING BLOOD SLICES : Gyutaro croise ses bras en croix manifestant deux faucilles dans chaque main puis frappe plusieurs coups successifs vers l'adversaire envoyant des slashs tranchants couvrant 3m de diamètre sur 10m de portée venant causer de violentes blessures sur la cible. *[SPECIAL]: RAMPANT FLYING SLICES : Gyutaro se penche légèrement en arrière en faisant tourner ses faucilles des deux mains puis libère une volée de taillades de sang acérées et tranchantes projetées en ligne droite sur une portée de 10m et un diamètre de 3m. *CIRCLE SLASH : Gyutaro pivote violemment sur lui-même en tendant ses bras vers l'extérieur pour déclencher une tempête de lacérations circulaires autour de lui dans un rayon de 5m tranchant tout ce qui s'y trouve. *[ULTIME]: BLOOD DEMON ART: FLYING BLOOD SLICES - NINE TURNED SLASHES : Gyutaro plante ses faucilles dans le sol en libérant une immense aura démoniaque puis fait jaillir du sol une multitude de vagues de sang tranchantes en forme de lames géantes qui convergent vers l'adversaire sur une portée de 10m et un diamètre de 3m.",
+  infos: [
+    "Gyutaro est une Lune Supérieure capable de manipuler son sang pour créer des faucilles empoisonnées mortelles. 🌀 POISON MORTEL : Ses lames sanguines infligent un poison redoutable qui après une coupure paralyse la cible pendant 1 tour. Régénération immédiate des membres coupés et blessures sauf en cas de décapitation. Il peut générer ses crochets de 50cm de long immédiatement directement de sa chair et ont une résistance 1."
+  ]
+}, 
 
   
 ];
