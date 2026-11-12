@@ -333,6 +333,25 @@ const cards = [
     "Gyutaro est une Lune Supérieure capable de manipuler son sang pour créer des faucilles empoisonnées mortelles. 🌀 POISON MORTEL : Ses lames sanguines infligent un poison redoutable qui après une coupure paralyse la cible pendant 1 tour. Régénération immédiate des membres coupés et blessures sauf en cas de décapitation. Il peut générer ses crochets de 50cm de long immédiatement directement de sa chair et ont une résistance 1."
   ]
 }, 
+{
+  name: "Doma",
+  grade: "Bronze",
+  rarete: "Legends",
+  category: "S+",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "500.000",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: "[BASIC]: LOTUS DE GLACES : Doma, tenant ses deux éventails, commence à souffler devant lui par sa bouche formant un nuage, puis sortent plusieurs pétales de glace en projectiles fonçant sur l'adversaire et le tranchant de plusieurs côtés couvrant 3m de diamètre[span_0](start_span)[span_0](end_span). *NUAGE GLACE : Doma commence à souffler de sa bouche générant un nuage de glace qui s'agrandit, puis déploie ses deux éventails d'un mouvement de frappe envoyant la vague sur l'adversaire couvrant 5m de diamètre et sur une portée de 10m, cette vague étant capable de geler l'adversaire pendant 1 tour et, si l'adversaire reste dans cette zone sans esquiver, il perd aussi 20% de stamina à chaque tour à cause de la respiration de l'air ambiant cristallin, le nuage restant là 2 tours mais pouvant être dissipé par une attaque ou le vent[span_1](start_span)[span_1](end_span). *[SPECIAL]: JARDIN SUSPENDU ARIDE : Doma écarte les bras sur les côtés tenant ses deux éventails et commence à souffler par la bouche générant un petit nuage glacial, puis il frappe avec ses mains 10 fois extrêmement vite, générant un petit blizzard de glace sur 5m de rayon avec des lotus volants de partout coupant ses adversaires dans le périmètre en morceaux[span_2](start_span)[span_2](end_span). *PRINCESSES BLANCHES ET FROIDES : Doma lève ses éventails vers le ciel en libérant une brume glaciale, puis souffle avec ses éventails en mains, formant deux formes humanoïdes de femmes avec des corps de lotus qui soufflent vers l'adversaire créant une vague de glace de 5m de diamètre gelant tout sur son passage et les adversaires pendant 2 tours[span_3](start_span)[span_3](end_span). *[ULTIME]: RIME BODHISATTVA LOTUS : Une aura de glace se dégage du corps de Doma soufflant grandement vers le sol formant un nuage, puis ce nuage prend une forme humanoïde géante en Buddha de 10m de haut couvrant 8m de diamètre avec Doma sur son épaule droite, le bouddha de glace étant entouré de lotus et pouvant lancer des vents glacials depuis sa bouche de 3m de diamètre et même envoyer plusieurs lotus en rafales à la vitesse de 12m/s, ses mains faisant 3m de diamètre et 5m de long donc sa portée de frappe est de 5m et sa vitesse de déplacement est Bronze 10m/s avec une portée d'attaque de 15m et une résistance de niveau 2 donc seuls des attaques ultimes de niveau 2 minimum ou des attaques spéciales de niveau 3 à plus peuvent le détruire, il reste manifesté 5 tours si pas détruit[span_4](start_span)[span_4](end_span).",
+  infos: [
+    "Doma est la Lune Supérieure Numéro Deux, maître de la glace et du froid absolu. 🌀 ENFANT DIVIN CRISTALLIN : Doma dégage une aura glaciale puis souffle un nuage de glace par sa bouche qui prend la forme de Doma donc c'est un clone. Ce clone peut utiliser les techniques basiques de Doma en support ou attaquer l'adversaire, mais ne peut pas esquiver ou saisir les coups. Quand il utilise une attaque de Doma le coût d'énergie est retiré dans l'énergie de Doma lui-même, le clone a une résistance de niveau 1 et possède aussi les deux éventails, Doma peut en sortir 2 max et pour un clone c'est 10% d'énergie, les clones ne disparaissent que si frappés ou détruits mais ils peuvent aussi bloquer les coups et ont un niveau de combat S-, mais leurs actions sont comptées comme celles de Doma donc tous partagent le même pavé avec 4 actions max. 🌀 ARMEMENT : Doma possède deux éventails très tranchants de résistance 1 et 50cm de long comme armes, ce qui lui donne 1m de portée avec les frappes à mains. Doma est invulnérable au poison, il annule les effets. 🌀 RÉGÉNÉRATION : Régénération immédiate des membres et des blessures mais Doma ne peut pas régénérer sa tête après décapitation."
+  ]
+}
 
   
 ];
