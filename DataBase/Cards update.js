@@ -277,6 +277,25 @@ const cards = [
   ]
 }, 
 {
+  name: "Sanemi",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "200k",
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: WIND BREATHING: FIRST FORM: DUST WHIRLWINDS CUTTER: Sanemi se met en position de course tenant son katana qui se recouvre de vent puis fonce droit sur l'adversaire à une vitesse fulgurante en créant un cyclone de taillades tranchantes en forme de lames de vent sur une portée de 10m et un diamètre de 5m. *SECOND FORM: CLAWS-PURIFYING WIND: Sanemi lève son katana qui se recouvre de vent puis libère quatre frappes tourbillonnantes successives en l'air qui s'abattent sur l'adversaire comme des griffes acérées pour lacérer la cible sur une portée de 10m et un diamètre de 5m. *THIRD FORM: CLEAN STORM WIND TREE: Sanemi pivote rapidement sur lui-même en recouvrant son katana de vent puis libère un tourbillon circulaire de lames de vent tranchantes autour de lui pour découper et repousser les ennemis sur une portée de 10m et un rayon de 5m. *[SPECIAL]: WIND BREATHING: FOURTH FORM: DUST STORM DANCE: Sanemi pivote rapidement sur lui-même en recouvrant son katana de vent puis libère une série de vagues de vent circulaires et tranchantes qui tourbillonnent autour de lui pour repousser et découper tout ce qui se trouve sur une portée de 10m et un rayon de 5m. *FIFTH FORM: COLD MOUNTAIN WIND: Sanemi lève son katana qui se recouvre de vent puis abat plusieurs coups tranchants verticaux et glacials qui s'écrasent sur l'adversaire pour le paralyser temporairement sur une portée de 10m et un diamètre de 5m. *SIXTH FORM: BLACK WIND MOUNTAIN MIST: Sanemi lève son katana qui se recouvre de vent puis exécute une frappe tourbillonnante horizontale massive qui balaie et lacère l'adversaire sur une portée de 10m et un diamètre de 5m. *SEVENTH FORM: GALE - GUSTY PURIFICATION: Sanemi saute vers le haut à 5m tenant son katana qui se recouvre de vent puis fond sur son adversaire en déclenchant une tempête de coups de vent verticaux et dévastateurs qui s'écrasent sur une portée de 10m et un rayon de 5m. *EIGHTH FORM: PRIMARY GALE CUTTING: Sanemi s'élance à pleine vitesse tenant son katana qui se recouvre de vent puis décoche une estocade frontale tranchante et fulgurante capable de fendre l'air sur une portée de 10m et un diamètre de 5m. *[ULTIME]: WIND BREATHING: NINTH FORM: TYPHOON WATER CUTTING: Sanemi concentre une immense quantité d'énergie dans son sabre qui se recouvre de vent en dégageant une aura écrasante puis s'élance comme un typhon destructeur pour porter une unique estocade surpuissante et ultra-rapide qui tranche net l'adversaire et tout l'environnement sur une portée de 10m et un diamètre de 5m.",
+  infos: [
+    "Sang rare et enivrant qui perturbe l'esprit des démons et ralentit leurs réflexes de manière drastique - 2 sur leurs niveau de combat pendant 3 tours. 🌀 MARQUE DES POURFENDEURS : Sanemi libère toute sa rage en criant pendant 1s debout puis sa marque de pourfendeur apparaît sur son front pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S+, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. Il possède un katana de 1m de long."
+  ]
+}, 
+{
   name: "Shinobu",
   grade: "Bronze",
   rarete: "Sparking",
@@ -351,7 +370,27 @@ const cards = [
   infos: [
     "Doma est la Lune Supérieure Numéro Deux, maître de la glace et du froid absolu. 🌀 ENFANT DIVIN CRISTALLIN : Doma dégage une aura glaciale puis souffle un nuage de glace par sa bouche qui prend la forme de Doma donc c'est un clone. Ce clone peut utiliser les techniques basiques de Doma en support ou attaquer l'adversaire, mais ne peut pas esquiver ou saisir les coups. Quand il utilise une attaque de Doma le coût d'énergie est retiré dans l'énergie de Doma lui-même, le clone a une résistance de niveau 1 et possède aussi les deux éventails, Doma peut en sortir 2 max et pour un clone c'est 10% d'énergie, les clones ne disparaissent que si frappés ou détruits mais ils peuvent aussi bloquer les coups et ont un niveau de combat S-, mais leurs actions sont comptées comme celles de Doma donc tous partagent le même pavé avec 4 actions max. 🌀 ARMEMENT : Doma possède deux éventails très tranchants de résistance 1 et 50cm de long comme armes, ce qui lui donne 1m de portée avec les frappes à mains. Doma est invulnérable au poison, il annule les effets. 🌀 RÉGÉNÉRATION : Régénération immédiate des membres et des blessures mais Doma ne peut pas régénérer sa tête après décapitation."
   ]
-}
+}, 
+ {
+  name: "Muichiro",
+  grade: "Bronze",
+  rarete: "Ultra",
+  category: "S",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "200k",
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: PREMIÈRE FORME - HAUTS LIEUX DE BRUME LOINTAINE : Muichiro prend une inspiration concentrée recouvrant son katana de brume puis frappe en pique vers l'avant pour transpercer l'adversaire à l'endroit visé sur une portée de 1m[span_0](start_span)[span_0](end_span). *DEUXIÈME FORME - HUIT COUCHES DE BRUME : Muichiro prend une posture offensive en chargeant son katana de brume puis assène instantanément 8 entailles rapides pour couper sa cible en face lui infligeant plusieurs coupures sur tout le corps avec une portée de 1m[span_1](start_span)[span_1](end_span). *[SPECIAL]: TROISIÈME FORME - VENT DE BRUME ÉCLATANT : Muichiro pivote rapidement recouvrant son sabre de brume puis exécute une frappe circulaire 360° puissante capable de faire exploser les projectiles entrants sur 3m de rayon[span_2](start_span)[span_2](end_span). *QUATRIÈME FORME - COUP DE BRUME FLUIDE : Muichiro se met en position accroupie tandis que son katana se recouvre de brume puis dash à grande vitesse pour délivrer une coupure directe et puissante sur la partie visée de son adversaire pour le transpercer sur une portée de 5m max[span_3](start_span)[span_3](end_span). *CINQUIÈME FORME - MER DE NUAGES ET DE BRUME : Muichiro s'élance en position de course avec une lame voilée de brume puis charge sa cible en zigzaguant tout en libérant un barrage de coups continus autour de lui sur 3m de rayon pour couper tout autour[span_4](start_span)[span_4](end_span). *SIXIÈME FORME - DISSOLUTION DE LA BRUME LUNAIRE : Muichiro saute dans les airs à 5m max en chargeant son sabre de brume puis effectue une volée de coups descendants en salto pour décimer ses adversaires sur 2m de rayon avec une portée de 2m[span_5](start_span)[span_5](end_span). *[ULTIME]: SEPTIÈME FORME - NUAGES OBSCURCIS : Un nuage de brume se répand sur 8m de rayon ce qui fait que si son adversaire reste dans le rayon, il aura des visions de lui marchant lentement comme des images, l'adversaire ne peut plus quitter la zone car il est désorienté par le brouillard et les images de Tokito qui exploseront au contact comme des éclats de brouillard et lui-même pourra attaquer de partout, de tous les angles terminant son adversaire avec des coups de katana en découpes[span_6](start_span)[span_6](end_span).",
+  infos: [
+    "Muichiro Tokito est le Pilier de la Brume, prodige du maniement du sabre et descendant de Kokushibo. 🌀 CONCENTRATION INTÉGRALE : L'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de déplacement de +1 pendant 3 tours. 🌀 MARQUE DES POURFENDEURS : Muichiro prend une grande inspiration étant debout calme puis sa marque de pourfendeur apparaît sur son front pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S+, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. 🌀 ARMEMENT : Il possède un katana de 1m de long."
+  ]
+},
+ 
 
   
 ];
