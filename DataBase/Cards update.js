@@ -390,7 +390,26 @@ const cards = [
     "Muichiro Tokito est le Pilier de la Brume, prodige du maniement du sabre et descendant de Kokushibo. 🌀 CONCENTRATION INTÉGRALE : L'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de déplacement de +1 pendant 3 tours. 🌀 MARQUE DES POURFENDEURS : Muichiro prend une grande inspiration étant debout calme puis sa marque de pourfendeur apparaît sur son front pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S+, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. 🌀 ARMEMENT : Il possède un katana de 1m de long."
   ]
 },
- 
+ {
+  name: "Obanai",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "200k",
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: PREMIÈRE FORME - CONTORSIONS DE VIPÈRE : Obanai, tenant son katana sinueux de 1m de long recouvert d'une aura de serpent, tord sa lame et frappe en zigzaguant pour contourner la garde et toucher l'adversaire de côté sur une portée de 2m. *DEUXIÈME FORME - CROCS DE VENIN : Obanai, tenant son katana sinueux de 1m de long enveloppé d'une aura de serpent, s'élance à ras du sol et assène une estoc fulgurante directement sur le point vital visé avec une portée de 2m. *[SPECIAL]: QUATRIÈME FORME - DOUBLE TORSADE DE VIPÈRE : Obanai, tenant son katana sinueux de 1m de long émettant une aura de serpent, se penche en position basse puis effectue un double dash à grande vitesse pour délivrer deux entailles croisées sur une portée de 5m max. *CINQUIÈME FORME - SLITHERING SERPENT : Obanai, tenant son katana sinueux de 1m de long entouré d'une aura de serpent, charge l'adversaire avec des mouvements imprévisibles tout en frappant en continu autour de lui sur 3m de rayon. *SIXIÈME FORME - ENLACEMENT MORTEL : Obanai, tenant son katana sinueux de 1m de long voilé d'une aura de serpent, s'élance dans les airs jusqu'à 5m max puis fond sur sa cible pour l'enserrer et la tailler en pièces sur 2m de rayon. *[ULTIME]: SEPTIÈME FORME - SERPENT ABRUTISSANT : Obanai commence à dégager une aura menaçante de serpent puis un immense flux sinueux se répand sur 10m de rayon désorientant l'adversaire avec des illusions et des attaques imprévisibles surgissant de tous les angles pour le submerger et l'achever.",
+  infos: [
+    "Obanai Iguro est le Pilier du Serpent, maître du Souffle du Serpent et redoutable bretteur à la lame ondulée. 🌀 RESPIRATION DU SERPENT : Ses techniques exploitent la souplesse extrême de son katana tortueux de 1m de long pour frapper à l'aveugle en contournant les obstacles et les gardes ennemies. 🌀 MARQUE DES POURFENDEURS : Obanai prend une grande inspiration étant debout calme puis sa marque de pourfendeur apparaît sur son corps pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S+, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. 🌀 ARMEMENT : Il possède un katana sinueux de 1m de long."
+  ]
+},
+
 
   
 ];
