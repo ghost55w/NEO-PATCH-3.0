@@ -409,6 +409,25 @@ const cards = [
     "Obanai Iguro est le Pilier du Serpent, maître du Souffle du Serpent et redoutable bretteur à la lame ondulée. 🌀 RESPIRATION DU SERPENT : Ses techniques exploitent la souplesse extrême de son katana tortueux de 1m de long pour frapper à l'aveugle en contournant les obstacles et les gardes ennemies. 🌀 MARQUE DES POURFENDEURS : Obanai prend une grande inspiration étant debout calme puis sa marque de pourfendeur apparaît sur son corps pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S+, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. 🌀 ARMEMENT : Il possède un katana sinueux de 1m de long."
   ]
 },
+{
+  name: "Mitsuri",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S- super",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "150k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: PREMIÈRE FORME - DOULEURS DE L'AMOUR INCONSTAMMENT BLESSÉES : Mitsuri, tenant son katana qui se recouvre d'une aura rose, prend une impulsion rapide puis effectue une estocade en arc de cercle pour trancher l'adversaire sur une portée de 3m. *DEUXIÈME FORME - AMOUR PÉNÉTRANT : Mitsuri, tenant son katana qui se recouvre d'une aura rose, prend une posture tournoyante puis lance une série de coups rapides pour percer les défenses de la cible sur une portée de 3m. *TROISIÈME FORME - AMOUR CHATOYANT : Mitsuri, tenant son katana qui se recouvre d'une aura rose, pivote avec souplesse puis délivre une série de taillades en arc de cercle pour trancher l'adversaire sur 3m de rayon. *[SPECIAL]: QUATRIÈME FORME - AMOUR PASSIONNÉ ET MULTIPLIÉ : Mitsuri, tenant son katana qui se recouvre d'une aura rose, fait tournoyer frénétiquement sa lame flexible puis crée un barrage défensif capable de repousser et trancher les attaques entrantes sur 4m de rayon. *CINQUIÈME FORME - HÉSITATIONS D'UN AMOUR DÉCHIRÉ : Mitsuri, tenant son katana qui se recouvre d'une aura rose, ondule sa lame de manière fluide puis frappe en continu tout autour d'elle sur 3m de rayon en envoyant des vagues de taillades en spirale qui repoussent et lacèrent les ennemis proches. *SIXIÈME FORME - AMOUR VENTEUX : Mitsuri, tenant son katana qui se recouvre d'une aura rose, s'élance dans les airs jusqu'à 5m max puis abat une volée de coups circulaires dévastateurs sur 3m de rayon. *[ULTIME]: SEPTIÈME FORME - AMOUR DÉPLOYÉ : UN CIEL BIEN AIMÉ : Mitsuri commence à dégager une aura rose incandescente puis un immense flux d'amour pur se répand sur 10m de rayon enveloppant la zone pour submerger l'adversaire de frappes souples et continues de tous les angles, l'épuisant et l'achevant dans un tourbillon floral.",
+  infos: [
+    "Mitsuri Kanroji est le Pilier de l'Amour, maîtresse du Souffle de l'Amour et dotée d'une force musculaire surhumaine grâce à une densité corporelle exceptionnelle. 🌀 MARQUE DES POURFENDEURS : Mitsuri prend une grande inspiration étant debout calme puis sa marque de pourfendeur en forme de cœurs apparaît sur son corps pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. 🌀 ARMEMENT : Elle possède un katana en fouet de 1m de long."
+  ]
+}, 
 
 
   
