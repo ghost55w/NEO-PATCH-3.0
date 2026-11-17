@@ -446,7 +446,7 @@ const cards = [
   infos: [
     "Kanao Tsuyuri est une pourfendeuse de démons d'élite, disciple de Shinobu Kocho et maîtresse du Souffle de la Fleur, dotée d'une vision dynamique exceptionnelle, d'une réactivité hors du commun et maîtrisant la concentration intégrale en permanence. 🌀 ARMEMENT : Elle possède un katana standard de 1m de long.🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours."
   ]
-}
+}, 
 
 
   
