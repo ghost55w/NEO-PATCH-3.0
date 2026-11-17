@@ -428,6 +428,25 @@ const cards = [
     "Mitsuri Kanroji est le Pilier de l'Amour, maîtresse du Souffle de l'Amour et dotée d'une force musculaire surhumaine grâce à une densité corporelle exceptionnelle. 🌀 MARQUE DES POURFENDEURS : Mitsuri prend une grande inspiration étant debout calme puis sa marque de pourfendeur en forme de cœurs apparaît sur son corps pour augmenter sa force physique de +1, sa vitesse de +1 et sa réactivité au niveau S, réduisant à néant les effets de retard face à son adversaire pendant 3 tours. 🌀 ARMEMENT : Elle possède un katana en fouet de 1m de long."
   ]
 }, 
+{
+  name: "Kanao",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S-",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  card: "https://files.catbox.moe/0pwalw.jpg",
+  Price: "100k",
+  specs: {
+    force: 0,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: SECOND FORM - HONOURABLE CRIMSON PEONY : Kanao, tenant son katana qui se recouvre d'une aura florale rose, puis pivote avec grâce en déployant une série de frappes circulaires pour dévier les attaques et lacérer l'adversaire sur une portée et un rayon de 5m. *FOURTH FORM - CRIMSON HANAYAKAMU : Kanao, tenant son katana qui se recouvre d'une aura florale rose, puis prend de l'élan en un instant en déployant une volée de taillades rapides imitant la floraison de fleurs sur une portée et un rayon de 5m. *[SPECIAL]: FIFTH FORM - PEONY OF FORTITUDE : Kanao, tenant son katana qui se recouvre d'une aura florale rose, puis prend appui au sol en déployant des coups d'estoc fulgurants et répétés à la vitesse de l'éclair pour percer les défenses de la cible sur une portée et un rayon de 3m. *NINTH FORM - FLOWERING OF PERCEPTION : Kanao, tenant son katana qui se recouvre d'une aura florale rose, puis bondit en avant en déployant un tourbillon de taillades gracieuses pour submerger l'adversaire sur une portée et un rayon de 5m. *[ULTIME]: VERITABLE FORM - EQUINOX VERMILION EYE : Kanao, tenant son katana qui se recouvre d'une aura florale rose avec les yeux virant au rouge cramoisi, puis se lance sur l'adversaire à une vitesse décuplée pour venir le trancher avec une seule frappe horizontale sur une portée de 10m et un diamètre de 1m, et le décapiter d'un coup net.",
+  infos: [
+    "Kanao Tsuyuri est une pourfendeuse de démons d'élite, disciple de Shinobu Kocho et maîtresse du Souffle de la Fleur, dotée d'une vision dynamique exceptionnelle, d'une réactivité hors du commun et maîtrisant la concentration intégrale en permanence. 🌀 ARMEMENT : Elle possède un katana standard de 1m de long.🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours."
+  ]
+}
 
 
   
