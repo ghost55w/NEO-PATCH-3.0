@@ -447,6 +447,25 @@ const cards = [
     "Kanao Tsuyuri est une pourfendeuse de démons d'élite, disciple de Shinobu Kocho et maîtresse du Souffle de la Fleur, dotée d'une vision dynamique exceptionnelle, d'une réactivité hors du commun et maîtrisant la concentration intégrale en permanence. 🌀 ARMEMENT : Elle possède un katana standard de 1m de long.🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours."
   ]
 }, 
+{
+  name: "Gyomei",
+  grade: "Bronze",
+  rarete: "Ultra",
+  category: "S+",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/gyomei1.jpg"],
+  card: "https://files.catbox.moe/gyomei2.jpg",
+  Price: "250k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: THIRD FORM - STONE SKIN : Gyomei, tenant sa hache et son fléau reliés par une chaîne qui se recouvrent d'une aura de pierre grise, puis déploie un mur défensif en faisant tournoyer sa hache et sa chaîne à grande vitesse pour bloquer les assauts frontaux sur un rayon de 5m autour. *SECOND FORM - UPPER SMASH : Gyomei, tenant sa hache et son fléau reliés par une chaîne robuste qui se recouvrent d'une aura de pierre grise, puis Gyomei projette ses deux armes et frappe la chaîne pour dévier leur trajectoire et être sûr de toucher la cible si elle ne quitte pas le rayon de 5m où n'utilise pas une autre attaque pour bloquer. *[SPECIAL]: FIRST FORM - SERPENTINITE BIPOLAR : Gyomei, tenant sa hache et son fléau reliés par une chaîne qui se recouvrent d'une aura de pierre grise, puis fait tournoyer ses armes avec une puissance colossale en déployant une frappe circulaire vers l'endroit du corps visé de son adversaire pour le fracasser sur une portée et un rayon de 5m. *FOURTH FORM - RHYOLITE, RAPID CONQUEST : Gyomei, tenant sa hache et son fléau reliés par une chaîne qui se recouvrent d'une aura de pierre grise, puis balance ses armes en cadence des deux côtés en déployant un barrage de massues et de projectiles pour submerger et balayer l'adversaire sur une portée et un rayon de 5m, donc tout ce qui se trouve dans ce rayon se fera balayé et prendra des dégâts. *[ULTIME]: FIFTH FORM - ARCS OF JUSTICE : Gyomei, tenant sa hache et son fléau reliés par une chaîne avec les yeux larmoyants vers le ciel et la marque des pourfendeurs active, puis gyomei fait un mouvement de frappe violente des deux mains où d'une main descendante sur l'adversaire pour l'écraser violemment au sol avec le massue de 1m de diamètre sur une portée de 5m.",
+  infos: [
+    "Gyomei Himejima est le Pilier de la Roche, considéré comme le pourfendeur de démons le plus puissant de sa génération, il est aveugle donc il ne peut que ressentir les attaques, les coups où les adversaires grâce à la zone de sensorialité et grâce à son ouïe sur développée sa Zone de sensorialité s'étant jusqu'à 30m autour de lui. 🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours. 🌀 MARQUE DES POURFENDEURS : Gyomei se concentre depuis une position fixe debout puis des marques se manifeste sur ses mains ce qui augmente sa vitesse de + 1, sa force physique de +1 et sa réactivité au niveau de combat S+ super pendant 3 tours. 🌀 MONDE TRANSPARENT : Gyomei debout en pleine concentration puis il active le monde transparent ce qui lui permets de prédire les actions de ses adversaires pendant 3 tours, il peut donc réagir au même moment dès le début d'une action et ne perds moitié de stamina pour les esquives donc 5% à cause de l'anticipation. 🌀 ARMEMENT : Il possède une hache à main géante de 50cm de diamètre et un fléau en fer hérissé de pointes de 50cm de diamètre, reliés par une longue chaîne ce qui lui donne une portée de 5m avec ses armes."
+  ]
+},
 
 
   
