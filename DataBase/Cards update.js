@@ -485,6 +485,44 @@ const cards = [
     "Zohakuten est la fusion et l'émotion de la Haine issue d'Hantengu, doté d'une puissance démoniaque écrasante, de tambours dorsaux et d'une maîtrise destructrice de la foudre, du vent, du son et du bois. 🌀 ARMEMENT : Il possède deux poignards démoniaques de 50cm de long. 🌀 REGENERATION: régénération immediate des membres coupés et blessures sauf la tête en cas de décapitation."
   ]
 },
+{
+  name: "Kaigaku",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S- super",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/kaigaku1.jpg"],
+  card: "https://files.catbox.moe/kaigaku2.jpg",
+  Price: "200k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: SECOND FORM - RICE SPIRIT : Kaigaku, tenant son katana qui se recouvre d'une aura électrique noire dorée, puis pivote en déployant une série de cinq frappes circulaires et obliques d'arcs électriques tranchants pour lacérer l'adversaire sur une portée de 5m. *THIRD FORM - SWARMING LIGHTNING : Kaigaku, tenant son katana qui se recouvre d'une aura électrique noire dorée, puis projette un essaim de frappes courbées et obliques d'éclairs fulgurants pour encercler et frapper la cible sur une portée de 5m. *[SPECIAL]: FOURTH FORM - DISTANT THUNDER : Kaigaku, tenant son katana qui se recouvre d'une aura électrique noire dorée, puis déclenche une décharge de foudre à distance par une frappe descendante ciblée pour foudroyer l'adversaire sur une portée de 10m et un rayon de 5m. *FIFTH FORM - HEAT LIGHTNING : Kaigaku, tenant son katana qui se recouvre d'une aura électrique noire dorée, puis effectue une frappe fulgurante horizontale accompagnée d'une onde de chaleur électrique pour brûler et trancher l'adversaire sur une portée de 5m et un diamètre de 1m. *[ULTIME]: SIXTH FORM - RUMBLE AND LIGHTNING : Kaigaku, tenant son katana qui se recouvre d'une aura électrique noire dorée, puis se lance sur l'adversaire à une vitesse décuplée en libérant un torrent de frappes obliques et circulaires d'éclairs dévastateurs avant de venir le trancher avec une seule frappe horizontale sur une portée de 10m et un diamètre de 1m, et le décapiter d'un coup net.",
+  infos: [
+    "Kaigaku est un ancien disciple de Jigoro Kuwajima devenu démon de rang Lune Supérieure Six, doté d'une vitesse fulgurante, d'une arrogance implacable et d'une maîtrise démoniaque du Souffle de la Foudre mêlée à la foudre noire. 🌀 ARMEMENT : Il possède un katana standard de 1m de long. 🌀 REGENERATION: régénération immediate des membres coupés et blessures sauf la tête en cas de décapitation."
+  ]
+},
+{
+  name: "Gyokko",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S- super",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/gyokko1.jpg"],
+  card: "https://files.catbox.moe/gyokko2.jpg",
+  Price: "200k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: *WATER PRISON POT : Gyokko manifeste un vase à la place de sa main qu'il pointe sur l'adversaire puis un jet d'eau en sort couvrant 2m de diamètre fonçant sur l'adversaire pour l'emprisonner dans une prison d'eau de 3m de diamètre l'étouffant au bout de 1 tour par noyade s'il ne se libère pas. Gyokko doit garder sa main tendue dans cette position fixe pour maintenir la prison qui dure 2 tours max. *THOUSAND NEEDLES FISH KILL : Gyokko manifeste un vase à la place de sa main qu'il pointe sur l'adversaire puis sortent des poissons rouges qui lancent des milliers d'épines de leurs bouches en direction de l'adversaire en colonne couvrant 2m de diamètre. *[SPECIAL]: *OCTOPUS VASE HELL : Gyokko manifeste un grand vase à la place de sa main qu'il pointe sur l'adversaire puis des tentacules géants sortent du vase allant jusqu'à 10m devant couvrant 50m de diamètre ce qui fait que tout ce qui est devant se verra empalé. *GLIDING SLIME-FISH : Gyokko manifeste deux vases à la place de ses deux mains puis deux colonnes de milliers de poissons sortent de chacun de ses vases fonçant sur l'adversaire couvrant 5m de diamètre combinés pour dévorer complètement la chair de l'adversaire ne laissant rien que les os au contact.",
+  infos: [
+    "Gyokko est un démon de rang Lune Supérieure Cinq à l'apparence serpentine et obsédé par l'art des vases, doté d'une grande force physique, d'une grande résistance et de la capacité de manifester des vases pour invoquer de l'eau ou des créatures aquatiques dangereuses. Il ne possède pas de jambes, donc il ne peut que ramper et frapper avec ses bras, sa tête, sa queue de 3m de portée et de 1m de diamètre, pas de coups de pieds. 🌀 ARMEMENT : Il possède que ses griffes et écailles acérées. 🌀 REGENERATION: régénération immediate des membres coupés et blessures sauf la tête en cas de décapitation."
+  ]
+},
 
 
   
