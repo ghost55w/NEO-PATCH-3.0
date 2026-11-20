@@ -466,6 +466,25 @@ const cards = [
     "Gyomei Himejima est le Pilier de la Roche, considéré comme le pourfendeur de démons le plus puissant de sa génération, il est aveugle donc il ne peut que ressentir les attaques, les coups où les adversaires grâce à la zone de sensorialité et grâce à son ouïe sur développée sa Zone de sensorialité s'étant jusqu'à 30m autour de lui. 🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours. 🌀 MARQUE DES POURFENDEURS : Gyomei se concentre depuis une position fixe debout puis des marques se manifeste sur ses mains ce qui augmente sa vitesse de + 1, sa force physique de +1 et sa réactivité au niveau de combat S+ super pendant 3 tours. 🌀 MONDE TRANSPARENT : Gyomei debout en pleine concentration puis il active le monde transparent ce qui lui permets de prédire les actions de ses adversaires pendant 3 tours, il peut donc réagir au même moment dès le début d'une action et ne perds moitié de stamina pour les esquives donc 5% à cause de l'anticipation. 🌀 ARMEMENT : Il possède une hache à main géante de 50cm de diamètre et un fléau en fer hérissé de pointes de 50cm de diamètre, reliés par une longue chaîne ce qui lui donne une portée de 5m avec ses armes."
   ]
 },
+{
+  name: "Zohakuten",
+  grade: "Bronze",
+  rarete: "Ultra",
+  category: "S",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/zohakuten1.jpg"],
+  card: "https://files.catbox.moe/zohakuten2.jpg",
+  Price: "250k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: *ELECTRIC STRIKE: zohakuten tends sa main avec un de ses poignards qui se recouvre d'électricité puis il pique sur le sol, sur n'importe qu'elle surface où sur l'adversaire pour lui envoyer une décharge électrique couvrant 3m de diamètre au contact causant une paralysie ensuite pendant 1 Seq. *WIND BLAST: zohakuten tends la main alors que une aura verte recouvre un de ses poignards puis d'un mouvement de main circulaire il envoie une puissante vague de vent d'aura verte sur l'adversaire couvrant 3m de diamètre et 5m de hauteur. *[SPECIAL]: *SONIC SCREAM: zohakuten ouvre sa bouche chargeant de la lumière jaune puis il relâche une puissante onde de son de 3m de diamètre assourdissante repoussant violemment l'adversaire à 10m max tout en le sonnant pendant 1 tour. *WOODEN BRAMBLE: Zohakuten tends la paume vers la cible créant des cassure du sol au dessous de lui où de l'adversaire puis ensuite une ronce de 10m de long max et 1m de diamètre avec des épines sort du sol s'enrouler autour de l'adversaire et le couper avec ses épines, à ses côtés la ronce va foncer sur l'adversaire. *[ULTIME]: *WOODEN DRAGONS: zohakuten dégage une aura sombre autour de lui puis tape dans un des tambours derrière son dos envoyant une onde de vent légère puis 3 têtes de dragons de bois longs de 20m max et d'un diamètre de 5m sortent du sol autour de lui alors que Zohakuten se tient sur la tête d'un des dragons, puis peuvent commencer à foncer sur la cible pour l'engloutir. Un dragon peut lancer une attaque de sa bouche de vitesse bronze: Electric strike, Sonic Scream, Wind Blast de 5m de diamètre sur une portée de 20m pendant 3 tours. Les dragons ont une résistance 3, un diamètre de 5m et sont longs de 20m. Les dragons de bois sont très résistants et seuls les attaques de niveau 3 à plus peuvent les détruire d'un coup. Leurs vitesse est Bronze.",
+  infos: [
+    "Zohakuten est la fusion et l'émotion de la Haine issue d'Hantengu, doté d'une puissance démoniaque écrasante, de tambours dorsaux et d'une maîtrise destructrice de la foudre, du vent, du son et du bois. 🌀 ARMEMENT : Il possède deux poignards démoniaques de 50cm de long. 🌀 REGENERATION: régénération immediate des membres coupés et blessures sauf la tête en cas de décapitation."
+  ]
+},
 
 
   
