@@ -523,6 +523,25 @@ const cards = [
     "Gyokko est un démon de rang Lune Supérieure Cinq à l'apparence serpentine et obsédé par l'art des vases, doté d'une grande force physique, d'une grande résistance et de la capacité de manifester des vases pour invoquer de l'eau ou des créatures aquatiques dangereuses. Il ne possède pas de jambes, donc il ne peut que ramper et frapper avec ses bras, sa tête, sa queue de 3m de portée et de 1m de diamètre, pas de coups de pieds. 🌀 ARMEMENT : Il possède que ses griffes et écailles acérées. 🌀 REGENERATION: régénération immediate des membres coupés et blessures sauf la tête en cas de décapitation."
   ]
 },
+{
+  name: "Genya",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S-",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/genya1.jpg"],
+  card: "https://files.catbox.moe/genya2.jpg",
+  Price: "100K",
+  specs: {
+    force: 1,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: *SHOTGUN BLAST : Genya épaule son fusil à canon scié et tire une salve horizontale de plombs sur une portée de 10m et un diamètre de 2m pour toucher et repousser l'adversaire. *[SPECIAL]: *NICHIRIN SLASH : Utilisable uniquement lorsqu'il est en forme de démon, Genya saisit son sabre Nichirin à deux mains et effectue une frappe descendante ou oblique tranchante sur une portée de 2m et un diamètre de 1m, envoyant une onde de choc tranchante de 1m de diamètre et 2m de hauteur.",
+  infos: [
+    "Genya Shinazugawa est un pourfendeur de démons tenace et brutal incapable d'utiliser les souffles classiques, mais capable d'acquérir temporairement des pouvoirs démoniaques en dévorant des démons. 🌀 ÉVEIL: Il se mets à rugir avec une aura sombre qui se dégage de lui puis il passe en démon avec les yeux noirs ce qui augmente sa force de +1. 🌀 DEMONIC CONSUMPTION : S'il mange ou dévore une partie du corps d'un démon de l'univers Demon Slayer, il obtient ses capacités pendant 3 tours ; s'il possède son katana, il peut reproduire les formes du démon adverse si celui-ci utilise des souffles, et même sans katana il peut utiliser les attaques du démon en face sauf les attaques ultimes. 🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours. 🌀 ARMEMENT: Katana de 1m de long plus arme à feu qu'il peut dégainer, il peut viser son adversaire fusil et tirer 3 balles max en projectile. 🌀 REGENERATION: régénération immédiate des membres coupés et blessures sauf la tête en cas de décapitation lorsqu'il est sous forme démoniaque."
+  ]
+}, 
 
 
   
