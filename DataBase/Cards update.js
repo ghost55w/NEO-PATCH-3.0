@@ -561,7 +561,28 @@ const cards = [
     "Kokushibo est un ancien pourfendeur de démons devenu la Lune Supérieure Un, doté d'une maîtrise absolue du Souffle de la Lune, d'une force physique colossale et d'une technique d'épée légendaire. 🌀 CONCENTRATION INTÉGRALE : l'utilisateur prend une grande inspiration depuis une position calme puis il active la concentration intégrale ce qui augmente sa vitesse de + 1 pendant 3 tours. 🌀 MARQUE & TRANSPARENCE : Pour activer, il doit se tenir debout calme en prenant une grande inspiration puis il active le mode ; l'activation de son monde transparent et de sa marque des pourfendeurs augmente sa force de +1 et il peut désormais réagir en même temps que son adversaire donc plus de retard sur la réaction grâce à l'anticipation, cela dure 3 tours. 🌀 ARMEMENT : Il possède un long sabre de chair et d'os de 2m de long couvert d'yeux démoniaques capable de s'allonger jusqu'à 5m max avec des lames sur les côtés. 🌀 REGENERATION: régénération immediate des membres coupés et blessures même sa tête mais pour la tête il perds 20% de stamina."
   ]
 }, 
-
+{
+  name: "Muzan",
+  grade: "Silver",
+  rarete: "Legends",
+  category: "S-",
+  univers: "Demon Slayer",
+  images: ["https://files.catbox.moe/muzan1.jpg"],
+  card: "https://files.catbox.moe/muzan2.jpg",
+  Price: "1.500.000",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 2
+  },
+  Moves: "[BASIC]: *FLESH MANIPULATION : Une aura rouge sombre se dégage de son corps puis il peut transformer sa main où ses deux mains en lames très tranchantes de 2m de long et 50cm de diamètre, assez tranchante pour trancher son adversaire en une frappe. Pendant 3 tours. *BLACK BLOOD BRIARS : Une aura rouge sombre se dégage de son corps puis il tend sa main vers l'adversaire alors que sa peau se déchire puis relâche plusieurs ronces noires fines à épines comme des fils barbelés extrêmement tranchants pouvant foncer sur l'adversaire couvrant 3m de diamètre sur 10m max où alors il peut envoyer de partout en utilisant les deux mains couvrant 10m de rayon et causant de violentes coupures à tous ceux qui sont dans le rayon alors qu'il reste stable surplace pour contrôler. *[SPECIAL]: *DEMONIC ROAR : Une aura rouge sombre se dégage de son corps puis sous sa forme finale il transforme son torse en une bouche bestiale gigantesque et projette une onde de choc de longue portée semblable à de l'énergie de 3m de diamètre qui endommage gravement le système nerveux de ceux qui y sont pris, provoquant des crises et des convulsions extrêmes, les rendant même incapables de respirer pendant une brève période de temps en raison des dommages infligés aux poumons de la cible et l'adversaire sera sonné pendant 1 tour. *BLOODY LACERATION : Une aura rouge sombre se dégage de son corps puis sous sa forme finale il manifeste 8 fouets de son dos extrêmement tranchants qu'il envoie ensuite dans toutes direction en rotation extrêmement rapide ce qui forme un barrage de découpes extrêmement tranchantes sur 10m de rayon et 5m de hauteur découpant tout ceux qui s'y trouve. *[ULTIME]: *SUPREME CARNAGE : Une aura rouge sombre se dégage de son corps puis il déploie un déluge de fouets osseux acérés dans toutes les directions en une attaque de zone dévastatrice sur 10m de rayon et 10m de portée, lacérant et tranchant tout ce qui se trouve dans la zone.",
+  infos: [
+    "Muzan Kibutsuji est le roi des démons et le créateur de tous les démons de Demon Slayer, doté d'une biologie manipulable à volonté, d'une régénération absolue et d'une puissance écrasante. 🌀 TENTACULES : Ses tentacules sont assez tranchantes pour découper des buildings et même la chair. Il peut sortir des tentacules tranchantes de son dos pour attaquer l'adversaire en un seul coup sur une portée de 10m max comme un projectile, donc 3 maximum en contrôlant leurs direction afin de trancher où transpercer ses adversaires mais leurs vitesse est bronze. 🌀 REGENERATION: régénération immédiate des membres coupés, blessures et même sa tête sans perte de stamina."
+  ]
+}, 
+//------------------------------
+  //           JUJUTSU KAISEN📿 
+  //------------------------------
 
   
 ];
