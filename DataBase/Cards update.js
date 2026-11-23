@@ -358,7 +358,7 @@ const cards = [
   rarete: "Legends",
   category: "S+",
   univers: "Demon Slayer",
-  images: ["https://files.catbox.moe/n8hk5b.jpg"],
+  images: ["https://files.catbox.moe/odsh4o.jpg"],
   card: "https://files.catbox.moe/23s5h1.jpg",
   Price: "300k",
   specs: {
@@ -378,7 +378,7 @@ const cards = [
   category: "S",
   univers: "Demon Slayer",
   images: ["https://files.catbox.moe/n8hk5b.jpg"],
-  card: "https://files.catbox.moe/0pwalw.jpg",
+  card: "https://files.catbox.moe/beenx7.jpg",
   Price: "200k",
   specs: {
     force: 1,
@@ -397,7 +397,7 @@ const cards = [
   category: "S",
   univers: "Demon Slayer",
   images: ["https://files.catbox.moe/n8hk5b.jpg"],
-  card: "https://files.catbox.moe/0pwalw.jpg",
+  card: "https://files.catbox.moe/23s5h1.jpg",
   Price: "200k",
   specs: {
     force: 1,
@@ -416,7 +416,7 @@ const cards = [
   category: "S- super",
   univers: "Demon Slayer",
   images: ["https://files.catbox.moe/n8hk5b.jpg"],
-  card: "https://files.catbox.moe/0pwalw.jpg",
+  card: "https://files.catbox.moe/u7i00p.jpg",
   Price: "150k",
   specs: {
     force: 2,
@@ -435,7 +435,7 @@ const cards = [
   category: "S-",
   univers: "Demon Slayer",
   images: ["https://files.catbox.moe/n8hk5b.jpg"],
-  card: "https://files.catbox.moe/0pwalw.jpg",
+  card: "https://files.catbox.moe/ijcx2g.jpg",
   Price: "100k",
   specs: {
     force: 0,
@@ -454,7 +454,7 @@ const cards = [
   category: "S+",
   univers: "Demon Slayer",
   images: ["https://files.catbox.moe/gyomei1.jpg"],
-  card: "https://files.catbox.moe/gyomei2.jpg",
+  card: "https://files.catbox.moe/k2xkbi.jpg",
   Price: "250k",
   specs: {
     force: 2,
