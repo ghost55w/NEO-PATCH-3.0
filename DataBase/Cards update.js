@@ -581,8 +581,27 @@ const cards = [
   ]
 }, 
 //------------------------------
-  //           JUJUTSU KAISEN📿 
-  //------------------------------
+//        JUJUTSU KAISEN📿 
+//------------------------------
+{
+  name: "Yuji",
+  grade: "Bronze",
+  rarete: "Sparking",
+  category: "S-",
+  univers: "Jujutsu Kaisen",
+  images: ["https://files.catbox.moe/yuji1.jpg"],
+  card: "https://files.catbox.moe/yuji2.jpg",
+  Price: "100k",
+  specs: {
+    force: 2,
+    speed: 1,
+    attacks: 1
+  },
+  Moves: "[BASIC]: *CURSED ENERGY FISTS : Une aura d'énergie occulte bleu sombre et noire se dégage de ses poings puis Yuji recouvre ses poings d'énergie occulte bleue sombre pour frapper au corps-à-corps (close distance, portée 50cm) avec une puissance augmentée causant donc 15% de dégâts pour un coup au lieu de 10%, la technique reste active 2 tours[span_0](start_span)[span_0](end_span). *DIVERGENT FIST : Une aura d'énergie occulte bleu sombre et noire se dégage de ses poings puis Yuji frappe son adversaire au corps-à-corps (close distance, portée 50cm) avec un coup de poing droit où gauche recouvert d'énergie occulte bleue qui une fois bloquer où stopper par une garde créer un deuxième impact qui suit en combo avec un léger retard de 0.5s et frappe l'adversaire à l'endroit visé initialement causant un brise garde déséquilibrant l'adversaire où un deuxième impact qui frappe l'adversaire causant 10% de dégâts si l'adversaire reste surplace après le coup[span_1](start_span)[span_1](end_span). *[SPECIAL]: *BLACK FLASH : Yuji frappe son adversaire d'un coup de poing droit où gauche recouvert d'énergie occulte rouge sombre à close distance, portée 50cm, déclenchant un rayon noir au contact qui inflige 30% de dégâts à l'adversaire[span_2](start_span)[span_2](end_span). Après avoir réussi un rayon noir à cause de l'état de flow l'utilisateur a un boost sur sa vitesse de combat qui augmente de +1, donc à S et la consommation d'énergie de toutes ses prochaines attaques est réduite de moitié jusqu'à la fin du combat, tandis que les Black Flash suivants n'accordent plus ce boost et infligent uniquement les dégâts[span_3](start_span)[span_3](end_span). Le black flash permets aussi de récupérer ses sorts bloqués après un burnout suite à une extension de territoire. *[ULTIME]: *SUKUNA SWITCH: Yuji se tient debout alors que des tatouages commence à apparaître sur son corps puis Sukuna prends le contrôle faisant un mudra des mains pour lancer son extension de territoire sur un rayon de 10m autour découpant entièrement tout ce qui se trouve dans ce rayon.",
+  infos: [
+    "Yuji Itadori est un exorciste de Jujutsu Kaisen doté d'une durabilité et d'une force physique colossales : il peut encaisser des coups critiques et se relever sans céder, et les coups des adversaires avec une force inférieure à 2 lui cause moitié de dégâts donc 5% au lieu de 10%[span_4](start_span)[span_4](end_span)."
+  ]
+}, 
 
   
 ];
