@@ -602,6 +602,25 @@ const cards = [
     "Yuji Itadori est un exorciste de Jujutsu Kaisen doté d'une durabilité et d'une force physique colossales : il peut encaisser des coups critiques et se relever sans céder, et les coups des adversaires avec une force inférieure à 2 lui cause moitié de dégâts donc 5% au lieu de 10%[span_4](start_span)[span_4](end_span)."
   ]
 }, 
+{
+  "name": "Megumi",
+  "grade": "Bronze",
+  "rarete": "Sparking",
+  "category": "S-",
+  "univers": "Jujutsu Kaisen",
+  "images": ["https://files.catbox.moe/megumi1.jpg"],
+  "card": "https://files.catbox.moe/megumi2.jpg",
+  "Price": "100k",
+  "specs": {
+    "force": 1,
+    "speed": 1,
+    "attacks": 1
+  },
+  "Moves": "[BASIC]: *JADE DOGS : Megumi fait un mudra des deux mains alors que deux ombres se manifestent à ses côtés puis deux chiens divins un noir et un blanc sortent pour foncer sur la cible et le mordre causant 20% de dégâts par morsure pour les deux à close (portée 50cm). *GAMA : Megumi fait un mudra des deux mains alors que deux ombres se manifestent à ses côtés puis 4 grenouilles sortent à côté de lui envoyant leurs langues sur 5m de portée max afin d'attacher l'adversaire au niveau des deux bras et ses deux jambes. Les langues couvrent 2m de diamètre, seul un adversaire de force 2 à plus peut se libérer en se dégageant avec force. *RABBITS : Megumi fait un mudra des deux mains avec une ombre qui se manifeste sous lui puis il libère une nuée de lapins d'ombre sur un rayon de 8m pour submerger le champ de vision de l'adversaire, perturber sa garde et le désorienter pour s'enfuir sans être traqué ou même attaquer par surprise parmi tous les lapins ce qui fait un effet de surprise avec un retard de 1s donc l'adversaire ne peut que esquiver le prochain coup de megumi s'il est toujours dans la zone, sortir de la zone avec un saut ou fuite coûtera du stamina. *OROCHI : Megumi fait un mudra des deux mains avec une ombre qui apparaît au sol sous l'adversaire de 3m de rayon puis fait surgir de l'ombre un grand serpent de 2m de diamètre gueule ouverte qui empale violemment l'adversaire de manière ascendante jusqu'à 10m de hauteur puis le ramène violemment au sol. *NUÉE : Megumi fait un mudra des deux mains avec une ombre qui se manifeste autour de lui puis il fait apparaître un oiseau de 3m de diamètre ailes déployées qui fonce sur l'adversaire à grande vitesse puis une fois arrivé à close distance l'oiseau relâche une décharge d'électricité sur 5m de rayon ou au contact de la cible pour causer de gros dégâts sur une décharge avant de disparaître, l'oiseau peut rester actif 2 tours et aider à transporter megumi. *[SPECIAL]: *MAX ELEPHANT : Megumi se met en position accroupie faisant un mudra des deux mains puis un Éléphant gros de 3m de diamètre tombe sur l'adversaire pour l'écraser complètement. Ou alors l'éléphant sort de l'ombre à côté de Megumi chargeant sa trompe puis il relâche un canon d'eau comme une vague d'eau couvrant 3m de diamètre pour frapper la cible violemment. *DIVINE DOG : Megumi fait un mudra des deux mains avec une ombre qui apparaît autour de lui selon son choix dans un rayon de 10m puis un Chien Divin renforcé de vitesse silver, des griffes acérées, avec une taille de 2m, qui attaque l'adversaire à close distance. Il peut griffer, mordre l'adversaire pour causer de gros dégâts de 25% par attaque. Mais il a une résistance 2 donc s'il encaisse un coup d'un perso de force 3 à plus ou une attaque il sera détruit, sinon il faut 5 coups pour le détruire ou un coup mortel. *[ULTIME]: *DOMAINE EXPANSION : EXTENSION DU TERRITOIRE, Megumi fait un mudra des deux mains avec une flaque d'ombre qui commence à se manifester sous ses jambes puis il répand son territoire sur 20m de rayon, une grande flaque d'eau noire d'ombre. Dans cette zone toutes les autres techniques de megumi peuvent être lancées sans coût d'énergie et avec effet imparable, donc garantie de toucher la cible. Megumi à ce moment peut se substituer en clone d'ombre s'il est touché, peut plonger dans la marre d'ombre pour se déplacer et surgir pour attaquer l'adversaire ect... Cela dure deux tours mais après une extension de territoire il y'a un burnout donc pendant les deux prochains tours l'utilisateur ne peut plus utiliser ses sorts.",
+  "infos": [
+    "Megumi Fushiguro est un exorciste de grade 2 prodige de Jujutsu Kaisen utilisant la Technique des Dix Ombres, invocations de shikigamis et manipulation des ombres. Il peut plonger sa main rapidement dans une flaque d'ombre qui se forme sur le sol en dessous de lui pour en tirer une arme soit un katana de 1m, un nunchaku de 2m de portée. Son extension de territoire est sans barrière donc un espace ouvert sur seulement 20m et peut être quitter."
+  ]
+}
 
   
 ];
